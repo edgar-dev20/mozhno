@@ -1,0 +1,269 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.filter.outputs.server }}
+      java_sdk: ${{ steps.filter.outputs.java_sdk }}
+      web: ${{ steps.filter.outputs.web }}
+      js_sdk: ${{ steps.filter.outputs.js_sdk }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            server:
+              - '.github/workflows/ci.yml'
+              - 'server/**'
+            java_sdk:
+              - '.github/workflows/ci.yml'
+              - 'sdks/java/**'
+            web:
+              - '.github/workflows/ci.yml'
+              - 'web/**'
+            js_sdk:
+              - '.github/workflows/ci.yml'
+              - 'sdks/js/**'
+
+  audit-web:
+    name: Audit web dependencies
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Audit dependencies
+        working-directory: web
+        run: npm audit --audit-level=high
+
+  audit-js-sdk:
+    name: Audit JS SDK dependencies
+    needs: changes
+    if: ${{ needs.changes.outputs.js_sdk == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: sdks/js/package-lock.json
+
+      - name: Install dependencies
+        working-directory: sdks/js
+        run: npm ci
+
+      - name: Audit dependencies
+        working-directory: sdks/js
+        run: npm audit --audit-level=high
+
+  lint-web:
+    name: Lint web UI
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Lint
+        working-directory: web
+        run: npm run lint
+
+  lint-js-sdk:
+    name: Lint JS SDK
+    needs: changes
+    if: ${{ needs.changes.outputs.js_sdk == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: sdks/js/package-lock.json
+
+      - name: Install dependencies
+        working-directory: sdks/js
+        run: npm ci
+
+      - name: Lint
+        working-directory: sdks/js
+        run: npm run lint
+
+  test-server:
+    name: Test server (Java ${{ matrix.java }})
+    needs: changes
+    if: ${{ needs.changes.outputs.server == 'true' || needs.changes.outputs.java_sdk == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['25']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: temurin
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          build-root-directory: server
+
+      - name: Check and test
+        working-directory: server
+        run: ./gradlew check jacocoTestReport
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          flags: server
+          fail_ci_if_error: false
+
+      - name: Upload test report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-test-report
+          path: server/**/build/reports/
+
+  test-web:
+    name: Test web UI (Node.js)
+    needs: changes
+    if: ${{ needs.changes.outputs.web == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: web
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          directory: web
+          flags: web
+          fail_ci_if_error: false
+
+  test-js-sdk:
+    name: Test JS SDK (Node.js)
+    needs: changes
+    if: ${{ needs.changes.outputs.js_sdk == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: sdks/js/package-lock.json
+
+      - name: Install dependencies
+        working-directory: sdks/js
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: sdks/js
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          directory: sdks/js
+          flags: js-sdk
+          fail_ci_if_error: false
+
+  codeql:
+    name: CodeQL Analysis
+    needs: changes
+    if: ${{ needs.changes.outputs.server == 'true' || needs.changes.outputs.java_sdk == 'true' || needs.changes.outputs.web == 'true' || needs.changes.outputs.js_sdk == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [java-kotlin, javascript-typescript]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - if: matrix.language == 'java-kotlin'
+        name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: temurin
+
+      - if: matrix.language == 'java-kotlin'
+        name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          build-root-directory: server
+
+      - if: matrix.language == 'java-kotlin'
+        name: Build Java
+        working-directory: server
+        run: ./gradlew compileJava compileTestJava
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}

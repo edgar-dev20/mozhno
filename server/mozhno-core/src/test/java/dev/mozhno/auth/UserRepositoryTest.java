@@ -1,0 +1,102 @@
+package dev.mozhno.auth;
+
+import org.junit.jupiter.api.Test;
+import dev.mozhno.BaseIntegrationTest;
+import dev.mozhno.apikeys.ApiKeyRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class UserRepositoryTest extends BaseIntegrationTest {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Test
+    void findByEmail_shouldReturnUser() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('test@example.com', 'hash123', 'admin')");
+
+        User user = userRepository.findByEmail("test@example.com");
+
+        assertNotNull(user);
+        assertEquals("test@example.com", user.getEmail());
+        assertEquals("hash123", user.getPasswordHash());
+        assertEquals("admin", user.getRole());
+        assertNotNull(user.getCreatedAt());
+    }
+
+    @Test
+    void findByEmail_shouldReturnNullForNonExistent() {
+        User user = userRepository.findByEmail("nobody@example.com");
+        assertNull(user);
+    }
+
+    @Test
+    void findById_shouldReturnUser() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('byid@example.com', 'hash', 'editor')");
+        Integer id = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'byid@example.com'", Integer.class);
+
+        User user = userRepository.findById(id);
+
+        assertNotNull(user);
+        assertEquals("byid@example.com", user.getEmail());
+        assertEquals("editor", user.getRole());
+    }
+
+    @Test
+    void findById_shouldReturnNullForNonExistent() {
+        User user = userRepository.findById(9999);
+        assertNull(user);
+    }
+
+    @Test
+    void existsByEmail_shouldReturnTrue() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('exists@example.com', 'hash', 'viewer')");
+        assertTrue(userRepository.existsByEmail("exists@example.com"));
+    }
+
+    @Test
+    void existsByEmail_shouldReturnFalse() {
+        assertFalse(userRepository.existsByEmail("missing@example.com"));
+    }
+
+    @Test
+    void findAllByIds_shouldReturnUsers() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, name, role) VALUES ('a@test.com', 'h1', 'Alice', 'admin')");
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, name, role) VALUES ('b@test.com', 'h2', 'Bob', 'editor')");
+        Integer id1 = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'a@test.com'", Integer.class);
+        Integer id2 = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'b@test.com'", Integer.class);
+
+        List<User> result = userRepository.findAllByIds(List.of(id1, id2));
+
+        assertEquals(2, result.size());
+        assertTrue(result.stream().anyMatch(u -> "Alice".equals(u.getName())));
+        assertTrue(result.stream().anyMatch(u -> "Bob".equals(u.getName())));
+    }
+
+    @Test
+    void findAllByIds_shouldReturnEmptyForEmptyList() {
+        List<User> result = userRepository.findAllByIds(List.of());
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void findAllByIds_shouldReturnEmptyForNull() {
+        List<User> result = userRepository.findAllByIds(null);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void findAllByIds_shouldReturnOnlyMatchingUsers() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, name, role) VALUES ('match@test.com', 'h1', 'Match', 'admin')");
+        Integer id = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'match@test.com'", Integer.class);
+
+        List<User> result = userRepository.findAllByIds(List.of(id, 99999));
+
+        assertEquals(1, result.size());
+        assertEquals("Match", result.get(0).getName());
+    }
+}

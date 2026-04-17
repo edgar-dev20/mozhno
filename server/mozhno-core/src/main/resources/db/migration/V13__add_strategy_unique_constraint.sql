@@ -1,0 +1,1 @@
+ALTER TABLE flag_strategies ADD CONSTRAINT uk_flag_strategies_flag_env UNIQUE (flag_id, environment_id);

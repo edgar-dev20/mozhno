@@ -1,0 +1,52 @@
+name: JS SDK Release
+
+on:
+  push:
+    tags:
+      - 'sdk-js-v[0-9]+.[0-9]+.[0-9]+'
+      - 'sdk-js-v[0-9]+.[0-9]+.[0-9]+-*'
+
+jobs:
+  test-js-sdk:
+    name: Test JS SDK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: sdks/js/package-lock.json
+
+      - name: Install and test
+        working-directory: sdks/js
+        run: npm ci && npm test
+
+  publish-js-sdk:
+    name: Publish JS SDK to GitHub Packages
+    needs: test-js-sdk
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://npm.pkg.github.com
+          scope: '@mozhno'
+
+      - name: Build and publish
+        working-directory: sdks/js
+        run: |
+          npm ci
+          TAG_VERSION="${{ github.ref_name }}"
+          VERSION="${TAG_VERSION#sdk-js-v}"
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+          npm run build
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

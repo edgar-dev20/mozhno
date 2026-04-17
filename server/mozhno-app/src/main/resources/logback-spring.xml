@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty name="APP_NAME" source="spring.application.name" defaultValue="mozhno"/>
+    <springProperty name="LOG_LEVEL_ROOT" source="logging.level.root" defaultValue="INFO"/>
+    <springProperty name="LOG_LEVEL_APP" source="logging.level.dev.mozhno" defaultValue="INFO"/>
+
+    <conversionRule conversionWord="maskedMsg"
+                    class="dev.mozhno.logging.MaskedMessageConverter"/>
+
+    <springProfile name="dev | local">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"app":"${APP_NAME}","environment":"dev"}</customFields>
+                <fieldNames>
+                    <timestamp>timestamp</timestamp>
+                    <message>message</message>
+                    <logger>logger</logger>
+                    <thread>thread</thread>
+                    <level>level</level>
+                    <version>[ignore]</version>
+                </fieldNames>
+                <jsonGeneratorDecorator class="net.logstash.logback.decorate.CompositeJsonGeneratorDecorator">
+                    <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+                    <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+                        <valueMasker class="dev.mozhno.logging.SensitiveDataMasker"/>
+                    </jsonGeneratorDecorator>
+                </jsonGeneratorDecorator>
+            </encoder>
+        </appender>
+    </springProfile>
+
+    <springProfile name="!dev &amp; !local">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"app":"${APP_NAME}"}</customFields>
+                <fieldNames>
+                    <timestamp>timestamp</timestamp>
+                    <message>message</message>
+                    <logger>logger</logger>
+                    <thread>thread</thread>
+                    <level>level</level>
+                    <version>[ignore]</version>
+                </fieldNames>
+                <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+                    <valueMasker class="dev.mozhno.logging.SensitiveDataMasker"/>
+                </jsonGeneratorDecorator>
+            </encoder>
+        </appender>
+    </springProfile>
+
+    <logger name="dev.mozhno" level="${LOG_LEVEL_APP}"/>
+    <logger name="org.springframework.security" level="WARN"/>
+    <logger name="org.springframework.web" level="WARN"/>
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+
+    <root level="${LOG_LEVEL_ROOT}">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

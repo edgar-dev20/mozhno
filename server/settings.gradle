@@ -1,0 +1,8 @@
+rootProject.name = 'mozhno'
+
+include 'mozhno-spi'
+include 'mozhno-core'
+include 'mozhno-web-api'
+include 'mozhno-app'
+include 'mozhno-client-java'
+project(':mozhno-client-java').projectDir = file('../sdks/java')

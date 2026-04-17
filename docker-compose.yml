@@ -1,0 +1,65 @@
+networks:
+  mozhno-net:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: mozhno-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-feature_flags}
+      POSTGRES_USER: ${POSTGRES_USER:-flags_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-flags_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mozhno-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-flags_user} -d ${POSTGRES_DB:-feature_flags}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mozhno:
+    image: ghcr.io/edgar-dev20/mozhno:latest
+    container_name: mozhno-server
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-feature_flags}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-flags_user}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-flags_password}
+      JWT_SECRET: ${JWT_SECRET}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      HIKARI_MAX_POOL_SIZE: ${HIKARI_MAX_POOL_SIZE:-20}
+      HIKARI_MIN_IDLE: ${HIKARI_MIN_IDLE:-5}
+      SMTP_HOST: ${SMTP_HOST:-localhost}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+    networks:
+      - mozhno-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: mozhno-pgadmin
+    profiles:
+      - tools
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - mozhno-net
+
+volumes:
+  postgres_data:
+  pgadmin_data:

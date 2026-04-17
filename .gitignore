@@ -1,0 +1,108 @@
+HELP.md
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+application-local.yml
+
+### Gradle ###
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+*.log
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### macOS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+### Windows ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+### Kilo ###
+.kilo/
+
+### Node ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dist/
+dist-ssr/
+*.local
+
+### React / Vite ###
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+### Frontend build output (embedded in JAR at build time) ###
+server/mozhno-app/src/main/resources/static/
+
+### Secrets & Credentials ###
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+secrets/
+credentials/
+
+### JaCoCo coverage ###
+**/jacoco/
+
+### Test reports ###
+**/build/test-results/
+**/build/reports/
+
+### Vitest coverage ###
+coverage/

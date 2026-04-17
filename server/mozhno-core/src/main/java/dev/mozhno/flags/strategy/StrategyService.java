@@ -1,0 +1,184 @@
+package dev.mozhno.flags.strategy;
+
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import dev.mozhno.events.DomainEvent;
+import dev.mozhno.events.DomainEventPublisher;
+import dev.mozhno.exception.NotFoundException;
+import dev.mozhno.flags.Flag;
+import dev.mozhno.flags.FlagRepository;
+
+import java.util.List;
+
+/**
+ * Service for managing flag strategies, which control how a flag is evaluated per environment.
+ * Strategies support percentage rollouts, context-based constraints, and segment targeting.
+ */
+@Service
+public class StrategyService {
+    private final FlagStrategyRepository strategyRepository;
+    private final FlagRepository flagRepository;
+    private final DomainEventPublisher events;
+
+    public StrategyService(FlagStrategyRepository strategyRepository, FlagRepository flagRepository,
+                           DomainEventPublisher events) {
+        this.strategyRepository = strategyRepository;
+        this.flagRepository = flagRepository;
+        this.events = events;
+    }
+
+    /**
+     * Returns all strategies for a flag.
+     *
+     * @param flagId the flag ID
+     * @return list of strategies
+     * @throws RuntimeException if the flag is not found
+     */
+    @Transactional(readOnly = true)
+    public List<FlagStrategy> findByFlagId(Integer flagId, Integer projectId) {
+        if (flagRepository.findByIdAndProjectId(flagId, projectId) == null) {
+            throw new NotFoundException("Flag", flagId);
+        }
+        return strategyRepository.findByFlagId(flagId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<FlagStrategy> findByFlagId(Integer flagId) {
+        if (flagRepository.findById(flagId) == null) {
+            throw new NotFoundException("Flag", flagId);
+        }
+        return strategyRepository.findByFlagId(flagId);
+    }
+
+    /**
+     * Finds the strategy for a specific flag and environment combination.
+     *
+     * @param flagId the flag ID
+     * @param environmentId the environment ID
+     * @return the strategy, or null if none exists
+     */
+    @Transactional(readOnly = true)
+    public FlagStrategy findByFlagIdAndEnvironmentId(Integer flagId, Integer environmentId) {
+        return strategyRepository.findByFlagIdAndEnvironmentId(flagId, environmentId);
+    }
+
+    /**
+     * Creates (or upserts) a strategy for a flag and environment.
+     *
+     * @param request the strategy creation request
+     * @return the created strategy
+     * @throws RuntimeException if the flag is not found
+     */
+    @Transactional
+    public FlagStrategy create(StrategyRequest request, Integer projectId) {
+        return upsert(request, projectId);
+    }
+
+    @Transactional
+    public FlagStrategy create(StrategyRequest request) {
+        return upsert(request);
+    }
+
+    /**
+     * Deletes a strategy by its ID.
+     *
+     * @param id the strategy ID
+     */
+    @Transactional
+    public void delete(Integer id, Integer flagId) {
+        FlagStrategy existing;
+        if (flagId != null) {
+            existing = strategyRepository.findByIdAndFlagId(id, flagId);
+        } else {
+            existing = strategyRepository.findById(id);
+        }
+        if (existing == null) throw new NotFoundException("Strategy", id);
+        strategyRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void delete(Integer id) {
+        delete(id, null);
+    }
+
+    /**
+     * Updates an existing strategy by its ID.
+     *
+     * @param id the strategy ID
+     * @param request the strategy update request
+     * @return the updated strategy
+     * @throws RuntimeException if the strategy is not found
+     */
+    @Transactional
+    public FlagStrategy update(Integer id, StrategyRequest request, Integer flagId) {
+        FlagStrategy existing;
+        if (flagId != null) {
+            existing = strategyRepository.findByIdAndFlagId(id, flagId);
+        } else {
+            existing = strategyRepository.findById(id);
+        }
+        if (existing == null) throw new NotFoundException("Strategy", id);
+
+        FlagStrategy saved = strategyRepository.updateById(
+            id,
+            request.getEnabled() != null ? request.getEnabled() : existing.isEnabled(),
+            request.getPercentage(),
+            request.getContextDefinitionId(),
+            request.getContextValuesJson(),
+            request.getSegmentIds()
+        );
+        if (saved == null) throw new NotFoundException("Strategy", id);
+
+        var flag = flagRepository.findById(existing.getFlagId());
+        if (flag != null) {
+            events.publish(DomainEvent.of(flag.getProjectId(), "strategy.updated", "strategy",
+                saved.getId(), flag.getName(), "Strategy updated for env " + existing.getEnvironmentId()));
+        }
+        return saved;
+    }
+
+    @Transactional
+    public FlagStrategy update(Integer id, StrategyRequest request) {
+        return update(id, request, null);
+    }
+
+    /**
+     * Creates or updates a strategy for a flag and environment (upsert).
+     *
+     * @param request the strategy request
+     * @return the upserted strategy
+     * @throws RuntimeException if the flag is not found
+     */
+    @Transactional
+    public FlagStrategy upsert(StrategyRequest request, Integer projectId) {
+        Flag flag;
+        if (projectId != null) {
+            flag = flagRepository.findByIdAndProjectId(request.getFlagId(), projectId);
+        } else {
+            flag = flagRepository.findById(request.getFlagId());
+        }
+        if (flag == null) {
+            throw new NotFoundException("Flag", request.getFlagId());
+        }
+
+        FlagStrategy saved = strategyRepository.upsert(
+            request.getFlagId(),
+            request.getEnvironmentId(),
+            request.getEnabled() != null ? request.getEnabled() : false,
+            request.getPercentage(),
+            request.getContextDefinitionId(),
+            request.getContextValuesJson(),
+            request.getSegmentIds()
+        );
+
+        events.publish(DomainEvent.of(flag.getProjectId(), "strategy.created", "strategy",
+            saved.getId(), flag.getName(), "Strategy upserted for env " + request.getEnvironmentId()));
+        return saved;
+    }
+
+    @Transactional
+    public FlagStrategy upsert(StrategyRequest request) {
+        return upsert(request, null);
+    }
+}

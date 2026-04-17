@@ -1,0 +1,65 @@
+name: Bug Report
+description: Сообщить об ошибке в Mozhno
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо, что помогаете улучшить Mozhno. Пожалуйста, заполните форму ниже — это ускорит исправление.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Компонент
+      description: В какой части проекта ошибка?
+      options:
+        - Server (Spring Boot / REST API)
+        - Web UI (React dashboard)
+        - Java SDK
+        - JavaScript SDK
+        - Docker image
+        - CI/CD pipelines
+        - Documentation
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Версия
+      placeholder: 1.0.0, develop branch, etc.
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Что случилось?
+      description: Опишите ошибку. Что вы ожидали? Что произошло на самом деле?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Шаги для воспроизведения
+      description: Минимальные шаги, чтобы воспроизвести ошибку.
+      placeholder: |
+        1. Запустить Docker: docker compose up
+        2. Открыть http://localhost:8080
+        3. Создать флаг с параметрами...
+        4. Ошибка: ...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи / Скриншоты
+      description: Приложите логи сервера, скриншоты ошибки, консоль браузера.
+      render: shell
+  - type: textarea
+    id: environment
+    attributes:
+      label: Окружение
+      placeholder: |
+        - OS: macOS 14 / Ubuntu 24.04 / Windows 11
+        - Docker: 26.0
+        - Browser: Chrome 125
+        - Java: Temurin 25
+        - Node: 24

@@ -1,0 +1,109 @@
+{
+  "name": "@mozhno/core-ui",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/mozhno-core-ui.cjs",
+  "module": "./dist/mozhno-core-ui.mjs",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/mozhno-core-ui.mjs",
+      "require": "./dist/mozhno-core-ui.cjs"
+    },
+    "./plugin": {
+      "types": "./src/app/pluginRegistry.ts",
+      "import": "./src/app/pluginRegistry.ts"
+    },
+    "./api": {
+      "types": "./src/api/index.ts",
+      "import": "./src/api/index.ts"
+    }
+  },
+  "files": [
+    "dist/",
+    "src/index.ts",
+    "src/app/pluginRegistry.ts",
+    "src/app/components/PluginSlot.tsx",
+    "src/api/index.ts"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:lib": "vite build --config vite.lib.config.js",
+    "build:static": "vite build --outDir ../server/mozhno-app/src/main/resources/static --emptyOutDir",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --ext ts,tsx",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css}\"",
+    "check:dead": "knip",
+    "knip": "knip",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
+    "@radix-ui/react-alert-dialog": "1.1.6",
+    "@radix-ui/react-avatar": "1.1.3",
+    "@radix-ui/react-checkbox": "1.1.4",
+    "@radix-ui/react-dialog": "1.1.6",
+    "@radix-ui/react-dropdown-menu": "2.1.6",
+    "@radix-ui/react-label": "2.1.2",
+    "@radix-ui/react-popover": "1.1.6",
+    "@radix-ui/react-select": "2.1.6",
+    "@radix-ui/react-slider": "1.2.3",
+    "@radix-ui/react-slot": "1.1.2",
+    "@radix-ui/react-switch": "1.1.3",
+    "@radix-ui/react-tooltip": "1.1.8",
+    "@tanstack/react-query": "^5.101.0",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "date-fns": "3.6.0",
+    "lucide-react": "0.487.0",
+    "motion": "12.23.24",
+    "next-themes": "0.4.6",
+    "react-day-picker": "^9.14.0",
+    "react-hook-form": "7.55.0",
+    "react-router": "7.17.0",
+    "recharts": "2.15.2",
+    "sonner": "2.0.3",
+    "tailwind-merge": "3.2.0",
+    "tw-animate-css": "1.3.8",
+    "vaul": "1.1.2",
+    "zod": "^4.4.3"
+  },
+  "overrides": {
+    "esbuild": "0.28.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.0.2",
+    "@commitlint/config-conventional": "^21.0.2",
+    "@eslint/js": "^9.0.0",
+    "@tailwindcss/vite": "4.1.12",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "4.7.0",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.0.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.0",
+    "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
+    "knip": "^6.16.1",
+    "prettier": "^3.4.0",
+    "rollup-plugin-visualizer": "^7.0.1",
+    "tailwindcss": "4.1.12",
+    "typescript-eslint": "^8.0.0",
+    "vite": "^6.4.3",
+    "vitest": "^4.1.8",
+    "vitest-axe": "^0.1.0"
+  }
+}

@@ -1,0 +1,9 @@
+jwt:
+  issuer: mozhno-dev
+  access-token-ttl-minutes: 60
+  refresh-token-ttl-days: 7
+
+logging:
+  level:
+    dev.mozhno: DEBUG
+    org.flywaydb: DEBUG
