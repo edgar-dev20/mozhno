@@ -1,0 +1,1 @@
+{"name":"feature-flags-ui","version":"1.0.0","devDependencies":{"esbuild":"^0.24.0"},"scripts":{"build":"esbuild src/index.js --bundle --outfile=../server/src/main/resources/static/bundle.js --format=iife"}}
