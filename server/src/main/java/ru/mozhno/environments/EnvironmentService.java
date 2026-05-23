@@ -16,6 +16,20 @@ public class EnvironmentService {
         return environmentRepository.findByProjectId(projectId);
     }
 
+    @Transactional(readOnly = true)
+    public Environment findById(Integer id) {
+        return environmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Environment not found: " + id));
+    }
+
+    @Transactional
+    public Environment update(Integer id, String name) {
+        var env = environmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Environment not found: " + id));
+        env.setName(name);
+        return environmentRepository.save(env);
+    }
+
     @Transactional
     public Environment create(Integer projectId, String name) {
         var env = new Environment();

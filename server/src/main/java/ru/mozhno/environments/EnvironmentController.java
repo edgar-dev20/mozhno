@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/projects/{projectId}/environments")
@@ -24,8 +25,8 @@ public class EnvironmentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create an environment")
-    public Environment create(@PathVariable Integer projectId, @RequestParam String name) {
-        return environmentService.create(projectId, name);
+    public Environment create(@PathVariable Integer projectId, @RequestBody Map<String, String> body) {
+        return environmentService.create(projectId, body.get("name"));
     }
 
     @DeleteMapping("/{id}")
@@ -33,5 +34,17 @@ public class EnvironmentController {
     @Operation(summary = "Delete an environment")
     public void delete(@PathVariable Integer id) {
         environmentService.delete(id);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get environment by ID")
+    public Environment getById(@PathVariable Integer id) {
+        return environmentService.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update an environment")
+    public Environment update(@PathVariable Integer id, @RequestBody Map<String, String> body) {
+        return environmentService.update(id, body.get("name"));
     }
 }

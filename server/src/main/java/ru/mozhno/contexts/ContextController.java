@@ -29,6 +29,18 @@ public class ContextController {
         return contextService.createDefinition(request);
     }
 
+    @GetMapping("/{definitionId}")
+    @Operation(summary = "Get context definition by ID")
+    public ContextDefinition getDefinitionById(@PathVariable Integer definitionId) {
+        return contextService.findDefinitionById(definitionId);
+    }
+
+    @PutMapping("/{definitionId}")
+    @Operation(summary = "Update a context definition")
+    public ContextDefinition updateDefinition(@PathVariable Integer definitionId, @RequestBody ContextDefinitionRequest request) {
+        return contextService.updateDefinition(definitionId, request);
+    }
+
     @DeleteMapping("/{definitionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a context definition")
@@ -48,6 +60,18 @@ public class ContextController {
     public ContextValue createValue(@PathVariable Integer definitionId, @RequestBody ContextValueRequest request) {
         request.setContextDefinitionId(definitionId);
         return contextService.createValue(request);
+    }
+
+    @GetMapping("/values/{valueId}")
+    @Operation(summary = "Get context value by ID")
+    public ContextValue getValueById(@PathVariable Integer valueId) {
+        return contextService.findValueById(valueId);
+    }
+
+    @PutMapping("/values/{valueId}")
+    @Operation(summary = "Update a context value")
+    public ContextValue updateValue(@PathVariable Integer valueId, @RequestBody ContextValueRequest request) {
+        return contextService.updateValue(valueId, request);
     }
 
     @DeleteMapping("/values/{valueId}")

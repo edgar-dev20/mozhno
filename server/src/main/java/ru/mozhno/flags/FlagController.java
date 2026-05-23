@@ -37,7 +37,7 @@ public class FlagController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a flag")
-    public Flag update(@PathVariable Integer id, @RequestBody FlagRequest request) {
+    public Flag update(@PathVariable Integer projectId, @PathVariable Integer id, @RequestBody FlagRequest request) {
         return flagService.update(id, request);
     }
 

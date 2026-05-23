@@ -16,8 +16,11 @@ async function api(path, method = 'GET', body = null) {
     const opts = { method, headers: { 'Content-Type': 'application/json' } };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(`${API_BASE}${path}`, opts);
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    const text = await res.text();
+    if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+    const trimmed = text.trim();
+    if (!trimmed) return null;
+    try { return JSON.parse(trimmed); } catch { return null; }
 }
 
 function render() {
@@ -341,11 +344,19 @@ window.openStrategyConfig = async function(envId) {
                 </select>
             </div>
             <div id="strOptions">
-                ${type === 'GRADUAL' ? `<input type="number" id="strPct" value="${percentage}" min="0" max="100" placeholder="Percentage">` : ''}
+                ${type === 'GRADUAL' ? `
+                    <div class="slider-group">
+                        <input type="range" id="strPct" min="0" max="100" value="${percentage}">
+                        <span class="slider-value">${percentage}%</span>
+                    </div>
+                ` : ''}
                 ${type === 'TARGETING' ? `
                     <select id="strCtx"><option value="">Select context</option>${contexts.map(c => `<option value="${c.id}" ${c.id == contextDefinitionId ? 'selected' : ''}>${c.name}</option>`).join('')}</select>
                     <input type="text" id="strValues" value='${contextValuesJson}' placeholder='Values JSON, e.g. ["user1","user2"]'>
-                    <input type="number" id="strPct" value="${rolloutPercentage}" min="0" max="100" placeholder="Rollout %">
+                    <div class="slider-group">
+                        <input type="range" id="strPct" min="0" max="100" value="${rolloutPercentage}">
+                        <span class="slider-value">${rolloutPercentage}%</span>
+                    </div>
                 ` : ''}
             </div>
             <div class="modal-actions">
@@ -358,17 +369,38 @@ window.openStrategyConfig = async function(envId) {
     document.getElementById('strType').addEventListener('change', () => {
         const t = document.getElementById('strType').value;
         const opts = document.getElementById('strOptions');
-        if (t === 'GRADUAL') opts.innerHTML = `<input type="number" id="strPct" value="50" min="0" max="100" placeholder="Percentage">`;
+        if (t === 'GRADUAL') opts.innerHTML = `
+            <div class="slider-group">
+                <input type="range" id="strPct" min="0" max="100" value="50">
+                <span class="slider-value">50%</span>
+            </div>
+        `;
         else if (t === 'TARGETING') opts.innerHTML = `
             <select id="strCtx"><option value="">Select context</option>${contexts.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select>
             <input type="text" id="strValues" value='["value1","value2"]' placeholder='Values JSON'>
-            <input type="number" id="strPct" value="100" min="0" max="100" placeholder="Rollout %">
+            <div class="slider-group">
+                <input type="range" id="strPct" min="0" max="100" value="100">
+                <span class="slider-value">100%</span>
+            </div>
         `;
         else opts.innerHTML = '';
+        setupSliderListeners();
     });
 
     document.getElementById('modal').classList.remove('hidden');
+    setupSliderListeners();
 };
+
+function setupSliderListeners() {
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+        slider.addEventListener('input', (e) => {
+            const valueSpan = e.target.nextElementSibling;
+            if (valueSpan && valueSpan.classList.contains('slider-value')) {
+                valueSpan.textContent = e.target.value + '%';
+            }
+        });
+    });
+}
 
 window.saveStrategy = async function(envId) {
     const type = document.getElementById('strType').value;
@@ -453,7 +485,7 @@ async function createProject() {
     if (!name) return alert('Name required');
     try {
         await api('/projects', 'POST', { name, description });
-        closeModal();
+        window.closeModal();
         render();
     } catch(e) { alert(e.message); }
 }
@@ -463,7 +495,7 @@ async function deleteProject(id) {
     try { await api(`/projects/${id}`, 'DELETE'); render(); } catch(e) { alert(e.message); }
 }
 
-function editProject(id) {
+window.editProject = function(id) {
     api(`/projects/${id}`).then(p => {
         document.getElementById('modal').innerHTML = `
             <div class="modal-content">
@@ -484,13 +516,13 @@ async function updateProject(id) {
     const name = document.getElementById('projName').value.trim();
     const description = document.getElementById('projDesc').value.trim();
     if (!name) return alert('Name required');
-    try { await api(`/projects/${id}`, 'PUT', { name, description }); closeModal(); render(); } catch(e) { alert(e.message); }
+    try { await api(`/projects/${id}`, 'PUT', { name, description }); window.closeModal(); render(); } catch(e) { alert(e.message); }
 }
 
-function openProject(id) { setState('project', id, null); render(); }
-function openFlag(id) { setState('flag', state.currentProjectId, id); render(); }
+window.openProject = function(id) { setState('project', id, null); render(); };
+window.openFlag = function(id) { setState('flag', state.currentProjectId, id); render(); };
 
-function showCreateEnvironment() {
+window.showCreateEnvironment = function() {
     document.getElementById('modal').innerHTML = `
         <div class="modal-content">
             <h2>Add Environment</h2>
@@ -504,13 +536,13 @@ function showCreateEnvironment() {
     document.getElementById('modal').classList.remove('hidden');
 }
 
-async function createEnvironment() {
+window.createEnvironment = async function() {
     const name = document.getElementById('envName').value.trim();
     if (!name) return alert('Name required');
-    try { await api(`/projects/${state.currentProjectId}/environments`, 'POST', { name }); closeModal(); render(); } catch(e) { alert(e.message); }
+    try { await api(`/projects/${state.currentProjectId}/environments`, 'POST', { name }); window.closeModal(); render(); } catch(e) { alert(e.message); }
 }
 
-function showCreateContext() {
+window.showCreateContext = function() {
     document.getElementById('modal').innerHTML = `
         <div class="modal-content">
             <h2>Add Context</h2>
@@ -525,14 +557,14 @@ function showCreateContext() {
     document.getElementById('modal').classList.remove('hidden');
 }
 
-async function createContext() {
+window.createContext = async function() {
     const name = document.getElementById('ctxName').value.trim();
     const description = document.getElementById('ctxDesc').value.trim();
     if (!name) return alert('Name required');
-    try { await api(`/projects/${state.currentProjectId}/contexts`, 'POST', { name, description }); closeModal(); render(); } catch(e) { alert(e.message); }
+    try { await api(`/projects/${state.currentProjectId}/contexts`, 'POST', { name, description }); window.closeModal(); render(); } catch(e) { alert(e.message); }
 }
 
-function showCreateFlag() {
+window.showCreateFlag = function() {
     document.getElementById('modal').innerHTML = `
         <div class="modal-content">
             <h2>Create Flag</h2>
@@ -548,12 +580,12 @@ function showCreateFlag() {
     document.getElementById('modal').classList.remove('hidden');
 }
 
-async function createFlag() {
+window.createFlag = async function() {
     const name = document.getElementById('flagName').value.trim();
     const key = document.getElementById('flagKey').value.trim();
     const description = document.getElementById('flagDesc').value.trim();
     if (!name || !key) return alert('Name and key required');
-    try { await api(`/projects/${state.currentProjectId}/flags`, 'POST', { name, key, description }); closeModal(); render(); } catch(e) { alert(e.message); }
+    try { await api(`/projects/${state.currentProjectId}/flags`, 'POST', { name, key, description }); window.closeModal(); render(); } catch(e) { alert(e.message); }
 }
 
 async function deleteFlag(id) {
@@ -571,7 +603,7 @@ async function deleteContext(id) {
     try { await api(`/projects/${state.currentProjectId}/contexts/${id}`, 'DELETE'); render(); } catch(e) { alert(e.message); }
 }
 
-function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+window.closeModal = function() { document.getElementById('modal').classList.add('hidden'); }
 
 function escapeHtml(text) {
     if (!text) return '';
