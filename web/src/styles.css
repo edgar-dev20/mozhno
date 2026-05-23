@@ -112,3 +112,44 @@ body { background: #f0f2f5; color: #1a1a1a; min-height: 100vh; }
 .form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 4px; color: #374151; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px; }
 .empty { text-align: center; color: #9ca3af; padding: 40px; font-size: 14px; }
+
+.tags-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.tag-checkbox { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border: 2px solid; border-radius: 6px; cursor: pointer; font-size: 13px; transition: all 0.15s; }
+.tag-checkbox:hover { background: #f9fafb; }
+.tag-checkbox input { display: none; }
+.tag-checkbox:has(input:checked) { background: #f0f7ff; }
+.tag-color-dot { width: 10px; height: 10px; border-radius: 50%; }
+.hint { font-weight: normal; color: #9ca3af; font-size: 12px; }
+.empty-hint { font-size: 12px; color: #9ca3af; }
+
+input[type="color"] { width: 60px; height: 36px; padding: 2px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; }
+
+.flag-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.flag-tag { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.flag-tag:empty { display: none; }
+
+.tag-values-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.tag-value-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #f9fafb; border-radius: 6px; }
+.tag-value-row .tag-color-dot { flex-shrink: 0; }
+.tag-value-row .tag-name { flex: 1; font-size: 14px; }
+.tag-value-row .tag-value-input { padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; width: 150px; }
+.toggle-small { position: relative; display: inline-block; width: 36px; height: 20px; }
+.toggle-small input { opacity: 0; width: 0; height: 0; }
+.toggle-slider-small { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #d1d5db; transition: 0.2s; border-radius: 20px; }
+.toggle-slider-small:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background: white; transition: 0.2s; border-radius: 50%; }
+.toggle-small input:checked + .toggle-slider-small { background: #10b981; }
+.toggle-small input:checked + .toggle-slider-small:before { transform: translateX(16px); }
+.flag-tag-values { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.flag-tag-value { padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+
+.nav-item .btn-icon:hover { background: transparent; color: #0066cc; }
+.nav-item-text { flex: 1; cursor: pointer; }
+.nav-item:hover .nav-item-text { text-decoration: underline; }
+.nav-item.editing { flex-direction: column; align-items: flex-start; gap: 8px; background: #f0f7ff; }
+.nav-item.editing .nav-item-text { display: none; }
+.nav-item.editing .tag-color-dot { margin-left: 8px; }
+.inline-edit-input { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; width: 100px; }
+.inline-edit-color { width: 30px; height: 28px; padding: 2px; border: 1px solid #d1d5db; border-radius: 4px; cursor: pointer; }
+
+.header-edit-input { padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+.flag-desc-edit { width: 100%; min-height: 80px; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; resize: vertical; margin-bottom: 16px; }

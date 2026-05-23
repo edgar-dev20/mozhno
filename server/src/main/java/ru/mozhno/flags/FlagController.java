@@ -14,31 +14,38 @@ import java.util.List;
 @Tag(name = "Flags", description = "Feature flag management")
 public class FlagController {
     private final FlagService flagService;
+    private final FlagTagValueRepository flagTagValueRepository;
 
     @GetMapping
     @Operation(summary = "Get all flags for a project")
-    public List<Flag> getAll(@PathVariable Integer projectId) {
-        return flagService.findByProjectId(projectId);
+    public List<FlagResponse> getAll(@PathVariable Integer projectId) {
+        List<Flag> flags = flagService.findByProjectId(projectId);
+        return flags.stream()
+                .map(f -> new FlagResponse(f, flagTagValueRepository.findByFlagId(f.getId())))
+                .toList();
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get flag by ID")
-    public Flag getById(@PathVariable Integer projectId, @PathVariable Integer id) {
-        return flagService.findById(id);
+    public FlagResponse getById(@PathVariable Integer projectId, @PathVariable Integer id) {
+        Flag flag = flagService.findById(id);
+        return new FlagResponse(flag, flagTagValueRepository.findByFlagId(id));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new flag")
-    public Flag create(@PathVariable Integer projectId, @RequestBody FlagRequest request) {
+    public FlagResponse create(@PathVariable Integer projectId, @RequestBody FlagRequest request) {
         request.setProjectId(projectId);
-        return flagService.create(request);
+        Flag flag = flagService.create(request);
+        return new FlagResponse(flag, flagTagValueRepository.findByFlagId(flag.getId()));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a flag")
-    public Flag update(@PathVariable Integer projectId, @PathVariable Integer id, @RequestBody FlagRequest request) {
-        return flagService.update(id, request);
+    public FlagResponse update(@PathVariable Integer projectId, @PathVariable Integer id, @RequestBody FlagRequest request) {
+        Flag flag = flagService.update(id, request);
+        return new FlagResponse(flag, flagTagValueRepository.findByFlagId(id));
     }
 
     @DeleteMapping("/{id}")

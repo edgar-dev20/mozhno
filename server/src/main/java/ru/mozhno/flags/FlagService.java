@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.mozhno.projects.ProjectRepository;
+import ru.mozhno.tags.TagRepository;
 
 import java.util.List;
 
@@ -12,6 +13,8 @@ import java.util.List;
 public class FlagService {
     private final FlagRepository flagRepository;
     private final ProjectRepository projectRepository;
+    private final TagRepository tagRepository;
+    private final FlagTagValueRepository flagTagValueRepository;
 
     @Transactional(readOnly = true)
     public Flag findById(Integer id) {
@@ -43,7 +46,19 @@ public class FlagService {
         flag.setName(request.getName());
         flag.setKey(request.getKey());
         flag.setDescription(request.getDescription());
-        return flagRepository.save(flag);
+        flag = flagRepository.save(flag);
+
+        if (request.getTags() != null) {
+            for (FlagRequest.TagValue tv : request.getTags()) {
+                var ftv = new FlagTagValue();
+                ftv.setFlag(flag);
+                ftv.setTag(tagRepository.findById(tv.getTagId())
+                        .orElseThrow(() -> new RuntimeException("Tag not found: " + tv.getTagId())));
+                ftv.setTagValue(tv.getValue());
+                flagTagValueRepository.save(ftv);
+            }
+        }
+        return flag;
     }
 
     @Transactional
@@ -53,11 +68,26 @@ public class FlagService {
         flag.setName(request.getName());
         flag.setKey(request.getKey());
         flag.setDescription(request.getDescription());
-        return flagRepository.save(flag);
+        flag = flagRepository.save(flag);
+
+        flagTagValueRepository.deleteByFlagId(id);
+
+        if (request.getTags() != null) {
+            for (FlagRequest.TagValue tv : request.getTags()) {
+                var ftv = new FlagTagValue();
+                ftv.setFlag(flag);
+                ftv.setTag(tagRepository.findById(tv.getTagId())
+                        .orElseThrow(() -> new RuntimeException("Tag not found: " + tv.getTagId())));
+                ftv.setTagValue(tv.getValue());
+                flagTagValueRepository.save(ftv);
+            }
+        }
+        return flag;
     }
 
     @Transactional
     public void delete(Integer id) {
+        flagTagValueRepository.deleteByFlagId(id);
         flagRepository.deleteById(id);
     }
 }
