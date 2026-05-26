@@ -1,15 +1,10 @@
 package ru.mozhno.environments;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.Instant;
 
 @Entity
 @Table(name = "environments")
-@Data
-@NoArgsConstructor
 public class Environment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +20,8 @@ public class Environment {
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+
+    public Environment() {}
 
     @PrePersist
     protected void onCreate() {

@@ -1,15 +1,10 @@
 package ru.mozhno.projects;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.Instant;
 
 @Entity
 @Table(name = "projects")
-@Data
-@NoArgsConstructor
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +17,8 @@ public class Project {
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+
+    public Project() {}
 
     @PrePersist
     protected void onCreate() {

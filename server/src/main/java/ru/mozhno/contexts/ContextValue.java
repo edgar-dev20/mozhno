@@ -1,16 +1,10 @@
 package ru.mozhno.contexts;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.Instant;
-import java.util.List;
 
 @Entity
 @Table(name = "context_values")
-@Data
-@NoArgsConstructor
 public class ContextValue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +18,8 @@ public class ContextValue {
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+
+    public ContextValue() {}
 
     @PrePersist
     protected void onCreate() {
