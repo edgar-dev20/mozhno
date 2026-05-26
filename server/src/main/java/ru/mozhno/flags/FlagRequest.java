@@ -1,23 +1,16 @@
 package ru.mozhno.flags;
 
 import java.util.List;
-import java.util.Map;
 
 public class FlagRequest {
     private Integer projectId;
     private String name;
     private String key;
     private String description;
+    private String flagType;
     private List<TagValue> tags;
 
     public FlagRequest() {}
-    public FlagRequest(Integer projectId, String name, String key, String description, List<TagValue> tags) {
-        this.projectId = projectId;
-        this.name = name;
-        this.key = key;
-        this.description = description;
-        this.tags = tags;
-    }
 
     public static class TagValue {
         private Integer tagId;
@@ -43,6 +36,8 @@ public class FlagRequest {
     public void setKey(String key) { this.key = key; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public String getFlagType() { return flagType; }
+    public void setFlagType(String flagType) { this.flagType = flagType; }
     public List<TagValue> getTags() { return tags; }
     public void setTags(List<TagValue> tags) { this.tags = tags; }
 }

@@ -1,29 +1,14 @@
 package ru.mozhno.projects;
 
-import jakarta.persistence.*;
 import java.time.Instant;
 
-@Entity
-@Table(name = "projects")
 public class Project {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column(nullable = false)
     private String name;
-
     private String description;
-
-    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     public Project() {}
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-    }
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

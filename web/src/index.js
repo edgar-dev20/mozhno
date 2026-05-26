@@ -169,7 +169,7 @@ async function renderProject(container) {
                             return `
                             <div class="flag-card" data-id="${f.id}">
                                 <div class="flag-info">
-                                    <h3>${escapeHtml(f.name)}</h3>
+                                    <h3>${escapeHtml(f.name)} <span class="flag-type-badge ${(f.flagType || 'RELEASE').toLowerCase()}">${escapeHtml(f.flagType || 'RELEASE')}</span></h3>
                                     <code>${escapeHtml(f.key)}</code>
                                     ${flagTags.length > 0 ? `<div class="flag-tags">${flagTags.map(t => `<span class="flag-tag" style="background:${t.color}20; color:${t.color}; border:1px solid ${t.color}">${escapeHtml(t.name)}</span>`).join('')}</div>` : ''}
                                 </div>
@@ -294,10 +294,14 @@ async function renderFlag(container) {
                 ${isEditing ? `
                     <input type="text" id="editFlagName" value="${escapeHtml(flag?.name || '')}" class="header-edit-input">
                     <input type="text" id="editFlagKey" value="${escapeHtml(flag?.key || '')}" class="header-edit-input">
+                    <select id="editFlagType" class="header-edit-input">
+                        <option value="RELEASE" ${flag?.flagType === 'RELEASE' ? 'selected' : ''}>Release</option>
+                        <option value="KILLSWITCH" ${flag?.flagType === 'KILLSWITCH' ? 'selected' : ''}>Killswitch</option>
+                    </select>
                     <button class="btn-primary btn-sm" onclick="saveFlagEdit()">Save</button>
                     <button class="btn-secondary btn-sm" onclick="cancelFlagEdit()">Cancel</button>
                 ` : `
-                    <h1>${escapeHtml(flag?.name || 'Flag')}</h1>
+                    <h1>${escapeHtml(flag?.name || 'Flag')} <span class="flag-type-badge ${(flag?.flagType || 'RELEASE').toLowerCase()}">${escapeHtml(flag?.flagType || 'RELEASE')}</span></h1>
                     <code class="flag-key-badge">${escapeHtml(flag?.key || '')}</code>
                     <button class="btn-secondary" id="btnEditFlag">Edit</button>
                 `}
@@ -441,10 +445,11 @@ window.saveFlagEdit = async function() {
     const name = document.getElementById('editFlagName').value.trim();
     const key = document.getElementById('editFlagKey').value.trim();
     const description = document.getElementById('editFlagDesc')?.value.trim() || '';
+    const flagType = document.getElementById('editFlagType')?.value || 'RELEASE';
     const tagIds = [...document.querySelectorAll('.flag-tag-check:checked')].map(c => parseInt(c.value));
     if (!name || !key) return alert('Name and key required');
     try {
-        await api(`/projects/${state.currentProjectId}/flags/${state.currentFlagId}`, 'PUT', { name, key, description, tagIds });
+        await api(`/projects/${state.currentProjectId}/flags/${state.currentFlagId}`, 'PUT', { name, key, description, flagType, tagIds });
         window.editingFlagId = null;
         render();
     } catch(e) { alert(e.message); }
@@ -726,6 +731,13 @@ window.showCreateFlag = async function() {
             <h2>Create Flag</h2>
             <input type="text" id="flagName" placeholder="Name">
             <input type="text" id="flagKey" placeholder="Key (e.g. new-feature)">
+            <div class="form-group">
+                <label>Type</label>
+                <select id="flagType">
+                    <option value="RELEASE">Release</option>
+                    <option value="KILLSWITCH">Killswitch</option>
+                </select>
+            </div>
             <textarea id="flagDesc" placeholder="Description"></textarea>
             <div class="form-group">
                 <label>Tags with values <span class="hint">(max 10)</span></label>
@@ -756,6 +768,7 @@ window.createFlag = async function() {
     const name = document.getElementById('flagName').value.trim();
     const key = document.getElementById('flagKey').value.trim();
     const description = document.getElementById('flagDesc').value.trim();
+    const flagType = document.getElementById('flagType').value;
     const tagValues = [];
     document.querySelectorAll('.tag-value-row').forEach(row => {
         if (row.querySelector('.tag-enabled-check').checked) {
@@ -767,7 +780,7 @@ window.createFlag = async function() {
         }
     });
     if (!name || !key) return alert('Name and key required');
-    try { await api(`/projects/${state.currentProjectId}/flags`, 'POST', { name, key, description, tags: tagValues }); window.closeModal(); render(); } catch(e) { alert(e.message); }
+    try { await api(`/projects/${state.currentProjectId}/flags`, 'POST', { name, key, description, flagType, tags: tagValues }); window.closeModal(); render(); } catch(e) { alert(e.message); }
 }
 
 async function deleteFlag(id) {

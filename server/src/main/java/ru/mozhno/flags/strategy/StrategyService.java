@@ -1,6 +1,5 @@
 package ru.mozhno.flags.strategy;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.mozhno.flags.FlagRepository;
@@ -8,15 +7,20 @@ import ru.mozhno.flags.FlagRepository;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class StrategyService {
     private final FlagStrategyRepository strategyRepository;
     private final FlagRepository flagRepository;
 
+    public StrategyService(FlagStrategyRepository strategyRepository, FlagRepository flagRepository) {
+        this.strategyRepository = strategyRepository;
+        this.flagRepository = flagRepository;
+    }
+
     @Transactional(readOnly = true)
     public List<FlagStrategy> findByFlagId(Integer flagId) {
-        flagRepository.findById(flagId)
-                .orElseThrow(() -> new RuntimeException("Flag not found: " + flagId));
+        if (flagRepository.findById(flagId) == null) {
+            throw new RuntimeException("Flag not found: " + flagId);
+        }
         return strategyRepository.findByFlagId(flagId);
     }
 
@@ -27,22 +31,23 @@ public class StrategyService {
 
     @Transactional
     public FlagStrategy create(StrategyRequest request) {
-        var flag = flagRepository.findById(request.getFlagId())
-                .orElseThrow(() -> new RuntimeException("Flag not found: " + request.getFlagId()));
+        if (flagRepository.findById(request.getFlagId()) == null) {
+            throw new RuntimeException("Flag not found: " + request.getFlagId());
+        }
         FlagStrategy strategy = switch (request.getType().toUpperCase()) {
             case "SERVER" -> {
-                var s = new ServerStrategy();
+                ServerStrategy s = new ServerStrategy();
                 s.setEnabled(request.getEnabled());
                 yield s;
             }
             case "GRADUAL" -> {
-                var s = new GradualStrategy();
+                GradualStrategy s = new GradualStrategy();
                 s.setEnabled(request.getEnabled());
                 s.setPercentage(request.getPercentage());
                 yield s;
             }
             case "TARGETING" -> {
-                var s = new TargetingStrategy();
+                TargetingStrategy s = new TargetingStrategy();
                 s.setEnabled(request.getEnabled());
                 s.setContextDefinitionId(request.getContextDefinitionId());
                 s.setContextValuesJson(request.getContextValuesJson());
@@ -51,7 +56,7 @@ public class StrategyService {
             }
             default -> throw new RuntimeException("Unknown strategy type: " + request.getType());
         };
-        strategy.setFlag(flag);
+        strategy.setFlagId(request.getFlagId());
         strategy.setEnvironmentId(request.getEnvironmentId());
         return strategyRepository.save(strategy);
     }
@@ -63,8 +68,8 @@ public class StrategyService {
 
     @Transactional
     public FlagStrategy update(Integer id, StrategyRequest request) {
-        var strategy = strategyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Strategy not found: " + id));
+        FlagStrategy strategy = strategyRepository.findById(id);
+        if (strategy == null) throw new RuntimeException("Strategy not found: " + id);
         strategy.setEnabled(request.getEnabled());
         if (strategy instanceof GradualStrategy gs) {
             gs.setPercentage(request.getPercentage());

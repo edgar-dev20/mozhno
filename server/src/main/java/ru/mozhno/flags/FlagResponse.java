@@ -9,6 +9,7 @@ public class FlagResponse {
     private String name;
     private String key;
     private String description;
+    private String flagType;
     private Instant createdAt;
     private List<TagValueResponse> tags;
 
@@ -37,20 +38,16 @@ public class FlagResponse {
     }
 
     public FlagResponse() {}
-    public FlagResponse(Flag flag, List<FlagTagValue> tagValues) {
-        this.id = flag.getId();
-        this.projectId = flag.getProjectId();
-        this.name = flag.getName();
-        this.key = flag.getKey();
-        this.description = flag.getDescription();
-        this.createdAt = flag.getCreatedAt();
-        this.tags = tagValues.stream()
-                .map(ftv -> new TagValueResponse(
-                        ftv.getTag().getId(),
-                        ftv.getTag().getName(),
-                        ftv.getTag().getColor(),
-                        ftv.getTagValue()))
-                .toList();
+
+    public FlagResponse(Integer id, Integer projectId, String name, String key, String description, String flagType, Instant createdAt, List<TagValueResponse> tags) {
+        this.id = id;
+        this.projectId = projectId;
+        this.name = name;
+        this.key = key;
+        this.description = description;
+        this.flagType = flagType;
+        this.createdAt = createdAt;
+        this.tags = tags;
     }
 
     public Integer getId() { return id; }
@@ -63,6 +60,8 @@ public class FlagResponse {
     public void setKey(String key) { this.key = key; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public String getFlagType() { return flagType; }
+    public void setFlagType(String flagType) { this.flagType = flagType; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public List<TagValueResponse> getTags() { return tags; }

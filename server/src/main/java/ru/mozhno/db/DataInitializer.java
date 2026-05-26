@@ -1,6 +1,5 @@
 package ru.mozhno.db;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +18,7 @@ import ru.mozhno.flags.strategy.TargetingStrategy;
 import ru.mozhno.projects.Project;
 import ru.mozhno.projects.ProjectRepository;
 
-@Component
-@RequiredArgsConstructor
+//@Component
 public class DataInitializer implements CommandLineRunner {
     private final ProjectRepository projectRepository;
     private final FlagRepository flagRepository;
@@ -28,6 +26,17 @@ public class DataInitializer implements CommandLineRunner {
     private final ContextDefinitionRepository contextDefinitionRepository;
     private final ContextValueRepository contextValueRepository;
     private final EnvironmentRepository environmentRepository;
+
+    public DataInitializer(ProjectRepository projectRepository, FlagRepository flagRepository,
+                            FlagStrategyRepository strategyRepository, ContextDefinitionRepository contextDefinitionRepository,
+                            ContextValueRepository contextValueRepository, EnvironmentRepository environmentRepository) {
+        this.projectRepository = projectRepository;
+        this.flagRepository = flagRepository;
+        this.strategyRepository = strategyRepository;
+        this.contextDefinitionRepository = contextDefinitionRepository;
+        this.contextValueRepository = contextValueRepository;
+        this.environmentRepository = environmentRepository;
+    }
 
     @Override
     @Transactional
@@ -59,7 +68,7 @@ public class DataInitializer implements CommandLineRunner {
         enabledFlag = flagRepository.save(enabledFlag);
 
         ServerStrategy serverStrategy = new ServerStrategy();
-        serverStrategy.setFlag(enabledFlag);
+        serverStrategy.setFlagId(enabledFlag.getId());
         serverStrategy.setEnvironmentId(devEnv.getId());
         serverStrategy.setEnabled(true);
         strategyRepository.save(serverStrategy);
@@ -72,14 +81,14 @@ public class DataInitializer implements CommandLineRunner {
         gradualFlag = flagRepository.save(gradualFlag);
 
         GradualStrategy gradualStrategy = new GradualStrategy();
-        gradualStrategy.setFlag(gradualFlag);
+        gradualStrategy.setFlagId(gradualFlag.getId());
         gradualStrategy.setEnvironmentId(devEnv.getId());
         gradualStrategy.setEnabled(true);
         gradualStrategy.setPercentage(50.0);
         strategyRepository.save(gradualStrategy);
 
         GradualStrategy gradualStrategyProd = new GradualStrategy();
-        gradualStrategyProd.setFlag(gradualFlag);
+        gradualStrategyProd.setFlagId(gradualFlag.getId());
         gradualStrategyProd.setEnvironmentId(prodEnv.getId());
         gradualStrategyProd.setEnabled(true);
         gradualStrategyProd.setPercentage(10.0);
@@ -115,7 +124,7 @@ public class DataInitializer implements CommandLineRunner {
         targetingFlag = flagRepository.save(targetingFlag);
 
         TargetingStrategy targetingStrategy = new TargetingStrategy();
-        targetingStrategy.setFlag(targetingFlag);
+        targetingStrategy.setFlagId(targetingFlag.getId());
         targetingStrategy.setEnvironmentId(devEnv.getId());
         targetingStrategy.setEnabled(true);
         targetingStrategy.setContextDefinitionId(userIdContext.getId());

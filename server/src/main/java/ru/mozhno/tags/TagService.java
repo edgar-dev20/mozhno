@@ -1,14 +1,17 @@
 package ru.mozhno.tags;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class TagService {
     private final TagRepository tagRepository;
+
+    public TagService(TagRepository tagRepository) {
+        this.tagRepository = tagRepository;
+    }
 
     @Transactional(readOnly = true)
     public List<Tag> findByProjectId(Integer projectId) {
@@ -17,8 +20,9 @@ public class TagService {
 
     @Transactional(readOnly = true)
     public Tag findById(Integer id) {
-        return tagRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tag not found: " + id));
+        Tag tag = tagRepository.findById(id);
+        if (tag == null) throw new RuntimeException("Tag not found: " + id);
+        return tag;
     }
 
     @Transactional

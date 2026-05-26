@@ -1,50 +1,39 @@
 package ru.mozhno.flags.strategy;
 
-import jakarta.persistence.*;
-import ru.mozhno.flags.Flag;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.time.Instant;
 
-@Entity
-@Table(name = "flag_strategies")
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "strategy_type", discriminatorType = DiscriminatorType.STRING)
-public abstract class FlagStrategy {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class FlagStrategy {
     private Integer id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "flag_id", nullable = false)
-    @JsonIgnore
-    private Flag flag;
-
-    @Column(name = "environment_id", nullable = false)
+    private Integer flagId;
     private Integer environmentId;
-
-    @Column(name = "created_at", nullable = false)
+    private String strategyType;
+    private boolean enabled;
+    private Double percentage;
+    private Double rolloutPercentage;
+    private Integer contextDefinitionId;
+    private String contextValuesJson;
     private Instant createdAt;
 
-    @Column(nullable = false)
-    private boolean enabled;
-
-    @Transient
-    public abstract String getStrategyType();
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-    }
+    public FlagStrategy() {}
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
-    public Flag getFlag() { return flag; }
-    public void setFlag(Flag flag) { this.flag = flag; }
+    public Integer getFlagId() { return flagId; }
+    public void setFlagId(Integer flagId) { this.flagId = flagId; }
     public Integer getEnvironmentId() { return environmentId; }
     public void setEnvironmentId(Integer environmentId) { this.environmentId = environmentId; }
-    public Instant getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public String getStrategyType() { return strategyType; }
+    public void setStrategyType(String strategyType) { this.strategyType = strategyType; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public Double getPercentage() { return percentage; }
+    public void setPercentage(Double percentage) { this.percentage = percentage; }
+    public Double getRolloutPercentage() { return rolloutPercentage; }
+    public void setRolloutPercentage(Double rolloutPercentage) { this.rolloutPercentage = rolloutPercentage; }
+    public Integer getContextDefinitionId() { return contextDefinitionId; }
+    public void setContextDefinitionId(Integer contextDefinitionId) { this.contextDefinitionId = contextDefinitionId; }
+    public String getContextValuesJson() { return contextValuesJson; }
+    public void setContextValuesJson(String contextValuesJson) { this.contextValuesJson = contextValuesJson; }
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

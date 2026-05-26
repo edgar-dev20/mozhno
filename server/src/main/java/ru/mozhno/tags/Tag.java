@@ -1,33 +1,16 @@
 package ru.mozhno.tags;
 
-import jakarta.persistence.*;
 import java.time.Instant;
 
-@Entity
-@Table(name = "tags")
 public class Tag {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column(nullable = false)
     private String name;
-
     private String description;
-
-    @Column(nullable = false)
     private String color;
-
-    @Column(name = "project_id", nullable = false)
     private Integer projectId;
-
-    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-    }
+    public Tag() {}
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

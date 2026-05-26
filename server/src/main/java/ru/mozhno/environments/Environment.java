@@ -1,32 +1,15 @@
 package ru.mozhno.environments;
 
-import jakarta.persistence.*;
 import java.time.Instant;
 
-@Entity
-@Table(name = "environments")
 public class Environment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column(nullable = false)
     private String name;
-
     private String description;
-
-    @Column(nullable = false)
     private Integer projectId;
-
-    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     public Environment() {}
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-    }
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }

@@ -1,16 +1,19 @@
 package ru.mozhno.contexts;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class ContextService {
     private final ContextDefinitionRepository contextDefinitionRepository;
     private final ContextValueRepository contextValueRepository;
+
+    public ContextService(ContextDefinitionRepository contextDefinitionRepository, ContextValueRepository contextValueRepository) {
+        this.contextDefinitionRepository = contextDefinitionRepository;
+        this.contextValueRepository = contextValueRepository;
+    }
 
     @Transactional(readOnly = true)
     public List<ContextDefinition> findDefinitionsByProjectId(Integer projectId) {
@@ -19,14 +22,15 @@ public class ContextService {
 
     @Transactional(readOnly = true)
     public ContextDefinition findDefinitionById(Integer id) {
-        return contextDefinitionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ContextDefinition not found: " + id));
+        ContextDefinition def = contextDefinitionRepository.findById(id);
+        if (def == null) throw new RuntimeException("ContextDefinition not found: " + id);
+        return def;
     }
 
     @Transactional
     public ContextDefinition updateDefinition(Integer id, ContextDefinitionRequest request) {
-        var definition = contextDefinitionRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ContextDefinition not found: " + id));
+        ContextDefinition definition = contextDefinitionRepository.findById(id);
+        if (definition == null) throw new RuntimeException("ContextDefinition not found: " + id);
         definition.setName(request.getName());
         definition.setDescription(request.getDescription());
         return contextDefinitionRepository.save(definition);
@@ -34,7 +38,7 @@ public class ContextService {
 
     @Transactional
     public ContextDefinition createDefinition(ContextDefinitionRequest request) {
-        var definition = new ContextDefinition();
+        ContextDefinition definition = new ContextDefinition();
         definition.setName(request.getName());
         definition.setDescription(request.getDescription());
         definition.setProjectId(request.getProjectId());
@@ -53,21 +57,22 @@ public class ContextService {
 
     @Transactional(readOnly = true)
     public ContextValue findValueById(Integer id) {
-        return contextValueRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ContextValue not found: " + id));
+        ContextValue value = contextValueRepository.findById(id);
+        if (value == null) throw new RuntimeException("ContextValue not found: " + id);
+        return value;
     }
 
     @Transactional
     public ContextValue updateValue(Integer id, ContextValueRequest request) {
-        var value = contextValueRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("ContextValue not found: " + id));
+        ContextValue value = contextValueRepository.findById(id);
+        if (value == null) throw new RuntimeException("ContextValue not found: " + id);
         value.setValues(request.getValues());
         return contextValueRepository.save(value);
     }
 
     @Transactional
     public ContextValue createValue(ContextValueRequest request) {
-        var value = new ContextValue();
+        ContextValue value = new ContextValue();
         value.setContextDefinitionId(request.getContextDefinitionId());
         value.setValues(request.getValues());
         return contextValueRepository.save(value);

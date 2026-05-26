@@ -1,16 +1,37 @@
 package ru.mozhno.flags;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 import java.util.List;
 
-public interface FlagTagValueRepository extends JpaRepository<FlagTagValue, Integer> {
-    @Query("SELECT ftv FROM FlagTagValue ftv WHERE ftv.flag.id = :flagId")
-    List<FlagTagValue> findByFlagId(@Param("flagId") Integer flagId);
+@Repository
+public class FlagTagValueRepository {
+    private final JdbcTemplate jdbc;
 
-    @Query("SELECT ftv FROM FlagTagValue ftv WHERE ftv.flag.id = :flagId AND ftv.tag.id = :tagId")
-    FlagTagValue findByFlagIdAndTagId(@Param("flagId") Integer flagId, @Param("tagId") Integer tagId);
+    public FlagTagValueRepository(JdbcTemplate jdbc) {
+        this.jdbc = jdbc;
+    }
 
-    void deleteByFlagId(Integer flagId);
+    private static final RowMapper<FlagTagValue> ROW_MAPPER = (rs, rowNum) -> {
+        FlagTagValue ftv = new FlagTagValue();
+        ftv.setId(rs.getInt("id"));
+        ftv.setFlagId(rs.getInt("flag_id"));
+        ftv.setTagId(rs.getInt("tag_id"));
+        ftv.setTagValue(rs.getString("tag_value"));
+        return ftv;
+    };
+
+    public List<FlagTagValue> findByFlagId(Integer flagId) {
+        return jdbc.query("SELECT id, flag_id, tag_id, tag_value FROM flag_tag_values WHERE flag_id = ?", ROW_MAPPER, flagId);
+    }
+
+    public void save(FlagTagValue ftv) {
+        jdbc.update("INSERT INTO flag_tag_values (flag_id, tag_id, tag_value) VALUES (?, ?, ?)",
+            ftv.getFlagId(), ftv.getTagId(), ftv.getTagValue());
+    }
+
+    public void deleteByFlagId(Integer flagId) {
+        jdbc.update("DELETE FROM flag_tag_values WHERE flag_id = ?", flagId);
+    }
 }

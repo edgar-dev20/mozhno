@@ -1,44 +1,38 @@
 package ru.mozhno.projects;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class ProjectService {
     private final ProjectRepository projectRepository;
 
-    @Transactional(readOnly = true)
+    public ProjectService(ProjectRepository projectRepository) {
+        this.projectRepository = projectRepository;
+    }
+
     public List<Project> findAll() {
         return projectRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
     public Project findById(Integer id) {
-        return projectRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Project not found: " + id));
+        return projectRepository.findById(id);
     }
 
-    @Transactional
     public Project create(ProjectRequest request) {
-        var project = new Project();
-        project.setName(request.getName());
-        project.setDescription(request.getDescription());
-        return projectRepository.save(project);
+        Project p = new Project();
+        p.setName(request.getName());
+        p.setDescription(request.getDescription());
+        return projectRepository.save(p);
     }
 
-    @Transactional
     public Project update(Integer id, ProjectRequest request) {
-        var project = findById(id);
-        project.setName(request.getName());
-        project.setDescription(request.getDescription());
-        return projectRepository.save(project);
+        Project p = projectRepository.findById(id);
+        p.setName(request.getName());
+        p.setDescription(request.getDescription());
+        return projectRepository.save(p);
     }
 
-    @Transactional
     public void delete(Integer id) {
         projectRepository.deleteById(id);
     }
