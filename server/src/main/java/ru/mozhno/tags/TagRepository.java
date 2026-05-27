@@ -40,9 +40,11 @@ public class TagRepository {
 
     public Tag save(Tag tag) {
         if (tag.getId() == null) {
+            Instant createTime = Instant.now();
             jdbc.update("INSERT INTO tags (name, description, color, project_id, created_at) VALUES (?, ?, ?, ?, ?)",
-                tag.getName(), tag.getDescription(), tag.getColor(), tag.getProjectId(), Timestamp.from(Instant.now()));
+                tag.getName(), tag.getDescription(), tag.getColor(), tag.getProjectId(), Timestamp.from(createTime));
             tag.setId(getLastInsertId());
+            tag.setCreatedAt(createTime);
         } else {
             jdbc.update("UPDATE tags SET name = ?, description = ?, color = ? WHERE id = ?",
                 tag.getName(), tag.getDescription(), tag.getColor(), tag.getId());

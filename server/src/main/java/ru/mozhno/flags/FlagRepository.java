@@ -49,10 +49,12 @@ public class FlagRepository {
 
     public Flag save(Flag flag) {
         if (flag.getId() == null) {
+            Instant createTime = Instant.now();
             jdbc.update("INSERT INTO flags (project_id, name, flag_key, description, flag_type, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                 flag.getProjectId(), flag.getName(), flag.getKey(), flag.getDescription(),
-                flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE", Timestamp.from(Instant.now()));
+                flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE", Timestamp.from(createTime));
             flag.setId(getLastInsertId());
+            flag.setCreatedAt(createTime);
         } else {
             jdbc.update("UPDATE flags SET name = ?, description = ?, flag_type = ? WHERE id = ?",
                 flag.getName(), flag.getDescription(), flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE", flag.getId());

@@ -52,11 +52,13 @@ public class FlagStrategyRepository {
 
     public FlagStrategy save(FlagStrategy fs) {
         if (fs.getId() == null) {
+            Instant createTime = Instant.now();
             jdbc.update("INSERT INTO flag_strategies (flag_id, environment_id, strategy_type, enabled, percentage, rollout_percentage, context_definition_id, context_values_json, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 fs.getFlagId(), fs.getEnvironmentId(), fs.getStrategyType(), fs.isEnabled(),
                 fs.getPercentage(), fs.getRolloutPercentage(), fs.getContextDefinitionId(),
-                fs.getContextValuesJson(), Timestamp.from(Instant.now()));
+                fs.getContextValuesJson(), Timestamp.from(createTime));
             fs.setId(getLastInsertId());
+            fs.setCreatedAt(createTime);
         } else {
             jdbc.update("UPDATE flag_strategies SET environment_id = ?, strategy_type = ?, enabled = ?, percentage = ?, rollout_percentage = ?, context_definition_id = ?, context_values_json = ? WHERE id = ?",
                 fs.getEnvironmentId(), fs.getStrategyType(), fs.isEnabled(),

@@ -1,5 +1,6 @@
 package ru.mozhno.projects;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -29,14 +30,20 @@ public class ProjectRepository {
     }
 
     public Project findById(Integer id) {
-        return jdbc.queryForObject("SELECT id, name, description, created_at FROM projects WHERE id = ?", ROW_MAPPER, id);
+        try {
+            return jdbc.queryForObject("SELECT id, name, description, created_at FROM projects WHERE id = ?", ROW_MAPPER, id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     public Project save(Project project) {
         if (project.getId() == null) {
+            Instant createTime = Instant.now();
             jdbc.update("INSERT INTO projects (name, description, created_at) VALUES (?, ?, ?)",
-                project.getName(), project.getDescription(), Timestamp.from(Instant.now()));
+                project.getName(), project.getDescription(), Timestamp.from(createTime));
             project.setId(getLastInsertId());
+            project.setCreatedAt(createTime);
         } else {
             jdbc.update("UPDATE projects SET name = ?, description = ? WHERE id = ?",
                 project.getName(), project.getDescription(), project.getId());

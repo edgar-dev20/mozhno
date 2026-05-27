@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: feature-flags-test
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+  datasource:
+    hikari:
+      connection-timeout: 30000
+      connection-test-query: SELECT 1
+      validation-timeout: 3000
+      initialization-fail-timeout: -1
+      keepalive-time: 30000
+      max-lifetime: 120000
+      idle-timeout: 600000
+      leak-detection-threshold: 10000
+      maximum-pool-size: 5
+
+logging:
+  level:
+    org.testcontainers: WARN
+
+server:
+  port: 8080

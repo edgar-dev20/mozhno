@@ -38,9 +38,14 @@ public class ContextValueRepository {
 
     public ContextValue save(ContextValue cv) {
         if (cv.getId() == null) {
+            Instant createTime = Instant.now();
             jdbc.update("INSERT INTO context_values (context_definition_id, context_values, created_at) VALUES (?, ?, ?)",
-                cv.getContextDefinitionId(), cv.getValues(), Timestamp.from(Instant.now()));
+                cv.getContextDefinitionId(), cv.getValues(), Timestamp.from(createTime));
             cv.setId(getLastInsertId());
+            cv.setCreatedAt(createTime);
+        } else {
+            jdbc.update("UPDATE context_values SET context_definition_id = ?, context_values = ? WHERE id = ?",
+                cv.getContextDefinitionId(), cv.getValues(), cv.getId());
         }
         return cv;
     }

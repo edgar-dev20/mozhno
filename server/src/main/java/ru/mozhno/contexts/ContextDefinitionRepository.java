@@ -39,9 +39,11 @@ public class ContextDefinitionRepository {
 
     public ContextDefinition save(ContextDefinition ctx) {
         if (ctx.getId() == null) {
+            Instant createTime = Instant.now();
             jdbc.update("INSERT INTO context_definitions (name, description, project_id, created_at) VALUES (?, ?, ?, ?)",
-                ctx.getName(), ctx.getDescription(), ctx.getProjectId(), Timestamp.from(Instant.now()));
+                ctx.getName(), ctx.getDescription(), ctx.getProjectId(), Timestamp.from(createTime));
             ctx.setId(getLastInsertId());
+            ctx.setCreatedAt(createTime);
         } else {
             jdbc.update("UPDATE context_definitions SET name = ?, description = ? WHERE id = ?",
                 ctx.getName(), ctx.getDescription(), ctx.getId());

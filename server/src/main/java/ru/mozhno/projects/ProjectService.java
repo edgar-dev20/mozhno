@@ -16,7 +16,11 @@ public class ProjectService {
     }
 
     public Project findById(Integer id) {
-        return projectRepository.findById(id);
+        Project p = projectRepository.findById(id);
+        if (p == null) {
+            throw new RuntimeException("Project not found: " + id);
+        }
+        return p;
     }
 
     public Project create(ProjectRequest request) {
@@ -28,6 +32,9 @@ public class ProjectService {
 
     public Project update(Integer id, ProjectRequest request) {
         Project p = projectRepository.findById(id);
+        if (p == null) {
+            throw new RuntimeException("Project not found: " + id);
+        }
         p.setName(request.getName());
         p.setDescription(request.getDescription());
         return projectRepository.save(p);

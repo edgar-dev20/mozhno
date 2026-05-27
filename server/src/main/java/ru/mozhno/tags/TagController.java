@@ -19,6 +19,12 @@ public class TagController {
         return tagService.findByProjectId(projectId);
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get tag by ID")
+    public Tag getById(@PathVariable Integer projectId, @PathVariable Integer id) {
+        return tagService.findById(id);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a tag")

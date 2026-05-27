@@ -10,19 +10,20 @@ import ru.mozhno.flags.FlagService;
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/v1/flags/{flagId}/strategies")
 @RequiredArgsConstructor
 @Tag(name = "Strategies", description = "Flag strategy management")
 public class StrategyController {
     private final StrategyService strategyService;
     private final FlagService flagService;
 
-    @GetMapping("/api/v1/flags/{flagId}/strategies")
+    @GetMapping
     @Operation(summary = "Get all strategies for a flag")
     public List<FlagStrategy> getAll(@PathVariable Integer flagId) {
         return strategyService.findByFlagId(flagId);
     }
 
-    @PostMapping("/api/v1/flags/{flagId}/strategies")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new strategy")
     public FlagStrategy create(@PathVariable Integer flagId, @RequestBody StrategyRequest request) {
@@ -30,16 +31,16 @@ public class StrategyController {
         return strategyService.create(request);
     }
 
-    @DeleteMapping("/api/v1/strategies/{id}")
+    @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a strategy")
-    public void delete(@PathVariable Integer id) {
+    public void delete(@PathVariable Integer flagId, @PathVariable Integer id) {
         strategyService.delete(id);
     }
 
-    @PutMapping("/api/v1/strategies/{id}")
+    @PutMapping("/{id}")
     @Operation(summary = "Update a strategy")
-    public FlagStrategy update(@PathVariable Integer id, @RequestBody StrategyRequest request) {
+    public FlagStrategy update(@PathVariable Integer flagId, @PathVariable Integer id, @RequestBody StrategyRequest request) {
         return strategyService.update(id, request);
     }
 }

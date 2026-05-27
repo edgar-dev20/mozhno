@@ -39,9 +39,11 @@ public class EnvironmentRepository {
 
     public Environment save(Environment env) {
         if (env.getId() == null) {
+            Instant createTime = Instant.now();
             jdbc.update("INSERT INTO environments (name, description, project_id, created_at) VALUES (?, ?, ?, ?)",
-                env.getName(), env.getDescription(), env.getProjectId(), Timestamp.from(Instant.now()));
+                env.getName(), env.getDescription(), env.getProjectId(), Timestamp.from(createTime));
             env.setId(getLastInsertId());
+            env.setCreatedAt(createTime);
         } else {
             jdbc.update("UPDATE environments SET name = ?, description = ? WHERE id = ?",
                 env.getName(), env.getDescription(), env.getId());
