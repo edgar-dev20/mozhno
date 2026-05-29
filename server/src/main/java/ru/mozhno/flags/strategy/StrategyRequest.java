@@ -9,6 +9,7 @@ public class StrategyRequest {
     private Integer contextDefinitionId;
     private String contextValuesJson;
     private Double rolloutPercentage;
+    private Integer segmentId;
 
     public StrategyRequest() {}
 
@@ -28,4 +29,6 @@ public class StrategyRequest {
     public void setContextValuesJson(String contextValuesJson) { this.contextValuesJson = contextValuesJson; }
     public Double getRolloutPercentage() { return rolloutPercentage; }
     public void setRolloutPercentage(Double rolloutPercentage) { this.rolloutPercentage = rolloutPercentage; }
+    public Integer getSegmentId() { return segmentId; }
+    public void setSegmentId(Integer segmentId) { this.segmentId = segmentId; }
 }

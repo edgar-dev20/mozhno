@@ -8,10 +8,10 @@
   var editingCtxId = null;
   var editingTagId = null;
   var state = { currentView, currentProjectId, currentFlagId };
-  function setState(view, projectId, flagId) {
+  function setState(view, projectId, flagId2) {
     state.currentView = view;
     state.currentProjectId = projectId;
-    state.currentFlagId = flagId;
+    state.currentFlagId = flagId2;
   }
   async function api(path, method = "GET", body = null) {
     const opts = { method, headers: { "Content-Type": "application/json" } };
@@ -78,13 +78,14 @@
     });
   }
   async function renderProject(container) {
-    let project, environments, contexts, flags, tags, allStrategies = {};
+    let project, environments, contexts, flags, tags, segments, allStrategies = {};
     try {
       project = await api(`/projects/${state.currentProjectId}`);
       environments = await api(`/projects/${state.currentProjectId}/environments`);
       contexts = await api(`/projects/${state.currentProjectId}/contexts`);
       flags = await api(`/projects/${state.currentProjectId}/flags`);
       tags = await api(`/projects/${state.currentProjectId}/tags`);
+      segments = await api(`/projects/${state.currentProjectId}/segments`);
       for (const f of flags) {
         allStrategies[f.id] = await api(`/flags/${f.id}/strategies`);
       }
@@ -139,26 +140,37 @@
                             `).join("") || ""}
                             ${!editingCtxId ? `<button class="btn-link" id="btnAddCtx">+ Add Context</button>` : ""}
                         </div>
-                        <div class="nav-section">
-                            <h4>Tags</h4>
-                            ${tags?.map((t) => `
-                                <div class="nav-item${editingTagId === t.id ? " editing" : ""}" data-tag="${t.id}">
-                                    ${editingTagId === t.id ? `
-                                        <span class="tag-color-dot" style="background:${t.color}"></span>
-                                        <input type="text" id="editTagName" value="${escapeHtml(t.name)}" class="inline-edit-input">
-                                        <input type="text" id="editTagDesc" value="${escapeHtml(t.description || "")}" class="inline-edit-input" placeholder="Description">
-                                        <input type="color" id="editTagColor" value="${t.color}" class="inline-edit-color">
-                                        <button class="btn-icon btn-save-tag" data-id="${t.id}">\u2713</button>
-                                        <button class="btn-icon btn-cancel-edit">\u2715</button>
-                                    ` : `
-                                        <span class="tag-color-dot" style="background:${t.color}"></span>
-                                        <span class="nav-item-text">${escapeHtml(t.name)}</span>
-                                        <button class="btn-icon btn-delete-tag" data-id="${t.id}">\u2715</button>
-                                    `}
-                                </div>
-                            `).join("") || ""}
-                            ${!editingTagId ? `<button class="btn-link" id="btnAddTag">+ Add Tag</button>` : ""}
-                        </div>
+<div class="nav-section">
+                             <h4>Tags</h4>
+                             ${tags?.map((t) => `
+                                 <div class="nav-item${editingTagId === t.id ? " editing" : ""}" data-tag="${t.id}">
+                                     ${editingTagId === t.id ? `
+                                         <span class="tag-color-dot" style="background:${t.color}"></span>
+                                         <input type="text" id="editTagName" value="${escapeHtml(t.name)}" class="inline-edit-input">
+                                         <input type="text" id="editTagDesc" value="${escapeHtml(t.description || "")}" class="inline-edit-input" placeholder="Description">
+                                         <input type="color" id="editTagColor" value="${t.color}" class="inline-edit-color">
+                                         <button class="btn-icon btn-save-tag" data-id="${t.id}">\u2713</button>
+                                         <button class="btn-icon btn-cancel-edit">\u2715</button>
+                                     ` : `
+                                         <span class="tag-color-dot" style="background:${t.color}"></span>
+                                         <span class="nav-item-text">${escapeHtml(t.name)}</span>
+                                         <button class="btn-icon btn-delete-tag" data-id="${t.id}">\u2715</button>
+                                     `}
+                                 </div>
+                             `).join("") || ""}
+                             ${!editingTagId ? `<button class="btn-link" id="btnAddTag">+ Add Tag</button>` : ""}
+                         </div>
+                         <div class="nav-section">
+                             <h4>Segments</h4>
+                             ${segments?.map((seg) => `
+                                 <div class="nav-item" data-segment="${seg.id}">
+                                     <span class="nav-icon">\u{1F3AF}</span>
+                                     <span class="nav-item-text">${escapeHtml(seg.name)}</span>
+                                     <button class="btn-icon btn-delete-segment" data-id="${seg.id}">\u2715</button>
+                                 </div>
+                             `).join("") || ""}
+                             <button class="btn-link" id="btnAddSegment">+ Add Segment</button>
+                         </div>
                     </nav>
                 </aside>
                 <main class="content">
@@ -218,10 +230,10 @@
     });
     document.querySelectorAll(".flag-env-toggle").forEach((toggle) => {
       toggle.addEventListener("change", async (e) => {
-        const flagId = parseInt(e.target.dataset.flag);
+        const flagId2 = parseInt(e.target.dataset.flag);
         const envId = parseInt(e.target.dataset.env);
         const enabled = e.target.checked;
-        await toggleFlagEnv(flagId, envId, enabled);
+        await toggleFlagEnv(flagId2, envId, enabled);
       });
     });
     document.querySelectorAll(".btn-delete-flag").forEach((btn) => {
@@ -314,15 +326,28 @@
         render();
       };
     });
+    if (document.getElementById("btnAddSegment")) document.getElementById("btnAddSegment").onclick = () => showCreateSegment();
+    document.querySelectorAll(".btn-delete-segment").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        deleteSegment(parseInt(btn.dataset.id));
+      };
+    });
+    document.querySelectorAll(".nav-item[data-segment]").forEach((item) => {
+      item.onclick = (e) => {
+        if (!e.target.classList.contains("btn-icon")) showEditSegment(parseInt(item.dataset.segment));
+      };
+    });
   }
   async function renderFlag(container) {
-    let flag = null, environments = [], strategies = [], tags = [];
+    let flag = null, environments = [], strategies = [], tags = [], segments = [];
     try {
       const flags = await api(`/projects/${state.currentProjectId}/flags`);
       flag = flags.find((f) => f.id === state.currentFlagId);
       environments = await api(`/projects/${state.currentProjectId}/environments`);
       strategies = await api(`/flags/${state.currentFlagId}/strategies`);
       tags = await api(`/projects/${state.currentProjectId}/tags`);
+      segments = await api(`/projects/${state.currentProjectId}/segments`);
     } catch (e) {
       console.error("Error loading flag data:", e);
     }
@@ -437,7 +462,7 @@
                                             <div class="strategy-info">
                                                 <span class="strategy-type ${type?.toLowerCase() || "server"}">${type || "SERVER"}</span>
                                                 ${type === "GRADUAL" ? `<span class="strategy-detail">${strategy.percentage}% rollout</span>` : ""}
-                                                ${type === "TARGETING" ? `<span class="strategy-detail">${strategy.rolloutPercentage}% for context #${strategy.contextDefinitionId}</span>` : ""}
+                                                ${type === "TARGETING" ? `<span class="strategy-detail">${strategy.rolloutPercentage}% for ${strategy.segmentId ? `segment "${(segments.find((s) => s.id === strategy.segmentId) || {}).name || "#" + strategy.segmentId}"` : `context #${strategy.contextDefinitionId}`}</span>` : ""}
                                             </div>
                                             <button class="btn-secondary btn-sm" data-env="${env.id}" onclick="openStrategyConfig(${env.id}); event.stopPropagation()">Configure</button>
                                             <button class="btn-icon btn-delete-strategy" data-env="${env.id}" onclick="event.stopPropagation()">\u2715</button>
@@ -505,12 +530,43 @@
       const strategies = await api(`/flags/${state.currentFlagId}/strategies`);
       const existing = strategies.find((s) => s.environmentId === envId);
       if (existing) {
-        await api(`/strategies/${existing.id}`, "DELETE");
+        await api(`/flags/${state.currentFlagId}/strategies/${existing.id}`, "DELETE");
         render();
       }
     } catch (e) {
       alert(e.message);
     }
+  }
+  function buildTargetingOptions(contexts, segments, selectedSegmentId, selectedCtxId, ctxValuesJson, rolloutPct) {
+    return `
+        <div class="strategy-targeting-section">
+            <div class="targeting-mode-select">
+                <label>
+                    <input type="radio" name="targetingMode" value="context" ${!selectedSegmentId ? "checked" : ""}>
+                    Use context fields
+                </label>
+                <label>
+                    <input type="radio" name="targetingMode" value="segment" ${selectedSegmentId ? "checked" : ""}>
+                    Use segment
+                </label>
+            </div>
+            <div class="targeting-mode-body" id="targetingContextBody" ${selectedSegmentId ? 'style="display:none"' : ""}>
+                <select id="strCtx"><option value="">Select context</option>${contexts.map((c) => `<option value="${c.id}" ${c.id == selectedCtxId ? "selected" : ""}>${escapeHtml(c.name)}</option>`).join("")}</select>
+                ${renderChipsBlock(ctxValuesJson)}
+                <div class="slider-group">
+                    <input type="range" id="strPct" min="0" max="100" value="${rolloutPct}">
+                    <span class="slider-value">${rolloutPct}%</span>
+                </div>
+            </div>
+            <div class="targeting-mode-body" id="targetingSegmentBody" ${!selectedSegmentId ? 'style="display:none"' : ""}>
+                <select id="strSegment"><option value="">Select segment</option>${segments.map((s) => `<option value="${s.id}" ${s.id == selectedSegmentId ? "selected" : ""}>${escapeHtml(s.name)}</option>`).join("")}</select>
+                <div class="slider-group">
+                    <input type="range" id="strPct" min="0" max="100" value="${rolloutPct}">
+                    <span class="slider-value">${rolloutPct}%</span>
+                </div>
+            </div>
+        </div>
+    `;
   }
   window.openStrategyConfig = async function(envId) {
     let strategies = [];
@@ -524,9 +580,15 @@
     const rolloutPercentage = existing?.rolloutPercentage || 100;
     const contextDefinitionId = existing?.contextDefinitionId || "";
     const contextValuesJson = existing?.contextValuesJson || "[]";
+    const segmentId = existing?.segmentId || "";
     let contexts = [];
+    let segments = [];
     try {
       contexts = await api(`/projects/${state.currentProjectId}/contexts`);
+    } catch (e) {
+    }
+    try {
+      segments = await api(`/projects/${state.currentProjectId}/segments`);
     } catch (e) {
     }
     document.getElementById("modal").innerHTML = `
@@ -547,14 +609,7 @@
                         <span class="slider-value">${percentage}%</span>
                     </div>
                 ` : ""}
-                ${type === "TARGETING" ? `
-                    <select id="strCtx"><option value="">Select context</option>${contexts.map((c) => `<option value="${c.id}" ${c.id == contextDefinitionId ? "selected" : ""}>${c.name}</option>`).join("")}</select>
-                    <input type="text" id="strValues" value='${contextValuesJson}' placeholder='Values JSON, e.g. ["user1","user2"]'>
-                    <div class="slider-group">
-                        <input type="range" id="strPct" min="0" max="100" value="${rolloutPercentage}">
-                        <span class="slider-value">${rolloutPercentage}%</span>
-                    </div>
-                ` : ""}
+                ${type === "TARGETING" ? buildTargetingOptions(contexts, segments, segmentId, contextDefinitionId, contextValuesJson, rolloutPercentage) : ""}
             </div>
             <div class="modal-actions">
                 <button class="btn-secondary" onclick="closeModal()">Cancel</button>
@@ -571,19 +626,16 @@
                 <span class="slider-value">50%</span>
             </div>
         `;
-      else if (t === "TARGETING") opts.innerHTML = `
-            <select id="strCtx"><option value="">Select context</option>${contexts.map((c) => `<option value="${c.id}">${c.name}</option>`).join("")}</select>
-            <input type="text" id="strValues" value='["value1","value2"]' placeholder='Values JSON'>
-            <div class="slider-group">
-                <input type="range" id="strPct" min="0" max="100" value="100">
-                <span class="slider-value">100%</span>
-            </div>
-        `;
+      else if (t === "TARGETING") opts.innerHTML = buildTargetingOptions(contexts, segments, null, null, "[]", 100);
       else opts.innerHTML = "";
       setupSliderListeners();
+      setupTargetingModeSwitch();
+      setupAllChipsBlocks();
     });
+    setupTargetingModeSwitch();
     document.getElementById("modal").classList.remove("hidden");
     setupSliderListeners();
+    setupAllChipsBlocks();
   };
   function setupSliderListeners() {
     document.querySelectorAll('input[type="range"]').forEach((slider) => {
@@ -595,6 +647,24 @@
       });
     });
   }
+  function setupTargetingModeSwitch() {
+    document.querySelectorAll('input[name="targetingMode"]').forEach((radio) => {
+      radio.addEventListener("change", (e) => {
+        const ctxBody = document.getElementById("targetingContextBody");
+        const segBody = document.getElementById("targetingSegmentBody");
+        if (e.target.value === "segment") {
+          if (ctxBody) ctxBody.style.display = "none";
+          if (segBody) segBody.style.display = "block";
+        } else {
+          if (ctxBody) ctxBody.style.display = "block";
+          if (segBody) segBody.style.display = "none";
+        }
+      });
+    });
+  }
+  function setupAllChipsBlocks() {
+    document.querySelectorAll(".values-chips-area").forEach((area) => setupChipsBlock(area));
+  }
   window.saveStrategy = async function(envId) {
     const type = document.getElementById("strType").value;
     const body = {
@@ -605,15 +675,22 @@
     };
     if (type === "GRADUAL") body.percentage = parseFloat(document.getElementById("strPct").value);
     if (type === "TARGETING") {
-      body.contextDefinitionId = parseInt(document.getElementById("strCtx").value) || null;
-      body.contextValuesJson = document.getElementById("strValues").value;
+      const modeInput = document.querySelector('input[name="targetingMode"]:checked');
+      const useSegment = modeInput?.value === "segment";
+      if (useSegment) {
+        body.segmentId = parseInt(document.getElementById("strSegment").value) || null;
+      } else {
+        body.contextDefinitionId = parseInt(document.getElementById("strCtx").value) || null;
+        const chipsArea = document.getElementById("targetingContextBody").querySelector(".values-chips-area");
+        body.contextValuesJson = chipsArea ? JSON.stringify(getChipValues(chipsArea)) : "[]";
+      }
       body.rolloutPercentage = parseFloat(document.getElementById("strPct").value);
     }
     try {
       const strategies = await api(`/flags/${state.currentFlagId}/strategies`);
       const existing = strategies.find((s) => s.environmentId === envId);
       if (existing) {
-        await api(`/strategies/${existing.id}`, "PUT", body);
+        await api(`/flags/${state.currentFlagId}/strategies/${existing.id}`, "PUT", body);
       } else {
         await api(`/flags/${state.currentFlagId}/strategies`, "POST", body);
       }
@@ -623,15 +700,15 @@
       alert("Error: " + e.message);
     }
   };
-  async function toggleFlagEnv(flagId, envId, enabled) {
+  async function toggleFlagEnv(flagId2, envId, enabled) {
     try {
-      const strategies = await api(`/flags/${flagId}/strategies`);
+      const strategies = await api(`/flags/${flagId2}/strategies`);
       const existing = strategies.find((s) => s.environmentId === envId);
       if (existing) {
-        await api(`/strategies/${existing.id}`, "PUT", { enabled });
+        await api(`/flags/${flagId2}/strategies/${existing.id}`, "PUT", { enabled });
       } else {
-        await api(`/flags/${flagId}/strategies`, "POST", {
-          flagId,
+        await api(`/flags/${flagId2}/strategies`, "POST", {
+          flagId: flagId2,
           environmentId: envId,
           type: "SERVER",
           enabled
@@ -646,7 +723,7 @@
       const strategies = await api(`/flags/${state.currentFlagId}/strategies`);
       const existing = strategies.find((s) => s.environmentId === envId);
       if (existing) {
-        await api(`/strategies/${existing.id}`, "PUT", { enabled });
+        await api(`/flags/${flagId}/strategies/${existing.id}`, "PUT", { enabled });
       } else {
         await api(`/flags/${state.currentFlagId}/strategies`, "POST", {
           flagId: state.currentFlagId,
@@ -875,6 +952,142 @@
       alert(e.message);
     }
   }
+  window.showCreateSegment = function(segId) {
+    let contexts = [];
+    const isEdit = !!segId;
+    let editPromise = null;
+    if (isEdit) {
+      editPromise = api(`/projects/${state.currentProjectId}/segments/${segId}`);
+    }
+    api(`/projects/${state.currentProjectId}/contexts`).then((allContexts) => {
+      contexts = allContexts;
+      if (isEdit) {
+        editPromise.then((seg) => {
+          buildSegmentModal(contexts, seg, true);
+        }).catch((e) => alert(e.message));
+      } else {
+        buildSegmentModal(contexts, null, false);
+      }
+    }).catch((e) => {
+      console.error(e);
+      buildSegmentModal(contexts, null, false);
+    });
+  };
+  function buildSegmentModal(contexts, existing, isEdit) {
+    const segContext = existing?.context || [];
+    document.getElementById("modal").innerHTML = `
+        <div class="modal-content" style="max-width:550px">
+            <h2>${isEdit ? "Edit" : "Create"} Segment</h2>
+            <input type="text" id="segName" placeholder="Segment name" value="${isEdit ? escapeHtml(existing.name) : ""}">
+            <textarea id="segDesc" placeholder="Description">${isEdit ? escapeHtml(existing.description || "") : ""}</textarea>
+            <div class="form-group">
+                <label>Context fields (AND)</label>
+                <div id="segmentContextEntries">
+                    ${segContext.map((e, i) => `
+                        <div class="context-entry-row" data-index="${i}">
+                            <select class="ctx-def-select">
+                                <option value="">Select context</option>
+                                ${contexts.map((c) => `<option value="${c.id}" ${c.id == e.contextDefinitionId ? "selected" : ""}>${escapeHtml(c.name)}</option>`).join("")}
+                            </select>
+                            ${renderChipsBlock(e.contextValues)}
+                            <button class="btn-icon btn-remove-ctx-entry">\u2715</button>
+                        </div>
+                    `).join("")}
+                </div>
+                <button class="btn-link" id="btnAddContextEntry">+ Add context field</button>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="${isEdit ? `saveSegment(${existing.id})` : "createSegment()"}">${isEdit ? "Save" : "Create"}</button>
+            </div>
+        </div>
+    `;
+    document.getElementById("modal").classList.remove("hidden");
+    document.getElementById("btnAddContextEntry").onclick = addContextEntryRow;
+    setupAllChipsBlocks();
+    document.querySelectorAll(".btn-remove-ctx-entry").forEach((btn) => {
+      btn.onclick = (e) => {
+        e.target.closest(".context-entry-row").remove();
+      };
+    });
+  }
+  function addContextEntryRow() {
+    let contexts = [];
+    api(`/projects/${state.currentProjectId}/contexts`).then((c) => {
+      contexts = c;
+      const container = document.getElementById("segmentContextEntries");
+      const div = document.createElement("div");
+      div.className = "context-entry-row";
+      div.innerHTML = `
+            <select class="ctx-def-select">
+                <option value="">Select context</option>
+                ${contexts.map((c2) => `<option value="${c2.id}">${escapeHtml(c2.name)}</option>`).join("")}
+            </select>
+            ${renderChipsBlock("[]")}
+            <button class="btn-icon btn-remove-ctx-entry">\u2715</button>
+        `;
+      container.appendChild(div);
+      div.querySelector(".btn-remove-ctx-entry").onclick = () => div.remove();
+      setupChipsBlock(div.querySelector(".values-chips-area"));
+    }).catch(() => {
+    });
+  }
+  window.createSegment = async function() {
+    const name = document.getElementById("segName").value.trim();
+    const description = document.getElementById("segDesc").value.trim();
+    if (!name) return alert("Name required");
+    const contextMap = {};
+    document.querySelectorAll(".context-entry-row").forEach((row) => {
+      const defId = parseInt(row.querySelector(".ctx-def-select").value) || null;
+      const chipsArea = row.querySelector(".values-chips-area");
+      const chipValues = chipsArea ? getChipValues(chipsArea) : [];
+      if (defId && chipValues.length > 0) {
+        contextMap[defId] = { contextDefinitionId: defId, contextValues: JSON.stringify(chipValues) };
+      }
+    });
+    const context = Object.values(contextMap);
+    try {
+      await api(`/projects/${state.currentProjectId}/segments`, "POST", { name, description, context });
+      window.closeModal();
+      render();
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+  window.saveSegment = async function(segId) {
+    const name = document.getElementById("segName").value.trim();
+    const description = document.getElementById("segDesc").value.trim();
+    if (!name) return alert("Name required");
+    const contextMap = {};
+    document.querySelectorAll(".context-entry-row").forEach((row) => {
+      const defId = parseInt(row.querySelector(".ctx-def-select").value) || null;
+      const chipsArea = row.querySelector(".values-chips-area");
+      const chipValues = chipsArea ? getChipValues(chipsArea) : [];
+      if (defId && chipValues.length > 0) {
+        contextMap[defId] = { contextDefinitionId: defId, contextValues: JSON.stringify(chipValues) };
+      }
+    });
+    const context = Object.values(contextMap);
+    try {
+      await api(`/projects/${state.currentProjectId}/segments/${segId}`, "PUT", { name, description, context });
+      window.closeModal();
+      render();
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+  window.showEditSegment = function(segId) {
+    showCreateSegment(segId);
+  };
+  async function deleteSegment(id) {
+    if (!confirm("Delete segment?")) return;
+    try {
+      await api(`/projects/${state.currentProjectId}/segments/${id}`, "DELETE");
+      render();
+    } catch (e) {
+      alert(e.message);
+    }
+  }
   window.showCreateTag = function() {
     document.getElementById("modal").innerHTML = `
         <div class="modal-content">
@@ -914,6 +1127,65 @@
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
+  }
+  function escAttr(s) {
+    return (s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function parseJsonArray(json) {
+    try {
+      return JSON.parse(json || "[]");
+    } catch {
+      return [];
+    }
+  }
+  function renderChipsBlock(existingJson) {
+    const values = parseJsonArray(existingJson);
+    const chips = values.map((v) => `<span class="value-chip"><span class="value-chip-text">${escAttr(v)}</span><button class="value-chip-remove">\xD7</button></span>`).join("");
+    return `<div class="values-chips-area" data-values='${escAttr(existingJson || "[]")}'>
+            <div class="chip-add-row">
+                <input type="text" class="chip-add-input" placeholder="Type value and press Enter">
+                <button type="button" class="btn-chip-add">Add</button>
+            </div>
+            <div class="chips-bank${chips ? " has-values" : ""}">${chips}</div>
+        </div>`;
+  }
+  function setupChipsBlock(container) {
+    const input = container.querySelector(".chip-add-input");
+    const addBtn = container.querySelector(".btn-chip-add");
+    const bank = container.querySelector(".chips-bank");
+    function addChip(value) {
+      value = value.trim();
+      if (!value) return;
+      if (getChipValues(container).some((v) => v === value)) return;
+      const chip = document.createElement("span");
+      chip.className = "value-chip";
+      chip.innerHTML = `<span class="value-chip-text">${escAttr(value)}</span><button class="value-chip-remove">\xD7</button>`;
+      chip.querySelector(".value-chip-remove").onclick = () => {
+        chip.remove();
+        if (bank.querySelectorAll(".value-chip").length === 0) bank.classList.remove("has-values");
+      };
+      bank.appendChild(chip);
+      bank.classList.add("has-values");
+      input.value = "";
+      input.focus();
+    }
+    addBtn.onclick = () => addChip(input.value);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addChip(input.value);
+      }
+    });
+    container.querySelectorAll(".value-chip-remove").forEach((btn) => {
+      btn.onclick = () => {
+        btn.closest(".value-chip").remove();
+        if (bank.querySelectorAll(".value-chip").length === 0) bank.classList.remove("has-values");
+      };
+    });
+  }
+  function getChipValues(container) {
+    const chips = container.querySelectorAll(".value-chip-text");
+    return Array.from(chips).map((c) => c.textContent.trim()).filter(Boolean);
   }
   document.addEventListener("DOMContentLoaded", render);
 })();

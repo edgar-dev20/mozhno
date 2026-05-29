@@ -58,6 +58,31 @@ CREATE TABLE flags (
     CONSTRAINT uk_flags_project_key UNIQUE (project_id, flag_key)
 );
 CREATE INDEX idx_flags_project_id ON flags(project_id);
+-- Segments table
+CREATE TABLE segments (
+    id SERIAL PRIMARY KEY,
+    project_id INTEGER NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_segments_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_segments_project_id ON segments(project_id);
+
+-- Segment contexts table (AND condition between rows)
+CREATE TABLE segment_contexts (
+    id SERIAL PRIMARY KEY,
+    segment_id INTEGER NOT NULL,
+    context_definition_id INTEGER NOT NULL,
+    context_values TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_segment_contexts_segment FOREIGN KEY (segment_id) REFERENCES segments(id) ON DELETE CASCADE,
+    CONSTRAINT fk_segment_contexts_definition FOREIGN KEY (context_definition_id) REFERENCES context_definitions(id) ON DELETE CASCADE,
+    CONSTRAINT uk_segment_context UNIQUE (segment_id, context_definition_id)
+);
+CREATE INDEX idx_segment_contexts_segment_id ON segment_contexts(segment_id);
+CREATE INDEX idx_segment_contexts_definition_id ON segment_contexts(context_definition_id);
+
 -- Flag strategies table
 CREATE TABLE flag_strategies (
     id SERIAL PRIMARY KEY,
@@ -69,11 +94,15 @@ CREATE TABLE flag_strategies (
     rollout_percentage DOUBLE PRECISION,
     context_definition_id INTEGER,
     context_values_json TEXT,
+    segment_id INTEGER,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_flag_strategies_flag FOREIGN KEY (flag_id) REFERENCES flags(id) ON DELETE CASCADE
+    CONSTRAINT fk_flag_strategies_flag FOREIGN KEY (flag_id) REFERENCES flags(id) ON DELETE CASCADE,
+    CONSTRAINT fk_flag_strategies_segment FOREIGN KEY (segment_id) REFERENCES segments(id) ON DELETE SET NULL
 );
 CREATE INDEX idx_flag_strategies_flag_id ON flag_strategies(flag_id);
 CREATE INDEX idx_flag_strategies_environment_id ON flag_strategies(environment_id);
+CREATE INDEX idx_flag_strategies_segment_id ON flag_strategies(segment_id);
+
 -- Flag tag values table (many-to-many with values)
 CREATE TABLE flag_tag_values (
     id SERIAL PRIMARY KEY,

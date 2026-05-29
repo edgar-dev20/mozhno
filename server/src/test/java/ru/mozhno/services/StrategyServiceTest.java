@@ -116,11 +116,13 @@ class StrategyServiceTest {
         req.setContextDefinitionId(3);
         req.setContextValuesJson("[\"web\"]");
         req.setRolloutPercentage(50.0);
+        req.setSegmentId(5);
 
         FlagStrategy result = strategyService.create(req);
         assertEquals("TARGETING", result.getStrategyType());
         assertTrue(result instanceof TargetingStrategy);
         assertEquals(50.0, ((TargetingStrategy) result).getRolloutPercentage());
+        assertEquals(5, result.getSegmentId());
     }
 
     @Test
@@ -207,11 +209,13 @@ class StrategyServiceTest {
         req.setContextDefinitionId(5);
         req.setContextValuesJson("[\"mobile\"]");
         req.setRolloutPercentage(90.0);
+        req.setSegmentId(7);
 
         FlagStrategy result = strategyService.update(1, req);
         assertEquals(5, existing.getContextDefinitionId());
         assertEquals("[\"mobile\"]", existing.getContextValuesJson());
         assertEquals(90.0, existing.getRolloutPercentage());
+        assertEquals(7, existing.getSegmentId());
     }
 
     @Test

@@ -16,6 +16,8 @@ import ru.mozhno.flags.FlagRepository;
 import ru.mozhno.flags.FlagTagValueRepository;
 import ru.mozhno.flags.strategy.FlagStrategyRepository;
 import ru.mozhno.projects.ProjectRepository;
+import ru.mozhno.segments.SegmentContextRepository;
+import ru.mozhno.segments.SegmentRepository;
 import ru.mozhno.tags.TagRepository;
 
 @Testcontainers(parallel = true)
@@ -69,10 +71,16 @@ public abstract class BaseIntegrationTest {
     @Autowired
     protected FlagTagValueRepository flagTagValueRepository;
 
+    @Autowired
+    protected SegmentRepository segmentRepository;
+
+    @Autowired
+    protected SegmentContextRepository segmentContextRepository;
+
     @BeforeEach
     void cleanDatabase() {
         try {
-            jdbcTemplate.execute("TRUNCATE TABLE flag_tag_values, flag_strategies, flags, context_values, context_definitions, tags, environments, projects CASCADE");
+            jdbcTemplate.execute("TRUNCATE TABLE flag_tag_values, flag_strategies, flags, segment_contexts, segments, context_values, context_definitions, tags, environments, projects CASCADE");
         } catch (Exception e) {
             // Tables may not exist on first run – schema will be created next
         }

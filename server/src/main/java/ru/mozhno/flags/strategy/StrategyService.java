@@ -52,6 +52,7 @@ public class StrategyService {
                 s.setContextDefinitionId(request.getContextDefinitionId());
                 s.setContextValuesJson(request.getContextValuesJson());
                 s.setRolloutPercentage(request.getRolloutPercentage());
+                s.setSegmentId(request.getSegmentId());
                 yield s;
             }
             default -> throw new RuntimeException("Unknown strategy type: " + request.getType());
@@ -77,6 +78,7 @@ public class StrategyService {
             ts.setContextDefinitionId(request.getContextDefinitionId());
             ts.setContextValuesJson(request.getContextValuesJson());
             ts.setRolloutPercentage(request.getRolloutPercentage());
+            ts.setSegmentId(request.getSegmentId());
         }
         return strategyRepository.save(strategy);
     }
