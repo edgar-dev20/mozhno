@@ -18,20 +18,22 @@ import ru.mozhno.flags.strategy.FlagStrategyRepository;
 import ru.mozhno.projects.ProjectRepository;
 import ru.mozhno.tags.TagRepository;
 
-@Testcontainers
+@Testcontainers(parallel = true)
 @SpringBootTest(properties = {
-    "spring.flyway.enabled=false",
-    "spring.jpa.hibernate.ddl-auto=none"
+    "spring.flyway.enabled=false"
 })
 public abstract class BaseIntegrationTest {
 
-    @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test")
             .withStartupTimeout(java.time.Duration.ofSeconds(120))
             .withCommand("postgres", "-c", "tcp_keepalives_idle=60", "-c", "tcp_keepalives_interval=10", "-c", "tcp_keepalives_count=3");
+
+    static {
+        postgres.start(); // Запуск один раз на всю JVM
+    }
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
