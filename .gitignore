@@ -38,6 +38,9 @@ out/
 .vscode/
 .DS_Store
 
+### Kilo ###
+.kilo/
+
 ### Node ###
 node_modules/
 npm-debug.log*
