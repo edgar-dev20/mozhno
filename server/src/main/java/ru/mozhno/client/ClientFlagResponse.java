@@ -15,7 +15,7 @@ public class ClientFlagResponse {
         this.name = flag.getName();
         this.key = flag.getKey();
         FlagStrategy strategy = flag.getStrategy();
-        this.enabled = strategy != null && strategy.isEnabled();
+        this.enabled = strategy != null ? strategy.isEnabled() : flag.isEnabled();
         if (strategy != null) {
             this.activation = new Activation(strategy);
         }

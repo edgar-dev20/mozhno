@@ -24,11 +24,19 @@ public class FlagController {
 
     @GetMapping
     @Operation(summary = "Get all flags for a project")
-    public List<FlagResponse> getAll(@PathVariable Integer projectId) {
-        List<Flag> flags = flagService.findByProjectId(projectId);
-        return flags.stream()
-                .map(f -> toResponse(f))
-                .toList();
+    public List<FlagResponse> getAll(@PathVariable Integer projectId, @RequestParam(required = false) Integer environmentId) {
+        List<Flag> flags;
+        if (environmentId != null) {
+            flags = flagService.findByProjectIdWithStrategyForEnvironment(projectId, environmentId);
+            return flags.stream()
+                    .map(f -> toResponse(f, f.getStrategy()))
+                    .toList();
+        } else {
+            flags = flagService.findByProjectId(projectId);
+            return flags.stream()
+                    .map(f -> toResponse(f))
+                    .toList();
+        }
     }
 
     @GetMapping("/{id}")
@@ -61,7 +69,7 @@ public class FlagController {
         flagService.delete(id);
     }
 
-    private FlagResponse toResponse(Flag flag) {
+    private FlagResponse toResponse(Flag flag, ru.mozhno.flags.strategy.FlagStrategy strategy) {
         List<FlagTagValue> tagValues = flagTagValueRepository.findByFlagId(flag.getId());
         List<FlagResponse.TagValueResponse> tags = tagValues.stream().map(ftv -> {
             ru.mozhno.tags.Tag tag = tagRepository.findById(ftv.getTagId());
@@ -72,6 +80,14 @@ public class FlagController {
                     ftv.getTagValue()
             );
         }).toList();
+        boolean enabled = strategy != null ? strategy.isEnabled() : flag.isEnabled();
+        Integer strategyId = strategy != null ? strategy.getId() : null;
+        String strategyType = strategy != null ? strategy.getStrategyType() : null;
+        Double percentage = strategy != null ? strategy.getPercentage() : null;
+        Double rolloutPercentage = strategy != null ? strategy.getRolloutPercentage() : null;
+        Integer contextDefinitionId = strategy != null ? strategy.getContextDefinitionId() : null;
+        String contextValuesJson = strategy != null ? strategy.getContextValuesJson() : null;
+        Integer segmentId = strategy != null ? strategy.getSegmentId() : null;
         return new FlagResponse(
                 flag.getId(),
                 flag.getProjectId(),
@@ -80,7 +96,19 @@ public class FlagController {
                 flag.getDescription(),
                 flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE",
                 flag.getCreatedAt(),
-                tags
+                tags,
+                enabled,
+                strategyId,
+                strategyType,
+                percentage,
+                rolloutPercentage,
+                contextDefinitionId,
+                contextValuesJson,
+                segmentId
         );
+    }
+
+    private FlagResponse toResponse(Flag flag) {
+        return toResponse(flag, null);
     }
 }

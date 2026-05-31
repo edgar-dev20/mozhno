@@ -16,6 +16,7 @@ export function ProjectProvider({ children }) {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [currentEnvironmentId, setCurrentEnvironmentId] = useState(null)
 
   const loadProjects = useCallback(async () => {
     try {
@@ -47,6 +48,8 @@ export function ProjectProvider({ children }) {
         getApiKeys(projectId)
       ])
 
+      setCurrentEnvironmentId(null)
+
       setProjectData({
         environments: environments || [],
         contexts: contexts || [],
@@ -70,7 +73,7 @@ export function ProjectProvider({ children }) {
         getContexts(currentProject.id),
         getTags(currentProject.id),
         getSegments(currentProject.id),
-        getFlags(currentProject.id),
+        getFlags(currentProject.id, currentEnvironmentId),
         getApiKeys(currentProject.id)
       ])
 
@@ -82,6 +85,17 @@ export function ProjectProvider({ children }) {
         flags: flags || [],
         apiKeys: apiKeys || []
       })
+    } catch (e) {
+      setError(e.message)
+    }
+  }, [currentProject?.id, currentEnvironmentId])
+
+  const setCurrentEnvironment = useCallback(async (environmentId) => {
+    setCurrentEnvironmentId(environmentId)
+    if (!currentProject?.id) return
+    try {
+      const flags = await getFlags(currentProject.id, environmentId)
+      setProjectData(prev => ({ ...prev, flags: flags || [] }))
     } catch (e) {
       setError(e.message)
     }
@@ -97,7 +111,9 @@ export function ProjectProvider({ children }) {
       loadProjects,
       selectProject,
       refreshProjectData,
-      setCurrentProject
+      setCurrentProject,
+      currentEnvironmentId,
+      setCurrentEnvironment
     }}>
       {children}
     </ProjectContext.Provider>

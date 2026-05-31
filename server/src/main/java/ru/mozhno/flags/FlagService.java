@@ -47,6 +47,14 @@ public class FlagService {
         return flag;
     }
 
+    @Transactional(readOnly = true)
+    public List<Flag> findByProjectIdWithStrategyForEnvironment(Integer projectId, Integer environmentId) {
+        if (projectRepository.findById(projectId) == null) {
+            throw new RuntimeException("Project not found: " + projectId);
+        }
+        return flagRepository.findByProjectIdWithStrategyForEnvironment(projectId, environmentId);
+    }
+
     @Transactional
     public Flag create(FlagRequest request) {
         if (projectRepository.findById(request.getProjectId()) == null) {
@@ -57,6 +65,7 @@ public class FlagService {
         flag.setName(request.getName());
         flag.setKey(request.getKey());
         flag.setDescription(request.getDescription());
+        flag.setEnabled(request.getEnabled() != null ? request.getEnabled() : false);
         if (request.getFlagType() != null) {
             try {
                 flag.setFlagType(FlagType.valueOf(request.getFlagType().toUpperCase()));
@@ -88,6 +97,9 @@ public class FlagService {
         flag.setName(request.getName());
         flag.setKey(request.getKey());
         flag.setDescription(request.getDescription());
+        if (request.getEnabled() != null) {
+            flag.setEnabled(request.getEnabled());
+        }
         if (request.getFlagType() != null) {
             try {
                 flag.setFlagType(FlagType.valueOf(request.getFlagType().toUpperCase()));

@@ -1,16 +1,16 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router'
-import { ToggleRight, Mail, Key } from 'lucide-react'
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { ToggleRight, Mail, Key } from 'lucide-react';
 
 export function Auth() {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleLogin = (e) => {
-    e.preventDefault()
-    navigate('/flags')
-  }
+    e.preventDefault();
+    navigate('/flags');
+  };
 
   return (
     <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center justify-center p-4 transition-colors">
@@ -91,7 +91,7 @@ export function Auth() {
 
             <button
               type="submit"
-              className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 text-white font-medium py-2.5 rounded-md transition-colors flex justify-center items-center gap-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900"
+              className="w-full mt-6 bg-indigo-600 hover:bg-indigo-700 dark:hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-neutral-900"
             >
               Войти в систему
             </button>
@@ -103,5 +103,5 @@ export function Auth() {
         </div>
       </div>
     </div>
-  )
+  );
 }

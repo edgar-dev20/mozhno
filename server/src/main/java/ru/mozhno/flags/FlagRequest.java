@@ -9,6 +9,7 @@ public class FlagRequest {
     private String description;
     private String flagType;
     private List<TagValue> tags;
+    private Boolean enabled;
 
     public FlagRequest() {}
 
@@ -40,4 +41,6 @@ public class FlagRequest {
     public void setFlagType(String flagType) { this.flagType = flagType; }
     public List<TagValue> getTags() { return tags; }
     public void setTags(List<TagValue> tags) { this.tags = tags; }
+    public Boolean getEnabled() { return enabled; }
+    public void setEnabled(Boolean enabled) { this.enabled = enabled; }
 }

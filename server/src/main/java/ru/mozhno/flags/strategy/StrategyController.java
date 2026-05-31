@@ -43,4 +43,11 @@ public class StrategyController {
     public FlagStrategy update(@PathVariable Integer flagId, @PathVariable Integer id, @RequestBody StrategyRequest request) {
         return strategyService.update(id, request);
     }
+
+    @PutMapping
+    @Operation(summary = "Upsert strategy for flag and environment")
+    public FlagStrategy upsert(@PathVariable Integer flagId, @RequestBody StrategyRequest request) {
+        request.setFlagId(flagId);
+        return strategyService.upsert(request);
+    }
 }

@@ -26,17 +26,18 @@ public class FlagRepository {
         f.setDescription(rs.getString("description"));
         f.setFlagType(FlagType.valueOf(rs.getString("flag_type")));
         f.setCreatedAt(rs.getTimestamp("created_at").toInstant());
+        f.setEnabled(rs.getBoolean("enabled"));
         return f;
     };
 
-public List<Flag> findByProjectId(Integer projectId) {
-        return jdbc.query("SELECT id, project_id, name, flag_key, description, flag_type, created_at FROM flags WHERE project_id = ? ORDER BY id", ROW_MAPPER, projectId);
+    public List<Flag> findByProjectId(Integer projectId) {
+        return jdbc.query("SELECT id, project_id, name, flag_key, description, flag_type, created_at, enabled FROM flags WHERE project_id = ? ORDER BY id", ROW_MAPPER, projectId);
     }
 
     public List<Flag> findByProjectIdWithStrategyForEnvironment(Integer projectId, Integer environmentId) {
         String sql = """
-            SELECT f.id, f.project_id, f.name, f.flag_key, f.description, f.flag_type, f.created_at,
-                   s.id as strategy_id, s.strategy_type, s.enabled, s.percentage, s.rollout_percentage,
+            SELECT f.id, f.project_id, f.name, f.flag_key, f.description, f.flag_type, f.created_at, f.enabled as flag_enabled,
+                   s.id as strategy_id, s.strategy_type, s.enabled as strategy_enabled, s.percentage, s.rollout_percentage,
                    s.context_definition_id, s.segment_id,
                    CASE
                        WHEN s.segment_id IS NOT NULL THEN sc.context_values
@@ -64,6 +65,7 @@ public List<Flag> findByProjectId(Integer projectId) {
 
             f.setFlagType(FlagType.valueOf(rs.getString("flag_type")));
             f.setCreatedAt(rs.getTimestamp("created_at").toInstant());
+            f.setEnabled(rs.getBoolean("flag_enabled"));
 
             Integer strategyId = rs.getObject("strategy_id") != null ? rs.getInt("strategy_id") : null;
             if (strategyId != null) {
@@ -72,7 +74,7 @@ public List<Flag> findByProjectId(Integer projectId) {
                 s.setFlagId(f.getId());
                 s.setEnvironmentId(environmentId);
                 s.setStrategyType(rs.getString("strategy_type"));
-                s.setEnabled(rs.getBoolean("enabled"));
+                s.setEnabled(rs.getBoolean("strategy_enabled"));
                 s.setPercentage(rs.getObject("percentage") != null ? rs.getDouble("percentage") : null);
                 s.setRolloutPercentage(rs.getObject("rollout_percentage") != null ? rs.getDouble("rollout_percentage") : null);
                 s.setContextDefinitionId(rs.getObject("context_definition_id") != null ? rs.getInt("context_definition_id") : null);
@@ -87,7 +89,7 @@ public List<Flag> findByProjectId(Integer projectId) {
 
     public Flag findById(Integer id) {
         try {
-            return jdbc.queryForObject("SELECT id, project_id, name, flag_key, description, flag_type, created_at FROM flags WHERE id = ?", ROW_MAPPER, id);
+            return jdbc.queryForObject("SELECT id, project_id, name, flag_key, description, flag_type, created_at, enabled FROM flags WHERE id = ?", ROW_MAPPER, id);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }
@@ -95,7 +97,7 @@ public List<Flag> findByProjectId(Integer projectId) {
 
     public Flag findByProjectIdAndKey(Integer projectId, String key) {
         try {
-            return jdbc.queryForObject("SELECT id, project_id, name, flag_key, description, flag_type, created_at FROM flags WHERE project_id = ? AND flag_key = ?", ROW_MAPPER, projectId, key);
+            return jdbc.queryForObject("SELECT id, project_id, name, flag_key, description, flag_type, created_at, enabled FROM flags WHERE project_id = ? AND flag_key = ?", ROW_MAPPER, projectId, key);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }
@@ -104,14 +106,14 @@ public List<Flag> findByProjectId(Integer projectId) {
     public Flag save(Flag flag) {
         if (flag.getId() == null) {
             Instant createTime = Instant.now();
-            jdbc.update("INSERT INTO flags (project_id, name, flag_key, description, flag_type, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+            jdbc.update("INSERT INTO flags (project_id, name, flag_key, description, flag_type, created_at, enabled) VALUES (?, ?, ?, ?, ?, ?, ?)",
                 flag.getProjectId(), flag.getName(), flag.getKey(), flag.getDescription(),
-                flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE", Timestamp.from(createTime));
+                flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE", Timestamp.from(createTime), flag.isEnabled());
             flag.setId(getLastInsertId());
             flag.setCreatedAt(createTime);
         } else {
-            jdbc.update("UPDATE flags SET name = ?, description = ?, flag_type = ? WHERE id = ?",
-                flag.getName(), flag.getDescription(), flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE", flag.getId());
+            jdbc.update("UPDATE flags SET name = ?, description = ?, flag_type = ?, enabled = ? WHERE id = ?",
+                flag.getName(), flag.getDescription(), flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE", flag.isEnabled(), flag.getId());
         }
         return flag;
     }

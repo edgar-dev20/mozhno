@@ -1,5 +1,6 @@
 package ru.mozhno.security;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +11,12 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
 import ru.mozhno.apikeys.ApiKeyService;
+
+import java.io.IOException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 
 @Configuration
 @EnableWebSecurity
@@ -37,8 +43,25 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/**").permitAll()
                 .anyRequest().permitAll()
             )
-            .addFilterBefore(new ApiKeyAuthenticationFilter(apiKeyService), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new ApiKeyAuthenticationFilter(apiKeyService), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(spaForwardFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public OncePerRequestFilter spaForwardFilter() {
+        return new OncePerRequestFilter() {
+            @Override
+            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+                    throws ServletException, IOException {
+                String path = request.getRequestURI();
+                if (!path.startsWith("/api") && !path.contains(".")) {
+                    request.getRequestDispatcher("/index.html").forward(request, response);
+                    return;
+                }
+                filterChain.doFilter(request, response);
+            }
+        };
     }
 }

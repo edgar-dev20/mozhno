@@ -54,6 +54,7 @@ CREATE TABLE flags (
     description TEXT,
     flag_type VARCHAR(20) NOT NULL DEFAULT 'RELEASE',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    enabled BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT fk_flags_project FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
     CONSTRAINT uk_flags_project_key UNIQUE (project_id, flag_key)
 );

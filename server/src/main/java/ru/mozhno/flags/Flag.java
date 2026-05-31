@@ -12,6 +12,7 @@ public class Flag {
     private FlagType flagType;
     private Instant createdAt;
     private FlagStrategy strategy;
+    private boolean enabled;
 
     public Flag() {}
 
@@ -31,4 +32,6 @@ public class Flag {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public FlagStrategy getStrategy() { return strategy; }
     public void setStrategy(FlagStrategy strategy) { this.strategy = strategy; }
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
 }

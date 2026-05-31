@@ -1,63 +1,89 @@
-import React, { useState } from 'react'
-import { Plus, Users, Filter, MoreHorizontal, Edit2, Trash2 } from 'lucide-react'
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { SidePanel } from '../components/SidePanel'
-import { useProject } from '../context/ProjectContext'
-import { createSegment, updateSegment, deleteSegment } from '../api'
+import { useState, useEffect } from 'react';
+import { Plus, Users, Filter, MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { SidePanel } from '../components/SidePanel';
+import { getProjects, getSegments, createSegment, updateSegment, deleteSegment } from '../api';
 
 export function Segments() {
-  const { currentProject, projectData, refreshProjectData } = useProject()
-  const [isPanelOpen, setIsPanelOpen] = useState(false)
-  const [editingSegment, setEditingSegment] = useState(null)
+  const [segments, setSegments] = useState([]);
+  const [projectId, setProjectId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const { segments } = projectData
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [editingSegment, setEditingSegment] = useState(null);
+  const [formData, setFormData] = useState({ name: '', description: '', context: [] });
 
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    rules: ''
-  })
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const projects = await getProjects();
+      if (projects && projects.length > 0) {
+        const pid = projects[0].id;
+        setProjectId(pid);
+        const data = await getSegments(pid);
+        setSegments(data || []);
+      }
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleOpenCreate = () => {
-    setEditingSegment(null)
-    setFormData({ name: '', description: '', rules: '' })
-    setIsPanelOpen(true)
-  }
+    setEditingSegment(null);
+    setFormData({ name: '', description: '', context: [] });
+    setIsPanelOpen(true);
+  };
 
   const handleOpenEdit = (segment) => {
-    setEditingSegment(segment)
-    setFormData({
-      name: segment.name || '',
-      description: segment.description || '',
-      rules: segment.rules || ''
-    })
-    setIsPanelOpen(true)
-  }
+    setEditingSegment(segment);
+    setFormData({ name: segment.name, description: segment.description || '', context: segment.context || [] });
+    setIsPanelOpen(true);
+  };
 
   const handleDelete = async (id) => {
-    if (confirm('Удалить этот сегмент?')) {
-      try {
-        await deleteSegment(currentProject.id, id)
-        await refreshProjectData()
-      } catch (e) {
-        alert(e.message)
-      }
+    if (!confirm('Удалить этот сегмент?')) return;
+    try {
+      await deleteSegment(projectId, id);
+      setSegments(segments.filter(s => s.id !== id));
+    } catch (e) {
+      alert(e.message);
     }
-  }
+  };
 
   const handleSave = async () => {
     try {
       if (editingSegment) {
-        await updateSegment(currentProject.id, editingSegment.id, formData)
+        const updated = await updateSegment(projectId, editingSegment.id, {
+          name: formData.name,
+          description: formData.description,
+          context: formData.context,
+          projectId
+        });
+        setSegments(segments.map(s => s.id === editingSegment.id ? updated : s));
       } else {
-        await createSegment(currentProject.id, { ...formData, context: [] })
+        const created = await createSegment(projectId, {
+          name: formData.name,
+          description: formData.description,
+          context: formData.context,
+          projectId
+        });
+        setSegments([created, ...segments]);
       }
-      setIsPanelOpen(false)
-      await refreshProjectData()
+      setIsPanelOpen(false);
     } catch (e) {
-      alert(e.message)
+      alert(e.message);
     }
-  }
+  };
+
+  if (loading) return <div className="text-center py-12 text-neutral-500">Загрузка...</div>;
+  if (error) return <div className="text-center py-12 text-red-500">Ошибка: {error}</div>;
 
   return (
     <div className="space-y-6">
@@ -68,7 +94,7 @@ export function Segments() {
         </div>
         <button
           onClick={handleOpenCreate}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-md font-medium flex items-center gap-2 transition-colors"
+          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
         >
           <Plus size={18} />
           Создать сегмент
@@ -76,13 +102,10 @@ export function Segments() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {segments.length > 0 ? segments.map((segment) => (
+        {segments.map(segment => (
           <div key={segment.id} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors shadow-sm relative group">
             <div className="flex justify-between items-start mb-4">
-              <div
-                className="bg-indigo-50 dark:bg-indigo-500/10 p-2.5 rounded-lg text-indigo-600 dark:text-indigo-400 cursor-pointer"
-                onClick={() => handleOpenEdit(segment)}
-              >
+              <div className="bg-indigo-50 dark:bg-indigo-500/10 p-2.5 rounded-lg text-indigo-600 dark:text-indigo-400 cursor-pointer" onClick={() => handleOpenEdit(segment)}>
                 <Users size={24} />
               </div>
 
@@ -112,35 +135,30 @@ export function Segments() {
               </DropdownMenu.Root>
             </div>
 
-            <h3
-              className="text-lg font-medium text-neutral-900 dark:text-white mb-1 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400"
-              onClick={() => handleOpenEdit(segment)}
-            >
-              {segment.name}
-            </h3>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6 line-clamp-2 h-10">{segment.description || '-'}</p>
+            <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-1 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400" onClick={() => handleOpenEdit(segment)}>{segment.name}</h3>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6 line-clamp-2 h-10">{segment.description}</p>
 
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Users size={16} className="text-neutral-400 dark:text-neutral-500" />
-                <span className="text-neutral-600 dark:text-neutral-300">~{segment.usersCount || 0} пользователей</span>
+            <div className="bg-neutral-50 dark:bg-neutral-950 rounded-lg p-3 border border-neutral-200 dark:border-neutral-800 flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                <Filter size={12} />
+                Контексты
               </div>
-
-              <div className="bg-neutral-50 dark:bg-neutral-950 rounded-lg p-3 border border-neutral-200 dark:border-neutral-800 flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-                  <Filter size={12} />
-                  Правила
+              {segment.context && segment.context.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {segment.context.map((ctx, i) => (
+                    <code key={i} className="text-xs font-mono text-emerald-600 dark:text-emerald-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded">
+                      {ctx.contextDefinitionId}: {ctx.contextValues}
+                    </code>
+                  ))}
                 </div>
-                <code className="text-xs font-mono text-emerald-600 dark:text-emerald-400 break-all line-clamp-2">
-                  {segment.rules || 'Нет правил'}
-                </code>
-              </div>
+              ) : (
+                <code className="text-xs font-mono text-neutral-400">Нет контекстов</code>
+              )}
             </div>
           </div>
-        )) : (
-          <div className="col-span-full text-center py-12 text-neutral-500">
-            {currentProject ? 'Нет сегментов в проекте' : 'Выберите проект'}
-          </div>
+        ))}
+        {segments.length === 0 && (
+          <div className="col-span-full text-center py-12 text-neutral-500">Нет сегментов</div>
         )}
       </div>
 
@@ -151,16 +169,13 @@ export function Segments() {
         description={editingSegment ? "Измените настройки аудитории" : "Создайте новую аудиторию пользователей"}
         footer={
           <>
-            <button
-              onClick={() => setIsPanelOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md transition-colors"
-            >
+            <button onClick={() => setIsPanelOpen(false)} className="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors">
               Отмена
             </button>
             <button
               onClick={handleSave}
               disabled={!formData.name}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-md transition-colors"
+              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
             >
               {editingSegment ? "Сохранить изменения" : "Создать сегмент"}
             </button>
@@ -173,7 +188,7 @@ export function Segments() {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
               placeholder="Например: Beta Тестеры"
               className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
@@ -183,7 +198,7 @@ export function Segments() {
             <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Описание</label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
               placeholder="Кто входит в этот сегмент?"
               rows={2}
               className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
@@ -191,14 +206,18 @@ export function Segments() {
           </div>
 
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Правила таргетинга</label>
-            </div>
+            <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Контексты (через запятую: definitionId:value)</label>
             <textarea
-              value={formData.rules}
-              onChange={(e) => setFormData({ ...formData, rules: e.target.value })}
-              placeholder={`email.endsWith("@company.com")\n&&\nplan === "premium"`}
-              rows={6}
+              value={formData.context?.map(c => `${c.contextDefinitionId}:${c.contextValues}`).join('\n') || ''}
+              onChange={(e) => {
+                const context = e.target.value.split('\n').filter(Boolean).map(line => {
+                  const [contextDefinitionId, contextValues] = line.split(':');
+                  return { contextDefinitionId: parseInt(contextDefinitionId) || null, contextValues: contextValues || '' };
+                });
+                setFormData({...formData, context});
+              }}
+              placeholder={`1:beta\n2:premium`}
+              rows={4}
               className="w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 text-emerald-600 dark:text-emerald-400 font-mono text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
             />
             <p className="text-xs text-neutral-500">Используйте ключи из Контекста для написания правил.</p>
@@ -206,5 +225,5 @@ export function Segments() {
         </div>
       </SidePanel>
     </div>
-  )
+  );
 }

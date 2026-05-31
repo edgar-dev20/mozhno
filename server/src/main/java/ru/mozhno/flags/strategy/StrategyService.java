@@ -88,4 +88,22 @@ public class StrategyService {
         }
         return strategyRepository.save(existing);
     }
+
+    @Transactional
+    public FlagStrategy upsert(StrategyRequest request) {
+        FlagStrategy existing = strategyRepository.findByFlagIdAndEnvironmentId(request.getFlagId(), request.getEnvironmentId());
+        if (existing != null) {
+            existing.setEnabled(request.getEnabled());
+            if ("GRADUAL".equalsIgnoreCase(existing.getStrategyType())) {
+                existing.setPercentage(request.getPercentage());
+            } else if ("TARGETING".equalsIgnoreCase(existing.getStrategyType())) {
+                existing.setContextDefinitionId(request.getContextDefinitionId());
+                existing.setContextValuesJson(request.getContextValuesJson());
+                existing.setRolloutPercentage(request.getRolloutPercentage());
+                existing.setSegmentId(request.getSegmentId());
+            }
+            return strategyRepository.save(existing);
+        }
+        return create(request);
+    }
 }

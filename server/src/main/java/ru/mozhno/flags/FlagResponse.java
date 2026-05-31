@@ -12,6 +12,14 @@ public class FlagResponse {
     private String flagType;
     private Instant createdAt;
     private List<TagValueResponse> tags;
+    private boolean enabled;
+    private Integer strategyId;
+    private String strategyType;
+    private Double percentage;
+    private Double rolloutPercentage;
+    private Integer contextDefinitionId;
+    private String contextValuesJson;
+    private Integer segmentId;
 
     public static class TagValueResponse {
         private Integer tagId;
@@ -39,7 +47,7 @@ public class FlagResponse {
 
     public FlagResponse() {}
 
-    public FlagResponse(Integer id, Integer projectId, String name, String key, String description, String flagType, Instant createdAt, List<TagValueResponse> tags) {
+    public FlagResponse(Integer id, Integer projectId, String name, String key, String description, String flagType, Instant createdAt, List<TagValueResponse> tags, boolean enabled, Integer strategyId, String strategyType, Double percentage, Double rolloutPercentage, Integer contextDefinitionId, String contextValuesJson, Integer segmentId) {
         this.id = id;
         this.projectId = projectId;
         this.name = name;
@@ -48,6 +56,14 @@ public class FlagResponse {
         this.flagType = flagType;
         this.createdAt = createdAt;
         this.tags = tags;
+        this.enabled = enabled;
+        this.strategyId = strategyId;
+        this.strategyType = strategyType;
+        this.percentage = percentage;
+        this.rolloutPercentage = rolloutPercentage;
+        this.contextDefinitionId = contextDefinitionId;
+        this.contextValuesJson = contextValuesJson;
+        this.segmentId = segmentId;
     }
 
     public Integer getId() { return id; }
@@ -66,4 +82,20 @@ public class FlagResponse {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public List<TagValueResponse> getTags() { return tags; }
     public void setTags(List<TagValueResponse> tags) { this.tags = tags; }
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public Integer getStrategyId() { return strategyId; }
+    public void setStrategyId(Integer strategyId) { this.strategyId = strategyId; }
+    public String getStrategyType() { return strategyType; }
+    public void setStrategyType(String strategyType) { this.strategyType = strategyType; }
+    public Double getPercentage() { return percentage; }
+    public void setPercentage(Double percentage) { this.percentage = percentage; }
+    public Double getRolloutPercentage() { return rolloutPercentage; }
+    public void setRolloutPercentage(Double rolloutPercentage) { this.rolloutPercentage = rolloutPercentage; }
+    public Integer getContextDefinitionId() { return contextDefinitionId; }
+    public void setContextDefinitionId(Integer contextDefinitionId) { this.contextDefinitionId = contextDefinitionId; }
+    public String getContextValuesJson() { return contextValuesJson; }
+    public void setContextValuesJson(String contextValuesJson) { this.contextValuesJson = contextValuesJson; }
+    public Integer getSegmentId() { return segmentId; }
+    public void setSegmentId(Integer segmentId) { this.segmentId = segmentId; }
 }

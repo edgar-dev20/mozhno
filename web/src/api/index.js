@@ -101,8 +101,8 @@ export async function deleteSegment(projectId, id) {
 }
 
 // Flags
-export async function getFlags(projectId) {
-  return api(`/projects/${projectId}/flags`);
+export async function getFlags(projectId, environmentId) {
+    return api(`/projects/${projectId}/flags${environmentId ? `?environmentId=${environmentId}` : ''}`);
 }
 
 export async function getFlag(projectId, id) {
@@ -132,6 +132,10 @@ export async function createStrategy(flagId, data) {
 
 export async function updateStrategy(flagId, strategyId, data) {
   return api(`/flags/${flagId}/strategies/${strategyId}`, 'PUT', data);
+}
+
+export async function upsertStrategy(flagId, data) {
+  return api(`/flags/${flagId}/strategies`, 'PUT', data);
 }
 
 export async function deleteStrategy(flagId, strategyId) {
