@@ -9,6 +9,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import ru.mozhno.apikeys.ApiKeyRepository;
 import ru.mozhno.contexts.ContextDefinitionRepository;
 import ru.mozhno.contexts.ContextValueRepository;
 import ru.mozhno.environments.EnvironmentRepository;
@@ -77,10 +78,13 @@ public abstract class BaseIntegrationTest {
     @Autowired
     protected SegmentContextRepository segmentContextRepository;
 
+    @Autowired
+    protected ApiKeyRepository apiKeyRepository;
+
     @BeforeEach
     void cleanDatabase() {
         try {
-            jdbcTemplate.execute("TRUNCATE TABLE flag_tag_values, flag_strategies, flags, segment_contexts, segments, context_values, context_definitions, tags, environments, projects CASCADE");
+            jdbcTemplate.execute("TRUNCATE TABLE api_keys, flag_tag_values, flag_strategies, flags, segment_contexts, segments, context_values, context_definitions, tags, environments, projects CASCADE");
         } catch (Exception e) {
             // Tables may not exist on first run – schema will be created next
         }

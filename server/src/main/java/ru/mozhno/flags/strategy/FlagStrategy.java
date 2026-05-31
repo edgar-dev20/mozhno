@@ -11,6 +11,7 @@ public class FlagStrategy {
     private Double percentage;
     private Double rolloutPercentage;
     private Integer contextDefinitionId;
+    private String contextName;
     private String contextValuesJson;
     private Integer segmentId;
     private Instant createdAt;
@@ -33,6 +34,8 @@ public class FlagStrategy {
     public void setRolloutPercentage(Double rolloutPercentage) { this.rolloutPercentage = rolloutPercentage; }
     public Integer getContextDefinitionId() { return contextDefinitionId; }
     public void setContextDefinitionId(Integer contextDefinitionId) { this.contextDefinitionId = contextDefinitionId; }
+    public String getContextName() { return contextName; }
+    public void setContextName(String contextName) { this.contextName = contextName; }
     public String getContextValuesJson() { return contextValuesJson; }
     public void setContextValuesJson(String contextValuesJson) { this.contextValuesJson = contextValuesJson; }
     public Integer getSegmentId() { return segmentId; }

@@ -69,17 +69,23 @@ public class StrategyService {
 
     @Transactional
     public FlagStrategy update(Integer id, StrategyRequest request) {
-        FlagStrategy strategy = strategyRepository.findById(id);
-        if (strategy == null) throw new RuntimeException("Strategy not found: " + id);
-        strategy.setEnabled(request.getEnabled());
-        if (strategy instanceof GradualStrategy gs) {
-            gs.setPercentage(request.getPercentage());
-        } else if (strategy instanceof TargetingStrategy ts) {
-            ts.setContextDefinitionId(request.getContextDefinitionId());
-            ts.setContextValuesJson(request.getContextValuesJson());
-            ts.setRolloutPercentage(request.getRolloutPercentage());
-            ts.setSegmentId(request.getSegmentId());
+        FlagStrategy existing = strategyRepository.findById(id);
+        if (existing == null) throw new RuntimeException("Strategy not found: " + id);
+        if (!existing.getStrategyType().equalsIgnoreCase(request.getType())) {
+            strategyRepository.deleteById(id);
+            request.setFlagId(existing.getFlagId());
+            request.setEnvironmentId(existing.getEnvironmentId());
+            return create(request);
         }
-        return strategyRepository.save(strategy);
+        existing.setEnabled(request.getEnabled());
+        if ("GRADUAL".equalsIgnoreCase(existing.getStrategyType())) {
+            existing.setPercentage(request.getPercentage());
+        } else if ("TARGETING".equalsIgnoreCase(existing.getStrategyType())) {
+            existing.setContextDefinitionId(request.getContextDefinitionId());
+            existing.setContextValuesJson(request.getContextValuesJson());
+            existing.setRolloutPercentage(request.getRolloutPercentage());
+            existing.setSegmentId(request.getSegmentId());
+        }
+        return strategyRepository.save(existing);
     }
 }

@@ -7,6 +7,8 @@ let editingEnvId = null;
 let editingCtxId = null;
 let editingTagId = null;
 let editingSegmentId = null;
+let editingApiKeyId = null;
+let currentApiKeyId = null;
 
 const state = { currentView, currentProjectId, currentFlagId };
 
@@ -75,7 +77,7 @@ async function renderProjects(container) {
 }
 
 async function renderProject(container) {
-    let project, environments, contexts, flags, tags, segments, allStrategies = {};
+    let project, environments, contexts, flags, tags, segments, apiKeys, allStrategies = {};
     try {
         project = await api(`/projects/${state.currentProjectId}`);
         environments = await api(`/projects/${state.currentProjectId}/environments`);
@@ -83,6 +85,7 @@ async function renderProject(container) {
         flags = await api(`/projects/${state.currentProjectId}/flags`);
         tags = await api(`/projects/${state.currentProjectId}/tags`);
         segments = await api(`/projects/${state.currentProjectId}/segments`);
+        apiKeys = await api(`/projects/${state.currentProjectId}/api-keys`);
         for (const f of flags) {
             allStrategies[f.id] = await api(`/flags/${f.id}/strategies`);
         }
@@ -156,20 +159,27 @@ async function renderProject(container) {
                              `).join('') || ''}
                              ${!editingTagId ? `<button class="btn-link" id="btnAddTag">+ Add Tag</button>` : ''}
                          </div>
-                         <div class="nav-section">
-                             <h4>Segments</h4>
-                             ${segments?.map(seg => `
-                                 <div class="nav-item" data-segment="${seg.id}">
-                                     <span class="nav-icon">🎯</span>
-                                     <span class="nav-item-text">${escapeHtml(seg.name)}</span>
-                                     <button class="btn-icon btn-delete-segment" data-id="${seg.id}">✕</button>
-                                 </div>
-                             `).join('') || ''}
-                             <button class="btn-link" id="btnAddSegment">+ Add Segment</button>
-                         </div>
+<div class="nav-section">
+                              <h4>Segments</h4>
+                              ${segments?.map(seg => `
+                                  <div class="nav-item" data-segment="${seg.id}">
+                                      <span class="nav-icon">🎯</span>
+                                      <span class="nav-item-text">${escapeHtml(seg.name)}</span>
+                                      <button class="btn-icon btn-delete-segment" data-id="${seg.id}">✕</button>
+                                  </div>
+                              `).join('') || ''}
+                              <button class="btn-link" id="btnAddSegment">+ Add Segment</button>
+                          </div>
+                          <div class="nav-section">
+                              <h4>API Keys</h4>
+                              <div class="nav-item" data-apikey-section="true" id="navApiKeys">
+                                  <span class="nav-icon">🔑</span>
+                                  <span class="nav-item-text">Manage API Keys</span>
+                              </div>
+                          </div>
                     </nav>
                 </aside>
-                <main class="content">
+                <main class="content" id="mainContent">
                     <div class="content-header">
                         <h2>Feature Flags</h2>
                         <button class="btn-primary" id="btnAddFlag">+ New Flag</button>
@@ -242,13 +252,14 @@ async function renderProject(container) {
     });
     document.querySelectorAll('.nav-item:not(.editing)').forEach(item => {
         if (item.dataset.env) {
-            item.onclick = (e) => { if (!e.target.classList.contains('btn-icon')) editingEnvId = parseInt(item.dataset.env); editingCtxId = null; editingTagId = null; render(); };
+            item.onclick = (e) => { if (!e.target.classList.contains('btn-icon')) { editingEnvId = parseInt(item.dataset.env); editingCtxId = null; editingTagId = null; editingApiKeyId = null; currentApiKeyId = null; render(); } };
         } else if (item.dataset.ctx) {
-            item.onclick = (e) => { if (!e.target.classList.contains('btn-icon')) editingCtxId = parseInt(item.dataset.ctx); editingEnvId = null; editingTagId = null; render(); };
+            item.onclick = (e) => { if (!e.target.classList.contains('btn-icon')) { editingCtxId = parseInt(item.dataset.ctx); editingEnvId = null; editingTagId = null; editingApiKeyId = null; currentApiKeyId = null; render(); } };
         } else if (item.dataset.tag) {
-            item.onclick = (e) => { if (!e.target.classList.contains('btn-icon')) editingTagId = parseInt(item.dataset.tag); editingEnvId = null; editingCtxId = null; render(); };
+            item.onclick = (e) => { if (!e.target.classList.contains('btn-icon')) { editingTagId = parseInt(item.dataset.tag); editingEnvId = null; editingCtxId = null; editingApiKeyId = null; currentApiKeyId = null; render(); } };
         }
     });
+    document.getElementById('navApiKeys')?.addEventListener('click', () => { currentApiKeyId = null; renderApiKeysScreen(); });
     document.querySelectorAll('.btn-save-env').forEach(btn => {
         btn.onclick = async (e) => {
             e.stopPropagation();
@@ -271,11 +282,11 @@ async function renderProject(container) {
             render();
         };
     });
-    document.querySelectorAll('.btn-save-tag').forEach(btn => {
+document.querySelectorAll('.btn-save-tag').forEach(btn => {
         btn.onclick = async (e) => {
             e.stopPropagation();
             const name = document.getElementById('editTagName').value.trim();
-            const description = document.getElementById('editTagDesc')?.value.trim() || '';
+            const description = document.getElementById('editTagDesc').value.trim();
             const color = document.getElementById('editTagColor').value;
             if (!name) return;
             await api(`/projects/${state.currentProjectId}/tags/${btn.dataset.id}`, 'PUT', { name, description, color });
@@ -283,8 +294,27 @@ async function renderProject(container) {
             render();
         };
     });
+    document.querySelectorAll('.btn-save-apikey').forEach(btn => {
+        btn.onclick = async (e) => {
+            e.stopPropagation();
+            const name = document.getElementById('editApiKeyName').value.trim();
+            const environmentId = document.getElementById('editApiKeyEnv').value || null;
+            const description = document.getElementById('editApiKeyDesc').value.trim();
+            if (!name) return;
+            await api(`/projects/${state.currentProjectId}/api-keys/${btn.dataset.id}`, 'PUT', {
+                name,
+                environmentId: environmentId ? parseInt(environmentId) : null,
+                description
+            });
+            editingApiKeyId = null;
+            render();
+        };
+    });
     document.querySelectorAll('.btn-cancel-edit').forEach(btn => {
         btn.onclick = () => { editingEnvId = null; editingCtxId = null; editingTagId = null; render(); };
+    });
+    document.querySelectorAll('.btn-cancel-edit-apikey').forEach(btn => {
+        btn.onclick = () => { editingApiKeyId = null; render(); };
     });
     if (document.getElementById('btnAddSegment')) document.getElementById('btnAddSegment').onclick = () => showCreateSegment();
     document.querySelectorAll('.btn-delete-segment').forEach(btn => {
@@ -295,6 +325,148 @@ async function renderProject(container) {
             if (!e.target.classList.contains('btn-icon')) showEditSegment(parseInt(item.dataset.segment));
         };
     });
+    if (document.getElementById('btnAddApiKey')) document.getElementById('btnAddApiKey').onclick = () => showCreateApiKey();
+    document.querySelectorAll('.btn-delete-apikey').forEach(btn => {
+        btn.onclick = (e) => { e.stopPropagation(); deleteApiKey(parseInt(btn.dataset.id)); };
+    });
+    document.querySelectorAll('#btnCopyApiKey').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const keyVal = document.getElementById('editApiKeyValue').textContent;
+            navigator.clipboard.writeText(keyVal).then(function() {
+                btn.textContent = 'Copied!';
+                setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+            });
+        };
+    });
+}
+
+async function renderApiKeysScreen() {
+    let apiKeys = [], environments = [];
+    try {
+        apiKeys = await api(`/projects/${state.currentProjectId}/api-keys`);
+        environments = await api(`/projects/${state.currentProjectId}/environments`);
+    } catch(e) { console.error(e); }
+
+    const selectedKey = currentApiKeyId ? apiKeys.find(k => k.id === currentApiKeyId) : null;
+
+    document.getElementById('mainContent').innerHTML = `
+        <div class="page api-keys-page">
+            <header class="page-header">
+                <button class="btn-back" id="btnBackApiKeys">← Back</button>
+                <h1>API Keys</h1>
+                <button class="btn-primary" id="btnAddApiKey">+ New API Key</button>
+            </header>
+            <div class="api-keys-layout">
+                <div class="api-keys-table-container">
+                    <table class="api-keys-table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Environment</th>
+                                <th>API Key</th>
+                                <th>Description</th>
+                                <th>Created</th>
+                                <th>Last Used</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${apiKeys.map(k => `
+                                <tr class="${currentApiKeyId === k.id ? 'selected' : ''}" data-id="${k.id}">
+                                    <td><strong>${escapeHtml(k.name)}</strong></td>
+                                    <td><span class="env-tag">${escapeHtml(k.environmentId ? (environments.find(e => e.id === k.environmentId)?.name || 'env') : 'All')}</span></td>
+                                    <td><code class="api-key-cell">${escapeHtml(k.apiKey)}</code></td>
+                                    <td>${escapeHtml(k.description || '—')}</td>
+                                    <td>${new Date(k.createdAt).toLocaleDateString()}</td>
+                                    <td>${k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleString() : 'Never'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                ${selectedKey ? `
+                <div class="api-key-edit-panel">
+                    <h2>Edit: ${escapeHtml(selectedKey.name)}</h2>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" id="editApiKeyName" value="${escapeHtml(selectedKey.name)}">
+                    </div>
+                    <div class="form-group">
+                        <label>Environment</label>
+                        <select id="editApiKeyEnv">
+                            <option value="">All environments</option>
+                            ${environments.map(e => `<option value="${e.id}" ${e.id === selectedKey.environmentId ? 'selected' : ''}>${escapeHtml(e.name)}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="editApiKeyDesc">${escapeHtml(selectedKey.description || '')}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <div class="api-key-value-row">
+                            <code class="api-key-display">${escapeHtml(selectedKey.apiKey)}</code>
+                            <button class="btn-secondary" id="btnCopyKey">Copy</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Created</label>
+                        <span class="readonly-field">${new Date(selectedKey.createdAt).toLocaleString()}</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Used</label>
+                        <span class="readonly-field">${selectedKey.lastUsedAt ? new Date(selectedKey.lastUsedAt).toLocaleString() : 'Never'}</span>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-primary" id="btnSaveApiKey">Save</button>
+                        <button class="btn-secondary" id="btnCancelEditApiKey">Cancel</button>
+                        <button class="btn-danger" id="btnDeleteApiKey">Delete</button>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+
+    document.getElementById('btnBackApiKeys').onclick = () => { currentApiKeyId = null; render(); };
+    document.getElementById('btnAddApiKey')?.addEventListener('click', showCreateApiKey);
+
+    document.querySelectorAll('.api-keys-table-bordered tbody tr').forEach(row => {
+        row.onclick = () => {
+            currentApiKeyId = parseInt(row.dataset.id);
+            renderApiKeysScreen();
+        };
+    });
+
+    if (selectedKey) {
+        document.getElementById('btnCopyKey')?.addEventListener('click', () => {
+            navigator.clipboard.writeText(selectedKey.apiKey).then(() => {
+                document.getElementById('btnCopyKey').textContent = 'Copied!';
+                setTimeout(() => { document.getElementById('btnCopyKey').textContent = 'Copy'; }, 2000);
+            });
+        });
+        document.getElementById('btnCancelEditApiKey')?.addEventListener('click', () => { currentApiKeyId = null; renderApiKeysScreen(); });
+        document.getElementById('btnSaveApiKey')?.addEventListener('click', async () => {
+            const name = document.getElementById('editApiKeyName').value.trim();
+            const environmentId = document.getElementById('editApiKeyEnv').value || null;
+            const description = document.getElementById('editApiKeyDesc').value.trim();
+            if (!name) return alert('Name required');
+            try {
+                await api(`/projects/${state.currentProjectId}/api-keys/${currentApiKeyId}`, 'PUT', {
+                    name, environmentId: environmentId ? parseInt(environmentId) : null, description
+                });
+                renderApiKeysScreen();
+            } catch(e) { alert(e.message); }
+        });
+        document.getElementById('btnDeleteApiKey')?.addEventListener('click', async () => {
+            if (!confirm('Delete API key?')) return;
+            try {
+                await api(`/projects/${state.currentProjectId}/api-keys/${currentApiKeyId}`, 'DELETE');
+                currentApiKeyId = null;
+                renderApiKeysScreen();
+            } catch(e) { alert(e.message); }
+        });
+    }
 }
 
 async function renderFlag(container) {
@@ -1041,6 +1213,108 @@ window.createTag = async function() {
 }
 
 window.closeModal = function() { document.getElementById('modal').classList.add('hidden'); }
+
+async function showCreateApiKey() {
+    let environments = [];
+    try { environments = await api(`/projects/${state.currentProjectId}/environments`); } catch(e) {}
+
+    document.getElementById('modal').innerHTML = `
+        <div class="modal-content">
+            <h2>Create API Key</h2>
+            <input type="text" id="apiKeyName" placeholder="Service name (e.g. My App)">
+            <div class="form-group">
+                <label>Environment</label>
+                <select id="apiKeyEnv">
+                    <option value="">All environments</option>
+                    ${environments.map(e => `<option value="${e.id}">${escapeHtml(e.name)}</option>`).join('')}
+                </select>
+            </div>
+            <textarea id="apiKeyDesc" placeholder="Description (optional)"></textarea>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="createApiKey()">Create</button>
+            </div>
+        </div>
+    `;
+    document.getElementById('modal').classList.remove('hidden');
+}
+
+window.createApiKey = async function() {
+    const name = document.getElementById('apiKeyName').value.trim();
+    const environmentId = document.getElementById('apiKeyEnv').value || null;
+    const description = document.getElementById('apiKeyDesc').value.trim();
+    if (!name) return alert('Name required');
+    try {
+        const result = await api(`/projects/${state.currentProjectId}/api-keys`, 'POST', {
+            name,
+            environmentId: environmentId ? parseInt(environmentId) : null,
+            description
+        });
+        window.closeModal();
+        currentApiKeyId = result.id;
+        renderApiKeysScreen();
+    } catch(e) { alert(e.message); }
+};
+
+async function deleteApiKey(id) {
+    if (!confirm('Delete API key? This will revoke access for any client using it.')) return;
+    try { await api(`/projects/${state.currentProjectId}/api-keys/${id}`, 'DELETE'); currentApiKeyId = null; renderApiKeysScreen(); } catch(e) { alert(e.message); }
+}
+
+function renderApiKeysSection(apiKeys, environments) {
+    if (!apiKeys || apiKeys.length === 0) return '';
+
+    return `
+        <div class="api-keys-section collapsed" id="apiKeysSection">
+            <div class="section-collapse-header">
+                <span class="collapse-icon">▼</span>
+                <h3>API Keys (${apiKeys.length})</h3>
+            </div>
+            <div class="section-collapse-body">
+                <table class="api-keys-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Environment</th>
+                            <th>API Key</th>
+                            <th>Description</th>
+                            <th>Created</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${apiKeys.map(k => `
+                            <tr>
+                                <td><strong>${escapeHtml(k.name)}</strong></td>
+                                <td><span class="env-tag">${escapeHtml(k.environmentId ? (environments?.find(e => e.id === k.environmentId)?.name || 'env') : 'All')}</span></td>
+                                <td><code class="api-key-val-cell">${escapeHtml(k.apiKey)}</code></td>
+                                <td class="desc-cell">${escapeHtml(k.description || '—')}</td>
+                                <td class="date-cell">${new Date(k.createdAt).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="btn-primary btn-sm api-key-copy-btn">Copy</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="api-keys-usage">
+                    <p>Include a key in the <code>Authorization</code> header to read flags:</p>
+                    <code class="api-key-curl">curl -H "Authorization: Bearer &lt;API_KEY&gt;" ${window.location.origin}/api/client/features</code>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+window.copyApiKey = function() {
+    const el = document.getElementById('apiKeyValue');
+    if (!el) return;
+    navigator.clipboard.writeText(el.textContent).then(() => {
+        const btn = document.querySelector('.btn-copy-key');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+    });
+};
 
 function escapeHtml(text) {
     if (!text) return '';
