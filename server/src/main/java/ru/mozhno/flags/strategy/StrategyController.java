@@ -6,7 +6,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.mozhno.flags.FlagService;
 
 import java.util.List;
 
@@ -16,7 +15,6 @@ import java.util.List;
 @Tag(name = "Strategies", description = "Flag strategy management")
 public class StrategyController {
     private final StrategyService strategyService;
-    private final FlagService flagService;
 
     @GetMapping
     @Operation(summary = "Get all strategies for a flag")

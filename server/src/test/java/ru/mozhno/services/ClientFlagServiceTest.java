@@ -9,8 +9,7 @@ import ru.mozhno.client.ClientFlagService;
 import ru.mozhno.environments.Environment;
 import ru.mozhno.flags.Flag;
 import ru.mozhno.flags.FlagType;
-import ru.mozhno.flags.strategy.GradualStrategy;
-import ru.mozhno.flags.strategy.ServerStrategy;
+import ru.mozhno.flags.strategy.FlagStrategy;
 import ru.mozhno.projects.Project;
 
 import java.util.List;
@@ -46,7 +45,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         flag.setFlagType(FlagType.RELEASE);
         Flag saved = flagRepository.save(flag);
 
-        ServerStrategy s = new ServerStrategy();
+        FlagStrategy s = new FlagStrategy();
         s.setFlagId(saved.getId());
         s.setEnvironmentId(envId);
         s.setEnabled(true);
@@ -60,11 +59,10 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         assertThat(resp.getKey()).isEqualTo("my-feature");
         assertThat(resp.isEnabled()).isTrue();
         assertThat(resp.getActivation()).isNotNull();
-        assertThat(resp.getActivation().getType()).isEqualTo("server");
     }
 
     @Test
-    void getFlagsForProject_withGradualStrategy_shouldReturnActivation() {
+    void getFlagsForProject_withPercentage_shouldReturnActivationWithRollOut() {
         Flag flag = new Flag();
         flag.setProjectId(projectId);
         flag.setName("Gradual Feature");
@@ -72,18 +70,17 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         flag.setFlagType(FlagType.RELEASE);
         Flag saved = flagRepository.save(flag);
 
-        GradualStrategy gs = new GradualStrategy();
-        gs.setFlagId(saved.getId());
-        gs.setEnvironmentId(envId);
-        gs.setEnabled(true);
-        gs.setPercentage(50.0);
-        flagStrategyRepository.save(gs);
+        FlagStrategy s = new FlagStrategy();
+        s.setFlagId(saved.getId());
+        s.setEnvironmentId(envId);
+        s.setEnabled(true);
+        s.setPercentage(50.0);
+        flagStrategyRepository.save(s);
 
         List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId, envId);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getActivation()).isNotNull();
-        assertThat(result.get(0).getActivation().getType()).isEqualTo("gradual");
         assertThat(result.get(0).getActivation().getRollOut()).isEqualTo(50.0);
     }
 

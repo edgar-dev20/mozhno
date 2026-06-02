@@ -31,22 +31,18 @@ public class ClientFlagResponse {
     public void setActivation(Activation activation) { this.activation = activation; }
 
     public static class Activation {
-        private String type;
         private Double rollOut;
         private Constraint constraint;
 
         public Activation() {}
 
         public Activation(FlagStrategy s) {
-            this.type = s.getStrategyType() != null ? s.getStrategyType().toLowerCase() : "server";
-            this.rollOut = "gradual".equalsIgnoreCase(s.getStrategyType()) ? s.getPercentage() : s.getRolloutPercentage();
+            this.rollOut = s.getPercentage();
             if (s.getContextName() != null && s.getContextValuesJson() != null) {
                 this.constraint = new Constraint(s.getContextName(), s.getContextValuesJson());
             }
         }
 
-        public String getType() { return type; }
-        public void setType(String type) { this.type = type; }
         public Double getRollOut() { return rollOut; }
         public void setRollOut(Double rollOut) { this.rollOut = rollOut; }
         public Constraint getConstraint() { return constraint; }

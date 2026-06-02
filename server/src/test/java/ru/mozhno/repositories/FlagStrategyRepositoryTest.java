@@ -6,9 +6,6 @@ import ru.mozhno.environments.Environment;
 import ru.mozhno.flags.Flag;
 import ru.mozhno.flags.FlagType;
 import ru.mozhno.flags.strategy.FlagStrategy;
-import ru.mozhno.flags.strategy.ServerStrategy;
-import ru.mozhno.flags.strategy.GradualStrategy;
-import ru.mozhno.flags.strategy.TargetingStrategy;
 
 import java.util.List;
 
@@ -41,12 +38,12 @@ class FlagStrategyRepositoryTest extends BaseIntegrationTest {
 
     @Test
     void findByFlagId_shouldReturnStrategies() {
-        ServerStrategy s1 = new ServerStrategy();
+        FlagStrategy s1 = new FlagStrategy();
         s1.setFlagId(flagId);
         s1.setEnvironmentId(envId);
         s1.setEnabled(true);
         flagStrategyRepository.save(s1);
-        ServerStrategy s2 = new ServerStrategy();
+        FlagStrategy s2 = new FlagStrategy();
         s2.setFlagId(flagId);
         s2.setEnvironmentId(envId);
         s2.setEnabled(false);
@@ -58,7 +55,7 @@ class FlagStrategyRepositoryTest extends BaseIntegrationTest {
 
     @Test
     void findById_shouldReturnStrategy() {
-        ServerStrategy s = new ServerStrategy();
+        FlagStrategy s = new FlagStrategy();
         s.setFlagId(flagId);
         s.setEnvironmentId(envId);
         s.setEnabled(true);
@@ -76,7 +73,7 @@ class FlagStrategyRepositoryTest extends BaseIntegrationTest {
 
     @Test
     void findByFlagIdAndEnvironmentId_shouldReturnStrategy() {
-        ServerStrategy s = new ServerStrategy();
+        FlagStrategy s = new FlagStrategy();
         s.setFlagId(flagId);
         s.setEnvironmentId(envId);
         s.setEnabled(true);
@@ -92,21 +89,20 @@ class FlagStrategyRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
-    void save_shouldInsertServerStrategy() {
-        ServerStrategy s = new ServerStrategy();
+    void save_shouldInsertStrategy() {
+        FlagStrategy s = new FlagStrategy();
         s.setFlagId(flagId);
         s.setEnvironmentId(envId);
         s.setEnabled(true);
 
         FlagStrategy saved = flagStrategyRepository.save(s);
         assertNotNull(saved.getId());
-        assertEquals("SERVER", saved.getStrategyType());
         assertNotNull(saved.getCreatedAt());
     }
 
     @Test
-    void save_shouldInsertGradualStrategy() {
-        GradualStrategy s = new GradualStrategy();
+    void save_shouldInsertStrategyWithPercentage() {
+        FlagStrategy s = new FlagStrategy();
         s.setFlagId(flagId);
         s.setEnvironmentId(envId);
         s.setEnabled(true);
@@ -114,28 +110,27 @@ class FlagStrategyRepositoryTest extends BaseIntegrationTest {
 
         FlagStrategy saved = flagStrategyRepository.save(s);
         assertNotNull(saved.getId());
-        assertEquals("GRADUAL", saved.getStrategyType());
         assertEquals(50.0, saved.getPercentage());
     }
 
     @Test
-    void save_shouldInsertTargetingStrategy() {
-        TargetingStrategy s = new TargetingStrategy();
+    void save_shouldInsertStrategyWithContextValues() {
+        FlagStrategy s = new FlagStrategy();
         s.setFlagId(flagId);
         s.setEnvironmentId(envId);
         s.setEnabled(true);
-        s.setRolloutPercentage(75.0);
+        s.setPercentage(75.0);
         s.setContextValuesJson("[\"web\"]");
 
         FlagStrategy saved = flagStrategyRepository.save(s);
         assertNotNull(saved.getId());
-        assertEquals("TARGETING", saved.getStrategyType());
-        assertEquals(75.0, saved.getRolloutPercentage());
+        assertEquals(75.0, saved.getPercentage());
+        assertEquals("[\"web\"]", saved.getContextValuesJson());
     }
 
     @Test
     void save_shouldUpdateExistingStrategy() {
-        ServerStrategy s = new ServerStrategy();
+        FlagStrategy s = new FlagStrategy();
         s.setFlagId(flagId);
         s.setEnvironmentId(envId);
         s.setEnabled(false);
@@ -150,7 +145,7 @@ class FlagStrategyRepositoryTest extends BaseIntegrationTest {
 
     @Test
     void deleteById_shouldRemoveStrategy() {
-        ServerStrategy s = new ServerStrategy();
+        FlagStrategy s = new FlagStrategy();
         s.setFlagId(flagId);
         s.setEnvironmentId(envId);
         s.setEnabled(true);

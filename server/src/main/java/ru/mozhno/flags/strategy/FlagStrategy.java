@@ -6,10 +6,8 @@ public class FlagStrategy {
     private Integer id;
     private Integer flagId;
     private Integer environmentId;
-    private String strategyType;
     private boolean enabled;
     private Double percentage;
-    private Double rolloutPercentage;
     private Integer contextDefinitionId;
     private String contextName;
     private String contextValuesJson;
@@ -24,14 +22,10 @@ public class FlagStrategy {
     public void setFlagId(Integer flagId) { this.flagId = flagId; }
     public Integer getEnvironmentId() { return environmentId; }
     public void setEnvironmentId(Integer environmentId) { this.environmentId = environmentId; }
-    public String getStrategyType() { return strategyType; }
-    public void setStrategyType(String strategyType) { this.strategyType = strategyType; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public Double getPercentage() { return percentage; }
     public void setPercentage(Double percentage) { this.percentage = percentage; }
-    public Double getRolloutPercentage() { return rolloutPercentage; }
-    public void setRolloutPercentage(Double rolloutPercentage) { this.rolloutPercentage = rolloutPercentage; }
     public Integer getContextDefinitionId() { return contextDefinitionId; }
     public void setContextDefinitionId(Integer contextDefinitionId) { this.contextDefinitionId = contextDefinitionId; }
     public String getContextName() { return contextName; }

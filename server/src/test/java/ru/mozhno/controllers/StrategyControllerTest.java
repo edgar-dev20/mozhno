@@ -13,7 +13,7 @@ import ru.mozhno.BaseIntegrationTest;
 import ru.mozhno.environments.Environment;
 import ru.mozhno.flags.Flag;
 import ru.mozhno.flags.FlagType;
-import ru.mozhno.flags.strategy.ServerStrategy;
+import ru.mozhno.flags.strategy.FlagStrategy;
 import ru.mozhno.projects.Project;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -80,7 +80,6 @@ class StrategyControllerTest extends BaseIntegrationTest {
         String json = "{" +
             "\"flagId\": " + flagId + "," +
             "\"environmentId\": " + environmentId + "," +
-            "\"type\": \"SERVER\"," +
             "\"enabled\": true" +
             "}";
 
@@ -89,13 +88,12 @@ class StrategyControllerTest extends BaseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.strategyType").value("SERVER"))
                 .andExpect(jsonPath("$.enabled").value(true));
     }
 
     @Test
     void updateStrategy_shouldReturnUpdated() throws Exception {
-        ServerStrategy strategy = new ServerStrategy();
+        FlagStrategy strategy = new FlagStrategy();
         strategy.setFlagId(flagId);
         strategy.setEnvironmentId(environmentId);
         strategy.setEnabled(false);
@@ -104,14 +102,14 @@ class StrategyControllerTest extends BaseIntegrationTest {
         mockMvc.perform(put("/api/v1/flags/{flagId}/strategies/{id}", flagId, saved.getId())
                         .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"type\": \"SERVER\", \"enabled\": true}"))
+                        .content("{\"enabled\": true}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enabled").value(true));
     }
 
     @Test
     void deleteStrategy_shouldReturn204() throws Exception {
-        ServerStrategy strategy = new ServerStrategy();
+        FlagStrategy strategy = new FlagStrategy();
         strategy.setFlagId(flagId);
         strategy.setEnvironmentId(environmentId);
         strategy.setEnabled(true);

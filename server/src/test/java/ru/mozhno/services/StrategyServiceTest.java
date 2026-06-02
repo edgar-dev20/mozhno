@@ -35,7 +35,7 @@ class StrategyServiceTest {
         Flag flag = new Flag();
         flag.setId(1);
         when(flagRepository.findById(1)).thenReturn(flag);
-        ServerStrategy s = new ServerStrategy();
+        FlagStrategy s = new FlagStrategy();
         s.setId(1);
         when(strategyRepository.findByFlagId(1)).thenReturn(List.of(s));
 
@@ -52,7 +52,7 @@ class StrategyServiceTest {
     }
 
     @Test
-    void create_shouldCreateServerStrategy() {
+    void create_shouldCreateStrategy() {
         Flag flag = new Flag();
         flag.setId(1);
         when(flagRepository.findById(1)).thenReturn(flag);
@@ -65,80 +65,40 @@ class StrategyServiceTest {
         StrategyRequest req = new StrategyRequest();
         req.setFlagId(1);
         req.setEnvironmentId(2);
-        req.setType("SERVER");
         req.setEnabled(true);
-
-        FlagStrategy result = strategyService.create(req);
-        assertEquals("SERVER", result.getStrategyType());
-        assertTrue(result.isEnabled());
-    }
-
-    @Test
-    void create_shouldCreateGradualStrategy() {
-        Flag flag = new Flag();
-        flag.setId(1);
-        when(flagRepository.findById(1)).thenReturn(flag);
-        when(strategyRepository.save(any(FlagStrategy.class))).thenAnswer(inv -> {
-            FlagStrategy s = inv.getArgument(0);
-            s.setId(10);
-            return s;
-        });
-
-        StrategyRequest req = new StrategyRequest();
-        req.setFlagId(1);
-        req.setEnvironmentId(2);
-        req.setType("GRADUAL");
-        req.setEnabled(true);
-        req.setPercentage(30.0);
-
-        FlagStrategy result = strategyService.create(req);
-        assertEquals("GRADUAL", result.getStrategyType());
-        assertTrue(result instanceof GradualStrategy);
-        assertEquals(30.0, ((GradualStrategy) result).getPercentage());
-    }
-
-    @Test
-    void create_shouldCreateTargetingStrategy() {
-        Flag flag = new Flag();
-        flag.setId(1);
-        when(flagRepository.findById(1)).thenReturn(flag);
-        when(strategyRepository.save(any(FlagStrategy.class))).thenAnswer(inv -> {
-            FlagStrategy s = inv.getArgument(0);
-            s.setId(10);
-            return s;
-        });
-
-        StrategyRequest req = new StrategyRequest();
-        req.setFlagId(1);
-        req.setEnvironmentId(2);
-        req.setType("TARGETING");
-        req.setEnabled(true);
-        req.setContextDefinitionId(3);
-        req.setContextValuesJson("[\"web\"]");
-        req.setRolloutPercentage(50.0);
+        req.setPercentage(50.0);
         req.setSegmentId(5);
 
         FlagStrategy result = strategyService.create(req);
-        assertEquals("TARGETING", result.getStrategyType());
-        assertTrue(result instanceof TargetingStrategy);
-        assertEquals(50.0, ((TargetingStrategy) result).getRolloutPercentage());
+        assertTrue(result.isEnabled());
+        assertEquals(50.0, result.getPercentage());
         assertEquals(5, result.getSegmentId());
     }
 
     @Test
-    void create_shouldThrowExceptionForUnknownType() {
+    void create_shouldCreateStrategyWithContext() {
         Flag flag = new Flag();
         flag.setId(1);
         when(flagRepository.findById(1)).thenReturn(flag);
+        when(strategyRepository.save(any(FlagStrategy.class))).thenAnswer(inv -> {
+            FlagStrategy s = inv.getArgument(0);
+            s.setId(10);
+            return s;
+        });
 
         StrategyRequest req = new StrategyRequest();
         req.setFlagId(1);
         req.setEnvironmentId(2);
-        req.setType("UNKNOWN");
         req.setEnabled(true);
+        req.setPercentage(30.0);
+        req.setContextDefinitionId(3);
+        req.setContextValuesJson("[\"web\"]");
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> strategyService.create(req));
-        assertTrue(ex.getMessage().contains("Unknown strategy type"));
+        FlagStrategy result = strategyService.create(req);
+        assertTrue(result.isEnabled());
+        assertEquals(30.0, result.getPercentage());
+        assertEquals(3, result.getContextDefinitionId());
+        assertEquals("[\"web\"]", result.getContextValuesJson());
     }
 
     @Test
@@ -148,7 +108,6 @@ class StrategyServiceTest {
         StrategyRequest req = new StrategyRequest();
         req.setFlagId(999);
         req.setEnvironmentId(2);
-        req.setType("SERVER");
         req.setEnabled(true);
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> strategyService.create(req));
@@ -157,14 +116,13 @@ class StrategyServiceTest {
 
     @Test
     void update_shouldUpdateStrategy() {
-        ServerStrategy existing = new ServerStrategy();
+        FlagStrategy existing = new FlagStrategy();
         existing.setId(1);
         existing.setEnabled(false);
         when(strategyRepository.findById(1)).thenReturn(existing);
         when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
 
         StrategyRequest req = new StrategyRequest();
-        req.setType("SERVER");
         req.setEnabled(true);
 
         FlagStrategy result = strategyService.update(1, req);
@@ -183,42 +141,76 @@ class StrategyServiceTest {
     }
 
     @Test
-    void update_shouldUpdateGradualStrategyPercentage() {
-        GradualStrategy existing = new GradualStrategy();
+    void update_shouldUpdatePercentage() {
+        FlagStrategy existing = new FlagStrategy();
         existing.setId(1);
         existing.setPercentage(10.0);
         when(strategyRepository.findById(1)).thenReturn(existing);
         when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
 
         StrategyRequest req = new StrategyRequest();
-        req.setType("GRADUAL");
         req.setEnabled(true);
         req.setPercentage(75.0);
 
         FlagStrategy result = strategyService.update(1, req);
-        assertEquals(75.0, ((GradualStrategy) result).getPercentage());
+        assertEquals(75.0, result.getPercentage());
     }
 
     @Test
-    void update_shouldUpdateTargetingStrategyFields() {
-        TargetingStrategy existing = new TargetingStrategy();
+    void update_shouldUpdateContextFields() {
+        FlagStrategy existing = new FlagStrategy();
         existing.setId(1);
         when(strategyRepository.findById(1)).thenReturn(existing);
         when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
 
         StrategyRequest req = new StrategyRequest();
-        req.setType("TARGETING");
         req.setEnabled(true);
         req.setContextDefinitionId(5);
         req.setContextValuesJson("[\"mobile\"]");
-        req.setRolloutPercentage(90.0);
         req.setSegmentId(7);
 
         FlagStrategy result = strategyService.update(1, req);
         assertEquals(5, existing.getContextDefinitionId());
         assertEquals("[\"mobile\"]", existing.getContextValuesJson());
-        assertEquals(90.0, existing.getRolloutPercentage());
         assertEquals(7, existing.getSegmentId());
+    }
+
+    @Test
+    void upsert_shouldCreateWhenNotExists() {
+        when(strategyRepository.findByFlagIdAndEnvironmentId(1, 2)).thenReturn(null);
+        Flag flag = new Flag();
+        flag.setId(1);
+        when(flagRepository.findById(1)).thenReturn(flag);
+        when(strategyRepository.save(any(FlagStrategy.class))).thenAnswer(inv -> {
+            FlagStrategy s = inv.getArgument(0);
+            s.setId(10);
+            return s;
+        });
+
+        StrategyRequest req = new StrategyRequest();
+        req.setFlagId(1);
+        req.setEnvironmentId(2);
+        req.setEnabled(true);
+
+        FlagStrategy result = strategyService.upsert(req);
+        assertTrue(result.isEnabled());
+    }
+
+    @Test
+    void upsert_shouldUpdateWhenExists() {
+        FlagStrategy existing = new FlagStrategy();
+        existing.setId(5);
+        existing.setEnabled(false);
+        when(strategyRepository.findByFlagIdAndEnvironmentId(1, 2)).thenReturn(existing);
+        when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
+
+        StrategyRequest req = new StrategyRequest();
+        req.setFlagId(1);
+        req.setEnvironmentId(2);
+        req.setEnabled(true);
+
+        FlagStrategy result = strategyService.upsert(req);
+        assertTrue(result.isEnabled());
     }
 
     @Test

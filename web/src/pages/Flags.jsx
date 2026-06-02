@@ -161,7 +161,7 @@ export function Flags() {
 
   const getFlagPercentage = (flagKey, envId) => {
     const flag = getFlagForEnv(flagKey, envId);
-    return flag ? (flag.rolloutPercentage || flag.percentage || 100) : null;
+    return flag ? (flag.percentage || 100) : null;
   };
 
   const handleOpenCreate = () => {
@@ -214,13 +214,11 @@ export function Flags() {
       flagType: flag.flagType || 'RELEASE',
       enabled: flag.enabled,
       tags: flag.tags || [],
-      strategyType: flag.strategyType || 'SERVER',
       percentage: flag.percentage || 100,
-      rolloutPercentage: flag.rolloutPercentage || null,
       segmentId: flag.segmentId || null,
       contextDefinitionId: flag.contextDefinitionId || null,
       contextValuesJson: flag.contextValuesJson || null,
-      rolloutRules: [{ id: 'env-1', percentage: flag.rolloutPercentage || flag.percentage || 100, segmentIds: flag.segmentId ? [String(flag.segmentId)] : [], contextConstraints: (() => {
+      rolloutRules: [{ id: 'env-1', percentage: flag.percentage || 100, segmentIds: flag.segmentId ? [String(flag.segmentId)] : [], contextConstraints: (() => {
         if (!flag.contextDefinitionId || !flag.contextValuesJson) return [];
         const ctxDef = contexts.find(c => c.id === flag.contextDefinitionId);
         const ctxName = ctxDef ? ctxDef.name : '';
@@ -284,13 +282,11 @@ export function Flags() {
           await upsertStrategy(editingFlag.id, {
             flagId: editingFlag.id,
             environmentId: editingEnvId,
-            type: 'TARGETING',
             enabled: formData.enabled,
             percentage: rule.percentage || 100,
             segmentId: rule.segmentIds?.length > 0 ? parseInt(rule.segmentIds[0]) : null,
             contextDefinitionId,
-            contextValuesJson,
-            rolloutPercentage: rule.percentage || 100
+            contextValuesJson
           });
         }
         await refreshFlags();
@@ -308,9 +304,11 @@ export function Flags() {
       await upsertStrategy(flag.id, {
         flagId: flag.id,
         environmentId: envId,
-        type: 'SERVER',
         enabled: !flag.enabled,
-        percentage: 100
+        percentage: flag.percentage || 100,
+        segmentId: flag.segmentId || null,
+        contextDefinitionId: flag.contextDefinitionId || null,
+        contextValuesJson: flag.contextValuesJson || null
       });
       await refreshFlags();
     } catch (e) {

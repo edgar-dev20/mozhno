@@ -14,8 +14,7 @@ import ru.mozhno.contexts.ContextDefinitionRepository;
 import ru.mozhno.environments.Environment;
 import ru.mozhno.flags.Flag;
 import ru.mozhno.flags.FlagType;
-import ru.mozhno.flags.strategy.TargetingStrategy;
-import ru.mozhno.flags.strategy.ServerStrategy;
+import ru.mozhno.flags.strategy.FlagStrategy;
 import ru.mozhno.flags.strategy.FlagStrategyRepository;
 import ru.mozhno.projects.Project;
 
@@ -55,7 +54,7 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
         flag.setFlagType(FlagType.RELEASE);
         Flag savedFlag = flagRepository.save(flag);
 
-        ServerStrategy strategy = new ServerStrategy();
+        FlagStrategy strategy = new FlagStrategy();
         strategy.setFlagId(savedFlag.getId());
         strategy.setEnvironmentId(envId);
         strategy.setEnabled(true);
@@ -78,12 +77,11 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$[0].key").value("test-feature"))
                 .andExpect(jsonPath("$[0].enabled").value(true))
                 .andExpect(jsonPath("$[0].activation").exists())
-                .andExpect(jsonPath("$[0].activation.type").value("server"))
                 .andExpect(jsonPath("$[0].activation.constraint").doesNotExist());
     }
 
     @Test
-    void getFeatures_withSegmentStrategy_shouldReturnConstraint() throws Exception {
+    void getFeatures_withContextConstraint_shouldReturnConstraint() throws Exception {
         ContextDefinition cd = new ContextDefinition();
         cd.setName("userId");
         cd.setProjectId(projectId);
@@ -96,7 +94,7 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
         flag2.setFlagType(FlagType.RELEASE);
         Flag savedFlag2 = flagRepository.save(flag2);
 
-        TargetingStrategy strategy = new TargetingStrategy();
+        FlagStrategy strategy = new FlagStrategy();
         strategy.setFlagId(savedFlag2.getId());
         strategy.setEnvironmentId(envId);
         strategy.setEnabled(true);
@@ -108,7 +106,6 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
                         .header("Authorization", "client-test-token-abcdefghijklmnop1234567890"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[1].name").value("Segment Feature"))
-                .andExpect(jsonPath("$[1].activation.type").value("targeting"))
                 .andExpect(jsonPath("$[1].activation.constraint.field").value("userId"))
                 .andExpect(jsonPath("$[1].activation.constraint.values").isArray())
                 .andExpect(jsonPath("$[1].activation.constraint.values.length()").value(2));
@@ -150,13 +147,13 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
         flag2.setFlagType(FlagType.RELEASE);
         Flag savedFlag2 = flagRepository.save(flag2);
 
-        ServerStrategy strategyProd = new ServerStrategy();
+        FlagStrategy strategyProd = new FlagStrategy();
         strategyProd.setFlagId(savedFlag2.getId());
         strategyProd.setEnvironmentId(envId);
         strategyProd.setEnabled(true);
         flagStrategyRepository.save(strategyProd);
 
-        ServerStrategy strategyStaging = new ServerStrategy();
+        FlagStrategy strategyStaging = new FlagStrategy();
         strategyStaging.setFlagId(savedFlag2.getId());
         strategyStaging.setEnvironmentId(stagingId);
         strategyStaging.setEnabled(false);

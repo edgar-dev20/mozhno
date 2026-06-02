@@ -73,7 +73,7 @@ public class FlagController {
     private FlagResponse toResponse(Flag flag, ru.mozhno.flags.strategy.FlagStrategy strategy) {
         List<FlagTagValue> tagValues = flagTagValueRepository.findByFlagId(flag.getId());
         List<FlagResponse.TagValueResponse> tags = tagValues.stream().map(ftv -> {
-            ru.mozhno.tags.Tag tag = tagRepository.findById(ftv.getTagId());
+            Tag tag = tagRepository.findById(ftv.getTagId());
             return new FlagResponse.TagValueResponse(
                     ftv.getTagId(),
                     tag != null ? tag.getName() : "",
@@ -83,9 +83,7 @@ public class FlagController {
         }).toList();
         boolean enabled = strategy != null ? strategy.isEnabled() : flag.isEnabled();
         Integer strategyId = strategy != null ? strategy.getId() : null;
-        String strategyType = strategy != null ? strategy.getStrategyType() : null;
         Double percentage = strategy != null ? strategy.getPercentage() : null;
-        Double rolloutPercentage = strategy != null ? strategy.getRolloutPercentage() : null;
         Integer contextDefinitionId = strategy != null ? strategy.getContextDefinitionId() : null;
         String contextValuesJson = strategy != null ? strategy.getContextValuesJson() : null;
         Integer segmentId = strategy != null ? strategy.getSegmentId() : null;
@@ -100,9 +98,7 @@ public class FlagController {
                 tags,
                 enabled,
                 strategyId,
-                strategyType,
                 percentage,
-                rolloutPercentage,
                 contextDefinitionId,
                 contextValuesJson,
                 segmentId

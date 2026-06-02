@@ -37,7 +37,7 @@ public class FlagRepository {
     public List<Flag> findByProjectIdWithStrategyForEnvironment(Integer projectId, Integer environmentId) {
         String sql = """
             SELECT f.id, f.project_id, f.name, f.flag_key, f.description, f.flag_type, f.created_at, f.enabled as flag_enabled,
-                   s.id as strategy_id, s.strategy_type, s.enabled as strategy_enabled, s.percentage, s.rollout_percentage,
+                   s.id as strategy_id, s.enabled as strategy_enabled, s.percentage,
                    s.context_definition_id, s.segment_id,
                    CASE
                        WHEN s.segment_id IS NOT NULL THEN sc.context_values
@@ -62,7 +62,6 @@ public class FlagRepository {
             f.setName(rs.getString("name"));
             f.setKey(rs.getString("flag_key"));
             f.setDescription(rs.getString("description"));
-
             f.setFlagType(FlagType.valueOf(rs.getString("flag_type")));
             f.setCreatedAt(rs.getTimestamp("created_at").toInstant());
             f.setEnabled(rs.getBoolean("flag_enabled"));
@@ -73,10 +72,8 @@ public class FlagRepository {
                 s.setId(strategyId);
                 s.setFlagId(f.getId());
                 s.setEnvironmentId(environmentId);
-                s.setStrategyType(rs.getString("strategy_type"));
                 s.setEnabled(rs.getBoolean("strategy_enabled"));
                 s.setPercentage(rs.getObject("percentage") != null ? rs.getDouble("percentage") : null);
-                s.setRolloutPercentage(rs.getObject("rollout_percentage") != null ? rs.getDouble("rollout_percentage") : null);
                 s.setContextDefinitionId(rs.getObject("context_definition_id") != null ? rs.getInt("context_definition_id") : null);
                 s.setSegmentId(rs.getObject("segment_id") != null ? rs.getInt("segment_id") : null);
                 s.setContextValuesJson(rs.getString("context_values"));

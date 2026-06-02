@@ -34,31 +34,14 @@ public class StrategyService {
         if (flagRepository.findById(request.getFlagId()) == null) {
             throw new RuntimeException("Flag not found: " + request.getFlagId());
         }
-        FlagStrategy strategy = switch (request.getType().toUpperCase()) {
-            case "SERVER" -> {
-                ServerStrategy s = new ServerStrategy();
-                s.setEnabled(request.getEnabled());
-                yield s;
-            }
-            case "GRADUAL" -> {
-                GradualStrategy s = new GradualStrategy();
-                s.setEnabled(request.getEnabled());
-                s.setPercentage(request.getPercentage());
-                yield s;
-            }
-            case "TARGETING" -> {
-                TargetingStrategy s = new TargetingStrategy();
-                s.setEnabled(request.getEnabled());
-                s.setContextDefinitionId(request.getContextDefinitionId());
-                s.setContextValuesJson(request.getContextValuesJson());
-                s.setRolloutPercentage(request.getRolloutPercentage());
-                s.setSegmentId(request.getSegmentId());
-                yield s;
-            }
-            default -> throw new RuntimeException("Unknown strategy type: " + request.getType());
-        };
+        FlagStrategy strategy = new FlagStrategy();
         strategy.setFlagId(request.getFlagId());
         strategy.setEnvironmentId(request.getEnvironmentId());
+        strategy.setEnabled(request.getEnabled() != null ? request.getEnabled() : false);
+        strategy.setPercentage(request.getPercentage());
+        strategy.setContextDefinitionId(request.getContextDefinitionId());
+        strategy.setContextValuesJson(request.getContextValuesJson());
+        strategy.setSegmentId(request.getSegmentId());
         return strategyRepository.save(strategy);
     }
 
@@ -71,21 +54,11 @@ public class StrategyService {
     public FlagStrategy update(Integer id, StrategyRequest request) {
         FlagStrategy existing = strategyRepository.findById(id);
         if (existing == null) throw new RuntimeException("Strategy not found: " + id);
-        if (!existing.getStrategyType().equalsIgnoreCase(request.getType())) {
-            strategyRepository.deleteById(id);
-            request.setFlagId(existing.getFlagId());
-            request.setEnvironmentId(existing.getEnvironmentId());
-            return create(request);
-        }
-        existing.setEnabled(request.getEnabled());
-        if ("GRADUAL".equalsIgnoreCase(existing.getStrategyType())) {
-            existing.setPercentage(request.getPercentage());
-        } else if ("TARGETING".equalsIgnoreCase(existing.getStrategyType())) {
-            existing.setContextDefinitionId(request.getContextDefinitionId());
-            existing.setContextValuesJson(request.getContextValuesJson());
-            existing.setRolloutPercentage(request.getRolloutPercentage());
-            existing.setSegmentId(request.getSegmentId());
-        }
+        existing.setEnabled(request.getEnabled() != null ? request.getEnabled() : existing.isEnabled());
+        existing.setPercentage(request.getPercentage());
+        existing.setContextDefinitionId(request.getContextDefinitionId());
+        existing.setContextValuesJson(request.getContextValuesJson());
+        existing.setSegmentId(request.getSegmentId());
         return strategyRepository.save(existing);
     }
 
@@ -93,19 +66,11 @@ public class StrategyService {
     public FlagStrategy upsert(StrategyRequest request) {
         FlagStrategy existing = strategyRepository.findByFlagIdAndEnvironmentId(request.getFlagId(), request.getEnvironmentId());
         if (existing != null) {
-if (request.getType() != null && !existing.getStrategyType().equalsIgnoreCase(request.getType())) {
-                strategyRepository.deleteById(existing.getId());
-                return create(request);
-            }
-            existing.setEnabled(request.getEnabled());
-            if ("GRADUAL".equalsIgnoreCase(existing.getStrategyType())) {
-                existing.setPercentage(request.getPercentage());
-            } else if ("TARGETING".equalsIgnoreCase(existing.getStrategyType())) {
-                existing.setContextDefinitionId(request.getContextDefinitionId());
-                existing.setContextValuesJson(request.getContextValuesJson());
-                existing.setRolloutPercentage(request.getRolloutPercentage());
-                existing.setSegmentId(request.getSegmentId());
-            }
+            existing.setEnabled(request.getEnabled() != null ? request.getEnabled() : existing.isEnabled());
+            existing.setPercentage(request.getPercentage());
+            existing.setContextDefinitionId(request.getContextDefinitionId());
+            existing.setContextValuesJson(request.getContextValuesJson());
+            existing.setSegmentId(request.getSegmentId());
             return strategyRepository.save(existing);
         }
         return create(request);
