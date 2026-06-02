@@ -93,6 +93,10 @@ public class StrategyService {
     public FlagStrategy upsert(StrategyRequest request) {
         FlagStrategy existing = strategyRepository.findByFlagIdAndEnvironmentId(request.getFlagId(), request.getEnvironmentId());
         if (existing != null) {
+if (request.getType() != null && !existing.getStrategyType().equalsIgnoreCase(request.getType())) {
+                strategyRepository.deleteById(existing.getId());
+                return create(request);
+            }
             existing.setEnabled(request.getEnabled());
             if ("GRADUAL".equalsIgnoreCase(existing.getStrategyType())) {
                 existing.setPercentage(request.getPercentage());

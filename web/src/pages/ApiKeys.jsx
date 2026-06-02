@@ -125,7 +125,7 @@ export function ApiKeys() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2 max-w-[240px]">
                       <div className="flex-1 bg-neutral-100 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded px-3 py-1.5 text-sm font-mono text-neutral-700 dark:text-neutral-300 truncate">
-                        {showKey === k.id ? k.apiKey : '••••••••••••••••••••••••••••'}
+                        {showKey === k.id ? k.apiKey : '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'}
                       </div>
                       <button
                         onClick={() => setShowKey(showKey === k.id ? null : k.id)}

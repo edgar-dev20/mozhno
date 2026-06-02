@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -21,15 +22,31 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
     private Integer projectId;
     private Integer environmentId;
+    private String authToken;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         objectMapper = new ObjectMapper();
+
+        jdbcTemplate.update(
+            "INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)",
+            "apikey-test@test.com", passwordEncoder.encode("secret"), "editor");
+
+        String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"apikey-test@test.com\",\"password\":\"secret\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        authToken = objectMapper.readTree(loginResponse).get("token").asText();
 
         Project p = new Project();
         p.setName("Test Project");
@@ -43,7 +60,8 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
 
     @Test
     void getAllApiKeys_shouldReturnEmptyList() throws Exception {
-        mockMvc.perform(get("/api/v1/projects/{projectId}/api-keys", projectId))
+        mockMvc.perform(get("/api/v1/projects/{projectId}/api-keys", projectId)
+                        .header("Authorization", "Bearer " + authToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -51,6 +69,7 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
     @Test
     void createApiKey_shouldReturnCreated() throws Exception {
         mockMvc.perform(post("/api/v1/projects/{projectId}/api-keys", projectId)
+                        .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(String.format(
                             "{\"name\": \"My Service\", \"environmentId\": %d, \"description\": \"Test service\"}",
@@ -68,14 +87,16 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
         k.setApiKey("test-key-1234567890");
         ApiKey saved = apiKeyRepository.save(k);
 
-        mockMvc.perform(get("/api/v1/projects/{projectId}/api-keys/{id}", projectId, saved.getId()))
+        mockMvc.perform(get("/api/v1/projects/{projectId}/api-keys/{id}", projectId, saved.getId())
+                        .header("Authorization", "Bearer " + authToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Staging Service"));
     }
 
     @Test
     void getApiKey_shouldReturn404WhenNotFound() throws Exception {
-        mockMvc.perform(get("/api/v1/projects/{projectId}/api-keys/9999", projectId))
+        mockMvc.perform(get("/api/v1/projects/{projectId}/api-keys/9999", projectId)
+                        .header("Authorization", "Bearer " + authToken))
                 .andExpect(status().isNotFound());
     }
 
@@ -88,6 +109,7 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
         ApiKey saved = apiKeyRepository.save(k);
 
         mockMvc.perform(put("/api/v1/projects/{projectId}/api-keys/{id}", projectId, saved.getId())
+                        .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(String.format(
                             "{\"name\": \"Updated Name\", \"environmentId\": %d, \"description\": \"Updated\"}",
@@ -104,7 +126,8 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
         k.setApiKey("delete-me-key-1234567890");
         ApiKey saved = apiKeyRepository.save(k);
 
-        mockMvc.perform(delete("/api/v1/projects/{projectId}/api-keys/{id}", projectId, saved.getId()))
+        mockMvc.perform(delete("/api/v1/projects/{projectId}/api-keys/{id}", projectId, saved.getId())
+                        .header("Authorization", "Bearer " + authToken))
                 .andExpect(status().isNoContent());
     }
 }

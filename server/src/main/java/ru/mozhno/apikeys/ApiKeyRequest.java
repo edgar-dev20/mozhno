@@ -1,15 +1,19 @@
 package ru.mozhno.apikeys;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Request body for creating or updating an API key")
 public class ApiKeyRequest {
+    @NotBlank @Size(max = 255)
     @Schema(description = "Human-readable name for the API key (e.g. 'Production App')", example = "My Application")
     private String name;
 
     @Schema(description = "Environment ID to restrict this key to (null for all environments)", example = "1", nullable = true)
     private Integer environmentId;
 
+    @Size(max = 1000)
     @Schema(description = "Optional description for the API key", example = "Used by the production web app", nullable = true)
     private String description;
 

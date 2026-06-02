@@ -3,6 +3,7 @@ package ru.mozhno.segments;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,14 +31,14 @@ public class SegmentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new segment")
-    public SegmentResponse create(@PathVariable Integer projectId, @RequestBody SegmentRequest request) {
+    public SegmentResponse create(@PathVariable Integer projectId, @Valid @RequestBody SegmentRequest request) {
         request.setProjectId(projectId);
         return segmentService.create(request);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a segment")
-    public SegmentResponse update(@PathVariable Integer id, @RequestBody SegmentRequest request) {
+    public SegmentResponse update(@PathVariable Integer id, @Valid @RequestBody SegmentRequest request) {
         return segmentService.update(id, request);
     }
 

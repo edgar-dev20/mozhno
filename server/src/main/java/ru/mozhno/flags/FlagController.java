@@ -1,6 +1,7 @@
 package ru.mozhno.flags;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.mozhno.tags.Tag;
@@ -49,7 +50,7 @@ public class FlagController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new flag")
-    public FlagResponse create(@PathVariable Integer projectId, @RequestBody FlagRequest request) {
+    public FlagResponse create(@PathVariable Integer projectId, @Valid @RequestBody FlagRequest request) {
         request.setProjectId(projectId);
         Flag flag = flagService.create(request);
         return toResponse(flag);
@@ -57,7 +58,7 @@ public class FlagController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a flag")
-    public FlagResponse update(@PathVariable Integer projectId, @PathVariable Integer id, @RequestBody FlagRequest request) {
+    public FlagResponse update(@PathVariable Integer projectId, @PathVariable Integer id, @Valid @RequestBody FlagRequest request) {
         Flag flag = flagService.update(id, request);
         return toResponse(flag);
     }

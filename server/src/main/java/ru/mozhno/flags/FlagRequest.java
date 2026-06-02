@@ -1,12 +1,15 @@
 package ru.mozhno.flags;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public class FlagRequest {
     private Integer projectId;
-    private String name;
-    private String key;
-    private String description;
+    @NotBlank @Size(max = 255) private String name;
+    @NotBlank @Size(max = 255) private String key;
+    @Size(max = 1000) private String description;
     private String flagType;
     private List<TagValue> tags;
     private Boolean enabled;

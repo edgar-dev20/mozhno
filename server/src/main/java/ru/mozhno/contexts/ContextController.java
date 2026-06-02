@@ -3,6 +3,7 @@ package ru.mozhno.contexts;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +25,7 @@ public class ContextController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a context definition")
-    public ContextDefinition createDefinition(@PathVariable Integer projectId, @RequestBody ContextDefinitionRequest request) {
+    public ContextDefinition createDefinition(@PathVariable Integer projectId, @Valid @RequestBody ContextDefinitionRequest request) {
         request.setProjectId(projectId);
         return contextService.createDefinition(request);
     }
@@ -37,7 +38,7 @@ public class ContextController {
 
     @PutMapping("/{definitionId}")
     @Operation(summary = "Update a context definition")
-    public ContextDefinition updateDefinition(@PathVariable Integer definitionId, @RequestBody ContextDefinitionRequest request) {
+    public ContextDefinition updateDefinition(@PathVariable Integer definitionId, @Valid @RequestBody ContextDefinitionRequest request) {
         return contextService.updateDefinition(definitionId, request);
     }
 
@@ -57,7 +58,7 @@ public class ContextController {
     @PostMapping("/{definitionId}/values")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add values to a context definition")
-    public ContextValue createValue(@PathVariable Integer definitionId, @RequestBody ContextValueRequest request) {
+    public ContextValue createValue(@PathVariable Integer definitionId, @Valid @RequestBody ContextValueRequest request) {
         request.setContextDefinitionId(definitionId);
         return contextService.createValue(request);
     }
@@ -70,7 +71,7 @@ public class ContextController {
 
     @PutMapping("/values/{valueId}")
     @Operation(summary = "Update a context value")
-    public ContextValue updateValue(@PathVariable Integer valueId, @RequestBody ContextValueRequest request) {
+    public ContextValue updateValue(@PathVariable Integer valueId, @Valid @RequestBody ContextValueRequest request) {
         return contextService.updateValue(valueId, request);
     }
 

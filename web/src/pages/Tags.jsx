@@ -23,6 +23,14 @@ const PRESET_COLORS = [
   { value: '#ec4899', label: 'Розовый' },
 ];
 
+function adjustColor(hex, amount) {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+  const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
 export function Tags() {
   const [tags, setTags] = useState([]);
   const [projectId, setProjectId] = useState(null);
@@ -117,7 +125,7 @@ export function Tags() {
         </div>
         <button
           onClick={handleOpenCreate}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
+          className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm hover:shadow-md"
         >
           <Plus size={18} />
           Создать тег
@@ -132,8 +140,10 @@ export function Tags() {
           >
             <div className="flex items-start justify-between mb-3">
               <div
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-white font-medium text-sm"
-                style={{ backgroundColor: tag.color || '#3b82f6' }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-white font-medium text-sm bg-gradient-to-r shadow-sm"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${tag.color || '#3b82f6'}, ${adjustColor(tag.color || '#3b82f6', 20)})`
+                }}
               >
                 <TagIcon size={14} />
                 {tag.name}
@@ -191,7 +201,7 @@ export function Tags() {
             <button
               onClick={handleSave}
               disabled={!formData.name}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all shadow-sm hover:shadow-md"
             >
               {editingTag ? "Сохранить изменения" : "Создать тег"}
             </button>
@@ -229,12 +239,14 @@ export function Tags() {
                   key={color.value}
                   type="button"
                   onClick={() => setFormData({...formData, color: color.value})}
-                  className={`w-10 h-10 rounded-lg transition-all ${
+                  className={`w-10 h-10 rounded-lg transition-all bg-gradient-to-r shadow-sm ${
                     formData.color === color.value
-                      ? 'ring-2 ring-offset-2 ring-indigo-500 dark:ring-offset-neutral-950 scale-110'
+                      ? 'ring-2 ring-offset-2 ring-violet-500 dark:ring-offset-neutral-950 scale-110'
                       : 'hover:scale-105'
                   }`}
-                  style={{ backgroundColor: color.value }}
+                  style={{
+                    backgroundImage: `linear-gradient(to right, ${color.value}, ${adjustColor(color.value, 20)})`
+                  }}
                   title={color.label}
                 />
               ))}
@@ -244,8 +256,10 @@ export function Tags() {
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Предпросмотр:</span>
                   <div
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-white font-medium text-sm"
-                    style={{ backgroundColor: formData.color }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-white font-medium text-sm bg-gradient-to-r shadow-sm"
+                    style={{
+                      backgroundImage: `linear-gradient(to right, ${formData.color}, ${adjustColor(formData.color, 20)})`
+                    }}
                   >
                     <TagIcon size={14} />
                     {formData.name || 'Название тега'}

@@ -1,9 +1,12 @@
 package ru.mozhno.segments;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class SegmentRequest {
     private Integer projectId;
-    private String name;
-    private String description;
+    @NotBlank @Size(max = 255) private String name;
+    @Size(max = 1000) private String description;
     private java.util.List<ContextEntry> context;
 
     public SegmentRequest() {}

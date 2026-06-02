@@ -1,10 +1,13 @@
 package ru.mozhno.tags;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class TagRequest {
     private Integer projectId;
-    private String name;
-    private String description;
-    private String color;
+    @NotBlank @Size(max = 255) private String name;
+    @Size(max = 1000) private String description;
+    @Size(max = 50) private String color;
 
     public TagRequest() {}
     public TagRequest(Integer projectId, String name, String description, String color) {

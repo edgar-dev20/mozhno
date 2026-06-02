@@ -1,8 +1,10 @@
 package ru.mozhno.contexts;
 
+import jakarta.validation.constraints.Size;
+
 public class ContextValueRequest {
     private Integer contextDefinitionId;
-    private String values;
+    @Size(max = 10000) private String values;
 
     public ContextValueRequest() {}
 

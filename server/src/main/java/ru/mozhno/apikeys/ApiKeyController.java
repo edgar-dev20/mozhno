@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +48,7 @@ public class ApiKeyController {
         @ApiResponse(responseCode = "201", description = "API key created successfully",
             content = @Content(schema = @Schema(implementation = ApiKey.class)))
     })
-    public ApiKey create(@PathVariable Integer projectId, @RequestBody ApiKeyRequest request) {
+    public ApiKey create(@PathVariable Integer projectId, @Valid @RequestBody ApiKeyRequest request) {
         return apiKeyService.create(projectId, request);
     }
 
@@ -57,7 +58,7 @@ public class ApiKeyController {
         @ApiResponse(responseCode = "200", description = "API key updated",
             content = @Content(schema = @Schema(implementation = ApiKey.class)))
     })
-    public ApiKey update(@PathVariable Integer id, @RequestBody ApiKeyRequest request) {
+    public ApiKey update(@PathVariable Integer id, @Valid @RequestBody ApiKeyRequest request) {
         return apiKeyService.update(id, request);
     }
 

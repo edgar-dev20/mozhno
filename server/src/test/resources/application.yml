@@ -28,3 +28,8 @@ logging:
 
 server:
   port: 8080
+
+jwt:
+  secret: "dGhpc2lzYXRlc3RzZWNyZXRrZXlmb3Jqd3R0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmc="
+  issuer: "mozhno-test"
+  access-token-ttl-minutes: 15

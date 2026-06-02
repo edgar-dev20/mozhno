@@ -1,13 +1,17 @@
 package ru.mozhno.flags.strategy;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 public class StrategyRequest {
     private Integer flagId;
-    private Integer environmentId;
-    private String type;
+    @NotNull private Integer environmentId;
+    @NotBlank private String type;
     private Boolean enabled;
     private Double percentage;
     private Integer contextDefinitionId;
-    private String contextValuesJson;
+    @Size(max = 5000) private String contextValuesJson;
     private Double rolloutPercentage;
     private Integer segmentId;
 

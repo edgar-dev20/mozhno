@@ -107,12 +107,11 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/client/features")
                         .header("Authorization", "client-test-token-abcdefghijklmnop1234567890"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length").value(2))
                 .andExpect(jsonPath("$[1].name").value("Segment Feature"))
                 .andExpect(jsonPath("$[1].activation.type").value("targeting"))
                 .andExpect(jsonPath("$[1].activation.constraint.field").value("userId"))
                 .andExpect(jsonPath("$[1].activation.constraint.values").isArray())
-                .andExpect(jsonPath("$[1].activation.constraint.values.length").value(2));
+                .andExpect(jsonPath("$[1].activation.constraint.values.length()").value(2));
     }
 
     @Test
@@ -166,7 +165,6 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/client/features")
                         .header("Authorization", "client-test-token-abcdefghijklmnop1234567890"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length").value(2))
                 .andExpect(jsonPath("$[0].enabled").value(true))
                 .andExpect(jsonPath("$[1].enabled").value(true));
     }

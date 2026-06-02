@@ -10,11 +10,19 @@ const FLAG_TYPES = [
   { value: 'KILLSWITCH', label: 'Рубильник' },
 ];
 
+function adjustColor(hex, amount) {
+  const num = parseInt(hex.replace('#', ''), 16);
+  const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+  const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amount));
+  const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amount));
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+}
+
 function getTypeColor(type) {
   switch (type) {
-    case 'RELEASE': return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20';
-    case 'KILLSWITCH': return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20';
-    default: return 'text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-500/10 border-gray-200 dark:border-gray-500/20';
+    case 'RELEASE': return 'bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10';
+    case 'KILLSWITCH': return 'bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent border-red-200 dark:border-red-500/20 bg-red-50 dark:bg-red-500/10';
+    default: return 'bg-gradient-to-r from-gray-600 to-gray-500 bg-clip-text text-transparent border-gray-200 dark:border-gray-500/20 bg-gray-50 dark:bg-gray-500/10';
   }
 }
 
@@ -211,8 +219,16 @@ export function Flags() {
       rolloutPercentage: flag.rolloutPercentage || null,
       segmentId: flag.segmentId || null,
       contextDefinitionId: flag.contextDefinitionId || null,
-      contextValuesJson: flag.contextValuesJson || '',
-      rolloutRules: [{ id: 'env-1', percentage: flag.rolloutPercentage || flag.percentage || 100, segmentIds: flag.segmentId ? [String(flag.segmentId)] : [], contextConstraints: [] }],
+      contextValuesJson: flag.contextValuesJson || null,
+      rolloutRules: [{ id: 'env-1', percentage: flag.rolloutPercentage || flag.percentage || 100, segmentIds: flag.segmentId ? [String(flag.segmentId)] : [], contextConstraints: (() => {
+        if (!flag.contextDefinitionId || !flag.contextValuesJson) return [];
+        const ctxDef = contexts.find(c => c.id === flag.contextDefinitionId);
+        const ctxName = ctxDef ? ctxDef.name : '';
+        let values;
+        try { values = JSON.parse(flag.contextValuesJson); } catch { values = [flag.contextValuesJson]; }
+        const value = Array.isArray(values) && values.length > 0 ? values[0] : (values || '');
+        return [{ contextKey: ctxName, operator: 'eq', value: value?.toString() || '' }];
+      })() }],
       defaultValue: flag.enabled
     });
     setIsPanelOpen(true);
@@ -255,6 +271,16 @@ export function Flags() {
       } else if (editMode === 'environment') {
         if (editingEnvId) {
           const rule = formData.rolloutRules?.[0] || {};
+          const constraints = (rule.contextConstraints || []).filter(c => c.value && c.value.toString().trim() !== '' && c.contextKey);
+          let contextDefinitionId = null;
+          let contextValuesJson = null;
+          if (constraints.length > 0) {
+            const ctxDef = contexts.find(c => c.name === constraints[0].contextKey);
+            if (ctxDef) {
+              contextDefinitionId = ctxDef.id;
+              contextValuesJson = JSON.stringify(constraints.map(c => c.value.toString().trim()));
+            }
+          }
           await upsertStrategy(editingFlag.id, {
             flagId: editingFlag.id,
             environmentId: editingEnvId,
@@ -262,8 +288,8 @@ export function Flags() {
             enabled: formData.enabled,
             percentage: rule.percentage || 100,
             segmentId: rule.segmentIds?.length > 0 ? parseInt(rule.segmentIds[0]) : null,
-            contextDefinitionId: formData.contextDefinitionId || null,
-            contextValuesJson: formData.contextValuesJson || null,
+            contextDefinitionId,
+            contextValuesJson,
             rolloutPercentage: rule.percentage || 100
           });
         }
@@ -316,9 +342,10 @@ export function Flags() {
   };
 
   const addConstraintToRule = (ruleId) => {
+    if (!contexts || contexts.length === 0) return;
     const updatedRules = (formData.rolloutRules || []).map(rule => {
       if (rule.id === ruleId) {
-        const newConstraint = { contextKey: contexts[0]?.key || '', operator: 'eq', value: '' };
+        const newConstraint = { contextKey: contexts[0].name, operator: 'eq', value: '' };
         return { ...rule, contextConstraints: [...(rule.contextConstraints || []), newConstraint] };
       }
       return rule;
@@ -400,7 +427,7 @@ export function Flags() {
         </div>
         <button
           onClick={handleOpenCreate}
-          className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
+          className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm hover:shadow-md"
         >
           <Plus size={18} />
           Создать флаг
@@ -428,10 +455,16 @@ export function Flags() {
                   setSelectedTagTypeFilter(selectedTagTypeFilter === String(tagType.id) ? null : String(tagType.id));
                   setSelectedTagValueFilter(null);
                 }}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                  selectedTagTypeFilter === String(tagType.id) ? 'text-white' : 'text-white opacity-70 hover:opacity-100'
+                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all shadow-sm ${
+                  selectedTagTypeFilter === String(tagType.id)
+                    ? 'text-white'
+                    : 'text-white opacity-70 hover:opacity-100'
                 }`}
-                style={{ backgroundColor: selectedTagTypeFilter === String(tagType.id) ? (tagType.color || '#3b82f6') : `${tagType.color || '#3b82f6'}80` }}
+                style={{
+                  backgroundImage: selectedTagTypeFilter === String(tagType.id)
+                    ? `linear-gradient(to right, ${tagType.color || '#3b82f6'}, ${adjustColor(tagType.color || '#3b82f6', 20)})`
+                    : `linear-gradient(to right, ${tagType.color || '#3b82f6'}cc, ${adjustColor(tagType.color || '#3b82f6', 20)}cc)`
+                }}
               >
                 {tagType.name}
               </button>
@@ -493,7 +526,7 @@ export function Flags() {
                 <tr key={flagKeyInfo.key} className="group hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex flex-col cursor-pointer" onClick={() => handleOpenGeneralEdit(flagKeyInfo)}>
-                      <span className="font-medium text-neutral-900 dark:text-neutral-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{flagKeyInfo.name}</span>
+                      <span className="font-medium text-neutral-900 dark:text-neutral-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-violet-600 hover:bg-clip-text hover:text-transparent transition-all">{flagKeyInfo.name}</span>
                       <span className="text-xs font-mono text-neutral-500 mt-0.5">{flagKeyInfo.key}</span>
                       {flagKeyInfo.tags && flagKeyInfo.tags.length > 0 && (
                         <div className="flex items-center gap-1.5 mt-2 flex-wrap">
@@ -502,8 +535,10 @@ export function Flags() {
                             return (
                               <span
                                 key={index}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium text-white"
-                                style={{ backgroundColor: tagType?.color || '#3b82f6' }}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium text-white shadow-sm"
+                                style={{
+                                  backgroundImage: `linear-gradient(to right, ${tagType?.color || '#3b82f6'}, ${adjustColor(tagType?.color || '#3b82f6', 20)})`
+                                }}
                               >
                                 {tagType?.name ? `${tagType.name}: ` : ''}{tag.value}
                               </span>
@@ -547,7 +582,7 @@ export function Flags() {
                             </div>
                             <button
                               onClick={() => handleOpenEnvironmentEdit(flagKeyInfo.key, env.id)}
-                              className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 font-medium opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="text-xs bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-violet-700 font-medium opacity-0 group-hover:opacity-100 transition-opacity"
                             >
                               Настроить
                             </button>
@@ -592,7 +627,7 @@ export function Flags() {
             <button
               onClick={handleSave}
               disabled={!formData.name || !formData.key}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all shadow-sm hover:shadow-md"
             >
               {editMode === 'create' ? "Создать флаг" : "Сохранить изменения"}
             </button>
@@ -667,8 +702,10 @@ export function Flags() {
                     return (
                       <div
                         key={index}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium text-white"
-                        style={{ backgroundColor: tagType?.color || '#3b82f6' }}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium text-white bg-gradient-to-r shadow-sm"
+                        style={{
+                          backgroundImage: `linear-gradient(to right, ${tagType?.color || '#3b82f6'}, ${adjustColor(tagType?.color || '#3b82f6', 20)})`
+                        }}
                       >
                         <span>{tagType?.name ? `${tagType.name}: ` : ''}{tag.value}</span>
                         <button
@@ -691,7 +728,7 @@ export function Flags() {
                 <button
                   type="button"
                   onClick={() => setIsAddingTag(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors border border-dashed border-indigo-300 dark:border-indigo-500/30"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-violet-700 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all border border-dashed border-blue-300 dark:border-violet-500/30"
                 >
                   <Plus size={14} />
                   Добавить тег
@@ -713,7 +750,12 @@ export function Flags() {
                           }`}
                           style={newTagTypeId === String(type.id) ? { borderColor: type.color || '#3b82f6', borderWidth: '2px' } : {}}
                         >
-                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: type.color || '#3b82f6' }} />
+                          <div
+                            className="w-2.5 h-2.5 rounded-full bg-gradient-to-r"
+                            style={{
+                              backgroundImage: `linear-gradient(to right, ${type.color || '#3b82f6'}, ${adjustColor(type.color || '#3b82f6', 20)})`
+                            }}
+                          />
                           <span className="text-neutral-700 dark:text-neutral-300">{type.name}</span>
                         </button>
                       ))}
@@ -753,7 +795,7 @@ export function Flags() {
                           }
                         }}
                         disabled={!newTagValue.trim()}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm font-medium"
+                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all text-sm font-medium shadow-sm hover:shadow-md"
                       >
                         Добавить
                       </button>
@@ -828,7 +870,7 @@ export function Flags() {
                       <Slider.Track className="bg-neutral-200 dark:bg-neutral-800 relative grow rounded-full h-2.5">
                         <Slider.Range className="absolute bg-indigo-600 dark:bg-indigo-500 rounded-full h-full" />
                       </Slider.Track>
-                      <Slider.Thumb className="block w-6 h-6 bg-white border-2 border-indigo-600 dark:border-indigo-500 rounded-full shadow-lg hover:bg-indigo-50 dark:hover:bg-indigo-950 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" />
+                      <Slider.Thumb className="block w-6 h-6 bg-white border-2 border-violet-600 dark:border-violet-500 rounded-full shadow-lg hover:bg-violet-50 dark:hover:bg-violet-950 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2" />
                     </Slider.Root>
                     <p className="text-xs text-neutral-500">
                       {rule.percentage === 100 ? 'Полная раскатка на всех пользователей' : rule.percentage === 0 ? 'Флаг отключен' : `${rule.percentage}% пользователей увидят эту функцию`}

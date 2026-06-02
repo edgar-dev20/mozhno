@@ -2,6 +2,7 @@ package ru.mozhno.flags.strategy;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class StrategyController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new strategy")
-    public FlagStrategy create(@PathVariable Integer flagId, @RequestBody StrategyRequest request) {
+    public FlagStrategy create(@PathVariable Integer flagId, @Valid @RequestBody StrategyRequest request) {
         request.setFlagId(flagId);
         return strategyService.create(request);
     }
@@ -40,13 +41,13 @@ public class StrategyController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a strategy")
-    public FlagStrategy update(@PathVariable Integer flagId, @PathVariable Integer id, @RequestBody StrategyRequest request) {
+    public FlagStrategy update(@PathVariable Integer flagId, @PathVariable Integer id, @Valid @RequestBody StrategyRequest request) {
         return strategyService.update(id, request);
     }
 
     @PutMapping
     @Operation(summary = "Upsert strategy for flag and environment")
-    public FlagStrategy upsert(@PathVariable Integer flagId, @RequestBody StrategyRequest request) {
+    public FlagStrategy upsert(@PathVariable Integer flagId, @Valid @RequestBody StrategyRequest request) {
         request.setFlagId(flagId);
         return strategyService.upsert(request);
     }

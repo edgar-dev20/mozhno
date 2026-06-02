@@ -12,7 +12,6 @@ import ru.mozhno.flags.FlagType;
 import ru.mozhno.flags.strategy.GradualStrategy;
 import ru.mozhno.flags.strategy.ServerStrategy;
 import ru.mozhno.projects.Project;
-import ru.mozhno.tags.Tag;
 
 import java.util.List;
 
@@ -24,21 +23,22 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
     private ClientFlagService clientFlagService;
 
     private Integer projectId;
+    private Integer envId;
 
     @BeforeEach
     void setUp() {
         Project p = new Project();
         p.setName("Service Test Project");
         projectId = projectRepository.save(p).getId();
+
+        Environment env = new Environment();
+        env.setName("production");
+        env.setProjectId(projectId);
+        envId = environmentRepository.save(env).getId();
     }
 
     @Test
     void getFlagsForProject_shouldReturnFlagsWithStrategies() {
-        Environment env = new Environment();
-        env.setName("production");
-        env.setProjectId(projectId);
-        Integer envId = environmentRepository.save(env).getId();
-
         Flag flag = new Flag();
         flag.setProjectId(projectId);
         flag.setName("My Feature");
@@ -52,56 +52,19 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         s.setEnabled(true);
         flagStrategyRepository.save(s);
 
-        List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId);
+        List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId, envId);
 
         assertThat(result).hasSize(1);
         ClientFlagResponse resp = result.get(0);
         assertThat(resp.getName()).isEqualTo("My Feature");
         assertThat(resp.getKey()).isEqualTo("my-feature");
         assertThat(resp.isEnabled()).isTrue();
-        assertThat(resp.getType()).isEqualTo("release");
-        assertThat(resp.getStrategies()).hasSize(1);
-        assertThat(resp.getStrategies().get(0).getName()).isEqualTo("server");
+        assertThat(resp.getActivation()).isNotNull();
+        assertThat(resp.getActivation().getType()).isEqualTo("server");
     }
 
     @Test
-    void getFlagsForProject_shouldReturnFlagsWithTags() {
-        Tag tag = new Tag();
-        tag.setName("team");
-        tag.setColor("#FF0000");
-        tag.setProjectId(projectId);
-        Integer tagId = tagRepository.save(tag).getId();
-
-        Flag flag = new Flag();
-        flag.setProjectId(projectId);
-        flag.setName("Tagged Feature");
-        flag.setKey("tagged-feature");
-        flag.setFlagType(FlagType.KILLSWITCH);
-        Flag saved = flagRepository.save(flag);
-
-        var ftv = new ru.mozhno.flags.FlagTagValue();
-        ftv.setFlagId(saved.getId());
-        ftv.setTagId(tagId);
-        ftv.setTagValue("backend");
-        flagTagValueRepository.save(ftv);
-
-        List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId);
-
-        assertThat(result).hasSize(1);
-        ClientFlagResponse resp = result.get(0);
-        assertThat(resp.getType()).isEqualTo("killswitch");
-        assertThat(resp.getTags()).hasSize(1);
-        assertThat(resp.getTags().get(0).getTagName()).isEqualTo("team");
-        assertThat(resp.getTags().get(0).getValue()).isEqualTo("backend");
-    }
-
-    @Test
-    void getFlagsForProject_withGradualStrategy_shouldReturnStrategies() {
-        Environment env = new Environment();
-        env.setName("production");
-        env.setProjectId(projectId);
-        Integer envId = environmentRepository.save(env).getId();
-
+    void getFlagsForProject_withGradualStrategy_shouldReturnActivation() {
         Flag flag = new Flag();
         flag.setProjectId(projectId);
         flag.setName("Gradual Feature");
@@ -116,16 +79,23 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         gs.setPercentage(50.0);
         flagStrategyRepository.save(gs);
 
-        List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId);
+        List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId, envId);
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getStrategies()).hasSize(1);
-        assertThat(result.get(0).getStrategies().get(0).getName()).isEqualTo("gradual");
+        assertThat(result.get(0).getActivation()).isNotNull();
+        assertThat(result.get(0).getActivation().getType()).isEqualTo("gradual");
+        assertThat(result.get(0).getActivation().getRollOut()).isEqualTo(50.0);
     }
 
     @Test
     void getFlagsForProject_emptyProject_shouldReturnEmptyList() {
-        List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId);
+        List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId, envId);
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getFlagsForProject_wrongEnvironment_shouldReturnEmptyList() {
+        List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId, 9999);
         assertThat(result).isEmpty();
     }
 }

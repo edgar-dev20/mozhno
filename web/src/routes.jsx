@@ -8,6 +8,12 @@ import { Strategies } from "./pages/Strategies";
 import { ApiKeys } from "./pages/ApiKeys";
 import { Tags } from "./pages/Tags";
 
+function RequireAuth({ children }) {
+  const token = localStorage.getItem('mozhno_token');
+  if (!token) return <Navigate to="/login" replace />;
+  return children;
+}
+
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -15,7 +21,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/",
-    Component: DashboardLayout,
+    element: <RequireAuth><DashboardLayout /></RequireAuth>,
     children: [
       { index: true, element: <Navigate to="/flags" replace /> },
       { path: "flags", Component: Flags },

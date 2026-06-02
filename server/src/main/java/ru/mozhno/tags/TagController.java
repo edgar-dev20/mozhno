@@ -2,6 +2,7 @@ package ru.mozhno.tags;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -28,14 +29,14 @@ public class TagController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a tag")
-    public Tag create(@PathVariable Integer projectId, @RequestBody TagRequest request) {
+    public Tag create(@PathVariable Integer projectId, @Valid @RequestBody TagRequest request) {
         request.setProjectId(projectId);
         return tagService.create(request);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a tag")
-    public Tag update(@PathVariable Integer id, @RequestBody TagRequest request) {
+    public Tag update(@PathVariable Integer id, @Valid @RequestBody TagRequest request) {
         return tagService.update(id, request);
     }
 

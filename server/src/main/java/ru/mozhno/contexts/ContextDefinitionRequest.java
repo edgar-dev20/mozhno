@@ -1,9 +1,12 @@
 package ru.mozhno.contexts;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class ContextDefinitionRequest {
     private Integer projectId;
-    private String name;
-    private String description;
+    @NotBlank @Size(max = 255) private String name;
+    @Size(max = 1000) private String description;
 
     public ContextDefinitionRequest() {}
 

@@ -1,11 +1,31 @@
 const API_BASE = '/api/v1';
 
+function getToken() {
+  try {
+    return localStorage.getItem('mozhno_token');
+  } catch {
+    return null;
+  }
+}
+
 export async function api(path, method = 'GET', body = null) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  const token = getToken();
+  if (token) {
+    opts.headers['Authorization'] = `Bearer ${token}`;
+  }
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(`${API_BASE}${path}`, opts);
   const text = await res.text();
-  if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+  if (!res.ok) {
+    if (res.status === 401) {
+      localStorage.removeItem('mozhno_token');
+      localStorage.removeItem('mozhno_user');
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+    throw new Error(text || `HTTP ${res.status}`);
+  }
   const trimmed = text.trim();
   if (!trimmed) return null;
   try { return JSON.parse(trimmed); } catch { return null; }

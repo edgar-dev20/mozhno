@@ -22,8 +22,8 @@ public class FlagStrategyRepository {
         fs.setEnvironmentId(rs.getInt("environment_id"));
         fs.setStrategyType(rs.getString("strategy_type"));
         fs.setEnabled(rs.getBoolean("enabled"));
-        fs.setPercentage(rs.getDouble("percentage"));
-        fs.setRolloutPercentage(rs.getDouble("rollout_percentage"));
+        fs.setPercentage(rs.getObject("percentage") != null ? rs.getDouble("percentage") : null);
+        fs.setRolloutPercentage(rs.getObject("rollout_percentage") != null ? rs.getDouble("rollout_percentage") : null);
         fs.setContextDefinitionId(rs.getObject("context_definition_id") != null ? rs.getInt("context_definition_id") : null);
         fs.setContextValuesJson(rs.getString("context_values_json"));
         fs.setSegmentId(rs.getObject("segment_id") != null ? rs.getInt("segment_id") : null);

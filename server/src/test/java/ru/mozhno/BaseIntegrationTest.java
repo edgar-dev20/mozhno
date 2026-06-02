@@ -23,7 +23,8 @@ import ru.mozhno.tags.TagRepository;
 
 @Testcontainers(parallel = true)
 @SpringBootTest(properties = {
-    "spring.flyway.enabled=false"
+    "spring.flyway.enabled=true",
+    "spring.sql.init.mode=never"
 })
 public abstract class BaseIntegrationTest {
 
@@ -84,7 +85,7 @@ public abstract class BaseIntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         try {
-            jdbcTemplate.execute("TRUNCATE TABLE api_keys, flag_tag_values, flag_strategies, flags, segment_contexts, segments, context_values, context_definitions, tags, environments, projects CASCADE");
+            jdbcTemplate.execute("TRUNCATE TABLE api_keys, flag_tag_values, flag_strategies, flags, segment_contexts, segments, context_values, context_definitions, tags, environments, projects, users CASCADE");
         } catch (Exception e) {
             // Tables may not exist on first run – schema will be created next
         }

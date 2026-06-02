@@ -1,8 +1,11 @@
 package ru.mozhno.projects;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class ProjectRequest {
-    private String name;
-    private String description;
+    @NotBlank @Size(max = 255) private String name;
+    @Size(max = 1000) private String description;
 
     public ProjectRequest() {}
     public ProjectRequest(String name, String description) {

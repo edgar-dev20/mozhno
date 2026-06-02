@@ -9,10 +9,14 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 import ru.mozhno.apikeys.ApiKeyService;
+import ru.mozhno.auth.JwtAuthenticationFilter;
+import ru.mozhno.auth.JwtService;
 
 import java.io.IOException;
 import jakarta.servlet.FilterChain;
@@ -22,9 +26,16 @@ import jakarta.servlet.ServletException;
 @EnableWebSecurity
 public class SecurityConfig {
     private final ApiKeyService apiKeyService;
+    private final JwtService jwtService;
 
-    public SecurityConfig(ApiKeyService apiKeyService) {
+    public SecurityConfig(ApiKeyService apiKeyService, JwtService jwtService) {
         this.apiKeyService = apiKeyService;
+        this.jwtService = jwtService;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12);
     }
 
     @Bean
@@ -34,16 +45,19 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) ->
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "API key required"))
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required"))
                 .accessDeniedHandler((request, response, accessDeniedException) ->
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "API key required"))
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"))
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/api/client/**").hasRole("CLIENT")
-                .requestMatchers("/api/v1/**").permitAll()
+                .requestMatchers("/api/v1/auth/login").permitAll()
+                .requestMatchers("/api/v1/auth/me").authenticated()
+                .requestMatchers("/api/v1/**").hasAnyRole("ADMIN", "EDITOR", "VIEWER")
                 .anyRequest().permitAll()
             )
-            .addFilterBefore(new ApiKeyAuthenticationFilter(apiKeyService), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(new ApiKeyAuthenticationFilter(apiKeyService), JwtAuthenticationFilter.class)
             .addFilterBefore(spaForwardFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

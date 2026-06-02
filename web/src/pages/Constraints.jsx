@@ -27,7 +27,6 @@ function getTypeColor(type) {
 export function Constraints() {
   const [contexts, setContexts] = useState([]);
   const [projectId, setProjectId] = useState(null);
-  const [environments, setEnvironments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -35,7 +34,6 @@ export function Constraints() {
   const [editingContext, setEditingContext] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
-    key: '',
     constraintType: 'String',
     description: ''
   });
@@ -47,12 +45,8 @@ export function Constraints() {
       if (projects && projects.length > 0) {
         const pid = projects[0].id;
         setProjectId(pid);
-        const [ctx, env] = await Promise.all([
-          getContexts(pid),
-          getEnvironments(pid)
-        ]);
+        const ctx = await getContexts(pid);
         setContexts(ctx || []);
-        setEnvironments(env || []);
       }
     } catch (e) {
       setError(e.message);
@@ -67,13 +61,13 @@ export function Constraints() {
 
   const handleOpenCreate = () => {
     setEditingContext(null);
-    setFormData({ name: '', key: '', constraintType: 'String', description: '' });
+    setFormData({ name: '', constraintType: 'String', description: '' });
     setIsPanelOpen(true);
   };
 
   const handleOpenEdit = (ctx) => {
     setEditingContext(ctx);
-    setFormData({ name: ctx.name, key: ctx.name.toLowerCase().replace(/\s+/g, '_'), constraintType: 'String', description: ctx.description || '' });
+    setFormData({ name: ctx.name, constraintType: 'String', description: ctx.description || '' });
     setIsPanelOpen(true);
   };
 
@@ -113,6 +107,8 @@ export function Constraints() {
   if (loading) return <div className="text-center py-12 text-neutral-500">Загрузка...</div>;
   if (error) return <div className="text-center py-12 text-red-500">Ошибка: {error}</div>;
 
+  const IconComponent = Type;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -143,13 +139,12 @@ export function Constraints() {
             </thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
               {contexts.map((ctx) => {
-                const Icon = Type;
                 return (
                   <tr key={ctx.id} className="group hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-neutral-600 dark:text-neutral-400">
-                          <Icon size={16} />
+                          <IconComponent size={16} />
                         </div>
                         <div>
                           <span

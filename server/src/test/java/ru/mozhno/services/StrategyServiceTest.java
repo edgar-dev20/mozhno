@@ -164,6 +164,7 @@ class StrategyServiceTest {
         when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
 
         StrategyRequest req = new StrategyRequest();
+        req.setType("SERVER");
         req.setEnabled(true);
 
         FlagStrategy result = strategyService.update(1, req);
@@ -190,6 +191,7 @@ class StrategyServiceTest {
         when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
 
         StrategyRequest req = new StrategyRequest();
+        req.setType("GRADUAL");
         req.setEnabled(true);
         req.setPercentage(75.0);
 
@@ -205,6 +207,7 @@ class StrategyServiceTest {
         when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
 
         StrategyRequest req = new StrategyRequest();
+        req.setType("TARGETING");
         req.setEnabled(true);
         req.setContextDefinitionId(5);
         req.setContextValuesJson("[\"mobile\"]");

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -23,15 +24,31 @@ class StrategyControllerTest extends BaseIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
     private Integer flagId;
     private Integer environmentId;
+    private String authToken;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         objectMapper = new ObjectMapper();
+
+        jdbcTemplate.update(
+            "INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)",
+            "strategy-test@test.com", passwordEncoder.encode("secret"), "editor");
+
+        String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"strategy-test@test.com\",\"password\":\"secret\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        authToken = objectMapper.readTree(loginResponse).get("token").asText();
 
         Project p = new Project();
         p.setName("Test Project");
@@ -52,7 +69,8 @@ class StrategyControllerTest extends BaseIntegrationTest {
 
     @Test
     void getStrategies_shouldReturnList() throws Exception {
-        mockMvc.perform(get("/api/v1/flags/{flagId}/strategies", flagId))
+        mockMvc.perform(get("/api/v1/flags/{flagId}/strategies", flagId)
+                        .header("Authorization", "Bearer " + authToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -67,6 +85,7 @@ class StrategyControllerTest extends BaseIntegrationTest {
             "}";
 
         mockMvc.perform(post("/api/v1/flags/{flagId}/strategies", flagId)
+                        .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
@@ -83,8 +102,9 @@ class StrategyControllerTest extends BaseIntegrationTest {
         var saved = flagStrategyRepository.save(strategy);
 
         mockMvc.perform(put("/api/v1/flags/{flagId}/strategies/{id}", flagId, saved.getId())
+                        .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"enabled\": true}"))
+                        .content("{\"type\": \"SERVER\", \"enabled\": true}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.enabled").value(true));
     }
@@ -97,7 +117,8 @@ class StrategyControllerTest extends BaseIntegrationTest {
         strategy.setEnabled(true);
         var saved = flagStrategyRepository.save(strategy);
 
-        mockMvc.perform(delete("/api/v1/flags/{flagId}/strategies/{id}", flagId, saved.getId()))
+        mockMvc.perform(delete("/api/v1/flags/{flagId}/strategies/{id}", flagId, saved.getId())
+                        .header("Authorization", "Bearer " + authToken))
                 .andExpect(status().isNoContent());
     }
 }

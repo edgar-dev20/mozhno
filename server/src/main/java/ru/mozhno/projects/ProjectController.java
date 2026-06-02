@@ -3,6 +3,7 @@ package ru.mozhno.projects;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,13 +31,13 @@ public class ProjectController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new project")
-    public Project create(@RequestBody ProjectRequest request) {
+    public Project create(@Valid @RequestBody ProjectRequest request) {
         return projectService.create(request);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a project")
-    public Project update(@PathVariable Integer id, @RequestBody ProjectRequest request) {
+    public Project update(@PathVariable Integer id, @Valid @RequestBody ProjectRequest request) {
         return projectService.update(id, request);
     }
 
