@@ -21,12 +21,16 @@ public class AuthService {
         if (user == null) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
+        if ("suspended".equals(user.getStatus())) {
+            throw new InvalidCredentialsException("Account is suspended");
+        }
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
 
+        userRepository.updateLastActive(user.getId());
         String token = jwtService.generateAccessToken(user);
-        return new LoginResponse(token, new UserDto(user.getId(), user.getEmail(), user.getRole()));
+        return new LoginResponse(token, toDto(user));
     }
 
     public UserDto getCurrentUser(String email) {
@@ -34,7 +38,11 @@ public class AuthService {
         if (user == null) {
             throw new RuntimeException("User not found");
         }
-        return new UserDto(user.getId(), user.getEmail(), user.getRole());
+        return toDto(user);
+    }
+
+    private UserDto toDto(User user) {
+        return new UserDto(user.getId(), user.getEmail(), user.getName(), user.getRole(), user.getStatus(), user.getCreatedAt(), user.getLastActiveAt());
     }
 
     public static class InvalidCredentialsException extends RuntimeException {

@@ -39,7 +39,7 @@ class JwtAuthenticationFilterTest {
     @Test
     void shouldSetAuthenticationOnValidToken() throws Exception {
         when(request.getHeader("Authorization")).thenReturn("Bearer valid.jwt.token");
-        JwtToken jwtToken = new JwtToken(1, "user@test.com", "admin");
+        JwtToken jwtToken = new JwtToken(1, "user@test.com", "Test User", "admin", "active");
         when(jwtService.parseToken("valid.jwt.token")).thenReturn(jwtToken);
 
         filter.doFilterInternal(request, response, filterChain);

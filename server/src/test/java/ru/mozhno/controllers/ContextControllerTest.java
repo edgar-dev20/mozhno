@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -21,23 +22,44 @@ class ContextControllerTest extends BaseIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
     private Integer projectId;
+    private String authToken;
 
     @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    void setUp() throws Exception {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity()).build();
         objectMapper = new ObjectMapper();
+
+        jdbcTemplate.update(
+            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
+            "context-test@test.com", passwordEncoder.encode("secret"), "developer", "active");
+
+        String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"context-test@test.com\",\"password\":\"secret\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        authToken = objectMapper.readTree(loginResponse).get("token").asText();
 
         Project p = new Project();
         p.setName("Test Project");
         projectId = projectRepository.save(p).getId();
     }
 
+    private String auth() {
+        return "Bearer " + authToken;
+    }
+
     @Test
     void getDefinitions_shouldReturnList() throws Exception {
-        mockMvc.perform(get("/api/v1/projects/{projectId}/contexts", projectId))
+        mockMvc.perform(get("/api/v1/projects/{projectId}/contexts", projectId)
+                .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -45,6 +67,7 @@ class ContextControllerTest extends BaseIntegrationTest {
     @Test
     void createDefinition_shouldReturnCreated() throws Exception {
         mockMvc.perform(post("/api/v1/projects/{projectId}/contexts", projectId)
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"userId\", \"description\": \"User identifier\"}"))
                 .andExpect(status().isCreated())
@@ -58,7 +81,8 @@ class ContextControllerTest extends BaseIntegrationTest {
         ctx.setProjectId(projectId);
         ContextDefinition saved = contextDefinitionRepository.save(ctx);
 
-        mockMvc.perform(get("/api/v1/projects/{projectId}/contexts/{id}", projectId, saved.getId()))
+        mockMvc.perform(get("/api/v1/projects/{projectId}/contexts/{id}", projectId, saved.getId())
+                .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("appName"));
     }
@@ -71,6 +95,7 @@ class ContextControllerTest extends BaseIntegrationTest {
         ContextDefinition saved = contextDefinitionRepository.save(ctx);
 
         mockMvc.perform(put("/api/v1/projects/{projectId}/contexts/{id}", projectId, saved.getId())
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"updated\", \"description\": \"Updated description\"}"))
                 .andExpect(status().isOk())
@@ -84,7 +109,8 @@ class ContextControllerTest extends BaseIntegrationTest {
         ctx.setProjectId(projectId);
         ContextDefinition saved = contextDefinitionRepository.save(ctx);
 
-        mockMvc.perform(delete("/api/v1/projects/{projectId}/contexts/{id}", projectId, saved.getId()))
+        mockMvc.perform(delete("/api/v1/projects/{projectId}/contexts/{id}", projectId, saved.getId())
+                .header("Authorization", auth()))
                 .andExpect(status().isNoContent());
     }
 
@@ -100,7 +126,8 @@ class ContextControllerTest extends BaseIntegrationTest {
         cv.setValues("[\"user1\",\"user2\"]");
         contextValueRepository.save(cv);
 
-        mockMvc.perform(get("/api/v1/projects/{projectId}/contexts/{id}/values", projectId, saved.getId()))
+        mockMvc.perform(get("/api/v1/projects/{projectId}/contexts/{id}/values", projectId, saved.getId())
+                .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -115,6 +142,7 @@ class ContextControllerTest extends BaseIntegrationTest {
         String json = "{\"contextDefinitionId\": " + saved.getId() + ", \"values\": \"[\\\"new-user\\\"]\"}";
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/contexts/{id}/values", projectId, saved.getId())
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated());

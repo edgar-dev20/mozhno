@@ -2,6 +2,8 @@ package ru.mozhno.segments;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.mozhno.events.DomainEvent;
+import ru.mozhno.events.DomainEventPublisher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +12,13 @@ import java.util.List;
 public class SegmentService {
     private final SegmentRepository segmentRepository;
     private final SegmentContextRepository segmentContextRepository;
+    private final DomainEventPublisher events;
 
-    public SegmentService(SegmentRepository segmentRepository, SegmentContextRepository segmentContextRepository) {
+    public SegmentService(SegmentRepository segmentRepository, SegmentContextRepository segmentContextRepository,
+                          DomainEventPublisher events) {
         this.segmentRepository = segmentRepository;
         this.segmentContextRepository = segmentContextRepository;
+        this.events = events;
     }
 
     @Transactional(readOnly = true)
@@ -51,6 +56,8 @@ public class SegmentService {
             }
         }
 
+        events.publish(new DomainEvent(saved.getProjectId(), "segment.created", "segment",
+            saved.getId(), saved.getName(), "Segment created"));
         return toResponse(saved);
     }
 
@@ -73,12 +80,19 @@ public class SegmentService {
             }
         }
 
+        events.publish(new DomainEvent(saved.getProjectId(), "segment.updated", "segment",
+            saved.getId(), saved.getName(), "Segment updated"));
         return toResponse(saved);
     }
 
     @Transactional
     public void delete(Integer id) {
+        Segment segment = segmentRepository.findById(id);
+        String name = segment != null ? segment.getName() : String.valueOf(id);
+        Integer projectId = segment != null ? segment.getProjectId() : null;
         segmentRepository.deleteById(id);
+        events.publish(new DomainEvent(projectId, "segment.deleted", "segment",
+            id, name, "Segment deleted"));
     }
 
     private SegmentResponse toResponse(Segment segment) {

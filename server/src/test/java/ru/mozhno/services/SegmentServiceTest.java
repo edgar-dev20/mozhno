@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.segments.*;
 
 import java.util.List;
@@ -21,11 +22,14 @@ class SegmentServiceTest {
     @Mock
     private SegmentContextRepository segmentContextRepository;
 
+    @Mock
+    private DomainEventPublisher events;
+
     private SegmentService segmentService;
 
     @BeforeEach
     void setUp() {
-        segmentService = new SegmentService(segmentRepository, segmentContextRepository);
+        segmentService = new SegmentService(segmentRepository, segmentContextRepository, events);
     }
 
     @Test

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -15,7 +16,6 @@ import ru.mozhno.segments.Segment;
 import ru.mozhno.segments.SegmentRequest;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -25,15 +25,31 @@ class SegmentControllerTest extends BaseIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
     private Integer projectId;
     private Integer contextDefId;
+    private String authToken;
 
     @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    void setUp() throws Exception {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity()).build();
         objectMapper = new ObjectMapper();
+
+        jdbcTemplate.update(
+            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
+            "segment-test@test.com", passwordEncoder.encode("secret"), "developer", "active");
+
+        String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"segment-test@test.com\",\"password\":\"secret\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        authToken = objectMapper.readTree(loginResponse).get("token").asText();
 
         Project p = new Project();
         p.setName("Test Project");
@@ -45,9 +61,14 @@ class SegmentControllerTest extends BaseIntegrationTest {
         contextDefId = contextDefinitionRepository.save(cd).getId();
     }
 
+    private String auth() {
+        return "Bearer " + authToken;
+    }
+
     @Test
     void getAllSegments_shouldReturnList() throws Exception {
-        mockMvc.perform(get("/api/v1/projects/{projectId}/segments", projectId))
+        mockMvc.perform(get("/api/v1/projects/{projectId}/segments", projectId)
+                .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -63,6 +84,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
         req.setContext(List.of(entry));
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/segments", projectId)
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
@@ -79,6 +101,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
         req.setContext(List.of());
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/segments", projectId)
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isCreated())
@@ -93,7 +116,8 @@ class SegmentControllerTest extends BaseIntegrationTest {
         s.setProjectId(projectId);
         Segment saved = segmentRepository.save(s);
 
-        mockMvc.perform(get("/api/v1/projects/{projectId}/segments/{id}", projectId, saved.getId()))
+        mockMvc.perform(get("/api/v1/projects/{projectId}/segments/{id}", projectId, saved.getId())
+                .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Power Users"));
     }
@@ -114,6 +138,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
         req.setContext(List.of(entry));
 
         mockMvc.perform(put("/api/v1/projects/{projectId}/segments/{id}", projectId, saved.getId())
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
@@ -137,6 +162,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
         reqWithContext.setContext(List.of(entry));
 
         mockMvc.perform(put("/api/v1/projects/{projectId}/segments/{id}", projectId, saved.getId())
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reqWithContext)))
                 .andExpect(status().isOk())
@@ -148,6 +174,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
         reqEmpty.setContext(List.of());
 
         mockMvc.perform(put("/api/v1/projects/{projectId}/segments/{id}", projectId, saved.getId())
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reqEmpty)))
                 .andExpect(status().isOk())
@@ -161,7 +188,8 @@ class SegmentControllerTest extends BaseIntegrationTest {
         s.setProjectId(projectId);
         Segment saved = segmentRepository.save(s);
 
-        mockMvc.perform(delete("/api/v1/projects/{projectId}/segments/{id}", projectId, saved.getId()))
+        mockMvc.perform(delete("/api/v1/projects/{projectId}/segments/{id}", projectId, saved.getId())
+                .header("Authorization", auth()))
                 .andExpect(status().isNoContent());
     }
 }

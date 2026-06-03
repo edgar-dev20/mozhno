@@ -3,7 +3,10 @@ package ru.mozhno.flags;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ru.mozhno.auth.UserPrincipal;
 import ru.mozhno.tags.Tag;
 import ru.mozhno.tags.TagRepository;
 
@@ -25,7 +28,9 @@ public class FlagController {
 
     @GetMapping
     @Operation(summary = "Get all flags for a project")
-    public List<FlagResponse> getAll(@PathVariable Integer projectId, @RequestParam(required = false) Integer environmentId) {
+    public List<FlagResponse> getAll(@PathVariable Integer projectId,
+                                     @RequestParam(required = false) Integer environmentId,
+                                     @AuthenticationPrincipal UserPrincipal user) {
         List<Flag> flags;
         if (environmentId != null) {
             flags = flagService.findByProjectIdWithStrategyForEnvironment(projectId, environmentId);
@@ -35,14 +40,15 @@ public class FlagController {
         } else {
             flags = flagService.findByProjectId(projectId);
             return flags.stream()
-                    .map(f -> toResponse(f))
+                    .map(this::toResponse)
                     .toList();
         }
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get flag by ID")
-    public FlagResponse getById(@PathVariable Integer projectId, @PathVariable Integer id) {
+    public FlagResponse getById(@PathVariable Integer projectId, @PathVariable Integer id,
+                                @AuthenticationPrincipal UserPrincipal user) {
         Flag flag = flagService.findById(id);
         return toResponse(flag);
     }
@@ -50,7 +56,9 @@ public class FlagController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new flag")
-    public FlagResponse create(@PathVariable Integer projectId, @Valid @RequestBody FlagRequest request) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    public FlagResponse create(@PathVariable Integer projectId, @Valid @RequestBody FlagRequest request,
+                               @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(projectId);
         Flag flag = flagService.create(request);
         return toResponse(flag);
@@ -58,7 +66,10 @@ public class FlagController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a flag")
-    public FlagResponse update(@PathVariable Integer projectId, @PathVariable Integer id, @Valid @RequestBody FlagRequest request) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    public FlagResponse update(@PathVariable Integer projectId, @PathVariable Integer id,
+                               @Valid @RequestBody FlagRequest request,
+                               @AuthenticationPrincipal UserPrincipal user) {
         Flag flag = flagService.update(id, request);
         return toResponse(flag);
     }
@@ -66,7 +77,9 @@ public class FlagController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a flag")
-    public void delete(@PathVariable Integer id) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    public void delete(@PathVariable Integer id,
+                       @AuthenticationPrincipal UserPrincipal user) {
         flagService.delete(id);
     }
 

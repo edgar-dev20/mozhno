@@ -2,15 +2,19 @@ package ru.mozhno.tags;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.mozhno.events.DomainEvent;
+import ru.mozhno.events.DomainEventPublisher;
 
 import java.util.List;
 
 @Service
 public class TagService {
     private final TagRepository tagRepository;
+    private final DomainEventPublisher events;
 
-    public TagService(TagRepository tagRepository) {
+    public TagService(TagRepository tagRepository, DomainEventPublisher events) {
         this.tagRepository = tagRepository;
+        this.events = events;
     }
 
     @Transactional(readOnly = true)
@@ -32,7 +36,10 @@ public class TagService {
         tag.setName(request.getName());
         tag.setDescription(request.getDescription());
         tag.setColor(request.getColor());
-        return tagRepository.save(tag);
+        Tag saved = tagRepository.save(tag);
+        events.publish(new DomainEvent(saved.getProjectId(), "tag.created", "tag",
+            saved.getId(), saved.getName(), "Tag created"));
+        return saved;
     }
 
     @Transactional
@@ -41,11 +48,19 @@ public class TagService {
         tag.setName(request.getName());
         tag.setDescription(request.getDescription());
         tag.setColor(request.getColor());
-        return tagRepository.save(tag);
+        Tag saved = tagRepository.save(tag);
+        events.publish(new DomainEvent(saved.getProjectId(), "tag.updated", "tag",
+            saved.getId(), saved.getName(), "Tag updated"));
+        return saved;
     }
 
     @Transactional
     public void delete(Integer id) {
+        Tag tag = tagRepository.findById(id);
+        String name = tag != null ? tag.getName() : String.valueOf(id);
+        Integer projectId = tag != null ? tag.getProjectId() : null;
         tagRepository.deleteById(id);
+        events.publish(new DomainEvent(projectId, "tag.deleted", "tag",
+            id, name, "Tag deleted"));
     }
 }

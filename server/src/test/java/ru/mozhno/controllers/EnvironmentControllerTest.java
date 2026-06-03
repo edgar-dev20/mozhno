@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -20,23 +21,44 @@ class EnvironmentControllerTest extends BaseIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
     private Integer projectId;
+    private String authToken;
 
     @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    void setUp() throws Exception {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity()).build();
         objectMapper = new ObjectMapper();
+
+        jdbcTemplate.update(
+            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
+            "env-test@test.com", passwordEncoder.encode("secret"), "admin", "active");
+
+        String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"env-test@test.com\",\"password\":\"secret\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        authToken = objectMapper.readTree(loginResponse).get("token").asText();
 
         Project p = new Project();
         p.setName("Test Project");
         projectId = projectRepository.save(p).getId();
     }
 
+    private String auth() {
+        return "Bearer " + authToken;
+    }
+
     @Test
     void getEnvironments_shouldReturnList() throws Exception {
-        mockMvc.perform(get("/api/v1/projects/{projectId}/environments", projectId))
+        mockMvc.perform(get("/api/v1/projects/{projectId}/environments", projectId)
+                .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -44,6 +66,7 @@ class EnvironmentControllerTest extends BaseIntegrationTest {
     @Test
     void createEnvironment_shouldReturnCreated() throws Exception {
         mockMvc.perform(post("/api/v1/projects/{projectId}/environments", projectId)
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"development\"}"))
                 .andExpect(status().isCreated())
@@ -57,7 +80,8 @@ class EnvironmentControllerTest extends BaseIntegrationTest {
         env.setProjectId(projectId);
         Environment saved = environmentRepository.save(env);
 
-        mockMvc.perform(get("/api/v1/projects/{projectId}/environments/{id}", projectId, saved.getId()))
+        mockMvc.perform(get("/api/v1/projects/{projectId}/environments/{id}", projectId, saved.getId())
+                .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("staging"));
     }
@@ -70,6 +94,7 @@ class EnvironmentControllerTest extends BaseIntegrationTest {
         Environment saved = environmentRepository.save(env);
 
         mockMvc.perform(put("/api/v1/projects/{projectId}/environments/{id}", projectId, saved.getId())
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"updated\"}"))
                 .andExpect(status().isOk())
@@ -83,7 +108,8 @@ class EnvironmentControllerTest extends BaseIntegrationTest {
         env.setProjectId(projectId);
         Environment saved = environmentRepository.save(env);
 
-        mockMvc.perform(delete("/api/v1/projects/{projectId}/environments/{id}", projectId, saved.getId()))
+        mockMvc.perform(delete("/api/v1/projects/{projectId}/environments/{id}", projectId, saved.getId())
+                .header("Authorization", auth()))
                 .andExpect(status().isNoContent());
     }
 }

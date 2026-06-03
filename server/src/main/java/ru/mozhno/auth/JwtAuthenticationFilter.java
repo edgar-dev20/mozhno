@@ -28,10 +28,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserAuthentication auth = new UserAuthentication(
                     jwtToken.getUserId(),
                     jwtToken.getEmail(),
-                    jwtToken.getRole()
+                    jwtToken.getName(),
+                    jwtToken.getRole(),
+                    jwtToken.getStatus()
                 );
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                request.setAttribute("userEmail", jwtToken.getEmail());
             }
         }
 

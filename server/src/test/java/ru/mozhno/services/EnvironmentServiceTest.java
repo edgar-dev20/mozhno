@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.environments.Environment;
 import ru.mozhno.environments.EnvironmentRepository;
 import ru.mozhno.environments.EnvironmentService;
@@ -20,11 +21,14 @@ class EnvironmentServiceTest {
     @Mock
     private EnvironmentRepository environmentRepository;
 
+    @Mock
+    private DomainEventPublisher events;
+
     private EnvironmentService environmentService;
 
     @BeforeEach
     void setUp() {
-        environmentService = new EnvironmentService(environmentRepository);
+        environmentService = new EnvironmentService(environmentRepository, events);
     }
 
     @Test

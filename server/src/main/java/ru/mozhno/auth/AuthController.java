@@ -3,9 +3,7 @@ package ru.mozhno.auth;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -24,13 +22,9 @@ public class AuthController {
         return authService.login(request.email(), request.password());
     }
 
-@GetMapping("/me")
-    public UserDto me() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth instanceof UserAuthentication userAuth) {
-            return authService.getCurrentUser(userAuth.getEmail());
-        }
-        throw new AuthService.InvalidCredentialsException("Not authenticated");
+    @GetMapping("/me")
+    public UserDto me(@AuthenticationPrincipal UserPrincipal user) {
+        return authService.getCurrentUser(user.email());
     }
 
     @ExceptionHandler(AuthService.InvalidCredentialsException.class)

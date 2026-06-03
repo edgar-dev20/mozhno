@@ -2,6 +2,8 @@ package ru.mozhno.flags;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.mozhno.events.DomainEvent;
+import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.projects.ProjectRepository;
 import ru.mozhno.tags.TagRepository;
 
@@ -13,13 +15,16 @@ public class FlagService {
     private final ProjectRepository projectRepository;
     private final TagRepository tagRepository;
     private final FlagTagValueRepository flagTagValueRepository;
+    private final DomainEventPublisher events;
 
     public FlagService(FlagRepository flagRepository, ProjectRepository projectRepository,
-                       TagRepository tagRepository, FlagTagValueRepository flagTagValueRepository) {
+                       TagRepository tagRepository, FlagTagValueRepository flagTagValueRepository,
+                       DomainEventPublisher events) {
         this.flagRepository = flagRepository;
         this.projectRepository = projectRepository;
         this.tagRepository = tagRepository;
         this.flagTagValueRepository = flagTagValueRepository;
+        this.events = events;
     }
 
     @Transactional(readOnly = true)
@@ -87,6 +92,9 @@ public class FlagService {
                 flagTagValueRepository.save(ftv);
             }
         }
+
+        events.publish(new DomainEvent(flag.getProjectId(), "flag.created", "flag",
+            flag.getId(), flag.getName(), "Flag created: " + flag.getKey()));
         return flag;
     }
 
@@ -123,12 +131,20 @@ public class FlagService {
                 flagTagValueRepository.save(ftv);
             }
         }
+
+        events.publish(new DomainEvent(flag.getProjectId(), "flag.updated", "flag",
+            flag.getId(), flag.getName(), "Flag updated: " + flag.getKey()));
         return flag;
     }
 
     @Transactional
     public void delete(Integer id) {
+        Flag flag = flagRepository.findById(id);
+        String name = flag != null ? flag.getName() : String.valueOf(id);
+        Integer projectId = flag != null ? flag.getProjectId() : null;
         flagTagValueRepository.deleteByFlagId(id);
         flagRepository.deleteById(id);
+        events.publish(new DomainEvent(projectId, "flag.deleted", "flag",
+            id, name, "Flag deleted"));
     }
 }

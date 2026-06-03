@@ -2,6 +2,8 @@ package ru.mozhno.contexts;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.mozhno.events.DomainEvent;
+import ru.mozhno.events.DomainEventPublisher;
 
 import java.util.List;
 
@@ -9,10 +11,14 @@ import java.util.List;
 public class ContextService {
     private final ContextDefinitionRepository contextDefinitionRepository;
     private final ContextValueRepository contextValueRepository;
+    private final DomainEventPublisher events;
 
-    public ContextService(ContextDefinitionRepository contextDefinitionRepository, ContextValueRepository contextValueRepository) {
+    public ContextService(ContextDefinitionRepository contextDefinitionRepository,
+                          ContextValueRepository contextValueRepository,
+                          DomainEventPublisher events) {
         this.contextDefinitionRepository = contextDefinitionRepository;
         this.contextValueRepository = contextValueRepository;
+        this.events = events;
     }
 
     @Transactional(readOnly = true)
@@ -33,7 +39,10 @@ public class ContextService {
         if (definition == null) throw new RuntimeException("ContextDefinition not found: " + id);
         definition.setName(request.getName());
         definition.setDescription(request.getDescription());
-        return contextDefinitionRepository.save(definition);
+        ContextDefinition saved = contextDefinitionRepository.save(definition);
+        events.publish(new DomainEvent(saved.getProjectId(), "context_definition.updated", "context",
+            saved.getId(), saved.getName(), "Context definition updated"));
+        return saved;
     }
 
     @Transactional
@@ -42,12 +51,20 @@ public class ContextService {
         definition.setName(request.getName());
         definition.setDescription(request.getDescription());
         definition.setProjectId(request.getProjectId());
-        return contextDefinitionRepository.save(definition);
+        ContextDefinition saved = contextDefinitionRepository.save(definition);
+        events.publish(new DomainEvent(saved.getProjectId(), "context_definition.created", "context",
+            saved.getId(), saved.getName(), "Context definition created"));
+        return saved;
     }
 
     @Transactional
     public void deleteDefinition(Integer id) {
+        ContextDefinition def = contextDefinitionRepository.findById(id);
+        String name = def != null ? def.getName() : String.valueOf(id);
+        Integer projectId = def != null ? def.getProjectId() : null;
         contextDefinitionRepository.deleteById(id);
+        events.publish(new DomainEvent(projectId, "context_definition.deleted", "context",
+            id, name, "Context definition deleted"));
     }
 
     @Transactional(readOnly = true)
@@ -67,7 +84,13 @@ public class ContextService {
         ContextValue value = contextValueRepository.findById(id);
         if (value == null) throw new RuntimeException("ContextValue not found: " + id);
         value.setValues(request.getValues());
-        return contextValueRepository.save(value);
+        ContextValue saved = contextValueRepository.save(value);
+        var def = contextDefinitionRepository.findById(saved.getContextDefinitionId());
+        if (def != null) {
+            events.publish(new DomainEvent(def.getProjectId(), "context_value.updated", "context",
+                saved.getId(), def.getName(), "Context value updated"));
+        }
+        return saved;
     }
 
     @Transactional
@@ -75,11 +98,25 @@ public class ContextService {
         ContextValue value = new ContextValue();
         value.setContextDefinitionId(request.getContextDefinitionId());
         value.setValues(request.getValues());
-        return contextValueRepository.save(value);
+        ContextValue saved = contextValueRepository.save(value);
+        var def = contextDefinitionRepository.findById(saved.getContextDefinitionId());
+        if (def != null) {
+            events.publish(new DomainEvent(def.getProjectId(), "context_value.created", "context",
+                saved.getId(), def.getName(), "Context value created"));
+        }
+        return saved;
     }
 
     @Transactional
     public void deleteValue(Integer id) {
+        ContextValue value = contextValueRepository.findById(id);
+        if (value != null) {
+            var def = contextDefinitionRepository.findById(value.getContextDefinitionId());
+            if (def != null) {
+                events.publish(new DomainEvent(def.getProjectId(), "context_value.deleted", "context",
+                    id, def.getName(), "Context value deleted"));
+            }
+        }
         contextValueRepository.deleteById(id);
     }
 }

@@ -33,12 +33,12 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity()).build();
         objectMapper = new ObjectMapper();
 
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)",
-            "apikey-test@test.com", passwordEncoder.encode("secret"), "editor");
+            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
+            "apikey-test@test.com", passwordEncoder.encode("secret"), "admin", "active");
 
         String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -58,10 +58,14 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
         environmentId = environmentRepository.save(env).getId();
     }
 
+    private String auth() {
+        return "Bearer " + authToken;
+    }
+
     @Test
     void getAllApiKeys_shouldReturnEmptyList() throws Exception {
         mockMvc.perform(get("/api/v1/projects/{projectId}/api-keys", projectId)
-                        .header("Authorization", "Bearer " + authToken))
+                        .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -69,7 +73,7 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
     @Test
     void createApiKey_shouldReturnCreated() throws Exception {
         mockMvc.perform(post("/api/v1/projects/{projectId}/api-keys", projectId)
-                        .header("Authorization", "Bearer " + authToken)
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(String.format(
                             "{\"name\": \"My Service\", \"environmentId\": %d, \"description\": \"Test service\"}",
@@ -88,7 +92,7 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
         ApiKey saved = apiKeyRepository.save(k);
 
         mockMvc.perform(get("/api/v1/projects/{projectId}/api-keys/{id}", projectId, saved.getId())
-                        .header("Authorization", "Bearer " + authToken))
+                        .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Staging Service"));
     }
@@ -96,7 +100,7 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
     @Test
     void getApiKey_shouldReturn404WhenNotFound() throws Exception {
         mockMvc.perform(get("/api/v1/projects/{projectId}/api-keys/9999", projectId)
-                        .header("Authorization", "Bearer " + authToken))
+                        .header("Authorization", auth()))
                 .andExpect(status().isNotFound());
     }
 
@@ -109,7 +113,7 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
         ApiKey saved = apiKeyRepository.save(k);
 
         mockMvc.perform(put("/api/v1/projects/{projectId}/api-keys/{id}", projectId, saved.getId())
-                        .header("Authorization", "Bearer " + authToken)
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(String.format(
                             "{\"name\": \"Updated Name\", \"environmentId\": %d, \"description\": \"Updated\"}",
@@ -127,7 +131,7 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
         ApiKey saved = apiKeyRepository.save(k);
 
         mockMvc.perform(delete("/api/v1/projects/{projectId}/api-keys/{id}", projectId, saved.getId())
-                        .header("Authorization", "Bearer " + authToken))
+                        .header("Authorization", auth()))
                 .andExpect(status().isNoContent());
     }
 }

@@ -85,7 +85,7 @@ public abstract class BaseIntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         try {
-            jdbcTemplate.execute("TRUNCATE TABLE api_keys, flag_tag_values, flag_strategies, flags, segment_contexts, segments, context_values, context_definitions, tags, environments, projects, users CASCADE");
+            jdbcTemplate.execute("TRUNCATE TABLE audit_log, integrations, project_settings, api_keys, flag_tag_values, flag_strategies, flags, segment_contexts, segments, context_values, context_definitions, tags, environments, projects, users CASCADE");
         } catch (Exception e) {
             // Tables may not exist on first run – schema will be created next
         }

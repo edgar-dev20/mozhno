@@ -35,12 +35,12 @@ class StrategyControllerTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity()).build();
         objectMapper = new ObjectMapper();
 
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)",
-            "strategy-test@test.com", passwordEncoder.encode("secret"), "editor");
+            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
+            "strategy-test@test.com", passwordEncoder.encode("secret"), "developer", "active");
 
         String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -67,10 +67,14 @@ class StrategyControllerTest extends BaseIntegrationTest {
         flagId = flagRepository.save(flag).getId();
     }
 
+    private String auth() {
+        return "Bearer " + authToken;
+    }
+
     @Test
     void getStrategies_shouldReturnList() throws Exception {
         mockMvc.perform(get("/api/v1/flags/{flagId}/strategies", flagId)
-                        .header("Authorization", "Bearer " + authToken))
+                        .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -84,7 +88,7 @@ class StrategyControllerTest extends BaseIntegrationTest {
             "}";
 
         mockMvc.perform(post("/api/v1/flags/{flagId}/strategies", flagId)
-                        .header("Authorization", "Bearer " + authToken)
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isCreated())
@@ -100,7 +104,7 @@ class StrategyControllerTest extends BaseIntegrationTest {
         var saved = flagStrategyRepository.save(strategy);
 
         mockMvc.perform(put("/api/v1/flags/{flagId}/strategies/{id}", flagId, saved.getId())
-                        .header("Authorization", "Bearer " + authToken)
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"enabled\": true}"))
                 .andExpect(status().isOk())
@@ -116,7 +120,7 @@ class StrategyControllerTest extends BaseIntegrationTest {
         var saved = flagStrategyRepository.save(strategy);
 
         mockMvc.perform(delete("/api/v1/flags/{flagId}/strategies/{id}", flagId, saved.getId())
-                        .header("Authorization", "Bearer " + authToken))
+                        .header("Authorization", auth()))
                 .andExpect(status().isNoContent());
     }
 }

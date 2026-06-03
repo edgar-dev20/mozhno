@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.contexts.*;
 
 import java.util.List;
@@ -21,11 +22,14 @@ class ContextServiceTest {
     @Mock
     private ContextValueRepository contextValueRepository;
 
+    @Mock
+    private DomainEventPublisher events;
+
     private ContextService contextService;
 
     @BeforeEach
     void setUp() {
-        contextService = new ContextService(contextDefinitionRepository, contextValueRepository);
+        contextService = new ContextService(contextDefinitionRepository, contextValueRepository, events);
     }
 
     @Test

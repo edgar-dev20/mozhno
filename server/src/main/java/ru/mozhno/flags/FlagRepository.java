@@ -39,19 +39,11 @@ public class FlagRepository {
             SELECT f.id, f.project_id, f.name, f.flag_key, f.description, f.flag_type, f.created_at, f.enabled as flag_enabled,
                    s.id as strategy_id, s.enabled as strategy_enabled, s.percentage,
                    s.context_definition_id, s.segment_id,
-                   CASE
-                       WHEN s.segment_id IS NOT NULL THEN sc.context_values
-                       ELSE s.context_values_json
-                   END as context_values,
-                   CASE
-                       WHEN s.segment_id IS NOT NULL THEN scd.name
-                       ELSE cd.name
-                   END as context_name
+                   s.context_values_json as context_values,
+                   cd.name as context_name
             FROM flags f
             LEFT JOIN flag_strategies s ON f.id = s.flag_id AND s.environment_id = ?
-            LEFT JOIN context_definitions cd ON cd.id = s.context_definition_id AND s.segment_id IS NULL
-            LEFT JOIN segment_contexts sc ON sc.segment_id = s.segment_id
-            LEFT JOIN context_definitions scd ON scd.id = sc.context_definition_id
+            LEFT JOIN context_definitions cd ON cd.id = s.context_definition_id
             WHERE f.project_id = ?
             ORDER BY f.id
             """;

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.tags.Tag;
 import ru.mozhno.tags.TagRepository;
 import ru.mozhno.tags.TagRequest;
@@ -21,11 +22,14 @@ class TagServiceTest {
     @Mock
     private TagRepository tagRepository;
 
+    @Mock
+    private DomainEventPublisher events;
+
     private TagService tagService;
 
     @BeforeEach
     void setUp() {
-        tagService = new TagService(tagRepository);
+        tagService = new TagService(tagRepository, events);
     }
 
     @Test

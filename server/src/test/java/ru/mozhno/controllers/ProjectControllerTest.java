@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -19,18 +20,39 @@ class ProjectControllerTest extends BaseIntegrationTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
+    private String authToken;
 
     @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    void setUp() throws Exception {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity()).build();
         objectMapper = new ObjectMapper();
+
+        jdbcTemplate.update(
+            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
+            "project-test@test.com", passwordEncoder.encode("secret"), "admin", "active");
+
+        String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"project-test@test.com\",\"password\":\"secret\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        authToken = objectMapper.readTree(loginResponse).get("token").asText();
+    }
+
+    private String auth() {
+        return "Bearer " + authToken;
     }
 
     @Test
     void getAllProjects_shouldReturnEmptyList() throws Exception {
-        mockMvc.perform(get("/api/v1/projects"))
+        mockMvc.perform(get("/api/v1/projects")
+                .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
@@ -38,6 +60,7 @@ class ProjectControllerTest extends BaseIntegrationTest {
     @Test
     void createProject_shouldReturnCreatedProject() throws Exception {
         mockMvc.perform(post("/api/v1/projects")
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"Test Project\", \"description\": \"Test Description\"}"))
                 .andExpect(status().isCreated())
@@ -52,14 +75,16 @@ class ProjectControllerTest extends BaseIntegrationTest {
         p.setDescription("Description");
         Project saved = projectRepository.save(p);
 
-        mockMvc.perform(get("/api/v1/projects/{id}", saved.getId()))
+        mockMvc.perform(get("/api/v1/projects/{id}", saved.getId())
+                .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Find Test"));
     }
 
     @Test
     void getProject_shouldReturn404WhenNotFound() throws Exception {
-        mockMvc.perform(get("/api/v1/projects/9999"))
+        mockMvc.perform(get("/api/v1/projects/9999")
+                .header("Authorization", auth()))
                 .andExpect(status().isNotFound());
     }
 
@@ -70,6 +95,7 @@ class ProjectControllerTest extends BaseIntegrationTest {
         Project saved = projectRepository.save(p);
 
         mockMvc.perform(put("/api/v1/projects/{id}", saved.getId())
+                        .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"Updated\", \"description\": \"Updated Description\"}"))
                 .andExpect(status().isOk())
@@ -82,7 +108,8 @@ class ProjectControllerTest extends BaseIntegrationTest {
         p.setName("To Delete");
         Project saved = projectRepository.save(p);
 
-        mockMvc.perform(delete("/api/v1/projects/{id}", saved.getId()))
+        mockMvc.perform(delete("/api/v1/projects/{id}", saved.getId())
+                .header("Authorization", auth()))
                 .andExpect(status().isNoContent());
     }
 }

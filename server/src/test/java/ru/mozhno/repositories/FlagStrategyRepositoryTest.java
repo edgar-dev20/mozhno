@@ -43,9 +43,15 @@ class FlagStrategyRepositoryTest extends BaseIntegrationTest {
         s1.setEnvironmentId(envId);
         s1.setEnabled(true);
         flagStrategyRepository.save(s1);
+
+        Environment env2 = new Environment();
+        env2.setName("staging");
+        env2.setProjectId(projectId);
+        int envId2 = environmentRepository.save(env2).getId();
+
         FlagStrategy s2 = new FlagStrategy();
         s2.setFlagId(flagId);
-        s2.setEnvironmentId(envId);
+        s2.setEnvironmentId(envId2);
         s2.setEnabled(false);
         flagStrategyRepository.save(s2);
 

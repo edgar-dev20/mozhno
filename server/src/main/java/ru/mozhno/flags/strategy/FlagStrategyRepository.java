@@ -3,6 +3,7 @@ package ru.mozhno.flags.strategy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -44,6 +45,35 @@ public class FlagStrategyRepository {
     public FlagStrategy findByFlagIdAndEnvironmentId(Integer flagId, Integer environmentId) {
         try {
             return jdbc.queryForObject("SELECT id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, segment_id, created_at FROM flag_strategies WHERE flag_id = ? AND environment_id = ?", ROW_MAPPER, flagId, environmentId);
+        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+            return null;
+        }
+    }
+
+    public FlagStrategy upsert(Integer flagId, Integer environmentId, boolean enabled, Double percentage,
+                                Integer contextDefinitionId, String contextValuesJson, Integer segmentId) {
+        String sql = """
+            INSERT INTO flag_strategies (flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, segment_id, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+            ON CONFLICT (flag_id, environment_id)
+            DO UPDATE SET enabled = EXCLUDED.enabled,
+                          percentage = EXCLUDED.percentage,
+                          context_definition_id = EXCLUDED.context_definition_id,
+                          context_values_json = EXCLUDED.context_values_json,
+                          segment_id = EXCLUDED.segment_id,
+                          created_at = flag_strategies.created_at
+            RETURNING id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, segment_id, created_at
+            """;
+        return jdbc.queryForObject(sql, ROW_MAPPER,
+            flagId, environmentId, enabled, percentage, contextDefinitionId, contextValuesJson, segmentId);
+    }
+
+    public FlagStrategy updateById(Integer id, boolean enabled, Double percentage,
+                                    Integer contextDefinitionId, String contextValuesJson, Integer segmentId) {
+        try {
+            return jdbc.queryForObject(
+                "UPDATE flag_strategies SET enabled = ?, percentage = ?, context_definition_id = ?, context_values_json = ?, segment_id = ? WHERE id = ? RETURNING id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, segment_id, created_at",
+                ROW_MAPPER, enabled, percentage, contextDefinitionId, contextValuesJson, segmentId, id);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }

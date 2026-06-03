@@ -2,6 +2,8 @@ package ru.mozhno.apikeys;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.mozhno.events.DomainEvent;
+import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.projects.ProjectRepository;
 
 import java.security.SecureRandom;
@@ -12,11 +14,14 @@ import java.util.List;
 public class ApiKeyService {
     private final ApiKeyRepository apiKeyRepository;
     private final ProjectRepository projectRepository;
+    private final DomainEventPublisher events;
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    public ApiKeyService(ApiKeyRepository apiKeyRepository, ProjectRepository projectRepository) {
+    public ApiKeyService(ApiKeyRepository apiKeyRepository, ProjectRepository projectRepository,
+                         DomainEventPublisher events) {
         this.apiKeyRepository = apiKeyRepository;
         this.projectRepository = projectRepository;
+        this.events = events;
     }
 
     @Transactional(readOnly = true)
@@ -50,7 +55,10 @@ public class ApiKeyService {
         k.setEnvironmentId(request.getEnvironmentId());
         k.setDescription(request.getDescription());
         k.setApiKey(generateApiKey());
-        return apiKeyRepository.save(k);
+        ApiKey saved = apiKeyRepository.save(k);
+        events.publish(new DomainEvent(saved.getProjectId(), "apikey.created", "apikey",
+            saved.getId(), saved.getName(), "API key created"));
+        return saved;
     }
 
     @Transactional
@@ -60,12 +68,20 @@ public class ApiKeyService {
         k.setName(request.getName());
         k.setEnvironmentId(request.getEnvironmentId());
         k.setDescription(request.getDescription());
-        return apiKeyRepository.save(k);
+        ApiKey saved = apiKeyRepository.save(k);
+        events.publish(new DomainEvent(saved.getProjectId(), "apikey.updated", "apikey",
+            saved.getId(), saved.getName(), "API key updated"));
+        return saved;
     }
 
     @Transactional
     public void delete(Integer id) {
+        ApiKey k = apiKeyRepository.findById(id);
+        String name = k != null ? k.getName() : String.valueOf(id);
+        Integer projectId = k != null ? k.getProjectId() : null;
         apiKeyRepository.deleteById(id);
+        events.publish(new DomainEvent(projectId, "apikey.deleted", "apikey",
+            id, name, "API key deleted"));
     }
 
     @Transactional

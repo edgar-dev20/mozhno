@@ -41,7 +41,9 @@ public class JwtService {
             .issuer(issuer)
             .subject(user.getEmail())
             .claim("user_id", user.getId())
+            .claim("name", user.getName())
             .claim("role", user.getRole())
+            .claim("status", user.getStatus())
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiry))
             .signWith(key)
@@ -58,9 +60,11 @@ public class JwtService {
                 .getPayload();
 
             Integer userId = claims.get("user_id", Integer.class);
+            String name = claims.get("name", String.class);
             String role = claims.get("role", String.class);
+            String status = claims.get("status", String.class);
 
-            return new JwtToken(userId, claims.getSubject(), role);
+            return new JwtToken(userId, claims.getSubject(), name, role, status);
         } catch (ExpiredJwtException | SignatureException | MalformedJwtException | IllegalArgumentException e) {
             return null;
         }

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.flags.Flag;
 import ru.mozhno.flags.FlagRepository;
 import ru.mozhno.flags.strategy.*;
@@ -23,11 +24,14 @@ class StrategyServiceTest {
     @Mock
     private FlagRepository flagRepository;
 
+    @Mock
+    private DomainEventPublisher events;
+
     private StrategyService strategyService;
 
     @BeforeEach
     void setUp() {
-        strategyService = new StrategyService(strategyRepository, flagRepository);
+        strategyService = new StrategyService(strategyRepository, flagRepository, events);
     }
 
     @Test
@@ -55,12 +59,18 @@ class StrategyServiceTest {
     void create_shouldCreateStrategy() {
         Flag flag = new Flag();
         flag.setId(1);
+        flag.setProjectId(100);
+        flag.setName("test-flag");
         when(flagRepository.findById(1)).thenReturn(flag);
-        when(strategyRepository.save(any(FlagStrategy.class))).thenAnswer(inv -> {
-            FlagStrategy s = inv.getArgument(0);
-            s.setId(10);
-            return s;
-        });
+
+        FlagStrategy mockSaved = new FlagStrategy();
+        mockSaved.setId(10);
+        mockSaved.setFlagId(1);
+        mockSaved.setEnvironmentId(2);
+        mockSaved.setEnabled(true);
+        mockSaved.setPercentage(50.0);
+        mockSaved.setSegmentId(5);
+        when(strategyRepository.upsert(1, 2, true, 50.0, null, null, 5)).thenReturn(mockSaved);
 
         StrategyRequest req = new StrategyRequest();
         req.setFlagId(1);
@@ -73,18 +83,26 @@ class StrategyServiceTest {
         assertTrue(result.isEnabled());
         assertEquals(50.0, result.getPercentage());
         assertEquals(5, result.getSegmentId());
+        verify(strategyRepository).upsert(1, 2, true, 50.0, null, null, 5);
     }
 
     @Test
     void create_shouldCreateStrategyWithContext() {
         Flag flag = new Flag();
         flag.setId(1);
+        flag.setProjectId(100);
+        flag.setName("test-flag");
         when(flagRepository.findById(1)).thenReturn(flag);
-        when(strategyRepository.save(any(FlagStrategy.class))).thenAnswer(inv -> {
-            FlagStrategy s = inv.getArgument(0);
-            s.setId(10);
-            return s;
-        });
+
+        FlagStrategy mockSaved = new FlagStrategy();
+        mockSaved.setId(10);
+        mockSaved.setFlagId(1);
+        mockSaved.setEnvironmentId(2);
+        mockSaved.setEnabled(true);
+        mockSaved.setPercentage(30.0);
+        mockSaved.setContextDefinitionId(3);
+        mockSaved.setContextValuesJson("[\"web\"]");
+        when(strategyRepository.upsert(1, 2, true, 30.0, 3, "[\"web\"]", null)).thenReturn(mockSaved);
 
         StrategyRequest req = new StrategyRequest();
         req.setFlagId(1);
@@ -99,6 +117,7 @@ class StrategyServiceTest {
         assertEquals(30.0, result.getPercentage());
         assertEquals(3, result.getContextDefinitionId());
         assertEquals("[\"web\"]", result.getContextValuesJson());
+        verify(strategyRepository).upsert(1, 2, true, 30.0, 3, "[\"web\"]", null);
     }
 
     @Test
@@ -118,15 +137,21 @@ class StrategyServiceTest {
     void update_shouldUpdateStrategy() {
         FlagStrategy existing = new FlagStrategy();
         existing.setId(1);
+        existing.setFlagId(10);
         existing.setEnabled(false);
         when(strategyRepository.findById(1)).thenReturn(existing);
-        when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
+
+        FlagStrategy updated = new FlagStrategy();
+        updated.setId(1);
+        updated.setEnabled(true);
+        when(strategyRepository.updateById(1, true, null, null, null, null)).thenReturn(updated);
 
         StrategyRequest req = new StrategyRequest();
         req.setEnabled(true);
 
         FlagStrategy result = strategyService.update(1, req);
         assertTrue(result.isEnabled());
+        verify(strategyRepository).updateById(1, true, null, null, null, null);
     }
 
     @Test
@@ -146,7 +171,12 @@ class StrategyServiceTest {
         existing.setId(1);
         existing.setPercentage(10.0);
         when(strategyRepository.findById(1)).thenReturn(existing);
-        when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
+
+        FlagStrategy updated = new FlagStrategy();
+        updated.setId(1);
+        updated.setEnabled(true);
+        updated.setPercentage(75.0);
+        when(strategyRepository.updateById(1, true, 75.0, null, null, null)).thenReturn(updated);
 
         StrategyRequest req = new StrategyRequest();
         req.setEnabled(true);
@@ -161,7 +191,14 @@ class StrategyServiceTest {
         FlagStrategy existing = new FlagStrategy();
         existing.setId(1);
         when(strategyRepository.findById(1)).thenReturn(existing);
-        when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
+
+        FlagStrategy updated = new FlagStrategy();
+        updated.setId(1);
+        updated.setEnabled(true);
+        updated.setContextDefinitionId(5);
+        updated.setContextValuesJson("[\"mobile\"]");
+        updated.setSegmentId(7);
+        when(strategyRepository.updateById(1, true, null, 5, "[\"mobile\"]", 7)).thenReturn(updated);
 
         StrategyRequest req = new StrategyRequest();
         req.setEnabled(true);
@@ -170,22 +207,26 @@ class StrategyServiceTest {
         req.setSegmentId(7);
 
         FlagStrategy result = strategyService.update(1, req);
-        assertEquals(5, existing.getContextDefinitionId());
-        assertEquals("[\"mobile\"]", existing.getContextValuesJson());
-        assertEquals(7, existing.getSegmentId());
+        assertEquals(5, result.getContextDefinitionId());
+        assertEquals("[\"mobile\"]", result.getContextValuesJson());
+        assertEquals(7, result.getSegmentId());
+        verify(strategyRepository).updateById(1, true, null, 5, "[\"mobile\"]", 7);
     }
 
     @Test
     void upsert_shouldCreateWhenNotExists() {
-        when(strategyRepository.findByFlagIdAndEnvironmentId(1, 2)).thenReturn(null);
         Flag flag = new Flag();
         flag.setId(1);
+        flag.setProjectId(100);
+        flag.setName("test-flag");
         when(flagRepository.findById(1)).thenReturn(flag);
-        when(strategyRepository.save(any(FlagStrategy.class))).thenAnswer(inv -> {
-            FlagStrategy s = inv.getArgument(0);
-            s.setId(10);
-            return s;
-        });
+
+        FlagStrategy mockSaved = new FlagStrategy();
+        mockSaved.setId(10);
+        mockSaved.setFlagId(1);
+        mockSaved.setEnvironmentId(2);
+        mockSaved.setEnabled(true);
+        when(strategyRepository.upsert(1, 2, true, null, null, null, null)).thenReturn(mockSaved);
 
         StrategyRequest req = new StrategyRequest();
         req.setFlagId(1);
@@ -194,15 +235,21 @@ class StrategyServiceTest {
 
         FlagStrategy result = strategyService.upsert(req);
         assertTrue(result.isEnabled());
+        verify(strategyRepository).upsert(1, 2, true, null, null, null, null);
     }
 
     @Test
     void upsert_shouldUpdateWhenExists() {
-        FlagStrategy existing = new FlagStrategy();
-        existing.setId(5);
-        existing.setEnabled(false);
-        when(strategyRepository.findByFlagIdAndEnvironmentId(1, 2)).thenReturn(existing);
-        when(strategyRepository.save(any(FlagStrategy.class))).thenReturn(existing);
+        Flag flag = new Flag();
+        flag.setId(1);
+        flag.setProjectId(100);
+        flag.setName("test-flag");
+        when(flagRepository.findById(1)).thenReturn(flag);
+
+        FlagStrategy updated = new FlagStrategy();
+        updated.setId(5);
+        updated.setEnabled(true);
+        when(strategyRepository.upsert(1, 2, true, null, null, null, null)).thenReturn(updated);
 
         StrategyRequest req = new StrategyRequest();
         req.setFlagId(1);
@@ -211,6 +258,7 @@ class StrategyServiceTest {
 
         FlagStrategy result = strategyService.upsert(req);
         assertTrue(result.isEnabled());
+        verify(strategyRepository).upsert(1, 2, true, null, null, null, null);
     }
 
     @Test

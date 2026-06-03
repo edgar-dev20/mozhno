@@ -72,7 +72,9 @@ class AuthServiceTest {
         User user = new User();
         user.setId(1);
         user.setEmail("user@example.com");
+        user.setName("Test User");
         user.setRole("viewer");
+        user.setStatus("active");
 
         when(userRepository.findByEmail("user@example.com")).thenReturn(user);
 

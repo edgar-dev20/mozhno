@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.flags.*;
 import ru.mozhno.projects.Project;
 import ru.mozhno.projects.ProjectRepository;
@@ -31,11 +32,14 @@ class FlagServiceTest {
     @Mock
     private FlagTagValueRepository flagTagValueRepository;
 
+    @Mock
+    private DomainEventPublisher events;
+
     private FlagService flagService;
 
     @BeforeEach
     void setUp() {
-        flagService = new FlagService(flagRepository, projectRepository, tagRepository, flagTagValueRepository);
+        flagService = new FlagService(flagRepository, projectRepository, tagRepository, flagTagValueRepository, events);
     }
 
     @Test

@@ -10,13 +10,17 @@ import java.util.List;
 public class UserAuthentication extends AbstractAuthenticationToken {
     private final Integer userId;
     private final String email;
+    private final String name;
     private final String role;
+    private final String status;
 
-    public UserAuthentication(Integer userId, String email, String role) {
+    public UserAuthentication(Integer userId, String email, String name, String role, String status) {
         super(buildAuthorities(role));
         this.userId = userId;
         this.email = email;
+        this.name = name;
         this.role = role;
+        this.status = status;
         setAuthenticated(true);
     }
 
@@ -34,10 +38,12 @@ public class UserAuthentication extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
-        return email;
+        return new UserPrincipal(userId, email, role);
     }
 
     public Integer getUserId() { return userId; }
     public String getEmail() { return email; }
+    public String getName() { return name; }
     public String getRole() { return role; }
+    public String getStatus() { return status; }
 }

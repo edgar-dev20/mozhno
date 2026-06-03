@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.projects.Project;
 import ru.mozhno.projects.ProjectRepository;
 import ru.mozhno.projects.ProjectRequest;
@@ -21,11 +22,14 @@ class ProjectServiceTest {
     @Mock
     private ProjectRepository projectRepository;
 
+    @Mock
+    private DomainEventPublisher events;
+
     private ProjectService projectService;
 
     @BeforeEach
     void setUp() {
-        projectService = new ProjectService(projectRepository);
+        projectService = new ProjectService(projectRepository, events);
     }
 
     @Test

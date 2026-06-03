@@ -9,7 +9,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ru.mozhno.auth.UserPrincipal;
 
 import java.util.List;
 
@@ -26,7 +29,8 @@ public class ApiKeyController {
         @ApiResponse(responseCode = "200", description = "List of API keys",
             content = @Content(schema = @Schema(implementation = ApiKey.class)))
     })
-    public List<ApiKey> getAll(@PathVariable Integer projectId) {
+    public List<ApiKey> getAll(@PathVariable Integer projectId,
+                               @AuthenticationPrincipal UserPrincipal user) {
         return apiKeyService.findByProjectId(projectId);
     }
 
@@ -37,7 +41,8 @@ public class ApiKeyController {
             content = @Content(schema = @Schema(implementation = ApiKey.class))),
         @ApiResponse(responseCode = "404", description = "API key not found")
     })
-    public ApiKey getById(@PathVariable Integer id) {
+    public ApiKey getById(@PathVariable Integer id,
+                          @AuthenticationPrincipal UserPrincipal user) {
         return apiKeyService.findById(id);
     }
 
@@ -48,7 +53,9 @@ public class ApiKeyController {
         @ApiResponse(responseCode = "201", description = "API key created successfully",
             content = @Content(schema = @Schema(implementation = ApiKey.class)))
     })
-    public ApiKey create(@PathVariable Integer projectId, @Valid @RequestBody ApiKeyRequest request) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiKey create(@PathVariable Integer projectId, @Valid @RequestBody ApiKeyRequest request,
+                         @AuthenticationPrincipal UserPrincipal user) {
         return apiKeyService.create(projectId, request);
     }
 
@@ -58,14 +65,18 @@ public class ApiKeyController {
         @ApiResponse(responseCode = "200", description = "API key updated",
             content = @Content(schema = @Schema(implementation = ApiKey.class)))
     })
-    public ApiKey update(@PathVariable Integer id, @Valid @RequestBody ApiKeyRequest request) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiKey update(@PathVariable Integer id, @Valid @RequestBody ApiKeyRequest request,
+                         @AuthenticationPrincipal UserPrincipal user) {
         return apiKeyService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete an API key")
-    public void delete(@PathVariable Integer id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public void delete(@PathVariable Integer id,
+                       @AuthenticationPrincipal UserPrincipal user) {
         apiKeyService.delete(id);
     }
 }
