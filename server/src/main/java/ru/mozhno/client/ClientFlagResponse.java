@@ -1,7 +1,8 @@
 package ru.mozhno.client;
 
 import ru.mozhno.flags.Flag;
-import ru.mozhno.flags.strategy.FlagStrategy;
+
+import java.util.List;
 
 public class ClientFlagResponse {
     private String name;
@@ -11,13 +12,12 @@ public class ClientFlagResponse {
 
     public ClientFlagResponse() {}
 
-    public ClientFlagResponse(Flag flag) {
+    public ClientFlagResponse(Flag flag, List<Constraint> constraints) {
         this.name = flag.getName();
         this.key = flag.getKey();
-        FlagStrategy strategy = flag.getStrategy();
-        this.enabled = strategy != null ? strategy.isEnabled() : flag.isEnabled();
-        if (strategy != null) {
-            this.activation = new Activation(strategy);
+        this.enabled = flag.getStrategy() != null ? flag.getStrategy().isEnabled() : flag.isEnabled();
+        if (flag.getStrategy() != null) {
+            this.activation = new Activation(flag.getStrategy().getPercentage(), constraints);
         }
     }
 
@@ -32,41 +32,38 @@ public class ClientFlagResponse {
 
     public static class Activation {
         private Double rollOut;
-        private Constraint constraint;
+        private List<Constraint> constraints;
 
         public Activation() {}
 
-        public Activation(FlagStrategy s) {
-            this.rollOut = s.getPercentage();
-            if (s.getContextName() != null && s.getContextValuesJson() != null) {
-                this.constraint = new Constraint(s.getContextName(), s.getContextValuesJson());
-            }
+        public Activation(Double rollOut, List<Constraint> constraints) {
+            this.rollOut = rollOut;
+            this.constraints = constraints;
         }
 
         public Double getRollOut() { return rollOut; }
         public void setRollOut(Double rollOut) { this.rollOut = rollOut; }
-        public Constraint getConstraint() { return constraint; }
-        public void setConstraint(Constraint constraint) { this.constraint = constraint; }
+        public List<Constraint> getConstraints() { return constraints; }
+        public void setConstraints(List<Constraint> constraints) { this.constraints = constraints; }
     }
 
     public static class Constraint {
         private String field;
+        private String operator;
         private java.util.List<String> values;
 
         public Constraint() {}
 
-        public Constraint(String field, String valuesJson) {
+        public Constraint(String field, String operator, java.util.List<String> values) {
             this.field = field;
-            try {
-                this.values = new com.fasterxml.jackson.databind.ObjectMapper().readValue(valuesJson,
-                    new com.fasterxml.jackson.core.type.TypeReference<java.util.List<String>>() {});
-            } catch (Exception e) {
-                this.values = java.util.Collections.emptyList();
-            }
+            this.operator = operator;
+            this.values = values;
         }
 
         public String getField() { return field; }
         public void setField(String field) { this.field = field; }
+        public String getOperator() { return operator; }
+        public void setOperator(String operator) { this.operator = operator; }
         public java.util.List<String> getValues() { return values; }
         public void setValues(java.util.List<String> values) { this.values = values; }
     }

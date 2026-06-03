@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Key, Copy, Eye, EyeOff, Shield, Server, Smartphone, Plus, Trash2 } from 'lucide-react';
 import { api, ApiKey, Environment } from '../../api';
+import { ConfirmDialog } from './ConfirmDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 export function ApiKeys() {
@@ -12,6 +13,8 @@ export function ApiKeys() {
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [newEnvId, setNewEnvId] = useState<number | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -30,7 +33,7 @@ export function ApiKeys() {
     if (!projectId || !newName) return;
     try { const k = await api.apiKeys.create(projectId, { name: newName, environmentId: newEnvId ?? undefined }); setKeys([k, ...keys]); setCreating(false); setNewName(''); setNewEnvId(environments[0]?.id ?? null); } catch (e: any) { alert(e.message); }
   };
-  const handleDelete = async (id: number) => { if (!projectId || !confirm('Удалить?')) return; try { await api.apiKeys.delete(projectId, id); setKeys(keys.filter(k => k.id !== id)); } catch (e: any) { alert(e.message); } };
+  const handleDelete = async () => { if (!projectId || !deleteId) return; setDeleting(true); try { await api.apiKeys.delete(projectId, deleteId); setKeys(keys.filter(k => k.id !== deleteId)); setDeleteId(null); } catch (e: any) { alert(e.message); } finally { setDeleting(false); } };
   const copyKey = (key: string) => { navigator.clipboard.writeText(key); };
   const envName = (id: number | null) => environments.find(e => e.id === id)?.name ?? '—';
   const envColor = (id: number | null) => {
@@ -63,10 +66,10 @@ export function ApiKeys() {
       <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead><tr className="border-b border-neutral-200 dark:border-neutral-800 text-sm font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/50"><th className="px-6 py-4">Название & Среда</th><th className="px-6 py-4">Тип</th><th className="px-6 py-4">Секретный ключ</th><th className="px-6 py-4">Создан</th><th className="px-6 py-4 text-right">Последнее</th></tr></thead>
+            <thead><tr className="border-b border-neutral-200 dark:border-neutral-800 text-sm font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/50"><th className="px-6 py-4">Название & Среда</th><th className="px-6 py-4">Тип</th><th className="px-6 py-4">Секретный ключ</th><th className="px-6 py-4">Создан</th><th className="px-6 py-4 text-right">Последнее</th><th className="px-6 py-4 w-16"></th></tr></thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-              {loading ? <tr><td colSpan={5} className="px-6 py-8 text-center text-neutral-500">Загрузка...</td></tr>
-              : keys.length === 0 ? <tr><td colSpan={5} className="px-6 py-8 text-center text-neutral-500">Нет ключей</td></tr>
+              {loading ? <tr><td colSpan={6} className="px-6 py-8 text-center text-neutral-500">Загрузка...</td></tr>
+              : keys.length === 0 ? <tr><td colSpan={6} className="px-6 py-8 text-center text-neutral-500">Нет ключей</td></tr>
               : keys.map(k => (
                 <tr key={k.id} className="group hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
                   <td className="px-6 py-4"><div className="flex flex-col"><span className="font-medium text-neutral-900 dark:text-neutral-200">{k.name}</span><span className="text-xs font-medium mt-1 flex items-center gap-1.5"><span className={`w-2 h-2 rounded-full ${envColor(k.environmentId)}`}></span><span className="text-neutral-500 dark:text-neutral-400">{envName(k.environmentId)}</span></span></div></td>
@@ -74,6 +77,9 @@ export function ApiKeys() {
                   <td className="px-6 py-4"><div className="flex items-center gap-2 max-w-[240px]"><div className="flex-1 bg-neutral-100 dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded px-3 py-1.5 text-sm font-mono text-neutral-700 dark:text-neutral-300 truncate">{showKey === k.id ? k.apiKey : '••••••••••••••••••••••••••••'}</div><button onClick={() => setShowKey(showKey === k.id ? null : k.id)} className="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 p-1.5">{showKey === k.id ? <EyeOff size={16} /> : <Eye size={16} />}</button><button onClick={() => copyKey(k.apiKey)} className="text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-1.5"><Copy size={16} /></button></div></td>
                   <td className="px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400">{formatDate(k.createdAt)}</td>
                   <td className="px-6 py-4 text-sm text-neutral-500 dark:text-neutral-400 text-right">{formatDate(k.lastUsedAt)}</td>
+                  <td className="px-6 py-4">
+                    <button onClick={() => setDeleteId(k.id)} className="text-neutral-400 hover:text-red-600 dark:hover:text-red-400 p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -85,6 +91,16 @@ export function ApiKeys() {
         <div className="bg-indigo-100 dark:bg-indigo-500/20 p-2 rounded-lg text-indigo-600 dark:text-indigo-400 shrink-0"><Shield size={20} /></div>
         <div><h4 className="text-indigo-900 dark:text-white font-medium mb-1">Безопасность ключей</h4><p className="text-sm text-indigo-700 dark:text-neutral-400 max-w-3xl">Client SDK ключи безопасны для использования на фронтенде (в браузере, мобильных приложениях). Server SDK ключи обладают полным доступом к данным и <strong>никогда не должны попадать на сторону клиента</strong>.</p></div>
       </div>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title="Удалить API ключ?"
+        description={`API-ключ «${keys.find(k => k.id === deleteId)?.name ?? ''}» будет удалён без возможности восстановления и перестанет работать немедленно.`}
+        confirmLabel="Удалить"
+        onConfirm={handleDelete}
+        loading={deleting}
+      />
     </div>
   );
 }

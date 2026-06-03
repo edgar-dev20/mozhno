@@ -83,7 +83,7 @@ public class SecurityConfig {
             protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
                     throws ServletException, IOException {
                 String path = request.getRequestURI();
-                if (!path.startsWith("/api") && !path.contains(".")) {
+                if (!path.startsWith("/api") && !path.startsWith("/v3/api-docs") && !path.startsWith("/swagger-ui") && !path.contains(".")) {
                     request.getRequestDispatcher("/index.html").forward(request, response);
                     return;
                 }

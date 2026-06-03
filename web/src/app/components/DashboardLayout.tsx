@@ -18,7 +18,6 @@ export function DashboardLayout() {
     { path: '/flags', label: 'Флаги', icon: Flag },
     { path: '/segments', label: 'Сегменты', icon: Users },
     { path: '/constraints', label: 'Контексты', icon: Box },
-    { path: '/strategies', label: 'Стратегии', icon: GitBranch },
     { path: '/tags', label: 'Теги', icon: Tag },
   ];
 
@@ -89,26 +88,22 @@ export function DashboardLayout() {
                 isActive ? 'bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 shadow-sm font-semibold' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
               }`}>
                 <Settings size={18} className={location.pathname.startsWith('/settings') ? 'text-violet-600 dark:text-violet-400' : 'text-neutral-400 dark:text-neutral-500'} />
-                <span className={location.pathname.startsWith('/settings') ? 'bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent' : ''}>Настройки</span>
+                <span className={location.pathname.startsWith('/settings') ? 'bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent' : ''}>Проект</span>
+              </NavLink>
+              <NavLink to="/audit" className={({isActive}) => `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium w-full text-left ${
+                isActive ? 'bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 shadow-sm font-semibold' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+              }`}>
+                <Activity size={18} className={location.pathname.startsWith('/audit') ? 'text-violet-600 dark:text-violet-400' : 'text-neutral-400 dark:text-neutral-500'} />
+                <span className={location.pathname.startsWith('/audit') ? 'bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent' : ''}>События</span>
+              </NavLink>
+              <NavLink to="/apikeys" className={({isActive}) => `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium w-full text-left ${
+                isActive ? 'bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 shadow-sm font-semibold' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+              }`}>
+                <Key size={18} className={location.pathname.startsWith('/apikeys') ? 'text-violet-600 dark:text-violet-400' : 'text-neutral-400 dark:text-neutral-500'} />
+                <span className={location.pathname.startsWith('/apikeys') ? 'bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent' : ''}>API Ключи</span>
               </NavLink>
             </>
           )}
-
-          <div className="mt-8 px-3 mb-2 text-xs font-semibold text-neutral-500 dark:text-neutral-500 uppercase tracking-wider">
-            Система
-          </div>
-          <NavLink to="/audit" className={({isActive}) => `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium w-full text-left ${
-            isActive ? 'bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 shadow-sm font-semibold' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
-          }`}>
-            <Activity size={18} className={location.pathname.startsWith('/audit') ? 'text-violet-600 dark:text-violet-400' : 'text-neutral-400 dark:text-neutral-500'} />
-            <span className={location.pathname.startsWith('/audit') ? 'bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent' : ''}>События</span>
-          </NavLink>
-          <NavLink to="/apikeys" className={({isActive}) => `flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm font-medium w-full text-left ${
-            isActive ? 'bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 shadow-sm font-semibold' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-neutral-800'
-          }`}>
-            <Key size={18} className={location.pathname.startsWith('/apikeys') ? 'text-violet-600 dark:text-violet-400' : 'text-neutral-400 dark:text-neutral-500'} />
-            <span className={location.pathname.startsWith('/apikeys') ? 'bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent' : ''}>API Ключи</span>
-          </NavLink>
         </div>
 
         <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 transition-colors">

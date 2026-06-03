@@ -77,7 +77,7 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$[0].key").value("test-feature"))
                 .andExpect(jsonPath("$[0].enabled").value(true))
                 .andExpect(jsonPath("$[0].activation").exists())
-                .andExpect(jsonPath("$[0].activation.constraint").doesNotExist());
+                .andExpect(jsonPath("$[0].activation.constraints").doesNotExist());
     }
 
     @Test
@@ -99,16 +99,16 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
         strategy.setEnvironmentId(envId);
         strategy.setEnabled(true);
         strategy.setContextDefinitionId(cdId);
-        strategy.setContextValuesJson("[\"user-123\",\"user-456\"]");
+        strategy.setContextValuesJson("[{\"cd\":" + cdId + ",\"op\":\"in\",\"val\":\"user-123\"},{\"cd\":" + cdId + ",\"op\":\"in\",\"val\":\"user-456\"}]");
         flagStrategyRepository.save(strategy);
 
         mockMvc.perform(get("/api/client/features")
                         .header("Authorization", "client-test-token-abcdefghijklmnop1234567890"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[1].name").value("Segment Feature"))
-                .andExpect(jsonPath("$[1].activation.constraint.field").value("userId"))
-                .andExpect(jsonPath("$[1].activation.constraint.values").isArray())
-                .andExpect(jsonPath("$[1].activation.constraint.values.length()").value(2));
+                .andExpect(jsonPath("$[1].activation.constraints[0].field").value("userId"))
+                .andExpect(jsonPath("$[1].activation.constraints[0].values").isArray())
+                .andExpect(jsonPath("$[1].activation.constraints[0].values.length()").value(2));
     }
 
     @Test

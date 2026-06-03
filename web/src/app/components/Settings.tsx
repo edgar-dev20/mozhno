@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Globe, Shield, Save, Plus, X } from 'lucide-react';
 import { api, Project, Environment, ProjectSettings } from '../../api';
+import { ConfirmDialog } from './ConfirmDialog';
 
 export function Settings() {
   const [project, setProject] = useState<Project | null>(null);
@@ -20,6 +21,8 @@ export function Settings() {
   const [sessionTimeout, setSessionTimeout] = useState(24);
   const [ipWhitelist, setIpWhitelist] = useState('');
   const [savingSecurity, setSavingSecurity] = useState(false);
+  const [deleteEnvId, setDeleteEnvId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,12 +75,14 @@ export function Settings() {
     } catch (e: any) { alert(e.message); } finally { setSavingEnv(false); }
   };
 
-  const removeEnv = async (envId: number) => {
-    if (!projectId || !confirm('Удалить это окружение?')) return;
+  const removeEnv = async () => {
+    if (!projectId || !deleteEnvId) return;
+    setDeleting(true);
     try {
-      await api.environments.delete(projectId, envId);
-      setEnvironments(environments.filter(e => e.id !== envId));
-    } catch (e: any) { alert(e.message); }
+      await api.environments.delete(projectId, deleteEnvId);
+      setEnvironments(environments.filter(e => e.id !== deleteEnvId));
+      setDeleteEnvId(null);
+    } catch (e: any) { alert(e.message); } finally { setDeleting(false); }
   };
 
   const saveSecurity = async () => {
@@ -145,7 +150,7 @@ export function Settings() {
               {environments.map(env => (
                 <div key={env.id} className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 border border-blue-200 dark:border-violet-500/20 rounded-lg text-sm font-medium text-neutral-900 dark:text-neutral-200">
                   {env.name}
-                  <button onClick={() => removeEnv(env.id)} className="text-neutral-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"><X size={14} /></button>
+                  <button onClick={() => setDeleteEnvId(env.id)} className="text-neutral-500 hover:text-red-600 dark:hover:text-red-400 transition-colors"><X size={14} /></button>
                 </div>
               ))}
             </div>
@@ -184,6 +189,16 @@ export function Settings() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={!!deleteEnvId}
+        onOpenChange={(open) => { if (!open) setDeleteEnvId(null); }}
+        title="Удалить окружение?"
+        description={`Окружение «${environments.find(e => e.id === deleteEnvId)?.name ?? ''}» будет удалено без возможности восстановления.`}
+        confirmLabel="Удалить"
+        onConfirm={removeEnv}
+        loading={deleting}
+      />
     </div>
   );
 }

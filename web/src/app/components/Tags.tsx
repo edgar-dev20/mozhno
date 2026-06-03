@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { SidePanel } from './SidePanel';
+import { ConfirmDialog } from './ConfirmDialog';
 import { api, Tag } from '../../api';
 
 const PRESET_COLORS = ['#ef4444','#f97316','#f59e0b','#84cc16','#22c55e','#10b981','#14b8a6','#06b6d4','#3b82f6','#6366f1','#8b5cf6','#a855f7','#d946ef'];
@@ -23,6 +24,8 @@ export function Tags() {
   const [formDesc, setFormDesc] = useState('');
   const [formColor, setFormColor] = useState('#3b82f6');
   const [error, setError] = useState('');
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     try {
@@ -37,9 +40,10 @@ export function Tags() {
   const openCreate = () => { setEditing(null); setFormName(''); setFormDesc(''); setFormColor('#3b82f6'); setError(''); setPanelOpen(true); };
   const openEdit = (t: Tag) => { setEditing(t); setFormName(t.name); setFormDesc(t.description ?? ''); setFormColor(t.color); setError(''); setPanelOpen(true); };
 
-  const handleDelete = async (id: number) => {
-    if (!projectId || !confirm('Удалить?')) return;
-    try { await api.tags.delete(projectId, id); setTags(tags.filter(t => t.id !== id)); } catch (e: any) { alert(e.message); }
+  const handleDelete = async () => {
+    if (!projectId || !deleteId) return;
+    setDeleting(true);
+    try { await api.tags.delete(projectId, deleteId); setTags(tags.filter(t => t.id !== deleteId)); setDeleteId(null); } catch (e: any) { alert(e.message); } finally { setDeleting(false); }
   };
 
   const handleSave = async () => {
@@ -87,7 +91,7 @@ export function Tags() {
                 <DropdownMenuContent align="end" className="w-40">
                   <DropdownMenuItem onClick={() => openEdit(t)}><Edit2 size={14} />Редактировать</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem variant="destructive" onClick={() => handleDelete(t.id)}><Trash2 size={14} />Удалить</DropdownMenuItem>
+                  <DropdownMenuItem variant="destructive" onClick={() => setDeleteId(t.id)}><Trash2 size={14} />Удалить</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -113,6 +117,16 @@ export function Tags() {
           </div>
         </div>
       </SidePanel>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title="Удалить тег?"
+        description={`Тег «${tags.find(t => t.id === deleteId)?.name ?? ''}» будет удалён без возможности восстановления.`}
+        confirmLabel="Удалить"
+        onConfirm={handleDelete}
+        loading={deleting}
+      />
     </div>
   );
 }

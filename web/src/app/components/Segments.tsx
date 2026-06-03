@@ -9,6 +9,7 @@ import {
 } from './ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { SidePanel } from './SidePanel';
+import { ConfirmDialog } from './ConfirmDialog';
 import { api, SegmentResponse, ContextDefinition } from '../../api';
 
 interface SegmentContextEntry {
@@ -29,6 +30,8 @@ export function Segments() {
   const [formDesc, setFormDesc] = useState('');
   const [formContexts, setFormContexts] = useState<SegmentContextEntry[]>([]);
   const [error, setError] = useState('');
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     try {
@@ -56,9 +59,10 @@ export function Segments() {
     setError(''); setPanelOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!projectId || !confirm('Удалить?')) return;
-    try { await api.segments.delete(projectId, id); setSegments(segments.filter(s => s.id !== id)); } catch (e: any) { alert(e.message); }
+  const handleDelete = async () => {
+    if (!projectId || !deleteId) return;
+    setDeleting(true);
+    try { await api.segments.delete(projectId, deleteId); setSegments(segments.filter(s => s.id !== deleteId)); setDeleteId(null); } catch (e: any) { alert(e.message); } finally { setDeleting(false); }
   };
 
   const addContext = () => setFormContexts(prev => [...prev, { id: `sc-${Date.now()}`, contextDefinitionId: contexts[0]?.id ?? 0, contextValues: '' }]);
@@ -99,7 +103,7 @@ export function Segments() {
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem onClick={() => openEdit(s)}><Edit2 size={14} /> Редактировать</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive" onClick={() => handleDelete(s.id)}><Trash2 size={14} /> Удалить</DropdownMenuItem>
+                    <DropdownMenuItem variant="destructive" onClick={() => setDeleteId(s.id)}><Trash2 size={14} /> Удалить</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -203,6 +207,16 @@ export function Segments() {
           </div>
         </div>
       </SidePanel>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title="Удалить сегмент?"
+        description={`Сегмент «${segments.find(s => s.id === deleteId)?.name ?? ''}» будет удалён без возможности восстановления.`}
+        confirmLabel="Удалить"
+        onConfirm={handleDelete}
+        loading={deleting}
+      />
     </div>
   );
 }

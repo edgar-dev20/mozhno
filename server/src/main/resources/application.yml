@@ -27,3 +27,11 @@ jwt:
 
 audit:
   retention-days: 365
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tryItOutEnabled: true
+    filter: true
+  api-docs:
+    path: /v3/api-docs

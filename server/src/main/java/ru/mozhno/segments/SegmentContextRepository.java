@@ -4,8 +4,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
 @Repository
@@ -26,8 +29,42 @@ public class SegmentContextRepository {
         return sc;
     };
 
+    public static final class SegmentContextWithName {
+        private final Integer segmentId;
+        private final String contextDefinitionName;
+        private final String contextValues;
+
+        public SegmentContextWithName(Integer segmentId, String contextDefinitionName, String contextValues) {
+            this.segmentId = segmentId;
+            this.contextDefinitionName = contextDefinitionName;
+            this.contextValues = contextValues;
+        }
+
+        public Integer getSegmentId() { return segmentId; }
+        public String getContextDefinitionName() { return contextDefinitionName; }
+        public String getContextValues() { return contextValues; }
+    }
+
     public List<SegmentContext> findBySegmentId(Integer segmentId) {
         return jdbc.query("SELECT id, segment_id, context_definition_id, context_values, created_at FROM segment_contexts WHERE segment_id = ?", ROW_MAPPER, segmentId);
+    }
+
+    public List<SegmentContextWithName> findContextsBySegmentIds(List<Integer> segmentIds) {
+        if (segmentIds == null || segmentIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        String placeholders = String.join(",", Collections.nCopies(segmentIds.size(), "?"));
+        String sql = "SELECT sc.segment_id, cd.name as context_name, sc.context_values " +
+                     "FROM segment_contexts sc " +
+                     "JOIN context_definitions cd ON cd.id = sc.context_definition_id " +
+                     "WHERE sc.segment_id IN (" + placeholders + ") " +
+                     "ORDER BY sc.segment_id, sc.id";
+        return jdbc.query(sql, (rs, rowNum) ->
+            new SegmentContextWithName(
+                rs.getInt("segment_id"),
+                rs.getString("context_name"),
+                rs.getString("context_values")
+            ), segmentIds.toArray());
     }
 
     public void deleteBySegmentId(Integer segmentId) {

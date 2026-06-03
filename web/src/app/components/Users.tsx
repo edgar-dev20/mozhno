@@ -9,6 +9,7 @@ import {
 } from './ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { SidePanel } from './SidePanel';
+import { ConfirmDialog } from './ConfirmDialog';
 import { api, UserDto } from '../../api';
 
 export function Users() {
@@ -22,6 +23,8 @@ export function Users() {
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({ name: '', email: '', password: '', role: 'viewer', status: 'active' });
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const loadUsers = async () => {
     try {
@@ -56,14 +59,16 @@ export function Users() {
     setIsPanelOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Удалить этого пользователя?')) return;
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
     try {
-      await api.users.delete(id);
-      setUsers(users.filter(u => u.id !== id));
+      await api.users.delete(deleteId);
+      setUsers(users.filter(u => u.id !== deleteId));
+      setDeleteId(null);
     } catch (e: any) {
       alert(e.message);
-    }
+    } finally { setDeleting(false); }
   };
 
   const handleSave = async () => {
@@ -201,7 +206,7 @@ export function Users() {
                     <DropdownMenuContent align="end" className="w-40">
                       <DropdownMenuItem onClick={() => handleOpenEdit(user)}><Edit2 size={14} /> Редактировать</DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem variant="destructive" onClick={() => handleDelete(user.id)}><Trash2 size={14} /> Удалить</DropdownMenuItem>
+                      <DropdownMenuItem variant="destructive" onClick={() => setDeleteId(user.id)}><Trash2 size={14} /> Удалить</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </td>
@@ -241,6 +246,16 @@ export function Users() {
           }
         </div>
       </SidePanel>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title="Удалить пользователя?"
+        description={`Пользователь «${users.find(u => u.id === deleteId)?.name ?? users.find(u => u.id === deleteId)?.email ?? ''}» будет удалён без возможности восстановления.`}
+        confirmLabel="Удалить"
+        onConfirm={handleDelete}
+        loading={deleting}
+      />
     </div>
   );
 }

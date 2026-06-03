@@ -8,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { SidePanel } from './SidePanel';
+import { ConfirmDialog } from './ConfirmDialog';
 import { api, ContextDefinition } from '../../api';
 
 const TYPE_ICONS: Record<string, React.ReactNode> = { String: <Type size={14} />, Number: <Hash size={14} />, Boolean: <ToggleLeft size={14} />, SemVer: <Settings2 size={14} /> };
@@ -23,6 +24,8 @@ export function Constraints() {
   const [formName, setFormName] = useState('');
   const [formDesc, setFormDesc] = useState('');
   const [error, setError] = useState('');
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     try { const projects = await api.projects.list(); if (projects.length === 0) return setLoading(false); const pid = projects[0].id; setProjectId(pid); setContexts(await api.contexts.list(pid)); } catch (e) { console.error(e); } finally { setLoading(false); }
@@ -31,7 +34,7 @@ export function Constraints() {
 
   const openCreate = () => { setEditing(null); setFormName(''); setFormDesc(''); setError(''); setPanelOpen(true); };
   const openEdit = (c: ContextDefinition) => { setEditing(c); setFormName(c.name); setFormDesc(c.description ?? ''); setError(''); setPanelOpen(true); };
-  const handleDelete = async (id: number) => { if (!projectId || !confirm('Удалить?')) return; try { await api.contexts.delete(projectId, id); setContexts(contexts.filter(c => c.id !== id)); } catch (e: any) { alert(e.message); } };
+  const handleDelete = async () => { if (!projectId || !deleteId) return; setDeleting(true); try { await api.contexts.delete(projectId, deleteId); setContexts(contexts.filter(c => c.id !== deleteId)); setDeleteId(null); } catch (e: any) { alert(e.message); } finally { setDeleting(false); } };
   const handleSave = async () => {
     if (!projectId) return; setError(''); setSaving(true);
     try {
@@ -62,7 +65,7 @@ export function Constraints() {
                     <DropdownMenuContent align="end" className="w-40">
                       <DropdownMenuItem onClick={() => openEdit(c)}><Edit2 size={14} />Редактировать</DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem variant="destructive" onClick={() => handleDelete(c.id)}><Trash2 size={14} />Удалить</DropdownMenuItem>
+                      <DropdownMenuItem variant="destructive" onClick={() => setDeleteId(c.id)}><Trash2 size={14} />Удалить</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </td>
@@ -77,6 +80,16 @@ export function Constraints() {
         <div className="space-y-4"><div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Название</label><input type="text" value={formName} onChange={e => setFormName(e.target.value)} placeholder="Например: User ID" className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" /></div>
           <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Описание</label><textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} rows={3} className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" /></div></div>
       </SidePanel>
+
+      <ConfirmDialog
+        open={!!deleteId}
+        onOpenChange={(open) => { if (!open) setDeleteId(null); }}
+        title="Удалить контекст?"
+        description={`Контекст «${contexts.find(c => c.id === deleteId)?.name ?? ''}» будет удалён без возможности восстановления.`}
+        confirmLabel="Удалить"
+        onConfirm={handleDelete}
+        loading={deleting}
+      />
     </div>
   );
 }
