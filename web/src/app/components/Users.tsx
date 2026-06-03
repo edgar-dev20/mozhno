@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Mail, Shield, Clock, MoreHorizontal, Trash2, Edit2, Search } from 'lucide-react';
+import { Plus, Mail, Shield, Clock, MoreHorizontal, Trash2, Edit2, Search, Fingerprint } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   DropdownMenu,
@@ -162,7 +162,10 @@ export function Users() {
       <TipCard
         accentColor="#e11d48"
         accentColor2="#8b5cf6"
-        text="Роль «Разработчик» позволяет управлять флагами и сегментами, но не настройками проекта. «Администратор» имеет полный доступ, включая управление пользователями."
+        text="Минимум привилегий — золотое правило. Выдавайте роль «Разработчик» по умолчанию, а «Администратор» — только после review security-чата."
+        label="Zero Trust"
+        icon={<Fingerprint />}
+        storageKey="users"
       />
 
       <div className="flex items-center gap-2">

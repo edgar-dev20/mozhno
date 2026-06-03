@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Globe, Shield, Save, Plus, X } from 'lucide-react';
+import { Building2, Globe, Shield, Save, Plus, X, Cog } from 'lucide-react';
 import { api, Project, Environment, ProjectSettings } from '../../api';
 import { TipCard } from './TipCard';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -117,7 +117,10 @@ export function Settings() {
       <TipCard
         accentColor="#78716c"
         accentColor2="#57534e"
-        text="Рекомендуется включить MFA для всех пользователей с доступом к production-окружению. Настройте IP Whitelist для дополнительной защиты."
+        text="Прогоните security checklist раз в квартал: MFA, IP whitelist, audit log retention ≥ 90 дней. Одна галочка сегодня — минус инцидент завтра."
+        label="Чеклист"
+        icon={<Cog />}
+        storageKey="settings"
       />
 
       <div className="space-y-6">

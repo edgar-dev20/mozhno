@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, Clock, User, Activity, Flag, Users, Tag, Key, Layers, Globe, GitBranch, Blocks } from 'lucide-react';
+import { Filter, Clock, User, Activity, Flag, Users, Tag, Key, Layers, Globe, GitBranch, Blocks, ScanSearch } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api, AuditEvent, Environment, Project, SegmentResponse } from '../../api';
 import { TipCard } from './TipCard';
@@ -86,7 +86,10 @@ export function AuditLog() {
       <TipCard
         accentColor="#a855f7"
         accentColor2="#8b5cf6"
-        text="Все действия в системе логируются автоматически. Используйте фильтр по типу ресурса для быстрого поиска - например, отслеживайте только изменения флагов."
+        text="Настройте webhook на фильтр «production + изменение флага» — так вы получите алерт в Slack ещё до того, как пользователи заметят проблему."
+        label="Проактивность"
+        icon={<ScanSearch />}
+        storageKey="auditlog"
       />
 
       <div className="flex items-center gap-3 flex-wrap bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-3 shadow-sm">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Send, MessageSquare, Webhook, Save, AlertCircle, ChevronDown } from 'lucide-react';
+import { Mail, Send, MessageSquare, Webhook, Save, AlertCircle, ChevronDown, Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api, Integration } from '../../api';
 import { TipCard } from './TipCard';
@@ -78,7 +78,10 @@ export function Integrations() {
       <TipCard
         accentColor="#3b82f6"
         accentColor2="#8b5cf6"
-        text="Настройте вебхук или Telegram-бота, чтобы получать уведомления об изменениях флагов в реальном времени. Выберите события, на которые хотите подписаться."
+        text="Подпишите Telegram-бота на событие «flag.toggled» в production. Одно сообщение в моменте экономит часы расследования инцидента."
+        label="Алертинг"
+        icon={<Bell />}
+        storageKey="integrations"
       />
 
       <div className="space-y-6">

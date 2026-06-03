@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Users, Filter, MoreHorizontal, Edit2, Trash2, Settings, X } from 'lucide-react';
+import { Plus, Users, Filter, MoreHorizontal, Edit2, Trash2, Settings, X, PieChart } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   DropdownMenu,
@@ -105,7 +105,10 @@ export function Segments() {
       <TipCard
         accentColor="#14b8a6"
         accentColor2="#10b981"
-        text="Сегменты позволяют раскатывать флаги на конкретные группы пользователей. Комбинируйте сегменты с процентами для канареечных релизов — например, 10% пользователей из сегмента «Beta Testers»."
+        text="Прогревайте сегменты от внутренних тестеров к external beta и только потом на 100%. Каждый переход — это новая точка отката без даунтайма."
+        label="Стратегия"
+        icon={<PieChart />}
+        storageKey="segments"
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

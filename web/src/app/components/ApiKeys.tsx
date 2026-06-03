@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Key, Copy, Eye, EyeOff, Shield, Server, Smartphone, Plus, Trash2 } from 'lucide-react';
+import { Key, Copy, Eye, EyeOff, Shield, Server, Smartphone, Plus, Trash2, BadgeCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { api, ApiKey, Environment } from '../../api';
 import { TipCard } from './TipCard';
@@ -64,7 +64,10 @@ export function ApiKeys() {
       <TipCard
         accentColor="#f59e0b"
         accentColor2="#ea580c"
-        text="Server SDK ключи имеют полный доступ к данным и не должны попадать в браузерный код. Для фронтенда создавайте ключи с типом Client."
+        text="Ротируйте ключи каждые 90 дней и никогда не коммитьте их. Для CI/CD используйте separate key ring — компрометация одного не заденет остальные."
+        label="Best Practice"
+        icon={<BadgeCheck />}
+        storageKey="apikeys"
       />
 
       {creating && (

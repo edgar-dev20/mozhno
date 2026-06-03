@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, MoreHorizontal, Type, Hash, ToggleLeft, Globe, Monitor, Settings2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, MoreHorizontal, Type, Hash, ToggleLeft, Globe, Monitor, Settings2, Braces } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   DropdownMenu,
@@ -64,7 +64,10 @@ export function Constraints() {
       <TipCard
         accentColor="#0ea5e9"
         accentColor2="#6366f1"
-        text="Контекстные поля — это параметры запроса (user_id, страна, версия приложения), по которым флаг принимает решение. Чем точнее контекст, тем гибче таргетинг."
+        text="Карта контекстных полей — ваш DSL для таргетинга. Минимум: user_id и страна. Максимум: добавьте версию приложения и часовой пояс для сверхточных правил."
+        label="DSL"
+        icon={<Braces />}
+        storageKey="constraints"
       />
 
       <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden shadow-sm">

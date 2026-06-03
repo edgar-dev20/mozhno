@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import * as Switch from '@radix-ui/react-switch';
 import * as Slider from '@radix-ui/react-slider';
-import { Plus, Tag, Trash2, Percent, Users, Settings, X, Filter, Rocket, ShieldOff } from 'lucide-react';
+import { Plus, Tag, Trash2, Percent, Users, Settings, X, Filter, Rocket, ShieldOff, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SidePanel } from './SidePanel';
 import { TipCard } from './TipCard';
@@ -282,7 +282,10 @@ export function Flags() {
       <TipCard
         accentColor="#6366f1"
         accentColor2="#8b5cf6"
-        text="Используйте теги для группировки флагов по командам или модулям. Фильтруйте флаги по типу тега в панели над таблицей — это ускоряет навигацию при большом количестве флагов."
+        text="Держите число активных флагов под контролем — удаляйте те, что отработали больше двух спринтов. Старые флаги замедляют CI и забивают контекст команды."
+        label="Гигиена кода"
+        icon={<Zap />}
+        storageKey="flags"
       />
 
       {tags.length > 0 && (
