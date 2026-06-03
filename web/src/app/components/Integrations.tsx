@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Send, MessageSquare, Webhook, Save, AlertCircle, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { api, Integration } from '../../api';
+import { TipCard } from './TipCard';
 
 interface LocalCfg { enabled: boolean; configJson: string; eventsJson: string; }
 type TypeDef = { label: string; desc: string; icon: React.ReactNode; fields: { key: string; label: string; hint: string; type: string }[] };
@@ -52,23 +54,48 @@ export function Integrations() {
     } catch (e: any) { alert(e.message); }
   };
 
-  if (loading) return <div className="text-neutral-500">Загрузка...</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center py-20 gap-3">
+      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-100 to-fuchsia-100 dark:from-blue-500/10 dark:to-fuchsia-500/10 animate-pulse" />
+      <span className="text-sm text-neutral-400">Загрузка интеграций...</span>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">Интеграции</h1><p className="text-neutral-500 dark:text-neutral-400 mt-1">Настройка уведомлений и внешних интеграций</p></div>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            <span className="bg-gradient-to-r from-blue-400 via-violet-500 to-fuchsia-500 bg-clip-text text-transparent">Интеграции</span>
+          </h1>
+          <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex-shrink-0 w-1 h-1 rounded-full bg-gradient-to-b from-blue-500 to-fuchsia-500" />
+            <p className="text-sm text-neutral-500/80 dark:text-neutral-400/80 leading-relaxed">Настройка уведомлений и внешних интеграций</p>
+          </div>
+        </div>
       </div>
 
+      <TipCard
+        accentColor="#3b82f6"
+        accentColor2="#8b5cf6"
+        text="Настройте вебхук или Telegram-бота, чтобы получать уведомления об изменениях флагов в реальном времени. Выберите события, на которые хотите подписаться."
+      />
+
       <div className="space-y-6">
-        {Object.entries(TYPES).map(([key, def]) => {
+        {Object.entries(TYPES).map(([key, def], idx) => {
           const existing = items.find(i => i.type === key);
           const rawCfg = existing ? JSON.parse(existing.configJson) : {};
           const events = existing ? JSON.parse(existing.eventSubscriptionsJson) : [];
           const enabled = existing?.enabled ?? false;
           const isOpen = open.includes(key);
           return (
-            <div key={key} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm overflow-hidden">
+            <motion.div
+              key={key}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: idx * 0.06 }}
+              className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm overflow-hidden"
+            >
               <button onClick={() => toggleOpen(key)} className="w-full p-6 flex items-center justify-between hover:bg-neutral-50 dark:hover:bg-neutral-950 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 border border-blue-200 dark:border-violet-500/20">{def.icon}</div>
@@ -82,7 +109,7 @@ export function Integrations() {
               {isOpen && (
                 <IntegrationSection type={key} def={def} rawCfg={rawCfg} enabled={enabled} events={events} onSave={upsert} />
               )}
-            </div>
+            </motion.div>
           );
         })}
       </div>

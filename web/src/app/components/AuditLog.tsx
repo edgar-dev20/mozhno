@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Filter, Clock, User, Activity, Flag, Users, Tag, Key, Layers, Globe, GitBranch, Blocks } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { api, AuditEvent, Environment, Project, SegmentResponse } from '../../api';
+import { TipCard } from './TipCard';
 
 export function AuditLog() {
   const [events, setEvents] = useState<AuditEvent[]>([]);
@@ -72,12 +74,27 @@ export function AuditLog() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">Журнал событий</h1>
-        <p className="text-neutral-500 dark:text-neutral-400 mt-1">История всех действий в системе</p>
+        <h1 className="text-3xl font-bold tracking-tight">
+          <span className="bg-gradient-to-r from-neutral-600 via-purple-500 to-violet-500 bg-clip-text text-transparent dark:from-neutral-300 dark:via-purple-400 dark:to-violet-400">Журнал событий</span>
+        </h1>
+        <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex-shrink-0 w-1 h-1 rounded-full bg-gradient-to-b from-purple-500 to-violet-500" />
+          <p className="text-sm text-neutral-500/80 dark:text-neutral-400/80 leading-relaxed">История всех действий в системе</p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2 text-sm font-medium text-neutral-600 dark:text-neutral-400"><Filter size={16} />Тип:</div>
+      <TipCard
+        accentColor="#a855f7"
+        accentColor2="#8b5cf6"
+        text="Все действия в системе логируются автоматически. Используйте фильтр по типу ресурса для быстрого поиска - например, отслеживайте только изменения флагов."
+      />
+
+      <div className="flex items-center gap-3 flex-wrap bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-3 shadow-sm">
+        <div className="flex items-center gap-2 text-sm font-semibold text-neutral-600 dark:text-neutral-400 px-1">
+          <Filter size={15} className="text-purple-500" />
+          <span className="hidden sm:inline">Фильтр:</span>
+        </div>
+        <div className="h-6 w-px bg-neutral-200 dark:border-neutral-800 hidden sm:block" />
         <button onClick={() => setFilterType(null)} className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${filterType === null ? 'bg-gradient-to-r from-blue-600 to-violet-600 text-white shadow-sm' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800'}`}>Все</button>
         {['flag', 'user', 'tag', 'apikey', 'segment', 'project', 'environment', 'context', 'strategy', 'integration'].map(type => (
           <button key={type} onClick={() => setFilterType(type)}
@@ -88,16 +105,32 @@ export function AuditLog() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-neutral-500">Загрузка...</div>
+        <div className="flex flex-col items-center justify-center py-20 gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-500/10 dark:to-violet-500/10 animate-pulse" />
+          <span className="text-sm text-neutral-400">Загрузка событий...</span>
+        </div>
       ) : filteredEvents.length === 0 ? (
-        <div className="text-center py-12">
-          <Activity size={48} className="mx-auto text-neutral-300 dark:text-neutral-700 mb-3" />
-          <p className="text-neutral-600 dark:text-neutral-400">Нет событий</p>
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-500/10 dark:to-violet-500/10 flex items-center justify-center">
+            <Activity size={28} className="text-purple-500 dark:text-purple-400" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Нет событий</p>
+            <p className="text-xs text-neutral-400 mt-1">{filterType ? 'Попробуйте выбрать другой тип фильтра' : 'События появятся здесь после действий с флагами, тегами и настройками'}</p>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
-          {filteredEvents.map(event => (
-            <div key={event.id} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors shadow-sm">
+          <AnimatePresence mode="popLayout">
+          {filteredEvents.map((event, idx) => (
+            <motion.div
+              key={event.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.18, delay: idx * 0.02 }}
+              className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors shadow-sm"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3 flex-1">
                   <div className={`p-2 rounded-lg border ${getResourceColor(event.resourceType)}`}>{getResourceIcon(event.resourceType)}</div>
@@ -117,8 +150,9 @@ export function AuditLog() {
                 </div>
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${getResourceColor(event.resourceType)}`}>{getResourceIcon(event.resourceType)}{getResourceLabel(event.resourceType)}</span>
               </div>
-            </div>
+            </motion.div>
           ))}
+          </AnimatePresence>
         </div>
       )}
     </div>

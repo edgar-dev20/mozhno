@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Building2, Globe, Shield, Save, Plus, X } from 'lucide-react';
 import { api, Project, Environment, ProjectSettings } from '../../api';
+import { TipCard } from './TipCard';
 import { ConfirmDialog } from './ConfirmDialog';
 
 export function Settings() {
@@ -94,20 +95,38 @@ export function Settings() {
     } catch (e: any) { alert(e.message); } finally { setSavingSecurity(false); }
   };
 
-  if (loading) return <div className="text-neutral-500">Загрузка...</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center py-20 gap-3">
+      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-zinc-100 to-stone-100 dark:from-zinc-500/10 dark:to-stone-500/10 animate-pulse" />
+      <span className="text-sm text-neutral-400">Загрузка настроек...</span>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">Настройки</h1>
-        <p className="text-neutral-500 dark:text-neutral-400 mt-1">Управление общими параметрами системы</p>
+        <h1 className="text-3xl font-bold tracking-tight">
+          <span className="bg-gradient-to-r from-neutral-700 via-zinc-600 to-stone-600 dark:from-zinc-200 dark:via-stone-300 dark:to-neutral-300 bg-clip-text text-transparent">Настройки</span>
+        </h1>
+        <div className="flex items-center gap-2 mt-1.5">
+          <div className="flex-shrink-0 w-1 h-1 rounded-full bg-gradient-to-b from-zinc-500 to-stone-500 dark:from-zinc-400 dark:to-stone-400" />
+          <p className="text-sm text-neutral-500/80 dark:text-neutral-400/80 leading-relaxed">Управление общими параметрами системы</p>
+        </div>
       </div>
+
+      <TipCard
+        accentColor="#78716c"
+        accentColor2="#57534e"
+        text="Рекомендуется включить MFA для всех пользователей с доступом к production-окружению. Настройте IP Whitelist для дополнительной защиты."
+      />
 
       <div className="space-y-6">
         {/* Project */}
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <Building2 size={20} className="text-blue-600 dark:text-blue-400" />
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/10 dark:to-blue-500/20 border border-blue-200/50 dark:border-blue-500/20">
+              <Building2 size={20} className="text-blue-600 dark:text-blue-400" />
+            </div>
             <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Проект</h2>
           </div>
           <div className="space-y-4">
@@ -129,9 +148,11 @@ export function Settings() {
         </div>
 
         {/* Environments */}
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <Globe size={20} className="text-violet-600 dark:text-violet-400" />
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-500/10 dark:to-violet-500/20 border border-violet-200/50 dark:border-violet-500/20">
+              <Globe size={20} className="text-violet-600 dark:text-violet-400" />
+            </div>
             <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Окружения</h2>
           </div>
           <div className="space-y-3">
@@ -158,9 +179,11 @@ export function Settings() {
         </div>
 
         {/* Security */}
-        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <Shield size={20} className="text-red-600 dark:text-red-400" />
+        <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-red-50 to-red-100 dark:from-red-500/10 dark:to-red-500/20 border border-red-200/50 dark:border-red-500/20">
+              <Shield size={20} className="text-red-600 dark:text-red-400" />
+            </div>
             <h2 className="text-lg font-semibold text-neutral-900 dark:text-white">Безопасность</h2>
           </div>
           <div className="space-y-4">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, MoreHorizontal, Type, Hash, ToggleLeft, Globe, Monitor, Settings2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { SidePanel } from './SidePanel';
+import { TipCard } from './TipCard';
 import { ConfirmDialog } from './ConfirmDialog';
 import { api, ContextDefinition } from '../../api';
 
@@ -46,15 +48,52 @@ export function Constraints() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between"><div><h1 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">Контексты</h1><p className="text-neutral-500 dark:text-neutral-400 mt-1">Поля контекста для таргетинга флагов</p></div><button onClick={openCreate} className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2"><Plus size={18} />Добавить контекст</button></div>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            <span className="bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent">Контексты</span>
+          </h1>
+          <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex-shrink-0 w-1 h-1 rounded-full bg-gradient-to-b from-sky-500 to-indigo-500" />
+            <p className="text-sm text-neutral-500/80 dark:text-neutral-400/80 leading-relaxed">Поля контекста для таргетинга флагов</p>
+          </div>
+        </div>
+        <button onClick={openCreate} className="bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all active:scale-95"><Plus size={18} />Добавить контекст</button>
+      </div>
+
+      <TipCard
+        accentColor="#0ea5e9"
+        accentColor2="#6366f1"
+        text="Контекстные поля — это параметры запроса (user_id, страна, версия приложения), по которым флаг принимает решение. Чем точнее контекст, тем гибче таргетинг."
+      />
 
       <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden shadow-sm">
         <table className="w-full text-left"><thead className="bg-neutral-50 dark:bg-neutral-800/50 border-b border-neutral-200 dark:border-neutral-800"><tr className="text-sm font-medium text-neutral-500 dark:text-neutral-400"><th className="px-6 py-3">Название</th><th className="px-6 py-3">Ключ</th><th className="px-6 py-3">Тип</th><th className="px-6 py-3">Описание</th><th className="px-6 py-3 w-16"></th></tr></thead>
           <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-            {loading ? <tr><td colSpan={5} className="px-6 py-8 text-center text-neutral-500">Загрузка...</td></tr>
-            : contexts.length === 0 ? <tr><td colSpan={5} className="px-6 py-8 text-center text-neutral-500">Нет контекстов</td></tr>
-            : contexts.map(c => (
-              <tr key={c.id} className="group hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+            {loading ? <tr><td colSpan={5} className="px-6 py-16 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-100 to-indigo-100 dark:from-sky-500/10 dark:to-indigo-500/10 animate-pulse" />
+                <span className="text-sm text-neutral-400">Загрузка...</span>
+              </div></td></tr>
+            : contexts.length === 0 ? <tr><td colSpan={5} className="px-6 py-16 text-center">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-100 to-indigo-100 dark:from-sky-500/10 dark:to-indigo-500/10 flex items-center justify-center">
+                  <Settings2 size={24} className="text-sky-500 dark:text-sky-400" />
+                </div>
+                <div><p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Нет контекстов</p><p className="text-xs text-neutral-400 mt-1">Добавьте контекстные поля для точного таргетинга</p></div>
+                <button onClick={openCreate} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-gradient-to-r from-sky-600 to-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all"><Plus size={14} />Добавить контекст</button>
+              </div></td></tr>
+            : (
+              <AnimatePresence mode="popLayout">
+                {contexts.map((c, idx) => (
+              <motion.tr
+                key={c.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -16 }}
+                transition={{ duration: 0.18, delay: idx * 0.025 }}
+                className="group hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
+              >
                 <td className="px-6 py-4"><span className="font-medium text-neutral-900 dark:text-white">{c.name}</span></td>
                 <td className="px-6 py-4"><code className="text-xs font-mono text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded">{c.id}</code></td>
                 <td className="px-6 py-4"><span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${TYPE_COLORS.String}`}>{TYPE_ICONS.String}String</span></td>
@@ -69,13 +108,15 @@ export function Constraints() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              </motion.tr>
+              ))}
+                </AnimatePresence>
+              )}
+            </tbody>
+          </table>
       </div>
 
-      <SidePanel open={panelOpen} onOpenChange={setPanelOpen} title={editing ? 'Редактировать' : 'Новый контекст'} footer={<><button onClick={() => setPanelOpen(false)} className="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">Отмена</button><button onClick={handleSave} disabled={saving || !formName} className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-lg">{saving ? 'Сохранение...' : 'Сохранить'}</button></>}>
+      <SidePanel open={panelOpen} onOpenChange={setPanelOpen} title={editing ? 'Редактировать' : 'Новый контекст'} description={editing ? 'Измените название или описание контекстного поля' : 'Контекстные поля используются для условий таргетинга в стратегиях флагов'} footer={<><button onClick={() => setPanelOpen(false)} className="px-5 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors">Отмена</button><button onClick={handleSave} disabled={saving || !formName} className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 disabled:opacity-40 rounded-xl shadow-lg shadow-indigo-500/20 transition-all">{saving ? 'Сохранение...' : 'Сохранить'}</button></>}>
         {error && <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-sm text-red-700 mb-4">{error}</div>}
         <div className="space-y-4"><div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Название</label><input type="text" value={formName} onChange={e => setFormName(e.target.value)} placeholder="Например: User ID" className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" /></div>
           <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Описание</label><textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} rows={3} className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" /></div></div>

@@ -2,7 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import * as Switch from '@radix-ui/react-switch';
 import * as Slider from '@radix-ui/react-slider';
 import { Plus, Tag, Trash2, Percent, Users, Settings, X, Filter, Rocket, ShieldOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { SidePanel } from './SidePanel';
+import { TipCard } from './TipCard';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { api, FlagResponse, FlagRequest, Tag as TagType, Environment, SegmentResponse, FlagStrategy, StrategyRequest, FlagTagValue, ContextDefinition, ContextValue } from '../../api';
@@ -264,10 +266,24 @@ export function Flags() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">Feature Flags</h1><p className="text-neutral-500 dark:text-neutral-400 mt-1">Управляйте доступностью функций во всех окружениях</p></div>
-        <button onClick={openCreate} className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm"><Plus size={18} />Создать флаг</button>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            <span className="bg-gradient-to-r from-blue-400 via-violet-500 to-purple-500 bg-clip-text text-transparent">Feature Flags</span>
+          </h1>
+          <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex-shrink-0 w-1 h-1 rounded-full bg-gradient-to-b from-blue-500 to-violet-500" />
+            <p className="text-sm text-neutral-500/80 dark:text-neutral-400/80 leading-relaxed">Управляйте доступностью функций во всех окружениях</p>
+          </div>
+        </div>
+        <button onClick={openCreate} className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all active:scale-95"><Plus size={18} />Создать флаг</button>
       </div>
+
+      <TipCard
+        accentColor="#6366f1"
+        accentColor2="#8b5cf6"
+        text="Используйте теги для группировки флагов по командам или модулям. Фильтруйте флаги по типу тега в панели над таблицей — это ускоряет навигацию при большом количестве флагов."
+      />
 
       {tags.length > 0 && (
         <div className="space-y-3">
@@ -296,10 +312,37 @@ export function Flags() {
           <table className="w-full text-left border-collapse">
             <thead><tr className="border-b border-neutral-200 dark:border-neutral-800 text-sm font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/50"><th className="px-6 py-4">Название & Ключ</th><th className="px-6 py-4">Тип</th>{environments.map(env => (<th key={env.id} className="px-6 py-4 text-center"><div className="flex items-center justify-center gap-1.5">{env.name}</div></th>))}</tr></thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-              {loading ? <tr><td colSpan={2 + environments.length} className="px-6 py-12 text-center text-neutral-500">Загрузка...</td></tr>
-              : filtered.length === 0 ? <tr><td colSpan={2 + environments.length} className="px-6 py-12 text-center text-neutral-500">Нет флагов</td></tr>
-              : filtered.map(flag => (
-                <tr key={flag.key} className="group hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
+              {loading ? <tr><td colSpan={2 + environments.length} className="px-6 py-16 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 dark:from-blue-500/10 dark:to-violet-500/10 animate-pulse" />
+                  <span className="text-sm text-neutral-400">Загрузка флагов...</span>
+                </div>
+              </td></tr>
+              : filtered.length === 0 ? <tr><td colSpan={2 + environments.length} className="px-6 py-16 text-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 dark:from-blue-500/10 dark:to-violet-500/10 flex items-center justify-center">
+                    <Rocket size={24} className="text-blue-500 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Нет флагов</p>
+                    <p className="text-xs text-neutral-400 mt-1">Создайте первый флаг для управления функциональностью</p>
+                  </div>
+                  <button onClick={openCreate} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-xl shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all">
+                    <Plus size={14} />Создать флаг
+                  </button>
+                </div>
+              </td></tr>
+              : (
+                <AnimatePresence mode="popLayout">
+                  {filtered.map((flag, idx) => (
+                    <motion.tr
+                      key={flag.key}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      transition={{ duration: 0.2, delay: idx * 0.025 }}
+                      className="group hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
+                    >
                   <td className="px-6 py-4 cursor-pointer" onClick={() => openGeneral(flag)}>
                     <div className="font-medium text-neutral-900 dark:text-neutral-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-violet-600 hover:bg-clip-text hover:text-transparent">{flag.name}</div>
                     <div className="text-xs font-mono text-neutral-500 mt-0.5">{flag.key}</div>
@@ -310,8 +353,10 @@ export function Flags() {
                     const es = flag.environments[env.id];
                     return (<td key={env.id} className="px-6 py-4">{es ? (<div className="flex flex-col items-center gap-1.5"><div className="flex items-center gap-2"><Switch.Root checked={es.enabled} onCheckedChange={() => toggleFlag(flag, env.id)} className={`w-[42px] h-[24px] rounded-full relative outline-none cursor-pointer transition-colors ${es.enabled ? 'bg-emerald-500' : 'bg-neutral-300 dark:bg-neutral-700'}`}><Switch.Thumb className={`block w-[20px] h-[20px] bg-white rounded-full transition-transform translate-x-[2px] will-change-transform ${es.enabled ? 'translate-x-[20px]' : ''} shadow-sm`} /></Switch.Root><div className="flex items-center gap-0.5 text-xs font-medium text-neutral-600 dark:text-neutral-400 min-w-[42px] justify-center"><Percent size={10} />{es.percentage ?? 100}</div></div><button onClick={() => openEnvironment(flag, env.id)} className="text-xs bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent font-medium opacity-0 group-hover:opacity-100 transition-opacity">Настроить</button></div>) : <span className="text-sm text-neutral-400">—</span>}</td>);
                   })}
-                </tr>
-              ))}
+                </motion.tr>
+                  ))}
+                </AnimatePresence>
+              )}
             </tbody>
           </table>
         </div>
@@ -322,8 +367,8 @@ export function Flags() {
         title={editing.mode === 'create' ? 'Новый флаг' : editing.mode === 'general' ? 'Настройки флага' : `Таргетинг для ${environments.find(e => e.id === editing.envId)?.name ?? ''}`}
         description={editing.mode === 'create' ? 'Флаг будет создан для всех окружений (Production и Development)' : editing.mode === 'general' ? 'Общие настройки флага применяются ко всем окружениям' : 'Настройте таргетинг и раскатку для этого окружения'}
         footer={<>
-          <button onClick={() => setPanelOpen(false)} className="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">Отмена</button>
-          <button onClick={handleSave} disabled={saving || (editing.mode === 'create' && (!formName || !formKey)) || (editing.mode === 'general' && !formName) || (editing.mode === 'environment' && !isEnvDirty)} className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:opacity-50 rounded-lg">{saving ? 'Сохранение...' : editing.mode === 'create' ? 'Создать флаг' : 'Сохранить изменения'}</button>
+          <button onClick={() => setPanelOpen(false)} className="px-5 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors">Отмена</button>
+          <button onClick={handleSave} disabled={saving || (editing.mode === 'create' && (!formName || !formKey)) || (editing.mode === 'general' && !formName) || (editing.mode === 'environment' && !isEnvDirty)} className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:opacity-40 rounded-xl shadow-lg shadow-violet-500/20 transition-all">{saving ? 'Сохранение...' : editing.mode === 'create' ? 'Создать флаг' : 'Сохранить изменения'}</button>
         </>}>
         <div className="space-y-5">
           {error && <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-sm text-red-700">{error}</div>}

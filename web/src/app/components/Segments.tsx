@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Users, Filter, MoreHorizontal, Edit2, Trash2, Settings, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { TipCard } from './TipCard';
 import { SidePanel } from './SidePanel';
 import { ConfirmDialog } from './ConfirmDialog';
 import { api, SegmentResponse, ContextDefinition } from '../../api';
@@ -87,19 +89,60 @@ export function Segments() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-neutral-900 dark:text-white tracking-tight">Сегменты</h1><p className="text-neutral-500 dark:text-neutral-400 mt-1">Создавайте аудитории для таргетирования фиче-флагов</p></div>
-        <button onClick={openCreate} className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"><Plus size={18} />Создать сегмент</button>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            <span className="bg-gradient-to-r from-teal-400 via-emerald-500 to-green-500 bg-clip-text text-transparent">Сегменты</span>
+          </h1>
+          <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex-shrink-0 w-1 h-1 rounded-full bg-gradient-to-b from-teal-500 to-green-500" />
+            <p className="text-sm text-neutral-500/80 dark:text-neutral-400/80 leading-relaxed">Создавайте аудитории для таргетирования фиче-флагов</p>
+          </div>
+        </div>
+        <button onClick={openCreate} className="bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all active:scale-95"><Plus size={18} />Создать сегмент</button>
       </div>
 
+      <TipCard
+        accentColor="#14b8a6"
+        accentColor2="#10b981"
+        text="Сегменты позволяют раскатывать флаги на конкретные группы пользователей. Комбинируйте сегменты с процентами для канареечных релизов — например, 10% пользователей из сегмента «Beta Testers»."
+      />
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {loading ? <p className="text-neutral-500 col-span-full">Загрузка...</p> : segments.length === 0 ? <p className="text-neutral-500 col-span-full">Нет сегментов</p> :
-          segments.map(s => (
-            <div key={s.id} className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-6 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors shadow-sm relative group">
+        {loading ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-500/10 dark:to-emerald-500/10 animate-pulse" />
+            <span className="text-sm text-neutral-400">Загрузка сегментов...</span>
+          </div>
+        ) : segments.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-500/10 dark:to-emerald-500/10 flex items-center justify-center">
+              <Users size={28} className="text-teal-500 dark:text-teal-400" />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Нет сегментов</p>
+              <p className="text-xs text-neutral-400 mt-1">Создайте сегменты для таргетинга по аудиториям</p>
+            </div>
+            <button onClick={openCreate} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all"><Plus size={14} />Создать сегмент</button>
+          </div>
+        ) :
+          <AnimatePresence mode="popLayout">
+            {segments.map((s, idx) => (
+            <motion.div
+              key={s.id}
+              layout
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2, delay: idx * 0.03 }}
+              className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all relative group"
+            >
+              <div className="h-1.5 bg-gradient-to-r from-teal-500 to-emerald-500" />
+              <div className="p-6">
               <div className="flex justify-between items-start mb-4">
-                <div className="bg-indigo-50 dark:bg-indigo-500/10 p-2.5 rounded-lg text-indigo-600 dark:text-indigo-400 cursor-pointer" onClick={() => openEdit(s)}><Users size={24} /></div>
+                <div className="bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-500/10 dark:to-emerald-500/10 p-2.5 rounded-xl text-teal-600 dark:text-teal-400 cursor-pointer" onClick={() => openEdit(s)}><Users size={24} /></div>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild><button className="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 outline-none p-1 rounded hover:bg-neutral-100 dark:hover:bg-neutral-800"><MoreHorizontal size={20} /></button></DropdownMenuTrigger>
+                  <DropdownMenuTrigger asChild><button className="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 outline-none p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-all"><MoreHorizontal size={20} /></button></DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem onClick={() => openEdit(s)}><Edit2 size={14} /> Редактировать</DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -107,7 +150,7 @@ export function Segments() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <h3 className="text-lg font-medium text-neutral-900 dark:text-white mb-1 cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400" onClick={() => openEdit(s)}>{s.name}</h3>
+              <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-1.5 cursor-pointer hover:bg-gradient-to-r hover:from-teal-600 hover:to-emerald-600 hover:bg-clip-text hover:text-transparent transition-colors" onClick={() => openEdit(s)}>{s.name}</h3>
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-6 line-clamp-2 h-10">{s.description}</p>
               <div className="space-y-3">
                 <div className="flex items-center gap-2 text-sm"><Users size={16} className="text-neutral-400 dark:text-neutral-500" /><span className="text-neutral-600 dark:text-neutral-300">~{(s.context ?? []).length} контекстов</span></div>
@@ -129,14 +172,16 @@ export function Segments() {
                   </div>
                 )}
               </div>
-            </div>
-          ))
+              </div>
+            </motion.div>
+            ))}
+              </AnimatePresence>
         }
       </div>
 
       <SidePanel open={panelOpen} onOpenChange={setPanelOpen} title={editing ? 'Редактировать сегмент' : 'Новый сегмент'} description="Настройте название и правила таргетинга для сегмента аудитории" footer={<>
-        <button onClick={() => setPanelOpen(false)} className="px-4 py-2 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">Отмена</button>
-        <button onClick={handleSave} disabled={saving || !formName} className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 rounded-lg">{saving ? 'Сохранение...' : editing ? 'Сохранить' : 'Создать'}</button>
+        <button onClick={() => setPanelOpen(false)} className="px-5 py-2.5 text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-xl transition-colors">Отмена</button>
+        <button onClick={handleSave} disabled={saving || !formName} className="px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 disabled:opacity-40 rounded-xl shadow-lg shadow-emerald-500/20 transition-all">{saving ? 'Сохранение...' : editing ? 'Сохранить' : 'Создать'}</button>
       </>}>
         <div className="space-y-5">
           {error && <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-sm text-red-700">{error}</div>}
