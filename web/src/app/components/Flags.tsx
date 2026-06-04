@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import * as Switch from '@radix-ui/react-switch';
 import * as Slider from '@radix-ui/react-slider';
+import { Switch } from './ui/switch';
 import { Plus, Tag, Trash2, Percent, Users, Settings, X, Filter, Rocket, ShieldOff, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SidePanel } from './SidePanel';
@@ -313,15 +313,15 @@ export function Flags() {
       <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead><tr className="border-b border-neutral-200 dark:border-neutral-800 text-sm font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/50"><th className="px-6 py-4">Название & Ключ</th><th className="px-6 py-4">Тип</th>{environments.map(env => (<th key={env.id} className="px-6 py-4 text-center"><div className="flex items-center justify-center gap-1.5">{env.name}</div></th>))}</tr></thead>
+            <thead><tr className="border-b border-neutral-200 dark:border-neutral-800 text-sm font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/50"><th className="px-6 py-4">Название & Ключ</th>{environments.map(env => (<th key={env.id} className="px-6 py-4 text-center"><div className="flex items-center justify-center gap-1.5">{env.name}</div></th>))}</tr></thead>
             <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-              {loading ? <tr><td colSpan={2 + environments.length} className="px-6 py-16 text-center">
+              {loading ? <tr><td colSpan={1 + environments.length} className="px-6 py-16 text-center">
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 dark:from-blue-500/10 dark:to-violet-500/10 animate-pulse" />
                   <span className="text-sm text-neutral-400">Загрузка флагов...</span>
                 </div>
               </td></tr>
-              : filtered.length === 0 ? <tr><td colSpan={2 + environments.length} className="px-6 py-16 text-center">
+              : filtered.length === 0 ? <tr><td colSpan={1 + environments.length} className="px-6 py-16 text-center">
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 dark:from-blue-500/10 dark:to-violet-500/10 flex items-center justify-center">
                     <Rocket size={24} className="text-blue-500 dark:text-blue-400" />
@@ -347,14 +347,16 @@ export function Flags() {
                       className="group hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
                     >
                   <td className="px-6 py-4 cursor-pointer" onClick={() => openGeneral(flag)}>
-                    <div className="font-medium text-neutral-900 dark:text-neutral-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-violet-600 hover:bg-clip-text hover:text-transparent">{flag.name}</div>
+                    <div className="flex items-center gap-2.5">
+                      <div className="font-medium text-neutral-900 dark:text-neutral-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-violet-600 hover:bg-clip-text hover:text-transparent">{flag.name}</div>
+                      {(() => { const Icon = getTypeIcon(flag.flagType); return (<span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getTypeColor(flag.flagType)}`}><Icon size={10} />{getTypeLabel(flag.flagType)}</span>); })()}
+                    </div>
                     <div className="text-xs font-mono text-neutral-500 mt-0.5">{flag.key}</div>
                     {flag.tags.length > 0 && (<div className="flex items-center gap-1.5 mt-2 flex-wrap">{flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}</div>)}
                   </td>
-                  <td className="px-6 py-4">{(() => { const Icon = getTypeIcon(flag.flagType); return (<span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border ${getTypeColor(flag.flagType)}`}><Icon size={12} />{getTypeLabel(flag.flagType)}</span>); })()}</td>
                   {environments.map(env => {
                     const es = flag.environments[env.id];
-                    return (<td key={env.id} className="px-6 py-4">{es ? (<div className="flex flex-col items-center gap-1.5"><div className="flex items-center gap-2"><Switch.Root checked={es.enabled} onCheckedChange={() => toggleFlag(flag, env.id)} className={`w-[42px] h-[24px] rounded-full relative outline-none cursor-pointer transition-colors ${es.enabled ? 'bg-emerald-500' : 'bg-neutral-300 dark:bg-neutral-700'}`}><Switch.Thumb className={`block w-[20px] h-[20px] bg-white rounded-full transition-transform translate-x-[2px] will-change-transform ${es.enabled ? 'translate-x-[20px]' : ''} shadow-sm`} /></Switch.Root><div className="flex items-center gap-0.5 text-xs font-medium text-neutral-600 dark:text-neutral-400 min-w-[42px] justify-center"><Percent size={10} />{es.percentage ?? 100}</div></div><button onClick={() => openEnvironment(flag, env.id)} className="text-xs bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent font-medium opacity-0 group-hover:opacity-100 transition-opacity">Настроить</button></div>) : <span className="text-sm text-neutral-400">—</span>}</td>);
+                    return (<td key={env.id} className="px-6 py-4">{es ? (<div className="flex items-center justify-center gap-2"><Switch checked={es.enabled} onCheckedChange={() => toggleFlag(flag, env.id)} className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-violet-500" /><span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[11px] font-semibold min-w-[42px] justify-center select-none transition-colors ${es.enabled ? 'bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}><Percent size={9} />{es.percentage ?? 100}</span><button onClick={() => openEnvironment(flag, env.id)} className="flex items-center justify-center size-[22px] rounded-md text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-violet-50 dark:hover:from-blue-500/10 dark:hover:to-violet-500/10 transition-colors" title="Настроить"><Settings size={13} /></button></div>) : <span className="text-sm text-neutral-400">—</span>}</td>);
                   })}
                 </motion.tr>
                   ))}
