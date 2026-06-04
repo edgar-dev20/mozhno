@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import * as Slider from '@radix-ui/react-slider';
 import { Switch } from './ui/switch';
-import { Plus, Tag, Trash2, Percent, Users, Settings, X, Filter, Rocket, ShieldOff, Zap } from 'lucide-react';
+import { Plus, Tag, Trash2, Percent, Users, Settings, X, Filter, Rocket, ShieldOff, Zap, Archive, ArchiveRestore } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { motion, AnimatePresence } from 'motion/react';
 import { SidePanel } from './SidePanel';
 import { TipCard } from './TipCard';
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { api, FlagResponse, FlagRequest, Tag as TagType, Environment, SegmentResponse, FlagStrategy, StrategyRequest, FlagTagValue, ContextDefinition, ContextValue } from '../../api';
 
 interface EnvState { enabled: boolean; percentage: number; segmentIds: number[]; strategyId: number | null; contextDefinitionId: number | null; contextValuesJson: string | null; }
-interface FlagView { key: string; name: string; description: string; flagType: string; tags: FlagTagValue[]; flagId: number; environments: Record<number, EnvState>; }
+interface FlagView { key: string; name: string; description: string; flagType: string; tags: FlagTagValue[]; flagId: number; environments: Record<number, EnvState>; archived: boolean; }
 
 interface ConstraintEntry {
   contextDefId: number;
@@ -54,8 +55,11 @@ export function Flags() {
 
   const [selectedTagTypeFilter, setSelectedTagTypeFilter] = useState<number | null>(null);
   const [selectedTagValueFilter, setSelectedTagValueFilter] = useState<string | null>(null);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<FlagView | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [archiveTarget, setArchiveTarget] = useState<FlagView | null>(null);
+  const [archiving, setArchiving] = useState(false);
 
   const loadProject = useCallback(async () => {
     try {
@@ -88,7 +92,7 @@ export function Flags() {
     try {
       const envs = environments.length > 0 ? environments : await api.environments.list(projectId);
       const [base, segs, tg, ctx] = await Promise.all([
-        api.flags.list(projectId),
+        api.flags.list(projectId, undefined, true),
         api.segments.list(projectId),
         api.tags.list(projectId),
         api.contexts.list(projectId),
@@ -97,12 +101,12 @@ export function Flags() {
 
       const byKey = new Map<string, FlagView>();
       for (const f of base) {
-        if (!byKey.has(f.key)) byKey.set(f.key, { key: f.key, name: f.name, description: f.description ?? '', flagType: f.flagType, tags: f.tags ?? [], flagId: f.id, environments: {} });
+        if (!byKey.has(f.key)) byKey.set(f.key, { key: f.key, name: f.name, description: f.description ?? '', flagType: f.flagType, tags: f.tags ?? [], flagId: f.id, environments: {}, archived: f.archived });
       }
       for (const env of envs) {
         const envFlags = await api.flags.list(projectId, env.id);
         for (const f of envFlags) {
-          const v = byKey.get(f.key) ?? byKey.set(f.key, { key: f.key, name: f.name, description: f.description ?? '', flagType: f.flagType, tags: f.tags ?? [], flagId: f.id, environments: {} }).get(f.key)!;
+          const v = byKey.get(f.key) ?? byKey.set(f.key, { key: f.key, name: f.name, description: f.description ?? '', flagType: f.flagType, tags: f.tags ?? [], flagId: f.id, environments: {}, archived: f.archived }).get(f.key)!;
           v.environments[env.id] = { enabled: f.enabled, percentage: f.percentage ?? 100, segmentIds: f.segmentIds ?? [], strategyId: f.strategyId ?? null, contextDefinitionId: f.contextDefinitionId ?? null, contextValuesJson: f.contextValuesJson ?? null };
         }
       }
@@ -162,6 +166,25 @@ export function Flags() {
       setFlags(flags.filter(f => f.key !== deleteTarget.key));
       setDeleteTarget(null);
     } catch (e: any) { alert(e.message); } finally { setDeleting(false); }
+  };
+
+  const handleArchive = async () => {
+    if (!projectId || !archiveTarget) return;
+    setArchiving(true);
+    try {
+      await api.flags.archive(projectId, archiveTarget.flagId);
+      setArchiveTarget(null);
+      setPanelOpen(false);
+      await loadFlags();
+    } catch (e: any) { alert(e.message); } finally { setArchiving(false); }
+  };
+
+  const handleUnarchive = async (flag: FlagView) => {
+    if (!projectId) return;
+    try {
+      await api.flags.unarchive(projectId, flag.flagId);
+      await loadFlags();
+    } catch (e: any) { alert(e.message); }
   };
 
   const handleSave = async () => {
@@ -260,8 +283,10 @@ export function Flags() {
   };
   const getTypeLabel = (t: string) => t === 'RELEASE' ? 'Релиз' : t === 'KILLSWITCH' ? 'Рубильник' : t;
 
-  let filtered = flags;
+  let filtered = flags.filter(f => !f.archived);
   if (selectedTagTypeFilter) filtered = filtered.filter(f => f.tags.some(tg => tg.tagId === selectedTagTypeFilter && (!selectedTagValueFilter || tg.value === selectedTagValueFilter)));
+  let archivedFlags = flags.filter(f => f.archived);
+  if (selectedTagTypeFilter) archivedFlags = archivedFlags.filter(f => f.tags.some(tg => tg.tagId === selectedTagTypeFilter && (!selectedTagValueFilter || tg.value === selectedTagValueFilter)));
   const uniqueTagValues = (typeId: number) => [...new Set(flags.flatMap(f => f.tags.filter(t => t.tagId === typeId).map(t => t.value)))].sort();
 
   return (
@@ -277,6 +302,34 @@ export function Flags() {
           </div>
         </div>
         <button onClick={openCreate} className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all active:scale-95"><Plus size={18} />Создать флаг</button>
+      </div>
+
+      <div className="flex items-center gap-2">
+        {archivedFlags.length === 0 ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-400 dark:text-neutral-500 cursor-not-allowed select-none">
+                <Archive size={16} />
+                Архив
+                <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 rounded-full">0</span>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>Нет архивных флагов</TooltipContent>
+          </Tooltip>
+        ) : (
+          <button
+            onClick={() => setArchiveOpen(!archiveOpen)}
+            className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all border ${
+              archiveOpen
+                ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30 text-amber-700 dark:text-amber-300'
+                : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-700'
+            }`}
+          >
+            <Archive size={16} />
+            Архив
+            <span className={`inline-flex items-center justify-center min-w-5 h-5 px-1 text-xs font-bold rounded-full ${archiveOpen ? 'bg-amber-200 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'}`}>{archivedFlags.length}</span>
+          </button>
+        )}
       </div>
 
       <TipCard
@@ -310,62 +363,124 @@ export function Flags() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead><tr className="border-b border-neutral-200 dark:border-neutral-800 text-sm font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/50"><th className="px-6 py-4">Название & Ключ</th>{environments.map(env => (<th key={env.id} className="px-6 py-4 text-center"><div className="flex items-center justify-center gap-1.5">{env.name}</div></th>))}</tr></thead>
-            <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
-              {loading ? <tr><td colSpan={1 + environments.length} className="px-6 py-16 text-center">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 dark:from-blue-500/10 dark:to-violet-500/10 animate-pulse" />
-                  <span className="text-sm text-neutral-400">Загрузка флагов...</span>
-                </div>
-              </td></tr>
-              : filtered.length === 0 ? <tr><td colSpan={1 + environments.length} className="px-6 py-16 text-center">
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 dark:from-blue-500/10 dark:to-violet-500/10 flex items-center justify-center">
-                    <Rocket size={24} className="text-blue-500 dark:text-blue-400" />
+      <div className="space-y-2">
+        <div className="flex items-center px-4 py-2 text-sm font-medium text-neutral-500 dark:text-neutral-400">
+          <div className="flex-1 pl-2">Название & Ключ</div>
+          {environments.map(env => (<div key={env.id} className="w-[152px] text-center">{env.name}</div>))}
+        </div>
+
+        {loading ? (
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl px-6 py-16 text-center shadow-sm">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 dark:from-blue-500/10 dark:to-violet-500/10 animate-pulse" />
+              <span className="text-sm text-neutral-400">Загрузка флагов...</span>
+            </div>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl px-6 py-16 text-center shadow-sm">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-100 to-violet-100 dark:from-blue-500/10 dark:to-violet-500/10 flex items-center justify-center">
+                <Rocket size={24} className="text-blue-500 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Нет флагов</p>
+                <p className="text-xs text-neutral-400 mt-1">Создайте первый флаг для управления функциональностью</p>
+              </div>
+              <button onClick={openCreate} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-xl shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all">
+                <Plus size={14} />Создать флаг
+              </button>
+            </div>
+          </div>
+        ) : (
+          <AnimatePresence mode="popLayout">
+            {filtered.map((flag, idx) => (
+              <motion.div
+                key={flag.key}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2, delay: idx * 0.025 }}
+                className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl px-6 py-4 flex items-center shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-md transition-all"
+              >
+                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openGeneral(flag)}>
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-medium text-neutral-900 dark:text-neutral-200 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-violet-600 group-hover:bg-clip-text group-hover:text-transparent transition-all">{flag.name}</span>
+                    {(() => { const Icon = getTypeIcon(flag.flagType); return (<span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getTypeColor(flag.flagType)}`}><Icon size={10} />{getTypeLabel(flag.flagType)}</span>); })()}
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Нет флагов</p>
-                    <p className="text-xs text-neutral-400 mt-1">Создайте первый флаг для управления функциональностью</p>
-                  </div>
-                  <button onClick={openCreate} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-gradient-to-r from-blue-600 to-violet-600 text-white rounded-xl shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all">
-                    <Plus size={14} />Создать флаг
-                  </button>
+                  <div className="text-xs font-mono text-neutral-500 mt-0.5">{flag.key}</div>
+                  {flag.tags.length > 0 && (<div className="flex items-center gap-1.5 mt-2 flex-wrap">{flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}</div>)}
                 </div>
-              </td></tr>
-              : (
-                <AnimatePresence mode="popLayout">
-                  {filtered.map((flag, idx) => (
-                    <motion.tr
-                      key={flag.key}
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2, delay: idx * 0.025 }}
-                      className="group hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
-                    >
-                  <td className="px-6 py-4 cursor-pointer" onClick={() => openGeneral(flag)}>
-                    <div className="flex items-center gap-2.5">
-                      <div className="font-medium text-neutral-900 dark:text-neutral-200 hover:bg-gradient-to-r hover:from-blue-600 hover:to-violet-600 hover:bg-clip-text hover:text-transparent">{flag.name}</div>
-                      {(() => { const Icon = getTypeIcon(flag.flagType); return (<span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getTypeColor(flag.flagType)}`}><Icon size={10} />{getTypeLabel(flag.flagType)}</span>); })()}
-                    </div>
-                    <div className="text-xs font-mono text-neutral-500 mt-0.5">{flag.key}</div>
-                    {flag.tags.length > 0 && (<div className="flex items-center gap-1.5 mt-2 flex-wrap">{flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}</div>)}
-                  </td>
+                <div className="flex items-center gap-4 ml-6 shrink-0">
                   {environments.map(env => {
                     const es = flag.environments[env.id];
-                    return (<td key={env.id} className="px-6 py-4">{es ? (<div className="flex items-center justify-center gap-2"><Switch checked={es.enabled} onCheckedChange={() => toggleFlag(flag, env.id)} className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-violet-500" /><span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[11px] font-semibold min-w-[42px] justify-center select-none transition-colors ${es.enabled ? 'bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}><Percent size={9} />{es.percentage ?? 100}</span><button onClick={() => openEnvironment(flag, env.id)} className="flex items-center justify-center size-[22px] rounded-md text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-violet-50 dark:hover:from-blue-500/10 dark:hover:to-violet-500/10 transition-colors" title="Настроить"><Settings size={13} /></button></div>) : <span className="text-sm text-neutral-400">—</span>}</td>);
+                    return (
+                      <div key={env.id} className="w-[120px] flex items-center justify-center">
+                        {es ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <Switch checked={es.enabled} onCheckedChange={() => toggleFlag(flag, env.id)} className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-violet-500" />
+                            <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[11px] font-semibold min-w-[42px] justify-center select-none transition-colors ${es.enabled ? 'bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}><Percent size={9} />{es.percentage ?? 100}</span>
+                            <button onClick={() => openEnvironment(flag, env.id)} className="flex items-center justify-center size-[22px] rounded-md text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-violet-50 dark:hover:from-blue-500/10 dark:hover:to-violet-500/10 transition-colors" title="Настроить"><Settings size={13} /></button>
+                          </div>
+                        ) : <span className="text-sm text-neutral-400">—</span>}
+                      </div>
+                    );
                   })}
-                </motion.tr>
-                  ))}
-                </AnimatePresence>
-              )}
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        )}
       </div>
+
+      {archiveOpen && archivedFlags.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white dark:bg-neutral-900 border border-amber-200 dark:border-amber-500/20 rounded-xl overflow-hidden shadow-sm"
+        >
+          <div className="px-6 py-4 bg-amber-50 dark:bg-amber-500/10 border-b border-amber-200 dark:border-amber-500/20">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
+                <Archive size={16} className="text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200">Архивные флаги</h3>
+                <p className="text-xs text-amber-600 dark:text-amber-400">Не отображаются в SDK и не влияют на работу приложения</p>
+              </div>
+            </div>
+          </div>
+          <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+            <AnimatePresence>
+              {archivedFlags.map((flag) => (
+                <motion.div
+                  key={flag.key}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  className="flex items-center justify-between px-6 py-4 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2.5">
+                      <span className="font-medium text-neutral-700 dark:text-neutral-300 truncate">{flag.name}</span>
+                      {(() => { const Icon = getTypeIcon(flag.flagType); return (<span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border shrink-0 ${getTypeColor(flag.flagType)}`}><Icon size={10} />{getTypeLabel(flag.flagType)}</span>); })()}
+                    </div>
+                    <div className="text-xs font-mono text-neutral-400 mt-0.5">{flag.key}</div>
+                    {flag.tags.length > 0 && (<div className="flex items-center gap-1.5 mt-1.5 flex-wrap">{flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}</div>)}
+                  </div>
+                  <div className="flex items-center gap-1.5 ml-4 shrink-0">
+                    <button
+                      onClick={() => handleUnarchive(flag)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors"
+                    >
+                      <ArchiveRestore size={13} />Восстановить
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      )}
 
       <SidePanel
         open={panelOpen} onOpenChange={setPanelOpen}
@@ -407,7 +522,13 @@ export function Flags() {
                 </div>}
             </div>}
 
-            {editing.flag && <div className="pt-6 border-t border-neutral-200 dark:border-neutral-800"><button onClick={() => { setDeleteTarget(editing.flag!); }} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20"><Trash2 size={16} />Удалить флаг из всех окружений</button></div>}
+            {editing.flag && <div className="pt-6 border-t border-neutral-200 dark:border-neutral-800 space-y-3">
+              {editing.flag.archived
+                ? <button onClick={() => handleUnarchive(editing.flag!)} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg border border-amber-200 dark:border-amber-500/20"><ArchiveRestore size={16} />Разархивировать флаг</button>
+                : <button onClick={() => { setArchiveTarget(editing.flag!); }} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg border border-amber-200 dark:border-amber-500/20"><Archive size={16} />Архивировать флаг</button>
+              }
+              <button onClick={() => { setDeleteTarget(editing.flag!); }} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20"><Trash2 size={16} />Удалить флаг из всех окружений</button>
+              </div>}
           </div>}
 
           {editing.mode === 'environment' && <div className="space-y-5">
@@ -525,6 +646,16 @@ export function Flags() {
         confirmLabel="Удалить"
         onConfirm={handleDelete}
         loading={deleting}
+      />
+
+      <ConfirmDialog
+        open={!!archiveTarget}
+        onOpenChange={(open) => { if (!open) setArchiveTarget(null); }}
+        title="Архивировать флаг?"
+        description={`Флаг «${archiveTarget?.name ?? ''}» будет помещён в архив. Он перестанет отображаться в списке по умолчанию и будет скрыт из SDK-ответов. Его можно будет разархивировать позже.`}
+        confirmLabel="Архивировать"
+        onConfirm={handleArchive}
+        loading={archiving}
       />
     </div>
   );

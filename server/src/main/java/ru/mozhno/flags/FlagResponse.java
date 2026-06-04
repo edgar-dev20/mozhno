@@ -18,6 +18,7 @@ public class FlagResponse {
     private Integer contextDefinitionId;
     private String contextValuesJson;
     private List<Integer> segmentIds;
+    private boolean archived;
 
     public static class TagValueResponse {
         private Integer tagId;
@@ -45,7 +46,7 @@ public class FlagResponse {
 
     public FlagResponse() {}
 
-    public FlagResponse(Integer id, Integer projectId, String name, String key, String description, String flagType, Instant createdAt, List<TagValueResponse> tags, boolean enabled, Integer strategyId, Double percentage, Integer contextDefinitionId, String contextValuesJson, List<Integer> segmentIds) {
+    public FlagResponse(Integer id, Integer projectId, String name, String key, String description, String flagType, Instant createdAt, List<TagValueResponse> tags, boolean enabled, Integer strategyId, Double percentage, Integer contextDefinitionId, String contextValuesJson, List<Integer> segmentIds, boolean archived) {
         this.id = id;
         this.projectId = projectId;
         this.name = name;
@@ -60,6 +61,7 @@ public class FlagResponse {
         this.contextDefinitionId = contextDefinitionId;
         this.contextValuesJson = contextValuesJson;
         this.segmentIds = segmentIds;
+        this.archived = archived;
     }
 
     public Integer getId() { return id; }
@@ -90,4 +92,6 @@ public class FlagResponse {
     public void setContextValuesJson(String contextValuesJson) { this.contextValuesJson = contextValuesJson; }
     public List<Integer> getSegmentIds() { return segmentIds; }
     public void setSegmentIds(List<Integer> segmentIds) { this.segmentIds = segmentIds; }
+    public boolean isArchived() { return archived; }
+    public void setArchived(boolean archived) { this.archived = archived; }
 }

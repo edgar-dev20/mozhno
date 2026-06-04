@@ -130,4 +130,83 @@ class FlagControllerTest extends BaseIntegrationTest {
                 .header("Authorization", auth()))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    void archiveFlag_shouldReturnOk() throws Exception {
+        Flag flag = new Flag();
+        flag.setName("ToArchive");
+        flag.setKey("to-archive");
+        flag.setProjectId(projectId);
+        flag.setFlagType(FlagType.RELEASE);
+        Flag saved = flagRepository.save(flag);
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/flags/{id}/archive", projectId, saved.getId())
+                .header("Authorization", auth()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.archived").value(true));
+    }
+
+    @Test
+    void unarchiveFlag_shouldReturnOk() throws Exception {
+        Flag flag = new Flag();
+        flag.setName("ToUnarchive");
+        flag.setKey("to-unarchive");
+        flag.setProjectId(projectId);
+        flag.setFlagType(FlagType.RELEASE);
+        Flag saved = flagRepository.save(flag);
+
+        flagRepository.setArchived(saved.getId(), true);
+
+        mockMvc.perform(post("/api/v1/projects/{projectId}/flags/{id}/unarchive", projectId, saved.getId())
+                .header("Authorization", auth()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.archived").value(false));
+    }
+
+    @Test
+    void getFlags_shouldExcludeArchivedByDefault() throws Exception {
+        Flag active = new Flag();
+        active.setName("Active");
+        active.setKey("active");
+        active.setProjectId(projectId);
+        active.setFlagType(FlagType.RELEASE);
+        flagRepository.save(active);
+
+        Flag archived = new Flag();
+        archived.setName("Archived");
+        archived.setKey("archived");
+        archived.setProjectId(projectId);
+        archived.setFlagType(FlagType.RELEASE);
+        Flag savedArchived = flagRepository.save(archived);
+        flagRepository.setArchived(savedArchived.getId(), true);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}/flags", projectId)
+                .header("Authorization", auth()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].name").value("Active"));
+    }
+
+    @Test
+    void getFlags_withIncludeArchived_shouldReturnAll() throws Exception {
+        Flag active = new Flag();
+        active.setName("Active");
+        active.setKey("active");
+        active.setProjectId(projectId);
+        active.setFlagType(FlagType.RELEASE);
+        flagRepository.save(active);
+
+        Flag archived = new Flag();
+        archived.setName("Archived");
+        archived.setKey("archived");
+        archived.setProjectId(projectId);
+        archived.setFlagType(FlagType.RELEASE);
+        Flag savedArchived = flagRepository.save(archived);
+        flagRepository.setArchived(savedArchived.getId(), true);
+
+        mockMvc.perform(get("/api/v1/projects/{projectId}/flags?includeArchived=true", projectId)
+                .header("Authorization", auth()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2));
+    }
 }

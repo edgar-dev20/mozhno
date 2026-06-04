@@ -43,6 +43,14 @@ public class FlagService {
     }
 
     @Transactional(readOnly = true)
+    public List<Flag> findByProjectIdIncludingArchived(Integer projectId) {
+        if (projectRepository.findById(projectId) == null) {
+            throw new RuntimeException("Project not found: " + projectId);
+        }
+        return flagRepository.findByProjectIdIncludingArchived(projectId);
+    }
+
+    @Transactional(readOnly = true)
     public Flag findByProjectIdAndKey(Integer projectId, String key) {
         if (projectRepository.findById(projectId) == null) {
             throw new RuntimeException("Project not found: " + projectId);
@@ -146,5 +154,27 @@ public class FlagService {
         flagRepository.deleteById(id);
         events.publish(new DomainEvent(projectId, "flag.deleted", "flag",
             id, name, "Flag deleted"));
+    }
+
+    @Transactional
+    public Flag archive(Integer id) {
+        Flag flag = flagRepository.findById(id);
+        if (flag == null) throw new RuntimeException("Flag not found: " + id);
+        flagRepository.setArchived(id, true);
+        flag.setArchived(true);
+        events.publish(new DomainEvent(flag.getProjectId(), "flag.archived", "flag",
+            flag.getId(), flag.getName(), "Flag archived: " + flag.getKey()));
+        return flag;
+    }
+
+    @Transactional
+    public Flag unarchive(Integer id) {
+        Flag flag = flagRepository.findById(id);
+        if (flag == null) throw new RuntimeException("Flag not found: " + id);
+        flagRepository.setArchived(id, false);
+        flag.setArchived(false);
+        events.publish(new DomainEvent(flag.getProjectId(), "flag.unarchived", "flag",
+            flag.getId(), flag.getName(), "Flag unarchived: " + flag.getKey()));
+        return flag;
     }
 }

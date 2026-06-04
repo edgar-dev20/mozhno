@@ -30,6 +30,7 @@ public class FlagController {
     @Operation(summary = "Get all flags for a project")
     public List<FlagResponse> getAll(@PathVariable Integer projectId,
                                      @RequestParam(required = false) Integer environmentId,
+                                     @RequestParam(required = false, defaultValue = "false") boolean includeArchived,
                                      @AuthenticationPrincipal UserPrincipal user) {
         List<Flag> flags;
         if (environmentId != null) {
@@ -37,12 +38,14 @@ public class FlagController {
             return flags.stream()
                     .map(f -> toResponse(f, f.getStrategy()))
                     .toList();
+        } else if (includeArchived) {
+            flags = flagService.findByProjectIdIncludingArchived(projectId);
         } else {
             flags = flagService.findByProjectId(projectId);
-            return flags.stream()
-                    .map(this::toResponse)
-                    .toList();
         }
+        return flags.stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @GetMapping("/{id}")
@@ -83,6 +86,24 @@ public class FlagController {
         flagService.delete(id);
     }
 
+    @PostMapping("/{id}/archive")
+    @Operation(summary = "Archive a flag")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    public FlagResponse archive(@PathVariable Integer projectId, @PathVariable Integer id,
+                                @AuthenticationPrincipal UserPrincipal user) {
+        Flag flag = flagService.archive(id);
+        return toResponse(flag);
+    }
+
+    @PostMapping("/{id}/unarchive")
+    @Operation(summary = "Unarchive a flag")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    public FlagResponse unarchive(@PathVariable Integer projectId, @PathVariable Integer id,
+                                  @AuthenticationPrincipal UserPrincipal user) {
+        Flag flag = flagService.unarchive(id);
+        return toResponse(flag);
+    }
+
     private FlagResponse toResponse(Flag flag, ru.mozhno.flags.strategy.FlagStrategy strategy) {
         List<FlagTagValue> tagValues = flagTagValueRepository.findByFlagId(flag.getId());
         List<FlagResponse.TagValueResponse> tags = tagValues.stream().map(ftv -> {
@@ -114,7 +135,8 @@ public class FlagController {
                 percentage,
                 contextDefinitionId,
                 contextValuesJson,
-                segmentIds
+                segmentIds,
+                flag.isArchived()
         );
     }
 

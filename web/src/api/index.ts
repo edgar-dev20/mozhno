@@ -68,8 +68,8 @@ export const api = {
       request<void>(`/projects/${projectId}/environments/${id}`, { method: 'DELETE' }),
   },
   flags: {
-    list: (projectId: number, envId?: number) =>
-      request<FlagResponse[]>(`/projects/${projectId}/flags${envId ? `?environmentId=${envId}` : ''}`),
+    list: (projectId: number, envId?: number, includeArchived?: boolean) =>
+      request<FlagResponse[]>(`/projects/${projectId}/flags${envId ? `?environmentId=${envId}` : includeArchived ? '?includeArchived=true' : ''}${envId && includeArchived ? '&includeArchived=true' : ''}`),
     get: (projectId: number, id: number) =>
       request<FlagResponse>(`/projects/${projectId}/flags/${id}`),
     create: (projectId: number, data: FlagRequest) =>
@@ -84,6 +84,10 @@ export const api = {
       }),
     delete: (projectId: number, id: number) =>
       request<void>(`/projects/${projectId}/flags/${id}`, { method: 'DELETE' }),
+    archive: (projectId: number, id: number) =>
+      request<FlagResponse>(`/projects/${projectId}/flags/${id}/archive`, { method: 'POST' }),
+    unarchive: (projectId: number, id: number) =>
+      request<FlagResponse>(`/projects/${projectId}/flags/${id}/unarchive`, { method: 'POST' }),
   },
   strategies: {
     list: (flagId: number) => request<FlagStrategy[]>(`/flags/${flagId}/strategies`),
@@ -216,7 +220,7 @@ export const api = {
 export type UserDto = { id: number; email: string; name: string; role: string; status: string; createdAt: string; lastActiveAt: string };
 export type Project = { id: number; name: string; description: string; createdAt: string };
 export type Environment = { id: number; projectId: number; name: string; createdAt: string };
-export type FlagResponse = { id: number; projectId: number; name: string; key: string; description: string; flagType: string; createdAt: string; tags: FlagTagValue[]; enabled: boolean; strategyId: number; percentage: number; contextDefinitionId: number; contextValuesJson: string; segmentIds: number[] };
+export type FlagResponse = { id: number; projectId: number; name: string; key: string; description: string; flagType: string; createdAt: string; tags: FlagTagValue[]; enabled: boolean; strategyId: number; percentage: number; contextDefinitionId: number; contextValuesJson: string; segmentIds: number[]; archived: boolean };
 export type FlagTagValue = { tagId: number; tagName: string; tagColor: string; value: string };
 export type FlagRequest = { name: string; key: string; description?: string; flagType?: string; enabled?: boolean; tags?: { tagId: number; value: string }[] };
 export type FlagStrategy = { id: number; flagId: number; environmentId: number; enabled: boolean; percentage: number; contextDefinitionId: number; contextValuesJson: string; segmentIds: number[]; createdAt: string };

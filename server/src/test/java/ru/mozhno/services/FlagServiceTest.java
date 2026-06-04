@@ -15,6 +15,7 @@ import ru.mozhno.tags.TagRepository;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -255,5 +256,73 @@ class FlagServiceTest {
 
         verify(flagTagValueRepository).deleteByFlagId(1);
         verify(flagRepository).deleteById(1);
+    }
+
+    @Test
+    void archive_shouldArchiveFlag() {
+        Flag flag = new Flag();
+        flag.setId(1);
+        flag.setName("test");
+        flag.setKey("test-key");
+        flag.setProjectId(1);
+        when(flagRepository.findById(1)).thenReturn(flag);
+
+        Flag result = flagService.archive(1);
+
+        assertTrue(result.isArchived());
+        verify(flagRepository).setArchived(1, true);
+        verify(events).publish(argThat(e -> e.action().equals("flag.archived")));
+    }
+
+    @Test
+    void archive_shouldThrowExceptionWhenNotFound() {
+        when(flagRepository.findById(999)).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> flagService.archive(999));
+        assertTrue(ex.getMessage().contains("Flag not found"));
+    }
+
+    @Test
+    void unarchive_shouldUnarchiveFlag() {
+        Flag flag = new Flag();
+        flag.setId(1);
+        flag.setName("test");
+        flag.setKey("test-key");
+        flag.setProjectId(1);
+        flag.setArchived(true);
+        when(flagRepository.findById(1)).thenReturn(flag);
+
+        Flag result = flagService.unarchive(1);
+
+        assertFalse(result.isArchived());
+        verify(flagRepository).setArchived(1, false);
+        verify(events).publish(argThat(e -> e.action().equals("flag.unarchived")));
+    }
+
+    @Test
+    void unarchive_shouldThrowExceptionWhenNotFound() {
+        when(flagRepository.findById(999)).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> flagService.unarchive(999));
+        assertTrue(ex.getMessage().contains("Flag not found"));
+    }
+
+    @Test
+    void findByProjectIdIncludingArchived_shouldReturnAllFlags() {
+        Project p = new Project();
+        p.setId(1);
+        when(projectRepository.findById(1)).thenReturn(p);
+        when(flagRepository.findByProjectIdIncludingArchived(1)).thenReturn(List.of(new Flag()));
+
+        List<Flag> result = flagService.findByProjectIdIncludingArchived(1);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findByProjectIdIncludingArchived_shouldThrowExceptionWhenProjectNotFound() {
+        when(projectRepository.findById(999)).thenReturn(null);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> flagService.findByProjectIdIncludingArchived(999));
+        assertTrue(ex.getMessage().contains("Project not found"));
     }
 }
