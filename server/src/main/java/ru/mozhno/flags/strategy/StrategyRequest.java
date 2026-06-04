@@ -1,6 +1,7 @@
 package ru.mozhno.flags.strategy;
 
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public class StrategyRequest {
     private Integer flagId;
@@ -9,7 +10,7 @@ public class StrategyRequest {
     private Double percentage;
     private Integer contextDefinitionId;
     @Size(max = 5000) private String contextValuesJson;
-    private Integer segmentId;
+    private List<Integer> segmentIds;
 
     public StrategyRequest() {}
 
@@ -25,6 +26,6 @@ public class StrategyRequest {
     public void setContextDefinitionId(Integer contextDefinitionId) { this.contextDefinitionId = contextDefinitionId; }
     public String getContextValuesJson() { return contextValuesJson; }
     public void setContextValuesJson(String contextValuesJson) { this.contextValuesJson = contextValuesJson; }
-    public Integer getSegmentId() { return segmentId; }
-    public void setSegmentId(Integer segmentId) { this.segmentId = segmentId; }
+    public List<Integer> getSegmentIds() { return segmentIds; }
+    public void setSegmentIds(List<Integer> segmentIds) { this.segmentIds = segmentIds; }
 }

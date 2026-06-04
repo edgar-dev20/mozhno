@@ -69,21 +69,21 @@ class StrategyServiceTest {
         mockSaved.setEnvironmentId(2);
         mockSaved.setEnabled(true);
         mockSaved.setPercentage(50.0);
-        mockSaved.setSegmentId(5);
-        when(strategyRepository.upsert(1, 2, true, 50.0, null, null, 5)).thenReturn(mockSaved);
+        mockSaved.setSegmentIds(List.of(5));
+        when(strategyRepository.upsert(1, 2, true, 50.0, null, null, List.of(5))).thenReturn(mockSaved);
 
         StrategyRequest req = new StrategyRequest();
         req.setFlagId(1);
         req.setEnvironmentId(2);
         req.setEnabled(true);
         req.setPercentage(50.0);
-        req.setSegmentId(5);
+        req.setSegmentIds(List.of(5));
 
         FlagStrategy result = strategyService.create(req);
         assertTrue(result.isEnabled());
         assertEquals(50.0, result.getPercentage());
-        assertEquals(5, result.getSegmentId());
-        verify(strategyRepository).upsert(1, 2, true, 50.0, null, null, 5);
+        assertEquals(List.of(5), result.getSegmentIds());
+        verify(strategyRepository).upsert(1, 2, true, 50.0, null, null, List.of(5));
     }
 
     @Test
@@ -197,20 +197,20 @@ class StrategyServiceTest {
         updated.setEnabled(true);
         updated.setContextDefinitionId(5);
         updated.setContextValuesJson("[\"mobile\"]");
-        updated.setSegmentId(7);
-        when(strategyRepository.updateById(1, true, null, 5, "[\"mobile\"]", 7)).thenReturn(updated);
+        updated.setSegmentIds(List.of(7));
+        when(strategyRepository.updateById(1, true, null, 5, "[\"mobile\"]", List.of(7))).thenReturn(updated);
 
         StrategyRequest req = new StrategyRequest();
         req.setEnabled(true);
         req.setContextDefinitionId(5);
         req.setContextValuesJson("[\"mobile\"]");
-        req.setSegmentId(7);
+        req.setSegmentIds(List.of(7));
 
         FlagStrategy result = strategyService.update(1, req);
         assertEquals(5, result.getContextDefinitionId());
         assertEquals("[\"mobile\"]", result.getContextValuesJson());
-        assertEquals(7, result.getSegmentId());
-        verify(strategyRepository).updateById(1, true, null, 5, "[\"mobile\"]", 7);
+        assertEquals(List.of(7), result.getSegmentIds());
+        verify(strategyRepository).updateById(1, true, null, 5, "[\"mobile\"]", List.of(7));
     }
 
     @Test

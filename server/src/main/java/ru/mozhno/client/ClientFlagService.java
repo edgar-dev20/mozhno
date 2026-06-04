@@ -39,8 +39,8 @@ public class ClientFlagService {
         List<Integer> segmentIds = new ArrayList<>();
         for (Flag flag : flags) {
             FlagStrategy s = flag.getStrategy();
-            if (s != null && s.getSegmentId() != null) {
-                segmentIds.add(s.getSegmentId());
+            if (s != null && s.getSegmentIds() != null) {
+                segmentIds.addAll(s.getSegmentIds());
             }
         }
 
@@ -60,12 +60,14 @@ public class ClientFlagService {
 
             FlagStrategy s = flag.getStrategy();
             if (s != null) {
-                if (s.getSegmentId() != null) {
-                    List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(s.getSegmentId(), Collections.emptyList());
-                    for (SegmentContextWithName sc : segContexts) {
-                        String key = sc.getContextDefinitionName() + "|in";
-                        merged.computeIfAbsent(key, k -> new ConstraintMerge(sc.getContextDefinitionName(), "in"))
-                                .values.addAll(splitValues(sc.getContextValues()));
+                if (s.getSegmentIds() != null) {
+                    for (Integer segId : s.getSegmentIds()) {
+                        List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(segId, Collections.emptyList());
+                        for (SegmentContextWithName sc : segContexts) {
+                            String key = sc.getContextDefinitionName() + "|in";
+                            merged.computeIfAbsent(key, k -> new ConstraintMerge(sc.getContextDefinitionName(), "in"))
+                                    .values.addAll(splitValues(sc.getContextValues()));
+                        }
                     }
                 }
 

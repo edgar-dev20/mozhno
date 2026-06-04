@@ -49,7 +49,7 @@ public class StrategyService {
             request.getPercentage(),
             request.getContextDefinitionId(),
             request.getContextValuesJson(),
-            request.getSegmentId()
+            request.getSegmentIds()
         );
         events.publish(new DomainEvent(flag.getProjectId(), "strategy.created", "strategy",
             saved.getId(), flag.getName(), "Strategy created for env " + request.getEnvironmentId()));
@@ -72,7 +72,7 @@ public class StrategyService {
             request.getPercentage(),
             request.getContextDefinitionId(),
             request.getContextValuesJson(),
-            request.getSegmentId()
+            request.getSegmentIds()
         );
         if (saved == null) throw new RuntimeException("Strategy not found: " + id);
 
@@ -98,7 +98,7 @@ public class StrategyService {
             request.getPercentage(),
             request.getContextDefinitionId(),
             request.getContextValuesJson(),
-            request.getSegmentId()
+            request.getSegmentIds()
         );
 
         events.publish(new DomainEvent(flag.getProjectId(), "strategy.created", "strategy",

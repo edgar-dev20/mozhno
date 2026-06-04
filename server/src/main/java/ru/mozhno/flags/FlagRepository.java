@@ -38,7 +38,7 @@ public class FlagRepository {
         String sql = """
             SELECT f.id, f.project_id, f.name, f.flag_key, f.description, f.flag_type, f.created_at, f.enabled as flag_enabled,
                    s.id as strategy_id, s.enabled as strategy_enabled, s.percentage,
-                   s.context_definition_id, s.segment_id,
+                   s.context_definition_id,
                    s.context_values_json as context_values,
                    cd.name as context_name
             FROM flags f
@@ -67,13 +67,19 @@ public class FlagRepository {
                 s.setEnabled(rs.getBoolean("strategy_enabled"));
                 s.setPercentage(rs.getObject("percentage") != null ? rs.getDouble("percentage") : null);
                 s.setContextDefinitionId(rs.getObject("context_definition_id") != null ? rs.getInt("context_definition_id") : null);
-                s.setSegmentId(rs.getObject("segment_id") != null ? rs.getInt("segment_id") : null);
                 s.setContextValuesJson(rs.getString("context_values"));
                 s.setContextName(rs.getString("context_name"));
+                s.setSegmentIds(loadSegmentIds(strategyId));
                 f.setStrategy(s);
             }
             return f;
         }, environmentId, projectId);
+    }
+
+    private List<Integer> loadSegmentIds(Integer strategyId) {
+        return jdbc.queryForList(
+            "SELECT segment_id FROM strategy_segments WHERE strategy_id = ? ORDER BY segment_id",
+            Integer.class, strategyId);
     }
 
     public Flag findById(Integer id) {

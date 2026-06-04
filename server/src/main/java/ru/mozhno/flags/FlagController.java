@@ -99,7 +99,7 @@ public class FlagController {
         Double percentage = strategy != null ? strategy.getPercentage() : null;
         Integer contextDefinitionId = strategy != null ? strategy.getContextDefinitionId() : null;
         String contextValuesJson = strategy != null ? strategy.getContextValuesJson() : null;
-        Integer segmentId = strategy != null ? strategy.getSegmentId() : null;
+        List<Integer> segmentIds = strategy != null ? strategy.getSegmentIds() : null;
         return new FlagResponse(
                 flag.getId(),
                 flag.getProjectId(),
@@ -114,7 +114,7 @@ public class FlagController {
                 percentage,
                 contextDefinitionId,
                 contextValuesJson,
-                segmentId
+                segmentIds
         );
     }
 

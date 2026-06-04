@@ -17,7 +17,7 @@ public class FlagResponse {
     private Double percentage;
     private Integer contextDefinitionId;
     private String contextValuesJson;
-    private Integer segmentId;
+    private List<Integer> segmentIds;
 
     public static class TagValueResponse {
         private Integer tagId;
@@ -45,7 +45,7 @@ public class FlagResponse {
 
     public FlagResponse() {}
 
-    public FlagResponse(Integer id, Integer projectId, String name, String key, String description, String flagType, Instant createdAt, List<TagValueResponse> tags, boolean enabled, Integer strategyId, Double percentage, Integer contextDefinitionId, String contextValuesJson, Integer segmentId) {
+    public FlagResponse(Integer id, Integer projectId, String name, String key, String description, String flagType, Instant createdAt, List<TagValueResponse> tags, boolean enabled, Integer strategyId, Double percentage, Integer contextDefinitionId, String contextValuesJson, List<Integer> segmentIds) {
         this.id = id;
         this.projectId = projectId;
         this.name = name;
@@ -59,7 +59,7 @@ public class FlagResponse {
         this.percentage = percentage;
         this.contextDefinitionId = contextDefinitionId;
         this.contextValuesJson = contextValuesJson;
-        this.segmentId = segmentId;
+        this.segmentIds = segmentIds;
     }
 
     public Integer getId() { return id; }
@@ -88,6 +88,6 @@ public class FlagResponse {
     public void setContextDefinitionId(Integer contextDefinitionId) { this.contextDefinitionId = contextDefinitionId; }
     public String getContextValuesJson() { return contextValuesJson; }
     public void setContextValuesJson(String contextValuesJson) { this.contextValuesJson = contextValuesJson; }
-    public Integer getSegmentId() { return segmentId; }
-    public void setSegmentId(Integer segmentId) { this.segmentId = segmentId; }
+    public List<Integer> getSegmentIds() { return segmentIds; }
+    public void setSegmentIds(List<Integer> segmentIds) { this.segmentIds = segmentIds; }
 }

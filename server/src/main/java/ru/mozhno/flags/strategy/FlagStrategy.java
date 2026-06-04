@@ -1,6 +1,7 @@
 package ru.mozhno.flags.strategy;
 
 import java.time.Instant;
+import java.util.List;
 
 public class FlagStrategy {
     private Integer id;
@@ -11,7 +12,7 @@ public class FlagStrategy {
     private Integer contextDefinitionId;
     private String contextName;
     private String contextValuesJson;
-    private Integer segmentId;
+    private List<Integer> segmentIds;
     private Instant createdAt;
 
     public FlagStrategy() {}
@@ -32,8 +33,8 @@ public class FlagStrategy {
     public void setContextName(String contextName) { this.contextName = contextName; }
     public String getContextValuesJson() { return contextValuesJson; }
     public void setContextValuesJson(String contextValuesJson) { this.contextValuesJson = contextValuesJson; }
-    public Integer getSegmentId() { return segmentId; }
-    public void setSegmentId(Integer segmentId) { this.segmentId = segmentId; }
+    public List<Integer> getSegmentIds() { return segmentIds; }
+    public void setSegmentIds(List<Integer> segmentIds) { this.segmentIds = segmentIds; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

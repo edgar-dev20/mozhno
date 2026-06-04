@@ -160,7 +160,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         s.setFlagId(saved.getId());
         s.setEnvironmentId(envId);
         s.setEnabled(true);
-        s.setSegmentId(segId);
+        s.setSegmentIds(List.of(segId));
         flagStrategyRepository.save(s);
 
         List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId, envId);
@@ -202,7 +202,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         s.setFlagId(saved.getId());
         s.setEnvironmentId(envId);
         s.setEnabled(true);
-        s.setSegmentId(segId);
+        s.setSegmentIds(List.of(segId));
         s.setContextDefinitionId(cdId);
         s.setContextValuesJson("[{\"cd\":" + cdId + ",\"op\":\"in\",\"val\":\"user-3\"},{\"cd\":" + cdId + ",\"op\":\"in\",\"val\":\"user-4\"}]");
         flagStrategyRepository.save(s);
@@ -251,7 +251,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         s.setFlagId(saved.getId());
         s.setEnvironmentId(envId);
         s.setEnabled(true);
-        s.setSegmentId(segId);
+        s.setSegmentIds(List.of(segId));
         s.setContextDefinitionId(userIdCdId);
         s.setContextValuesJson("[{\"cd\":" + userIdCdId + ",\"op\":\"eq\",\"val\":\"user-42\"},{\"cd\":" + userIdCdId + ",\"op\":\"eq\",\"val\":\"user-99\"}]");
         flagStrategyRepository.save(s);
@@ -309,7 +309,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         s.setFlagId(saved.getId());
         s.setEnvironmentId(envId);
         s.setEnabled(true);
-        s.setSegmentId(segId);
+        s.setSegmentIds(List.of(segId));
         flagStrategyRepository.save(s);
 
         List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId, envId);
@@ -352,7 +352,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         s.setFlagId(saved.getId());
         s.setEnvironmentId(envId);
         s.setEnabled(true);
-        s.setSegmentId(segId);
+        s.setSegmentIds(List.of(segId));
         flagStrategyRepository.save(s);
 
         List<ClientFlagResponse> result = clientFlagService.getFlagsForProject(projectId, envId);

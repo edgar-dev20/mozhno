@@ -9,7 +9,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { api, FlagResponse, FlagRequest, Tag as TagType, Environment, SegmentResponse, FlagStrategy, StrategyRequest, FlagTagValue, ContextDefinition, ContextValue } from '../../api';
 
-interface EnvState { enabled: boolean; percentage: number; segmentId: number | null; strategyId: number | null; contextDefinitionId: number | null; contextValuesJson: string | null; }
+interface EnvState { enabled: boolean; percentage: number; segmentIds: number[]; strategyId: number | null; contextDefinitionId: number | null; contextValuesJson: string | null; }
 interface FlagView { key: string; name: string; description: string; flagType: string; tags: FlagTagValue[]; flagId: number; environments: Record<number, EnvState>; }
 
 interface ConstraintEntry {
@@ -103,7 +103,7 @@ export function Flags() {
         const envFlags = await api.flags.list(projectId, env.id);
         for (const f of envFlags) {
           const v = byKey.get(f.key) ?? byKey.set(f.key, { key: f.key, name: f.name, description: f.description ?? '', flagType: f.flagType, tags: f.tags ?? [], flagId: f.id, environments: {} }).get(f.key)!;
-          v.environments[env.id] = { enabled: f.enabled, percentage: f.percentage ?? 100, segmentId: f.segmentId ?? null, strategyId: f.strategyId ?? null, contextDefinitionId: f.contextDefinitionId ?? null, contextValuesJson: f.contextValuesJson ?? null };
+          v.environments[env.id] = { enabled: f.enabled, percentage: f.percentage ?? 100, segmentIds: f.segmentIds ?? [], strategyId: f.strategyId ?? null, contextDefinitionId: f.contextDefinitionId ?? null, contextValuesJson: f.contextValuesJson ?? null };
         }
       }
       setFlags(Array.from(byKey.values()));
@@ -129,7 +129,7 @@ export function Flags() {
   const openEnvironment = (flag: FlagView, envId: number) => {
     setEditing({ flag, mode: 'environment', envId }); setError(''); setPanelOpen(true);
     setFormName(flag.name); setFormKey(flag.key);
-    const es = flag.environments[envId] ?? { enabled: false, percentage: 100, segmentId: null, strategyId: null, contextDefinitionId: null, contextValuesJson: null };
+    const es = flag.environments[envId] ?? { enabled: false, percentage: 100, segmentIds: [], strategyId: null, contextDefinitionId: null, contextValuesJson: null };
     let constraints: ConstraintEntry[] = [];
     if (es.contextValuesJson) {
       try {
@@ -145,10 +145,10 @@ export function Flags() {
       } catch {}
     }
     setEnvRulePercent(es.percentage ?? 100);
-    setEnvRuleSegments(es.segmentId ? [es.segmentId] : []);
+    setEnvRuleSegments(es.segmentIds ?? []);
     setEnvRuleConstraints(constraints.map(c => ({...c})));
     setInitialEnvRulePercent(es.percentage ?? 100);
-    setInitialEnvRuleSegments(es.segmentId ? [es.segmentId] : []);
+    setInitialEnvRuleSegments(es.segmentIds ?? []);
     setInitialEnvRuleConstraints(constraints.map(c => ({...c})));
   };
 
@@ -202,7 +202,7 @@ export function Flags() {
           environmentId: editing.envId,
           enabled: true,
           percentage: envRulePercent,
-          segmentId: envRuleSegments[0] ?? undefined,
+          segmentIds: envRuleSegments.length > 0 ? envRuleSegments : undefined,
           contextDefinitionId: contextDefId,
           contextValuesJson,
         });
@@ -226,7 +226,7 @@ export function Flags() {
         environmentId: envId,
         enabled: newEnabled,
         percentage: es.percentage,
-        segmentId: es.segmentId ?? undefined,
+        segmentIds: es.segmentIds.length > 0 ? es.segmentIds : undefined,
         contextDefinitionId: es.contextDefinitionId ?? undefined,
         contextValuesJson: es.contextValuesJson ?? undefined,
       });
