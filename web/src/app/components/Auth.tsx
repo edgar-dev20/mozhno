@@ -8,6 +8,7 @@ export function Auth() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -16,7 +17,7 @@ export function Auth() {
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
+      await login(email, password, rememberMe);
       navigate('/flags');
     } catch (err: any) {
       setError(err.message || 'Ошибка входа');
@@ -103,7 +104,13 @@ export function Auth() {
 
               <div className="flex items-center justify-between pt-2">
                 <div className="flex items-center">
-                  <input id="remember" type="checkbox" className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-violet-500 focus:ring-violet-500" />
+                  <input
+                    id="remember"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 rounded border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-violet-500 focus:ring-violet-500"
+                  />
                   <label htmlFor="remember" className="ml-2 block text-sm text-neutral-600 dark:text-neutral-400">Запомнить меня</label>
                 </div>
                 <div className="text-sm">

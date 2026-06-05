@@ -1,6 +1,7 @@
 const BASE_URL = '/api/v1';
 
 let token: string | null = localStorage.getItem('mozhno_token');
+let refreshToken: string | null = localStorage.getItem('mozhno_refresh_token');
 
 export function getToken(): string | null {
   return token;
@@ -10,6 +11,65 @@ export function setToken(t: string | null) {
   token = t;
   if (t) localStorage.setItem('mozhno_token', t);
   else localStorage.removeItem('mozhno_token');
+}
+
+export function getRefreshToken(): string | null {
+  return refreshToken;
+}
+
+export function setRefreshToken(rt: string | null) {
+  refreshToken = rt;
+  if (rt) localStorage.setItem('mozhno_refresh_token', rt);
+  else localStorage.removeItem('mozhno_refresh_token');
+}
+
+let isRefreshing = false;
+let refreshPromise: Promise<boolean> | null = null;
+let failedQueue: Array<{ resolve: (val: boolean) => void; reject: (err: unknown) => void }> = [];
+
+function processQueue(success: boolean, error: unknown = null) {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (success) resolve(true);
+    else reject(error);
+  });
+  failedQueue = [];
+}
+
+async function tryRefreshToken(): Promise<boolean> {
+  if (!refreshToken) return false;
+
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+      if (!res.ok) return false;
+      const data = await res.json();
+      setToken(data.token);
+      setRefreshToken(data.refreshToken);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+export function clearAuth() {
+  setToken(null);
+  setRefreshToken(null);
+  window.location.hash = '/login';
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -23,8 +83,19 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
   if (!res.ok) {
     if (res.status === 401) {
-      setToken(null);
-      window.location.hash = '/login';
+      const refreshed = await tryRefreshToken();
+      if (refreshed) {
+        headers['Authorization'] = `Bearer ${token}`;
+        const retryRes = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+        if (!retryRes.ok) {
+          clearAuth();
+          const body = await retryRes.json().catch(() => ({}));
+          throw new Error(body.error || body.message || `HTTP ${retryRes.status}`);
+        }
+        if (retryRes.status === 204) return undefined as T;
+        return retryRes.json();
+      }
+      clearAuth();
     }
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || body.message || `HTTP ${res.status}`);
@@ -35,12 +106,22 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const api = {
   auth: {
-    login: (email: string, password: string) =>
-      request<{ token: string; user: UserDto }>('/auth/login', {
+    login: (email: string, password: string, rememberMe: boolean = false) =>
+      request<{ token: string; refreshToken: string; user: UserDto }>('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, rememberMe }),
       }),
     me: () => request<UserDto>('/auth/me'),
+    refresh: () =>
+      request<{ token: string; refreshToken: string; user: UserDto }>('/auth/refresh', {
+        method: 'POST',
+        body: JSON.stringify({ refreshToken }),
+      }),
+    logout: () =>
+      request<void>('/auth/logout', {
+        method: 'POST',
+        body: JSON.stringify({ refreshToken }),
+      }),
   },
   projects: {
     list: () => request<Project[]>('/projects'),

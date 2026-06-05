@@ -9,14 +9,17 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
+    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                       JwtService jwtService, RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
-    public LoginResponse login(String email, String password) {
+    public LoginResponse login(String email, String password, boolean rememberMe) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new InvalidCredentialsException("Invalid email or password");
@@ -29,8 +32,22 @@ public class AuthService {
         }
 
         userRepository.updateLastActive(user.getId());
-        String token = jwtService.generateAccessToken(user);
-        return new LoginResponse(token, toDto(user));
+        RefreshTokenService.TokenPair tokens = refreshTokenService.issueTokens(user, rememberMe);
+        return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
+    }
+
+    @Transactional
+    public LoginResponse refresh(String rawRefreshToken) {
+        RefreshTokenService.TokenPair tokens = refreshTokenService.refresh(rawRefreshToken);
+        String email = jwtService.parseToken(tokens.getAccessToken()).getEmail();
+        User user = userRepository.findByEmail(email);
+        return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
+    }
+
+    public void logout(String rawRefreshToken) {
+        if (rawRefreshToken != null && !rawRefreshToken.isEmpty()) {
+            refreshTokenService.revoke(rawRefreshToken);
+        }
     }
 
     public UserDto getCurrentUser(String email) {

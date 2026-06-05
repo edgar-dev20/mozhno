@@ -50,6 +50,7 @@ class AuthControllerTest extends BaseIntegrationTest {
                 .content("{\"email\":\"login@test.com\",\"password\":\"secret123\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.refreshToken").isNotEmpty())
                 .andExpect(jsonPath("$.user.email").value("login@test.com"))
                 .andExpect(jsonPath("$.user.role").value("editor"))
                 .andExpect(jsonPath("$.user.id").isNumber());

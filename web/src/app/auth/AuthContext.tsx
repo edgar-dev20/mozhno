@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { getToken, setToken, api, UserDto } from '../../api';
+import { getToken, setToken, getRefreshToken, setRefreshToken, clearAuth, api, UserDto } from '../../api';
 
 interface AuthState {
   user: UserDto | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe: boolean) => Promise<void>;
   logout: () => void;
 }
 
@@ -28,23 +28,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (t) {
       api.auth.me()
         .then(u => setUser(u))
-        .catch(() => { setToken(null); setUser(null); })
+        .catch(async () => {
+          const rt = getRefreshToken();
+          if (rt) {
+            try {
+              const res = await api.auth.refresh();
+              setUser(res.user);
+              return;
+            } catch {}
+          }
+          clearAuth();
+          setUser(null);
+        })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await api.auth.login(email, password);
+  const login = useCallback(async (email: string, password: string, rememberMe: boolean) => {
+    const res = await api.auth.login(email, password, rememberMe);
     setToken(res.token);
+    setRefreshToken(res.refreshToken);
     setUser(res.user);
   }, []);
 
   const logout = useCallback(() => {
-    setToken(null);
+    api.auth.logout().catch(() => {});
+    clearAuth();
     setUser(null);
-    window.location.hash = '/login';
   }, []);
 
   return (

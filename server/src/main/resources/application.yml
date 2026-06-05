@@ -23,7 +23,8 @@ server:
 jwt:
   secret: "dGhpc2lzYXRlc3RzZWNyZXRrZXlmb3Jqd3R0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmc="
   issuer: "mozhno"
-  access-token-ttl-minutes: 60
+  access-token-ttl-minutes: 15
+  refresh-token-ttl-days: 30
 
 audit:
   retention-days: 365
