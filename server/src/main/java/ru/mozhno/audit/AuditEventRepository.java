@@ -51,7 +51,7 @@ public class AuditEventRepository {
             PreparedStatement ps = con.prepareStatement(
                 "INSERT INTO audit_log (project_id, user_id, user_name, user_email, action, resource_type, resource_id, resource_name, details, ip_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 new String[]{"id"});
-            ps.setInt(1, event.getProjectId());
+            if (event.getProjectId() != null) ps.setInt(1, event.getProjectId()); else ps.setNull(1, java.sql.Types.INTEGER);
             if (event.getUserId() != null) ps.setInt(2, event.getUserId()); else ps.setNull(2, java.sql.Types.INTEGER);
             ps.setString(3, event.getUserName());
             ps.setString(4, event.getUserEmail());
