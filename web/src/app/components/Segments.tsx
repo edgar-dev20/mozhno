@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Users, Filter, MoreHorizontal, Edit2, Trash2, Settings, X, PieChart, Upload } from 'lucide-react';
+import { Plus, Users, Filter, MoreHorizontal, Edit2, Trash2, Settings, X, PieChart, Upload, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   DropdownMenu,
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { TipCard } from './TipCard';
 import { SidePanel } from './SidePanel';
 import { ConfirmDialog } from './ConfirmDialog';
+import { SegmentIcon, SegmentIconPicker, SegmentColorPicker } from './SegmentIcon';
 import { api, SegmentResponse, ContextDefinition } from '../../api';
 
 interface SegmentContextEntry {
@@ -26,13 +27,24 @@ export function Segments() {
   const [contexts, setContexts] = useState<ContextDefinition[]>([]);
   const [projectId, setProjectId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const adjustColor = (hex: string, amount: number) => {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = Math.min(255, Math.max(0, (num >> 16) + amount));
+    const g = Math.min(255, Math.max(0, ((num >> 8) & 0xFF) + amount));
+    const b = Math.min(255, Math.max(0, (num & 0xFF) + amount));
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+  };
   const [panelOpen, setPanelOpen] = useState(false);
   const [editing, setEditing] = useState<SegmentResponse | null>(null);
   const [saving, setSaving] = useState(false);
   const [formName, setFormName] = useState('');
   const [formDesc, setFormDesc] = useState('');
+  const [formIcon, setFormIcon] = useState('Users');
+  const [formColor, setFormColor] = useState('#3b82f6');
   const [formContexts, setFormContexts] = useState<SegmentContextEntry[]>([]);
   const [error, setError] = useState('');
+  const [showCustomize, setShowCustomize] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -51,16 +63,16 @@ export function Segments() {
   };
   useEffect(() => { load(); }, []);
 
-  const openCreate = () => { setEditing(null); setFormName(''); setFormDesc(''); setFormContexts([]); setError(''); setPanelOpen(true); };
+  const openCreate = () => { setEditing(null); setFormName(''); setFormDesc(''); setFormIcon('Users'); setFormColor('#3b82f6'); setFormContexts([]); setError(''); setShowCustomize(false); setPanelOpen(true); };
   const openEdit = (s: SegmentResponse) => {
-    setEditing(s); setFormName(s.name); setFormDesc(s.description ?? '');
+    setEditing(s); setFormName(s.name); setFormDesc(s.description ?? ''); setFormIcon(s.icon ?? 'Users'); setFormColor(s.color ?? '#3b82f6');
     setFormContexts((s.context ?? []).map((c, i) => ({
       id: `sc-${Date.now()}-${i}`,
       contextDefinitionId: c.contextDefinitionId,
       operator: c.operator ?? 'in',
       contextValues: c.contextValues,
     })));
-    setError(''); setPanelOpen(true);
+    setError(''); setShowCustomize(false); setPanelOpen(true);
   };
 
   const handleDelete = async () => {
@@ -117,10 +129,10 @@ export function Segments() {
     try {
       const context = formContexts.map(c => ({ contextDefinitionId: c.contextDefinitionId, operator: c.operator, contextValues: c.contextValues }));
       if (editing) {
-        const u = await api.segments.update(projectId, editing.id, { projectId, name: formName, description: formDesc, context });
+        const u = await api.segments.update(projectId, editing.id, { projectId, name: formName, description: formDesc, icon: formIcon, color: formColor, context });
         setSegments(segments.map(s => s.id === u.id ? u : s));
       } else {
-        const c = await api.segments.create(projectId, { projectId, name: formName, description: formDesc, context });
+        const c = await api.segments.create(projectId, { projectId, name: formName, description: formDesc, icon: formIcon, color: formColor, context });
         setSegments([c, ...segments]);
       }
       setPanelOpen(false);
@@ -160,7 +172,7 @@ export function Segments() {
         ) : segments.length === 0 ? (
           <div className="col-span-full flex flex-col items-center justify-center py-20 gap-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-100 to-emerald-100 dark:from-teal-500/10 dark:to-emerald-500/10 flex items-center justify-center">
-              <Users size={28} className="text-teal-500 dark:text-teal-400" />
+              <SegmentIcon name="Users" size={28} className="text-teal-500 dark:text-teal-400" />
             </div>
             <div className="text-center">
               <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Нет сегментов</p>
@@ -180,10 +192,16 @@ export function Segments() {
               transition={{ duration: 0.2, delay: idx * 0.03 }}
               className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all relative group"
             >
-              <div className="h-1.5 bg-gradient-to-r from-teal-500 to-emerald-500" />
+              <div className="h-1.5" style={{ background: `linear-gradient(to right, ${s.color || '#3b82f6'}, ${adjustColor(s.color || '#3b82f6', 40)})` }} />
               <div className="p-6">
               <div className="flex justify-between items-start mb-4">
-                <div className="bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-500/10 dark:to-emerald-500/10 p-2.5 rounded-xl text-teal-600 dark:text-teal-400 cursor-pointer" onClick={() => openEdit(s)}><Users size={24} /></div>
+                <div
+                  className="p-2.5 rounded-xl text-white cursor-pointer transition-transform hover:scale-110"
+                  style={{ backgroundColor: s.color || '#3b82f6' }}
+                  onClick={() => openEdit(s)}
+                >
+                  <SegmentIcon name={s.icon || 'Users'} size={24} />
+                </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild><button className="text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 outline-none p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 opacity-0 group-hover:opacity-100 transition-all"><MoreHorizontal size={20} /></button></DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
@@ -229,8 +247,46 @@ export function Segments() {
         <div className="space-y-5">
           {error && <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-sm text-red-700">{error}</div>}
 
-          <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Название</label><input type="text" value={formName} onChange={e => setFormName(e.target.value)} placeholder="Например: Beta Тестеры" className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" /></div>
-          <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Описание</label><textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} placeholder="Кто входит в этот сегмент?" rows={2} className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" /></div>
+          <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Название</label><input type="text" value={formName} onChange={e => setFormName(e.target.value)} placeholder="Например: Beta Тестеры" className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all placeholder:font-normal placeholder:text-neutral-400" /></div>
+          <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Описание</label><textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} placeholder="Кто входит в этот сегмент?" rows={2} ref={el => { if (el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 64) + 'px'; } }} onInput={e => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 64) + 'px'; }} className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all placeholder:text-neutral-400 resize-none overflow-hidden" /></div>
+
+          <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800">
+            <button
+              type="button"
+              onClick={() => setShowCustomize(!showCustomize)}
+              className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors group"
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm"
+                  style={{ backgroundColor: formColor }}
+                >
+                  <SegmentIcon name={formIcon} size={15} />
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Оформление</div>
+                  <div className="text-xs text-neutral-400 dark:text-neutral-500">Иконка и цвет сегмента</div>
+                </div>
+              </div>
+              <ChevronDown
+                size={18}
+                className={`text-neutral-400 group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-transform duration-200 ${showCustomize ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {showCustomize && (
+              <div className="mt-3 space-y-4 pl-2">
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2 block">Иконка</label>
+                  <SegmentIconPicker value={formIcon} onChange={setFormIcon} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 dark:text-neutral-400 mb-2 block">Цвет</label>
+                  <SegmentColorPicker value={formColor} onChange={setFormColor} />
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800">
             <div className="flex items-center justify-between mb-3">
@@ -289,7 +345,7 @@ export function Segments() {
                       <input
                         type="text"
                         placeholder="Добавить значение..."
-                        className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md px-2.5 py-2 text-xs placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md px-2.5 py-2 text-xs placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all"
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' || e.key === ',') {
                             e.preventDefault();

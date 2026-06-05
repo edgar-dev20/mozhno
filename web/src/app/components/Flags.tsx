@@ -8,6 +8,7 @@ import { SidePanel } from './SidePanel';
 import { TipCard } from './TipCard';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { SegmentIcon } from './SegmentIcon';
 import { api, FlagResponse, FlagRequest, Tag as TagType, Environment, SegmentResponse, FlagStrategy, StrategyRequest, FlagTagValue, ContextDefinition, ContextValue } from '../../api';
 
 interface EnvState { enabled: boolean; percentage: number; segmentIds: number[]; strategyId: number | null; contextDefinitionId: number | null; contextValuesJson: string | null; }
@@ -505,9 +506,9 @@ export function Flags() {
           {(editing.mode === 'create' || editing.mode === 'general') && <div className="space-y-5">
             {editing.mode === 'create' && <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg"><p className="text-xs text-indigo-700 dark:text-indigo-300">Флаг будет создан для <strong>всех окружений</strong> (Production и Development). Вы сможете настроить параметры раскатки отдельно для каждого окружения после создания.</p></div>}
 
-            <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Название</label><input type="text" value={formName} onChange={e => setFormName(e.target.value)} placeholder="Например: Новый чекаут" className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" /></div>
-            <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Ключ (Key)</label><input type="text" value={formKey} onChange={e => setFormKey(e.target.value)} disabled={editing.mode !== 'create'} placeholder="new-checkout-flow" className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50 font-mono text-sm" /><p className="text-xs text-neutral-500">Используется в коде. Нельзя изменить после создания.</p></div>
-            <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Описание</label><textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} placeholder="Краткое описание флага..." rows={3} className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" /></div>
+            <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Название</label><input type="text" value={formName} onChange={e => setFormName(e.target.value)} placeholder="Например: Новый чекаут" className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all placeholder:font-normal placeholder:text-neutral-400" /></div>
+            <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Ключ (Key)</label><input type="text" value={formKey} onChange={e => setFormKey(e.target.value)} disabled={editing.mode !== 'create'} placeholder="new-checkout-flow" className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all placeholder:text-neutral-400 disabled:opacity-50 font-mono" /><p className="text-xs text-neutral-500">Используется в коде. Нельзя изменить после создания.</p></div>
+            <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Описание</label><textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} placeholder="Краткое описание флага..." rows={3} ref={el => { if (el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 80) + 'px'; } }} onInput={e => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 80) + 'px'; }} className="w-full bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all placeholder:text-neutral-400 resize-none overflow-hidden" /></div>
             <div className="space-y-1.5"><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Тип флага</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => setFormType('RELEASE')} className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 text-sm font-semibold transition-all ${formType === 'RELEASE' ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 shadow-sm' : 'border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:border-blue-300 dark:hover:border-blue-700'}`}>
@@ -526,7 +527,7 @@ export function Flags() {
                   <div className="space-y-2"><label className="text-xs font-medium text-neutral-600 dark:text-neutral-400">Выберите тип тега</label>
                     <div className="grid grid-cols-2 gap-2">{tags.map(tg => (<button key={tg.id} onClick={() => setNewTagId(tg.id)} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border ${newTagId === tg.id ? 'shadow-sm' : 'hover:shadow-sm border-neutral-200 dark:border-neutral-800'}`} style={newTagId === tg.id ? { borderColor: tg.color, borderWidth: '2px' } : {}}><div className="w-2.5 h-2.5 rounded-full" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }} /><span className="text-neutral-700 dark:text-neutral-300">{tg.name}</span></button>))}</div>
                   </div>
-                  {newTagId && <div className="flex gap-2 items-center pt-1"><input type="text" value={newTagVal} onChange={e => setNewTagVal(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && newTagVal.trim()) { const tg = tags.find(t => t.id === newTagId)!; setFormTags([...formTags, { tagId: tg.id, tagName: tg.name, tagColor: tg.color, value: newTagVal.trim() }]); setAddingTag(false); setNewTagId(null); setNewTagVal(''); } else if (e.key === 'Escape') { setAddingTag(false); setNewTagId(null); setNewTagVal(''); } }} placeholder="Введите значение тега" autoFocus className="flex-1 bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" /><button onClick={() => { if (newTagVal.trim() && newTagId) { const tg = tags.find(t => t.id === newTagId)!; setFormTags([...formTags, { tagId: tg.id, tagName: tg.name, tagColor: tg.color, value: newTagVal.trim() }]); setAddingTag(false); setNewTagId(null); setNewTagVal(''); } }} disabled={!newTagVal.trim()} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium">Добавить</button></div>}
+                  {newTagId && <div className="flex gap-2 items-center pt-1"><input type="text" value={newTagVal} onChange={e => setNewTagVal(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && newTagVal.trim()) { const tg = tags.find(t => t.id === newTagId)!; setFormTags([...formTags, { tagId: tg.id, tagName: tg.name, tagColor: tg.color, value: newTagVal.trim() }]); setAddingTag(false); setNewTagId(null); setNewTagVal(''); } else if (e.key === 'Escape') { setAddingTag(false); setNewTagId(null); setNewTagVal(''); } }} placeholder="Введите значение тега" autoFocus className="flex-1 bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all placeholder:text-neutral-400" /><button onClick={() => { if (newTagVal.trim() && newTagId) { const tg = tags.find(t => t.id === newTagId)!; setFormTags([...formTags, { tagId: tg.id, tagName: tg.name, tagColor: tg.color, value: newTagVal.trim() }]); setAddingTag(false); setNewTagId(null); setNewTagVal(''); } }} disabled={!newTagVal.trim()} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium">Добавить</button></div>}
                   <button onClick={() => { setAddingTag(false); setNewTagId(null); setNewTagVal(''); }} className="w-full px-3 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">Отмена</button>
                 </div>}
             </div>}
@@ -559,61 +560,82 @@ export function Flags() {
               {/* Segments */}
               <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800">
                 <div className="flex items-center gap-2 mb-3"><Users size={16} className="text-indigo-600 dark:text-indigo-400" /><label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Целевые сегменты</label></div>
-                <div className="grid grid-cols-1 gap-2 p-3 bg-white dark:bg-neutral-950 rounded-lg border border-neutral-200 dark:border-neutral-800">
-                  {segments.map(seg => { const checked = envRuleSegments.includes(seg.id); return (
-                    <label key={seg.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-900 cursor-pointer group">
-                      <input type="checkbox" checked={checked} onChange={e => setEnvRuleSegments(e.target.checked ? [...envRuleSegments, seg.id] : envRuleSegments.filter(id => id !== seg.id))} className="w-4 h-4 text-indigo-600 border-neutral-300 dark:border-neutral-700 rounded focus:ring-2 focus:ring-indigo-500" />
-                      <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white">{seg.name}</span>
-                    </label>
-                  ); })}
-                </div>
-                {envRuleSegments.length === 0 && <p className="text-xs text-neutral-500 mt-2 ml-1">Нет выбранных сегментов — правило применится ко всем пользователям</p>}
-              </div>
+                <div className="grid grid-cols-1 gap-2">
+                  {segments.map(seg => {
+                    const checked = envRuleSegments.includes(seg.id);
+                    const hasContext = (seg.context?.length ?? 0) > 0;
+                    const segColor = seg.color || '#3b82f6';
+                    return (
+                    <div
+                      key={seg.id}
+                      onClick={() => setEnvRuleSegments(checked ? envRuleSegments.filter(id => id !== seg.id) : [...envRuleSegments, seg.id])}
+                      className={`group cursor-pointer flex flex-col p-3.5 rounded-xl transition-all border ${
+                        checked
+                          ? 'shadow-sm'
+                          : 'bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800 hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-sm'
+                      }`}
+                      style={checked ? {
+                        backgroundColor: segColor + '0D',
+                        borderColor: segColor + '40',
+                      } : undefined}
+                    >
+                      <div className="flex gap-3">
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 mt-0.5"
+                          style={{ backgroundColor: segColor }}
+                        >
+                          <SegmentIcon name={seg.icon || 'Users'} size={16} />
+                        </div>
 
-              {envRuleSegments.length > 0 && (() => {
-                const segsWithContext = envRuleSegments
-                  .map(sid => segments.find(s => s.id === sid))
-                  .filter((s): s is SegmentResponse => !!s && (s.context?.length ?? 0) > 0);
-                if (segsWithContext.length === 0) return null;
-                return (
-                  <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Filter size={16} className="text-amber-600 dark:text-amber-400" />
-                      <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                        Constraints из сегментов
-                      </label>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 font-medium">
-                        только чтение
-                      </span>
-                    </div>
-                    {segsWithContext.map(seg => (
-                      <div key={seg.id} className="p-3 bg-amber-50 dark:bg-amber-500/5 rounded-lg border border-amber-200 dark:border-amber-500/20 mb-2">
-                        <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 mb-2">
-                          {seg.name}
-                        </p>
-                        <div className="space-y-1">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">{seg.name}</div>
+                          {seg.description && (
+                            <div className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5 line-clamp-1">{seg.description}</div>
+                          )}
+                        </div>
+
+                        <div className="shrink-0 mt-0.5">
+                          <div
+                            className={`w-5 h-5 rounded-md flex items-center justify-center transition-all border-2 ${
+                              checked ? '' : 'border-neutral-300 dark:border-neutral-600'
+                            }`}
+                            style={checked ? {
+                              backgroundColor: segColor,
+                              borderColor: segColor,
+                            } : undefined}
+                          >
+                            {checked && (
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M2.5 6L5 8.5L9.5 3.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {checked && hasContext && (
+                        <div className="mt-2.5 space-y-1">
                           {seg.context!.map((c, ci) => {
                             const ctxDef = contexts.find(cd => cd.id === c.contextDefinitionId);
                             return (
-                              <div key={ci} className="flex items-center gap-2 text-xs bg-amber-100 dark:bg-amber-500/10 rounded-md px-2.5 py-1.5 border border-amber-200/50 dark:border-amber-500/10">
-                                <span className="font-semibold text-amber-700 dark:text-amber-300">
-                                  {ctxDef?.name ?? `Поле #${c.contextDefinitionId}`}
-                                </span>
-                                <span className="text-amber-500 dark:text-amber-600 font-mono text-[10px] uppercase tracking-wider">
-                                  {c.operator ?? 'in'}
-                                </span>
-                                <code className="font-mono text-amber-800 dark:text-amber-200 break-all">
-                                  {c.contextValues}
-                                </code>
+                              <div key={ci} className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg border"
+                                style={{
+                                  backgroundColor: segColor + '0F',
+                                  borderColor: segColor + '1A',
+                                }}>
+                                <span className="font-semibold shrink-0" style={{ color: segColor }}>{ctxDef?.name ?? `#${c.contextDefinitionId}`}</span>
+                                <span className="text-[10px] uppercase font-mono tracking-wider opacity-60" style={{ color: segColor }}>{c.operator ?? 'in'}</span>
+                                <code className="font-mono break-all min-w-0 opacity-90" style={{ color: segColor }}>{c.contextValues}</code>
                               </div>
                             );
                           })}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              })()}
+                      )}
+                    </div>
+                  ); })}
+                </div>
+                {envRuleSegments.length === 0 && <p className="text-xs text-neutral-500 mt-2 ml-1">Нет выбранных сегментов — правило применится ко всем пользователям</p>}
+              </div>
 
               {/* Constraints */}
               <div>
@@ -637,7 +659,7 @@ export function Flags() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <div className="space-y-1"><label className="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Значение</label><input type="text" value={c.value} onChange={e => updateConstraint(ci, 'value', e.target.value)} placeholder="значение..." className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md px-2.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" /></div>
+                        <div className="space-y-1"><label className="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Значение</label><input type="text" value={c.value} onChange={e => updateConstraint(ci, 'value', e.target.value)} placeholder="значение..." className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md px-2.5 py-2 text-xs placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all" /></div>
                       </div>
                     </div>
                   ))}

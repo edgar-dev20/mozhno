@@ -44,6 +44,8 @@ public class SegmentService {
         segment.setProjectId(request.getProjectId());
         segment.setName(request.getName());
         segment.setDescription(request.getDescription());
+        segment.setIcon(request.getIcon());
+        segment.setColor(request.getColor());
         Segment saved = segmentRepository.save(segment);
 
         if (request.getContext() != null) {
@@ -68,6 +70,8 @@ public class SegmentService {
         if (segment == null) throw new RuntimeException("Segment not found: " + id);
         segment.setName(request.getName());
         segment.setDescription(request.getDescription());
+        segment.setIcon(request.getIcon());
+        segment.setColor(request.getColor());
         Segment saved = segmentRepository.save(segment);
 
         segmentContextRepository.deleteBySegmentId(id);
@@ -103,6 +107,8 @@ public class SegmentService {
         resp.setProjectId(segment.getProjectId());
         resp.setName(segment.getName());
         resp.setDescription(segment.getDescription());
+        resp.setIcon(segment.getIcon());
+        resp.setColor(segment.getColor());
         resp.setCreatedAt(segment.getCreatedAt());
 
         List<SegmentContext> contexts = segmentContextRepository.findBySegmentId(segment.getId());

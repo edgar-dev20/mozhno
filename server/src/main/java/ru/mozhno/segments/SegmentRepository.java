@@ -22,17 +22,19 @@ public class SegmentRepository {
         s.setProjectId(rs.getInt("project_id"));
         s.setName(rs.getString("name"));
         s.setDescription(rs.getString("description"));
+        s.setIcon(rs.getString("icon"));
+        s.setColor(rs.getString("color"));
         s.setCreatedAt(rs.getTimestamp("created_at").toInstant());
         return s;
     };
 
     public List<Segment> findByProjectId(Integer projectId) {
-        return jdbc.query("SELECT id, project_id, name, description, created_at FROM segments WHERE project_id = ?", ROW_MAPPER, projectId);
+        return jdbc.query("SELECT id, project_id, name, description, icon, color, created_at FROM segments WHERE project_id = ?", ROW_MAPPER, projectId);
     }
 
     public Segment findById(Integer id) {
         try {
-            return jdbc.queryForObject("SELECT id, project_id, name, description, created_at FROM segments WHERE id = ?", ROW_MAPPER, id);
+            return jdbc.queryForObject("SELECT id, project_id, name, description, icon, color, created_at FROM segments WHERE id = ?", ROW_MAPPER, id);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }
@@ -41,13 +43,19 @@ public class SegmentRepository {
     public Segment save(Segment segment) {
         if (segment.getId() == null) {
             Instant createTime = Instant.now();
-            jdbc.update("INSERT INTO segments (project_id, name, description, created_at) VALUES (?, ?, ?, ?)",
-                segment.getProjectId(), segment.getName(), segment.getDescription(), Timestamp.from(createTime));
+            jdbc.update("INSERT INTO segments (project_id, name, description, icon, color, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                segment.getProjectId(), segment.getName(), segment.getDescription(),
+                segment.getIcon() != null ? segment.getIcon() : "Users",
+                segment.getColor() != null ? segment.getColor() : "#3b82f1",
+                Timestamp.from(createTime));
             segment.setId(getLastInsertId());
             segment.setCreatedAt(createTime);
         } else {
-            jdbc.update("UPDATE segments SET name = ?, description = ? WHERE id = ?",
-                segment.getName(), segment.getDescription(), segment.getId());
+            jdbc.update("UPDATE segments SET name = ?, description = ?, icon = ?, color = ? WHERE id = ?",
+                segment.getName(), segment.getDescription(),
+                segment.getIcon() != null ? segment.getIcon() : "Users",
+                segment.getColor() != null ? segment.getColor() : "#3b82f1",
+                segment.getId());
         }
         return segment;
     }
