@@ -27,12 +27,14 @@ public class FlagStrategyRepository {
         fs.setContextDefinitionId(rs.getObject("context_definition_id") != null ? rs.getInt("context_definition_id") : null);
         fs.setContextValuesJson(rs.getString("context_values_json"));
         fs.setCreatedAt(rs.getTimestamp("created_at").toInstant());
+        Timestamp lastUsedTs = rs.getTimestamp("last_used_at");
+        fs.setLastUsedAt(lastUsedTs != null ? lastUsedTs.toInstant() : null);
         return fs;
     };
 
     public List<FlagStrategy> findByFlagId(Integer flagId) {
         List<FlagStrategy> strategies = jdbc.query(
-            "SELECT id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, created_at FROM flag_strategies WHERE flag_id = ?",
+            "SELECT id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, created_at, last_used_at FROM flag_strategies WHERE flag_id = ?",
             ROW_MAPPER, flagId);
         for (FlagStrategy fs : strategies) {
             fs.setSegmentIds(findSegmentIds(fs.getId()));
@@ -43,7 +45,7 @@ public class FlagStrategyRepository {
     public FlagStrategy findById(Integer id) {
         try {
             FlagStrategy fs = jdbc.queryForObject(
-                "SELECT id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, created_at FROM flag_strategies WHERE id = ?",
+                "SELECT id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, created_at, last_used_at FROM flag_strategies WHERE id = ?",
                 ROW_MAPPER, id);
             if (fs != null) {
                 fs.setSegmentIds(findSegmentIds(fs.getId()));
@@ -57,7 +59,7 @@ public class FlagStrategyRepository {
     public FlagStrategy findByFlagIdAndEnvironmentId(Integer flagId, Integer environmentId) {
         try {
             FlagStrategy fs = jdbc.queryForObject(
-                "SELECT id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, created_at FROM flag_strategies WHERE flag_id = ? AND environment_id = ?",
+                "SELECT id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, created_at, last_used_at FROM flag_strategies WHERE flag_id = ? AND environment_id = ?",
                 ROW_MAPPER, flagId, environmentId);
             if (fs != null) {
                 fs.setSegmentIds(findSegmentIds(fs.getId()));
@@ -79,7 +81,7 @@ public class FlagStrategyRepository {
                           context_definition_id = EXCLUDED.context_definition_id,
                           context_values_json = EXCLUDED.context_values_json,
                           created_at = flag_strategies.created_at
-            RETURNING id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, created_at
+            RETURNING id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, created_at, last_used_at
             """;
         FlagStrategy fs = jdbc.queryForObject(sql, ROW_MAPPER,
             flagId, environmentId, enabled, percentage, contextDefinitionId, contextValuesJson);
@@ -94,7 +96,7 @@ public class FlagStrategyRepository {
                                     Integer contextDefinitionId, String contextValuesJson, List<Integer> segmentIds) {
         try {
             FlagStrategy fs = jdbc.queryForObject(
-                "UPDATE flag_strategies SET enabled = ?, percentage = ?, context_definition_id = ?, context_values_json = ? WHERE id = ? RETURNING id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, created_at",
+                "UPDATE flag_strategies SET enabled = ?, percentage = ?, context_definition_id = ?, context_values_json = ? WHERE id = ? RETURNING id, flag_id, environment_id, enabled, percentage, context_definition_id, context_values_json, created_at, last_used_at",
                 ROW_MAPPER, enabled, percentage, contextDefinitionId, contextValuesJson, id);
             if (fs != null) {
                 syncSegmentIds(id, segmentIds);
@@ -128,6 +130,13 @@ public class FlagStrategyRepository {
 
     public void deleteById(Integer id) {
         jdbc.update("DELETE FROM flag_strategies WHERE id = ?", id);
+    }
+
+    public void touchLastUsedAt(List<Integer> strategyIds) {
+        if (strategyIds == null || strategyIds.isEmpty()) return;
+        String placeholders = strategyIds.stream().map(id -> "?").reduce((a, b) -> a + "," + b).orElse("");
+        jdbc.update("UPDATE flag_strategies SET last_used_at = NOW() WHERE id IN (" + placeholders + ")",
+            strategyIds.toArray());
     }
 
     private List<Integer> findSegmentIds(Integer strategyId) {

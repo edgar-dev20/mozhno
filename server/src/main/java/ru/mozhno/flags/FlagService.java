@@ -7,6 +7,7 @@ import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.projects.ProjectRepository;
 import ru.mozhno.tags.TagRepository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -70,6 +71,11 @@ public class FlagService {
 
     @Transactional
     public Flag create(FlagRequest request) {
+        return create(request, null);
+    }
+
+    @Transactional
+    public Flag create(FlagRequest request, Integer creatorId) {
         if (projectRepository.findById(request.getProjectId()) == null) {
             throw new RuntimeException("Project not found: " + request.getProjectId());
         }
@@ -79,6 +85,7 @@ public class FlagService {
         flag.setKey(request.getKey());
         flag.setDescription(request.getDescription());
         flag.setEnabled(request.getEnabled() != null ? request.getEnabled() : false);
+        flag.setCreatorId(creatorId);
         if (request.getFlagType() != null) {
             try {
                 flag.setFlagType(FlagType.valueOf(request.getFlagType().toUpperCase()));
@@ -158,10 +165,17 @@ public class FlagService {
 
     @Transactional
     public Flag archive(Integer id) {
+        return archive(id, null);
+    }
+
+    @Transactional
+    public Flag archive(Integer id, Integer archivedBy) {
         Flag flag = flagRepository.findById(id);
         if (flag == null) throw new RuntimeException("Flag not found: " + id);
-        flagRepository.setArchived(id, true);
+        flagRepository.setArchived(id, true, archivedBy);
         flag.setArchived(true);
+        flag.setArchivedBy(archivedBy);
+        flag.setArchivedAt(Instant.now());
         events.publish(new DomainEvent(flag.getProjectId(), "flag.archived", "flag",
             flag.getId(), flag.getName(), "Flag archived: " + flag.getKey()));
         return flag;
@@ -171,8 +185,10 @@ public class FlagService {
     public Flag unarchive(Integer id) {
         Flag flag = flagRepository.findById(id);
         if (flag == null) throw new RuntimeException("Flag not found: " + id);
-        flagRepository.setArchived(id, false);
+        flagRepository.clearArchived(id);
         flag.setArchived(false);
+        flag.setArchivedBy(null);
+        flag.setArchivedAt(null);
         events.publish(new DomainEvent(flag.getProjectId(), "flag.unarchived", "flag",
             flag.getId(), flag.getName(), "Flag unarchived: " + flag.getKey()));
         return flag;

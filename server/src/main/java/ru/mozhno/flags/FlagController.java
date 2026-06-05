@@ -7,9 +7,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ru.mozhno.auth.UserPrincipal;
+import ru.mozhno.auth.UserRepository;
 import ru.mozhno.tags.Tag;
 import ru.mozhno.tags.TagRepository;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -19,11 +21,13 @@ public class FlagController {
     private final FlagService flagService;
     private final FlagTagValueRepository flagTagValueRepository;
     private final TagRepository tagRepository;
+    private final UserRepository userRepository;
 
-    public FlagController(FlagService flagService, FlagTagValueRepository flagTagValueRepository, TagRepository tagRepository) {
+    public FlagController(FlagService flagService, FlagTagValueRepository flagTagValueRepository, TagRepository tagRepository, UserRepository userRepository) {
         this.flagService = flagService;
         this.flagTagValueRepository = flagTagValueRepository;
         this.tagRepository = tagRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -63,7 +67,7 @@ public class FlagController {
     public FlagResponse create(@PathVariable Integer projectId, @Valid @RequestBody FlagRequest request,
                                @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(projectId);
-        Flag flag = flagService.create(request);
+        Flag flag = flagService.create(request, user.userId());
         return toResponse(flag);
     }
 
@@ -91,7 +95,7 @@ public class FlagController {
     @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
     public FlagResponse archive(@PathVariable Integer projectId, @PathVariable Integer id,
                                 @AuthenticationPrincipal UserPrincipal user) {
-        Flag flag = flagService.archive(id);
+        Flag flag = flagService.archive(id, user.userId());
         return toResponse(flag);
     }
 
@@ -121,6 +125,23 @@ public class FlagController {
         Integer contextDefinitionId = strategy != null ? strategy.getContextDefinitionId() : null;
         String contextValuesJson = strategy != null ? strategy.getContextValuesJson() : null;
         List<Integer> segmentIds = strategy != null ? strategy.getSegmentIds() : null;
+        Instant lastUsedAt = strategy != null ? strategy.getLastUsedAt() : null;
+        String createdBy = null;
+        if (flag.getCreatorId() != null) {
+            var creator = userRepository.findById(flag.getCreatorId());
+            if (creator != null) {
+                String name = creator.getName() != null ? creator.getName() : creator.getEmail();
+                createdBy = name + " (" + creator.getEmail() + ")";
+            }
+        }
+        String archivedBy = null;
+        if (flag.getArchivedBy() != null) {
+            var archiver = userRepository.findById(flag.getArchivedBy());
+            if (archiver != null) {
+                String name = archiver.getName() != null ? archiver.getName() : archiver.getEmail();
+                archivedBy = name + " (" + archiver.getEmail() + ")";
+            }
+        }
         return new FlagResponse(
                 flag.getId(),
                 flag.getProjectId(),
@@ -129,6 +150,10 @@ public class FlagController {
                 flag.getDescription(),
                 flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE",
                 flag.getCreatedAt(),
+                createdBy,
+                lastUsedAt,
+                archivedBy,
+                flag.getArchivedAt(),
                 tags,
                 enabled,
                 strategyId,

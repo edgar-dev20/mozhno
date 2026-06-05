@@ -11,6 +11,9 @@ public class Flag {
     private String description;
     private FlagType flagType;
     private Instant createdAt;
+    private Integer creatorId;
+    private Integer archivedBy;
+    private Instant archivedAt;
     private FlagStrategy strategy;
     private boolean enabled;
     private boolean archived;
@@ -31,6 +34,12 @@ public class Flag {
     public void setFlagType(FlagType flagType) { this.flagType = flagType; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public Integer getCreatorId() { return creatorId; }
+    public void setCreatorId(Integer creatorId) { this.creatorId = creatorId; }
+    public Integer getArchivedBy() { return archivedBy; }
+    public void setArchivedBy(Integer archivedBy) { this.archivedBy = archivedBy; }
+    public Instant getArchivedAt() { return archivedAt; }
+    public void setArchivedAt(Instant archivedAt) { this.archivedAt = archivedAt; }
     public FlagStrategy getStrategy() { return strategy; }
     public void setStrategy(FlagStrategy strategy) { this.strategy = strategy; }
     public boolean isEnabled() { return enabled; }

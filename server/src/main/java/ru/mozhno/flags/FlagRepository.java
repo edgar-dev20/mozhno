@@ -26,25 +26,30 @@ public class FlagRepository {
         f.setDescription(rs.getString("description"));
         f.setFlagType(FlagType.valueOf(rs.getString("flag_type")));
         f.setCreatedAt(rs.getTimestamp("created_at").toInstant());
+        f.setCreatorId(rs.getObject("creator_id") != null ? rs.getInt("creator_id") : null);
+        f.setArchivedBy(rs.getObject("archived_by") != null ? rs.getInt("archived_by") : null);
+        Timestamp archivedAtTs = rs.getTimestamp("archived_at");
+        f.setArchivedAt(archivedAtTs != null ? archivedAtTs.toInstant() : null);
         f.setEnabled(rs.getBoolean("enabled"));
         f.setArchived(rs.getBoolean("archived"));
         return f;
     };
 
     public List<Flag> findByProjectId(Integer projectId) {
-        return jdbc.query("SELECT id, project_id, name, flag_key, description, flag_type, created_at, enabled, archived FROM flags WHERE project_id = ? AND archived = FALSE ORDER BY id", ROW_MAPPER, projectId);
+        return jdbc.query("SELECT id, project_id, name, flag_key, description, flag_type, created_at, creator_id, archived_by, archived_at, enabled, archived FROM flags WHERE project_id = ? AND archived = FALSE ORDER BY id", ROW_MAPPER, projectId);
     }
 
     public List<Flag> findByProjectIdIncludingArchived(Integer projectId) {
-        return jdbc.query("SELECT id, project_id, name, flag_key, description, flag_type, created_at, enabled, archived FROM flags WHERE project_id = ? ORDER BY id", ROW_MAPPER, projectId);
+        return jdbc.query("SELECT id, project_id, name, flag_key, description, flag_type, created_at, creator_id, archived_by, archived_at, enabled, archived FROM flags WHERE project_id = ? ORDER BY id", ROW_MAPPER, projectId);
     }
 
     public List<Flag> findByProjectIdWithStrategyForEnvironment(Integer projectId, Integer environmentId) {
         String sql = """
-            SELECT f.id, f.project_id, f.name, f.flag_key, f.description, f.flag_type, f.created_at, f.enabled as flag_enabled, f.archived,
+            SELECT f.id, f.project_id, f.name, f.flag_key, f.description, f.flag_type, f.created_at, f.creator_id, f.archived_by, f.archived_at, f.enabled as flag_enabled, f.archived,
                    s.id as strategy_id, s.enabled as strategy_enabled, s.percentage,
                    s.context_definition_id,
                    s.context_values_json as context_values,
+                   s.last_used_at as strategy_last_used_at,
                    cd.name as context_name
             FROM flags f
             LEFT JOIN flag_strategies s ON f.id = s.flag_id AND s.environment_id = ?
@@ -61,6 +66,10 @@ public class FlagRepository {
             f.setDescription(rs.getString("description"));
             f.setFlagType(FlagType.valueOf(rs.getString("flag_type")));
             f.setCreatedAt(rs.getTimestamp("created_at").toInstant());
+            f.setCreatorId(rs.getObject("creator_id") != null ? rs.getInt("creator_id") : null);
+            f.setArchivedBy(rs.getObject("archived_by") != null ? rs.getInt("archived_by") : null);
+            Timestamp archivedAtTs = rs.getTimestamp("archived_at");
+            f.setArchivedAt(archivedAtTs != null ? archivedAtTs.toInstant() : null);
             f.setEnabled(rs.getBoolean("flag_enabled"));
             f.setArchived(rs.getBoolean("archived"));
 
@@ -75,6 +84,8 @@ public class FlagRepository {
                 s.setContextDefinitionId(rs.getObject("context_definition_id") != null ? rs.getInt("context_definition_id") : null);
                 s.setContextValuesJson(rs.getString("context_values"));
                 s.setContextName(rs.getString("context_name"));
+                Timestamp lastUsedTs = rs.getTimestamp("strategy_last_used_at");
+                s.setLastUsedAt(lastUsedTs != null ? lastUsedTs.toInstant() : null);
                 s.setSegmentIds(loadSegmentIds(strategyId));
                 f.setStrategy(s);
             }
@@ -90,7 +101,7 @@ public class FlagRepository {
 
     public Flag findById(Integer id) {
         try {
-            return jdbc.queryForObject("SELECT id, project_id, name, flag_key, description, flag_type, created_at, enabled, archived FROM flags WHERE id = ?", ROW_MAPPER, id);
+            return jdbc.queryForObject("SELECT id, project_id, name, flag_key, description, flag_type, created_at, creator_id, archived_by, archived_at, enabled, archived FROM flags WHERE id = ?", ROW_MAPPER, id);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }
@@ -98,7 +109,7 @@ public class FlagRepository {
 
     public Flag findByProjectIdAndKey(Integer projectId, String key) {
         try {
-            return jdbc.queryForObject("SELECT id, project_id, name, flag_key, description, flag_type, created_at, enabled, archived FROM flags WHERE project_id = ? AND flag_key = ?", ROW_MAPPER, projectId, key);
+            return jdbc.queryForObject("SELECT id, project_id, name, flag_key, description, flag_type, created_at, creator_id, archived_by, archived_at, enabled, archived FROM flags WHERE project_id = ? AND flag_key = ?", ROW_MAPPER, projectId, key);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }
@@ -107,9 +118,10 @@ public class FlagRepository {
     public Flag save(Flag flag) {
         if (flag.getId() == null) {
             Instant createTime = Instant.now();
-            jdbc.update("INSERT INTO flags (project_id, name, flag_key, description, flag_type, created_at, enabled, archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            jdbc.update("INSERT INTO flags (project_id, name, flag_key, description, flag_type, created_at, creator_id, enabled, archived) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 flag.getProjectId(), flag.getName(), flag.getKey(), flag.getDescription(),
-                flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE", Timestamp.from(createTime), flag.isEnabled(), flag.isArchived());
+                flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE", Timestamp.from(createTime),
+                flag.getCreatorId(), flag.isEnabled(), flag.isArchived());
             flag.setId(getLastInsertId());
             flag.setCreatedAt(createTime);
         } else {
@@ -123,8 +135,13 @@ public class FlagRepository {
         jdbc.update("DELETE FROM flags WHERE id = ?", id);
     }
 
-    public void setArchived(Integer id, boolean archived) {
-        jdbc.update("UPDATE flags SET archived = ? WHERE id = ?", archived, id);
+    public void setArchived(Integer id, boolean archived, Integer archivedBy) {
+        jdbc.update("UPDATE flags SET archived = ?, archived_by = ?, archived_at = ? WHERE id = ?",
+            archived, archivedBy, archived ? new Timestamp(System.currentTimeMillis()) : null, id);
+    }
+
+    public void clearArchived(Integer id) {
+        jdbc.update("UPDATE flags SET archived = FALSE, archived_by = NULL, archived_at = NULL WHERE id = ?", id);
     }
 
     private Integer getLastInsertId() {

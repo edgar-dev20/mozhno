@@ -8,6 +8,7 @@ import ru.mozhno.contexts.ContextDefinitionRepository;
 import ru.mozhno.flags.Flag;
 import ru.mozhno.flags.FlagRepository;
 import ru.mozhno.flags.strategy.FlagStrategy;
+import ru.mozhno.flags.strategy.FlagStrategyRepository;
 import ru.mozhno.segments.SegmentContextRepository;
 import ru.mozhno.segments.SegmentContextRepository.SegmentContextWithName;
 import ru.mozhno.client.ClientFlagResponse.Constraint;
@@ -22,13 +23,16 @@ import java.util.Map;
 @Service
 public class ClientFlagService {
     private final FlagRepository flagRepository;
+    private final FlagStrategyRepository flagStrategyRepository;
     private final SegmentContextRepository segmentContextRepository;
     private final ContextDefinitionRepository contextDefinitionRepository;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public ClientFlagService(FlagRepository flagRepository, SegmentContextRepository segmentContextRepository,
+    public ClientFlagService(FlagRepository flagRepository, FlagStrategyRepository flagStrategyRepository,
+                             SegmentContextRepository segmentContextRepository,
                              ContextDefinitionRepository contextDefinitionRepository) {
         this.flagRepository = flagRepository;
+        this.flagStrategyRepository = flagStrategyRepository;
         this.segmentContextRepository = segmentContextRepository;
         this.contextDefinitionRepository = contextDefinitionRepository;
     }
@@ -36,13 +40,19 @@ public class ClientFlagService {
     public List<ClientFlagResponse> getFlagsForProject(Integer projectId, Integer environmentId) {
         List<Flag> flags = flagRepository.findByProjectIdWithStrategyForEnvironment(projectId, environmentId);
 
+        List<Integer> strategyIds = new ArrayList<>();
         List<Integer> segmentIds = new ArrayList<>();
         for (Flag flag : flags) {
             FlagStrategy s = flag.getStrategy();
-            if (s != null && s.getSegmentIds() != null) {
-                segmentIds.addAll(s.getSegmentIds());
+            if (s != null) {
+                strategyIds.add(s.getId());
+                if (s.getSegmentIds() != null) {
+                    segmentIds.addAll(s.getSegmentIds());
+                }
             }
         }
+
+        flagStrategyRepository.touchLastUsedAt(strategyIds);
 
         Map<Integer, List<SegmentContextWithName>> segmentContextsMap;
         if (!segmentIds.isEmpty()) {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import * as Slider from '@radix-ui/react-slider';
 import { Switch } from './ui/switch';
-import { Plus, Tag, Trash2, Percent, Users, Settings, X, Filter, Rocket, ShieldOff, Zap, Archive, ArchiveRestore } from 'lucide-react';
+import { Plus, Tag, Trash2, Percent, Users, Settings, X, Filter, Rocket, ShieldOff, Zap, Archive, ArchiveRestore, Clock, User } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { motion, AnimatePresence } from 'motion/react';
 import { SidePanel } from './SidePanel';
@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { SegmentIcon } from './SegmentIcon';
 import { api, FlagResponse, FlagRequest, Tag as TagType, Environment, SegmentResponse, FlagStrategy, StrategyRequest, FlagTagValue, ContextDefinition, ContextValue } from '../../api';
 
-interface EnvState { enabled: boolean; percentage: number; segmentIds: number[]; strategyId: number | null; contextDefinitionId: number | null; contextValuesJson: string | null; }
-interface FlagView { key: string; name: string; description: string; flagType: string; tags: FlagTagValue[]; flagId: number; environments: Record<number, EnvState>; archived: boolean; }
+interface EnvState { enabled: boolean; percentage: number; segmentIds: number[]; strategyId: number | null; contextDefinitionId: number | null; contextValuesJson: string | null; lastUsedAt: string | null; }
+interface FlagView { key: string; name: string; description: string; flagType: string; tags: FlagTagValue[]; flagId: number; environments: Record<number, EnvState>; archived: boolean; createdAt: string | null; createdBy: string | null; archivedBy: string | null; archivedAt: string | null; }
 
 interface ConstraintEntry {
   contextDefId: number;
@@ -105,13 +105,13 @@ export function Flags() {
 
       const byKey = new Map<string, FlagView>();
       for (const f of base) {
-        if (!byKey.has(f.key)) byKey.set(f.key, { key: f.key, name: f.name, description: f.description ?? '', flagType: f.flagType, tags: f.tags ?? [], flagId: f.id, environments: {}, archived: f.archived });
+        if (!byKey.has(f.key)) byKey.set(f.key, { key: f.key, name: f.name, description: f.description ?? '', flagType: f.flagType, tags: f.tags ?? [], flagId: f.id, environments: {}, archived: f.archived, createdAt: f.createdAt ?? null, createdBy: f.createdBy ?? null, archivedBy: f.archivedBy ?? null, archivedAt: f.archivedAt ?? null });
       }
       for (const env of envs) {
         const envFlags = await api.flags.list(projectId, env.id);
         for (const f of envFlags) {
-          const v = byKey.get(f.key) ?? byKey.set(f.key, { key: f.key, name: f.name, description: f.description ?? '', flagType: f.flagType, tags: f.tags ?? [], flagId: f.id, environments: {}, archived: f.archived }).get(f.key)!;
-          v.environments[env.id] = { enabled: f.enabled, percentage: f.percentage ?? 100, segmentIds: f.segmentIds ?? [], strategyId: f.strategyId ?? null, contextDefinitionId: f.contextDefinitionId ?? null, contextValuesJson: f.contextValuesJson ?? null };
+          const v = byKey.get(f.key) ?? byKey.set(f.key, { key: f.key, name: f.name, description: f.description ?? '', flagType: f.flagType, tags: f.tags ?? [], flagId: f.id, environments: {}, archived: f.archived, createdAt: f.createdAt ?? null, createdBy: f.createdBy ?? null, archivedBy: f.archivedBy ?? null, archivedAt: f.archivedAt ?? null }).get(f.key)!;
+          v.environments[env.id] = { enabled: f.enabled, percentage: f.percentage ?? 100, segmentIds: f.segmentIds ?? [], strategyId: f.strategyId ?? null, contextDefinitionId: f.contextDefinitionId ?? null, contextValuesJson: f.contextValuesJson ?? null, lastUsedAt: f.lastUsedAt ?? null };
         }
       }
       setFlags(Array.from(byKey.values()));
@@ -292,6 +292,29 @@ export function Flags() {
     }
   };
   const getTypeLabel = (t: string) => t === 'RELEASE' ? 'Релиз' : t === 'KILLSWITCH' ? 'Рубильник' : t;
+  const formatDate = (d: string | null) => {
+    if (!d) return null;
+    const date = new Date(d);
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+  const formatDateTime = (d: string | null) => {
+    if (!d) return null;
+    const date = new Date(d);
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  };
+  const timeAgo = (d: string | null) => {
+    if (!d) return 'Никогда не использовался';
+    const diff = Date.now() - new Date(d).getTime();
+    const seconds = Math.floor(diff / 1000);
+    if (seconds < 60) return 'Только что';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} мин. назад`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} ч. назад`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days} дн. назад`;
+    return formatDate(d) ?? '';
+  };
 
   let filtered = flags.filter(f => !f.archived);
   if (selectedTagTypeFilter) filtered = filtered.filter(f => f.tags.some(tg => tg.tagId === selectedTagTypeFilter && (!selectedTagValueFilter || tg.value === selectedTagValueFilter)));
@@ -419,18 +442,39 @@ export function Flags() {
                   </div>
                   <div className="text-xs font-mono text-neutral-500 mt-0.5">{flag.key}</div>
                   {flag.tags.length > 0 && (<div className="flex items-center gap-1.5 mt-2 flex-wrap">{flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}</div>)}
+                  <div className="flex items-center gap-2 mt-1.5 text-[11px] text-neutral-400 dark:text-neutral-500">
+                    {flag.createdAt && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex items-center gap-1"><Clock size={10} />{formatDate(flag.createdAt)}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>{formatDateTime(flag.createdAt)}</TooltipContent>
+                      </Tooltip>
+                    )}
+                    {flag.createdBy && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="flex items-center gap-1 truncate max-w-[160px]"><User size={10} />{flag.createdBy}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>{flag.createdBy}</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-4 ml-6 shrink-0">
                   {environments.map(env => {
                     const es = flag.environments[env.id];
                     return (
-                      <div key={env.id} className="w-[120px] flex items-center justify-center">
+                      <div key={env.id} className="w-[120px] flex flex-col items-center justify-center">
                         {es ? (
+                          <>
                           <div className="flex items-center justify-center gap-2">
                             <Switch checked={es.enabled} onCheckedChange={() => toggleFlag(flag, env.id)} className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-violet-500" />
                             <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[11px] font-semibold min-w-[42px] justify-center select-none transition-colors ${es.enabled ? 'bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}><Percent size={9} />{es.percentage ?? 100}</span>
                             <button onClick={() => openEnvironment(flag, env.id)} className="flex items-center justify-center size-[22px] rounded-md text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-violet-50 dark:hover:from-blue-500/10 dark:hover:to-violet-500/10 transition-colors" title="Настроить"><Settings size={13} /></button>
                           </div>
+                          <span className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5 leading-none">{timeAgo(es.lastUsedAt)}</span>
+                          </>
                         ) : <span className="text-sm text-neutral-400">—</span>}
                       </div>
                     );
@@ -476,6 +520,16 @@ export function Flags() {
                     </div>
                     <div className="text-xs font-mono text-neutral-400 mt-0.5">{flag.key}</div>
                     {flag.tags.length > 0 && (<div className="flex items-center gap-1.5 mt-1.5 flex-wrap">{flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}</div>)}
+                    <div className="flex items-center gap-2 mt-1 text-[10px] text-neutral-400 dark:text-neutral-500">
+                      <span className="flex items-center gap-1"><User size={10} />{flag.createdBy ?? '—'}</span>
+                      {flag.createdAt && <span className="flex items-center gap-1"><Clock size={10} />{formatDate(flag.createdAt)}</span>}
+                    </div>
+                    {flag.archivedBy && (
+                      <div className="flex items-center gap-2 mt-1 text-[10px] text-amber-600 dark:text-amber-400">
+                        <span className="flex items-center gap-1"><Archive size={10} />{flag.archivedBy}</span>
+                        {flag.archivedAt && <span className="flex items-center gap-1"><Clock size={10} />{formatDate(flag.archivedAt)}</span>}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-1.5 ml-4 shrink-0">
                     <button
@@ -531,6 +585,31 @@ export function Flags() {
                   <button onClick={() => { setAddingTag(false); setNewTagId(null); setNewTagVal(''); }} className="w-full px-3 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg">Отмена</button>
                 </div>}
             </div>}
+
+            {editing.flag && (
+              <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800 space-y-2.5">
+                <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                  <User size={12} className="text-neutral-400" />
+                  <span>Создал: <span className="font-medium text-neutral-700 dark:text-neutral-300">{editing.flag.createdBy ?? 'Неизвестно'}</span></span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                  <Clock size={12} className="text-neutral-400" />
+                  <span>Создан: <span className="font-medium text-neutral-700 dark:text-neutral-300">{formatDateTime(editing.flag.createdAt) ?? '—'}</span></span>
+                </div>
+                {editing.flag.archivedBy && (
+                  <>
+                    <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                      <Archive size={12} className="text-amber-500" />
+                      <span>Архивировал: <span className="font-medium text-neutral-700 dark:text-neutral-300">{editing.flag.archivedBy}</span></span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-neutral-500 dark:text-neutral-400">
+                      <Clock size={12} className="text-amber-500" />
+                      <span>Архивирован: <span className="font-medium text-neutral-700 dark:text-neutral-300">{formatDateTime(editing.flag.archivedAt) ?? '—'}</span></span>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
 
             {editing.flag && <div className="pt-6 border-t border-neutral-200 dark:border-neutral-800 space-y-3">
               {editing.flag.archived

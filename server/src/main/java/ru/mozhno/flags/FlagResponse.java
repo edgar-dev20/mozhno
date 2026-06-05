@@ -11,6 +11,10 @@ public class FlagResponse {
     private String description;
     private String flagType;
     private Instant createdAt;
+    private String createdBy;
+    private Instant lastUsedAt;
+    private String archivedBy;
+    private Instant archivedAt;
     private List<TagValueResponse> tags;
     private boolean enabled;
     private Integer strategyId;
@@ -46,7 +50,7 @@ public class FlagResponse {
 
     public FlagResponse() {}
 
-    public FlagResponse(Integer id, Integer projectId, String name, String key, String description, String flagType, Instant createdAt, List<TagValueResponse> tags, boolean enabled, Integer strategyId, Double percentage, Integer contextDefinitionId, String contextValuesJson, List<Integer> segmentIds, boolean archived) {
+    public FlagResponse(Integer id, Integer projectId, String name, String key, String description, String flagType, Instant createdAt, String createdBy, Instant lastUsedAt, String archivedBy, Instant archivedAt, List<TagValueResponse> tags, boolean enabled, Integer strategyId, Double percentage, Integer contextDefinitionId, String contextValuesJson, List<Integer> segmentIds, boolean archived) {
         this.id = id;
         this.projectId = projectId;
         this.name = name;
@@ -54,6 +58,10 @@ public class FlagResponse {
         this.description = description;
         this.flagType = flagType;
         this.createdAt = createdAt;
+        this.createdBy = createdBy;
+        this.lastUsedAt = lastUsedAt;
+        this.archivedBy = archivedBy;
+        this.archivedAt = archivedAt;
         this.tags = tags;
         this.enabled = enabled;
         this.strategyId = strategyId;
@@ -78,6 +86,14 @@ public class FlagResponse {
     public void setFlagType(String flagType) { this.flagType = flagType; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public Instant getLastUsedAt() { return lastUsedAt; }
+    public void setLastUsedAt(Instant lastUsedAt) { this.lastUsedAt = lastUsedAt; }
+    public String getArchivedBy() { return archivedBy; }
+    public void setArchivedBy(String archivedBy) { this.archivedBy = archivedBy; }
+    public Instant getArchivedAt() { return archivedAt; }
+    public void setArchivedAt(Instant archivedAt) { this.archivedAt = archivedAt; }
     public List<TagValueResponse> getTags() { return tags; }
     public void setTags(List<TagValueResponse> tags) { this.tags = tags; }
     public boolean isEnabled() { return enabled; }
