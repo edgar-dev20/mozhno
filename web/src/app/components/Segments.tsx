@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Users, Filter, MoreHorizontal, Edit2, Trash2, Settings, X, PieChart } from 'lucide-react';
+import { Plus, Users, Filter, MoreHorizontal, Edit2, Trash2, Settings, X, PieChart, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   DropdownMenu,
@@ -17,6 +17,7 @@ import { api, SegmentResponse, ContextDefinition } from '../../api';
 interface SegmentContextEntry {
   id: string;
   contextDefinitionId: number;
+  operator: string;
   contextValues: string;
 }
 
@@ -56,6 +57,7 @@ export function Segments() {
     setFormContexts((s.context ?? []).map((c, i) => ({
       id: `sc-${Date.now()}-${i}`,
       contextDefinitionId: c.contextDefinitionId,
+      operator: c.operator ?? 'in',
       contextValues: c.contextValues,
     })));
     setError(''); setPanelOpen(true);
@@ -67,15 +69,53 @@ export function Segments() {
     try { await api.segments.delete(projectId, deleteId); setSegments(segments.filter(s => s.id !== deleteId)); setDeleteId(null); } catch (e: any) { alert(e.message); } finally { setDeleting(false); }
   };
 
-  const addContext = () => setFormContexts(prev => [...prev, { id: `sc-${Date.now()}`, contextDefinitionId: contexts[0]?.id ?? 0, contextValues: '' }]);
+  const addContext = () => setFormContexts(prev => [...prev, { id: `sc-${Date.now()}`, contextDefinitionId: contexts[0]?.id ?? 0, operator: 'in', contextValues: '' }]);
   const removeContext = (id: string) => setFormContexts(prev => prev.filter(c => c.id !== id));
   const updateContextDef = (id: string, contextDefinitionId: number) => setFormContexts(prev => prev.map(c => c.id === id ? { ...c, contextDefinitionId } : c));
+  const updateOperator = (id: string, operator: string) => setFormContexts(prev => prev.map(c => c.id === id ? { ...c, operator } : c));
   const updateContextVal = (id: string, contextValues: string) => setFormContexts(prev => prev.map(c => c.id === id ? { ...c, contextValues } : c));
+
+  const addValue = (id: string, value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    setFormContexts(prev => prev.map(c => {
+      if (c.id !== id) return c;
+      const existing = c.contextValues ? c.contextValues.split(',').map(v => v.trim()).filter(Boolean) : [];
+      if (existing.includes(trimmed)) return c;
+      return { ...c, contextValues: existing.concat(trimmed).join(', ') };
+    }));
+  };
+
+  const removeValue = (id: string, index: number) => {
+    setFormContexts(prev => prev.map(c => {
+      if (c.id !== id) return c;
+      const values = (c.contextValues ?? '').split(',').map(v => v.trim()).filter(Boolean);
+      values.splice(index, 1);
+      return { ...c, contextValues: values.join(', ') };
+    }));
+  };
+
+  const handleFileUpload = (id: string, file: File) => {
+    const MAX_SIZE = 1_048_576;
+    if (file.size > MAX_SIZE) { setError(`Файл слишком большой. Максимальный размер: ${(MAX_SIZE / 1024 / 1024).toFixed(1)}MB`); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = (e.target?.result as string) || '';
+      const newValues = text.split(/[\n\r,]+/).map(v => v.trim()).filter(Boolean);
+      setFormContexts(prev => prev.map(c => {
+        if (c.id !== id) return c;
+        const existing = (c.contextValues ?? '').split(',').map(v => v.trim()).filter(Boolean);
+        const merged = [...new Set([...existing, ...newValues])];
+        return { ...c, contextValues: merged.join(', ') };
+      }));
+    };
+    reader.readAsText(file);
+  };
 
   const handleSave = async () => {
     if (!projectId) return; setError(''); setSaving(true);
     try {
-      const context = formContexts.map(c => ({ contextDefinitionId: c.contextDefinitionId, contextValues: c.contextValues }));
+      const context = formContexts.map(c => ({ contextDefinitionId: c.contextDefinitionId, operator: c.operator, contextValues: c.contextValues }));
       if (editing) {
         const u = await api.segments.update(projectId, editing.id, { projectId, name: formName, description: formDesc, context });
         setSegments(segments.map(s => s.id === u.id ? u : s));
@@ -166,7 +206,7 @@ export function Segments() {
                         return (
                           <div key={ci} className="flex items-center gap-1.5 text-xs">
                             <span className="font-semibold text-neutral-600 dark:text-neutral-400">{ctxDef?.name ?? `Поле #${c.contextDefinitionId}`}</span>
-                            <span className="text-neutral-400 dark:text-neutral-600 font-mono text-[10px] uppercase">in</span>
+                            <span className="text-neutral-400 dark:text-neutral-600 font-mono text-[10px] uppercase">{c.operator ?? 'in'}</span>
                             <code className="font-mono text-emerald-600 dark:text-emerald-400 break-all line-clamp-1">{c.contextValues}</code>
                           </div>
                         );
@@ -204,8 +244,9 @@ export function Segments() {
             <div className="space-y-3">
               {formContexts.map((c, ci) => {
                 const ctxDef = contexts.find(cd => cd.id === c.contextDefinitionId);
+                const parsedValues = (c.contextValues ?? '').split(',').map(v => v.trim()).filter(Boolean);
                 return (
-                  <div key={c.id} className="p-3 bg-white dark:bg-neutral-950 rounded-lg border border-neutral-200 dark:border-neutral-800 space-y-2.5">
+                  <div key={c.id} className="p-3 bg-white dark:bg-neutral-950 rounded-lg border border-neutral-200 dark:border-neutral-800 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Условие {ci + 1}</span>
                       <button onClick={() => removeContext(c.id)} className="text-neutral-400 hover:text-red-600 dark:hover:text-red-400"><X size={14} /></button>
@@ -221,17 +262,56 @@ export function Segments() {
                           </Select>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Значения</label>
-                        <input type="text" value={c.contextValues} onChange={e => updateContextVal(c.id, e.target.value)} placeholder="значения через запятую..." className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md px-2.5 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                        <label className="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Оператор</label>
+                        <Select value={c.operator} onValueChange={(v) => updateOperator(c.id, v)}>
+                          <SelectTrigger size="sm" className="w-full text-xs [&>span]:text-xs rounded-md"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="eq">равно</SelectItem>
+                            <SelectItem value="ne">не равно</SelectItem>
+                            <SelectItem value="in">в списке</SelectItem>
+                            <SelectItem value="not_in">не в списке</SelectItem>
+                            <SelectItem value="gt">&gt;</SelectItem>
+                            <SelectItem value="gte">≥</SelectItem>
+                            <SelectItem value="lt">&lt;</SelectItem>
+                            <SelectItem value="lte">≤</SelectItem>
+                            <SelectItem value="contains">содержит</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                    {ctxDef && (
-                      <div className="flex items-center gap-1.5 text-[10px] text-neutral-500 dark:text-neutral-400 bg-neutral-50 dark:bg-neutral-900/50 rounded px-2 py-1">
-                        <Filter size={10} />
-                        <span className="font-medium text-indigo-600 dark:text-indigo-400">{ctxDef.name}</span>
-                        <span className="text-neutral-400">—</span>
-                        <code className="font-mono text-emerald-600 dark:text-emerald-400 break-all">{c.contextValues || '(пусто)'}</code>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-medium text-neutral-500 uppercase tracking-wide flex items-center gap-1.5">Значения
+                        <label className="cursor-pointer text-indigo-500 hover:text-indigo-400 transition-colors" title="Загрузить из файла (.txt, .csv, до 1MB)">
+                          <Upload size={11} />
+                          <input type="file" accept=".txt,.csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(c.id, f); e.target.value = ''; }} />
+                        </label>
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Добавить значение..."
+                        className="w-full bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-md px-2.5 py-2 text-xs placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            addValue(c.id, (e.target as HTMLInputElement).value);
+                            (e.target as HTMLInputElement).value = '';
+                          }
+                        }}
+                      />
+                    </div>
+                    {parsedValues.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {parsedValues.map((v, vi) => (
+                          <span key={vi} className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-mono bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20 rounded-md break-all">
+                            {v}
+                            <button onClick={() => removeValue(c.id, vi)} className="text-emerald-500 hover:text-red-500 transition-colors"><X size={11} /></button>
+                          </span>
+                        ))}
+                        <span className="text-[10px] text-neutral-400 self-center ml-1">{parsedValues.length} знач.</span>
                       </div>
+                    )}
+                    {parsedValues.length === 0 && (
+                      <div className="text-[10px] text-neutral-400 italic">Нет значений. Введите значение и нажмите Enter, или загрузите файл.</div>
                     )}
                   </div>
                 );

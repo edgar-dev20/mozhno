@@ -22,12 +22,15 @@ public class SegmentRequest {
 
     public static class ContextEntry {
         private Integer contextDefinitionId;
+        private String operator;
         private String contextValues;
 
         public ContextEntry() {}
 
         public Integer getContextDefinitionId() { return contextDefinitionId; }
         public void setContextDefinitionId(Integer contextDefinitionId) { this.contextDefinitionId = contextDefinitionId; }
+        public String getOperator() { return operator; }
+        public void setOperator(String operator) { this.operator = operator; }
         public String getContextValues() { return contextValues; }
         public void setContextValues(String contextValues) { this.contextValues = contextValues; }
     }

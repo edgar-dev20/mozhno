@@ -25,6 +25,7 @@ public class SegmentContextRepository {
         sc.setSegmentId(rs.getInt("segment_id"));
         sc.setContextDefinitionId(rs.getInt("context_definition_id"));
         sc.setContextValues(rs.getString("context_values"));
+        sc.setOperator(rs.getString("operator"));
         sc.setCreatedAt(rs.getTimestamp("created_at").toInstant());
         return sc;
     };
@@ -32,21 +33,24 @@ public class SegmentContextRepository {
     public static final class SegmentContextWithName {
         private final Integer segmentId;
         private final String contextDefinitionName;
+        private final String operator;
         private final String contextValues;
 
-        public SegmentContextWithName(Integer segmentId, String contextDefinitionName, String contextValues) {
+        public SegmentContextWithName(Integer segmentId, String contextDefinitionName, String operator, String contextValues) {
             this.segmentId = segmentId;
             this.contextDefinitionName = contextDefinitionName;
+            this.operator = operator;
             this.contextValues = contextValues;
         }
 
         public Integer getSegmentId() { return segmentId; }
         public String getContextDefinitionName() { return contextDefinitionName; }
+        public String getOperator() { return operator; }
         public String getContextValues() { return contextValues; }
     }
 
     public List<SegmentContext> findBySegmentId(Integer segmentId) {
-        return jdbc.query("SELECT id, segment_id, context_definition_id, context_values, created_at FROM segment_contexts WHERE segment_id = ?", ROW_MAPPER, segmentId);
+        return jdbc.query("SELECT id, segment_id, context_definition_id, context_values, operator, created_at FROM segment_contexts WHERE segment_id = ?", ROW_MAPPER, segmentId);
     }
 
     public List<SegmentContextWithName> findContextsBySegmentIds(List<Integer> segmentIds) {
@@ -54,7 +58,7 @@ public class SegmentContextRepository {
             return Collections.emptyList();
         }
         String placeholders = String.join(",", Collections.nCopies(segmentIds.size(), "?"));
-        String sql = "SELECT sc.segment_id, cd.name as context_name, sc.context_values " +
+        String sql = "SELECT sc.segment_id, cd.name as context_name, sc.operator, sc.context_values " +
                      "FROM segment_contexts sc " +
                      "JOIN context_definitions cd ON cd.id = sc.context_definition_id " +
                      "WHERE sc.segment_id IN (" + placeholders + ") " +
@@ -63,6 +67,7 @@ public class SegmentContextRepository {
             new SegmentContextWithName(
                 rs.getInt("segment_id"),
                 rs.getString("context_name"),
+                rs.getString("operator"),
                 rs.getString("context_values")
             ), segmentIds.toArray());
     }
@@ -72,16 +77,18 @@ public class SegmentContextRepository {
     }
 
     public SegmentContext save(SegmentContext ctx) {
+        String operator = ctx.getOperator() != null ? ctx.getOperator() : "in";
         if (ctx.getId() == null) {
             Instant createTime = Instant.now();
-            jdbc.update("INSERT INTO segment_contexts (segment_id, context_definition_id, context_values, created_at) VALUES (?, ?, ?, ?) ON CONFLICT (segment_id, context_definition_id) DO UPDATE SET context_values = EXCLUDED.context_values",
-                ctx.getSegmentId(), ctx.getContextDefinitionId(), ctx.getContextValues(), Timestamp.from(createTime));
+            jdbc.update("INSERT INTO segment_contexts (segment_id, context_definition_id, operator, context_values, created_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT (segment_id, context_definition_id, operator) DO UPDATE SET context_values = EXCLUDED.context_values",
+                ctx.getSegmentId(), ctx.getContextDefinitionId(), operator, ctx.getContextValues(), Timestamp.from(createTime));
             ctx.setId(getLastInsertId());
             ctx.setCreatedAt(createTime);
         } else {
-            jdbc.update("UPDATE segment_contexts SET context_values = ? WHERE id = ?",
-                ctx.getContextValues(), ctx.getId());
+            jdbc.update("UPDATE segment_contexts SET operator = ?, context_values = ? WHERE id = ?",
+                operator, ctx.getContextValues(), ctx.getId());
         }
+        ctx.setOperator(operator);
         return ctx;
     }
 

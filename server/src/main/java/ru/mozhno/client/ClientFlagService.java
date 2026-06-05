@@ -64,8 +64,8 @@ public class ClientFlagService {
                     for (Integer segId : s.getSegmentIds()) {
                         List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(segId, Collections.emptyList());
                         for (SegmentContextWithName sc : segContexts) {
-                            String key = sc.getContextDefinitionName() + "|in";
-                            merged.computeIfAbsent(key, k -> new ConstraintMerge(sc.getContextDefinitionName(), "in"))
+                            String key = sc.getContextDefinitionName() + "|" + sc.getOperator();
+                            merged.computeIfAbsent(key, k -> new ConstraintMerge(sc.getContextDefinitionName(), sc.getOperator()))
                                     .values.addAll(splitValues(sc.getContextValues()));
                         }
                     }

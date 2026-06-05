@@ -45,13 +45,16 @@ export function Flags() {
   const [envRulePercent, setEnvRulePercent] = useState(100);
   const [envRuleSegments, setEnvRuleSegments] = useState<number[]>([]);
   const [envRuleConstraints, setEnvRuleConstraints] = useState<ConstraintEntry[]>([]);
+  const [envRuleEnabled, setEnvRuleEnabled] = useState(false);
   const [initialEnvRulePercent, setInitialEnvRulePercent] = useState(100);
   const [initialEnvRuleSegments, setInitialEnvRuleSegments] = useState<number[]>([]);
   const [initialEnvRuleConstraints, setInitialEnvRuleConstraints] = useState<ConstraintEntry[]>([]);
+  const [initialEnvRuleEnabled, setInitialEnvRuleEnabled] = useState(false);
 
   const isEnvDirty = envRulePercent !== initialEnvRulePercent ||
     JSON.stringify(envRuleSegments) !== JSON.stringify(initialEnvRuleSegments) ||
-    JSON.stringify(envRuleConstraints) !== JSON.stringify(initialEnvRuleConstraints);
+    JSON.stringify(envRuleConstraints) !== JSON.stringify(initialEnvRuleConstraints) ||
+    envRuleEnabled !== initialEnvRuleEnabled;
 
   const [selectedTagTypeFilter, setSelectedTagTypeFilter] = useState<number | null>(null);
   const [selectedTagValueFilter, setSelectedTagValueFilter] = useState<string | null>(null);
@@ -151,9 +154,11 @@ export function Flags() {
     setEnvRulePercent(es.percentage ?? 100);
     setEnvRuleSegments(es.segmentIds ?? []);
     setEnvRuleConstraints(constraints.map(c => ({...c})));
+    setEnvRuleEnabled(es.enabled ?? false);
     setInitialEnvRulePercent(es.percentage ?? 100);
     setInitialEnvRuleSegments(es.segmentIds ?? []);
     setInitialEnvRuleConstraints(constraints.map(c => ({...c})));
+    setInitialEnvRuleEnabled(es.enabled ?? false);
   };
 
   const handleDelete = async () => {
@@ -223,15 +228,19 @@ export function Flags() {
         }
         await api.strategies.upsert(envFlag.id, {
           environmentId: editing.envId,
-          enabled: true,
+          enabled: envRuleEnabled,
           percentage: envRulePercent,
           segmentIds: envRuleSegments.length > 0 ? envRuleSegments : undefined,
           contextDefinitionId: contextDefId,
           contextValuesJson,
         });
+        setInitialEnvRuleEnabled(envRuleEnabled);
+        setInitialEnvRulePercent(envRulePercent);
+        setInitialEnvRuleSegments([...envRuleSegments]);
+        setInitialEnvRuleConstraints(envRuleConstraints.map(c => ({...c})));
         await loadFlags();
       }
-      setPanelOpen(false);
+      if (editing.mode === 'create') setPanelOpen(false);
     } catch (e: any) { setError(e.message); } finally { setSaving(false); }
   };
 
@@ -532,7 +541,12 @@ export function Flags() {
           </div>}
 
           {editing.mode === 'environment' && <div className="space-y-5">
-            <div className="flex items-center justify-between"><div><h4 className="text-sm font-medium text-neutral-900 dark:text-white">Правило таргетинга</h4><p className="text-xs text-neutral-500 mt-0.5">Управляйте раскаткой для разных аудиторий</p></div></div>
+            <div className="flex items-center justify-between"><div><h4 className="text-sm font-medium text-neutral-900 dark:text-white">Правило таргетинга</h4><p className="text-xs text-neutral-500 mt-0.5">Управляйте раскаткой для разных аудиторий</p></div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <span className="text-xs text-neutral-500">{envRuleEnabled ? 'Вкл' : 'Выкл'}</span>
+                <Switch checked={envRuleEnabled} onCheckedChange={setEnvRuleEnabled} />
+              </label>
+            </div>
 
             <div className="p-5 bg-neutral-50 dark:bg-neutral-900/50 rounded-xl border border-neutral-200 dark:border-neutral-800 space-y-5">
               {/* Percentage */}
@@ -586,7 +600,7 @@ export function Flags() {
                                   {ctxDef?.name ?? `Поле #${c.contextDefinitionId}`}
                                 </span>
                                 <span className="text-amber-500 dark:text-amber-600 font-mono text-[10px] uppercase tracking-wider">
-                                  in
+                                  {c.operator ?? 'in'}
                                 </span>
                                 <code className="font-mono text-amber-800 dark:text-amber-200 break-all">
                                   {c.contextValues}
@@ -631,6 +645,106 @@ export function Flags() {
                 </div>
               </div>
             </div>
+
+            {/* Targeting Summary */}
+              {(() => {
+                const hasSegments = envRuleSegments.length > 0;
+                const hasConstraints = envRuleConstraints.length > 0;
+                const selectedSegs = envRuleSegments.map(sid => segments.find(s => s.id === sid)).filter((s): s is SegmentResponse => !!s);
+
+                interface SummaryLine { field: string; operator: string; values: string[]; source: string; }
+                const lines: SummaryLine[] = [];
+
+                for (const seg of selectedSegs) {
+                  for (const c of (seg.context ?? [])) {
+                    const ctxDef = contexts.find(cd => cd.id === c.contextDefinitionId);
+                    const field = ctxDef?.name ?? `Поле #${c.contextDefinitionId}`;
+                    const vals = (c.contextValues ?? '').split(',').map(v => v.trim()).filter(Boolean);
+                    const existing = lines.find(l => l.field === field && l.operator === (c.operator ?? 'in'));
+                    if (existing) {
+                      for (const v of vals) { if (!existing.values.includes(v)) existing.values.push(v); }
+                    } else {
+                      lines.push({ field, operator: c.operator ?? 'in', values: vals, source: seg.name });
+                    }
+                  }
+                }
+
+                for (const c of envRuleConstraints) {
+                  const ctxDef = contexts.find(cd => cd.id === c.contextDefId);
+                  const field = ctxDef?.name ?? `Поле #${c.contextDefId}`;
+                  const existing = lines.find(l => l.field === field && l.operator === c.operator);
+                  if (existing) {
+                    if (!existing.values.includes(c.value)) existing.values.push(c.value);
+                    if (existing.source !== 'custom') existing.source = existing.source + ' + custom';
+                  } else {
+                    lines.push({ field, operator: c.operator, values: [c.value], source: 'custom' });
+                  }
+                }
+
+                const hasSummary = envRulePercent !== 100 || hasSegments || hasConstraints;
+
+                if (!hasSummary) return null;
+
+                const operatorLabels: Record<string, string> = { eq: '=', ne: '≠', in: 'IN', not_in: 'NOT IN', gt: '>', gte: '≥', lt: '<', lte: '≤', contains: '≈' };
+
+                return (
+                  <div className="pt-4 border-t border-neutral-200 dark:border-neutral-800">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Zap size={16} className="text-violet-600 dark:text-violet-400" />
+                      <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Итоговое выражение</label>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 font-medium">тактика</span>
+                    </div>
+                    <div className="bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-500/5 dark:to-indigo-500/5 rounded-xl border border-violet-200 dark:border-violet-500/20 overflow-hidden">
+                      <div className="p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-violet-600/10 dark:bg-violet-500/20 flex items-center justify-center">
+                            <Percent size={16} className="text-violet-600 dark:text-violet-400" />
+                          </div>
+                          <div>
+                            <span className="text-2xl font-bold text-violet-700 dark:text-violet-300">{envRulePercent}%</span>
+                            <span className="text-sm text-neutral-500 dark:text-neutral-400 ml-1.5">от {hasSegments ? selectedSegs.map(s => s.name).join(', ') : 'всех пользователей'}</span>
+                          </div>
+                        </div>
+
+                        {lines.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">
+                              <Filter size={10} />
+                              условия (AND)
+                            </div>
+                            <div className="space-y-1.5">
+                              {lines.map((line, li) => (
+                                <div key={li} className="flex items-center gap-2 text-xs bg-white/70 dark:bg-neutral-900/50 rounded-lg px-3 py-2 border border-violet-100 dark:border-violet-500/10">
+                                  <span className="font-semibold text-neutral-700 dark:text-neutral-300 shrink-0">{line.field}</span>
+                                  <span className="font-mono text-[10px] font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-1.5 py-0.5 rounded shrink-0">{operatorLabels[line.operator] ?? line.operator}</span>
+                                  <code className="font-mono text-neutral-700 dark:text-neutral-300 break-all min-w-0">
+                                    {line.values.length === 1 ? line.values[0] : `[${line.values.join(', ')}]`}
+                                  </code>
+                                  <span className="text-[10px] text-neutral-400 shrink-0 ml-auto" title={line.source}>← {line.source}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {(hasSegments || hasConstraints) && lines.length === 0 && (
+                          <div className="flex items-center gap-2 text-xs text-neutral-400 italic">
+                            <Filter size={12} />
+                            Нет активных условий (сегменты без правил)
+                          </div>
+                        )}
+
+                        {!hasSegments && !hasConstraints && envRulePercent !== 100 && (
+                          <div className="flex items-center gap-2 text-xs text-neutral-500">
+                            <Filter size={12} />
+                            Без дополнительных условий — раскатка применяется глобально
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
 
             {/* Info box */}
             <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg"><div className="flex gap-3"><div className="shrink-0 mt-0.5"><div className="w-5 h-5 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center"><Settings size={12} className="text-white" /></div></div><div><h5 className="text-xs font-semibold text-indigo-900 dark:text-indigo-200 mb-1">Как работает таргетинг?</h5><p className="text-xs text-indigo-700 dark:text-indigo-300">Процент раскатки работает внутри выбранных сегментов и условий. Например, 50% для сегмента "Premium" покажет флаг половине premium-пользователей.</p></div></div></div>

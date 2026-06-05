@@ -51,6 +51,7 @@ public class SegmentService {
                 SegmentContext ctx = new SegmentContext();
                 ctx.setSegmentId(saved.getId());
                 ctx.setContextDefinitionId(entry.getContextDefinitionId());
+                ctx.setOperator(entry.getOperator() != null ? entry.getOperator() : "in");
                 ctx.setContextValues(entry.getContextValues());
                 segmentContextRepository.save(ctx);
             }
@@ -75,6 +76,7 @@ public class SegmentService {
                 SegmentContext ctx = new SegmentContext();
                 ctx.setSegmentId(id);
                 ctx.setContextDefinitionId(entry.getContextDefinitionId());
+                ctx.setOperator(entry.getOperator() != null ? entry.getOperator() : "in");
                 ctx.setContextValues(entry.getContextValues());
                 segmentContextRepository.save(ctx);
             }
@@ -108,6 +110,7 @@ public class SegmentService {
         for (SegmentContext ctx : contexts) {
             SegmentResponse.ContextEntryResponse ce = new SegmentResponse.ContextEntryResponse();
             ce.setContextDefinitionId(ctx.getContextDefinitionId());
+            ce.setOperator(ctx.getOperator());
             ce.setContextValues(ctx.getContextValues());
             contextResps.add(ce);
         }

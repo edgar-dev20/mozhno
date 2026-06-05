@@ -7,6 +7,7 @@ public class SegmentContext {
     private Integer segmentId;
     private Integer contextDefinitionId;
     private String contextValues;
+    private String operator;
     private Instant createdAt;
 
     public SegmentContext() {}
@@ -19,6 +20,8 @@ public class SegmentContext {
     public void setContextDefinitionId(Integer contextDefinitionId) { this.contextDefinitionId = contextDefinitionId; }
     public String getContextValues() { return contextValues; }
     public void setContextValues(String contextValues) { this.contextValues = contextValues; }
+    public String getOperator() { return operator; }
+    public void setOperator(String operator) { this.operator = operator; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }
