@@ -50,11 +50,26 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
       .finally(() => setLoading(false));
   }, [open, flagId, selectedEnvId]);
 
-  const chartData = metrics.map(m => ({
-    time: formatHourBucket(m.timeBucket),
-    trueCount: m.evaluationTrueCount,
-    falseCount: m.evaluationFalseCount,
-  }));
+  const chartData = (() => {
+    const buckets = new Map<number, FlagMetric>();
+    for (const m of metrics) {
+      buckets.set(Date.parse(m.timeBucket), m);
+    }
+    const now = new Date();
+    const currentHourMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours());
+    const result = [];
+    for (let i = 47; i >= 0; i--) {
+      const t = currentHourMs - i * 3600000;
+      const iso = new Date(t).toISOString();
+      const found = buckets.get(t);
+      result.push({
+        time: formatHourBucket(iso),
+        trueCount: found?.evaluationTrueCount ?? 0,
+        falseCount: found?.evaluationFalseCount ?? 0,
+      });
+    }
+    return result;
+  })();
 
   const totalTrue = metrics.reduce((sum, m) => sum + m.evaluationTrueCount, 0);
   const totalFalse = metrics.reduce((sum, m) => sum + m.evaluationFalseCount, 0);

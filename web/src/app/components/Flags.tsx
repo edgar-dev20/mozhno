@@ -129,11 +129,27 @@ export function Flags() {
     if (!projectId || environments.length === 0 || flags.length === 0) return;
     api.metrics.listForProject(projectId)
       .then(data => {
+        const now = new Date();
+        const currentHourMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours());
         const map = new Map<string, { trueCount: number; falseCount: number; timeBucket: string }[]>();
+        const raw = new Map<string, Map<number, { trueCount: number; falseCount: number }>>();
         for (const m of data) {
           const key = `${m.flagId}-${m.environmentId}`;
-          if (!map.has(key)) map.set(key, []);
-          map.get(key)!.push({ trueCount: m.evaluationTrueCount, falseCount: m.evaluationFalseCount, timeBucket: m.timeBucket });
+          if (!raw.has(key)) raw.set(key, new Map());
+          raw.get(key)!.set(Date.parse(m.timeBucket), { trueCount: m.evaluationTrueCount, falseCount: m.evaluationFalseCount });
+        }
+        for (const [key, bucketMap] of raw) {
+          const items = [];
+          for (let i = 47; i >= 0; i--) {
+            const t = currentHourMs - i * 3600000;
+            const found = bucketMap.get(t);
+            items.push({
+              timeBucket: new Date(t).toISOString(),
+              trueCount: found?.trueCount ?? 0,
+              falseCount: found?.falseCount ?? 0,
+            });
+          }
+          map.set(key, items);
         }
         setSparklineData(map);
       })
@@ -450,7 +466,7 @@ export function Flags() {
                 className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-md transition-all"
               >
                 <div className="flex gap-4 px-4 py-3">
-                  <div className="min-w-0 flex flex-col cursor-pointer" onClick={() => openGeneral(flag)}>
+                  <div className="w-[300px] shrink-0 flex flex-col cursor-pointer" onClick={() => openGeneral(flag)}>
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-200 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-violet-600 group-hover:bg-clip-text group-hover:text-transparent transition-all">{flag.name}</span>
@@ -459,7 +475,7 @@ export function Flags() {
                       <div className="mt-0.5">
                         <span className="text-[11px] font-mono text-neutral-400">{flag.key}</span>
                       </div>
-                      {flag.description && <div className="text-[11px] text-neutral-400 leading-relaxed mt-0.5">{flag.description}</div>}
+                      {flag.description && <div className="text-[11px] text-neutral-600 dark:text-neutral-300 mt-0.5 mb-1 line-clamp-2">{flag.description}</div>}
                       {flag.tags.length > 0 && (
                         <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                           {flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}
