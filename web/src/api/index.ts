@@ -270,6 +270,12 @@ export const api = {
     delete: (projectId: number, id: number) =>
       request<void>(`/projects/${projectId}/api-keys/${id}`, { method: 'DELETE' }),
   },
+  metrics: {
+    get: (flagId: number, environmentId: number) =>
+      request<FlagMetric[]>(`/flags/${flagId}/metrics?environmentId=${environmentId}`),
+    listForProject: (projectId: number, environmentId?: number) =>
+      request<FlagMetric[]>(`/projects/${projectId}/metrics${environmentId != null ? `?environmentId=${environmentId}` : ''}`),
+  },
   audit: {
     list: (projectId: number) => request<AuditEvent[]>(`/audit?projectId=${projectId}`),
   },
@@ -321,3 +327,4 @@ export type Integration = { id: number; projectId: number; type: string; name: s
 export type IntegrationRequest = { type: string; name: string; enabled: boolean; configJson: string; eventSubscriptionsJson: string };
 export type ProjectSettings = { id: number; projectId: number; requireMfa: boolean; sessionTimeoutHours: number; ipWhitelist: string; createdAt: string; updatedAt: string };
 export type SettingsUpdateRequest = { requireMfa?: boolean; sessionTimeoutHours?: number; ipWhitelist?: string };
+export type FlagMetric = { id: number; projectId: number; flagId: number; environmentId: number; evaluationTrueCount: number; evaluationFalseCount: number; timeBucket: string; createdAt: string };

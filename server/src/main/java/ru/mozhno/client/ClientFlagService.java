@@ -9,6 +9,7 @@ import ru.mozhno.flags.Flag;
 import ru.mozhno.flags.FlagRepository;
 import ru.mozhno.flags.strategy.FlagStrategy;
 import ru.mozhno.flags.strategy.FlagStrategyRepository;
+import ru.mozhno.metrics.FlagMetricRepository;
 import ru.mozhno.segments.SegmentContextRepository;
 import ru.mozhno.segments.SegmentContextRepository.SegmentContextWithName;
 import ru.mozhno.client.ClientFlagResponse.Constraint;
@@ -26,15 +27,18 @@ public class ClientFlagService {
     private final FlagStrategyRepository flagStrategyRepository;
     private final SegmentContextRepository segmentContextRepository;
     private final ContextDefinitionRepository contextDefinitionRepository;
+    private final FlagMetricRepository flagMetricRepository;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public ClientFlagService(FlagRepository flagRepository, FlagStrategyRepository flagStrategyRepository,
                              SegmentContextRepository segmentContextRepository,
-                             ContextDefinitionRepository contextDefinitionRepository) {
+                             ContextDefinitionRepository contextDefinitionRepository,
+                             FlagMetricRepository flagMetricRepository) {
         this.flagRepository = flagRepository;
         this.flagStrategyRepository = flagStrategyRepository;
         this.segmentContextRepository = segmentContextRepository;
         this.contextDefinitionRepository = contextDefinitionRepository;
+        this.flagMetricRepository = flagMetricRepository;
     }
 
     public List<ClientFlagResponse> getFlagsForProject(Integer projectId, Integer environmentId) {
@@ -53,6 +57,12 @@ public class ClientFlagService {
         }
 
         flagStrategyRepository.touchLastUsedAt(strategyIds);
+
+        for (Flag flag : flags) {
+            FlagStrategy s = flag.getStrategy();
+            boolean enabled = s != null ? s.isEnabled() : flag.isEnabled();
+            flagMetricRepository.recordEvaluation(projectId, flag.getId(), environmentId, enabled);
+        }
 
         Map<Integer, List<SegmentContextWithName>> segmentContextsMap;
         if (!segmentIds.isEmpty()) {

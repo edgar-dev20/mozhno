@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { SidePanel } from './SidePanel';
 import { TipCard } from './TipCard';
 import { ConfirmDialog } from './ConfirmDialog';
+import { FlagMetricsDialog } from './FlagMetricsDialog';
+import { FlagSparkline } from './FlagSparkline';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { SegmentIcon } from './SegmentIcon';
 import { api, FlagResponse, FlagRequest, Tag as TagType, Environment, SegmentResponse, FlagStrategy, StrategyRequest, FlagTagValue, ContextDefinition, ContextValue } from '../../api';
@@ -64,6 +66,9 @@ export function Flags() {
   const [deleting, setDeleting] = useState(false);
   const [archiveTarget, setArchiveTarget] = useState<FlagView | null>(null);
   const [archiving, setArchiving] = useState(false);
+  const [sparklineData, setSparklineData] = useState<Map<string, { trueCount: number; falseCount: number; timeBucket: string }[]>>(new Map());
+  const [metricsDialogOpen, setMetricsDialogOpen] = useState(false);
+  const [metricsTarget, setMetricsTarget] = useState<{ flagId: number; flagName: string; envId: number } | null>(null);
 
   const loadProject = useCallback(async () => {
     try {
@@ -120,6 +125,20 @@ export function Flags() {
 
   useEffect(() => { loadProject(); }, []);
   useEffect(() => { if (projectId && environments.length > 0) loadFlags(); }, [projectId, environments]);
+  useEffect(() => {
+    if (!projectId || environments.length === 0 || flags.length === 0) return;
+    api.metrics.listForProject(projectId)
+      .then(data => {
+        const map = new Map<string, { trueCount: number; falseCount: number; timeBucket: string }[]>();
+        for (const m of data) {
+          const key = `${m.flagId}-${m.environmentId}`;
+          if (!map.has(key)) map.set(key, []);
+          map.get(key)!.push({ trueCount: m.evaluationTrueCount, falseCount: m.evaluationFalseCount, timeBucket: m.timeBucket });
+        }
+        setSparklineData(map);
+      })
+      .catch(() => {});
+  }, [projectId, environments.length, flags.length]);
 
   const openCreate = () => {
     setEditing({ flag: null, mode: 'create', envId: null }); setError(''); setPanelOpen(true);
@@ -396,12 +415,7 @@ export function Flags() {
         </div>
       )}
 
-      <div className="space-y-2">
-        <div className="flex items-center px-4 py-2 text-sm font-medium text-neutral-500 dark:text-neutral-400">
-          <div className="flex-1 pl-2">Название & Ключ</div>
-          {environments.map(env => (<div key={env.id} className="w-[152px] text-center">{env.name}</div>))}
-        </div>
-
+      <div className="space-y-3">
         {loading ? (
           <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl px-6 py-16 text-center shadow-sm">
             <div className="flex flex-col items-center gap-3">
@@ -433,52 +447,136 @@ export function Flags() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2, delay: idx * 0.025 }}
-                className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl px-6 py-4 flex items-center shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-md transition-all"
+                className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-md transition-all"
               >
-                <div className="flex-1 min-w-0 cursor-pointer" onClick={() => openGeneral(flag)}>
-                  <div className="flex items-center gap-2.5">
-                    <span className="font-medium text-neutral-900 dark:text-neutral-200 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-violet-600 group-hover:bg-clip-text group-hover:text-transparent transition-all">{flag.name}</span>
-                    {(() => { const Icon = getTypeIcon(flag.flagType); return (<span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getTypeColor(flag.flagType)}`}><Icon size={10} />{getTypeLabel(flag.flagType)}</span>); })()}
-                  </div>
-                  <div className="text-xs font-mono text-neutral-500 mt-0.5">{flag.key}</div>
-                  {flag.tags.length > 0 && (<div className="flex items-center gap-1.5 mt-2 flex-wrap">{flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}</div>)}
-                  <div className="flex items-center gap-2 mt-1.5 text-[11px] text-neutral-400 dark:text-neutral-500">
-                    {flag.createdAt && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex items-center gap-1"><Clock size={10} />{formatDate(flag.createdAt)}</span>
-                        </TooltipTrigger>
-                        <TooltipContent>{formatDateTime(flag.createdAt)}</TooltipContent>
-                      </Tooltip>
-                    )}
-                    {flag.createdBy && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="flex items-center gap-1 truncate max-w-[160px]"><User size={10} />{flag.createdBy}</span>
-                        </TooltipTrigger>
-                        <TooltipContent>{flag.createdBy}</TooltipContent>
-                      </Tooltip>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-4 ml-6 shrink-0">
-                  {environments.map(env => {
-                    const es = flag.environments[env.id];
-                    return (
-                      <div key={env.id} className="w-[120px] flex flex-col items-center justify-center">
-                        {es ? (
-                          <>
-                          <div className="flex items-center justify-center gap-2">
-                            <Switch checked={es.enabled} onCheckedChange={() => toggleFlag(flag, env.id)} className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-violet-500" />
-                            <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[11px] font-semibold min-w-[42px] justify-center select-none transition-colors ${es.enabled ? 'bg-gradient-to-r from-blue-50 to-violet-50 dark:from-blue-500/10 dark:to-violet-500/10 text-indigo-600 dark:text-indigo-400' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500'}`}><Percent size={9} />{es.percentage ?? 100}</span>
-                            <button onClick={() => openEnvironment(flag, env.id)} className="flex items-center justify-center size-[22px] rounded-md text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-violet-50 dark:hover:from-blue-500/10 dark:hover:to-violet-500/10 transition-colors" title="Настроить"><Settings size={13} /></button>
-                          </div>
-                          <span className="text-[10px] text-neutral-400 dark:text-neutral-500 mt-0.5 leading-none">{timeAgo(es.lastUsedAt)}</span>
-                          </>
-                        ) : <span className="text-sm text-neutral-400">—</span>}
+                <div className="flex gap-4 px-4 py-3">
+                  <div className="min-w-0 flex flex-col cursor-pointer" onClick={() => openGeneral(flag)}>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-200 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-violet-600 group-hover:bg-clip-text group-hover:text-transparent transition-all">{flag.name}</span>
+                        {(() => { const Icon = getTypeIcon(flag.flagType); return (<span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getTypeColor(flag.flagType)}`}><Icon size={10} />{getTypeLabel(flag.flagType)}</span>); })()}
                       </div>
-                    );
-                  })}
+                      <div className="mt-0.5">
+                        <span className="text-[11px] font-mono text-neutral-400">{flag.key}</span>
+                      </div>
+                      {flag.description && <div className="text-[11px] text-neutral-400 leading-relaxed mt-0.5">{flag.description}</div>}
+                      {flag.tags.length > 0 && (
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                          {flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 text-[10px] text-neutral-400 dark:text-neutral-500 mt-auto pt-2">
+                      {flag.createdAt && <span className="flex items-center gap-1"><Clock size={10} />{formatDate(flag.createdAt)}</span>}
+                      {flag.createdBy && <span className="flex items-center gap-1"><User size={10} />{flag.createdBy}</span>}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 flex-1 min-w-0">
+                    {environments.map(env => {
+                      const es = flag.environments[env.id];
+                      const sparkKey = `${flag.flagId}-${env.id}`;
+                      const sparkBuckets = sparklineData.get(sparkKey) ?? [];
+                      const activeSegs = (es?.segmentIds ?? []).map(sid => segments.find(s => s.id === sid)).filter(Boolean) as SegmentResponse[];
+                      const muted = !es || !es.enabled;
+                      let rule: React.ReactNode = <span className="text-neutral-400/50">—</span>;
+                      if (es) {
+                        const pct = es.percentage ?? 100;
+                        const parts: React.ReactNode[] = [];
+                        const isFull = pct === 100 && activeSegs.length === 0 && !es.contextValuesJson;
+                        const pctClass = muted ? 'opacity-40' : '';
+                        parts.push(<span key="pct" className={`font-bold text-[12px] text-violet-600 dark:text-violet-400 ${pctClass}`}>{isFull ? '100%' : `${pct}%`}</span>);
+                        if (isFull) {
+                          parts.push(<span key="all" className={`text-[10px] ${muted ? 'text-neutral-400/40' : 'text-neutral-400'}`}>всех</span>);
+                        } else if (activeSegs.length > 0) {
+                          parts.push(<span key="sdot" className={`text-[10px] text-neutral-300 ${muted ? 'opacity-30' : ''}`}>·</span>);
+                          const visibleSegs = activeSegs.slice(0, 2);
+                          const overflow = activeSegs.length - visibleSegs.length;
+                          visibleSegs.forEach((seg, si) => {
+                            if (si > 0) parts.push(<span key={`sc${si}`} className="text-neutral-300/50">, </span>);
+                            parts.push(
+                              <span key={`s${si}`} className="inline-flex items-center gap-0.5" style={{ color: muted ? '#d4d4d8' : seg.color, opacity: muted ? 0.5 : 1 }}>
+                                <SegmentIcon name={seg.icon} size={10} />
+                                <span className="text-[10px]">{seg.name}</span>
+                              </span>
+                            );
+                          });
+                          if (overflow > 0) {
+                            const restNames = activeSegs.slice(2).map(s => s.name).join(', ');
+                            parts.push(
+                              <Tooltip key="segovf">
+                                <TooltipTrigger asChild>
+                                  <span className={muted ? 'text-neutral-400/50' : 'text-neutral-400'}> +{overflow}</span>
+                                </TooltipTrigger>
+                                <TooltipContent className="text-[11px] bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 shadow-lg rounded-xl px-3 py-2">{restNames}</TooltipContent>
+                              </Tooltip>
+                            );
+                          }
+                        }
+                        if (es.contextValuesJson) {
+                          try {
+                            const parsed: { cd: number; op: string; val: string }[] = JSON.parse(es.contextValuesJson);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                              const groups = new Map<string, string[]>();
+                              for (const c of parsed) {
+                                const ctx = contexts.find(x => x.id === c.cd);
+                                if (!ctx) continue;
+                                const key = `${ctx.name} ${c.op || 'in'}`;
+                                if (!groups.has(key)) groups.set(key, []);
+                                groups.get(key)!.push(c.val || '');
+                              }
+                              const collapsed: string[] = [];
+                              for (const [key, vals] of groups) {
+                                collapsed.push(vals.length === 1 ? `${key.split(' ')[0]}=${vals[0]}` : `${key.split(' ')[0]}: ${vals.join(', ')}`);
+                              }
+                              if (collapsed.length > 0) {
+                                parts.push(<span key="cdot" className="text-neutral-300/50">·</span>);
+                                const extra = collapsed.length - 1;
+                                parts.push(<span key="first" className={muted ? 'text-neutral-400/50' : 'text-neutral-400'}>{collapsed[0]}</span>);
+                                if (extra > 0) {
+                                  parts.push(<span key="more" className={muted ? 'text-neutral-400/50' : 'text-neutral-400'}> и ещё {extra}</span>);
+                                }
+                              }
+                            }
+                          } catch {}
+                        }
+                        rule = <span className="inline-flex items-baseline flex-wrap gap-x-0.5">{parts}</span>;
+                      }
+                      return (
+                        <div key={env.id} onClick={() => openEnvironment(flag, env.id)} className="flex-1 bg-neutral-50/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 pt-3 pb-2 cursor-pointer hover:border-indigo-300/60 dark:hover:border-indigo-700/60 transition-all flex flex-col">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide">{env.name}</span>
+                            {es && (
+                              <span onClick={(e) => e.stopPropagation()}>
+                                <Switch checked={es.enabled} onCheckedChange={() => toggleFlag(flag, env.id)} className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-violet-500 scale-75 origin-right" />
+                              </span>
+                            )}
+                          </div>
+                          {es ? (
+                            <>
+                              <div className="text-[11px] leading-relaxed mb-2">{rule}</div>
+                              <div className="flex-1 min-h-0 rounded-md overflow-hidden">
+                                {sparkBuckets.length > 0 ? (
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setMetricsTarget({ flagId: flag.flagId, flagName: flag.name, envId: env.id }); setMetricsDialogOpen(true); }}
+                                    className="w-full h-full hover:opacity-85 transition-opacity cursor-pointer"
+                                  >
+                                    <FlagSparkline data={sparkBuckets} height={52} />
+                                  </button>
+                                ) : (
+                                  <div className="w-full h-full flex items-end justify-center pb-3">
+                                    <div className="w-3/4 border-t border-neutral-200 dark:border-neutral-700" />
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            <span className="text-[10px] text-neutral-400/50 italic">Нет стратегии</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </motion.div>
             ))}
@@ -545,6 +643,15 @@ export function Flags() {
           </div>
         </motion.div>
       )}
+
+      <FlagMetricsDialog
+        open={metricsDialogOpen}
+        onOpenChange={setMetricsDialogOpen}
+        flagId={metricsTarget?.flagId ?? 0}
+        flagName={metricsTarget?.flagName ?? ''}
+        environments={environments}
+        defaultEnvId={metricsTarget?.envId}
+      />
 
       <SidePanel
         open={panelOpen} onOpenChange={setPanelOpen}
