@@ -136,7 +136,7 @@ class FlagRepositoryTest extends BaseIntegrationTest {
         Flag saved = flagRepository.save(f);
         assertFalse(saved.isArchived());
 
-        flagRepository.setArchived(saved.getId(), true);
+        flagRepository.setArchived(saved.getId(), true, null);
         Flag archived = flagRepository.findById(saved.getId());
         assertTrue(archived.isArchived());
     }
@@ -150,8 +150,8 @@ class FlagRepositoryTest extends BaseIntegrationTest {
         f.setKey("to-unarchive-key");
         Flag saved = flagRepository.save(f);
 
-        flagRepository.setArchived(saved.getId(), true);
-        flagRepository.setArchived(saved.getId(), false);
+        flagRepository.setArchived(saved.getId(), true, null);
+        flagRepository.setArchived(saved.getId(), false, null);
         Flag unarchived = flagRepository.findById(saved.getId());
         assertFalse(unarchived.isArchived());
     }
@@ -170,7 +170,7 @@ class FlagRepositoryTest extends BaseIntegrationTest {
         f2.setName("hidden");
         f2.setKey("hidden-key");
         Flag saved2 = flagRepository.save(f2);
-        flagRepository.setArchived(saved2.getId(), true);
+        flagRepository.setArchived(saved2.getId(), true, null);
 
         List<Flag> result = flagRepository.findByProjectId(projectId);
         assertEquals(1, result.size());
@@ -191,7 +191,7 @@ class FlagRepositoryTest extends BaseIntegrationTest {
         f2.setName("hidden");
         f2.setKey("hidden-key");
         Flag saved2 = flagRepository.save(f2);
-        flagRepository.setArchived(saved2.getId(), true);
+        flagRepository.setArchived(saved2.getId(), true, null);
 
         List<Flag> result = flagRepository.findByProjectIdIncludingArchived(projectId);
         assertEquals(2, result.size());

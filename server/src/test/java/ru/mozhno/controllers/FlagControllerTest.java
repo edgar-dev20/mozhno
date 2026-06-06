@@ -155,7 +155,7 @@ class FlagControllerTest extends BaseIntegrationTest {
         flag.setFlagType(FlagType.RELEASE);
         Flag saved = flagRepository.save(flag);
 
-        flagRepository.setArchived(saved.getId(), true);
+        flagRepository.setArchived(saved.getId(), true, null);
 
         mockMvc.perform(post("/api/v1/projects/{projectId}/flags/{id}/unarchive", projectId, saved.getId())
                 .header("Authorization", auth()))
@@ -178,7 +178,7 @@ class FlagControllerTest extends BaseIntegrationTest {
         archived.setProjectId(projectId);
         archived.setFlagType(FlagType.RELEASE);
         Flag savedArchived = flagRepository.save(archived);
-        flagRepository.setArchived(savedArchived.getId(), true);
+        flagRepository.setArchived(savedArchived.getId(), true, null);
 
         mockMvc.perform(get("/api/v1/projects/{projectId}/flags", projectId)
                 .header("Authorization", auth()))
@@ -202,7 +202,7 @@ class FlagControllerTest extends BaseIntegrationTest {
         archived.setProjectId(projectId);
         archived.setFlagType(FlagType.RELEASE);
         Flag savedArchived = flagRepository.save(archived);
-        flagRepository.setArchived(savedArchived.getId(), true);
+        flagRepository.setArchived(savedArchived.getId(), true, null);
 
         mockMvc.perform(get("/api/v1/projects/{projectId}/flags?includeArchived=true", projectId)
                 .header("Authorization", auth()))

@@ -19,13 +19,15 @@ public class FlagMetricRepository {
     public void recordEvaluation(Integer projectId, Integer flagId, Integer environmentId, boolean enabled) {
         Instant now = Instant.now();
         Instant bucket = now.truncatedTo(ChronoUnit.HOURS);
-        String column = enabled ? "evaluation_true_count" : "evaluation_false_count";
 
         jdbc.update("""
             INSERT INTO flag_metrics (project_id, flag_id, environment_id, evaluation_true_count, evaluation_false_count, time_bucket)
             VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT (flag_id, environment_id, time_bucket)
-            DO UPDATE SET """ + column + " = flag_metrics." + column + " + 1",
+            DO UPDATE SET
+              evaluation_true_count = flag_metrics.evaluation_true_count + EXCLUDED.evaluation_true_count,
+              evaluation_false_count = flag_metrics.evaluation_false_count + EXCLUDED.evaluation_false_count
+            """,
             projectId, flagId, environmentId, enabled ? 1 : 0, enabled ? 0 : 1, Timestamp.from(bucket));
     }
 

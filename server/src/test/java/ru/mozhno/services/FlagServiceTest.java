@@ -267,10 +267,10 @@ class FlagServiceTest {
         flag.setProjectId(1);
         when(flagRepository.findById(1)).thenReturn(flag);
 
-        Flag result = flagService.archive(1);
+        Flag result = flagService.archive(1, 99);
 
         assertTrue(result.isArchived());
-        verify(flagRepository).setArchived(1, true);
+        verify(flagRepository).setArchived(1, true, 99);
         verify(events).publish(argThat(e -> e.action().equals("flag.archived")));
     }
 
@@ -295,7 +295,7 @@ class FlagServiceTest {
         Flag result = flagService.unarchive(1);
 
         assertFalse(result.isArchived());
-        verify(flagRepository).setArchived(1, false);
+        verify(flagRepository).clearArchived(1);
         verify(events).publish(argThat(e -> e.action().equals("flag.unarchived")));
     }
 

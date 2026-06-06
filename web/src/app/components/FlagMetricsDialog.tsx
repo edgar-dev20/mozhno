@@ -134,7 +134,7 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
               <div className="flex items-center justify-center h-64">
                 <div className="animate-spin rounded-full h-6 w-6 border-2 border-violet-500 border-t-transparent" />
               </div>
-            ) : chartData.length === 0 ? (
+            ) : totalTrue === 0 && totalFalse === 0 ? (
               <div className="flex items-center justify-center h-64 text-sm text-neutral-400 dark:text-neutral-500">
                 Нет данных за последние 48 часов
               </div>
