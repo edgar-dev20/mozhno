@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import * as Slider from '@radix-ui/react-slider';
 import { Switch } from './ui/switch';
-import { Plus, Tag, Trash2, Percent, Users, Settings, X, Filter, Rocket, ShieldOff, Zap, Archive, ArchiveRestore, Clock, User } from 'lucide-react';
+import { Plus, Tag, Trash2, Percent, Users, Settings, X, Filter, Rocket, ShieldOff, Zap, Archive, ArchiveRestore, Clock, User, Search } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { motion, AnimatePresence } from 'motion/react';
 import { SidePanel } from './SidePanel';
@@ -61,6 +61,10 @@ export function Flags() {
 
   const [selectedTagTypeFilter, setSelectedTagTypeFilter] = useState<number | null>(null);
   const [selectedTagValueFilter, setSelectedTagValueFilter] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'name' | 'createdAt'>('name');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<FlagView | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -355,11 +359,34 @@ export function Flags() {
   if (selectedTagTypeFilter) filtered = filtered.filter(f => f.tags.some(tg => tg.tagId === selectedTagTypeFilter && (!selectedTagValueFilter || tg.value === selectedTagValueFilter)));
   let archivedFlags = flags.filter(f => f.archived);
   if (selectedTagTypeFilter) archivedFlags = archivedFlags.filter(f => f.tags.some(tg => tg.tagId === selectedTagTypeFilter && (!selectedTagValueFilter || tg.value === selectedTagValueFilter)));
+
+  const applySearch = (list: FlagView[]) => {
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.toLowerCase();
+    return list.filter(f => f.name.toLowerCase().includes(q) || f.key.toLowerCase().includes(q) || (f.createdBy ?? '').toLowerCase().includes(q));
+  };
+  const applyDateFilter = (list: FlagView[]) => {
+    return list.filter(f => {
+      if (!f.createdAt) return !dateFrom && !dateTo;
+      const d = f.createdAt.slice(0, 10);
+      if (dateFrom && d < dateFrom) return false;
+      if (dateTo && d > dateTo) return false;
+      return true;
+    });
+  };
+  const applySort = (list: FlagView[]) => {
+    return [...list].sort((a, b) => {
+      if (sortBy === 'name') return a.name.localeCompare(b.name);
+      return (b.createdAt ?? '').localeCompare(a.createdAt ?? '');
+    });
+  };
+  filtered = applySort(applyDateFilter(applySearch(filtered)));
+  archivedFlags = applySort(applyDateFilter(applySearch(archivedFlags)));
   const uniqueTagValues = (typeId: number) => [...new Set(flags.flatMap(f => f.tags.filter(t => t.tagId === typeId).map(t => t.value)))].sort();
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             <span className="bg-gradient-to-r from-blue-400 via-violet-500 to-purple-500 bg-clip-text text-transparent">Feature Flags</span>
@@ -369,35 +396,58 @@ export function Flags() {
             <p className="text-sm text-neutral-500/80 dark:text-neutral-400/80 leading-relaxed">Управляйте доступностью функций во всех окружениях</p>
           </div>
         </div>
-        <button onClick={openCreate} className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all active:scale-95"><Plus size={18} />Создать флаг</button>
+        <div className="flex flex-col items-end gap-2">
+          <button onClick={openCreate} className="bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition-all active:scale-95"><Plus size={18} />Создать флаг</button>
+          {archivedFlags.length === 0 ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-400 dark:text-neutral-500 cursor-not-allowed select-none">
+                  <Archive size={16} />
+                  Архив
+                  <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 rounded-full">0</span>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Нет архивных флагов</TooltipContent>
+            </Tooltip>
+          ) : (
+            <button
+              onClick={() => setArchiveOpen(!archiveOpen)}
+              className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all border ${
+                archiveOpen
+                  ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30 text-amber-700 dark:text-amber-300'
+                  : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-700'
+              }`}
+            >
+              <Archive size={16} />
+              Архив
+              <span className={`inline-flex items-center justify-center min-w-5 h-5 px-1 text-xs font-bold rounded-full ${archiveOpen ? 'bg-amber-200 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'}`}>{archivedFlags.length}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-2">
-        {archivedFlags.length === 0 ? (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl border bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-400 dark:text-neutral-500 cursor-not-allowed select-none">
-                <Archive size={16} />
-                Архив
-                <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-neutral-100 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 rounded-full">0</span>
-              </span>
-            </TooltipTrigger>
-            <TooltipContent>Нет архивных флагов</TooltipContent>
-          </Tooltip>
-        ) : (
-          <button
-            onClick={() => setArchiveOpen(!archiveOpen)}
-            className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all border ${
-              archiveOpen
-                ? 'bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30 text-amber-700 dark:text-amber-300'
-                : 'bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400 hover:border-neutral-300 dark:hover:border-neutral-700'
-            }`}
-          >
-            <Archive size={16} />
-            Архив
-            <span className={`inline-flex items-center justify-center min-w-5 h-5 px-1 text-xs font-bold rounded-full ${archiveOpen ? 'bg-amber-200 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-500 dark:text-neutral-400'}`}>{archivedFlags.length}</span>
-          </button>
-        )}
+        <div className="relative flex-1 max-w-sm">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+          <input
+            type="text"
+            placeholder="Поиск по названию, ключу или автору..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl focus:outline-none focus:border-violet-400 dark:focus:border-violet-600 text-neutral-700 dark:text-neutral-300 placeholder-neutral-400"
+          />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400">Создан</span>
+        <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="text-xs bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-2.5 py-1.5 text-neutral-600 dark:text-neutral-400 focus:outline-none focus:border-violet-400 dark:focus:border-violet-600 [color-scheme:light] dark:[color-scheme:dark]" />
+        <span className="text-neutral-300 text-xs">–</span>
+        <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="text-xs bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg px-2.5 py-1.5 text-neutral-600 dark:text-neutral-400 focus:outline-none focus:border-violet-400 dark:focus:border-violet-600 [color-scheme:light] dark:[color-scheme:dark]" />
+        {(dateFrom || dateTo) && <button onClick={() => { setDateFrom(''); setDateTo(''); }} className="flex items-center justify-center size-6 rounded text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"><X size={13} /></button>}
+        <span className="text-neutral-200 dark:text-neutral-700 mx-1">|</span>
+        <button onClick={() => setSortBy('name')} className={`text-xs px-2 py-1 rounded-md transition-colors ${sortBy === 'name' ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 font-medium' : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'}`}>По названию</button>
+        <button onClick={() => setSortBy('createdAt')} className={`text-xs px-2 py-1 rounded-md transition-colors ${sortBy === 'createdAt' ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 font-medium' : 'text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'}`}>По дате</button>
       </div>
 
       <TipCard
@@ -920,7 +970,7 @@ export function Flags() {
                     </div>
                     <div className="bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-500/5 dark:to-indigo-500/5 rounded-xl border border-violet-200 dark:border-violet-500/20 overflow-hidden">
                       <div className="p-4 space-y-3">
-                        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-end gap-2">
                           <div className="w-8 h-8 rounded-lg bg-violet-600/10 dark:bg-violet-500/20 flex items-center justify-center">
                             <Percent size={16} className="text-violet-600 dark:text-violet-400" />
                           </div>
