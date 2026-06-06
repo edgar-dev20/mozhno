@@ -76,6 +76,13 @@ public class SegmentContextRepository {
         jdbc.update("DELETE FROM segment_contexts WHERE segment_id = ?", segmentId);
     }
 
+    public boolean existsByContextDefinitionId(Integer contextDefinitionId) {
+        Integer count = jdbc.queryForObject(
+            "SELECT COUNT(*) FROM segment_contexts WHERE context_definition_id = ?",
+            Integer.class, contextDefinitionId);
+        return count != null && count > 0;
+    }
+
     public SegmentContext save(SegmentContext ctx) {
         String operator = ctx.getOperator() != null ? ctx.getOperator() : "in";
         if (ctx.getId() == null) {

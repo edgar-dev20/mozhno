@@ -224,12 +224,12 @@ export const api = {
   },
   contexts: {
     list: (projectId: number) => request<ContextDefinition[]>(`/projects/${projectId}/contexts`),
-    create: (projectId: number, data: { name: string; description?: string }) =>
+    create: (projectId: number, data: { name: string; key: string; type?: string; description?: string }) =>
       request<ContextDefinition>(`/projects/${projectId}/contexts`, {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-    update: (projectId: number, id: number, data: { name: string; description?: string }) =>
+    update: (projectId: number, id: number, data: { name: string; key: string; type?: string; description?: string }) =>
       request<ContextDefinition>(`/projects/${projectId}/contexts/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -316,7 +316,7 @@ export type SegmentResponse = { id: number; projectId: number; name: string; des
 export type SegmentRequest = { projectId: number; name: string; description?: string; icon?: string; color?: string; context?: { contextDefinitionId: number; operator: string; contextValues: string }[] };
 export type Tag = { id: number; projectId: number; name: string; description: string; color: string; createdAt: string };
 export type TagRequest = { projectId?: number; name: string; description?: string; color: string };
-export type ContextDefinition = { id: number; projectId: number; name: string; description: string; createdAt: string };
+export type ContextDefinition = { id: number; projectId: number; name: string; key: string; type: string; createdBy: string | null; description: string; createdAt: string };
 export type ContextValue = { id: number; contextDefinitionId: number; values: string; createdAt: string };
 export type UserCreateRequest = { email: string; password: string; name?: string; role: string };
 export type UserUpdateRequest = { email?: string; password?: string; name?: string; role?: string; status?: string };

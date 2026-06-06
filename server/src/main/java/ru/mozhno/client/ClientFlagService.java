@@ -148,7 +148,8 @@ public class ClientFlagService {
         }
         try {
             List<Map<String, Object>> list = objectMapper.readValue(json,
-                    new TypeReference<List<Map<String, Object>>>() {});
+                    new TypeReference<>() {
+                    });
             List<StrategyConstraint> result = new ArrayList<>(list.size());
             for (Map<String, Object> item : list) {
                 int cd = toInt(item.get("cd"));

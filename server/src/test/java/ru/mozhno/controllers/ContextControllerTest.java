@@ -69,7 +69,7 @@ class ContextControllerTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/projects/{projectId}/contexts", projectId)
                         .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"userId\", \"description\": \"User identifier\"}"))
+                        .content("{\"name\": \"userId\", \"key\": \"user_id\", \"description\": \"User identifier\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("userId"));
     }
@@ -97,7 +97,7 @@ class ContextControllerTest extends BaseIntegrationTest {
         mockMvc.perform(put("/api/v1/projects/{projectId}/contexts/{id}", projectId, saved.getId())
                         .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"updated\", \"description\": \"Updated description\"}"))
+                        .content("{\"name\": \"updated\", \"key\": \"updated_key\", \"description\": \"Updated description\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("updated"));
     }

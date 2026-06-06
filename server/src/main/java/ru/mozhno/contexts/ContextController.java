@@ -34,7 +34,7 @@ public class ContextController {
                                                @Valid @RequestBody ContextDefinitionRequest request,
                                                @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(projectId);
-        return contextService.createDefinition(request);
+        return contextService.createDefinition(request, user.email());
     }
 
     @GetMapping("/{definitionId}")

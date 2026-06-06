@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.mozhno.events.DomainEventPublisher;
 import ru.mozhno.contexts.*;
+import ru.mozhno.segments.SegmentContextRepository;
 
 import java.util.List;
 
@@ -23,13 +24,16 @@ class ContextServiceTest {
     private ContextValueRepository contextValueRepository;
 
     @Mock
+    private SegmentContextRepository segmentContextRepository;
+
+    @Mock
     private DomainEventPublisher events;
 
     private ContextService contextService;
 
     @BeforeEach
     void setUp() {
-        contextService = new ContextService(contextDefinitionRepository, contextValueRepository, events);
+        contextService = new ContextService(contextDefinitionRepository, contextValueRepository, segmentContextRepository, events);
     }
 
     @Test
@@ -99,9 +103,36 @@ class ContextServiceTest {
 
     @Test
     void deleteDefinition_shouldCallRepository() {
+        ContextDefinition def = new ContextDefinition();
+        def.setId(1);
+        def.setName("test");
+        def.setProjectId(1);
+        when(contextDefinitionRepository.findById(1)).thenReturn(def);
+        when(segmentContextRepository.existsByContextDefinitionId(1)).thenReturn(false);
         doNothing().when(contextDefinitionRepository).deleteById(1);
         contextService.deleteDefinition(1);
         verify(contextDefinitionRepository).deleteById(1);
+    }
+
+    @Test
+    void deleteDefinition_shouldThrowWhenUsedBySegments() {
+        ContextDefinition def = new ContextDefinition();
+        def.setId(1);
+        def.setName("test");
+        def.setProjectId(1);
+        when(contextDefinitionRepository.findById(1)).thenReturn(def);
+        when(segmentContextRepository.existsByContextDefinitionId(1)).thenReturn(true);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.deleteDefinition(1));
+        assertTrue(ex.getMessage().contains("Cannot delete context"));
+        verify(contextDefinitionRepository, never()).deleteById(1);
+    }
+
+    @Test
+    void deleteDefinition_shouldThrowWhenNotFound() {
+        when(contextDefinitionRepository.findById(999)).thenReturn(null);
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.deleteDefinition(999));
+        assertTrue(ex.getMessage().contains("not found"));
     }
 
     @Test
