@@ -3,6 +3,7 @@ import { Building2, Globe, Shield, Save, Plus, X, Cog } from 'lucide-react';
 import { api, Project, Environment, ProjectSettings } from '../../api';
 import { TipCard } from './TipCard';
 import { ConfirmDialog } from './ConfirmDialog';
+import { PluginSlot } from './PluginSlot';
 
 export function Settings() {
   const [project, setProject] = useState<Project | null>(null);
@@ -215,6 +216,8 @@ export function Settings() {
           </div>
         </div>
       </div>
+
+      <PluginSlot slotId="settings.premium" />
 
       <ConfirmDialog
         open={!!deleteEnvId}

@@ -1,13 +1,38 @@
 {
-  "name": "feature-flags-ui",
-  "private": true,
+  "name": "@mozhno/core-ui",
   "version": "1.0.0",
   "type": "module",
+  "main": "./dist/mozhno-core-ui.cjs",
+  "module": "./dist/mozhno-core-ui.mjs",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./dist/mozhno-core-ui.mjs",
+      "require": "./dist/mozhno-core-ui.cjs"
+    },
+    "./plugin": {
+      "types": "./src/app/pluginRegistry.ts",
+      "import": "./src/app/pluginRegistry.ts"
+    },
+    "./api": {
+      "types": "./src/api/index.ts",
+      "import": "./src/api/index.ts"
+    }
+  },
+  "files": [
+    "dist/",
+    "src/index.ts",
+    "src/app/pluginRegistry.ts",
+    "src/app/components/PluginSlot.tsx",
+    "src/api/index.ts"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:lib": "vite build --config vite.lib.config.js",
+    "build:static": "vite build --outDir ../server/mozhno-app/src/main/resources/static --emptyOutDir",
     "preview": "vite preview",
-    "build:static": "vite build --outDir ../server/src/main/resources/static --emptyOutDir",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"

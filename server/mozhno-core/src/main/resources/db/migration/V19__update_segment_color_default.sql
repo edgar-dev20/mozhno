@@ -1,0 +1,1 @@
+ALTER TABLE segments ALTER COLUMN color SET DEFAULT '#3b82f1';
