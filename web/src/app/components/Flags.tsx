@@ -73,6 +73,7 @@ export function Flags() {
   const [sparklineData, setSparklineData] = useState<Map<string, { trueCount: number; falseCount: number; timeBucket: string }[]>>(new Map());
   const [metricsDialogOpen, setMetricsDialogOpen] = useState(false);
   const [metricsTarget, setMetricsTarget] = useState<{ flagId: number; flagName: string; envId: number } | null>(null);
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
 
   const loadProject = useCallback(async () => {
     try {
@@ -506,146 +507,186 @@ export function Flags() {
           </div>
         ) : (
           <AnimatePresence mode="popLayout">
-            {filtered.map((flag, idx) => (
+            {filtered.map((flag, idx) => {
+              const expanded = expandedKeys.has(flag.key);
+              return (
               <motion.div
                 key={flag.key}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.2, delay: idx * 0.025 }}
-                className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-md transition-all"
+                className="group bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm hover:border-neutral-300 dark:hover:border-neutral-700 hover:shadow-md transition-all overflow-hidden"
               >
-                <div className="flex gap-4 px-4 py-3">
-                  <div className="w-[300px] shrink-0 flex flex-col cursor-pointer" onClick={() => openGeneral(flag)}>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-200 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-violet-600 group-hover:bg-clip-text group-hover:text-transparent transition-all">{flag.name}</span>
-                        {(() => { const Icon = getTypeIcon(flag.flagType); return (<span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border ${getTypeColor(flag.flagType)}`}><Icon size={10} />{getTypeLabel(flag.flagType)}</span>); })()}
-                      </div>
-                      <div className="mt-0.5">
-                        <span className="text-[11px] font-mono text-neutral-400">{flag.key}</span>
-                      </div>
-                      {flag.description && <div className="text-[11px] text-neutral-600 dark:text-neutral-300 mt-0.5 mb-1 line-clamp-2">{flag.description}</div>}
-                      {flag.tags.length > 0 && (
-                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                          {flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 text-[10px] text-neutral-400 dark:text-neutral-500 mt-auto pt-2">
-                      {flag.createdAt && <span className="flex items-center gap-1"><Clock size={10} />{formatDate(flag.createdAt)}</span>}
-                      {flag.createdBy && <span className="flex items-center gap-1"><User size={10} />{flag.createdBy}</span>}
+                <div className="flex gap-4 px-4 py-3 cursor-pointer" onClick={() => { const next = new Set(expandedKeys); if (expanded) next.delete(flag.key); else next.add(flag.key); setExpandedKeys(next); }}>
+                  <div className="flex-1 min-w-0 flex items-center gap-3">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      <span className="font-semibold text-sm text-neutral-900 dark:text-neutral-200 truncate group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-violet-600 group-hover:bg-clip-text group-hover:text-transparent transition-all">{flag.name}</span>
+                      {(() => { const Icon = getTypeIcon(flag.flagType); return (<span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border shrink-0 ${getTypeColor(flag.flagType)}`}><Icon size={10} />{getTypeLabel(flag.flagType)}</span>); })()}
+                      {!expanded && flag.tags.length > 0 && flag.tags.slice(0, 4).map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}
+                      {!expanded && flag.tags.length > 4 && <span className="text-[10px] text-neutral-400">+{flag.tags.length - 4}</span>}
                     </div>
                   </div>
-
-                  <div className="flex gap-2 flex-1 min-w-0">
-                    {environments.map(env => {
-                      const es = flag.environments[env.id];
-                      const sparkKey = `${flag.flagId}-${env.id}`;
-                      const sparkBuckets = sparklineData.get(sparkKey) ?? [];
-                      const activeSegs = (es?.segmentIds ?? []).map(sid => segments.find(s => s.id === sid)).filter(Boolean) as SegmentResponse[];
-                      const muted = !es || !es.enabled;
-                      let rule: React.ReactNode = <span className="text-neutral-400/50">—</span>;
-                      if (es) {
-                        const pct = es.percentage ?? 100;
-                        const parts: React.ReactNode[] = [];
-                        const isFull = pct === 100 && activeSegs.length === 0 && !es.contextValuesJson;
-                        const pctClass = muted ? 'opacity-40' : '';
-                        parts.push(<span key="pct" className={`font-bold text-[12px] text-violet-600 dark:text-violet-400 ${pctClass}`}>{isFull ? '100%' : `${pct}%`}</span>);
-                        if (isFull) {
-                          parts.push(<span key="all" className={`text-[10px] ${muted ? 'text-neutral-400/40' : 'text-neutral-400'}`}>всех</span>);
-                        } else if (activeSegs.length > 0) {
-                          parts.push(<span key="sdot" className={`text-[10px] text-neutral-300 ${muted ? 'opacity-30' : ''}`}>·</span>);
-                          const visibleSegs = activeSegs.slice(0, 2);
-                          const overflow = activeSegs.length - visibleSegs.length;
-                          visibleSegs.forEach((seg, si) => {
-                            if (si > 0) parts.push(<span key={`sc${si}`} className="text-neutral-300/50">, </span>);
-                            parts.push(
-                              <span key={`s${si}`} className="inline-flex items-center gap-0.5" style={{ color: muted ? '#d4d4d8' : seg.color, opacity: muted ? 0.5 : 1 }}>
-                                <SegmentIcon name={seg.icon} size={10} />
-                                <span className="text-[10px]">{seg.name}</span>
-                              </span>
-                            );
-                          });
-                          if (overflow > 0) {
-                            const restNames = activeSegs.slice(2).map(s => s.name).join(', ');
-                            parts.push(
-                              <Tooltip key="segovf">
-                                <TooltipTrigger asChild>
-                                  <span className={muted ? 'text-neutral-400/50' : 'text-neutral-400'}> +{overflow}</span>
-                                </TooltipTrigger>
-                                <TooltipContent className="text-[11px] bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 shadow-lg rounded-xl px-3 py-2">{restNames}</TooltipContent>
-                              </Tooltip>
-                            );
-                          }
-                        }
-                        if (es.contextValuesJson) {
-                          try {
-                            const parsed: { cd: number; op: string; val: string }[] = JSON.parse(es.contextValuesJson);
-                            if (Array.isArray(parsed) && parsed.length > 0) {
-                              const groups = new Map<string, string[]>();
-                              for (const c of parsed) {
-                                const ctx = contexts.find(x => x.id === c.cd);
-                                if (!ctx) continue;
-                                const key = `${ctx.name} ${c.op || 'in'}`;
-                                if (!groups.has(key)) groups.set(key, []);
-                                groups.get(key)!.push(c.val || '');
-                              }
-                              const collapsed: string[] = [];
-                              for (const [key, vals] of groups) {
-                                collapsed.push(vals.length === 1 ? `${key.split(' ')[0]}=${vals[0]}` : `${key.split(' ')[0]}: ${vals.join(', ')}`);
-                              }
-                              if (collapsed.length > 0) {
-                                parts.push(<span key="cdot" className="text-neutral-300/50">·</span>);
-                                const extra = collapsed.length - 1;
-                                parts.push(<span key="first" className={muted ? 'text-neutral-400/50' : 'text-neutral-400'}>{collapsed[0]}</span>);
-                                if (extra > 0) {
-                                  parts.push(<span key="more" className={muted ? 'text-neutral-400/50' : 'text-neutral-400'}> и ещё {extra}</span>);
-                                }
-                              }
-                            }
-                          } catch {}
-                        }
-                        rule = <span className="inline-flex items-baseline flex-wrap gap-x-0.5">{parts}</span>;
-                      }
-                      return (
-                        <div key={env.id} onClick={() => openEnvironment(flag, env.id)} className="flex-1 bg-neutral-50/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 pt-3 pb-2 cursor-pointer hover:border-indigo-300/60 dark:hover:border-indigo-700/60 transition-all flex flex-col">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide">{env.name}</span>
+                  <div className="flex items-center gap-3 shrink-0">
+                    {!expanded ? (
+                      environments.map(env => {
+                        const es = flag.environments[env.id];
+                        return (
+                          <div key={env.id} className="flex items-center gap-1.5">
+                            <span className="text-[10px] font-medium text-neutral-400 uppercase tracking-wide">{env.name}</span>
                             {es && (
                               <span onClick={(e) => e.stopPropagation()}>
                                 <Switch checked={es.enabled} onCheckedChange={() => toggleFlag(flag, env.id)} className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-violet-500 scale-75 origin-right" />
                               </span>
                             )}
                           </div>
-                          {es ? (
-                            <>
-                              <div className="text-[11px] leading-relaxed mb-2">{rule}</div>
-                              <div className="flex-1 min-h-0 rounded-md overflow-hidden">
-                                {sparkBuckets.length > 0 ? (
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); setMetricsTarget({ flagId: flag.flagId, flagName: flag.name, envId: env.id }); setMetricsDialogOpen(true); }}
-                                    className="w-full h-full hover:opacity-85 transition-opacity cursor-pointer"
-                                  >
-                                    <FlagSparkline data={sparkBuckets} height={52} />
-                                  </button>
-                                ) : (
-                                  <div className="w-full h-full flex items-end justify-center pb-3">
-                                    <div className="w-3/4 border-t border-neutral-200 dark:border-neutral-700" />
-                                  </div>
-                                )}
-                              </div>
-                            </>
-                          ) : (
-                            <span className="text-[10px] text-neutral-400/50 italic">Нет стратегии</span>
-                          )}
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    ) : (
+                      <button onClick={(e) => { e.stopPropagation(); openGeneral(flag); }} className="flex items-center justify-center size-7 rounded-md text-neutral-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-violet-50 dark:hover:from-blue-500/10 dark:hover:to-violet-500/10 transition-colors" title="Настройки флага"><Settings size={14} /></button>
+                    )}
                   </div>
                 </div>
+
+                <AnimatePresence initial={false}>
+                  {expanded && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex gap-4 px-4 pb-3 border-t border-neutral-100 dark:border-neutral-800 pt-3">
+                        <div className="w-[300px] shrink-0 flex flex-col">
+                          <div>
+                            <div className="mt-0.5">
+                              <span className="text-[11px] font-mono text-neutral-400">{flag.key}</span>
+                            </div>
+                            {flag.description && <div className="text-[11px] text-neutral-600 dark:text-neutral-300 mt-0.5 mb-1 line-clamp-2">{flag.description}</div>}
+                            {flag.tags.length > 0 && (
+                              <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                                {flag.tags.map((tv, i) => { const tg = tags.find(t => t.id === tv.tagId); return tg ? (<span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-white shadow-sm" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}>{tv.value}</span>) : null; })}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] text-neutral-400 dark:text-neutral-500 mt-auto pt-2">
+                            {flag.createdAt && <span className="flex items-center gap-1"><Clock size={10} />{formatDate(flag.createdAt)}</span>}
+                            {flag.createdBy && <span className="flex items-center gap-1"><User size={10} />{flag.createdBy}</span>}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 flex-1 min-w-0">
+                          {environments.map(env => {
+                            const es = flag.environments[env.id];
+                            const sparkKey = `${flag.flagId}-${env.id}`;
+                            const sparkBuckets = sparklineData.get(sparkKey) ?? [];
+                            const activeSegs = (es?.segmentIds ?? []).map(sid => segments.find(s => s.id === sid)).filter(Boolean) as SegmentResponse[];
+                            const muted = !es || !es.enabled;
+                            let rule: React.ReactNode = <span className="text-neutral-400/50">—</span>;
+                            if (es) {
+                              const pct = es.percentage ?? 100;
+                              const parts: React.ReactNode[] = [];
+                              const isFull = pct === 100 && activeSegs.length === 0 && !es.contextValuesJson;
+                              const pctClass = muted ? 'opacity-40' : '';
+                              parts.push(<span key="pct" className={`font-bold text-[12px] text-violet-600 dark:text-violet-400 ${pctClass}`}>{isFull ? '100%' : `${pct}%`}</span>);
+                              if (isFull) {
+                                parts.push(<span key="all" className={`text-[10px] ${muted ? 'text-neutral-400/40' : 'text-neutral-400'}`}>всех</span>);
+                              } else if (activeSegs.length > 0) {
+                                parts.push(<span key="sdot" className={`text-[10px] text-neutral-300 ${muted ? 'opacity-30' : ''}`}>·</span>);
+                                const visibleSegs = activeSegs.slice(0, 2);
+                                const overflow = activeSegs.length - visibleSegs.length;
+                                visibleSegs.forEach((seg, si) => {
+                                  if (si > 0) parts.push(<span key={`sc${si}`} className="text-neutral-300/50">, </span>);
+                                  parts.push(
+                                    <span key={`s${si}`} className="inline-flex items-center gap-0.5" style={{ color: muted ? '#d4d4d8' : seg.color, opacity: muted ? 0.5 : 1 }}>
+                                      <SegmentIcon name={seg.icon} size={10} />
+                                      <span className="text-[10px]">{seg.name}</span>
+                                    </span>
+                                  );
+                                });
+                                if (overflow > 0) {
+                                  const restNames = activeSegs.slice(2).map(s => s.name).join(', ');
+                                  parts.push(
+                                    <Tooltip key="segovf">
+                                      <TooltipTrigger asChild>
+                                        <span className={muted ? 'text-neutral-400/50' : 'text-neutral-400'}> +{overflow}</span>
+                                      </TooltipTrigger>
+                                      <TooltipContent className="text-[11px] bg-white dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200 border border-neutral-200 dark:border-neutral-700 shadow-lg rounded-xl px-3 py-2">{restNames}</TooltipContent>
+                                    </Tooltip>
+                                  );
+                                }
+                              }
+                              if (es.contextValuesJson) {
+                                try {
+                                  const parsed: { cd: number; op: string; val: string }[] = JSON.parse(es.contextValuesJson);
+                                  if (Array.isArray(parsed) && parsed.length > 0) {
+                                    const groups = new Map<string, string[]>();
+                                    for (const c of parsed) {
+                                      const ctx = contexts.find(x => x.id === c.cd);
+                                      if (!ctx) continue;
+                                      const key = `${ctx.name} ${c.op || 'in'}`;
+                                      if (!groups.has(key)) groups.set(key, []);
+                                      groups.get(key)!.push(c.val || '');
+                                    }
+                                    const collapsed: string[] = [];
+                                    for (const [key, vals] of groups) {
+                                      collapsed.push(vals.length === 1 ? `${key.split(' ')[0]}=${vals[0]}` : `${key.split(' ')[0]}: ${vals.join(', ')}`);
+                                    }
+                                    if (collapsed.length > 0) {
+                                      parts.push(<span key="cdot" className="text-neutral-300/50">·</span>);
+                                      const extra = collapsed.length - 1;
+                                      parts.push(<span key="first" className={muted ? 'text-neutral-400/50' : 'text-neutral-400'}>{collapsed[0]}</span>);
+                                      if (extra > 0) {
+                                        parts.push(<span key="more" className={muted ? 'text-neutral-400/50' : 'text-neutral-400'}> и ещё {extra}</span>);
+                                      }
+                                    }
+                                  }
+                                } catch {}
+                              }
+                              rule = <span className="inline-flex items-baseline flex-wrap gap-x-0.5">{parts}</span>;
+                            }
+                            return (
+                              <div key={env.id} onClick={(e) => { e.stopPropagation(); openEnvironment(flag, env.id); }} className="flex-1 bg-neutral-50/60 dark:bg-neutral-900/60 border border-neutral-200 dark:border-neutral-800 rounded-xl px-4 pt-3 pb-2 cursor-pointer hover:border-indigo-300/60 dark:hover:border-indigo-700/60 transition-all flex flex-col">
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-[10px] font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wide">{env.name}</span>
+                                  {es && (
+                                    <span onClick={(e) => e.stopPropagation()}>
+                                      <Switch checked={es.enabled} onCheckedChange={() => toggleFlag(flag, env.id)} className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-violet-500 scale-75 origin-right" />
+                                    </span>
+                                  )}
+                                </div>
+                                {es ? (
+                                  <>
+                                    <div className="text-[11px] leading-relaxed mb-2">{rule}</div>
+                                    <div className="flex-1 min-h-0 rounded-md overflow-hidden">
+                                      {sparkBuckets.length > 0 ? (
+                                        <button
+                                          onClick={(e) => { e.stopPropagation(); setMetricsTarget({ flagId: flag.flagId, flagName: flag.name, envId: env.id }); setMetricsDialogOpen(true); }}
+                                          className="w-full h-full hover:opacity-85 transition-opacity cursor-pointer"
+                                        >
+                                          <FlagSparkline data={sparkBuckets} height={52} />
+                                        </button>
+                                      ) : (
+                                        <div className="w-full h-full flex items-end justify-center pb-3">
+                                          <div className="w-3/4 border-t border-neutral-200 dark:border-neutral-700" />
+                                        </div>
+                                      )}
+                                    </div>
+                                  </>
+                                ) : (
+                                  <span className="text-[10px] text-neutral-400/50 italic">Нет стратегии</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
-            ))}
+            );})}
           </AnimatePresence>
         )}
       </div>
@@ -970,7 +1011,7 @@ export function Flags() {
                     </div>
                     <div className="bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-500/5 dark:to-indigo-500/5 rounded-xl border border-violet-200 dark:border-violet-500/20 overflow-hidden">
                       <div className="p-4 space-y-3">
-        <div className="flex flex-col items-end gap-2">
+                        <div className="flex items-center gap-2">
                           <div className="w-8 h-8 rounded-lg bg-violet-600/10 dark:bg-violet-500/20 flex items-center justify-center">
                             <Percent size={16} className="text-violet-600 dark:text-violet-400" />
                           </div>
