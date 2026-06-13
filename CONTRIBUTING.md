@@ -46,8 +46,7 @@ cd server
 
 ## Branching
 
-- `main` — стабильные релизы, не коммитить напрямую
-- `develop` — интеграционная ветка, base для feature-веток
+- `main` — основная ветка, base для всех PR
 - `feature/*` — новые фичи
 - `fix/*` — багфиксы
 - `docs/*` — документация
@@ -75,12 +74,12 @@ cd server
 
 1. Форк и клон репозитория
 2. Установите pre-commit хуки: `pre-commit install`
-3. Создайте ветку от `develop`: `git checkout -b feature/my-feature`
+3. Создайте ветку от `main`: `git checkout -b feature/my-feature`
 4. Внесите изменения, добавьте тесты
 5. Убедитесь, что тесты и линтеры проходят: `./gradlew check` (server) или `npm test && npm run lint` (web/sdk)
 6. Следуйте стилю кода в существующих файлах (4 пробела в Java, 2 пробела в TS/TSX)
 7. Коммиты в формате Conventional Commits
-8. Создайте PR в `develop`
+8. Создайте PR в `main`
 
 ### PR Checklist
 
