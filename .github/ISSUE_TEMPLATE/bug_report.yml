@@ -25,7 +25,7 @@ body:
     id: version
     attributes:
       label: Версия
-      placeholder: 1.0.0, develop branch, etc.
+      placeholder: 1.0.0, main branch, etc.
     validations:
       required: true
   - type: textarea
