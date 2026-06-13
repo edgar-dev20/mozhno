@@ -26,12 +26,6 @@
 </p>
 
 <p align="center">
-  <a href="https://app.codecov.io/gh/edgar-dev20/mozhno"><img src="https://codecov.io/gh/edgar-dev20/mozhno/graph/badge.svg?flag=server" alt="Server coverage" /></a>
-  <a href="https://app.codecov.io/gh/edgar-dev20/mozhno"><img src="https://codecov.io/gh/edgar-dev20/mozhno/graph/badge.svg?flag=web" alt="Web UI coverage" /></a>
-  <a href="https://app.codecov.io/gh/edgar-dev20/mozhno"><img src="https://codecov.io/gh/edgar-dev20/mozhno/graph/badge.svg?flag=js-sdk" alt="JS SDK coverage" /></a>
-</p>
-
-<p align="center">
   <a href="https://scorecard.dev/viewer/?uri=github.com%2Fedgar-dev20%2Fmozhno"><img src="https://api.securityscorecards.dev/projects/github.com/edgar-dev20/mozhno/badge" alt="OpenSSF Scorecard" /></a>
   <a href="https://github.com/edgar-dev20/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/edgar-dev20/mozhno/ci.yml?branch=main&label=codeql&style=flat-square&color=2563eb" alt="CodeQL" /></a>
 </p>

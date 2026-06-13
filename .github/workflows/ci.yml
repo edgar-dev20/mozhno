@@ -151,14 +151,7 @@ jobs:
 
       - name: Check and test
         working-directory: server
-        run: ./gradlew check jacocoTestReport
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: server
-          fail_ci_if_error: false
+        run: ./gradlew check
 
       - name: Upload test report
         if: failure()
@@ -189,14 +182,6 @@ jobs:
         working-directory: web
         run: npm run test:coverage
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: web
-          flags: web
-          fail_ci_if_error: false
-
   test-js-sdk:
     name: Test JS SDK (Node.js)
     needs: changes
@@ -218,14 +203,6 @@ jobs:
       - name: Run tests with coverage
         working-directory: sdks/js
         run: npm run test:coverage
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          directory: sdks/js
-          flags: js-sdk
-          fail_ci_if_error: false
 
   codeql:
     name: CodeQL Analysis
