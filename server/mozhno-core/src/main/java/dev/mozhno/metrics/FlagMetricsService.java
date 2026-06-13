@@ -18,7 +18,7 @@ public class FlagMetricsService {
     }
 
     /**
-     * Returns metrics for a specific flag and environment over the last 48 hours.
+     * Returns aggregated metrics for a specific flag and environment over the last 48 hours.
      *
      * @param flagId the flag ID
      * @param environmentId the environment ID
@@ -27,6 +27,22 @@ public class FlagMetricsService {
     public List<FlagMetric> getMetrics(Integer flagId, Integer environmentId) {
         Instant since = Instant.now().minus(48, ChronoUnit.HOURS).truncatedTo(ChronoUnit.HOURS);
         return flagMetricRepository.findByFlagIdAndEnvironmentId(flagId, environmentId, since);
+    }
+
+    /**
+     * Returns per-instance metrics for a specific flag, environment, and client instance.
+     */
+    public List<FlagMetric> getMetricsByInstance(Integer flagId, Integer environmentId, Long instanceId) {
+        Instant since = Instant.now().minus(48, ChronoUnit.HOURS).truncatedTo(ChronoUnit.HOURS);
+        return flagMetricRepository.findByFlagIdAndEnvironmentIdAndInstanceId(flagId, environmentId, instanceId, since);
+    }
+
+    /**
+     * Returns per-app metrics for a specific flag and environment, filtered by app_name.
+     */
+    public List<FlagMetric> getMetricsByAppName(Integer flagId, Integer environmentId, String appName) {
+        Instant since = Instant.now().minus(48, ChronoUnit.HOURS).truncatedTo(ChronoUnit.HOURS);
+        return flagMetricRepository.findByFlagIdAndEnvironmentIdAndAppName(flagId, environmentId, appName, since);
     }
 
     /**

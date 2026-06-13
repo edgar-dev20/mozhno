@@ -1,5 +1,5 @@
-import { request } from "@/api/modules/http";
-import { Tag, TagRequest } from "@/api/modules/types";
+import { request } from '@/api/modules/http';
+import { Tag, TagRequest } from '@/api/modules/types';
 
 export const tagsApi = {
   list: () => request<Tag[]>('/tags'),
@@ -14,6 +14,5 @@ export const tagsApi = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
-  delete: (id: number) =>
-    request<void>(`/tags/${id}`, { method: 'DELETE' }),
+  delete: (id: number) => request<void>(`/tags/${id}`, { method: 'DELETE' }),
 };

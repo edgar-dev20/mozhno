@@ -13,6 +13,7 @@ import dev.mozhno.spi.QuotaSpi;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
 import static dev.mozhno.client.HashUtils.generateRawToken;
 import static dev.mozhno.client.HashUtils.sha256;
@@ -20,6 +21,8 @@ import static dev.mozhno.client.HashUtils.sha256;
 @Service
 public class UserInviteService {
     private static final int TOKEN_TTL_DAYS = 7;
+
+    private static final Map<String, String> RU_INVITE_SUBJECT = Map.of("ru", "Приглашение в Mozhno", "en", "Invitation to Mozhno");
 
     private final EmailTemplateService emailTemplateService;
     private final InviteTokenRepository tokenRepository;
@@ -61,20 +64,23 @@ public class UserInviteService {
 
         String rawToken = generateRawToken();
         String tokenHash = sha256(rawToken);
+        String locale = request.locale() != null ? request.locale() : "ru";
 
         InviteToken token = new InviteToken();
         token.setEmail(request.email());
         token.setRole(request.role());
         token.setCreatedBy(createdBy);
         token.setTokenHash(tokenHash);
+        token.setLocale(locale);
         token.setExpiresAt(Instant.now().plus(TOKEN_TTL_DAYS, ChronoUnit.DAYS));
         tokenRepository.save(token);
 
-        String inviteLink = baseUrl + "/auth/accept-invite?token=" + rawToken;
-        String html = emailTemplateService.renderInviteEmail(inviteLink);
+        String inviteLink = baseUrl + "/accept-invite?token=" + rawToken;
+        String html = emailTemplateService.renderInviteEmail(inviteLink, locale);
+        String subject = RU_INVITE_SUBJECT.getOrDefault(locale, "Invitation to Mozhno");
 
         notificationSpi.send(new NotificationSpi.NotificationEvent(
-            "EMAIL", request.email(), "Приглашение в Mozhno", html, null));
+            "EMAIL", request.email(), subject, html, null));
 
         events.publish(DomainEvent.of(null, "user.invited", "user",
             null, request.email(), "Invitation sent for role: " + request.role()));
@@ -105,12 +111,16 @@ public class UserInviteService {
             user.setName(name != null ? name : token.getEmail());
             user.setRole(token.getRole());
             user.setStatus("active");
+            user.setLocale(token.getLocale() != null ? token.getLocale() : "ru");
             userRepository.save(user);
-        } else {
+        } else if ("invited".equals(user.getStatus())) {
             user.setPasswordHash(passwordEncoder.encode(password));
             user.setName(name != null ? name : user.getName());
+            user.setRole(token.getRole());
             user.setStatus("active");
             userRepository.save(user);
+        } else {
+            throw new ConflictException("User " + token.getEmail() + " cannot accept invite (status: " + user.getStatus() + ")");
         }
 
         tokenRepository.markUsed(token.getId());
@@ -119,7 +129,7 @@ public class UserInviteService {
             user.getId(), user.getEmail(), "Invitation accepted, account activated"));
 
         return new UserDto(user.getId(), user.getEmail(), user.getName(),
-            user.getRole(), user.getStatus(), user.getAvatar(),
+            user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(),
             user.getCreatedAt(), user.getLastActiveAt());
     }
 

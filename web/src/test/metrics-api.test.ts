@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { api } from "@/api";
+import { api } from '@/api';
 
 describe('Metrics API', () => {
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('Metrics API', () => {
     await api.metrics.get(1, 2);
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/flags/1/metrics?environmentId=2'),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 
@@ -30,7 +30,7 @@ describe('Metrics API', () => {
     await api.metrics.listForProject(3);
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/metrics?environmentId=3'),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 
@@ -44,7 +44,7 @@ describe('Metrics API', () => {
     await api.metrics.listForProject();
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/metrics'),
-      expect.any(Object)
+      expect.any(Object),
     );
   });
 

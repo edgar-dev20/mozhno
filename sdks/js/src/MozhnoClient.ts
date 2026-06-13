@@ -33,6 +33,7 @@ export class MozhnoClient extends EventEmitter {
     this.context = {
       appName: this.config.appName,
       environment: this.config.environment || 'default',
+      currentTime: new Date().toISOString(),
       ...config.context,
     };
   }
@@ -66,7 +67,7 @@ export class MozhnoClient extends EventEmitter {
   }
 
   isEnabled(flagKey: string, context?: MozhnoContext): boolean {
-    const ctx = context || this.context;
+    const ctx = this.enrichContext(context);
 
     if (this.config.mode === 'client') {
       return this.clientToggles.get(flagKey) || false;
@@ -77,6 +78,22 @@ export class MozhnoClient extends EventEmitter {
 
     this.recordMetric(flagKey);
     return isFlagEnabled(flag, ctx);
+  }
+
+  private enrichContext(context?: MozhnoContext): MozhnoContext {
+    const ctx = context || this.context;
+    const needsAppName = ctx.appName == null;
+    const needsEnvironment = ctx.environment == null;
+    const needsCurrentTime = ctx.currentTime == null;
+
+    if (!needsAppName && !needsEnvironment && !needsCurrentTime) return ctx;
+
+    return {
+      ...ctx,
+      ...(needsAppName && { appName: this.config.appName }),
+      ...(needsEnvironment && { environment: this.config.environment || 'default' }),
+      ...(needsCurrentTime && { currentTime: new Date().toISOString() }),
+    };
   }
 
   getVariant(flagKey: string): ToggleResult['variant'] | null {

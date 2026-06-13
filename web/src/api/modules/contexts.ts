@@ -1,5 +1,5 @@
-import { request } from "@/api/modules/http";
-import { ContextDefinition, ContextValue } from "@/api/modules/types";
+import { request } from '@/api/modules/http';
+import { ContextDefinition, ContextValue } from '@/api/modules/types';
 
 export const contextsApi = {
   list: () => request<ContextDefinition[]>('/contexts'),
@@ -13,11 +13,9 @@ export const contextsApi = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
-  delete: (id: number) =>
-    request<void>(`/contexts/${id}`, { method: 'DELETE' }),
+  delete: (id: number) => request<void>(`/contexts/${id}`, { method: 'DELETE' }),
   values: {
-    list: (defId: number) =>
-      request<ContextValue[]>(`/contexts/${defId}/values`),
+    list: (defId: number) => request<ContextValue[]>(`/contexts/${defId}/values`),
     create: (defId: number, values: string) =>
       request<ContextValue>(`/contexts/${defId}/values`, {
         method: 'POST',

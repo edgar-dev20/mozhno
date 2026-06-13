@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getMessages } from "@/i18n/messages";
+import { getMessages } from '@/i18n/messages';
 
 describe('getMessages', () => {
   it('returns ru messages for ru locale', () => {

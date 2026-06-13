@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeDiff } from "@/shared/diffUtils";
+import { computeDiff } from '@/shared/diffUtils';
 
 describe('computeDiff', () => {
   it('returns empty array for identical objects', () => {
@@ -51,6 +51,6 @@ describe('computeDiff', () => {
       { a: 'Alpha', b: 'Beta', c: 'Gamma' },
     );
     expect(changes).toHaveLength(2);
-    expect(changes.map(c => c.field).sort()).toEqual(['a', 'c']);
+    expect(changes.map((c) => c.field).sort()).toEqual(['a', 'c']);
   });
 });

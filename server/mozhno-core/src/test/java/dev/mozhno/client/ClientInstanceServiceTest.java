@@ -26,20 +26,20 @@ class ClientInstanceServiceTest {
 
     @Test
     void record_withNullAppName_shouldNotUpsert() {
-        service.record(1, 2, 3, null, "inst-1", "web", "SERVER");
+        service.record(1, 2, 3, null, "inst-1", "web", "1.0.0", "SERVER");
         verifyNoInteractions(repository);
     }
 
     @Test
     void record_withNullInstanceId_shouldNotUpsert() {
-        service.record(1, 2, 3, "MyApp", null, "web", "SERVER");
+        service.record(1, 2, 3, "MyApp", null, "web", "1.0.0", "SERVER");
         verifyNoInteractions(repository);
     }
 
     @Test
     void record_withValidData_shouldUpsert() {
-        service.record(1, 2, 3, "MyApp", "inst-1", "web", "SERVER");
-        verify(repository).upsert(1, 2, 3, "MyApp", "inst-1", "web", "SERVER");
+        service.record(1, 2, 3, "MyApp", "inst-1", "web", "1.0.0", "SERVER");
+        verify(repository).upsert(1, 2, 3, "MyApp", "inst-1", "web", "1.0.0", "SERVER");
     }
 
     @Test

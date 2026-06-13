@@ -1,12 +1,12 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router';
-import { Plus, Zap, Rocket, Archive } from '@/shared/icons';
-import { SidePanel } from '@/app/components/SidePanel';
+import { Plus, Zap, Archive } from '@/shared/icons';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
-import { DiffView } from '@/app/components/DiffView';
-import { FlagMetricsDialog } from '@/app/components/FlagMetricsDialog';
-import { SectionHeader, EmptyState, GradientButton, LoadingState, adjustColor } from '@/shared';
+const FlagMetricsDialog = lazy(() =>
+  import('@/app/components/FlagMetricsDialog').then((m) => ({ default: m.FlagMetricsDialog })),
+);
+import { SectionHeader, GradientButton } from '@/shared';
 import type { FlagTagValue } from '@/api';
 import { useT } from '@/i18n';
 
@@ -23,36 +23,27 @@ import {
   useFlagToggle,
 } from '@/app/hooks/mutations';
 import { useFlagFilters } from '@/app/hooks/useFlagFilters';
-import { useFlagSave } from '@/app/components/flags/useFlagSave';
 import { useFlagPanels } from '@/app/hooks/useFlagPanels';
-import { FlagCreatePanel } from '@/app/components/flags/FlagCreatePanel';
-import { FlagEditPanel } from '@/app/components/flags/FlagEditPanel';
-import { FlagEnvironmentPanel } from '@/app/components/flags/FlagEnvironmentPanel';
-import { createFormId, editFormId } from '@/app/components/flags/formIds';
-import { FlagCard } from '@/app/components/flags/FlagCard';
-import { ArchivedFlagsList } from '@/app/components/flags/ArchivedFlagsList';
 import { FlagFiltersBar } from '@/app/components/flags/FlagFiltersBar';
-import { SegmentIcon } from '@/app/components/SegmentIcon';
+import { ArchivedFlagsList } from '@/app/components/flags/ArchivedFlagsList';
+import { FlagsList } from '@/app/components/flags/FlagsList';
+import { FlagsSidePanel } from '@/app/components/flags/FlagsSidePanel';
+import { useFlagDiff } from '@/app/components/flags/useFlagDiff';
+import { useFlagSave } from '@/app/components/flags/useFlagSave';
 import type { CreateFlagFormValues, EditFlagFormValues } from '@/app/components/flags/schemas';
-import type { DiffChange } from '@/shared/diffUtils';
-import type { ReactNode } from 'react';
-import { OPERATOR_LABELS } from '@/app/components/operators';
 
 export function Flags() {
   const { data: project, isLoading: projectLoading } = useProjectQuery();
   const t = useT();
   const projectId = project?.id ?? null;
+
   const { data: environments = [] } = useEnvironmentsQuery();
-  const {
-    data: enrichedData,
-    isLoading: flagsLoading,
-  } = useEnrichedFlagsQuery(projectId);
+  const { data: enrichedData, isLoading: flagsLoading } = useEnrichedFlagsQuery(projectId);
 
   const flags = enrichedData?.flags ?? [];
   const segments = enrichedData?.segments ?? [];
   const tags = enrichedData?.tags ?? [];
   const contexts = enrichedData?.contexts ?? [];
-
   const loading = projectLoading || flagsLoading;
 
   const deleteFlag = useFlagDelete();
@@ -66,30 +57,78 @@ export function Flags() {
   );
 
   const {
-    filtered, archivedFlags, visibleFlags, hasMoreFlags,
-    showMoreFlags, showAllFlags,
-    selectedTagTypeFilter, setSelectedTagTypeFilter,
-    selectedTagValueFilter, setSelectedTagValueFilter,
-    flagTypeFilter, setFlagTypeFilter,
-    searchQuery, setSearchQuery,
-    sortBy, setSortBy,
-    dateFrom, setDateFrom,
-    dateTo, setDateTo,
+    filtered,
+    archivedFlags,
+    visibleFlags,
+    hasMoreFlags,
+    showMoreFlags,
+    showAllFlags,
+    selectedTagTypeFilter,
+    setSelectedTagTypeFilter,
+    selectedTagValueFilter,
+    setSelectedTagValueFilter,
+    flagTypeFilter,
+    setFlagTypeFilter,
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy,
+    dateFrom,
+    setDateFrom,
+    dateTo,
+    setDateTo,
     uniqueTagValues,
   } = useFlagFilters(flags, enrichedData?.totalItems);
 
   const {
-    panelOpen, setPanelOpen, editing, setEditing, expandedKeys, setExpandedKeys,
-    generalDirty, setGeneralDirty,
-    envRulePercent, setEnvRulePercent, envRuleSegments, setEnvRuleSegments,
-    envRuleConstraints, setEnvRuleConstraints, envRuleEnabled, setEnvRuleEnabled,
-    initialEnvRulePercent, initialEnvRuleSegments, initialEnvRuleConstraints, initialEnvRuleEnabled,
-    setInitialEnvRulePercent, setInitialEnvRuleSegments, setInitialEnvRuleConstraints, setInitialEnvRuleEnabled,
+    panelOpen,
+    editing,
+    expandedKeys,
+    generalDirty,
+    activeGroupId,
+    envRulePercent,
+    envRuleSegments,
+    envRuleConstraints,
+    envRuleEnabled,
+    initialEnvRulePercent,
+    initialEnvRuleSegments,
+    initialEnvRuleConstraints,
+    initialEnvRuleEnabled,
     isEnvDirty,
-    archiveOpen, setArchiveOpen, deleteTarget, setDeleteTarget, deleting,
-    archiveTarget, setArchiveTarget, archiving,
-    metricsDialogOpen, setMetricsDialogOpen, metricsTarget, setMetricsTarget,
-    openCreate, openGeneral, openEnvironment, doDelete, doArchive, doUnarchive, doToggleFlag,
+    archiveOpen,
+    deleteTarget,
+    deleting,
+    archiveTarget,
+    archiving,
+    metricsDialogOpen,
+    metricsTarget,
+    openCreate,
+    openGeneral,
+    openEnvironment,
+    doDelete,
+    doArchive,
+    doUnarchive,
+    doToggleFlag,
+    setPanelOpen,
+    setExpandedKeys,
+    setGeneralDirty,
+    setActiveGroupId,
+    setEnvRulePercent,
+    setEnvRuleSegments,
+    setEnvRuleConstraints,
+    setEnvRuleEnabled,
+    setInitialEnvRulePercent,
+    setInitialEnvRuleSegments,
+    setInitialEnvRuleConstraints,
+    setInitialEnvRuleEnabled,
+    setArchiveOpen,
+    setDeleteTarget,
+    setArchiveTarget,
+    setMetricsDialogOpen,
+    setMetricsTarget,
+    setEditing,
+    closePanel,
+    flattenConstraintGroups,
   } = useFlagPanels(
     projectId,
     contexts,
@@ -99,291 +138,75 @@ export function Flags() {
     toggleFlagMutation,
   );
 
-  const handleAfterSave = useCallback((saved?: { key: string; name: string; description: string; flagType: string; tags: FlagTagValue[] }) => {
-    if (editing.mode === 'create') {
-      setPanelOpen(false);
-    } else if (editing.mode === 'environment') {
-      setInitialEnvRulePercent(envRulePercent);
-      setInitialEnvRuleSegments([...envRuleSegments]);
-      setInitialEnvRuleConstraints(envRuleConstraints.map(c => ({ ...c })));
-      setInitialEnvRuleEnabled(envRuleEnabled);
-    } else if (editing.mode === 'general' && editing.flag && saved) {
-      setEditing({
-        flag: {
-          ...editing.flag,
-          name: saved.name,
-          key: saved.key,
-          description: saved.description,
-          flagType: saved.flagType,
-          tags: saved.tags,
-        },
-        mode: 'general',
-        envId: null,
-      });
-    }
-  }, [editing.mode, editing.flag, envRulePercent, envRuleSegments, envRuleConstraints, envRuleEnabled, setInitialEnvRulePercent, setInitialEnvRuleSegments, setInitialEnvRuleConstraints, setInitialEnvRuleEnabled, setPanelOpen, setEditing]);
+  const { computeGeneralDiff, computeEnvironmentDiff } = useFlagDiff(t, segments, contexts);
 
-  const { save, showDiff, confirmDiff, closeDiff, saving, error, diffOpen, diffChanges } = useFlagSave({
-    projectId: projectId ?? 0,
-    environments,
-    onSaveSuccess: handleAfterSave,
-  });
+  const handleAfterSave = useCallback(
+    (saved?: { key: string; name: string; description: string; flagType: string; tags: FlagTagValue[] }) => {
+      if (editing.mode === 'create') {
+        closePanel();
+      } else if (editing.mode === 'environment') {
+        setInitialEnvRulePercent(envRulePercent);
+        setInitialEnvRuleSegments([...envRuleSegments]);
+        setInitialEnvRuleConstraints(envRuleConstraints.map((g) => ({ ...g, values: [...g.values] })));
+        setInitialEnvRuleEnabled(envRuleEnabled);
+      } else if (editing.mode === 'general' && editing.flag && saved) {
+        setEditing({
+          flag: { ...editing.flag, name: saved.name, key: saved.key, description: saved.description, flagType: saved.flagType, tags: saved.tags },
+          mode: 'general',
+          envId: null,
+        });
+      }
+    },
+    [editing.mode, editing.flag, envRulePercent, envRuleSegments, envRuleConstraints, envRuleEnabled],
+  );
 
-  const [searchParams] = useSearchParams();
+  const { save, showDiff, confirmDiff, closeDiff, saving, error, diffOpen, diffChanges } =
+    useFlagSave({ projectId: projectId ?? 0, environments, onSaveSuccess: handleAfterSave });
 
-  useEffect(() => {
-    const targetKey = searchParams.get('open');
-    if (targetKey && flags.length > 0 && !expandedKeys.has(targetKey)) {
-      setExpandedKeys(prev => new Set([...prev, targetKey]));
-      const el = document.getElementById(`flag-card-${targetKey}`);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- setExpandedKeys is stable; expandedKeys intentional guard
-  }, [flags, searchParams]);
+  const handleCreateSave = useCallback(
+    (data: CreateFlagFormValues, tags: FlagTagValue[]) => {
+      save({ mode: 'create', data: { name: data.name, key: data.key, description: data.description ?? '', flagType: data.flagType, tags } });
+    },
+    [save],
+  );
 
-  const handleCreateSave = (data: CreateFlagFormValues, tags: FlagTagValue[]) => {
-    save({
-      mode: 'create',
-      data: {
-        name: data.name,
-        key: data.key,
-        description: data.description ?? '',
-        flagType: data.flagType,
+  const handleGeneralSave = useCallback(
+    (data: EditFlagFormValues, tags: FlagTagValue[]) => {
+      if (!editing.flag) return;
+      const changes = computeGeneralDiff({
+        flag: editing.flag,
+        data: { name: data.name, description: data.description ?? '', flagType: data.flagType },
         tags,
+      });
+      const config = {
+        mode: 'general' as const,
+        data: { flag: editing.flag, name: data.name, key: editing.flag.key, description: data.description ?? '', flagType: data.flagType, tags },
+      };
+      if (changes.length > 0) {
+        showDiff(changes, config);
+      } else {
+        save(config);
+      }
+    },
+    [editing.flag, computeGeneralDiff, showDiff, save],
+  );
+
+  const handleEnvironmentSave = useCallback(() => {
+    if (!projectId || !editing.flag || !editing.envId) return;
+    const changes = computeEnvironmentDiff({
+      current: {
+        enabled: envRuleEnabled,
+        percentage: envRulePercent,
+        segments: envRuleSegments,
+        constraints: envRuleConstraints,
+      },
+      initial: {
+        enabled: initialEnvRuleEnabled,
+        percentage: initialEnvRulePercent,
+        segments: initialEnvRuleSegments,
+        constraints: initialEnvRuleConstraints,
       },
     });
-  };
-
-  const handleGeneralSave = (data: EditFlagFormValues, tags: FlagTagValue[]) => {
-    if (!editing.flag) return;
-
-    const changes: DiffChange[] = [];
-
-    if (editing.flag.name !== data.name) {
-      changes.push({
-        field: 'name', label: 'Название',
-        before: editing.flag.name,
-        after: data.name,
-        group: 'Основные настройки',
-      });
-    }
-
-    if (editing.flag.description !== (data.description ?? '')) {
-      changes.push({
-        field: 'description', label: 'Описание',
-        before: editing.flag.description,
-        after: data.description ?? '',
-        group: 'Основные настройки',
-      });
-    }
-
-    if (editing.flag.flagType !== data.flagType) {
-      const label = (t: string) => t === 'RELEASE' ? 'Релиз' : 'Рубильник';
-      changes.push({
-        field: 'flagType', label: 'Тип',
-        before: label(editing.flag.flagType),
-        after: label(data.flagType),
-        group: 'Основные настройки',
-      });
-    }
-
-    if (JSON.stringify(editing.flag.tags ?? []) !== JSON.stringify(tags)) {
-      const makeTagNode = (tv: FlagTagValue): ReactNode => (
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-white shadow-sm leading-none"
-            style={{ backgroundImage: `linear-gradient(to right, ${tv.tagColor}, ${adjustColor(tv.tagColor, 20)})` }}>
-            {tv.tagName}
-          </span>
-          <span>{tv.value || '∅'}</span>
-        </span>
-      );
-
-      const oldMap = new Map((editing.flag.tags ?? []).map(t => [t.tagId, t]));
-      const newMap = new Map(tags.map(t => [t.tagId, t]));
-
-      for (const [tagId, oldTv] of oldMap) {
-        const newTv = newMap.get(tagId);
-        if (!newTv) {
-          changes.push({
-            field: `tag-removed-${tagId}`,
-            label: `Убран тег «${oldTv.tagName}»`,
-            group: 'Теги',
-            before: makeTagNode(oldTv),
-            after: '',
-          });
-        } else if (oldTv.value !== newTv.value) {
-          changes.push({
-            field: `tag-${tagId}`,
-            label: `Тег «${oldTv.tagName}»`,
-            group: 'Теги',
-            before: oldTv.value || '∅',
-            after: newTv.value || '∅',
-          });
-        }
-      }
-      for (const [tagId, newTv] of newMap) {
-        if (!oldMap.has(tagId)) {
-          changes.push({
-            field: `tag-added-${tagId}`,
-            label: `Добавлен тег «${newTv.tagName}»`,
-            group: 'Теги',
-            before: '',
-            after: makeTagNode(newTv),
-          });
-        }
-      }
-    }
-
-    const config = {
-      mode: 'general' as const,
-      data: {
-        flag: editing.flag,
-        name: data.name,
-        key: editing.flag.key,
-        description: data.description ?? '',
-        flagType: data.flagType,
-        tags,
-      },
-    };
-
-    if (changes.length > 0) {
-      showDiff(changes, config);
-    } else {
-      save(config);
-    }
-  };
-
-  const handleEnvironmentSave = () => {
-    if (!projectId || !editing.flag || !editing.envId) return;
-
-    const makeSegNode = (segId: number) => {
-      const seg = segments.find(s => s.id === segId);
-      const segName = seg?.name ?? `Сегмент #${segId}`;
-      const segColor = seg?.color ?? '#6b7280';
-      const segIcon = seg?.icon ?? 'Users';
-      return (
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-flex items-center justify-center w-4 h-4 rounded text-white shrink-0" style={{ backgroundColor: segColor }}>
-            <SegmentIcon name={segIcon} size={9} />
-          </span>
-          <span style={{ color: segColor }} className="font-medium">{segName}</span>
-        </span>
-      );
-    };
-
-    const formatConstraintLabel = (c: { contextDefId: number; operator: string; value: string }) => {
-      const ctx = contexts.find(cd => cd.id === c.contextDefId);
-      const attr = ctx?.name ?? `Атрибут #${c.contextDefId}`;
-      const op = OPERATOR_LABELS[c.operator] ?? c.operator;
-      return `${attr} ${op} ${c.value || '∅'}`;
-    };
-
-    const changes: DiffChange[] = [];
-
-    if (initialEnvRuleEnabled !== envRuleEnabled) {
-      changes.push({
-        field: 'enabled', label: 'Включён',
-        before: initialEnvRuleEnabled ? 'Да' : 'Нет',
-        after: envRuleEnabled ? 'Да' : 'Нет',
-        group: 'Стратегия активации',
-      });
-    }
-
-    if (initialEnvRulePercent !== envRulePercent) {
-      changes.push({
-        field: 'percentage', label: 'Процент раскатки',
-        before: `${initialEnvRulePercent}%`,
-        after: `${envRulePercent}%`,
-        group: 'Стратегия активации',
-      });
-    }
-
-    if (JSON.stringify(initialEnvRuleSegments) !== JSON.stringify(envRuleSegments)) {
-      const added = envRuleSegments.filter(id => !initialEnvRuleSegments.includes(id));
-      const removed = initialEnvRuleSegments.filter(id => !envRuleSegments.includes(id));
-
-      for (const id of removed) {
-        changes.push({
-          field: `seg-removed-${id}`,
-          label: 'Убран сегмент',
-          group: 'Сегменты',
-          before: makeSegNode(id),
-          after: '',
-        });
-      }
-      for (const id of added) {
-        changes.push({
-          field: `seg-added-${id}`,
-          label: 'Добавлен сегмент',
-          group: 'Сегменты',
-          before: '',
-          after: makeSegNode(id),
-        });
-      }
-    }
-
-    if (JSON.stringify(initialEnvRuleConstraints) !== JSON.stringify(envRuleConstraints)) {
-      const maxLen = Math.max(initialEnvRuleConstraints.length, envRuleConstraints.length);
-      for (let i = 0; i < maxLen; i++) {
-        const oldC = initialEnvRuleConstraints[i];
-        const newC = envRuleConstraints[i];
-
-        if (!oldC && newC) {
-          changes.push({
-            field: `con-added-${i}`,
-            label: 'Добавлено условие',
-            group: 'Ограничения',
-            before: '',
-            after: formatConstraintLabel(newC),
-          });
-        } else if (oldC && !newC) {
-          changes.push({
-            field: `con-removed-${i}`,
-            label: 'Убрано условие',
-            group: 'Ограничения',
-            before: formatConstraintLabel(oldC),
-            after: '',
-          });
-        } else if (oldC && newC) {
-          const attrChanged = oldC.contextDefId !== newC.contextDefId;
-          const opChanged = oldC.operator !== newC.operator;
-          const valueChanged = oldC.value !== newC.value;
-
-          if (attrChanged || opChanged || valueChanged) {
-            const mkNode = (c: { contextDefId: number; operator: string; value: string }, isOld: boolean): ReactNode => {
-              const ctx = contexts.find(cd => cd.id === c.contextDefId);
-              const attrName = ctx?.name ?? `Атрибут #${c.contextDefId}`;
-              const op = OPERATOR_LABELS[c.operator] ?? c.operator;
-              const val = c.value || '∅';
-              return (
-                <span className="inline-flex items-baseline gap-1">
-                  <span className={attrChanged ? (isOld ? 'line-through text-muted-foreground/60' : 'font-medium text-foreground/90') : ''}>
-                    {attrName}
-                  </span>
-                  <span className="text-muted-foreground/40">·</span>
-                  <span className={opChanged ? (isOld ? 'line-through text-muted-foreground/60' : 'font-medium text-violet-600 dark:text-violet-400') : ''}>
-                    {op}
-                  </span>
-                  <span className="text-muted-foreground/40">·</span>
-                  <span className={valueChanged ? (isOld ? 'line-through text-muted-foreground/60' : 'font-medium text-foreground/90') : ''}>
-                    {val}
-                  </span>
-                </span>
-              );
-            };
-
-            changes.push({
-              field: `con-${i}`,
-              label: `Условие ${i + 1}`,
-              group: 'Ограничения',
-              before: mkNode(oldC, true),
-              after: mkNode(newC, false),
-            });
-          }
-        }
-      }
-    }
-
     const config = {
       mode: 'environment' as const,
       data: {
@@ -392,51 +215,56 @@ export function Flags() {
         enabled: envRuleEnabled,
         percentage: envRulePercent,
         segmentIds: envRuleSegments,
-        constraints: envRuleConstraints,
+        constraints: flattenConstraintGroups(envRuleConstraints),
         initialEnabled: initialEnvRuleEnabled,
         initialPercentage: initialEnvRulePercent,
         initialSegments: initialEnvRuleSegments,
-        initialConstraints: initialEnvRuleConstraints,
+        initialConstraints: flattenConstraintGroups(initialEnvRuleConstraints),
       },
     };
-
     if (changes.length > 0) {
       showDiff(changes, config);
     } else {
       save(config);
     }
-  };
+  }, [
+    projectId, editing.flag, editing.envId,
+    envRuleEnabled, envRulePercent, envRuleSegments, envRuleConstraints,
+    initialEnvRuleEnabled, initialEnvRulePercent, initialEnvRuleSegments, initialEnvRuleConstraints,
+    computeEnvironmentDiff, showDiff, save, flattenConstraintGroups,
+  ]);
 
-  const sidePanelTitle = editing.mode === 'create'
-    ? t('flags.createTitle')
-    : editing.mode === 'general'
-      ? t('flags.generalSettings')
-      : `${t('flags.environmentTitle')} ${environments.find(e => e.id === editing.envId)?.name ?? ''}`;
+  const [searchParams] = useSearchParams();
 
-  const sidePanelDescription = editing.mode === 'create'
-    ? t('flags.createDescription')
-    : editing.mode === 'general'
-      ? t('flags.generalDescription')
-      : t('flags.environmentDescription');
+  useEffect(() => {
+    if (!panelOpen) setActiveGroupId(null);
+  }, [panelOpen]);
 
-  const activeFormId = editing.mode === 'create' ? createFormId : editing.mode === 'general' ? editFormId : undefined;
+  useEffect(() => {
+    const targetKey = searchParams.get('open');
+    if (targetKey && flags.length > 0 && !expandedKeys.has(targetKey)) {
+      setExpandedKeys(new Set([...expandedKeys, targetKey]));
+      document.getElementById(`flag-card-${targetKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [flags, searchParams]);
 
-  const saveLabel = t('common.saveChanges');
-  const saveDisabled = saving || (editing.mode === 'environment' && !isEnvDirty) || (editing.mode === 'general' && !generalDirty);
+  const handleMetricsClick = useCallback(
+    (flagId: number, flagName: string, envId: number) => {
+      setMetricsTarget({ flagId, flagName, envId });
+      setMetricsDialogOpen(true);
+    },
+    [],
+  );
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('flags.title')} description={t('flags.description')} />
-        <GradientButton onClick={openCreate} icon={<Plus size={18} />}>{t('flags.create')}</GradientButton>
+        <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
+          {t('flags.create')}
+        </GradientButton>
       </div>
 
-      
-      {(enrichedData?.totalItems != null) && (
-        <div className="text-xs text-muted-foreground/60">
-          {enrichedData.totalItems} flags total ({filtered.length} matching filters)
-        </div>
-      )}
       <FlagFiltersBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -455,60 +283,36 @@ export function Flags() {
         uniqueTagValues={uniqueTagValues}
       />
 
-      <TipCard
-        text={t('flags.hygieneTip')}
-        label={t('flags.hygieneLabel')}
-        icon={<Zap />}
-        storageKey="flags"
-      />
+      <TipCard text={t('flags.hygieneTip')} label={t('flags.hygieneLabel')} icon={<Zap />} storageKey="flags" />
 
-      <div className="space-y-3">
-        {loading ? (
-          <LoadingState text={t('flags.loadingFlags')} />
-        ) : filtered.length === 0 ? (
-          <EmptyState
-            icon={<Rocket size={28} className="text-violet-500 dark:text-violet-400" />}
-            title={t('flags.noFlags')}
-            description={t('flags.noFlagsDescription')}
-            buttonLabel={t('flags.create')}
-            onAction={openCreate}
-          />
-        ) : (
-          <>
-            {visibleFlags.map((flag) => (
-              <FlagCard
-                  key={flag.key}
-                  flag={flag}
-                  expanded={expandedKeys.has(flag.key)}
-                  onToggleExpand={() => {
-                    const next = new Set(expandedKeys);
-                    if (expandedKeys.has(flag.key)) next.delete(flag.key);
-                    else next.add(flag.key);
-                    setExpandedKeys(next);
-                  }}
-                  onOpenGeneral={openGeneral}
-                  onOpenEnvironment={openEnvironment}
-                  onToggleFlag={doToggleFlag}
-                  onMetricsClick={(flagId, flagName, envId) => {
-                    setMetricsTarget({ flagId, flagName, envId });
-                    setMetricsDialogOpen(true);
-                  }}
-                  environments={environments}
-                  segments={segments}
-                  tags={tags}
-                  contexts={contexts}
-                  sparklineData={sparklineData}
-                />
-              ))}
-            {hasMoreFlags && (
-              <div className="flex items-center justify-center gap-3 pt-3 pb-1">
-                <GradientButton variant="secondary" onClick={showMoreFlags}>{t('flags.showMore')} ({filtered.length - visibleFlags.length})</GradientButton>
-                <GradientButton variant="secondary" onClick={showAllFlags} className="bg-violet-50 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20">{t('flags.showAll')} ({filtered.length})</GradientButton>
-              </div>
-            )}
-          </>
-        )}
-      </div>
+      <FlagsList
+        loading={loading}
+        empty={!loading && filtered.length === 0}
+        visibleFlags={visibleFlags}
+        expandedKeys={expandedKeys}
+        onToggleExpand={(key) => {
+          const next = new Set(expandedKeys);
+          if (expandedKeys.has(key)) {
+            next.delete(key);
+          } else {
+            next.add(key);
+          }
+          setExpandedKeys(next);
+        }}
+        onOpenGeneral={openGeneral}
+        onOpenEnvironment={openEnvironment}
+        onToggleFlag={doToggleFlag}
+        onMetricsClick={handleMetricsClick}
+        onCreateClick={openCreate}
+        environments={environments}
+        segments={segments}
+        tags={tags}
+        sparklineData={sparklineData}
+        hasMoreFlags={hasMoreFlags}
+        totalFiltered={filtered.length}
+        onShowMore={showMoreFlags}
+        onShowAll={showAllFlags}
+      />
 
       {archivedFlags.length > 0 && (
         <div className="flex justify-center pt-2">
@@ -518,92 +322,62 @@ export function Flags() {
         </div>
       )}
 
-      {archiveOpen && <ArchivedFlagsList flags={archivedFlags} onUnarchive={doUnarchive} tags={tags} />}
+      {archiveOpen && (
+        <ArchivedFlagsList flags={archivedFlags} onUnarchive={doUnarchive} tags={tags} />
+      )}
 
-      <FlagMetricsDialog
-        open={metricsDialogOpen}
-        onOpenChange={setMetricsDialogOpen}
-        flagId={metricsTarget?.flagId ?? 0}
-        flagName={metricsTarget?.flagName ?? ''}
-        environments={environments}
-        defaultEnvId={metricsTarget?.envId}
-      />
+      <Suspense fallback={null}>
+        <FlagMetricsDialog
+          open={metricsDialogOpen}
+          onOpenChange={setMetricsDialogOpen}
+          flagId={metricsTarget?.flagId ?? 0}
+          flagName={metricsTarget?.flagName ?? ''}
+          environments={environments}
+          defaultEnvId={metricsTarget?.envId}
+        />
+      </Suspense>
 
-      <SidePanel
+      <FlagsSidePanel
         open={panelOpen}
         onOpenChange={setPanelOpen}
-        title={sidePanelTitle}
-        description={sidePanelDescription}
-        footer={
-          <>
-            <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-xl transition-colors">{t('common.cancel')}</button>
-            {(editing.mode === 'create' || editing.mode === 'general') ? (
-              <GradientButton type="submit" form={activeFormId} disabled={saveDisabled} loading={saving}>{saveLabel}</GradientButton>
-            ) : (
-              <GradientButton onClick={handleEnvironmentSave} disabled={saveDisabled} loading={saving}>{saveLabel}</GradientButton>
-            )}
-          </>
-        }
-      >
-        <div className="space-y-5">
-          {error && <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-sm text-red-700">{error}</div>}
-
-          {editing.mode === 'create' && (
-            <FlagCreatePanel
-              allTags={tags}
-              onSave={handleCreateSave}
-            />
-          )}
-
-          {editing.mode === 'general' && editing.flag && (
-            <FlagEditPanel
-              flag={editing.flag}
-              allTags={tags}
-              onSave={handleGeneralSave}
-              onArchive={() => setArchiveTarget(editing.flag!)}
-              onUnarchive={() => doUnarchive(editing.flag!)}
-              onDelete={() => setDeleteTarget(editing.flag!)}
-              onDirtyChange={setGeneralDirty}
-            />
-          )}
-
-          {editing.mode === 'environment' && (
-            <FlagEnvironmentPanel
-              envRulePercent={envRulePercent}
-              onEnvRulePercentChange={setEnvRulePercent}
-              envRuleSegments={envRuleSegments}
-              onEnvRuleSegmentsChange={setEnvRuleSegments}
-              envRuleConstraints={envRuleConstraints}
-              onEnvRuleConstraintsChange={setEnvRuleConstraints}
-              envRuleEnabled={envRuleEnabled}
-              onEnvRuleEnabledChange={setEnvRuleEnabled}
-              segments={segments}
-              contexts={contexts}
-            />
-          )}
-        </div>
-      </SidePanel>
-
-      <ConfirmDialog
-        open={diffOpen}
-        onOpenChange={(open) => { if (!open) closeDiff(); }}
-        title={t('flags.applyChanges')}
-        description={t('common.reviewChanges')}
-        confirmLabel={t('common.applyChanges')}
-        cancelLabel={t('common.cancel')}
-        variant="default"
-        onConfirm={confirmDiff}
-        loading={false}
-        wide
-      >
-        <DiffView changes={diffChanges} />
-      </ConfirmDialog>
+        onClose={closePanel}
+        editing={editing}
+        generalDirty={generalDirty}
+        envRulePercent={envRulePercent}
+        envRuleSegments={envRuleSegments}
+        envRuleConstraints={envRuleConstraints}
+        envRuleEnabled={envRuleEnabled}
+        isEnvDirty={isEnvDirty}
+        activeGroupId={activeGroupId}
+        saving={saving}
+        error={error}
+        diffOpen={diffOpen}
+        diffChanges={diffChanges}
+        onDiffDismiss={closeDiff}
+        onConfirmDiff={confirmDiff}
+        environments={environments}
+        segments={segments}
+        contexts={contexts}
+        allTags={tags}
+        onSaveCreate={handleCreateSave}
+        onSaveGeneral={handleGeneralSave}
+        onSaveEnvironment={handleEnvironmentSave}
+        onSetEnvRulePercent={setEnvRulePercent}
+        onSetEnvRuleSegments={setEnvRuleSegments}
+        onSetEnvRuleConstraints={setEnvRuleConstraints}
+        onSetEnvRuleEnabled={setEnvRuleEnabled}
+        onSetActiveGroupId={setActiveGroupId}
+        onSetGeneralDirty={setGeneralDirty}
+        onArchive={() => setArchiveTarget(editing.flag!)}
+        onUnarchive={() => editing.flag && doUnarchive(editing.flag)}
+        onDelete={() => setDeleteTarget(editing.flag!)}
+      />
 
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}
         title={t('flags.deleteConfirm')}
-        description={`${t('flags.namePlaceholder')} «${deleteTarget?.name ?? ''}» ${t('flags.deleteDescription')}`}
+        description={`${t('flags.namePlaceholder')} \u00AB${deleteTarget?.name ?? ''}\u00BB ${t('flags.deleteDescription')}`}
         confirmLabel={t('common.delete')}
         onConfirm={doDelete}
         loading={deleting}
@@ -613,8 +387,9 @@ export function Flags() {
         open={!!archiveTarget}
         onOpenChange={(open) => { if (!open) setArchiveTarget(null); }}
         title={t('flags.archiveConfirm')}
-        description={`${t('flags.namePlaceholder')} «${archiveTarget?.name ?? ''}» ${t('flags.archiveDescription')}`}
+        description={`${t('flags.namePlaceholder')} \u00AB${archiveTarget?.name ?? ''}\u00BB ${t('flags.archiveDescription')}`}
         confirmLabel={t('flags.archiveBtn')}
+        variant="default"
         onConfirm={doArchive}
         loading={archiving}
       />

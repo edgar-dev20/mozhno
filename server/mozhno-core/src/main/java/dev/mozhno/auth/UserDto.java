@@ -20,6 +20,8 @@ public record UserDto(
     String status,
     @Schema(description = "Avatar image filename", nullable = true)
     String avatar,
+    @Schema(description = "Preferred locale: ru or en", example = "ru")
+    String locale,
     @Schema(description = "When the user was created")
     Instant createdAt,
     @Schema(description = "When the user was last active", nullable = true)

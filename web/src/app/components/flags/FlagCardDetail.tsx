@@ -1,16 +1,15 @@
-import { Settings, Clock, User } from "@/shared/icons";
-import { formatDate, adjustColor } from "@/shared";
-import { useT } from "@/i18n";
-import { FlagCardEnvironmentColumn } from "@/app/components/flags/FlagCardEnvironmentColumn";
-import type { FlagView } from "@/app/hooks/flagTypes";
-import type { SegmentResponse, Tag as TagType, ContextDefinition } from "@/api";
+import { Settings, Clock, User } from '@/shared/icons';
+import { formatDate, adjustColor } from '@/shared';
+import { useT } from '@/i18n';
+import { FlagCardEnvironmentColumn } from '@/app/components/flags/FlagCardEnvironmentColumn';
+import type { FlagView } from '@/app/hooks/flagTypes';
+import type { SegmentResponse, Tag as TagType } from '@/api';
 
 interface FlagCardDetailProps {
   flag: FlagView;
   environments: { id: number; name: string }[];
   segments: SegmentResponse[];
   tags: TagType[];
-  contexts: ContextDefinition[];
   sparklineData: Map<string, { trueCount: number; falseCount: number; timeBucket: string }[]>;
   onOpenGeneral: (flag: FlagView) => void;
   onOpenEnvironment: (flag: FlagView, envId: number) => void;
@@ -23,7 +22,6 @@ export function FlagCardDetail({
   environments,
   segments,
   tags,
-  contexts,
   sparklineData,
   onOpenGeneral,
   onOpenEnvironment,
@@ -51,7 +49,9 @@ export function FlagCardDetail({
                   <span
                     key={i}
                     className="inline-flex items-center px-1.5 py-1 rounded text-xs font-medium text-white shadow-sm leading-none"
-                    style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}
+                    style={{
+                      backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})`,
+                    }}
                   >
                     {tv.value}
                   </span>
@@ -80,7 +80,7 @@ export function FlagCardDetail({
               e.stopPropagation();
               onOpenGeneral(flag);
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-lg hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand dark:hover:text-brand hover:border-brand/20 dark:hover:border-brand/30 hover:bg-brand/5 dark:hover:bg-brand/10 transition-all"
           >
             <Settings size={12} />
             {t('common.edit')}
@@ -98,7 +98,6 @@ export function FlagCardDetail({
               env={env}
               flag={flag}
               segments={segments}
-              contexts={contexts}
               sparkBuckets={sparkBuckets}
               onOpenEnvironment={onOpenEnvironment}
               onToggleFlag={onToggleFlag}

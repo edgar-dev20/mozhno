@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X } from "@/shared/icons";
+import { X } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
+import { Badge } from '@/shared/components/Badge';
 import { useT } from '@/i18n';
 
 interface TipCardProps {
@@ -39,34 +40,40 @@ export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProp
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -10, scale: 0.97 }}
           transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative overflow-hidden rounded-2xl border border-primary/10 backdrop-blur-xl bg-gradient-to-br from-gradient-subtle-start/5 to-gradient-subtle-end/3 shadow-sm"
+          className="relative overflow-hidden rounded-xl border border-border bg-card shadow-sm"
         >
           <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-gradient-start to-gradient-end" />
           <div className="p-4 pl-6 flex items-start gap-3">
             {showIcon && (
               <div className="shrink-0 rounded-xl overflow-hidden">
                 {imageSrc ? (
-                  <img
-                    src={imageSrc}
-                    alt=""
-                    className="w-10 h-10 object-cover"
-                  />
+                  <img src={imageSrc} alt="" className="w-10 h-10 object-cover" />
                 ) : icon ? (
-                  <div className="p-2.5 bg-gradient-to-br from-gradient-start/10 to-gradient-end/7">
-                    {React.cloneElement(icon as React.ReactElement<{ size?: number; className?: string; style?: React.CSSProperties }>, { size: 16, className: 'text-primary' })}
+                  <div className="p-2.5 bg-muted">
+                    {React.cloneElement(
+                      icon as React.ReactElement<{
+                        size?: number;
+                        className?: string;
+                        style?: React.CSSProperties;
+                      }>,
+                      { size: 16, className: 'text-primary' },
+                    )}
                   </div>
                 ) : null}
               </div>
             )}
             <div className="flex-1 min-w-0 pt-0.5">
-              <span className="inline-block text-xs font-extrabold uppercase tracking-[0.2em] px-2 py-0.5 rounded-md mb-1.5 text-primary bg-primary/10 border border-primary/10">
-                {displayLabel}
-              </span>
+              <div className="mb-1.5">
+                <Badge variant="primary" uppercase>
+                  {displayLabel}
+                </Badge>
+              </div>
               <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
             </div>
             <button
               onClick={handleDismiss}
-              className="shrink-0 p-1.5 rounded-xl hover:bg-white/40 dark:hover:bg-white/5 text-muted-foreground/70 hover:text-foreground/80 transition-colors"
+              aria-label={t('common.close')}
+              className="shrink-0 p-1.5 rounded-lg hover:bg-white/40 dark:hover:bg-white/5 text-muted-foreground/70 hover:text-foreground/80 transition-colors"
             >
               <X size={14} strokeWidth={2} />
             </button>

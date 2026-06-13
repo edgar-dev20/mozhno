@@ -85,7 +85,8 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
     @Test
     void getFeatures_withContextConstraint_shouldReturnConstraint() throws Exception {
         ContextDefinition cd = new ContextDefinition();
-        cd.setName("userId");
+        cd.setName("User ID");
+        cd.setContextKey("userId");
         cd.setProjectId(projectId);
         Integer cdId = contextDefinitionRepository.save(cd).getId();
 
@@ -193,7 +194,8 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
     @Test
     void evaluate_withConstraintMatch_shouldReturnFlag() throws Exception {
         ContextDefinition cd = new ContextDefinition();
-        cd.setName("country");
+        cd.setName("Country");
+        cd.setContextKey("country");
         cd.setProjectId(projectId);
         Integer cdId = contextDefinitionRepository.save(cd).getId();
 
@@ -224,7 +226,8 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
     @Test
     void evaluate_withConstraintMismatch_shouldNotReturnFlag() throws Exception {
         ContextDefinition cd = new ContextDefinition();
-        cd.setName("country");
+        cd.setName("Country");
+        cd.setContextKey("country");
         cd.setProjectId(projectId);
         Integer cdId = contextDefinitionRepository.save(cd).getId();
 
@@ -275,7 +278,7 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/client/metrics")
                         .header("Authorization", "client-test-token-abcdefghijklmnop1234567890")
                         .contentType("application/json")
-                        .content("{\"evaluations\":{\"test-feature\":5}}"))
+                        .content("{\"evaluations\":{\"test-feature\":{\"t\":3,\"f\":2}}}"))
                 .andExpect(status().isOk());
     }
 

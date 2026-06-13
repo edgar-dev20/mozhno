@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { adjustColor } from "@/shared/color";
+import { adjustColor } from '@/shared/color';
 
 describe('adjustColor', () => {
   it('lightens a color with positive amount', () => {

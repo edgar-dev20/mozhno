@@ -81,7 +81,7 @@ public class SegmentContextRepository {
             return Collections.emptyList();
         }
         String placeholders = String.join(",", Collections.nCopies(segmentIds.size(), "?"));
-        String sql = "SELECT sc.segment_id, cd.id as context_definition_id, cd.name as context_name, cd.context_type, sc.operator, sc.context_values " +
+        String sql = "SELECT sc.segment_id, cd.id as context_definition_id, cd.context_key as context_name, cd.context_type, sc.operator, sc.context_values " +
                      "FROM segment_contexts sc " +
                      "JOIN context_definitions cd ON cd.id = sc.context_definition_id " +
                      "WHERE sc.segment_id IN (" + placeholders + ") " +

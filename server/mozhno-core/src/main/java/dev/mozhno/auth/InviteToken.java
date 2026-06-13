@@ -14,6 +14,7 @@ public class InviteToken {
     private String role;
     private Integer createdBy;
     private String tokenHash;
+    private String locale;
     private Instant expiresAt;
     private Instant usedAt;
     private Instant createdAt;

@@ -22,6 +22,8 @@ public class FlagMetric {
     private long evaluationTrueCount;
     /** Number of evaluations that returned false. */
     private long evaluationFalseCount;
+    /** Client instance ID (null = aggregated row). */
+    private Long clientInstanceId;
     /** The hour bucket this metric represents. */
     private Instant timeBucket;
     /** When this metric row was created. */

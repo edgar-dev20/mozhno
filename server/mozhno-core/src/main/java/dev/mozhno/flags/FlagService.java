@@ -6,12 +6,11 @@ import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.NotFoundException;
-import dev.mozhno.exception.QuotaExceededException;
 import dev.mozhno.common.PageResponse;
 import dev.mozhno.spi.QuotaSpi;
+import dev.mozhno.tags.Tag;
 import dev.mozhno.tags.TagRepository;
 
-import java.time.Instant;
 import java.util.List;
 
 /**
@@ -49,11 +48,6 @@ public class FlagService {
         Flag flag = flagRepository.findByIdAndProjectId(id, projectId);
         if (flag == null) throw new NotFoundException("Flag", id);
         return flag;
-    }
-
-    @Transactional(readOnly = true)
-    public Flag findById(Integer id) {
-        return findById(id, null);
     }
 
     /**
@@ -121,7 +115,7 @@ public class FlagService {
 
     @Transactional(readOnly = true)
     public PageResponse<FlagWithStrategy> findByProjectIdWithAllEnvironmentStrategiesPaginated(Integer projectId, int page, int size) {
-        long total = flagRepository.countByProjectId(projectId, false);
+        long total = flagRepository.countByProjectId(projectId, true);
         int offset = page * size;
         List<FlagWithStrategy> items = flagRepository.findByProjectIdWithAllEnvironmentStrategiesPaginated(projectId, offset, size);
         return new PageResponse<>(items, page, size, total);
@@ -136,18 +130,6 @@ public class FlagService {
     }
 
     /**
-     * Creates a new flag with no explicit creator.
-     *
-     * @param request the flag creation request
-     * @return the created flag
-     * @throws RuntimeException if the project is not found or quota is exceeded
-     */
-    @Transactional
-    public Flag create(FlagRequest request) {
-        return create(request, null);
-    }
-
-    /**
      * Creates a new flag.
      *
      * @param request the flag creation request
@@ -157,10 +139,7 @@ public class FlagService {
      */
     @Transactional
     public Flag create(FlagRequest request, Integer creatorId) {
-        QuotaSpi.QuotaResult quota = quotaSpi.canCreateFlag(request.getProjectId());
-        if (quota instanceof QuotaSpi.Blocked blocked) {
-            throw new QuotaExceededException(blocked.current(), blocked.limit(), blocked.planName());
-        }
+        dev.mozhno.util.QuotaValidator.check(quotaSpi.canCreateFlag(request.getProjectId()));
 
         Flag flag = new Flag();
         flag.setProjectId(request.getProjectId());
@@ -180,13 +159,9 @@ public class FlagService {
 
         if (request.getTags() != null && !request.getTags().isEmpty()) {
             if (request.getTags().size() > 10) {
-                throw new BadRequestException("Не более 10 тегов на флаг");
+                throw new BadRequestException("At most 10 tags per flag");
             }
-            for (FlagRequest.TagValue tv : request.getTags()) {
-                if (tagRepository.findById(tv.getTagId()) == null) {
-                    throw new NotFoundException("Tag", tv.getTagId());
-                }
-            }
+            validateTagIds(request.getTags());
             flagTagValueRepository.saveBatch(flag.getId(), request.getTags());
         }
 
@@ -226,13 +201,9 @@ public class FlagService {
 
         if (request.getTags() != null && !request.getTags().isEmpty()) {
             if (request.getTags().size() > 10) {
-                throw new BadRequestException("Не более 10 тегов на флаг");
+                throw new BadRequestException("At most 10 tags per flag");
             }
-            for (FlagRequest.TagValue tv : request.getTags()) {
-                if (tagRepository.findById(tv.getTagId()) == null) {
-                    throw new NotFoundException("Tag", tv.getTagId());
-                }
-            }
+            validateTagIds(request.getTags());
             flagTagValueRepository.saveBatch(id, request.getTags());
         }
 
@@ -256,70 +227,35 @@ public class FlagService {
     }
 
     @Transactional
-    public void delete(Integer id) {
-        delete(id, null);
-    }
-
-    /**
-     * Archives a flag without recording who performed the action.
-     *
-     * @param id the flag ID
-     * @return the archived flag
-     */
-    @Transactional
-    public Flag archive(Integer id) {
-        return archive(id, null, null);
-    }
-
-    @Transactional
-    public Flag archive(Integer id, Integer archivedBy) {
-        return archive(id, archivedBy, null);
-    }
-
-    /**
-     * Archives a flag.
-     *
-     * @param id the flag ID
-     * @param archivedBy the ID of the user who archived the flag, may be null
-     * @return the archived flag
-     * @throws RuntimeException if the flag is not found
-     */
-    @Transactional
     public Flag archive(Integer id, Integer archivedBy, Integer projectId) {
         int affected = flagRepository.setArchived(id, true, archivedBy, projectId);
         if (affected == 0) throw new NotFoundException("Flag", id);
-        Flag flag = new Flag();
-        flag.setId(id);
-        flag.setProjectId(projectId);
-        flag.setArchived(true);
-        flag.setArchivedBy(archivedBy);
-        flag.setArchivedAt(Instant.now());
+        Flag flag = flagRepository.findByIdAndProjectId(id, projectId);
         events.publish(DomainEvent.of(projectId, "flag.archived", "flag",
             id, null, "Flag archived"));
         return flag;
     }
 
-    /**
-     * Unarchives a previously archived flag.
-     *
-     * @param id the flag ID
-     * @return the unarchived flag
-     * @throws RuntimeException if the flag is not found
-     */
     @Transactional
     public Flag unarchive(Integer id, Integer projectId) {
         int affected = flagRepository.clearArchived(id, projectId);
         if (affected == 0) throw new NotFoundException("Flag", id);
-        Flag flag = new Flag();
-        flag.setId(id);
-        flag.setProjectId(projectId);
-        flag.setArchived(false);
+        Flag flag = flagRepository.findByIdAndProjectId(id, projectId);
         events.publish(DomainEvent.of(projectId, "flag.unarchived", "flag",
             id, null, "Flag unarchived"));
         return flag;
     }
 
-    public Flag unarchive(Integer id) {
-        return unarchive(id, null);
+    private void validateTagIds(List<FlagRequest.TagValue> tags) {
+        List<Integer> tagIds = tags.stream().map(FlagRequest.TagValue::getTagId).distinct().toList();
+        List<Tag> found = tagRepository.findAllByIds(tagIds);
+        if (found.size() != tagIds.size()) {
+            java.util.Set<Integer> foundIds = found.stream().map(Tag::getId).collect(java.util.stream.Collectors.toSet());
+            for (Integer tagId : tagIds) {
+                if (!foundIds.contains(tagId)) {
+                    throw new NotFoundException("Tag", tagId);
+                }
+            }
+        }
     }
 }

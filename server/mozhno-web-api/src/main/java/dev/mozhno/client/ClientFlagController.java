@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.micrometer.core.annotation.Timed;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,6 +30,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Tag(name = "Client", description = "Client SDK API — requires API key via Bearer token")
 public class ClientFlagController {
+    private static final Logger log = LoggerFactory.getLogger(ClientFlagController.class);
     private final ClientFlagService clientFlagService;
     private final ClientInstanceService clientInstanceService;
 
@@ -51,12 +54,12 @@ public class ClientFlagController {
         if (!(auth instanceof ApiKeyAuthentication apiKeyAuth)) {
             throw new RuntimeException("Unauthorized");
         }
-        recordInstance(apiKeyAuth, request);
+        Long instanceId = recordInstance(apiKeyAuth, request);
         Map<String, String> context = req.getContext() != null ? req.getContext() : Collections.emptyMap();
         List<String> requestedToggles = req.getToggles();
 
         List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
-            apiKeyAuth.getProjectId(), apiKeyAuth.getEnvironmentId(), context);
+            apiKeyAuth.getProjectId(), apiKeyAuth.getEnvironmentId(), context, instanceId);
 
         if (requestedToggles != null && !requestedToggles.isEmpty()) {
             results = results.stream()
@@ -75,17 +78,23 @@ public class ClientFlagController {
         if (!(auth instanceof ApiKeyAuthentication apiKeyAuth)) {
             throw new RuntimeException("Unauthorized");
         }
-        recordInstance(apiKeyAuth, request);
-        clientFlagService.recordMetrics(apiKeyAuth.getProjectId(), apiKeyAuth.getEnvironmentId(), req);
+        Long instanceId = recordInstance(apiKeyAuth, request);
+        clientFlagService.recordMetrics(apiKeyAuth.getProjectId(), apiKeyAuth.getEnvironmentId(), req, instanceId);
         return ResponseEntity.ok().build();
     }
 
-    private void recordInstance(ApiKeyAuthentication auth, HttpServletRequest request) {
+    private Long recordInstance(ApiKeyAuthentication auth, HttpServletRequest request) {
         String appName = request.getHeader("X-Mozhno-App-Name");
         String instanceId = request.getHeader("X-Mozhno-Instance-Id");
         if (appName != null && instanceId != null) {
-            clientInstanceService.record(auth.getProjectId(), auth.getEnvironmentId(),
-                null, appName, instanceId, "unknown", auth.getKeyType());
+            String sdkType = request.getHeader("X-Mozhno-Sdk-Type");
+            String sdkVersion = request.getHeader("X-Mozhno-Sdk-Version");
+            log.info("Recording instance: app={}, instance={}, sdkType={}, sdkVersion={}",
+                appName, instanceId, sdkType, sdkVersion);
+            return clientInstanceService.record(auth.getProjectId(), auth.getEnvironmentId(),
+                null, appName, instanceId, sdkType != null ? sdkType : "unknown",
+                sdkVersion, auth.getKeyType());
         }
+        return null;
     }
 }

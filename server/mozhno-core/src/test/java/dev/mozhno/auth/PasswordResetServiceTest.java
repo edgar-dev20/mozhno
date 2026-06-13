@@ -17,6 +17,7 @@ import java.time.Instant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,14 +47,13 @@ class PasswordResetServiceTest {
     @InjectMocks
     private PasswordResetService passwordResetService;
 
-    private static final String BASE_URL = "http://localhost:8080";
-
     private User createTestUser(Integer id, String status) {
         User user = new User();
         user.setId(id);
         user.setEmail("test" + id + "@example.com");
         user.setRole("editor");
         user.setStatus(status);
+        user.setLocale("ru");
         return user;
     }
 
@@ -61,14 +61,16 @@ class PasswordResetServiceTest {
     void sendResetEmail_userFound_shouldStoreTokenAndSendEmail() {
         User user = createTestUser(1, "active");
         when(userRepository.findByEmail("test@example.com")).thenReturn(user);
-        when(emailTemplateService.renderResetPasswordEmail(anyString())).thenReturn("<html>reset</html>");
+        when(emailTemplateService.renderResetPasswordEmail(anyString(), anyString())).thenReturn("<html>reset</html>");
         when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
             PasswordResetToken t = inv.getArgument(0);
             t.setId(1);
             return t;
         });
 
-        passwordResetService.sendResetEmail("test@example.com");
+        boolean result = passwordResetService.sendResetEmail("test@example.com", "ru");
+
+        assertThat(result).isTrue();
 
         ArgumentCaptor<PasswordResetToken> tokenCaptor = ArgumentCaptor.forClass(PasswordResetToken.class);
         verify(tokenRepository).markAllUsedForUser(1);
@@ -91,24 +93,162 @@ class PasswordResetServiceTest {
     }
 
     @Test
-    void sendResetEmail_userNotFound_shouldSilentlyReturn() {
+    void sendResetEmail_englishLocale_shouldUseEnglishSubject() {
+        User user = createTestUser(2, "active");
+        when(userRepository.findByEmail("eng@example.com")).thenReturn(user);
+        when(emailTemplateService.renderResetPasswordEmail(anyString(), eq("en"))).thenReturn("<html>reset-en</html>");
+        when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
+            PasswordResetToken t = inv.getArgument(0);
+            t.setId(2);
+            return t;
+        });
+
+        passwordResetService.sendResetEmail("eng@example.com", "en");
+
+        ArgumentCaptor<NotificationSpi.NotificationEvent> eventCaptor =
+            ArgumentCaptor.forClass(NotificationSpi.NotificationEvent.class);
+        verify(notificationSpi).send(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().subject()).isEqualTo("Mozhno password reset");
+        assertThat(eventCaptor.getValue().body()).isEqualTo("<html>reset-en</html>");
+    }
+
+    @Test
+    void sendResetEmail_userNotFound_shouldReturnFalse() {
         when(userRepository.findByEmail("nobody@example.com")).thenReturn(null);
 
-        passwordResetService.sendResetEmail("nobody@example.com");
+        boolean result = passwordResetService.sendResetEmail("nobody@example.com", "ru");
 
+        assertThat(result).isFalse();
         verify(tokenRepository, never()).save(any());
         verify(notificationSpi, never()).send(any());
     }
 
     @Test
-    void sendResetEmail_userSuspended_shouldSilentlyReturn() {
+    void sendResetEmail_userSuspended_shouldReturnFalse() {
         User user = createTestUser(2, "suspended");
         when(userRepository.findByEmail("suspended@example.com")).thenReturn(user);
 
-        passwordResetService.sendResetEmail("suspended@example.com");
+        boolean result = passwordResetService.sendResetEmail("suspended@example.com", "ru");
 
+        assertThat(result).isFalse();
         verify(tokenRepository, never()).save(any());
         verify(notificationSpi, never()).send(any());
+    }
+
+    @Test
+    void sendResetEmail_userInvited_shouldReturnFalse() {
+        User user = createTestUser(3, "invited");
+        when(userRepository.findByEmail("invited@example.com")).thenReturn(user);
+
+        boolean result = passwordResetService.sendResetEmail("invited@example.com", "ru");
+
+        assertThat(result).isFalse();
+        verify(tokenRepository, never()).save(any());
+        verify(notificationSpi, never()).send(any());
+    }
+
+    @Test
+    void sendResetEmail_cooldown_shouldReturnFalse() {
+        User user = createTestUser(1, "active");
+        when(userRepository.findByEmail("cooldown@example.com")).thenReturn(user);
+        when(emailTemplateService.renderResetPasswordEmail(anyString(), anyString())).thenReturn("<html>reset</html>");
+        when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
+            PasswordResetToken t = inv.getArgument(0);
+            t.setId(1);
+            return t;
+        });
+
+        boolean first = passwordResetService.sendResetEmail("cooldown@example.com", "ru");
+        assertThat(first).isTrue();
+
+        boolean second = passwordResetService.sendResetEmail("cooldown@example.com", "ru");
+        assertThat(second).isFalse();
+
+        verify(tokenRepository, times(1)).save(any());
+    }
+
+    @Test
+    void sendResetEmail_resetLink_shouldNotHaveAuthPrefix() {
+        User user = createTestUser(3, "active");
+        when(userRepository.findByEmail("link@example.com")).thenReturn(user);
+        when(emailTemplateService.renderResetPasswordEmail(anyString(), anyString())).thenAnswer(inv -> inv.getArgument(0));
+        when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
+            PasswordResetToken t = inv.getArgument(0);
+            t.setId(3);
+            return t;
+        });
+
+        passwordResetService.sendResetEmail("link@example.com", "ru");
+
+        ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
+        verify(emailTemplateService).renderResetPasswordEmail(linkCaptor.capture(), anyString());
+        String link = linkCaptor.getValue();
+        assertThat(link).contains("/reset-password?token=");
+        assertThat(link).doesNotContain("/auth/reset-password");
+    }
+
+    @Test
+    void sendAdminResetEmail_shouldUseAdminTemplate() {
+        User user = createTestUser(4, "active");
+        user.setLocale("en");
+        when(userRepository.findById(4)).thenReturn(user);
+        when(emailTemplateService.renderAdminResetPasswordEmail(anyString(), eq("en"))).thenReturn("<html>admin-reset-en</html>");
+        when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
+            PasswordResetToken t = inv.getArgument(0);
+            t.setId(4);
+            return t;
+        });
+
+        passwordResetService.sendAdminResetEmail(4);
+
+        ArgumentCaptor<NotificationSpi.NotificationEvent> eventCaptor =
+            ArgumentCaptor.forClass(NotificationSpi.NotificationEvent.class);
+        verify(notificationSpi).send(eventCaptor.capture());
+        NotificationSpi.NotificationEvent event = eventCaptor.getValue();
+        assertThat(event.type()).isEqualTo("EMAIL");
+        assertThat(event.recipient()).isEqualTo("test4@example.com");
+        assertThat(event.subject()).isEqualTo("Mozhno password reset");
+        assertThat(event.body()).isEqualTo("<html>admin-reset-en</html>");
+
+        verify(emailTemplateService).renderAdminResetPasswordEmail(anyString(), eq("en"));
+    }
+
+    @Test
+    void sendAdminResetEmail_userNotFound_shouldThrow() {
+        when(userRepository.findById(999)).thenReturn(null);
+
+        assertThatThrownBy(() -> passwordResetService.sendAdminResetEmail(999))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("User");
+    }
+
+    @Test
+    void sendAdminResetEmail_userSuspended_shouldThrow() {
+        User user = createTestUser(5, "suspended");
+        when(userRepository.findById(5)).thenReturn(user);
+
+        assertThatThrownBy(() -> passwordResetService.sendAdminResetEmail(5))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("User");
+    }
+
+    @Test
+    void sendAdminResetEmail_shouldNotHaveAuthPrefix() {
+        User user = createTestUser(6, "active");
+        when(userRepository.findById(6)).thenReturn(user);
+        when(emailTemplateService.renderAdminResetPasswordEmail(anyString(), anyString())).thenAnswer(inv -> inv.getArgument(0));
+        when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
+            PasswordResetToken t = inv.getArgument(0);
+            t.setId(6);
+            return t;
+        });
+
+        passwordResetService.sendAdminResetEmail(6);
+
+        ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
+        verify(emailTemplateService).renderAdminResetPasswordEmail(linkCaptor.capture(), anyString());
+        assertThat(linkCaptor.getValue()).contains("/reset-password?token=");
+        assertThat(linkCaptor.getValue()).doesNotContain("/auth/reset-password");
     }
 
     @Test

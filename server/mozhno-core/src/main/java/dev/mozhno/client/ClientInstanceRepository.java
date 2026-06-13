@@ -2,7 +2,11 @@ package dev.mozhno.client;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -15,15 +19,37 @@ public class ClientInstanceRepository {
         this.jdbc = jdbc;
     }
 
-    public void upsert(Integer projectId, Integer environmentId, Integer apiKeyId,
-                       String appName, String instanceId, String appType, String keyType) {
-        jdbc.update("""
-            INSERT INTO client_instances (project_id, environment_id, api_key_id, app_name, instance_id, app_type, key_type, first_seen_at, last_seen_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-            ON CONFLICT (project_id, environment_id, app_name, instance_id)
-            DO UPDATE SET last_seen_at = NOW(), api_key_id = COALESCE(EXCLUDED.api_key_id, client_instances.api_key_id)
-            """,
-            projectId, environmentId, apiKeyId, appName, instanceId, appType, keyType);
+    public Long upsert(Integer projectId, Integer environmentId, Integer apiKeyId,
+                       String appName, String instanceId, String appType, String sdkVersion, String keyType) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbc.update(con -> {
+            PreparedStatement ps = con.prepareStatement(
+                """
+                INSERT INTO client_instances (project_id, environment_id, api_key_id, app_name, instance_id, app_type, sdk_version, key_type, first_seen_at, last_seen_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                ON CONFLICT (project_id, environment_id, app_name, instance_id)
+                DO UPDATE SET last_seen_at = NOW(), api_key_id = COALESCE(EXCLUDED.api_key_id, client_instances.api_key_id),
+                    app_type = EXCLUDED.app_type, sdk_version = EXCLUDED.sdk_version
+                RETURNING id
+                """,
+                Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, projectId);
+            ps.setInt(2, environmentId);
+            if (apiKeyId != null) {
+                ps.setInt(3, apiKeyId);
+            } else {
+                ps.setNull(3, java.sql.Types.INTEGER);
+            }
+            ps.setString(4, appName);
+            ps.setString(5, instanceId);
+            ps.setString(6, appType != null ? appType : "unknown");
+            ps.setString(7, sdkVersion);
+            ps.setString(8, keyType != null ? keyType : "SERVER");
+            return ps;
+        }, keyHolder);
+
+        Number key = keyHolder.getKey();
+        return key != null ? key.longValue() : null;
     }
 
     public List<ClientInstance> findByProjectId(Integer projectId) {
@@ -44,6 +70,12 @@ public class ClientInstanceRepository {
             ORDER BY last_seen_at DESC
             """;
         return jdbc.query(sql, rowMapper(), projectId, environmentId);
+    }
+
+    public int deleteOlderThan(int days) {
+        return jdbc.update(
+            "DELETE FROM client_instances WHERE last_seen_at < NOW() - (? * INTERVAL '1 day')",
+            days);
     }
 
     private static org.springframework.jdbc.core.RowMapper<ClientInstance> rowMapper() {

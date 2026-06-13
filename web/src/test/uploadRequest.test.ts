@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { uploadRequest, setToken } from "@/api/modules/http";
-import { AppError } from "@/shared/errors";
+import { uploadRequest, setToken } from '@/api/modules/http';
+import { AppError } from '@/shared/errors';
 
 beforeEach(() => {
   vi.restoreAllMocks();
@@ -36,9 +36,12 @@ describe('uploadRequest', () => {
     mockFetch(200, { ok: true });
     const fd = new FormData();
     await uploadRequest('/upload', fd);
-    expect(fetch).toHaveBeenCalledWith('/api/v1/upload', expect.objectContaining({
-      headers: { Authorization: 'Bearer test-token' },
-      body: fd,
-    }));
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/v1/upload',
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer test-token' },
+        body: fd,
+      }),
+    );
   });
 });

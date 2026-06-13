@@ -25,18 +25,19 @@ export function isAppError(error: unknown): error is AppError {
   return error instanceof AppError;
 }
 
-export function createAppError(
-  message: string,
-  statusCode: number,
-  details?: unknown,
-): AppError {
+export function createAppError(message: string, statusCode: number, details?: unknown): AppError {
   const code: ErrorCode =
-    statusCode === 401 ? 'UNAUTHORIZED' :
-    statusCode === 403 ? 'FORBIDDEN' :
-    statusCode === 404 ? 'NOT_FOUND' :
-    statusCode === 422 ? 'VALIDATION' :
-    statusCode >= 500 ? 'SERVER' :
-    'UNKNOWN';
+    statusCode === 401
+      ? 'UNAUTHORIZED'
+      : statusCode === 403
+        ? 'FORBIDDEN'
+        : statusCode === 404
+          ? 'NOT_FOUND'
+          : statusCode === 422
+            ? 'VALIDATION'
+            : statusCode >= 500
+              ? 'SERVER'
+              : 'UNKNOWN';
 
   return new AppError(message, code, statusCode, details);
 }

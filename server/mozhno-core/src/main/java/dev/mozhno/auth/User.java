@@ -19,6 +19,7 @@ public class User {
     private String role;
     private String status;
     private String avatar;
+    private String locale;
     private byte[] avatarData;
     private Instant createdAt;
     private Instant lastActiveAt;

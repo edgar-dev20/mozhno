@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import { format } from "date-fns";
-import { ru } from "date-fns/locale/ru";
-import { Calendar, X } from "@/shared/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/app/components/ui/calendar";
-import { useT } from "@/i18n";
+import React, { useState } from 'react';
+import { format } from 'date-fns';
+import { enUS } from 'date-fns/locale';
+import { Calendar, X } from '@/shared/icons';
+import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/app/components/ui/calendar';
+import { useLocale, useT } from '@/i18n';
+import { dateLocales } from '@/i18n/dateLocales';
+import type { Locale } from 'date-fns/locale';
 
 interface DatePickerProps {
   value?: Date | null;
@@ -16,8 +18,8 @@ interface DatePickerProps {
   className?: string;
 }
 
-function formatDisplay(date: Date): string {
-  return format(date, "d MMM yyyy", { locale: ru });
+function formatDisplay(date: Date, locale: Locale): string {
+  return format(date, 'd MMM yyyy', { locale });
 }
 
 export function DatePicker({
@@ -27,15 +29,23 @@ export function DatePicker({
   presets: showPresets = false,
   minDate,
   maxDate,
-  className = "",
+  className = '',
 }: DatePickerProps) {
+  const { locale } = useLocale();
   const t = useT();
   const [open, setOpen] = useState(false);
+  const dateLocale = dateLocales[locale] ?? enUS;
 
   const presets = [
-    { label: t("common.today"), getValue: () => new Date() },
-    { label: t("common.yesterday"), getValue: () => { const d = new Date(); d.setDate(d.getDate() + 1); return d; } },
-    { label: t("common.clearFilter"), getValue: () => { const d = new Date(); d.setDate(d.getDate() + 7); return d; } },
+    { label: t('common.today'), getValue: () => new Date() },
+    {
+      label: t('common.yesterday'),
+      getValue: () => {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return d;
+      },
+    },
   ];
 
   const handleSelect = (date: Date | undefined) => {
@@ -56,11 +66,14 @@ export function DatePicker({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-xl px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
+          aria-label={placeholder ?? t('common.selectDate')}
+          className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-lg px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
         >
           <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
-          <span className={displayDate ? "text-foreground/80" : "text-muted-foreground"}>
-            {displayDate ? formatDisplay(value!) : placeholder ?? t("common.selectDate")}
+          <span className={displayDate ? 'text-foreground/80' : 'text-muted-foreground'}>
+            {displayDate
+              ? formatDisplay(value!, dateLocale)
+              : (placeholder ?? t('common.selectDate'))}
           </span>
           {displayDate && (
             <span
@@ -72,14 +85,14 @@ export function DatePicker({
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="rounded-2xl w-auto p-0" align="center">
+      <PopoverContent className="rounded-xl w-auto p-0" align="center" avoidCollisions={false}>
         <CalendarComponent
           mode="single"
           selected={value ?? undefined}
           onSelect={handleSelect}
           fromDate={minDate}
           toDate={maxDate}
-          locale={ru}
+          locale={dateLocale}
           initialFocus
         />
         {showPresets && (
@@ -89,11 +102,20 @@ export function DatePicker({
                 key={preset.label}
                 type="button"
                 onClick={() => handleSelect(preset.getValue())}
-                className="px-3 py-1.5 text-xs font-semibold rounded-xl transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
               >
                 {preset.label}
               </button>
             ))}
+            {value && (
+              <button
+                type="button"
+                onClick={() => onChange(undefined)}
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
+              >
+                {t('common.clearFilter')}
+              </button>
+            )}
           </div>
         )}
       </PopoverContent>

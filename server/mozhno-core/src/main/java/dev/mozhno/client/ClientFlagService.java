@@ -2,7 +2,6 @@ package dev.mozhno.client;
 
 import dev.mozhno.contexts.ContextDefinition;
 import dev.mozhno.contexts.ContextDefinitionRepository;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import dev.mozhno.flags.Flag;
 import dev.mozhno.flags.FlagRepository;
@@ -31,19 +30,16 @@ public class ClientFlagService {
     private final SegmentContextRepository segmentContextRepository;
     private final ContextDefinitionRepository contextDefinitionRepository;
     private final FlagMetricRepository flagMetricRepository;
-    private final int maxMetricsPerKey;
 
     public ClientFlagService(FlagRepository flagRepository, FlagStrategyRepository flagStrategyRepository,
                              SegmentContextRepository segmentContextRepository,
                              ContextDefinitionRepository contextDefinitionRepository,
-                             FlagMetricRepository flagMetricRepository,
-                             @Value("${app.client.max-metrics-per-key:1000}") int maxMetricsPerKey) {
+                             FlagMetricRepository flagMetricRepository) {
         this.flagRepository = flagRepository;
         this.flagStrategyRepository = flagStrategyRepository;
         this.segmentContextRepository = segmentContextRepository;
         this.contextDefinitionRepository = contextDefinitionRepository;
         this.flagMetricRepository = flagMetricRepository;
-        this.maxMetricsPerKey = maxMetricsPerKey;
     }
 
     public List<ClientFlagResponse> getFlagsForProject(Integer projectId, Integer environmentId) {
@@ -69,12 +65,6 @@ public class ClientFlagService {
         }
 
         flagStrategyRepository.touchLastUsedAt(strategyIds);
-
-        for (FlagWithStrategy fws : flags) {
-            FlagStrategy s = fws.strategy();
-            boolean enabled = s != null ? s.isEnabled() : fws.flag().isEnabled();
-            flagMetricRepository.recordEvaluation(projectId, fws.flag().getId(), environmentId, enabled);
-        }
 
         Map<Integer, List<SegmentContextWithName>> segmentContextsMap;
         if (!segmentIds.isEmpty()) {
@@ -111,7 +101,7 @@ public class ClientFlagService {
                     List<FlagConstraintParser.StrategyConstraint> parsed = parseStrategyConstraints(s.getContextValuesJson());
                     for (FlagConstraintParser.StrategyConstraint sc : parsed) {
                         ContextDefinition cd = contextDefMap.getOrDefault(sc.cd(), null);
-                        String fieldName = cd != null ? cd.getName() : String.valueOf(sc.cd());
+                        String fieldName = cd != null ? cd.getContextKey() : String.valueOf(sc.cd());
                         String ctxType = cd != null && cd.getContextType() != null ? cd.getContextType() : "string";
                         String key = fieldName + "|" + sc.op();
                         merged.computeIfAbsent(key, k -> new ConstraintMerge(fieldName, sc.op(), ctxType))
@@ -134,7 +124,7 @@ public class ClientFlagService {
         }).toList();
     }
 
-    public List<ClientEvaluateResponse.ToggleResult> evaluate(Integer projectId, Integer environmentId, Map<String, String> context) {
+    public List<ClientEvaluateResponse.ToggleResult> evaluate(Integer projectId, Integer environmentId, Map<String, String> context, Long clientInstanceId) {
         List<FlagWithStrategy> flags = flagRepository.findByProjectIdWithStrategyForEnvironment(projectId, environmentId);
 
         List<Integer> strategyIds = new ArrayList<>();
@@ -176,7 +166,7 @@ public class ClientFlagService {
         List<ClientEvaluateResponse.ToggleResult> results = new ArrayList<>();
         for (FlagWithStrategy fws : flags) {
             boolean enabled = evaluator.evaluateFlag(fws.flag(), fws.strategy(), context, segmentContextsMap, contextDefMap);
-            flagMetricRepository.recordEvaluation(projectId, fws.flag().getId(), environmentId, enabled);
+            flagMetricRepository.recordEvaluation(projectId, fws.flag().getId(), environmentId, enabled, clientInstanceId);
 
             if (enabled) {
                 results.add(new ClientEvaluateResponse.ToggleResult(
@@ -189,13 +179,15 @@ public class ClientFlagService {
         return results;
     }
 
-    public void recordMetrics(Integer projectId, Integer environmentId, ClientMetricsRequest request) {
+    public void recordMetrics(Integer projectId, Integer environmentId, ClientMetricsRequest request, Long clientInstanceId) {
         if (request.getEvaluations() == null) return;
-        for (Map.Entry<String, Long> entry : request.getEvaluations().entrySet()) {
+        for (Map.Entry<String, ClientMetricsRequest.EvalCount> entry : request.getEvaluations().entrySet()) {
             Flag flag = flagRepository.findByProjectIdAndKey(projectId, entry.getKey());
             if (flag != null) {
-                long count = entry.getValue() != null ? entry.getValue() : 0;
-                flagMetricRepository.recordEvaluations(projectId, flag.getId(), environmentId, (int) Math.min(count, maxMetricsPerKey));
+                ClientMetricsRequest.EvalCount ec = entry.getValue();
+                int t = (int) Math.min(ec.getTrueCount(), Integer.MAX_VALUE);
+                int f = (int) Math.min(ec.getFalseCount(), Integer.MAX_VALUE);
+                flagMetricRepository.recordEvaluations(projectId, flag.getId(), environmentId, t, f, clientInstanceId);
             }
         }
     }

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { FlagFiltersBar } from "@/app/components/flags/FlagFiltersBar";
+import { FlagFiltersBar } from '@/app/components/flags/FlagFiltersBar';
 
 const mockTags = [
   { id: 1, name: 'Priority', color: '#ef4444', projectId: 1 },

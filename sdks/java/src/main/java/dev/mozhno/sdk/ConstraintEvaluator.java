@@ -20,12 +20,13 @@ public class ConstraintEvaluator {
         if (activation.getRollOut() != null) {
             if (activation.getRollOut() >= 100) return true;
             if (activation.getRollOut() <= 0) return false;
-            String seed = flag.getKey() + context.getProperty("userId");
-            if (context.getProperty("userId") == null) {
-                seed = flag.getKey() + context.getProperty("sessionId");
+            String identifier = context.getProperty("userId");
+            if (identifier == null) {
+                identifier = context.getProperty("sessionId");
             }
+            String seed = flag.getKey() + (identifier != null ? identifier : "");
             int hash = murmurHash32(seed.getBytes(StandardCharsets.UTF_8));
-            int bucket = Math.abs(hash) % 100;
+            int bucket = Math.abs(hash % 100);
             return bucket < activation.getRollOut().intValue();
         }
 

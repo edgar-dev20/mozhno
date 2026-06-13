@@ -45,7 +45,7 @@ public class FeatureFlagEvaluator {
                     FlagConstraintParser.parseStrategyConstraints(s.getContextValuesJson());
                 for (FlagConstraintParser.StrategyConstraint sc : parsed) {
                     ContextDefinition cd = contextDefMap.getOrDefault(sc.cd(), null);
-                    String fieldName = cd != null ? cd.getName() : String.valueOf(sc.cd());
+                    String fieldName = cd != null ? cd.getContextKey() : String.valueOf(sc.cd());
                     String ctxType = cd != null && cd.getContextType() != null ? cd.getContextType() : "string";
                     String op = sc.op() != null ? sc.op() : "in";
                     String key = fieldName + "|" + op;
@@ -80,7 +80,7 @@ public class FeatureFlagEvaluator {
             if (s.getPercentage() <= 0) return false;
             String seed = flag.getKey() + context.getOrDefault("userId", context.getOrDefault("sessionId", ""));
             int hash = murmurHash32(seed.getBytes(StandardCharsets.UTF_8));
-            int bucket = Math.abs(hash) % 100;
+            int bucket = Math.abs(hash % 100);
             return bucket < s.getPercentage().intValue();
         }
 

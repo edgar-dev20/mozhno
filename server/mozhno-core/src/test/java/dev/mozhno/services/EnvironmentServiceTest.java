@@ -53,7 +53,7 @@ class EnvironmentServiceTest {
         e.setName("staging");
         when(environmentRepository.findById(1)).thenReturn(e);
 
-        Environment result = environmentService.findById(1);
+        Environment result = environmentService.findById(1, null);
         assertEquals("staging", result.getName());
     }
 
@@ -61,7 +61,7 @@ class EnvironmentServiceTest {
     void findById_shouldThrowExceptionWhenNotFound() {
         when(environmentRepository.findById(999)).thenReturn(null);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> environmentService.findById(999));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> environmentService.findById(999, null));
         assertTrue(ex.getMessage().contains("Environment not found"));
     }
 
@@ -90,7 +90,7 @@ class EnvironmentServiceTest {
         when(environmentRepository.findById(1)).thenReturn(existing);
         when(environmentRepository.save(any(Environment.class))).thenReturn(existing);
 
-        Environment result = environmentService.update(1, "new-name");
+        Environment result = environmentService.update(1, "new-name", null);
         assertEquals("new-name", result.getName());
     }
 
@@ -98,14 +98,14 @@ class EnvironmentServiceTest {
     void update_shouldThrowExceptionWhenNotFound() {
         when(environmentRepository.findById(999)).thenReturn(null);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> environmentService.update(999, "name"));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> environmentService.update(999, "name", null));
         assertTrue(ex.getMessage().contains("Environment not found"));
     }
 
     @Test
     void delete_shouldCallRepository() {
         when(environmentRepository.deleteById(anyInt(), any())).thenReturn(1);
-        environmentService.delete(1);
+        environmentService.delete(1, null);
         verify(environmentRepository).deleteById(eq(1), any());
     }
 }

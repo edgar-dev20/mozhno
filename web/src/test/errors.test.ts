@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { AppError, isAppError, createAppError } from "@/shared/errors";
-import { getErrorMessage, getErrorCode, shouldRetry, shouldRedirect } from "@/shared/errorHandler";
+import { AppError, isAppError, createAppError } from '@/shared/errors';
+import { getErrorMessage, getErrorCode, shouldRetry, shouldRedirect } from '@/shared/errorHandler';
 
 describe('AppError', () => {
   it('creates an error with code and status', () => {

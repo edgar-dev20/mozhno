@@ -1,9 +1,8 @@
-import { request } from "@/api/modules/http";
-import { Environment } from "@/api/modules/types";
+import { request } from '@/api/modules/http';
+import { Environment } from '@/api/modules/types';
 
 export const environmentsApi = {
-  list: () =>
-    request<Environment[]>('/environments'),
+  list: () => request<Environment[]>('/environments'),
   create: (name: string) =>
     request<Environment>('/environments', {
       method: 'POST',
@@ -14,8 +13,6 @@ export const environmentsApi = {
       method: 'PUT',
       body: JSON.stringify({ name }),
     }),
-  getLimit: () =>
-    request<{ maxEnvironments: number }>('/environments/limit'),
-  delete: (id: number) =>
-    request<void>(`/environments/${id}`, { method: 'DELETE' }),
+  getLimit: () => request<{ maxEnvironments: number }>('/environments/limit'),
+  delete: (id: number) => request<void>(`/environments/${id}`, { method: 'DELETE' }),
 };

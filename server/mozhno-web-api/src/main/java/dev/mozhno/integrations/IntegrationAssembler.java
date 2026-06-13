@@ -15,6 +15,8 @@ public class IntegrationAssembler {
             .name(integration.getName())
             .enabled(integration.isEnabled())
             .lastError(integration.getLastError())
+            .configJson(integration.getConfigJson())
+            .eventSubscriptionsJson(integration.getEventSubscriptionsJson())
             .createdAt(integration.getCreatedAt())
             .updatedAt(integration.getUpdatedAt())
             .build();

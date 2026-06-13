@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { FlagSparkline } from "@/app/components/FlagSparkline";
+import { FlagSparkline } from '@/app/components/FlagSparkline';
 
 describe('FlagSparkline', () => {
   it('renders dash when data is empty', () => {

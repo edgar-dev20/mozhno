@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api';
+import { queryKeys } from '@/api/queryKeys';
 
 function buildSparklineMap(data: Awaited<ReturnType<typeof api.metrics.listForProject>>) {
   const now = new Date();
@@ -40,12 +41,9 @@ function buildSparklineMap(data: Awaited<ReturnType<typeof api.metrics.listForPr
 
 export type SparklineData = ReturnType<typeof buildSparklineMap>;
 
-export function useMetricsSparklineQuery(
-  environmentsLength: number,
-  flagsLength: number,
-) {
+export function useMetricsSparklineQuery(environmentsLength: number, flagsLength: number) {
   return useQuery({
-    queryKey: ['metrics', 'sparkline'],
+    queryKey: queryKeys.metrics.sparkline,
     queryFn: async () => {
       const data = await api.metrics.listForProject();
       return buildSparklineMap(data);

@@ -1,4 +1,15 @@
-import { Flag, Users, Box, Tag, UserCog, Webhook, Settings, Activity, Key, Monitor } from '@/shared/icons';
+import {
+  Flag,
+  Users,
+  Box,
+  Tag,
+  UserCog,
+  Webhook,
+  Settings,
+  Activity,
+  Key,
+  Monitor,
+} from '@/shared/icons';
 
 export interface NavItem {
   path: string;

@@ -33,7 +33,7 @@ public class JdbcMetricsSinkProvider implements MetricsSinkSpi {
      */
     @Override
     public void recordFlagEvaluation(Integer projectId, Integer flagId, Integer environmentId, boolean enabled) {
-        flagMetricRepository.recordEvaluation(projectId, flagId, environmentId, enabled);
+        flagMetricRepository.recordEvaluation(projectId, flagId, environmentId, enabled, null);
     }
 
     /**

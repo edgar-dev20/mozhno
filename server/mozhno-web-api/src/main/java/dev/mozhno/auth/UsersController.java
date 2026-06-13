@@ -29,6 +29,7 @@ import java.util.List;
 public class UsersController {
     private final UserService userService;
     private final UserInviteService userInviteService;
+    private final PasswordResetService passwordResetService;
 
     @GetMapping
     @Operation(summary = "Get all users (admin only)")
@@ -108,5 +109,14 @@ public class UsersController {
         return ResponseEntity.ok()
                 .contentType(contentType)
                 .body(data);
+    }
+
+    @PostMapping("/{id}/send-reset-link")
+    @Operation(summary = "Send a password reset link to a user (admin only)")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Object> sendResetLink(@PathVariable Integer id,
+                                                 @AuthenticationPrincipal UserPrincipal user) {
+        passwordResetService.sendAdminResetEmail(id);
+        return ResponseEntity.ok(java.util.Map.of("message", "Password reset link sent"));
     }
 }

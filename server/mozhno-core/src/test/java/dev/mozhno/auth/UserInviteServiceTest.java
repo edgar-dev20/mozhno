@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +50,11 @@ class UserInviteServiceTest {
     private UserInviteService userInviteService;
 
     private InviteUserRequest createRequest(String email, String role) {
-        return new InviteUserRequest(email, role, null);
+        return new InviteUserRequest(email, role, null, null);
+    }
+
+    private InviteUserRequest createRequest(String email, String role, String locale) {
+        return new InviteUserRequest(email, role, null, locale);
     }
 
     @Test
@@ -77,7 +82,7 @@ class UserInviteServiceTest {
     void inviteUser_success_shouldStoreTokenAndSendEmail() {
         when(userRepository.existsByEmail("invitee@example.com")).thenReturn(false);
         when(quotaSpi.canCreateUser(null)).thenReturn(new QuotaSpi.Allowed());
-        when(emailTemplateService.renderInviteEmail(anyString())).thenReturn("<html>invite</html>");
+        when(emailTemplateService.renderInviteEmail(anyString(), anyString())).thenReturn("<html>invite</html>");
         when(tokenRepository.save(any(InviteToken.class))).thenAnswer(inv -> {
             InviteToken t = inv.getArgument(0);
             t.setId(1);
@@ -105,6 +110,65 @@ class UserInviteServiceTest {
         assertThat(event.body()).isEqualTo("<html>invite</html>");
 
         verify(events).publish(any(DomainEvent.class));
+    }
+
+    @Test
+    void inviteUser_englishLocale_shouldUseEnglishSubjectAndTemplate() {
+        when(userRepository.existsByEmail("eng@example.com")).thenReturn(false);
+        when(quotaSpi.canCreateUser(null)).thenReturn(new QuotaSpi.Allowed());
+        when(emailTemplateService.renderInviteEmail(anyString(), eq("en"))).thenReturn("<html>invite-en</html>");
+        when(tokenRepository.save(any(InviteToken.class))).thenAnswer(inv -> {
+            InviteToken t = inv.getArgument(0);
+            t.setId(1);
+            return t;
+        });
+
+        userInviteService.inviteUser(createRequest("eng@example.com", "developer", "en"), 42);
+
+        ArgumentCaptor<NotificationSpi.NotificationEvent> eventCaptor =
+            ArgumentCaptor.forClass(NotificationSpi.NotificationEvent.class);
+        verify(notificationSpi).send(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().subject()).isEqualTo("Invitation to Mozhno");
+        assertThat(eventCaptor.getValue().body()).isEqualTo("<html>invite-en</html>");
+    }
+
+    @Test
+    void inviteUser_defaultLocale_shouldBeRussian() {
+        when(userRepository.existsByEmail("def@example.com")).thenReturn(false);
+        when(quotaSpi.canCreateUser(null)).thenReturn(new QuotaSpi.Allowed());
+        when(emailTemplateService.renderInviteEmail(anyString(), eq("ru"))).thenReturn("<html>invite-ru</html>");
+        when(tokenRepository.save(any(InviteToken.class))).thenAnswer(inv -> {
+            InviteToken t = inv.getArgument(0);
+            t.setId(1);
+            return t;
+        });
+
+        userInviteService.inviteUser(createRequest("def@example.com", "developer"), 42);
+
+        ArgumentCaptor<NotificationSpi.NotificationEvent> eventCaptor =
+            ArgumentCaptor.forClass(NotificationSpi.NotificationEvent.class);
+        verify(notificationSpi).send(eventCaptor.capture());
+        assertThat(eventCaptor.getValue().subject()).isEqualTo("Приглашение в Mozhno");
+    }
+
+    @Test
+    void inviteUser_inviteLink_shouldNotHaveAuthPrefix() {
+        when(userRepository.existsByEmail("link@example.com")).thenReturn(false);
+        when(quotaSpi.canCreateUser(null)).thenReturn(new QuotaSpi.Allowed());
+        when(emailTemplateService.renderInviteEmail(anyString(), anyString())).thenAnswer(inv -> inv.getArgument(0));
+        when(tokenRepository.save(any(InviteToken.class))).thenAnswer(inv -> {
+            InviteToken t = inv.getArgument(0);
+            t.setId(1);
+            return t;
+        });
+
+        userInviteService.inviteUser(createRequest("link@example.com", "viewer"), 1);
+
+        ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
+        verify(emailTemplateService).renderInviteEmail(linkCaptor.capture(), anyString());
+        String link = linkCaptor.getValue();
+        assertThat(link).contains("/accept-invite?token=");
+        assertThat(link).doesNotContain("/auth/accept-invite");
     }
 
     @Test
@@ -146,6 +210,7 @@ class UserInviteServiceTest {
         token.setId(10);
         token.setEmail("newuser@example.com");
         token.setRole("editor");
+        token.setLocale("en");
         token.setExpiresAt(Instant.now().plus(6, java.time.temporal.ChronoUnit.DAYS));
 
         when(tokenRepository.findByHashForUpdate(anyString())).thenReturn(token);
@@ -163,6 +228,7 @@ class UserInviteServiceTest {
         assertThat(result.name()).isEqualTo("John Doe");
         assertThat(result.role()).isEqualTo("editor");
         assertThat(result.status()).isEqualTo("active");
+        assertThat(result.locale()).isEqualTo("en");
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -172,6 +238,7 @@ class UserInviteServiceTest {
         assertThat(saved.getName()).isEqualTo("John Doe");
         assertThat(saved.getRole()).isEqualTo("editor");
         assertThat(saved.getStatus()).isEqualTo("active");
+        assertThat(saved.getLocale()).isEqualTo("en");
 
         verify(tokenRepository).markUsed(10);
         verify(events).publish(any(DomainEvent.class));
@@ -201,11 +268,37 @@ class UserInviteServiceTest {
         assertThat(result.email()).isEqualTo("existing@example.com");
         assertThat(result.name()).isEqualTo("Updated Name");
         assertThat(result.status()).isEqualTo("active");
+        assertThat(result.role()).isEqualTo("developer");
 
         assertThat(existing.getPasswordHash()).isEqualTo("hashed-newpass");
         assertThat(existing.getStatus()).isEqualTo("active");
+        assertThat(existing.getRole()).isEqualTo("developer");
 
         verify(tokenRepository).markUsed(11);
+    }
+
+    @Test
+    void acceptInvite_existingActiveUser_shouldThrowConflict() {
+        User existing = new User();
+        existing.setId(50);
+        existing.setEmail("active@example.com");
+        existing.setStatus("active");
+
+        InviteToken token = new InviteToken();
+        token.setId(12);
+        token.setEmail("active@example.com");
+        token.setRole("viewer");
+        token.setExpiresAt(Instant.now().plus(6, java.time.temporal.ChronoUnit.DAYS));
+
+        when(tokenRepository.findByHashForUpdate(anyString())).thenReturn(token);
+        when(userRepository.findByEmail("active@example.com")).thenReturn(existing);
+
+        assertThatThrownBy(() -> userInviteService.acceptInvite("valid-token", "Name", "password1"))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("cannot accept invite");
+
+        verify(tokenRepository, never()).markUsed(anyInt());
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test

@@ -1,5 +1,5 @@
-import { request } from "@/api/modules/http";
-import { AuditEvent } from "@/api/modules/types";
+import { request } from '@/api/modules/http';
+import { AuditEvent } from '@/api/modules/types';
 
 export const auditApi = {
   list: (page?: number, size?: number, dateFrom?: string, dateTo?: string) => {

@@ -25,6 +25,12 @@ public record IntegrationResponse(
     @Schema(description = "Last dispatch error message", nullable = true)
     String lastError,
 
+    @Schema(description = "JSON configuration (URL, headers, body)")
+    String configJson,
+
+    @Schema(description = "JSON array of subscribed event keys")
+    String eventSubscriptionsJson,
+
     @Schema(description = "When the integration was created")
     Instant createdAt,
 

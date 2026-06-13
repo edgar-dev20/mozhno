@@ -1,11 +1,27 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api';
+import { queryKeys } from '@/api/queryKeys';
 import type { FlagView } from '@/app/hooks/flagTypes';
-import type { SegmentResponse, Tag as TagType, ContextDefinition, EnrichedFlagResponse } from '@/api';
+import type {
+  SegmentResponse,
+  Tag as TagType,
+  ContextDefinition,
+  EnrichedFlagResponse,
+} from '@/api';
 
-function createFlagView(
-  f: { key: string; name: string; description: string; flagType: string; id: number; tags: { tagId: number; tagName: string; tagColor: string; value: string }[]; archived: boolean; createdAt: string | null; createdBy: string | null; archivedBy: string | null; archivedAt: string | null },
-): FlagView {
+function createFlagView(f: {
+  key: string;
+  name: string;
+  description: string;
+  flagType: string;
+  id: number;
+  tags: { tagId: number; tagName: string; tagColor: string; value: string }[];
+  archived: boolean;
+  createdAt: string | null;
+  createdBy: string | null;
+  archivedBy: string | null;
+  archivedAt: string | null;
+}): FlagView {
   return {
     key: f.key,
     name: f.name,
@@ -23,7 +39,7 @@ function createFlagView(
 }
 
 function transformEnrichedResponse(enriched: EnrichedFlagResponse[]): FlagView[] {
-  return enriched.map(e => {
+  return enriched.map((e) => {
     const fv = createFlagView(e);
     for (const envState of e.environments) {
       fv.environments[envState.environmentId] = {
@@ -40,7 +56,12 @@ function transformEnrichedResponse(enriched: EnrichedFlagResponse[]): FlagView[]
   });
 }
 
-async function legacyEnrichment(): Promise<{ flags: FlagView[]; segments: SegmentResponse[]; tags: TagType[]; contexts: ContextDefinition[] }> {
+async function legacyEnrichment(): Promise<{
+  flags: FlagView[];
+  segments: SegmentResponse[];
+  tags: TagType[];
+  contexts: ContextDefinition[];
+}> {
   const [base, segs, tg, ctx, envs] = await Promise.all([
     api.flags.list(undefined, true),
     api.segments.list(),
@@ -61,9 +82,7 @@ async function legacyEnrichment(): Promise<{ flags: FlagView[]; segments: Segmen
   }
 
   const envResults = await Promise.all(
-    envs.map(env =>
-      api.flags.list(env.id).then(flags => ({ envId: env.id, flags })),
-    ),
+    envs.map((env) => api.flags.list(env.id).then((flags) => ({ envId: env.id, flags }))),
   );
 
   for (const { envId, flags: envFlags } of envResults) {
@@ -102,7 +121,7 @@ export function useEnrichedFlagsQuery(projectId: number | null) {
   const queryClient = useQueryClient();
 
   return useQuery({
-    queryKey: ['flags', 'enriched'],
+    queryKey: queryKeys.flags.enriched,
     queryFn: async (): Promise<EnrichedFlagsData> => {
       if (!projectId) {
         return { flags: [], segments: [], tags: [], contexts: [] };
@@ -111,10 +130,10 @@ export function useEnrichedFlagsQuery(projectId: number | null) {
       try {
         const data = await api.flags.listEnriched(0, 500);
 
-        queryClient.setQueryData(['segments', projectId], data.segments);
-        queryClient.setQueryData(['tags', projectId], data.tags);
-        queryClient.setQueryData(['contexts', projectId], data.contexts);
-        queryClient.setQueryData(['environments', projectId], data.environments);
+        queryClient.setQueryData(queryKeys.segments.byProject(projectId), data.segments);
+        queryClient.setQueryData(queryKeys.tags.all, data.tags);
+        queryClient.setQueryData(queryKeys.contexts.byProject(projectId), data.contexts);
+        queryClient.setQueryData(queryKeys.environments.all, data.environments);
 
         return {
           flags: transformEnrichedResponse(data.flags),

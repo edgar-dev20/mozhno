@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, type StrategyRequest } from '@/api';
+import { queryKeys } from '@/api/queryKeys';
 
 interface UpsertStrategyInput {
   flagId: number;
@@ -27,7 +28,7 @@ export function useStrategyUpsert() {
       return api.strategies.upsert(input.flagId, req);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
     },
   });
 }

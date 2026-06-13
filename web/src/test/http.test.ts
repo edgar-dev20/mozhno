@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { AppError } from "@/shared/errors";
+import { AppError } from '@/shared/errors';
 
-let request: typeof import("@/api/modules/http").request;
-let setToken: typeof import("@/api/modules/http").setToken;
-let setRefreshToken: typeof import("@/api/modules/http").setRefreshToken;
+let request: typeof import('@/api/modules/http').request;
+let setToken: typeof import('@/api/modules/http').setToken;
+let setRefreshToken: typeof import('@/api/modules/http').setRefreshToken;
 
 beforeEach(async () => {
   vi.restoreAllMocks();
   localStorage.clear();
-  const mod = await import("@/api/modules/http");
+  const mod = await import('@/api/modules/http');
   request = mod.request;
   setToken = mod.setToken;
   setRefreshToken = mod.setRefreshToken;
@@ -70,9 +70,7 @@ describe('request (http)', () => {
   });
 
   it('throws AppError with TIMEOUT on abort', async () => {
-    vi.spyOn(globalThis, 'fetch').mockRejectedValue(
-      new DOMException('Aborted', 'AbortError'),
-    );
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new DOMException('Aborted', 'AbortError'));
     try {
       await request('/test');
     } catch (e) {

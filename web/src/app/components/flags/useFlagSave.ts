@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api, FlagRequest, FlagTagValue } from '@/api';
+import { queryKeys } from '@/api/queryKeys';
 import type { FlagView, EnvState } from '@/app/hooks/flagTypes';
 import type { ConstraintEntry } from '@/app/components/flags/types';
 import type { DiffChange } from '@/shared/diffUtils';
@@ -10,7 +11,13 @@ import type { EnrichedFlagsData } from '@/app/hooks/queries/useEnrichedFlagsQuer
 interface SaveDeps {
   projectId: number;
   environments: { id: number; name: string }[];
-  onSaveSuccess?: (saved?: { key: string; name: string; description: string; flagType: string; tags: FlagTagValue[] }) => void;
+  onSaveSuccess?: (saved?: {
+    key: string;
+    name: string;
+    description: string;
+    flagType: string;
+    tags: FlagTagValue[];
+  }) => void;
 }
 
 interface CreateSaveData {
@@ -53,7 +60,7 @@ export function useFlagSave(deps: SaveDeps) {
   const queryClient = useQueryClient();
 
   const invalidateFlags = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] }),
+    () => queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched }),
     [queryClient],
   );
 
@@ -65,165 +72,171 @@ export function useFlagSave(deps: SaveDeps) {
   const onSaveSuccessRef = useRef(onSaveSuccess);
   onSaveSuccessRef.current = onSaveSuccess;
 
-  const executeSaveImpl = useCallback(async (config: SaveConfig) => {
-    setError('');
-    setSaving(true);
-    try {
-      if (config.mode === 'create') {
-        const { name, key, description, flagType, tags } = config.data;
-        const tagsPayload = tags.map(t => ({ tagId: t.tagId, value: t.value }));
-        const created = await api.flags.create({
-          name,
-          key,
-          description,
-          flagType,
-          tags: tagsPayload.length > 0 ? tagsPayload : undefined,
-        });
-        for (const env of environments) {
-          await api.strategies.create(created.id, {
-            environmentId: env.id,
-            enabled: false,
-            percentage: 100,
+  const executeSaveImpl = useCallback(
+    async (config: SaveConfig) => {
+      setError('');
+      setSaving(true);
+      try {
+        if (config.mode === 'create') {
+          const { name, key, description, flagType, tags } = config.data;
+          const tagsPayload = tags.map((t) => ({ tagId: t.tagId, value: t.value }));
+          const created = await api.flags.create({
+            name,
+            key,
+            description,
+            flagType,
+            tags: tagsPayload.length > 0 ? tagsPayload : undefined,
           });
-        }
+          for (const env of environments) {
+            await api.strategies.create(created.id, {
+              environmentId: env.id,
+              enabled: false,
+              percentage: 100,
+            });
+          }
 
-        const newEnvStates: Record<number, EnvState> = {};
-        for (const env of environments) {
-          newEnvStates[env.id] = {
-            enabled: false,
-            percentage: 100,
-            segmentIds: [],
-            strategyId: null,
-            contextDefinitionId: null,
-            contextValuesJson: null,
-            lastUsedAt: null,
+          const newEnvStates: Record<number, EnvState> = {};
+          for (const env of environments) {
+            newEnvStates[env.id] = {
+              enabled: false,
+              percentage: 100,
+              segmentIds: [],
+              strategyId: null,
+              contextDefinitionId: null,
+              contextValuesJson: null,
+              lastUsedAt: null,
+            };
+          }
+
+          const newFlag: FlagView = {
+            key: created.key,
+            name: created.name,
+            description: created.description ?? '',
+            flagType: created.flagType,
+            tags: created.tags ?? [],
+            flagId: created.id,
+            environments: newEnvStates,
+            archived: created.archived ?? false,
+            createdAt: created.createdAt ?? null,
+            createdBy: created.createdBy ?? null,
+            archivedBy: created.archivedBy ?? null,
+            archivedAt: created.archivedAt ?? null,
           };
-        }
 
-        const newFlag: FlagView = {
-          key: created.key,
-          name: created.name,
-          description: created.description ?? '',
-          flagType: created.flagType,
-          tags: created.tags ?? [],
-          flagId: created.id,
-          environments: newEnvStates,
-          archived: created.archived ?? false,
-          createdAt: created.createdAt ?? null,
-          createdBy: created.createdBy ?? null,
-          archivedBy: created.archivedBy ?? null,
-          archivedAt: created.archivedAt ?? null,
-        };
+          queryClient.setQueryData<EnrichedFlagsData>(['flags', 'enriched'], (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              flags: [newFlag, ...old.flags],
+              totalItems: (old.totalItems ?? 0) + 1,
+            };
+          });
 
-        queryClient.setQueryData<EnrichedFlagsData>(['flags', 'enriched'], (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            flags: [newFlag, ...old.flags],
-            totalItems: (old.totalItems ?? 0) + 1,
-          };
-        });
+          invalidateFlags();
+          onSaveSuccessRef.current?.();
+        } else if (config.mode === 'general') {
+          const { flag, name, key, description, flagType, tags } = config.data;
+          const tagsPayload = tags.map((t) => ({ tagId: t.tagId, value: t.value }));
+          const req = {
+            name,
+            key,
+            description,
+            flagType,
+            tags: tagsPayload.length > 0 ? tagsPayload : undefined,
+          } as FlagRequest;
+          const envFlags = await api.flags.list(Object.keys(flag.environments).map(Number)[0]);
+          const match = envFlags.find((f) => f.key === flag.key);
+          if (match) await api.flags.update(match.id, req);
+          queryClient.setQueryData<EnrichedFlagsData>(['flags', 'enriched'], (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              flags: old.flags.map((f) =>
+                f.key === flag.key
+                  ? {
+                      ...f,
+                      name,
+                      key,
+                      description: description ?? '',
+                      flagType,
+                      tags,
+                    }
+                  : f,
+              ),
+            };
+          });
 
-        invalidateFlags();
-        onSaveSuccessRef.current?.();
-      } else if (config.mode === 'general') {
-        const { flag, name, key, description, flagType, tags } = config.data;
-        const tagsPayload = tags.map(t => ({ tagId: t.tagId, value: t.value }));
-        const req = {
-          name,
-          key,
-          description,
-          flagType,
-          tags: tagsPayload.length > 0 ? tagsPayload : undefined,
-        } as FlagRequest;
-        const envFlags = await api.flags.list(Object.keys(flag.environments).map(Number)[0]);
-        const match = envFlags.find(f => f.key === flag.key);
-        if (match) await api.flags.update(match.id, req);
-        queryClient.setQueryData<EnrichedFlagsData>(['flags', 'enriched'], (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            flags: old.flags.map(f =>
-              f.key === flag.key
-                ? {
-                    ...f,
-                    name,
-                    key,
-                    description: description ?? '',
-                    flagType,
-                    tags,
-                  }
-                : f
-            ),
-          };
-        });
-
-        invalidateFlags();
-        onSaveSuccessRef.current?.({ key, name, description, flagType, tags });
-      } else if (config.mode === 'environment') {
-        const { flag, envId, enabled, percentage, segmentIds, constraints } = config.data;
-        const envFlags = await api.flags.list(envId);
-        const envFlag = envFlags.find(f => f.key === flag.key);
-        if (!envFlag) {
-          setError('Флаг не найден в окружении. Попробуйте обновить страницу.');
-          setSaving(false);
-          return;
-        }
-        let contextDefId: number | undefined;
-        let contextValuesJson: string | undefined;
-        if (constraints.length > 0) {
-          contextDefId = constraints[0].contextDefId;
-          contextValuesJson = JSON.stringify(
-            constraints.map(c => ({ cd: c.contextDefId, op: c.operator, val: c.value })),
-          );
-        }
-        await api.strategies.upsert(envFlag.id, {
-          environmentId: envId,
-          enabled,
-          percentage,
-          segmentIds: segmentIds.length > 0 ? segmentIds : undefined,
-          contextDefinitionId: contextDefId,
-          contextValuesJson,
-        });
-        queryClient.setQueryData<EnrichedFlagsData>(['flags', 'enriched'], (old) => {
-          if (!old) return old;
-          return {
-            ...old,
-            flags: old.flags.map(f =>
-              f.key === flag.key
-                ? {
-                    ...f,
-                    environments: {
-                      ...f.environments,
-                      [envId]: {
-                        enabled,
-                        percentage,
-                        segmentIds,
-                        strategyId: f.environments[envId]?.strategyId ?? null,
-                        contextDefinitionId: contextDefId ?? null,
-                        contextValuesJson: contextValuesJson ?? null,
-                        lastUsedAt: f.environments[envId]?.lastUsedAt ?? null,
+          invalidateFlags();
+          onSaveSuccessRef.current?.({ key, name, description, flagType, tags });
+        } else if (config.mode === 'environment') {
+          const { flag, envId, enabled, percentage, segmentIds, constraints } = config.data;
+          const envFlags = await api.flags.list(envId);
+          const envFlag = envFlags.find((f) => f.key === flag.key);
+          if (!envFlag) {
+            setError('Flag not found in environment. Please refresh the page.');
+            setSaving(false);
+            return;
+          }
+          let contextDefId: number | undefined;
+          let contextValuesJson: string | undefined;
+          if (constraints.length > 0) {
+            contextDefId = constraints[0].contextDefId;
+            contextValuesJson = JSON.stringify(
+              constraints.map((c) => ({ cd: c.contextDefId, op: c.operator, val: c.value })),
+            );
+          }
+          await api.strategies.upsert(envFlag.id, {
+            environmentId: envId,
+            enabled,
+            percentage,
+            segmentIds: segmentIds.length > 0 ? segmentIds : undefined,
+            contextDefinitionId: contextDefId,
+            contextValuesJson,
+          });
+          queryClient.setQueryData<EnrichedFlagsData>(['flags', 'enriched'], (old) => {
+            if (!old) return old;
+            return {
+              ...old,
+              flags: old.flags.map((f) =>
+                f.key === flag.key
+                  ? {
+                      ...f,
+                      environments: {
+                        ...f.environments,
+                        [envId]: {
+                          enabled,
+                          percentage,
+                          segmentIds,
+                          strategyId: f.environments[envId]?.strategyId ?? null,
+                          contextDefinitionId: contextDefId ?? null,
+                          contextValuesJson: contextValuesJson ?? null,
+                          lastUsedAt: f.environments[envId]?.lastUsedAt ?? null,
+                        },
                       },
-                    },
-                  }
-                : f
-            ),
-          };
-        });
+                    }
+                  : f,
+              ),
+            };
+          });
 
-        invalidateFlags();
-        onSaveSuccessRef.current?.();
+          invalidateFlags();
+          onSaveSuccessRef.current?.();
+        }
+      } catch (e: unknown) {
+        setError(getErrorMessage(e));
+      } finally {
+        setSaving(false);
       }
-    } catch (e: unknown) {
-      setError(getErrorMessage(e));
-    } finally {
-      setSaving(false);
-    }
-  }, [projectId, environments, invalidateFlags, queryClient]);
+    },
+    [projectId, environments, invalidateFlags, queryClient],
+  );
 
-  const save = useCallback((config: SaveConfig) => {
-    executeSaveImpl(config);
-  }, [executeSaveImpl]);
+  const save = useCallback(
+    (config: SaveConfig) => {
+      executeSaveImpl(config);
+    },
+    [executeSaveImpl],
+  );
 
   const showDiff = useCallback((changes: DiffChange[], config: SaveConfig) => {
     pendingConfig.current = config;

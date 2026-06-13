@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { ColorBar } from "@/shared/components/ColorBar";
+import { ColorBar } from '@/shared/components/ColorBar';
 
 describe('ColorBar', () => {
   it('renders with given color', () => {

@@ -20,8 +20,17 @@ public class FlagMetricsController {
     @Operation(summary = "Get evaluation metrics for a specific flag")
     public List<FlagMetricResponse> getFlagMetrics(@PathVariable Integer flagId,
                                                    @RequestParam Integer environmentId,
+                                                   @RequestParam(required = false) Long instanceId,
+                                                   @RequestParam(required = false) String appName,
                                                    @AuthenticationPrincipal UserPrincipal user) {
-        List<FlagMetric> metrics = flagMetricsService.getMetrics(flagId, environmentId);
+        List<FlagMetric> metrics;
+        if (instanceId != null) {
+            metrics = flagMetricsService.getMetricsByInstance(flagId, environmentId, instanceId);
+        } else if (appName != null && !appName.isEmpty()) {
+            metrics = flagMetricsService.getMetricsByAppName(flagId, environmentId, appName);
+        } else {
+            metrics = flagMetricsService.getMetrics(flagId, environmentId);
+        }
         return metricsAssembler.toResponseList(metrics);
     }
 

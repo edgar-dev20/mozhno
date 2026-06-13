@@ -56,6 +56,8 @@ function compareSemver(a: string, b: string): number {
   return 0;
 }
 
+const isoRe = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
+
 function compareValues(contextType: string | undefined, a: string, b: string): number {
   if (contextType === 'number') {
     const na = Number(a);
@@ -68,7 +70,7 @@ function compareValues(contextType: string | undefined, a: string, b: string): n
   if (contextType === 'time') {
     const ta = Date.parse(a);
     const tb = Date.parse(b);
-    if (!isNaN(ta) && !isNaN(tb)) {
+    if (!isNaN(ta) && !isNaN(tb) && isoRe.test(a) && isoRe.test(b)) {
       return ta - tb;
     }
     return a.localeCompare(b);

@@ -18,18 +18,26 @@ import java.util.List;
 @Tag(name = "Segments", description = "Custom segments with context-based targeting rules")
 public class SegmentController {
     private final SegmentService segmentService;
+    private final SegmentAssembler segmentAssembler;
 
     @GetMapping
     @Operation(summary = "Get all segments for a project")
     public List<SegmentResponse> getAll(@AuthenticationPrincipal UserPrincipal user) {
-        return segmentService.findByProjectId(user.projectId());
+        List<Segment> segments = segmentService.findByProjectId(user.projectId());
+        List<Integer> segmentIds = segments.stream().map(Segment::getId).toList();
+        List<SegmentContextRepository.SegmentContextWithName> contexts =
+            segmentService.getContextsForSegments(segmentIds);
+        return segmentAssembler.toResponseList(segments, contexts);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get segment by ID")
     public SegmentResponse getById(@PathVariable Integer id,
                                    @AuthenticationPrincipal UserPrincipal user) {
-        return segmentService.findById(id, user.projectId());
+        Segment segment = segmentService.findById(id, user.projectId());
+        List<SegmentContextRepository.SegmentContextWithName> contexts =
+            segmentService.getContextsForSegments(List.of(id));
+        return segmentAssembler.toResponse(segment, contexts, id);
     }
 
     @PostMapping
@@ -39,7 +47,10 @@ public class SegmentController {
     public SegmentResponse create(@Valid @RequestBody SegmentRequest request,
                                   @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(user.projectId());
-        return segmentService.create(request);
+        Segment segment = segmentService.create(request);
+        List<SegmentContextRepository.SegmentContextWithName> contexts =
+            segmentService.getContextsForSegments(List.of(segment.getId()));
+        return segmentAssembler.toResponse(segment, contexts, segment.getId());
     }
 
     @PutMapping("/{id}")
@@ -49,7 +60,10 @@ public class SegmentController {
                                   @Valid @RequestBody SegmentRequest request,
                                   @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(user.projectId());
-        return segmentService.update(id, request);
+        Segment segment = segmentService.update(id, request);
+        List<SegmentContextRepository.SegmentContextWithName> contexts =
+            segmentService.getContextsForSegments(List.of(segment.getId()));
+        return segmentAssembler.toResponse(segment, contexts, segment.getId());
     }
 
     @DeleteMapping("/{id}")

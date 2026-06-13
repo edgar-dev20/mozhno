@@ -38,12 +38,14 @@ export const flagResponseSchema = z.object({
   lastUsedAt: z.string().nullable(),
   archivedBy: z.string().nullable(),
   archivedAt: z.string().nullable(),
-  tags: z.array(z.object({
-    tagId: z.number(),
-    tagName: z.string(),
-    tagColor: z.string(),
-    value: z.string(),
-  })),
+  tags: z.array(
+    z.object({
+      tagId: z.number(),
+      tagName: z.string(),
+      tagColor: z.string(),
+      value: z.string(),
+    }),
+  ),
   enabled: z.boolean(),
   strategyId: z.number(),
   percentage: z.number(),
@@ -61,11 +63,13 @@ export const segmentResponseSchema = z.object({
   icon: z.string(),
   color: z.string(),
   createdAt: z.string(),
-  context: z.array(z.object({
-    contextDefinitionId: z.number(),
-    operator: z.string(),
-    contextValues: z.string(),
-  })),
+  context: z.array(
+    z.object({
+      contextDefinitionId: z.number(),
+      operator: z.string(),
+      contextValues: z.string(),
+    }),
+  ),
 });
 
 export const tagSchema = z.object({

@@ -1,35 +1,50 @@
 import React from 'react';
-import { GradientButton } from "@/shared/components/GradientButton";
-import { Plus } from "@/shared/icons";
+import { GradientButton } from '@/shared/components/GradientButton';
+import { Plus } from '@/shared/icons';
 import { motion } from 'motion/react';
+import { Card } from '@/shared/components/Card';
 
 interface EmptyStateProps {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  illustration?: React.ReactNode;
   title: string;
   description: string;
   buttonLabel?: string;
   onAction?: () => void;
 }
 
-export function EmptyState({ icon, title, description, buttonLabel, onAction }: EmptyStateProps) {
+export function EmptyState({
+  icon,
+  illustration,
+  title,
+  description,
+  buttonLabel,
+  onAction,
+}: EmptyStateProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-card border-border rounded-xl px-6 py-16 text-center shadow-sm"
-    >
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-gradient-subtle-start/10 to-gradient-subtle-end/6">
-          {icon}
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <Card padded className="px-6 py-20 text-center">
+        <div className="flex flex-col items-center gap-5 max-w-xs mx-auto">
+          {illustration ? (
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center bg-secondary/20 ring-1 ring-border/30">
+              {illustration}
+            </div>
+          ) : icon ? (
+            <div className="w-16 h-16 rounded-3xl flex items-center justify-center bg-secondary/30 ring-1 ring-border/50">
+              {icon}
+            </div>
+          ) : null}
+          <div>
+            <p className="text-h3 font-heading text-foreground">{title}</p>
+            <p className="text-body-sm text-muted-foreground mt-1.5 leading-body">{description}</p>
+          </div>
+          {buttonLabel && onAction && (
+            <GradientButton onClick={onAction} icon={<Plus size={14} />}>
+              {buttonLabel}
+            </GradientButton>
+          )}
         </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground">{title}</p>
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        </div>
-        {buttonLabel && onAction && (
-          <GradientButton onClick={onAction} icon={<Plus size={14} />}>{buttonLabel}</GradientButton>
-        )}
-      </div>
+      </Card>
     </motion.div>
   );
 }

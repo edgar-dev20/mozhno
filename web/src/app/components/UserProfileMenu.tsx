@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { Camera, Sun, Moon, LogOut, ChevronDown, Loader2, Globe } from "@/shared/icons";
+import { Camera, Sun, Moon, LogOut, ChevronDown, Loader2, Globe } from '@/shared/icons';
 import { useTheme } from 'next-themes';
-import { useAuth } from "@/app/auth/useAuth";
-import { api } from "@/api";
+import { useAuth } from '@/app/auth/useAuth';
+import { api } from '@/api';
 import { useLocale, useT } from '@/i18n';
 import {
   DropdownMenu,
@@ -12,8 +12,9 @@ import {
   DropdownMenuTrigger,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-} from "@/app/components/ui/dropdown-menu";
-import { Avatar, AvatarImage, AvatarFallback } from "@/app/components/ui/avatar";
+} from '@/app/components/ui/dropdown-menu';
+import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
+import { Badge } from '@/shared/components/Badge';
 
 export function UserProfileMenu() {
   const { theme, setTheme } = useTheme();
@@ -25,8 +26,12 @@ export function UserProfileMenu() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const initials = user?.name
-    ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase()
-    : user?.email?.charAt(0).toUpperCase() ?? '?';
+    ? user.name
+        .split(' ')
+        .map((n: string) => n[0])
+        .join('')
+        .toUpperCase()
+    : (user?.email?.charAt(0).toUpperCase() ?? '?');
 
   const avatarUrl = user ? `${api.users.getAvatarUrl(user.id)}?v=${avatarVersion}` : undefined;
   const hasAvatar = !!(user && user.avatar);
@@ -35,45 +40,58 @@ export function UserProfileMenu() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     setUploading(true);
-    api.users.uploadAvatar(user.id, file)
+    api.users
+      .uploadAvatar(user.id, file)
       .then((updatedUser) => {
         updateUser(updatedUser);
-        setAvatarVersion(v => v + 1);
+        setAvatarVersion((v) => v + 1);
       })
-      .catch(err => console.error('Avatar upload failed:', err))
+      .catch((err) => {
+        if (import.meta.env.DEV) console.error('Avatar upload failed:', err);
+      })
       .finally(() => setUploading(false));
     e.target.value = '';
   };
 
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case 'admin': return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/20';
-      case 'developer': return 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-500/20';
-      default: return 'bg-secondary dark:bg-secondary/10 text-foreground/70 dark:text-muted-foreground/70 border-border dark:border-neutral-500/20';
-    }
+  const roleVariantMap: Record<string, 'warning' | 'info' | 'default'> = {
+    admin: 'warning',
+    developer: 'info',
   };
+
+  const getRoleVariant = (role: string): 'warning' | 'info' | 'default' =>
+    roleVariantMap[role] ?? 'default';
 
   const getRoleLabel = (role: string) => {
     switch (role) {
-      case 'admin': return t('userMenu.roleAdmin');
-      case 'developer': return t('userMenu.roleDeveloper');
-      case 'editor': return t('userMenu.roleEditor');
-      case 'viewer': return t('userMenu.roleViewer');
-      default: return role;
+      case 'admin':
+        return t('userMenu.roleAdmin');
+      case 'developer':
+        return t('userMenu.roleDeveloper');
+      case 'editor':
+        return t('userMenu.roleEditor');
+      case 'viewer':
+        return t('userMenu.roleViewer');
+      default:
+        return role;
     }
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full">
+        <button
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full"
+          aria-label={t('common.openUserMenu')}
+        >
           <Avatar className="w-8 h-8 ring-2 ring-white dark:ring-neutral-700 shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-gradient-to-br from-gradient-start to-gradient-end text-xs font-bold text-white">
+            <AvatarFallback className="bg-brand text-xs font-bold text-white">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <span className="hidden sm:block max-w-[120px] truncate">{user?.name ?? user?.email ?? '—'}</span>
+          <span className="hidden sm:block max-w-[160px] truncate">
+            {user?.name ?? user?.email ?? '—'}
+          </span>
           <ChevronDown size={14} className="text-muted-foreground/70" />
         </button>
       </DropdownMenuTrigger>
@@ -82,7 +100,7 @@ export function UserProfileMenu() {
         <div className="flex items-center gap-3 px-2 py-2">
           <Avatar className="w-12 h-12 ring-2 ring-neutral-200 dark:ring-neutral-700 shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-gradient-to-br from-gradient-start to-gradient-end text-sm font-bold text-white">
+            <AvatarFallback className="bg-brand text-sm font-bold text-white">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -90,12 +108,10 @@ export function UserProfileMenu() {
             <div className="text-sm font-semibold text-foreground truncate">
               {user?.name ?? user?.email ?? '—'}
             </div>
-            <div className="text-xs text-muted-foreground truncate">
-              {user?.email}
-            </div>
-            <span className={`inline-flex items-center mt-1 px-1.5 py-1 rounded text-xs font-semibold border leading-none ${getRoleBadge(user?.role ?? 'viewer')}`}>
+            <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
+            <Badge variant={getRoleVariant(user?.role ?? 'viewer')} size="sm">
               {getRoleLabel(user?.role ?? 'viewer')}
-            </span>
+            </Badge>
           </div>
         </div>
 
@@ -108,9 +124,20 @@ export function UserProfileMenu() {
           className="hidden"
           onChange={handleUpload}
         />
-        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); fileInputRef.current?.click(); }} className="cursor-pointer" disabled={uploading}>
+        <DropdownMenuItem
+          onSelect={(e) => {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }}
+          className="cursor-pointer"
+          disabled={uploading}
+        >
           {uploading ? <Loader2 size={16} className="animate-spin" /> : <Camera size={16} />}
-          {uploading ? t('common.loading') : hasAvatar ? t('userMenu.changePhoto') : t('userMenu.uploadPhoto')}
+          {uploading
+            ? t('common.loading')
+            : hasAvatar
+              ? t('userMenu.changePhoto')
+              : t('userMenu.uploadPhoto')}
         </DropdownMenuItem>
 
         <DropdownMenuItem
@@ -132,7 +159,10 @@ export function UserProfileMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuRadioGroup value={locale} onValueChange={(value) => setLocale(value as 'ru' | 'en')}>
+        <DropdownMenuRadioGroup
+          value={locale}
+          onValueChange={(value) => setLocale(value as 'ru' | 'en')}
+        >
           <DropdownMenuRadioItem value="ru" className="cursor-pointer">
             <Globe size={16} />
             Русский
@@ -145,7 +175,10 @@ export function UserProfileMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
+        <DropdownMenuItem
+          onClick={logout}
+          className="cursor-pointer text-destructive focus:text-destructive"
+        >
           <LogOut size={16} />
           {t('auth.logout')}
         </DropdownMenuItem>

@@ -6,9 +6,14 @@ import { SidePanel } from '@/app/components/SidePanel';
 describe('SidePanel', () => {
   it('has no accessibility violations with description', async () => {
     const { container } = render(
-      <SidePanel open={true} onOpenChange={() => {}} title="Test Panel" description="A test side panel">
+      <SidePanel
+        open={true}
+        onOpenChange={() => {}}
+        title="Test Panel"
+        description="A test side panel"
+      >
         <p>Content</p>
-      </SidePanel>
+      </SidePanel>,
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
@@ -18,7 +23,7 @@ describe('SidePanel', () => {
     const { container } = render(
       <SidePanel open={true} onOpenChange={() => {}} title="Test Panel">
         <p>Content</p>
-      </SidePanel>
+      </SidePanel>,
     );
     const results = await axe(container);
     expect(results).toHaveNoViolations();
@@ -28,7 +33,7 @@ describe('SidePanel', () => {
     render(
       <SidePanel open={true} onOpenChange={() => {}} title="My Title">
         <p>Content</p>
-      </SidePanel>
+      </SidePanel>,
     );
     expect(document.querySelector('[role="dialog"]')).toBeTruthy();
   });

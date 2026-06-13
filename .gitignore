@@ -80,6 +80,7 @@ dist-ssr/
 .env.production.local
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+stats.html
 
 ### Frontend build output (embedded in JAR at build time) ###
 server/mozhno-app/src/main/resources/static/

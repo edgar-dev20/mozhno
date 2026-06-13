@@ -5,21 +5,21 @@ export {
   setRefreshToken,
   clearAuth,
   setOnAuthExpired,
-} from "@/api/modules/http";
+} from '@/api/modules/http';
 
-import { authApi } from "@/api/modules/auth";
-import { projectsApi } from "@/api/modules/projects";
-import { environmentsApi } from "@/api/modules/environments";
-import { flagsApi, strategiesApi, metricsApi } from "@/api/modules/flags";
-import { segmentsApi } from "@/api/modules/segments";
-import { tagsApi } from "@/api/modules/tags";
-import { contextsApi } from "@/api/modules/contexts";
-import { usersApi } from "@/api/modules/users";
-import { apiKeysApi } from "@/api/modules/apiKeys";
-import { clientInstancesApi } from "@/api/modules/clientInstances";
-import { auditApi } from "@/api/modules/audit";
-import { integrationsApi } from "@/api/modules/integrations";
-import { settingsApi } from "@/api/modules/settings";
+import { authApi } from '@/api/modules/auth';
+import { projectsApi } from '@/api/modules/projects';
+import { environmentsApi } from '@/api/modules/environments';
+import { flagsApi, strategiesApi, metricsApi } from '@/api/modules/flags';
+import { segmentsApi } from '@/api/modules/segments';
+import { tagsApi } from '@/api/modules/tags';
+import { contextsApi } from '@/api/modules/contexts';
+import { usersApi } from '@/api/modules/users';
+import { apiKeysApi } from '@/api/modules/apiKeys';
+import { clientInstancesApi } from '@/api/modules/clientInstances';
+import { auditApi } from '@/api/modules/audit';
+import { integrationsApi } from '@/api/modules/integrations';
+import { settingsApi } from '@/api/modules/settings';
 
 export const api = {
   auth: authApi,
@@ -57,6 +57,7 @@ export type {
   ContextValue,
   UserCreateRequest,
   UserUpdateRequest,
+  UserInviteRequest,
   ApiKey,
   ApiKeyRequest,
   AuditEvent,
@@ -67,4 +68,4 @@ export type {
   ClientInstance,
   EnrichedFlagResponse,
   DashboardResponse,
-} from "@/api/modules/types";
+} from '@/api/modules/types';

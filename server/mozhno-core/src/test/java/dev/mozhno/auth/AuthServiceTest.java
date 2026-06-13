@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import dev.mozhno.spi.AuthenticationFlowSpi;
+import dev.mozhno.exception.InvalidCredentialsException;
 import dev.mozhno.projects.ProjectRepository;
 
 import java.util.Collections;
@@ -83,7 +84,7 @@ class AuthServiceTest {
     void login_shouldThrowOnInvalidEmail() {
         mockLoginFailure("Invalid email or password");
 
-        assertThrows(AuthService.InvalidCredentialsException.class,
+        assertThrows(InvalidCredentialsException.class,
             () -> authService.login("nonexistent@example.com", "password", false));
     }
 
@@ -91,7 +92,7 @@ class AuthServiceTest {
     void login_shouldThrowOnInvalidPassword() {
         mockLoginFailure("Invalid email or password");
 
-        assertThrows(AuthService.InvalidCredentialsException.class,
+        assertThrows(InvalidCredentialsException.class,
             () -> authService.login("user@example.com", "wrongpassword", false));
     }
 
@@ -198,8 +199,8 @@ class AuthServiceTest {
     void login_shouldThrowWhenUserSuspended() {
         mockLoginFailure("Account is suspended");
 
-        AuthService.InvalidCredentialsException ex = assertThrows(
-            AuthService.InvalidCredentialsException.class,
+        InvalidCredentialsException ex = assertThrows(
+            InvalidCredentialsException.class,
             () -> authService.login("suspended@example.com", "pass", false));
 
         assertEquals("Account is suspended", ex.getMessage());

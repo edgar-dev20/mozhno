@@ -50,7 +50,7 @@ class FlagServiceTest {
         flag.setName("test");
         when(flagRepository.findByIdAndProjectId(1, null)).thenReturn(flag);
 
-        Flag result = flagService.findById(1);
+        Flag result = flagService.findById(1, null);
         assertEquals("test", result.getName());
     }
 
@@ -58,7 +58,7 @@ class FlagServiceTest {
     void findById_shouldThrowExceptionWhenNotFound() {
         when(flagRepository.findByIdAndProjectId(999, null)).thenReturn(null);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> flagService.findById(999));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> flagService.findById(999, null));
         assertTrue(ex.getMessage().contains("Flag not found"));
     }
 
@@ -66,7 +66,7 @@ class FlagServiceTest {
     void unarchive_shouldThrowExceptionWhenNotFound() {
         when(flagRepository.clearArchived(eq(999), any())).thenReturn(0);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> flagService.unarchive(999));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> flagService.unarchive(999, null));
         assertTrue(ex.getMessage().contains("Flag not found"));
     }
 

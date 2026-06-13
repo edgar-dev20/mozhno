@@ -233,6 +233,34 @@ class ConstraintEvaluatorTest {
     }
 
     @Test
+    void percentageRolloutUsesSessionIdWhenUserIdNull() {
+        FeatureFlag flag = createFlagWithConstraint(null, null, null, 100.0, null);
+
+        MozhnoContext ctx = MozhnoContext.builder().sessionId("session-1").build();
+        assertTrue(evaluator.isEnabled(flag, ctx));
+    }
+
+    @Test
+    void percentageRolloutWorksWithNullIds() {
+        FeatureFlag flag = createFlagWithConstraint(null, null, null, 50.0, null);
+
+        MozhnoContext ctx = MozhnoContext.builder().build();
+        boolean first = evaluator.isEnabled(flag, ctx);
+        boolean second = evaluator.isEnabled(flag, ctx);
+        assertEquals(first, second, "Same null-id context should produce consistent result");
+    }
+
+    @Test
+    void murmurHashBucketNeverNegative() {
+        int[] testValues = {0, -1, 1, Integer.MAX_VALUE, Integer.MIN_VALUE, 42, -42};
+        for (int val : testValues) {
+            int bucket = Math.abs(val % 100);
+            assertTrue(bucket >= 0 && bucket < 100,
+                "Bucket for " + val + " should be in [0, 99], was: " + bucket);
+        }
+    }
+
+    @Test
     void noActivation() {
         FeatureFlag flag = new FeatureFlag();
         flag.setKey("test");

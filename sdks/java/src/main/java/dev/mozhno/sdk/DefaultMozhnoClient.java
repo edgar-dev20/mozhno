@@ -24,7 +24,7 @@ public class DefaultMozhnoClient implements MozhnoClient {
     private final ConstraintEvaluator evaluator;
     private final List<EventListener> listeners;
     private final Map<String, FeatureFlag> flagCache;
-    private final Map<String, Long> metricsBuffer;
+    private final Map<String, long[]> metricsBuffer;
     private final ScheduledExecutorService scheduler;
     private final AtomicBoolean running;
 
@@ -111,13 +111,13 @@ public class DefaultMozhnoClient implements MozhnoClient {
     public boolean isEnabled(String flagKey, MozhnoContext context, boolean defaultReturn) {
         FeatureFlag flag = flagCache.get(flagKey);
         if (flag == null) {
-            recordMetric(flagKey);
+            recordMetric(flagKey, defaultReturn);
             return defaultReturn;
         }
 
         MozhnoContext enriched = enrichContext(context);
         boolean enabled = evaluator.isEnabled(flag, enriched);
-        recordMetric(flagKey);
+        recordMetric(flagKey, enabled);
         return enabled;
     }
 
@@ -139,12 +139,14 @@ public class DefaultMozhnoClient implements MozhnoClient {
 
         boolean needsAppName = context.getAppName() == null;
         boolean needsEnvironment = context.getEnvironment() == null;
-        if (!needsAppName && !needsEnvironment) return context;
+        boolean needsCurrentTime = context.getProperty("currentTime") == null;
+        if (!needsAppName && !needsEnvironment && !needsCurrentTime) return context;
 
         var builder = MozhnoContext.builder();
         context.getProperties().forEach(builder::addProperty);
         if (needsAppName) builder.appName(config.getAppName());
         if (config.getEnvironment() != null && needsEnvironment) builder.environment(config.getEnvironment());
+        if (needsCurrentTime) builder.addProperty("currentTime", java.time.Instant.now().toString());
         return builder.build();
     }
 
@@ -196,19 +198,35 @@ public class DefaultMozhnoClient implements MozhnoClient {
         }
     }
 
-    private void recordMetric(String flagKey) {
-        metricsBuffer.compute(flagKey, (k, v) -> v == null ? 1L : v + 1);
+    private void recordMetric(String flagKey, boolean enabled) {
+        metricsBuffer.compute(flagKey, (k, v) -> {
+            if (v == null) v = new long[2];
+            if (enabled) v[0]++; else v[1]++;
+            return v;
+        });
     }
 
     private void sendMetrics() {
         if (metricsBuffer.isEmpty()) return;
 
-        Map<String, Long> snapshot = new HashMap<>(metricsBuffer);
+        Map<String, long[]> snapshot = new HashMap<>(metricsBuffer);
         metricsBuffer.clear();
 
-        var result = fetcher.sendMetrics(snapshot);
+        Map<String, Map<String, Long>> payload = new HashMap<>();
+        for (var entry : snapshot.entrySet()) {
+            long[] counts = entry.getValue();
+            payload.put(entry.getKey(), Map.of("t", counts[0], "f", counts[1]));
+        }
+
+        var result = fetcher.sendMetrics(payload);
         if (result != HttpFeatureFetcher.MetricsSendResult.SUCCESS) {
-            snapshot.forEach((k, v) -> metricsBuffer.merge(k, v, Long::sum));
+            for (var entry : snapshot.entrySet()) {
+                metricsBuffer.merge(entry.getKey(), entry.getValue(), (a, b) -> {
+                    b[0] += a[0];
+                    b[1] += a[1];
+                    return b;
+                });
+            }
         }
     }
 }

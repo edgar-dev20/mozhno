@@ -1,6 +1,11 @@
-import type { ConstraintEntry } from "@/app/components/flags/types";
-import type { ContextDefinition } from "@/api";
-import { isValidOperator, getDefaultOperator } from "@/app/components/operators";
+import type { ConstraintEntry } from '@/app/components/flags/types';
+import type { ContextDefinition } from '@/api';
+import { isValidOperator, getDefaultOperator } from '@/app/components/operators';
+
+export {
+  groupConstraintEntries,
+  flattenConstraintGroups,
+} from '@/app/components/flags/groupConstraints';
 
 export function parseConstraintEntries(
   contextValuesJson: string | null,
@@ -9,7 +14,13 @@ export function parseConstraintEntries(
 ): ConstraintEntry[] {
   if (!contextValuesJson) return [];
   try {
-    const parsed: { cd?: number; op?: string; val?: string; value?: string; contextDefId?: number }[] = JSON.parse(contextValuesJson);
+    const parsed: {
+      cd?: number;
+      op?: string;
+      val?: string;
+      value?: string;
+      contextDefId?: number;
+    }[] = JSON.parse(contextValuesJson);
     if (!Array.isArray(parsed)) return [];
     return parsed.map((item) => {
       let cdId: number;
@@ -24,7 +35,7 @@ export function parseConstraintEntries(
         op = 'in';
         val = String(item);
       }
-      const ctx = contexts.find(x => x.id === cdId);
+      const ctx = contexts.find((x) => x.id === cdId);
       return {
         contextDefId: cdId,
         operator: isValidOperator(ctx?.type, op) ? op : getDefaultOperator(ctx?.type),

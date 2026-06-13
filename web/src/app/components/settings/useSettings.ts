@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { api, Project, Environment, ProjectSettings } from "@/api";
+import { api, Project, Environment, ProjectSettings } from '@/api';
 
 const MAX_ENVIRONMENTS_DEFAULT = 6;
 
@@ -82,17 +82,22 @@ export function useSettings() {
           const limit = await api.environments.getLimit();
           setMaxEnvironments(limit.maxEnvironments);
         } catch {}
-      } catch (e) { console.error(e); } finally {
+      } catch (e) {
+        if (import.meta.env.DEV) console.error(e);
+      } finally {
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const toggleExpandEnv = (id: number) => {
-    setExpandedEnvIds(prev => {
+    setExpandedEnvIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
@@ -112,10 +117,14 @@ export function useSettings() {
     setSavingEnvEdit(true);
     try {
       const updated = await api.environments.update(editingEnvId, editEnvName.trim());
-      setEnvironments(prev => prev.map(e => e.id === updated.id ? updated : e));
+      setEnvironments((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
       setEditingEnvId(null);
       setEditEnvName('');
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Ошибка при сохранении окружения'); } finally { setSavingEnvEdit(false); }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Failed to save environment');
+    } finally {
+      setSavingEnvEdit(false);
+    }
   };
 
   const saveProject = async () => {
@@ -126,15 +135,22 @@ export function useSettings() {
         setUploadingLogo(true);
         const updatedWithLogo = await api.projects.uploadLogo(projectId, pendingLogo.file);
         setProject(updatedWithLogo);
-        setLogoKey(k => k + 1);
+        setLogoKey((k) => k + 1);
         if (pendingLogo.previewUrl) URL.revokeObjectURL(pendingLogo.previewUrl);
         setPendingLogo(null);
         setUploadingLogo(false);
       }
-      const updated = await api.projects.update(projectId, { name: projectName, description: projectDesc });
+      const updated = await api.projects.update(projectId, {
+        name: projectName,
+        description: projectDesc,
+      });
       setProject(updated);
       window.dispatchEvent(new Event('project-updated'));
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Ошибка при сохранении проекта'); } finally { setSavingProject(false); }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Failed to save project');
+    } finally {
+      setSavingProject(false);
+    }
   };
 
   const handleLogoSelect = (file: File) => {
@@ -153,7 +169,11 @@ export function useSettings() {
       const created = await api.environments.create(newEnvName.trim());
       setEnvironments([...environments, created]);
       setNewEnvName('');
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Ошибка при добавлении окружения'); } finally { setSavingEnv(false); }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Ошибка при добавлении окружения');
+    } finally {
+      setSavingEnv(false);
+    }
   };
 
   const removeEnv = async () => {
@@ -161,11 +181,22 @@ export function useSettings() {
     setDeletingEnv(true);
     try {
       await api.environments.delete(deleteEnvId);
-      setEnvironments(environments.filter(e => e.id !== deleteEnvId));
-      setExpandedEnvIds(prev => { const next = new Set(prev); next.delete(deleteEnvId); return next; });
-      if (editingEnvId === deleteEnvId) { setEditingEnvId(null); setEditEnvName(''); }
+      setEnvironments(environments.filter((e) => e.id !== deleteEnvId));
+      setExpandedEnvIds((prev) => {
+        const next = new Set(prev);
+        next.delete(deleteEnvId);
+        return next;
+      });
+      if (editingEnvId === deleteEnvId) {
+        setEditingEnvId(null);
+        setEditEnvName('');
+      }
       setDeleteEnvId(null);
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Ошибка при удалении окружения'); } finally { setDeletingEnv(false); }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Ошибка при удалении окружения');
+    } finally {
+      setDeletingEnv(false);
+    }
   };
 
   const deleteProject = async () => {
@@ -176,29 +207,62 @@ export function useSettings() {
       localStorage.removeItem('mozhno_token');
       localStorage.removeItem('mozhno_refresh_token');
       window.location.replace('/login');
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Ошибка при удалении проекта'); setDeletingProject(false); }
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Ошибка при удалении проекта');
+      setDeletingProject(false);
+    }
   };
 
   const toggleSection = (id: string) => {
-    setExpandedSections(prev => {
+    setExpandedSections((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
 
   return {
-    project, environments, settings, loading, projectId,
-    projectName, setProjectName, projectDesc, setProjectDesc,
+    project,
+    environments,
+    settings,
+    loading,
+    projectId,
+    projectName,
+    setProjectName,
+    projectDesc,
+    setProjectDesc,
     savingProject,
-    expandedEnvIds, editingEnvId, editEnvName, setEditEnvName,
-    savingEnvEdit, newEnvName, setNewEnvName, savingEnv, deleteEnvId, setDeleteEnvId, deletingEnv,
-    uploadingLogo, pendingLogo, setPendingLogo,
-    deleteProjectOpen, setDeleteProjectOpen, deletingProject,
-    maxEnvironments, logoKey, setLogoKey,
+    expandedEnvIds,
+    editingEnvId,
+    editEnvName,
+    setEditEnvName,
+    savingEnvEdit,
+    newEnvName,
+    setNewEnvName,
+    savingEnv,
+    deleteEnvId,
+    setDeleteEnvId,
+    deletingEnv,
+    uploadingLogo,
+    pendingLogo,
+    setPendingLogo,
+    deleteProjectOpen,
+    setDeleteProjectOpen,
+    deletingProject,
+    maxEnvironments,
+    logoKey,
+    setLogoKey,
     expandedSections,
-    toggleExpandEnv, startEditEnv, cancelEditEnv, saveEditEnv,
-    saveProject, handleLogoSelect, addEnv, removeEnv, deleteProject,
+    toggleExpandEnv,
+    startEditEnv,
+    cancelEditEnv,
+    saveEditEnv,
+    saveProject,
+    handleLogoSelect,
+    addEnv,
+    removeEnv,
+    deleteProject,
     toggleSection,
   };
 }

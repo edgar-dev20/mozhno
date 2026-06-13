@@ -11,7 +11,7 @@ import dev.mozhno.spi.NotificationSpi;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 import static dev.mozhno.client.HashUtils.generateRawToken;
 import static dev.mozhno.client.HashUtils.sha256;
@@ -21,7 +21,25 @@ public class PasswordResetService {
     private static final int TOKEN_TTL_HOURS = 1;
     private static final int RESET_COOLDOWN_MINUTES = 5;
 
-    private final ConcurrentHashMap<String, Instant> lastResetSent = new ConcurrentHashMap<>();
+    private static final Map<String, String> RU_RESET_SUBJECT = Map.of("ru", "Сброс пароля Mozhno", "en", "Mozhno password reset");
+    private static final Map<String, String> RU_ADMIN_RESET_SUBJECT = Map.of("ru", "Сброс пароля Mozhno", "en", "Mozhno password reset");
+
+    private final Map<String, Instant> lastResetSent = new java.util.concurrent.ConcurrentHashMap<>();
+
+    private boolean isInCooldown(String email) {
+        Instant lastSent = lastResetSent.get(email);
+        if (lastSent == null) return false;
+        if (lastSent.plus(RESET_COOLDOWN_MINUTES, ChronoUnit.MINUTES).isAfter(Instant.now())) {
+            return true;
+        }
+        lastResetSent.remove(email);
+        return false;
+    }
+
+    private void cleanupCooldowns() {
+        Instant cutoff = Instant.now().minus(RESET_COOLDOWN_MINUTES + 1, ChronoUnit.MINUTES);
+        lastResetSent.entrySet().removeIf(e -> e.getValue().isBefore(cutoff));
+    }
 
     private final EmailTemplateService emailTemplateService;
     private final PasswordResetTokenRepository tokenRepository;
@@ -50,17 +68,19 @@ public class PasswordResetService {
         this.baseUrl = baseUrl;
     }
 
-    public void sendResetEmail(String email) {
-        Instant lastSent = lastResetSent.get(email);
-        if (lastSent != null && lastSent.plus(RESET_COOLDOWN_MINUTES, ChronoUnit.MINUTES).isAfter(Instant.now())) {
-            return;
-        }
-        lastResetSent.put(email, Instant.now());
+    public boolean sendResetEmail(String email, String locale) {
+        String effectiveLocale = locale != null ? locale : "ru";
 
         User user = userRepository.findByEmail(email);
-        if (user == null || "suspended".equals(user.getStatus())) {
-            return;
+        if (user == null || "suspended".equals(user.getStatus()) || "invited".equals(user.getStatus())) {
+            return false;
         }
+
+        if (isInCooldown(email)) {
+            return false;
+        }
+        cleanupCooldowns();
+        lastResetSent.put(email, Instant.now());
 
         tokenRepository.markAllUsedForUser(user.getId());
 
@@ -73,14 +93,46 @@ public class PasswordResetService {
         token.setExpiresAt(Instant.now().plus(TOKEN_TTL_HOURS, ChronoUnit.HOURS));
         tokenRepository.save(token);
 
-        String resetLink = baseUrl + "/auth/reset-password?token=" + rawToken;
-        String html = emailTemplateService.renderResetPasswordEmail(resetLink);
+        String resetLink = baseUrl + "/reset-password?token=" + rawToken;
+        String html = emailTemplateService.renderResetPasswordEmail(resetLink, effectiveLocale);
+        String subject = RU_RESET_SUBJECT.getOrDefault(effectiveLocale, "Mozhno password reset");
 
         notificationSpi.send(new NotificationSpi.NotificationEvent(
-            "EMAIL", email, "Сброс пароля Mozhno", html, null));
+            "EMAIL", email, subject, html, null));
 
         events.publish(DomainEvent.of(null, "password_reset.requested", "user",
             user.getId(), user.getEmail(), "Password reset email sent"));
+        return true;
+    }
+
+    public void sendAdminResetEmail(Integer userId) {
+        User user = userRepository.findById(userId);
+        if (user == null || "suspended".equals(user.getStatus())) {
+            throw new dev.mozhno.exception.NotFoundException("User", userId);
+        }
+
+        String locale = user.getLocale() != null ? user.getLocale() : "ru";
+
+        tokenRepository.markAllUsedForUser(userId);
+
+        String rawToken = generateRawToken();
+        String tokenHash = sha256(rawToken);
+
+        PasswordResetToken token = new PasswordResetToken();
+        token.setUserId(userId);
+        token.setTokenHash(tokenHash);
+        token.setExpiresAt(Instant.now().plus(TOKEN_TTL_HOURS, ChronoUnit.HOURS));
+        tokenRepository.save(token);
+
+        String resetLink = baseUrl + "/reset-password?token=" + rawToken;
+        String html = emailTemplateService.renderAdminResetPasswordEmail(resetLink, locale);
+        String subject = RU_ADMIN_RESET_SUBJECT.getOrDefault(locale, "Mozhno password reset");
+
+        notificationSpi.send(new NotificationSpi.NotificationEvent(
+            "EMAIL", user.getEmail(), subject, html, null));
+
+        events.publish(DomainEvent.of(null, "password_reset.admin_requested", "user",
+            userId, user.getEmail(), "Admin requested password reset"));
     }
 
     @Transactional

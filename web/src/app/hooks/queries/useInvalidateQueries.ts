@@ -1,23 +1,18 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 
 export function useInvalidateQueries() {
   const queryClient = useQueryClient();
   return {
-    invalidateFlags: () =>
-      queryClient.invalidateQueries({ queryKey: ['flags'] }),
-    invalidateSegments: () =>
-      queryClient.invalidateQueries({ queryKey: ['segments'] }),
-    invalidateTags: () =>
-      queryClient.invalidateQueries({ queryKey: ['tags'] }),
-    invalidateContexts: () =>
-      queryClient.invalidateQueries({ queryKey: ['contexts'] }),
-    invalidateProjects: () =>
-      queryClient.invalidateQueries({ queryKey: ['projects'] }),
+    invalidateFlags: () => queryClient.invalidateQueries({ queryKey: queryKeys.flags.all }),
+    invalidateSegments: () => queryClient.invalidateQueries({ queryKey: queryKeys.segments.all }),
+    invalidateTags: () => queryClient.invalidateQueries({ queryKey: queryKeys.tags.all }),
+    invalidateContexts: () => queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all }),
+    invalidateProjects: () => queryClient.invalidateQueries({ queryKey: queryKeys.projects.all }),
     invalidateEnvironments: () =>
-      queryClient.invalidateQueries({ queryKey: ['environments'] }),
-    invalidateEnriched: (projectId: number) =>
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] }),
-    invalidateAll: () =>
-      queryClient.invalidateQueries(),
+      queryClient.invalidateQueries({ queryKey: queryKeys.environments.all }),
+    invalidateEnriched: () =>
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched }),
+    invalidateAll: () => queryClient.invalidateQueries(),
   };
 }

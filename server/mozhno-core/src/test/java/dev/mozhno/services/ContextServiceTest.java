@@ -60,7 +60,7 @@ class ContextServiceTest {
         def.setName("appName");
         when(contextDefinitionRepository.findById(1)).thenReturn(def);
 
-        ContextDefinition result = contextService.findDefinitionById(1);
+        ContextDefinition result = contextService.findDefinitionById(1, null);
         assertEquals("appName", result.getName());
     }
 
@@ -68,7 +68,7 @@ class ContextServiceTest {
     void findDefinitionById_shouldThrowExceptionWhenNotFound() {
         when(contextDefinitionRepository.findById(999)).thenReturn(null);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.findDefinitionById(999));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.findDefinitionById(999, null));
         assertTrue(ex.getMessage().contains("ContextDefinition not found"));
     }
 
@@ -85,7 +85,7 @@ class ContextServiceTest {
             return d;
         });
 
-        ContextDefinition result = contextService.createDefinition(request);
+        ContextDefinition result = contextService.createDefinition(request, null);
         assertNotNull(result);
         assertEquals("appName", result.getName());
     }
@@ -110,7 +110,7 @@ class ContextServiceTest {
     void deleteDefinition_shouldCallRepository() {
         when(segmentContextRepository.existsByContextDefinitionId(1)).thenReturn(false);
         when(contextDefinitionRepository.deleteById(anyInt(), any())).thenReturn(1);
-        contextService.deleteDefinition(1);
+        contextService.deleteDefinition(1, null);
         verify(contextDefinitionRepository).deleteById(eq(1), any());
     }
 
@@ -118,7 +118,7 @@ class ContextServiceTest {
     void deleteDefinition_shouldThrowWhenUsedBySegments() {
         when(segmentContextRepository.existsByContextDefinitionId(1)).thenReturn(true);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.deleteDefinition(1));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.deleteDefinition(1, null));
         assertTrue(ex.getMessage().contains("Cannot delete context"));
         verify(contextDefinitionRepository, never()).deleteById(anyInt(), any());
     }
@@ -127,7 +127,7 @@ class ContextServiceTest {
     void deleteDefinition_shouldThrowWhenNotFound() {
         when(segmentContextRepository.existsByContextDefinitionId(999)).thenReturn(false);
         when(contextDefinitionRepository.deleteById(eq(999), any())).thenReturn(0);
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.deleteDefinition(999));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.deleteDefinition(999, null));
         assertTrue(ex.getMessage().contains("not found"));
     }
 
@@ -136,9 +136,12 @@ class ContextServiceTest {
         ContextValue cv = new ContextValue();
         cv.setId(1);
         cv.setValues("[\"web\"]");
+        ContextDefinition def = new ContextDefinition();
+        def.setId(1);
+        when(contextDefinitionRepository.findById(1)).thenReturn(def);
         when(contextValueRepository.findByContextDefinitionId(1)).thenReturn(List.of(cv));
 
-        List<ContextValue> result = contextService.findValuesByContextDefinitionId(1);
+        List<ContextValue> result = contextService.findValuesByContextDefinitionId(1, null);
         assertEquals(1, result.size());
     }
 
@@ -149,7 +152,7 @@ class ContextServiceTest {
         cv.setValues("[\"test\"]");
         when(contextValueRepository.findById(1)).thenReturn(cv);
 
-        ContextValue result = contextService.findValueById(1);
+        ContextValue result = contextService.findValueById(1, null);
         assertEquals("[\"test\"]", result.getValues());
     }
 
@@ -157,7 +160,7 @@ class ContextServiceTest {
     void findValueById_shouldThrowExceptionWhenNotFound() {
         when(contextValueRepository.findById(999)).thenReturn(null);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.findValueById(999));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.findValueById(999, null));
         assertTrue(ex.getMessage().contains("ContextValue not found"));
     }
 
@@ -173,7 +176,7 @@ class ContextServiceTest {
             return cv;
         });
 
-        ContextValue result = contextService.createValue(request);
+        ContextValue result = contextService.createValue(request, null);
         assertNotNull(result);
         assertEquals("[\"new-value\"]", result.getValues());
     }
@@ -189,7 +192,7 @@ class ContextServiceTest {
         ContextValueRequest request = new ContextValueRequest();
         request.setValues("[\"new\"]");
 
-        ContextValue result = contextService.updateValue(1, request);
+        ContextValue result = contextService.updateValue(1, request, null);
         assertEquals("[\"new\"]", result.getValues());
     }
 
@@ -200,7 +203,7 @@ class ContextServiceTest {
         ContextValueRequest request = new ContextValueRequest();
         request.setValues("[\"x\"]");
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.updateValue(999, request));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.updateValue(999, request, null));
         assertTrue(ex.getMessage().contains("ContextValue not found"));
     }
 
@@ -211,7 +214,7 @@ class ContextServiceTest {
         value.setContextDefinitionId(10);
         when(contextValueRepository.findById(1)).thenReturn(value);
         doNothing().when(contextValueRepository).deleteById(1);
-        contextService.deleteValue(1);
+        contextService.deleteValue(1, null);
         verify(contextValueRepository).deleteById(1);
     }
 }

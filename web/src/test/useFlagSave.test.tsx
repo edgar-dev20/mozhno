@@ -41,7 +41,16 @@ const makeFlag = (overrides: Record<string, unknown> = {}) => ({
   flagType: 'RELEASE',
   tags: [] as { tagId: number; tagName: string; tagColor: string; value: string }[],
   flagId: 1,
-  environments: { 1: { enabled: true, percentage: 100, segmentIds: [], strategyId: null, contextDefinitionId: null, contextValuesJson: null } },
+  environments: {
+    1: {
+      enabled: true,
+      percentage: 100,
+      segmentIds: [],
+      strategyId: null,
+      contextDefinitionId: null,
+      contextValuesJson: null,
+    },
+  },
   archived: false,
   createdAt: null as string | null,
   createdBy: null as string | null,
@@ -81,7 +90,15 @@ describe('useFlagSave', () => {
       });
     });
 
-    expect(api.flags.create).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test', key: 'test-key', description: '', flagType: 'RELEASE', tags: undefined }));
+    expect(api.flags.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Test',
+        key: 'test-key',
+        description: '',
+        flagType: 'RELEASE',
+        tags: undefined,
+      }),
+    );
   });
 
   it('save in general mode shows diff when name changes', () => {
@@ -106,12 +123,25 @@ describe('useFlagSave', () => {
       flagType: 'RELEASE',
       tags: '—',
     };
-    const changes = computeDiff(before, after, { name: 'Название', key: 'Ключ', description: 'Описание', flagType: 'Тип', tags: 'Теги' });
+    const changes = computeDiff(before, after, {
+      name: 'Название',
+      key: 'Ключ',
+      description: 'Описание',
+      flagType: 'Тип',
+      tags: 'Теги',
+    });
 
     act(() => {
       result.current.showDiff(changes, {
         mode: 'general',
-        data: { flag, name: 'New Name', key: 'test', description: '', flagType: 'RELEASE', tags: [] },
+        data: {
+          flag,
+          name: 'New Name',
+          key: 'test',
+          description: '',
+          flagType: 'RELEASE',
+          tags: [],
+        },
       });
     });
 
@@ -128,7 +158,14 @@ describe('useFlagSave', () => {
     act(() => {
       result.current.showDiff([{ field: 'name', label: 'Название', before: 'Old', after: 'New' }], {
         mode: 'general',
-        data: { flag: makeFlag(), name: 'New', key: 'test', description: '', flagType: 'RELEASE', tags: [] },
+        data: {
+          flag: makeFlag(),
+          name: 'New',
+          key: 'test',
+          description: '',
+          flagType: 'RELEASE',
+          tags: [],
+        },
       });
     });
 

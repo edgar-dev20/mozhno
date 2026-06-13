@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DateRangePicker } from "@/shared/components/DateRangePicker";
+import { DateRangePicker } from '@/shared/components/DateRangePicker';
 
 describe('DateRangePicker', () => {
   it('renders placeholder', () => {
@@ -33,7 +33,15 @@ describe('DateRangePicker', () => {
     const from = new Date(2024, 0, 15);
     const to = new Date(2024, 0, 20);
     const user = userEvent.setup();
-    render(<DateRangePicker from={from} to={to} onChange={(f, t) => { if (f === undefined) cleared = true; }} />);
+    render(
+      <DateRangePicker
+        from={from}
+        to={to}
+        onChange={(f, t) => {
+          if (f === undefined) cleared = true;
+        }}
+      />,
+    );
     const clearBtn = screen.getByRole('button').querySelector('.ml-auto');
     if (clearBtn) await user.click(clearBtn);
     expect(cleared).toBe(true);
