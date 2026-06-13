@@ -32,7 +32,7 @@ describe('timeAgo', () => {
 
   it('returns recent for current time', () => {
     const now = new Date().toISOString();
-    expect(timeAgo(now)).toBe('Только что');
+    expect(timeAgo(now)).toBe('только что');
   });
 
   it('returns minutes ago', () => {

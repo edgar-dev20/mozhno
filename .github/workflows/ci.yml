@@ -153,6 +153,12 @@ jobs:
         working-directory: server
         run: ./gradlew check jacocoTestReport
 
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          flags: server
+          fail_ci_if_error: false
+
       - name: Upload test report
         if: failure()
         uses: actions/upload-artifact@v4
@@ -178,9 +184,16 @@ jobs:
         working-directory: web
         run: npm ci
 
-      - name: Run tests
+      - name: Run tests with coverage
         working-directory: web
-        run: npm test
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          directory: web
+          flags: web
+          fail_ci_if_error: false
 
   test-js-sdk:
     name: Test JS SDK (Node.js)
@@ -200,9 +213,16 @@ jobs:
         working-directory: sdks/js
         run: npm ci
 
-      - name: Run tests
+      - name: Run tests with coverage
         working-directory: sdks/js
-        run: npm test
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          directory: sdks/js
+          flags: js-sdk
+          fail_ci_if_error: false
 
   codeql:
     name: CodeQL Analysis
@@ -231,6 +251,17 @@ jobs:
         with:
           java-version: '25'
           distribution: temurin
+
+      - if: matrix.language == 'java-kotlin'
+        name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          build-root-directory: server
+
+      - if: matrix.language == 'java-kotlin'
+        name: Build Java
+        working-directory: server
+        run: ./gradlew compileJava compileTestJava
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

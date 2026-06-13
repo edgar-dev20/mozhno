@@ -25,6 +25,18 @@
   <a href="https://github.com/edgar-dev20/mozhno/stargazers"><img src="https://img.shields.io/github/stars/edgar-dev20/mozhno?style=flat-square&logo=github&color=fedc32" alt="Stars" /></a>
 </p>
 
+<p align="center">
+  <a href="https://codecov.io/gh/edgar-dev20/mozhno"><img src="https://codecov.io/gh/edgar-dev20/mozhno/graph/badge.svg?flag=server" alt="Server coverage" /></a>
+  <a href="https://codecov.io/gh/edgar-dev20/mozhno"><img src="https://codecov.io/gh/edgar-dev20/mozhno/graph/badge.svg?flag=web" alt="Web UI coverage" /></a>
+  <a href="https://codecov.io/gh/edgar-dev20/mozhno"><img src="https://codecov.io/gh/edgar-dev20/mozhno/graph/badge.svg?flag=js-sdk" alt="JS SDK coverage" /></a>
+</p>
+
+<p align="center">
+  <a href="https://scorecard.dev/viewer/?uri=github.com/edgar-dev20/mozhno"><img src="https://img.shields.io/ossf-scorecard/github.com/edgar-dev20/mozhno?style=flat-square&label=OpenSSF" alt="OpenSSF Scorecard" /></a>
+  <a href="https://github.com/edgar-dev20/mozhno/security/code-scanning"><img src="https://img.shields.io/badge/SAST-CodeQL-2563eb?style=flat-square&logo=github" alt="CodeQL" /></a>
+  <a href="https://github.com/edgar-dev20/mozhno/security/dependabot"><img src="https://img.shields.io/badge/SCA-npm_audit-cb3837?style=flat-square&logo=npm" alt="npm audit" /></a>
+</p>
+
 <div align="center">
   <a href="https://starchart.cc/edgar-dev20/mozhno">
     <picture>

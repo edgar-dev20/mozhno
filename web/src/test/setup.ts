@@ -5,7 +5,7 @@ import * as matchers from 'vitest-axe/matchers';
 
 expect.extend(matchers);
 
-const store: Record<string, string> = {};
+const store: Record<string, string> = { 'mozhno-locale': 'ru' };
 globalThis.localStorage = {
   getItem: (key: string) => store[key] ?? null,
   setItem: (key: string, value: string) => { store[key] = value; },
