@@ -192,7 +192,6 @@ const ru = {
     archivedFlagsTitle: 'Архивные флаги',
     archivedFlagsDesc: 'Не отображаются в SDK и не влияют на работу приложения',
     restore: 'Восстановить',
-  },
     metrics: {
       title: '{{flag}}',
       titleWithEnv: '{{flag}} в {{env}}',
@@ -200,6 +199,7 @@ const ru = {
       selectEnv: 'Выберите окружение',
       noData: 'Нет данных за последние 48 часов',
     },
+  },
   segments: {
     title: 'Сегменты',
     description: 'Создавайте аудитории для таргетирования фиче-флагов',

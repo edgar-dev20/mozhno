@@ -34,7 +34,7 @@ describe('FlagMetricsDialog', () => {
       />
     );
     await waitFor(() => {
-      expect(screen.getByText('Test Flag · production')).toBeTruthy();
+      expect(screen.getByText('Test Flag в production')).toBeTruthy();
     });
   });
 
@@ -86,7 +86,7 @@ describe('FlagMetricsDialog', () => {
     );
 
     await waitFor(() => {
-      expect(api.metrics.get).toHaveBeenCalledWith(1, 1);
+      expect(api.metrics.get).toHaveBeenCalledWith(1, 2);
     });
   });
 
@@ -103,7 +103,7 @@ describe('FlagMetricsDialog', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('My Flag · staging')).toBeTruthy();
+      expect(screen.getByText('My Flag в staging')).toBeTruthy();
     });
     expect(screen.queryByLabelText('Окружение')).toBeNull();
   });
