@@ -39,6 +39,23 @@ describe('timeAgo', () => {
     const d = new Date(Date.now() - 5 * 60_000).toISOString();
     expect(timeAgo(d)).toBe('5 мин. назад');
   });
+
+  it('returns hours ago', () => {
+    const d = new Date(Date.now() - 3 * 3600_000).toISOString();
+    expect(timeAgo(d)).toBe('3 ч. назад');
+  });
+
+  it('returns days ago', () => {
+    const d = new Date(Date.now() - 5 * 86400_000).toISOString();
+    expect(timeAgo(d)).toBe('5 дн. назад');
+  });
+
+  it('returns formatted date for old dates', () => {
+    const d = new Date(Date.now() - 60 * 86400_000).toISOString();
+    const result = timeAgo(d);
+    expect(result).toBeDefined();
+    expect(result?.length).toBeGreaterThan(0);
+  });
 });
 
 describe('getFlagTypeColor', () => {

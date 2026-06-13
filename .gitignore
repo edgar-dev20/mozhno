@@ -103,3 +103,6 @@ credentials/
 ### Test reports ###
 **/build/test-results/
 **/build/reports/
+
+### Vitest coverage ###
+coverage/
