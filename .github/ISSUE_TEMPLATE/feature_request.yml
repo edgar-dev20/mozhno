@@ -1,0 +1,46 @@
+name: Feature Request
+description: Предложить новую фичу для Mozhno
+labels: [enhancement, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Опишите, чего не хватает и почему это важно для вас.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Компонент
+      options:
+        - Server (Spring Boot / REST API)
+        - Web UI (React dashboard)
+        - Java SDK
+        - JavaScript SDK
+        - Docker image
+        - CI/CD pipelines
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему решает?
+      description: Опишите, что сейчас не так и почему это нужно исправить.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Предлагаемое решение
+      description: Как должно работать? Опишите поведение, API, UI.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Альтернативы
+      description: Какие ещё варианты вы рассматривали?
+  - type: textarea
+    id: context
+    attributes:
+      label: Дополнительный контекст
+      description: Ссылки, примеры из других проектов, макеты.

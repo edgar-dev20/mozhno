@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mozhno-db
+  labels:
+    app: mozhno
+type: Opaque
+stringData:
+  url: "jdbc:postgresql://postgres-service:5432/feature_flags"
+  username: "flags_user"
+  password: "change-me"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mozhno-jwt
+  labels:
+    app: mozhno
+type: Opaque
+stringData:
+  secret: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mozhno-config
+  labels:
+    app: mozhno
+data:
+  APP_BASE_URL: "https://flags.example.com"
+  CLIENT_MAX_METRICS_PER_KEY: "1000"
+  HIKARI_MAX_POOL_SIZE: "30"
+  HIKARI_MIN_IDLE: "5"
+  CACHE_TTL_MINUTES: "5"
+  LOG_LEVEL_APP: "INFO"

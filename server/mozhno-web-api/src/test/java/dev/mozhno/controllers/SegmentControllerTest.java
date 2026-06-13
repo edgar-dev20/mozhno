@@ -1,0 +1,195 @@
+package dev.mozhno.controllers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import dev.mozhno.BaseIntegrationTest;
+import dev.mozhno.contexts.ContextDefinition;
+import dev.mozhno.projects.Project;
+import dev.mozhno.segments.Segment;
+import dev.mozhno.segments.SegmentRequest;
+
+import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+class SegmentControllerTest extends BaseIntegrationTest {
+
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
+    private Integer projectId;
+    private Integer contextDefId;
+    private String authToken;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity()).build();
+        objectMapper = new ObjectMapper();
+
+        jdbcTemplate.update(
+            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
+            "segment-test@test.com", passwordEncoder.encode("secret"), "developer", "active");
+
+        Project p = new Project();
+        p.setName("Test Project");
+        projectId = projectRepository.save(p).getId();
+
+        String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"segment-test@test.com\",\"password\":\"secret\",\"projectId\":" + projectId + "}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        authToken = objectMapper.readTree(loginResponse).get("token").asText();
+
+        ContextDefinition cd = new ContextDefinition();
+        cd.setName("appName");
+        cd.setProjectId(projectId);
+        contextDefId = contextDefinitionRepository.save(cd).getId();
+    }
+
+    private String auth() {
+        return "Bearer " + authToken;
+    }
+
+    @Test
+    void getAllSegments_shouldReturnList() throws Exception {
+        mockMvc.perform(get("/api/v1/segments")
+                .header("Authorization", auth()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void createSegment_shouldReturnCreated() throws Exception {
+        SegmentRequest req = new SegmentRequest();
+        req.setName("Power Users");
+        req.setDescription("High-value users");
+        SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
+        entry.setContextDefinitionId(contextDefId);
+        entry.setContextValues("[\"web\",\"mobile\"]");
+        req.setContext(List.of(entry));
+
+        mockMvc.perform(post("/api/v1/segments")
+                        .header("Authorization", auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Power Users"))
+                .andExpect(jsonPath("$.context").isArray())
+                .andExpect(jsonPath("$.context[0].contextDefinitionId").value(contextDefId));
+    }
+
+    @Test
+    void createSegment_withoutContext_shouldReturnCreated() throws Exception {
+        SegmentRequest req = new SegmentRequest();
+        req.setName("Empty Segment");
+        req.setDescription("No context");
+        req.setContext(List.of());
+
+        mockMvc.perform(post("/api/v1/segments")
+                        .header("Authorization", auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Empty Segment"))
+                .andExpect(jsonPath("$.context").isArray());
+    }
+
+    @Test
+    void getSegmentById_shouldReturnSegment() throws Exception {
+        Segment s = new Segment();
+        s.setName("Power Users");
+        s.setProjectId(projectId);
+        Segment saved = segmentRepository.save(s);
+
+        mockMvc.perform(get("/api/v1/segments/{id}", saved.getId())
+                .header("Authorization", auth()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Power Users"));
+    }
+
+    @Test
+    void updateSegment_shouldReturnUpdated() throws Exception {
+        Segment s = new Segment();
+        s.setName("Old Name");
+        s.setProjectId(projectId);
+        Segment saved = segmentRepository.save(s);
+
+        SegmentRequest req = new SegmentRequest();
+        req.setName("Updated Name");
+        req.setDescription("Updated description");
+        SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
+        entry.setContextDefinitionId(contextDefId);
+        entry.setContextValues("[\"mobile\"]");
+        req.setContext(List.of(entry));
+
+        mockMvc.perform(put("/api/v1/segments/{id}", saved.getId())
+                        .header("Authorization", auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Name"))
+                .andExpect(jsonPath("$.context[0].contextValues").value("[\"mobile\"]"));
+    }
+
+    @Test
+    void updateSegment_shouldReplaceContext() throws Exception {
+        Segment s = new Segment();
+        s.setName("With Context");
+        s.setProjectId(projectId);
+        Segment saved = segmentRepository.save(s);
+
+        SegmentRequest reqWithContext = new SegmentRequest();
+        reqWithContext.setName("Replaced Context");
+        reqWithContext.setDescription("Test");
+        SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
+        entry.setContextDefinitionId(contextDefId);
+        entry.setContextValues("[\"web\"]");
+        reqWithContext.setContext(List.of(entry));
+
+        mockMvc.perform(put("/api/v1/segments/{id}", saved.getId())
+                        .header("Authorization", auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reqWithContext)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.context.length()").value(1));
+
+        SegmentRequest reqEmpty = new SegmentRequest();
+        reqEmpty.setName("Empty Context");
+        reqEmpty.setDescription("Test");
+        reqEmpty.setContext(List.of());
+
+        mockMvc.perform(put("/api/v1/segments/{id}", saved.getId())
+                        .header("Authorization", auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reqEmpty)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.context.length()").value(0));
+    }
+
+    @Test
+    void deleteSegment_shouldReturn204() throws Exception {
+        Segment s = new Segment();
+        s.setName("To Delete");
+        s.setProjectId(projectId);
+        Segment saved = segmentRepository.save(s);
+
+        mockMvc.perform(delete("/api/v1/segments/{id}", saved.getId())
+                .header("Authorization", auth()))
+                .andExpect(status().isNoContent());
+    }
+}

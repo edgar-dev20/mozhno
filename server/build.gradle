@@ -1,24 +1,45 @@
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '4.0.5'
+    id 'org.springframework.boot' version '4.0.5' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
 }
 
-apply plugin: 'io.spring.dependency-management'
+allprojects {
+    group = 'dev.mozhno'
+    version = '1.0-SNAPSHOT'
 
-group = 'org.example'
-version = '1.0-SNAPSHOT'
-
-repositories {
-    mavenCentral()
+    repositories {
+        mavenCentral()
+    }
 }
 
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+
+    tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs.add('-parameters')
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    test {
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
+
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.required = true
+            html.required = true
+        }
+    }
 }
 
-test {
-    useJUnitPlatform()
-}
+ext.isReleaseVersion = !version.toString().endsWith("-SNAPSHOT")

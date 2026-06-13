@@ -1,0 +1,16 @@
+body { margin: 0; padding: 0; background-color: #f5f3f7; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+.container { max-width: 520px; margin: 48px auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 32px rgba(26, 10, 62, 0.10); border: 1px solid rgba(255,255,255,0.6); }
+.logo-section { padding: 40px 40px 0 40px; text-align: center; }
+.logo-badge { display: inline-block; background: linear-gradient(135deg, #5b3cc4 0%, #7c3aed 100%); padding: 14px 28px; border-radius: 16px; box-shadow: 0 8px 24px rgba(91, 60, 196, 0.25); }
+.logo-text { font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace; font-size: 32px; font-weight: 600; color: #ffffff; letter-spacing: 0.15em; }
+.tagline { text-align: center; color: #7a6f9e; font-size: 13px; margin: 12px 0 0 0; }
+.body { padding: 40px; }
+.body h2 { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #1a1a2e; font-size: 22px; font-weight: 600; margin: 0 0 12px 0; }
+.body p { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #3d3660; font-size: 15px; line-height: 1.7; margin: 0 0 20px 0; }
+.body p.muted { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #7a6f9e; font-size: 13px; line-height: 1.6; }
+.btn-wrap { text-align: center; margin: 28px 0 20px 0; }
+.button { display: inline-block; background: linear-gradient(135deg, #5b3cc4 0%, #7c3aed 100%); color: #ffffff; text-decoration: none; padding: 14px 36px; border-radius: 12px; font-size: 15px; font-weight: 600; box-shadow: 0 4px 16px rgba(91, 60, 196, 0.35); }
+.link-fallback { color: #7a6f9e; font-size: 12px; word-break: break-all; margin-top: 12px; line-height: 1.5; }
+.footer { background: #faf9fb; padding: 24px 40px; text-align: center; border-top: 1px solid #ede8f3; }
+.footer p { color: #8b80a8; font-size: 12px; margin: 0; line-height: 1.5; }
+.footer-brand { font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: #4a3a6e; font-weight: 600; }
