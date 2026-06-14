@@ -16,7 +16,12 @@ class ClientMetricsRequestTest {
     @Test
     void setter_shouldWork() {
         ClientMetricsRequest req = new ClientMetricsRequest();
-        req.setEvaluations(Map.of("flag-a", 5L));
-        assertThat(req.getEvaluations()).containsEntry("flag-a", 5L);
+        ClientMetricsRequest.EvalCount ec = new ClientMetricsRequest.EvalCount();
+        ec.setTrueCount(5);
+        ec.setFalseCount(2);
+        req.setEvaluations(Map.of("flag-a", ec));
+        assertThat(req.getEvaluations()).containsKey("flag-a");
+        assertThat(req.getEvaluations().get("flag-a").getTrueCount()).isEqualTo(5);
+        assertThat(req.getEvaluations().get("flag-a").getFalseCount()).isEqualTo(2);
     }
 }

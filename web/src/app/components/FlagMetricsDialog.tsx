@@ -1,20 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { BarChart3 } from "@/shared/icons";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
+import { BarChart3, X, Server } from "@/shared/icons";
+import * as Dialog from "@radix-ui/react-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
-import { api, Environment, FlagMetric } from "@/api";
+import { api, Environment, FlagMetric, ClientInstance } from "@/api";
+import { timeAgo, Card, CardHeader, Hairline, StatusDot, TruncatedCopyTooltip } from "@/shared";
+import { motion, AnimatePresence } from 'motion/react';
 import { useT } from '@/i18n';
+
+const ACTIVE_MS = 5 * 60 * 1000;
+const RECENT_MS = 60 * 60 * 1000;
 
 function formatHourBucket(iso: string): string {
   const d = new Date(iso);
   const now = new Date();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
   const isToday = d.toDateString() === now.toDateString();
   if (isToday) {
-    return d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    return `${hh}:${mm}`;
   }
-  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }) + ' ' +
-    d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  const dd = String(d.getDate()).padStart(2, '0');
+  const MM = String(d.getMonth() + 1).padStart(2, '0');
+  return `${dd}.${MM} ${hh}:${mm}`;
+}
+
+import { loadLocale, toIntlLocale } from '@/i18n/locale';
+
+function formatNumber(n: number): string {
+  return new Intl.NumberFormat(toIntlLocale(loadLocale())).format(n);
 }
 
 interface FlagMetricsDialogProps {
@@ -26,35 +40,96 @@ interface FlagMetricsDialogProps {
   defaultEnvId?: number;
 }
 
+function getSdkLabel(appType: string) {
+  if (appType === 'java') return 'Java SDK';
+  if (appType === 'js') return 'JS SDK';
+  return appType;
+}
+
+function getStaleness(lastSeenAt: string): 'active' | 'recent' | 'stale' {
+  const age = Date.now() - new Date(lastSeenAt).getTime();
+  if (age <= ACTIVE_MS) return 'active';
+  if (age <= RECENT_MS) return 'recent';
+  return 'stale';
+}
+
 export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, environments, defaultEnvId }: FlagMetricsDialogProps) {
   const t = useT();
   const [selectedEnvId, setSelectedEnvId] = useState<number | null>(null);
   const [metrics, setMetrics] = useState<FlagMetric[]>([]);
+  const [staleMetrics, setStaleMetrics] = useState<FlagMetric[]>([]);
   const [loading, setLoading] = useState(false);
+  const [chartReady, setChartReady] = useState(false);
+  const [instances, setInstances] = useState<ClientInstance[]>([]);
+  const [instancesLoading, setInstancesLoading] = useState(false);
+  const [filterAppName, setFilterAppName] = useState<string | null>(null);
+  const [filterInstanceId, setFilterInstanceId] = useState<number | null>(null);
+  const loadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasEverLoaded = useRef(false);
+
+  const projectId = environments[0]?.projectId ?? 0;
+
+  useEffect(() => {
+    return () => {
+      if (loadTimerRef.current) clearTimeout(loadTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (open) {
       setSelectedEnvId(defaultEnvId ?? environments[0]?.id ?? null);
-    } else {
-      setMetrics([]);
+      setFilterAppName(null);
+      setFilterInstanceId(null);
     }
   }, [open, defaultEnvId, environments]);
 
   useEffect(() => {
-    if (!open || !flagId || !selectedEnvId) {
-      setMetrics([]);
-      return;
-    }
+    if (!open || !flagId || !selectedEnvId) return;
+
     setLoading(true);
-    api.metrics.get(flagId, selectedEnvId)
-      .then(data => setMetrics(data))
-      .catch(() => setMetrics([]))
-      .finally(() => setLoading(false));
-  }, [open, flagId, selectedEnvId]);
+    if (loadTimerRef.current) clearTimeout(loadTimerRef.current);
+    loadTimerRef.current = setTimeout(() => {
+      api.metrics.get(flagId, selectedEnvId,
+        filterInstanceId ? { instanceId: filterInstanceId }
+        : filterAppName ? { appName: filterAppName }
+        : undefined)
+        .then((metricsData) => {
+          setMetrics(metricsData);
+          setStaleMetrics(metricsData);
+          hasEverLoaded.current = true;
+          setChartReady(true);
+        })
+        .catch(() => {
+          setMetrics([]);
+          setChartReady(true);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }, 350);
+  }, [open, flagId, selectedEnvId, filterAppName, filterInstanceId]);
+
+  useEffect(() => {
+    if (!open || !projectId || !selectedEnvId) return;
+
+    setInstancesLoading(true);
+    api.clientInstances.list(projectId, selectedEnvId)
+      .then((data) => {
+        setInstances(data.filter(i => Date.now() - new Date(i.lastSeenAt).getTime() < 24 * 60 * 60 * 1000));
+      })
+      .catch(() => {
+        setInstances([]);
+      })
+      .finally(() => {
+        setInstancesLoading(false);
+      });
+  }, [open, projectId, selectedEnvId]);
+
+  const displayMetrics = loading && staleMetrics.length > 0 ? staleMetrics : metrics;
 
   const chartData = (() => {
     const buckets = new Map<number, FlagMetric>();
-    for (const m of metrics) {
+    for (const m of displayMetrics) {
       buckets.set(Date.parse(m.timeBucket), m);
     }
     const now = new Date();
@@ -73,106 +148,367 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
     return result;
   })();
 
-  const totalTrue = metrics.reduce((sum, m) => sum + m.evaluationTrueCount, 0);
-  const totalFalse = metrics.reduce((sum, m) => sum + m.evaluationFalseCount, 0);
+  const totalTrue = displayMetrics.reduce((sum, m) => sum + m.evaluationTrueCount, 0);
+  const totalFalse = displayMetrics.reduce((sum, m) => sum + m.evaluationFalseCount, 0);
+  const totalEvaluations = totalTrue + totalFalse;
+
+  const trueRate = totalEvaluations > 0
+    ? `${((totalTrue / totalEvaluations) * 100).toFixed(1)}%`
+    : '—';
+
+  const peakMetric = displayMetrics.length > 0
+    ? displayMetrics.reduce((a, b) =>
+        (a.evaluationTrueCount + a.evaluationFalseCount) > (b.evaluationTrueCount + b.evaluationFalseCount) ? a : b)
+    : null;
+  const peakTime = peakMetric ? formatHourBucket(peakMetric.timeBucket) : '—';
+
+  const activeBuckets = chartData.filter(d => d.trueCount + d.falseCount > 0).length;
+  const avgPerHour = activeBuckets > 0 ? Math.round(totalEvaluations / activeBuckets) : 0;
 
   const selectedEnvName = environments.find(e => e.id === selectedEnvId)?.name ?? '';
 
+  const stats = [
+    { value: totalEvaluations > 0 ? formatNumber(totalEvaluations) : '—', label: t('flags.metrics.totalEvals') },
+    { value: trueRate, label: t('flags.metrics.trueRate') },
+    { value: peakTime, label: t('flags.metrics.peak') },
+    { value: avgPerHour > 0 ? formatNumber(avgPerHour) : '—', label: t('flags.metrics.avgPerHour') },
+  ];
+
+  const instanceGroups = (() => {
+    const groups = new Map<string, ClientInstance[]>();
+    for (const inst of instances) {
+      const key = inst.appName;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(inst);
+    }
+    return Array.from(groups.entries())
+      .map(([appName, insts]) => ({
+        appName,
+        instances: insts,
+        appType: insts[0]?.appType ?? 'unknown',
+      }))
+      .sort((a, b) => a.appName.localeCompare(b.appName));
+  })();
+
+  const filterInstance = filterInstanceId ? instances.find(i => i.id === filterInstanceId) : null;
+
+  const clearFilters = () => {
+    setFilterAppName(null);
+    setFilterInstanceId(null);
+  };
+
+  const selectApp = (appName: string) => {
+    if (filterAppName === appName && filterInstanceId === null) {
+      clearFilters();
+    } else {
+      setFilterAppName(appName);
+      setFilterInstanceId(null);
+    }
+  };
+
+  const selectInstance = (appName: string, instanceId: number) => {
+    if (filterInstanceId === instanceId) {
+      clearFilters();
+    } else {
+      setFilterAppName(appName);
+      setFilterInstanceId(instanceId);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[720px] bg-card border-border shadow-xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-gradient-start to-gradient-end rounded-lg blur opacity-30"></div>
-              <div className="relative bg-gradient-to-r from-gradient-start/10 to-gradient-end/10 dark:from-blue-500/5 dark:to-violet-500/5 rounded-lg p-1.5">
-                <BarChart3 size={18} className="text-violet-600 dark:text-violet-400" />
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-neutral-900/40 dark:bg-black/60 backdrop-blur-sm z-40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-300" />
+        <Dialog.Content className="fixed right-4 top-4 bottom-4 w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:[--tw-exit-translate-x:calc(100%+1rem)] data-[state=open]:slide-in-from-right-full duration-300">
+          {/* Header */}
+          <div className="flex-shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="relative shrink-0">
+                <div className="absolute inset-0 bg-gradient-to-r from-gradient-start to-gradient-end rounded-lg blur opacity-30" />
+                <div className="relative bg-gradient-to-r from-gradient-start/10 to-gradient-end/10 dark:from-blue-500/5 dark:to-violet-500/5 rounded-lg p-1.5">
+                  <BarChart3 size={18} className="text-violet-600 dark:text-violet-400" />
+                </div>
               </div>
+              <span className="text-sm font-semibold text-foreground truncate">{flagName}</span>
+              <span className="text-muted-foreground/30 shrink-0">·</span>
+              {defaultEnvId ? (
+                <span className="text-xs font-medium text-muted-foreground truncate">{selectedEnvName}</span>
+              ) : (
+                <Select
+                  value={selectedEnvId?.toString() ?? ''}
+                  onValueChange={(v) => setSelectedEnvId(v ? parseInt(v) : null)}
+                >
+                  <SelectTrigger className="h-7 text-xs gap-1 border-0 bg-transparent hover:bg-secondary/50 px-2 w-auto min-w-0">
+                    <SelectValue placeholder={t('flags.metrics.selectEnv')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {environments.map(e => (
+                      <SelectItem key={e.id} value={e.id.toString()}>{e.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
-            <span className="bg-gradient-to-r from-gradient-start to-gradient-end bg-clip-text text-transparent">
-              {selectedEnvName
-                ? t('flags.metrics.titleWithEnv', { flag: flagName, env: selectedEnvName })
-                : t('flags.metrics.title', { flag: flagName })
-              }
-            </span>
-          </DialogTitle>
-          <DialogDescription className="sr-only">{t('flags.metrics.chartTitle')}</DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          {!defaultEnvId && (
-            <div className="w-56">
-              <label className="block text-sm font-medium text-foreground/80 mb-1.5">
-                {t('clientInstances.environment')}
-              </label>
-              <Select
-                value={selectedEnvId?.toString() ?? ''}
-                onValueChange={(v) => setSelectedEnvId(v ? parseInt(v) : null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('flags.metrics.selectEnv')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {environments.map(e => (
-                    <SelectItem key={e.id} value={e.id.toString()}>{e.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          <div className="border border-border rounded-xl bg-gradient-to-br from-neutral-50 to-neutral-100 dark:from-neutral-950 dark:to-neutral-900 p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-muted-foreground">{t('flags.metrics.chartTitle')}</span>
-              <div className="flex items-center gap-3 text-xs">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-gradient-start" />
-                  <span className="text-muted-foreground/80">true {totalTrue}</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-sm bg-gradient-start/30" />
-                  <span className="text-muted-foreground/80">false {totalFalse}</span>
-                </span>
-              </div>
-            </div>
-
-            {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-6 w-6 border-2 border-gradient-start/50 border-t-transparent" />
-              </div>
-            ) : totalTrue === 0 && totalFalse === 0 ? (
-              <div className="flex items-center justify-center h-64 text-sm text-muted-foreground/70">
-                {t('flags.metrics.noData')}
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-                  <XAxis
-                    dataKey="time"
-                    tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }}
-                    interval={Math.max(0, Math.floor(chartData.length / 6))}
-                    angle={0}
-                    height={24}
-                  />
-                  <YAxis tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }} allowDecimals={false} width={40} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--popover)',
-                      border: 'none',
-                      borderRadius: '8px',
-                      color: 'var(--popover-foreground)',
-                      fontSize: '12px',
-                    }}
-                  />
-                  <Bar dataKey="falseCount" stackId="a" fill="var(--color-gradient-start)" fillOpacity={0.3} name="false" radius={[0, 0, 0, 0]} />
-                  <Bar dataKey="trueCount" stackId="a" fill="var(--color-gradient-start)" name="true" radius={[3, 3, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+            <Dialog.Close asChild>
+              <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0">
+                <X size={20} />
+              </button>
+            </Dialog.Close>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+
+          {/* Body */}
+          <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
+            {/* Stats bar — always visible */}
+            <div className="flex-shrink-0 min-h-[56px] flex items-stretch divide-x divide-border/30 bg-secondary/30 mx-5 mt-5 rounded-xl overflow-hidden shadow-sm">
+              {stats.map((s, i) => (
+                <div
+                  key={i}
+                  className="flex-1 flex flex-col items-center justify-center py-2.5 px-1"
+                >
+                  <span className={`text-base font-medium leading-none tracking-tight ${totalEvaluations > 0 ? 'text-foreground/85' : 'text-muted-foreground/40'}`}>
+                    {s.value}
+                  </span>
+                  <span className="text-xs text-muted-foreground/45 uppercase tracking-widest mt-1 leading-none">
+                    {s.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Chart card */}
+            <div className="flex-shrink-0 mx-5 mt-4 h-[280px] min-h-[280px] flex flex-col rounded-xl shadow-md bg-gradient-to-br from-gradient-subtle-start/80 to-gradient-subtle-end/50 dark:from-neutral-900/80 dark:to-neutral-900/60 p-4">
+              <div className="flex-shrink-0 flex flex-col gap-2 mb-3">
+                <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                  {t('flags.metrics.chartTitle')}
+                </span>
+                <div className="flex items-center gap-4 text-xs">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-sparkline-true" />
+                    <span className="text-muted-foreground/60">true {totalTrue > 0 ? formatNumber(totalTrue) : '—'}</span>
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-sparkline-false/45" />
+                    <span className="text-muted-foreground/60">false {totalFalse > 0 ? formatNumber(totalFalse) : '—'}</span>
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex-1 min-h-0 relative">
+                {!chartReady && !hasEverLoaded.current ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-[3px] border-sparkline-true/30 border-t-sparkline-true" />
+                    <span className="text-xs text-muted-foreground/40">{t('common.loading')}</span>
+                  </div>
+                ) : totalTrue === 0 && totalFalse === 0 ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-gradient-subtle-start/10 to-gradient-subtle-end/6">
+                      <BarChart3 size={28} className="text-muted-foreground/30" />
+                    </div>
+                    <span className="text-sm text-muted-foreground/40">{t('flags.metrics.noData')}</span>
+                  </div>
+                ) : (
+                  <div className={`absolute inset-0 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
+                    {loading && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-sparkline-true/30 border-t-sparkline-true" />
+                      </div>
+                    )}
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+                        <CartesianGrid strokeDasharray="4 4" stroke="var(--color-border)" strokeOpacity={0.12} vertical={false} />
+                        <XAxis
+                          dataKey="time"
+                          tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }}
+                          interval={Math.max(0, Math.floor(chartData.length / 6))}
+                          height={30}
+                        />
+                        <YAxis tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }} allowDecimals={false} width={40} />
+                        <Tooltip
+                          cursor={{ stroke: 'var(--color-sparkline-false)', strokeWidth: 1, strokeOpacity: 0.25 }}
+                          contentStyle={{
+                            backgroundColor: 'var(--color-popover)',
+                            border: '1px solid var(--color-border)',
+                            borderRadius: '12px',
+                            color: 'var(--color-popover-foreground)',
+                            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+                            fontSize: '12px',
+                            padding: '10px 14px',
+                          }}
+                        />
+                        <Bar dataKey="falseCount" stackId="a" fill="var(--sparkline-false)" fillOpacity={0.45} name="false" radius={[3, 3, 0, 0]} />
+                        <Bar dataKey="trueCount" stackId="a" fill="var(--sparkline-true)" name="true" radius={[3, 3, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Filter breadcrumb */}
+            {(filterAppName || filterInstanceId) && (
+              <div className="flex-shrink-0 mx-5 mt-3 flex items-center gap-1.5 text-xs">
+                <span className="text-muted-foreground/40">Showing:</span>
+                <button
+                  onClick={clearFilters}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent text-muted-foreground hover:bg-accent/80 transition-colors font-medium"
+                >
+                  {t('common.all')}
+                </button>
+                {filterAppName && (
+                  <>
+                    <span className="text-muted-foreground/30">→</span>
+                    <button
+                      onClick={() => { setFilterAppName(null); setFilterInstanceId(null); }}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-medium transition-colors ${filterInstanceId ? 'bg-sparkline-true/10 text-sparkline-true' : 'bg-sparkline-true/10 text-sparkline-true'}`}
+                    >
+                      {filterAppName}
+                    </button>
+                  </>
+                )}
+                {filterInstance && (
+                  <>
+                    <span className="text-muted-foreground/30">→</span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sparkline-true/10 text-sparkline-true font-medium">
+                      {filterInstance.instanceId}
+                    </span>
+                  </>
+                )}
+                <button
+                  onClick={clearFilters}
+                  className="ml-2 p-0.5 rounded text-muted-foreground/40 hover:text-foreground/60 transition-colors"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
+
+            {/* SDK instances */}
+            <div className="flex-shrink-0 mx-5 mt-4 mb-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Server size={13} className="text-muted-foreground/40" />
+                <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                  Все приложения
+                </span>
+                {instances.length > 0 && (
+                  <span className="text-xs text-muted-foreground/30">
+                    {instanceGroups.length} приложений · {instances.length} экземпляров
+                  </span>
+                )}
+              </div>
+
+              {instancesLoading && instances.length === 0 ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-14 bg-secondary/60 rounded-xl animate-pulse" />
+                  ))}
+                </div>
+              ) : instances.length === 0 ? (
+                <div className="rounded-xl shadow-md bg-gradient-to-br from-gradient-subtle-start/80 to-gradient-subtle-end/50 dark:from-neutral-900/80 dark:to-neutral-900/60 px-4 py-8 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <Server size={24} className="text-muted-foreground/25" />
+                    <p className="text-xs text-muted-foreground/50">{t('clientInstances.emptyDescription')}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* All instances */}
+                  <Card
+                    variant="selectable"
+                    selected={!filterAppName && !filterInstanceId}
+                    onClick={clearFilters}
+                    className="w-full"
+                  >
+                    <CardHeader
+                      title="Все экземпляры"
+                      subtitle="Показать метрики по всем приложениям"
+                      meta={instances.length}
+                    />
+                  </Card>
+
+                  <AnimatePresence mode="popLayout">
+                    {instanceGroups.map((group, idx) => {
+                      const isAppSelected = filterAppName === group.appName && filterInstanceId === null;
+                      const isDimmed = (filterAppName || filterInstanceId) && !isAppSelected && filterAppName !== group.appName;
+
+                      return (
+                        <motion.div
+                          key={group.appName}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, x: -16 }}
+                          transition={{ duration: 0.2, delay: idx * 0.03 }}
+                        >
+                          <Card
+                            variant="selectable"
+                            selected={isAppSelected}
+                            dimmed={!!isDimmed}
+                            onClick={() => selectApp(group.appName)}
+                            className="w-full"
+                          >
+                            <CardHeader
+                              title={group.appName}
+                              subtitle={`${getSdkLabel(group.appType)} · ${group.instances.length} экземпляров`}
+                            />
+                            <Hairline />
+
+                            <div className="px-3 py-2 space-y-1.5">
+                              {group.instances.map(inst => {
+                                const isInstSelected = filterInstanceId === inst.id;
+                                const staleness = getStaleness(inst.lastSeenAt);
+                                const envName = environments.find(e => e.id === inst.environmentId)?.name ?? '';
+                                const envColor = (() => {
+                                  if (envName === 'Production') return 'bg-emerald-500';
+                                  if (envName === 'Development') return 'bg-amber-500';
+                                  if (envName === 'staging') return 'bg-violet-500';
+                                  return 'bg-blue-500';
+                                })();
+
+                                return (
+                                  <button
+                                    key={inst.id}
+                                    onClick={(e) => { e.stopPropagation(); selectInstance(group.appName, inst.id); }}
+                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
+                                      isInstSelected
+                                        ? 'bg-sparkline-true/10 ring-1 ring-sparkline-true/20'
+                                        : 'bg-secondary/30 hover:bg-secondary/50'
+                                    }`}
+                                  >
+                                    <StatusDot state={staleness} />
+                                    <div className="flex-1 min-w-0 flex items-center gap-2">
+                                      <TruncatedCopyTooltip
+                                        value={inst.instanceId}
+                                        className={`font-mono text-detail font-medium ${isInstSelected ? 'text-sparkline-true' : 'text-foreground/80'}`}
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-2 shrink-0">
+                                      {envName && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-secondary/60 text-muted-foreground/60 shrink-0">
+                                          <span className={`w-1 h-1 rounded-full ${envColor}`} />
+                                          {envName}
+                                        </span>
+                                      )}
+                                      {inst.sdkVersion && (
+                                        <span className="text-muted-foreground/35 font-mono text-xs shrink-0">v{inst.sdkVersion}</span>
+                                      )}
+                                      <span className="text-muted-foreground/30 text-xs w-14 text-right tabular-nums shrink-0">
+                                        {timeAgo(inst.lastSeenAt)}
+                                      </span>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </Card>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

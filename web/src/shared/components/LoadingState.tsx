@@ -1,4 +1,6 @@
 import { useT } from '@/i18n';
+import { Card } from "@/shared/components/Card";
+
 interface LoadingStateProps {
   text?: string;
 }
@@ -6,11 +8,11 @@ interface LoadingStateProps {
 export function LoadingState({ text }: LoadingStateProps) {
   const t = useT();
   return (
-    <div className="bg-card border border-border rounded-xl px-6 py-16 text-center shadow-sm">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gradient-subtle-start to-gradient-subtle-end animate-pulse" />
-        <span className="text-sm text-muted-foreground">{text ?? t('common.loading')}</span>
+    <Card padded className="px-6 py-20 text-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-gradient-subtle-start/60 to-gradient-subtle-end/40 animate-pulse ring-1 ring-border/50" />
+        <span className="text-body-sm text-muted-foreground">{text ?? t('common.loading')}</span>
       </div>
-    </div>
+    </Card>
   );
 }

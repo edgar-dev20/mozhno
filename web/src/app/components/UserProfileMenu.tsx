@@ -40,7 +40,9 @@ export function UserProfileMenu() {
         updateUser(updatedUser);
         setAvatarVersion(v => v + 1);
       })
-      .catch(err => console.error('Avatar upload failed:', err))
+      .catch(err => {
+        if (import.meta.env.DEV) console.error('Avatar upload failed:', err);
+      })
       .finally(() => setUploading(false));
     e.target.value = '';
   };
@@ -66,14 +68,14 @@ export function UserProfileMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full">
+          <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full" aria-label={t('common.openUserMenu')}>
           <Avatar className="w-8 h-8 ring-2 ring-white dark:ring-neutral-700 shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
             <AvatarFallback className="bg-gradient-to-br from-gradient-start to-gradient-end text-xs font-bold text-white">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <span className="hidden sm:block max-w-[120px] truncate">{user?.name ?? user?.email ?? '—'}</span>
+          <span className="hidden sm:block max-w-[160px] truncate">{user?.name ?? user?.email ?? '—'}</span>
           <ChevronDown size={14} className="text-muted-foreground/70" />
         </button>
       </DropdownMenuTrigger>

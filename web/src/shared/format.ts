@@ -1,14 +1,16 @@
 import { t as ti } from '@/i18n';
+import { loadLocale, toIntlLocale } from '@/i18n/locale';
+
 export function formatDate(d: string | null): string | null {
   if (!d) return null;
   const date = new Date(d);
-  return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+  return date.toLocaleDateString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export function formatDateTime(d: string | null): string | null {
   if (!d) return null;
   const date = new Date(d);
-  return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleDateString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 export function timeAgo(d: string | null): string {

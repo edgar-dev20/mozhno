@@ -7,6 +7,13 @@ export interface ConstraintEntry {
   value: string;
 }
 
+export interface ConstraintGroup {
+  id: string;
+  contextDefId: number;
+  operator: string;
+  values: string[];
+}
+
 export interface EditingState {
   flag: FlagView | null;
   mode: 'create' | 'general' | 'environment';

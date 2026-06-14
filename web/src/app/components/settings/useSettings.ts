@@ -82,7 +82,7 @@ export function useSettings() {
           const limit = await api.environments.getLimit();
           setMaxEnvironments(limit.maxEnvironments);
         } catch {}
-      } catch (e) { console.error(e); } finally {
+      } catch (e) { if (import.meta.env.DEV) console.error(e); } finally {
         if (!cancelled) setLoading(false);
       }
     })();
@@ -115,7 +115,7 @@ export function useSettings() {
       setEnvironments(prev => prev.map(e => e.id === updated.id ? updated : e));
       setEditingEnvId(null);
       setEditEnvName('');
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Ошибка при сохранении окружения'); } finally { setSavingEnvEdit(false); }
+    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Failed to save environment'); } finally { setSavingEnvEdit(false); }
   };
 
   const saveProject = async () => {
@@ -134,7 +134,7 @@ export function useSettings() {
       const updated = await api.projects.update(projectId, { name: projectName, description: projectDesc });
       setProject(updated);
       window.dispatchEvent(new Event('project-updated'));
-    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Ошибка при сохранении проекта'); } finally { setSavingProject(false); }
+    } catch (e: unknown) { toast.error(e instanceof Error ? e.message : 'Failed to save project'); } finally { setSavingProject(false); }
   };
 
   const handleLogoSelect = (file: File) => {

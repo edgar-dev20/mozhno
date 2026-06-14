@@ -1,99 +1,54 @@
-import { useState, useRef, useMemo } from 'react';
-import { useT } from '@/i18n';
-import { Plus, Webhook, Globe, Trash2, Code2, FileText, X, Info, Bell, Clipboard, Check, Copy, ChevronDown, AlertTriangle } from "@/shared/icons";
+import { useState, useRef, useMemo, useCallback } from 'react';
+import { useT, type MessageKey } from '@/i18n';
+import { Plus, Webhook, Globe, Trash2, Code2, FileText, X, Bell, Clipboard, Check, Copy, ChevronDown, AlertTriangle } from "@/shared/icons";
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { api, Integration } from "@/api";
 import { SidePanel } from "@/app/components/SidePanel";
 import { TipCard } from "@/app/components/TipCard";
 import { ConfirmDialog } from "@/app/components/ConfirmDialog";
-import { SectionHeader, EmptyState, FormField, GradientButton } from "@/shared";
+import { SectionHeader, EmptyState, FormField, GradientButton, ErrorBox } from "@/shared";
 import { Switch } from "@/app/components/ui/switch";
 import { Checkbox } from "@/app/components/ui/checkbox";
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-const EVENT_CATEGORIES: { label: string; events: { key: string; title: string; desc: string }[] }[] = [
-  {
-    label: 'Флаги',
-    events: [
-      { key: 'flag.created', title: 'Создание флага', desc: 'Новый флаг добавлен' },
-      { key: 'flag.updated', title: 'Изменение флага', desc: 'Обновление настроек' },
-      { key: 'flag.deleted', title: 'Удаление флага', desc: 'Флаг удалён' },
-      { key: 'flag.archived', title: 'Архивирование', desc: 'Флаг перемещён в архив' },
-      { key: 'flag.unarchived', title: 'Разархивирование', desc: 'Флаг восстановлен из архива' },
-    ],
-  },
-  {
-    label: 'Активация в средах',
-    events: [
-      { key: 'strategy.created', title: 'Активация флага', desc: 'Флаг включён в среде' },
-      { key: 'strategy.updated', title: 'Изменение стратегии', desc: 'Правила активации изменены' },
-    ],
-  },
-  {
-    label: 'Окружения',
-    events: [
-      { key: 'environment.created', title: 'Создание окружения', desc: 'Добавлено новое окружение' },
-      { key: 'environment.updated', title: 'Изменение окружения', desc: 'Окружение переименовано' },
-      { key: 'environment.deleted', title: 'Удаление окружения', desc: 'Окружение удалено' },
-    ],
-  },
-  {
-    label: 'Проекты',
-    events: [
-      { key: 'project.created', title: 'Создание проекта', desc: 'Новый проект добавлен' },
-      { key: 'project.updated', title: 'Изменение проекта', desc: 'Настройки проекта обновлены' },
-      { key: 'project.deleted', title: 'Удаление проекта', desc: 'Проект удалён' },
-      { key: 'project.logo_updated', title: 'Логотип обновлён', desc: 'Загружен новый логотип' },
-    ],
-  },
-  {
-    label: 'Пользователи',
-    events: [
-      { key: 'user.created', title: 'Приглашение', desc: 'Новый пользователь добавлен' },
-      { key: 'user.updated', title: 'Изменение роли', desc: 'Роль или статус изменены' },
-      { key: 'user.deleted', title: 'Удаление', desc: 'Пользователь удалён' },
-    ],
-  },
-  {
-    label: 'Сегменты',
-    events: [
-      { key: 'segment.created', title: 'Создание сегмента', desc: 'Новый сегмент добавлен' },
-      { key: 'segment.updated', title: 'Изменение сегмента', desc: 'Сегмент обновлён' },
-      { key: 'segment.deleted', title: 'Удаление сегмента', desc: 'Сегмент удалён' },
-    ],
-  },
-  {
-    label: 'Теги',
-    events: [
-      { key: 'tag.created', title: 'Создание тега', desc: 'Новый тег добавлен' },
-      { key: 'tag.updated', title: 'Изменение тега', desc: 'Тег обновлён' },
-      { key: 'tag.deleted', title: 'Удаление тега', desc: 'Тег удалён' },
-    ],
-  },
-  {
-    label: 'API ключи',
-    events: [
-      { key: 'apikey.created', title: 'Создание ключа', desc: 'Новый API ключ выпущен' },
-      { key: 'apikey.updated', title: 'Изменение ключа', desc: 'API ключ обновлён' },
-      { key: 'apikey.deleted', title: 'Удаление ключа', desc: 'API ключ удалён' },
-    ],
-  },
-  {
-    label: 'Контексты',
-    events: [
-      { key: 'context_definition.created', title: 'Создание определения', desc: 'Новый тип контекста' },
-      { key: 'context_definition.updated', title: 'Изменение определения', desc: 'Тип контекста обновлён' },
-      { key: 'context_definition.deleted', title: 'Удаление определения', desc: 'Тип контекста удалён' },
-      { key: 'context_value.created', title: 'Добавление значения', desc: 'Новое значение контекста' },
-      { key: 'context_value.updated', title: 'Изменение значения', desc: 'Значение контекста обновлено' },
-      { key: 'context_value.deleted', title: 'Удаление значения', desc: 'Значение контекста удалено' },
-    ],
-  },
+const ALL_EVENTS = [
+  'flag.created', 'flag.updated', 'flag.deleted', 'flag.archived', 'flag.unarchived',
+  'strategy.created', 'strategy.updated',
+  'environment.created', 'environment.updated', 'environment.deleted',
+  'project.created', 'project.updated', 'project.deleted', 'project.logo_updated',
+  'user.created', 'user.updated', 'user.deleted',
+  'segment.created', 'segment.updated', 'segment.deleted',
+  'tag.created', 'tag.updated', 'tag.deleted',
+  'apikey.created', 'apikey.updated', 'apikey.deleted',
+  'context_definition.created', 'context_definition.updated', 'context_definition.deleted',
+  'context_value.created', 'context_value.updated', 'context_value.deleted',
 ];
 
-const ALL_EVENTS = EVENT_CATEGORIES.flatMap(c => c.events.map(e => e.key));
+const EVENT_CATEGORY_KEYS = ['flags', 'strategies', 'environments', 'projects', 'users', 'segments', 'tags', 'apiKeys', 'contexts'] as const;
+
+type EventCategoryKey = (typeof EVENT_CATEGORY_KEYS)[number];
+
+const CATEGORY_EVENT_MAP: Record<EventCategoryKey, string[]> = {
+  flags: ['flag.created', 'flag.updated', 'flag.deleted', 'flag.archived', 'flag.unarchived'],
+  strategies: ['strategy.created', 'strategy.updated'],
+  environments: ['environment.created', 'environment.updated', 'environment.deleted'],
+  projects: ['project.created', 'project.updated', 'project.deleted', 'project.logo_updated'],
+  users: ['user.created', 'user.updated', 'user.deleted'],
+  segments: ['segment.created', 'segment.updated', 'segment.deleted'],
+  tags: ['tag.created', 'tag.updated', 'tag.deleted'],
+  apiKeys: ['apikey.created', 'apikey.updated', 'apikey.deleted'],
+  contexts: ['context_definition.created', 'context_definition.updated', 'context_definition.deleted', 'context_value.created', 'context_value.updated', 'context_value.deleted'],
+};
+
+function eventI18nKey(eventKey: string): MessageKey {
+  return `integrations.eventDescriptions.${eventKey}` as MessageKey;
+}
+
+function categoryI18nKey(catKey: EventCategoryKey): MessageKey {
+  return `integrations.eventCategories.${catKey}` as MessageKey;
+}
 
 const OLD_EVENT_KEY_MAP: Record<string, string> = {
   flagCreated: 'flag.created',
@@ -108,20 +63,22 @@ function migrateEventKeys(events: string[]): string[] {
 
 interface HeaderRow { id: number; key: string; value: string; }
 
-const TEMPLATE_VARS = [
-  { key: 'events.action', label: 'Тип события' },
-  { key: 'events.resourceType', label: 'Тип ресурса' },
-  { key: 'events.resourceId', label: 'ID ресурса' },
-  { key: 'events.resourceName', label: 'Имя ресурса' },
-  { key: 'events.details', label: 'Детали' },
-  { key: 'events.projectId', label: 'ID проекта' },
-  { key: 'events.user.id', label: 'ID пользователя' },
-  { key: 'events.user.name', label: 'Имя пользователя' },
-  { key: 'events.user.email', label: 'Email' },
-  { key: 'events.timestamp', label: 'Время (ISO 8601)' },
-];
+const TEMPLATE_VAR_KEYS = [
+  'events.action',
+  'events.resourceType',
+  'events.resourceId',
+  'events.resourceName',
+  'events.details',
+  'events.projectId',
+  'events.user.id',
+  'events.user.name',
+  'events.user.email',
+  'events.timestamp',
+] as const;
 
-let headerIdCounter = 0;
+function templateVarI18nKey(key: string): MessageKey {
+  return `integrations.templateVars.${key}` as MessageKey;
+}
 
 function parseWebhookConfig(integration: Integration): { url: string; headers: Record<string, string>; body: string } {
   try {
@@ -193,12 +150,13 @@ export function Integrations() {
   const [showTemplateHelp, setShowTemplateHelp] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedVar, setCopiedVar] = useState<string | null>(null);
-  const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set(EVENT_CATEGORIES.map(c => c.label)));
+  const [expandedCats, setExpandedCats] = useState<Set<EventCategoryKey>>(new Set(EVENT_CATEGORY_KEYS));
 
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   const initialRef = useRef<{ name: string; url: string; headers: Record<string, string>; body: string; enabled: boolean; events: string[] } | null>(null);
+  const headerIdRef = useRef(0);
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -243,41 +201,66 @@ export function Integrations() {
 
   const t = useT();
 
-  const openCreate = () => {
+  const eventCategories = useMemo(() => {
+    return EVENT_CATEGORY_KEYS.map(catKey => {
+      const events = CATEGORY_EVENT_MAP[catKey];
+      return {
+        catKey,
+        label: t(categoryI18nKey(catKey)),
+        events: events.map(eventKey => {
+          const evtKey = eventI18nKey(eventKey);
+          return {
+            key: eventKey,
+            title: t(`${evtKey}.title` as MessageKey),
+            desc: t(`${evtKey}.desc` as MessageKey),
+          };
+        }),
+      };
+    });
+  }, [t]);
+
+  const templateVars = useMemo(() => {
+    return TEMPLATE_VAR_KEYS.map(key => ({
+      key,
+      label: t(templateVarI18nKey(key)),
+    }));
+  }, [t]);
+
+  const openCreate = useCallback(() => {
     setEditing(null);
     setFormName('');
     setFormUrl('');
-    setFormHeaders([{ id: ++headerIdCounter, key: 'Content-Type', value: 'application/json' }]);
+    setFormHeaders([{ id: ++headerIdRef.current, key: 'Content-Type', value: 'application/json' }]);
     setFormBody('');
     setFormEnabled(false);
     setFormEvents([]);
     setShowTemplateHelp(false);
     setCopied(false);
-    setExpandedCats(new Set(EVENT_CATEGORIES.map(c => c.label)));
+    setExpandedCats(new Set(EVENT_CATEGORY_KEYS));
     setError('');
     initialRef.current = { name: '', url: '', headers: { 'Content-Type': 'application/json' }, body: '', enabled: false, events: [] };
     setPanelOpen(true);
-  };
+  }, []);
 
-  const openEdit = (item: Integration) => {
+  const openEdit = useCallback((item: Integration) => {
     const cfg = parseWebhookConfig(item);
     const evts = parseEvents(item);
     setEditing(item);
     setFormName(item.name);
     setFormUrl(cfg.url);
-    const hdrArr = Object.entries(cfg.headers).map(([k, v]) => ({ id: ++headerIdCounter, key: k, value: v }));
-    setFormHeaders(hdrArr.length > 0 ? hdrArr : [{ id: ++headerIdCounter, key: '', value: '' }]);
+    const hdrArr = Object.entries(cfg.headers).map(([k, v]) => ({ id: ++headerIdRef.current, key: k, value: v }));
+    setFormHeaders(hdrArr.length > 0 ? hdrArr : [{ id: ++headerIdRef.current, key: '', value: '' }]);
     setFormBody(cfg.body);
     setFormEnabled(item.enabled);
     setFormEvents(evts);
     setShowTemplateHelp(false);
-    setExpandedCats(new Set(EVENT_CATEGORIES.map(c => c.label)));
+    setExpandedCats(new Set(EVENT_CATEGORY_KEYS));
     setError('');
     initialRef.current = { name: item.name, url: cfg.url, headers: { ...cfg.headers }, body: cfg.body, enabled: item.enabled, events: [...evts] };
     setPanelOpen(true);
-  };
+  }, []);
 
-  const addHeaderRow = () => setFormHeaders(prev => [...prev, { id: ++headerIdCounter, key: '', value: '' }]);
+  const addHeaderRow = () => setFormHeaders(prev => [...prev, { id: ++headerIdRef.current, key: '', value: '' }]);
   const removeHeaderRow = (id: number) => setFormHeaders(prev => prev.filter(h => h.id !== id));
   const updateHeader = (id: number, field: 'key' | 'value', val: string) => {
     setFormHeaders(prev => prev.map(h => h.id === id ? { ...h, [field]: val } : h));
@@ -290,7 +273,7 @@ export function Integrations() {
     saveMutation.mutate();
   };
 
-  const buildCurlCommand = (): string => {
+  const buildCurlCommand = useCallback((): string => {
     const hdrLines = formHeaders
       .filter(h => h.key.trim())
       .map(h => `-H '${h.key.trim()}: ${h.value}'`)
@@ -298,7 +281,7 @@ export function Integrations() {
     const hdrsPart = hdrLines ? ` ${hdrLines}` : '';
     const bodyPart = formBody.trim() ? ` -d '${formBody.replace(/'/g, "'\\''")}'` : '';
     return `curl -v -X POST '${formUrl}'${hdrsPart}${bodyPart}`;
-  };
+  }, [formUrl, formHeaders, formBody]);
 
   const copyCurl = async () => {
     await navigator.clipboard.writeText(curlCommand);
@@ -312,18 +295,18 @@ export function Integrations() {
     setTimeout(() => setCopiedVar(null), 1500);
   };
 
-  const toggleCatExpand = (label: string) => {
+  const toggleCatExpand = (catKey: EventCategoryKey) => {
     setExpandedCats(prev => {
       const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
+      if (next.has(catKey)) next.delete(catKey);
+      else next.add(catKey);
       return next;
     });
   };
 
-  const toggleCatAll = (cat: typeof EVENT_CATEGORIES[number]) => {
-    const keys = cat.events.map(e => e.key);
-    const allInCat = cat.events.every(e => formEventSet.has(e.key));
+  const toggleCatAll = (catKey: EventCategoryKey) => {
+    const keys = CATEGORY_EVENT_MAP[catKey];
+    const allInCat = keys.every(key => formEventSet.has(key));
     if (allInCat) {
       setFormEvents(prev => prev.filter(k => !keys.includes(k)));
     } else {
@@ -374,7 +357,7 @@ export function Integrations() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader
           title={t('integrations.title')}
           description={t('integrations.description')}
@@ -383,8 +366,8 @@ export function Integrations() {
       </div>
 
       <TipCard
-        text="Настройте вебхук на событие «flag.updated» и получайте HTTP POST на ваш endpoint с деталями каждого изменения. Используйте шаблоны {{events.*}} в теле запроса."
-        label="Вебхуки"
+        text={t('integrations.tipText')}
+        label={t('integrations.tipLabel')}
         icon={<Bell />}
         storageKey="integrations"
       />
@@ -426,7 +409,7 @@ export function Integrations() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.2, delay: idx * 0.03 }}
-                  className="group relative bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:border-border hover:shadow-md transition-all cursor-pointer"
+                  className="group relative bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer"
                   onClick={() => openEdit(item)}
                 >
                   <div className={`h-1.5 bg-gradient-to-r ${hasError ? 'from-red-500 to-amber-500' : 'from-gradient-start to-gradient-end'}`} />
@@ -438,7 +421,7 @@ export function Integrations() {
                         </div>
                         <div className="min-w-0">
                           <h3 className="font-semibold text-foreground truncate">{item.name}</h3>
-                          <p className="text-xs text-muted-foreground/70 font-mono mt-0.5 truncate">{cfg.url || 'URL не указан'}</p>
+                          <p className="text-xs text-muted-foreground/70 font-mono mt-0.5 truncate">{cfg.url || t('integrations.urlNotSet')}</p>
                         </div>
                       </div>
                     </div>
@@ -459,7 +442,7 @@ export function Integrations() {
                         </span>
                       )}
                       <span className="text-xs text-muted-foreground/70">
-                        {evts.length > 0 ? `${evts.length} событ.` : 'Нет событий'}
+                        {evts.length > 0 ? t('integrations.eventCount', { count: String(evts.length) }) : t('integrations.noEvents')}
                       </span>
                     </div>
                   </div>
@@ -475,8 +458,8 @@ export function Integrations() {
         onOpenChange={setPanelOpen}
         title={editing ? t('integrations.configure') : t('integrations.connect')}
         description={editing
-          ? 'Измените URL, заголовки, тело запроса или список событий для этого вебхука.'
-          : 'Создайте вебхук для отправки HTTP POST с данными событий на ваш endpoint.'
+          ? t('integrations.panelEditDescription')
+          : t('integrations.panelCreateDescription')
         }
         footer={<>
           {editing && (
@@ -488,25 +471,22 @@ export function Integrations() {
               <Trash2 size={16} className="inline mr-1.5" />{t('common.delete')}
             </button>
           )}
-          <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-xl transition-colors">{t('common.cancel')}</button>
+          <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors">{t('common.cancel')}</button>
           <GradientButton onClick={handleSave} disabled={saving || !isDirty} loading={saving}>{t('common.saveChanges')}</GradientButton>
         </>}
       >
         <div className="space-y-6">
           {error && (
-            <div className="p-3.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-sm text-red-700 dark:text-red-400 flex items-start gap-2.5">
-              <Info size={18} className="text-red-500 shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
+            <ErrorBox>{error}</ErrorBox>
           )}
 
           <div className="flex items-center justify-between p-4 bg-secondary rounded-xl border border-border">
             <div>
-              <div className="font-medium text-sm text-foreground">Включить вебхук</div>
+              <div className="font-medium text-sm text-foreground">{t('integrations.enable')}</div>
               <div className="text-xs text-muted-foreground mt-0.5">
-                Отправлять события при их наступлении
+                {t('integrations.enableHint')}
                 {limitRemaining < Number.MAX_SAFE_INTEGER && (
-                  <span className="ml-2 text-violet-500">· Осталось отправок: {limitRemaining}</span>
+                  <span className="ml-2 text-violet-500">· {t('integrations.enableRemaining')}: {limitRemaining}</span>
                 )}
               </div>
             </div>
@@ -514,19 +494,19 @@ export function Integrations() {
               className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-violet-500 scale-75 origin-right" />
           </div>
 
-          <FormField label="Название" hint="Короткое имя для идентификации вебхука" maxLength={120} value={formName}>
+          <FormField label={t('integrations.name')} hint={t('integrations.nameHint')} maxLength={120} value={formName}>
             <input
               type="text"
               value={formName}
               onChange={e => setFormName(e.target.value)}
               maxLength={120}
-              placeholder="Мой вебхук"
+              placeholder={t('integrations.namePlaceholder')}
               autoFocus={!editing}
               className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
             />
           </FormField>
 
-          <FormField label="URL" hint="HTTPS-эндпоинт, на который будут отправляться POST-запросы" maxLength={2048} value={formUrl}>
+          <FormField label={t('integrations.url')} hint={t('integrations.urlHint')} maxLength={2048} value={formUrl}>
             <div className="flex items-center gap-2">
               <Globe size={16} className="text-muted-foreground shrink-0" />
               <input
@@ -534,7 +514,7 @@ export function Integrations() {
                 value={formUrl}
                 onChange={e => setFormUrl(e.target.value)}
                 maxLength={2048}
-                placeholder="https://example.com/webhook"
+                placeholder={t('integrations.urlPlaceholder')}
                 className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
               />
             </div>
@@ -544,7 +524,7 @@ export function Integrations() {
             <div className="flex items-center justify-between gap-1.5 px-3 py-2 bg-secondary border-b border-border">
               <div className="flex items-center gap-1.5">
                 <Code2 size={14} className="text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground">Preview запроса</span>
+                <span className="text-xs font-medium text-muted-foreground">{t('integrations.preview')}</span>
               </div>
               <button
                 type="button"
@@ -552,7 +532,7 @@ export function Integrations() {
                 className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-xl transition-colors"
               >
                 {copied ? <Check size={11} /> : <Clipboard size={11} />}
-                {copied ? 'Скопировано' : 'Копировать'}
+                {copied ? t('integrations.copied') : t('integrations.copy')}
               </button>
             </div>
             <pre className="p-3 bg-white dark:bg-neutral-950 text-xs text-foreground/80 font-mono whitespace-pre-wrap break-all m-0 overflow-x-auto">
@@ -562,13 +542,13 @@ export function Integrations() {
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-foreground/80">Заголовки</label>
+              <label className="text-sm font-medium text-foreground/80">{t('integrations.headers')}</label>
               <button
                 type="button"
                 onClick={addHeaderRow}
                 className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium flex items-center gap-1 transition-colors"
               >
-                <Plus size={12} />Добавить
+                <Plus size={12} />{t('integrations.addHeader')}
               </button>
             </div>
             <div className="space-y-2">
@@ -579,7 +559,7 @@ export function Integrations() {
                     value={h.key}
                     onChange={e => updateHeader(h.id, 'key', e.target.value)}
                     maxLength={500}
-                    placeholder="Header"
+                    placeholder={t('integrations.headerKeyPlaceholder')}
                     className="flex-1 bg-white dark:bg-neutral-950 border border-border rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                   />
                   <input
@@ -587,7 +567,7 @@ export function Integrations() {
                     value={h.value}
                     onChange={e => updateHeader(h.id, 'value', e.target.value)}
                     maxLength={500}
-                    placeholder="Value"
+                    placeholder={t('integrations.headerValuePlaceholder')}
                     className="flex-1 bg-white dark:bg-neutral-950 border border-border rounded-xl px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                   />
                   <button
@@ -605,19 +585,19 @@ export function Integrations() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-foreground/80 flex items-center gap-1.5">
-                <FileText size={14} className="text-muted-foreground" />Тело запроса
+                <FileText size={14} className="text-muted-foreground" />{t('integrations.body')}
               </label>
               <button
                 type="button"
                 onClick={() => setShowTemplateHelp(!showTemplateHelp)}
                 className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium flex items-center gap-1 transition-colors"
               >
-                <Code2 size={12} />{showTemplateHelp ? 'Скрыть переменные' : 'Переменные'}
+                <Code2 size={12} />{showTemplateHelp ? t('integrations.hideVariables') : t('integrations.showVariables')}
               </button>
             </div>
             {showTemplateHelp && (
               <div className="p-3 bg-secondary border border-border rounded-xl space-y-0.5">
-                {TEMPLATE_VARS.map(v => {
+                {templateVars.map(v => {
                   const isCopied = copiedVar === v.key;
                   return (
                     <button
@@ -643,36 +623,36 @@ export function Integrations() {
               value={formBody}
               onChange={e => setFormBody(e.target.value)}
               maxLength={10000}
-              placeholder={'{\n  "text": "**{{events.action}}**: {{events.resourceName}} ({{events.resourceType}} #{{events.resourceId}})\\nby {{events.user.name}} at {{events.timestamp}}",\n  "channel": "integrations",\n  "username": "Mozhno"\n}'}
+              placeholder={t('integrations.bodyPlaceholder')}
               rows={7}
               className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-y"
             />
-            <p className="text-xs text-muted-foreground/70">Если заголовок Content-Type не указан, по умолчанию используется application/json.</p>
+            <p className="text-xs text-muted-foreground/70">{t('integrations.bodyHint')}</p>
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-foreground/80">Отправлять при событиях</label>
+              <label className="text-sm font-medium text-foreground/80">{t('integrations.events')}</label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">{formEvents.length} из {ALL_EVENTS.length}</span>
+                <span className="text-xs text-muted-foreground">{t('integrations.eventsCount', { selected: String(formEvents.length), total: String(ALL_EVENTS.length) })}</span>
                 <button
                   type="button"
                   onClick={toggleAllEvents}
                   className="text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
                 >
-                  {formEvents.length === ALL_EVENTS.length ? 'Снять всё' : 'Выбрать всё'}
+                  {formEvents.length === ALL_EVENTS.length ? t('integrations.deselectAll') : t('integrations.selectAll')}
                 </button>
               </div>
             </div>
             <div className="space-y-1">
-              {EVENT_CATEGORIES.map(cat => {
+              {eventCategories.map(cat => {
                 const allInCat = cat.events.every(e => formEventSet.has(e.key));
-                const expanded = expandedCats.has(cat.label);
+                const expanded = expandedCats.has(cat.catKey);
                 return (
-                  <div key={cat.label} className="rounded-xl border border-border overflow-hidden">
+                  <div key={cat.catKey} className="rounded-xl border border-border overflow-hidden">
                     <button
                       type="button"
-                      onClick={() => toggleCatExpand(cat.label)}
+                      onClick={() => toggleCatExpand(cat.catKey)}
                       className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-secondary dark:hover:bg-neutral-900 transition-colors"
                     >
                       <div className="flex items-center gap-2.5">
@@ -682,10 +662,10 @@ export function Integrations() {
                       </div>
                       <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); toggleCatAll(cat); }}
+                        onClick={(e) => { e.stopPropagation(); toggleCatAll(cat.catKey); }}
                         className="text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
                       >
-                        {allInCat ? 'Снять' : 'Все'}
+                        {allInCat ? t('integrations.deselectCategory') : t('integrations.selectCategory')}
                       </button>
                     </button>
                     {expanded && (
@@ -727,8 +707,8 @@ export function Integrations() {
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={(open) => { if (!open) setDeleteId(null); }}
-        title="Удалить вебхук?"
-        description={`Вебхук «${items.find(i => i.id === deleteId)?.name ?? ''}» будет удалён без возможности восстановления.`}
+        title={t('integrations.confirmTitle')}
+        description={t('integrations.confirmDescription', { name: items.find(i => i.id === deleteId)?.name ?? '' })}
         confirmLabel={t('common.delete')}
         onConfirm={handleDelete}
         loading={deleting}

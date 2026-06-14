@@ -21,6 +21,8 @@ public class HttpFeatureFetcher {
     private static final Logger log = LoggerFactory.getLogger(HttpFeatureFetcher.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    private static final String SDK_TYPE = "java";
+    private static final String SDK_VERSION = "1.0.1";
     private static final int MAX_CONSECUTIVE_FAILURES = 5;
     private static final long CIRCUIT_BREAKER_COOLDOWN_MS = 60_000;
 
@@ -59,6 +61,8 @@ public class HttpFeatureFetcher {
                     .header("Accept", "application/json")
                     .header("X-Mozhno-App-Name", config.getAppName())
                     .header("X-Mozhno-Instance-Id", config.getInstanceId())
+                    .header("X-Mozhno-Sdk-Type", SDK_TYPE)
+                    .header("X-Mozhno-Sdk-Version", SDK_VERSION)
                     .GET();
 
                 if (lastEtag != null) {
@@ -108,7 +112,7 @@ public class HttpFeatureFetcher {
         return new FeatureFetcherResult(null, null, false);
     }
 
-    public MetricsSendResult sendMetrics(Map<String, Long> evaluations) {
+    public MetricsSendResult sendMetrics(Map<String, Map<String, Long>> evaluations) {
         if (isCircuitOpenForMetrics()) {
             return MetricsSendResult.FAILURE;
         }
@@ -124,6 +128,8 @@ public class HttpFeatureFetcher {
                 .header("Content-Type", "application/json")
                 .header("X-Mozhno-App-Name", config.getAppName())
                 .header("X-Mozhno-Instance-Id", config.getInstanceId())
+                .header("X-Mozhno-Sdk-Type", SDK_TYPE)
+                .header("X-Mozhno-Sdk-Version", SDK_VERSION)
                 .POST(HttpRequest.BodyPublishers.ofString(body))
                 .build();
 

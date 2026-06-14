@@ -9,7 +9,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import dev.mozhno.auth.UserAuthentication;
 import dev.mozhno.spi.AuditSpi;
-import dev.mozhno.util.RequestUtils;
 
 /**
  * Bridges domain events to the registered {@link dev.mozhno.spi.AuditSpi} implementation.
@@ -57,7 +56,11 @@ public class AuditEventListener {
             var attrs = RequestContextHolder.getRequestAttributes();
             if (attrs instanceof ServletRequestAttributes servletAttrs) {
                 HttpServletRequest request = servletAttrs.getRequest();
-                return RequestUtils.resolveClientIp(request);
+                String forwardedFor = request.getHeader("X-Forwarded-For");
+                if (forwardedFor != null && !forwardedFor.isBlank()) {
+                    return forwardedFor.split(",")[0].trim();
+                }
+                return request.getRemoteAddr();
             }
         } catch (IllegalStateException ignored) {
         }

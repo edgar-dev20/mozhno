@@ -48,8 +48,15 @@ export const strategiesApi = {
 };
 
 export const metricsApi = {
-  get: (flagId: number, environmentId: number) =>
-    request<FlagMetric[]>(`/flags/${flagId}/metrics?environmentId=${environmentId}`),
+  get: (flagId: number, environmentId: number, params?: { instanceId?: number; appName?: string }) => {
+    let queryString = `?environmentId=${environmentId}`;
+    if (params?.instanceId != null) {
+      queryString += `&instanceId=${params.instanceId}`;
+    } else if (params?.appName != null) {
+      queryString += `&appName=${encodeURIComponent(params.appName)}`;
+    }
+    return request<FlagMetric[]>(`/flags/${flagId}/metrics${queryString}`);
+  },
   listForProject: (environmentId?: number) =>
     request<FlagMetric[]>(`/metrics${environmentId != null ? `?environmentId=${environmentId}` : ''}`),
 };

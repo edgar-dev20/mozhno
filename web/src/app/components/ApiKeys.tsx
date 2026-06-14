@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useT } from '@/i18n';
+import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import { Key, Copy, Eye, EyeOff, Shield, Server, Globe, Plus, Trash2, BadgeCheck, Monitor, ExternalLink, ChevronDown, ChevronUp, Clock } from "@/shared/icons";
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -8,7 +9,7 @@ import { TipCard } from "@/app/components/TipCard";
 import { ConfirmDialog } from "@/app/components/ConfirmDialog";
 import { SidePanel } from "@/app/components/SidePanel";
 import { SdkInfo } from "@/app/components/SdkInfo";
-import { SectionHeader, GradientButton, EmptyState, LoadingState, SearchInput } from "@/shared";
+import { SectionHeader, GradientButton, EmptyState, LoadingState, SearchInput, ErrorBox } from "@/shared";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { NavLink } from 'react-router';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
@@ -144,10 +145,10 @@ export function ApiKeys() {
   const getKeyTypeLabel = (t: string) => t === 'FRONTEND' ? 'Frontend' : 'Server';
   const getKeyTypeIcon = (t: string) => t === 'FRONTEND' ? Globe : Server;
 
-  const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('ru-RU') : t('apiKeys.never');
+  const formatDate = (d: string) => d ? new Date(d).toLocaleDateString(toIntlLocale(loadLocale())) : t('apiKeys.never');
   const formatDateTime = (d: string) => {
     if (!d) return t('apiKeys.never');
-    return new Date(d).toLocaleString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return new Date(d).toLocaleString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
   const timeAgo = (d: string) => {
     if (!d) return t('apiKeys.neverUsed');
@@ -210,7 +211,7 @@ export function ApiKeys() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader
           title={t('apiKeys.title')}
           description={t('apiKeys.description')}
@@ -280,8 +281,8 @@ export function ApiKeys() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2, delay: idx * 0.025 }}
-                  className="group bg-card border border-border rounded-xl shadow-sm hover:border-border hover:shadow-md transition-all overflow-hidden"
+                  transition={{ duration: 0.2, delay: idx * 0.03 }}
+                  className="group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
                 >
                   <div
                     className="flex gap-4 px-4 py-3 cursor-pointer"
@@ -446,13 +447,13 @@ export function ApiKeys() {
         description={t('apiKeys.panelDescription')}
         footer={
           <>
-            <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-xl transition-colors">{t('common.cancel')}</button>
+            <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors">{t('common.cancel')}</button>
             <GradientButton onClick={handleCreate} disabled={saving || !formName} loading={saving}>{t('common.saveChanges')}</GradientButton>
           </>
         }
       >
         <div className="space-y-5">
-          {error && <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-sm text-red-700 dark:text-red-400">{error}</div>}
+          {error && <ErrorBox>{error}</ErrorBox>}
 
           <div className="p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg">
             <p className="text-xs text-amber-700 dark:text-amber-300">

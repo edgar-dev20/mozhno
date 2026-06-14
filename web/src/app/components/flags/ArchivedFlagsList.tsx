@@ -31,7 +31,7 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
     <motion.div
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card border border-violet-200 dark:border-violet-500/20 rounded-xl overflow-hidden shadow-sm"
+      className="bg-card rounded-xl overflow-hidden shadow-md ring-1 ring-violet-200 dark:ring-violet-500/20"
     >
       <div className="px-6 py-4 bg-violet-50 dark:bg-violet-500/10 border-b border-violet-200 dark:border-violet-500/20">
         <div className="flex items-center gap-3">

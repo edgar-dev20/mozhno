@@ -11,6 +11,7 @@ public record FlagMetricResponse(
     Integer environmentId,
     long evaluationTrueCount,
     long evaluationFalseCount,
+    Long clientInstanceId,
     Instant timeBucket,
     Instant createdAt
 ) {}

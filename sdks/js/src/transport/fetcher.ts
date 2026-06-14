@@ -1,5 +1,8 @@
 import type { MozhnoConfig, FeatureFlag, ToggleResult, MozhnoContext } from './types';
 
+const SDK_TYPE = 'js';
+const SDK_VERSION = '1.0.0';
+
 export class HttpFetcher {
   private config: MozhnoConfig;
   private lastEtag: string | null = null;
@@ -18,6 +21,8 @@ export class HttpFetcher {
       'Accept': 'application/json',
       'X-Mozhno-App-Name': this.config.appName,
       'X-Mozhno-Instance-Id': this.config.instanceId || '',
+      'X-Mozhno-Sdk-Type': SDK_TYPE,
+      'X-Mozhno-Sdk-Version': SDK_VERSION,
     };
 
     if (this.lastEtag) {
@@ -53,6 +58,8 @@ export class HttpFetcher {
           'Content-Type': 'application/json',
           'X-Mozhno-App-Name': this.config.appName,
           'X-Mozhno-Instance-Id': this.config.instanceId || '',
+          'X-Mozhno-Sdk-Type': SDK_TYPE,
+          'X-Mozhno-Sdk-Version': SDK_VERSION,
         },
         body: JSON.stringify({ context }),
       });
@@ -82,6 +89,8 @@ export class HttpFetcher {
           'Content-Type': 'application/json',
           'X-Mozhno-App-Name': this.config.appName,
           'X-Mozhno-Instance-Id': this.config.instanceId || '',
+          'X-Mozhno-Sdk-Type': SDK_TYPE,
+          'X-Mozhno-Sdk-Version': SDK_VERSION,
         },
         body: JSON.stringify({ evaluations }),
       });

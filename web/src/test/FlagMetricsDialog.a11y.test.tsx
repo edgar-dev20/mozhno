@@ -9,6 +9,9 @@ vi.mock('@/api', () => ({
     metrics: {
       get: vi.fn(),
     },
+    clientInstances: {
+      list: vi.fn().mockResolvedValue([]),
+    },
   },
 }));
 

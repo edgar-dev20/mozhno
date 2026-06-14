@@ -63,7 +63,8 @@ export function DateRangePicker({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className={`inline-flex items-center gap-2 bg-card border border-border rounded-xl px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
+          aria-label={placeholder ?? t("common.selectPeriod")}
+          className={`inline-flex items-center gap-2 bg-accent border-transparent rounded-lg px-3 py-2 text-sm hover:bg-accent/80 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
         >
           <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
           <span className={hasValue ? "text-foreground/80" : "text-muted-foreground"}>
@@ -81,7 +82,7 @@ export function DateRangePicker({
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="rounded-2xl w-auto p-0" align="center">
+      <PopoverContent className="rounded-xl w-auto p-0" align="center">
         <CalendarComponent
           mode="range"
           selected={hasValue ? { from: from ?? undefined, to: to ?? undefined } : undefined}
@@ -103,7 +104,7 @@ export function DateRangePicker({
                   onChange(value.from, value.to);
                   setOpen(false);
                 }}
-                className="px-3 py-1.5 text-xs font-semibold rounded-xl transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
               >
                 {preset.label}
               </button>
@@ -115,7 +116,7 @@ export function DateRangePicker({
                   onChange(undefined, undefined);
                   setOpen(false);
                 }}
-                className="px-3 py-1.5 text-xs font-semibold rounded-xl transition-all border border-transparent bg-accent text-muted-foreground hover:bg-accent/80"
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border border-transparent bg-accent text-muted-foreground hover:bg-accent/80"
               >
                 {t("common.clearFilter")}
               </button>

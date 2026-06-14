@@ -4,10 +4,12 @@ import { Plus, Zap, Rocket, Archive } from '@/shared/icons';
 import { SidePanel } from '@/app/components/SidePanel';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
-import { DiffView } from '@/app/components/DiffView';
+import { InlineDiffBar } from '@/app/components/InlineDiffBar';
+import { OperatorBadge } from '@/app/components/OperatorBadge';
 import { FlagMetricsDialog } from '@/app/components/FlagMetricsDialog';
-import { SectionHeader, EmptyState, GradientButton, LoadingState, adjustColor } from '@/shared';
+import { SectionHeader, EmptyState, GradientButton, LoadingState, ErrorBox, adjustColor } from '@/shared';
 import type { FlagTagValue } from '@/api';
+import type { ConstraintGroup } from '@/app/components/flags/types';
 import { useT } from '@/i18n';
 
 import {
@@ -36,7 +38,7 @@ import { SegmentIcon } from '@/app/components/SegmentIcon';
 import type { CreateFlagFormValues, EditFlagFormValues } from '@/app/components/flags/schemas';
 import type { DiffChange } from '@/shared/diffUtils';
 import type { ReactNode } from 'react';
-import { OPERATOR_LABELS } from '@/app/components/operators';
+import { isConstraintValueValid } from '@/app/components/operators';
 
 export function Flags() {
   const { data: project, isLoading: projectLoading } = useProjectQuery();
@@ -81,6 +83,7 @@ export function Flags() {
   const {
     panelOpen, setPanelOpen, editing, setEditing, expandedKeys, setExpandedKeys,
     generalDirty, setGeneralDirty,
+    activeGroupId, setActiveGroupId,
     envRulePercent, setEnvRulePercent, envRuleSegments, setEnvRuleSegments,
     envRuleConstraints, setEnvRuleConstraints, envRuleEnabled, setEnvRuleEnabled,
     initialEnvRulePercent, initialEnvRuleSegments, initialEnvRuleConstraints, initialEnvRuleEnabled,
@@ -90,6 +93,7 @@ export function Flags() {
     archiveTarget, setArchiveTarget, archiving,
     metricsDialogOpen, setMetricsDialogOpen, metricsTarget, setMetricsTarget,
     openCreate, openGeneral, openEnvironment, doDelete, doArchive, doUnarchive, doToggleFlag,
+    flattenConstraintGroups: flattenConstraints,
   } = useFlagPanels(
     projectId,
     contexts,
@@ -105,7 +109,7 @@ export function Flags() {
     } else if (editing.mode === 'environment') {
       setInitialEnvRulePercent(envRulePercent);
       setInitialEnvRuleSegments([...envRuleSegments]);
-      setInitialEnvRuleConstraints(envRuleConstraints.map(c => ({ ...c })));
+      setInitialEnvRuleConstraints(envRuleConstraints.map(g => ({ ...g, values: [...g.values] })));
       setInitialEnvRuleEnabled(envRuleEnabled);
     } else if (editing.mode === 'general' && editing.flag && saved) {
       setEditing({
@@ -130,6 +134,12 @@ export function Flags() {
   });
 
   const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (!panelOpen) {
+      setActiveGroupId(null);
+    }
+  }, [panelOpen, setActiveGroupId]);
 
   useEffect(() => {
     const targetKey = searchParams.get('open');
@@ -161,36 +171,36 @@ export function Flags() {
 
     if (editing.flag.name !== data.name) {
       changes.push({
-        field: 'name', label: 'Название',
+        field: 'name', label: t('flags.diffLabelName'),
         before: editing.flag.name,
         after: data.name,
-        group: 'Основные настройки',
+        group: t('flags.diffGroupMain'),
       });
     }
 
     if (editing.flag.description !== (data.description ?? '')) {
       changes.push({
-        field: 'description', label: 'Описание',
+        field: 'description', label: t('flags.diffLabelDescription'),
         before: editing.flag.description,
         after: data.description ?? '',
-        group: 'Основные настройки',
+        group: t('flags.diffGroupMain'),
       });
     }
 
     if (editing.flag.flagType !== data.flagType) {
-      const label = (t: string) => t === 'RELEASE' ? 'Релиз' : 'Рубильник';
+      const typeLabel = (ft: string) => ft === 'RELEASE' ? t('flags.release') : t('flags.killswitch');
       changes.push({
-        field: 'flagType', label: 'Тип',
-        before: label(editing.flag.flagType),
-        after: label(data.flagType),
-        group: 'Основные настройки',
+        field: 'flagType', label: t('flags.diffLabelType'),
+        before: typeLabel(editing.flag.flagType),
+        after: typeLabel(data.flagType),
+        group: t('flags.diffGroupMain'),
       });
     }
 
     if (JSON.stringify(editing.flag.tags ?? []) !== JSON.stringify(tags)) {
       const makeTagNode = (tv: FlagTagValue): ReactNode => (
         <span className="inline-flex items-center gap-1.5">
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium text-white shadow-sm leading-none"
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white shadow-sm leading-none"
             style={{ backgroundImage: `linear-gradient(to right, ${tv.tagColor}, ${adjustColor(tv.tagColor, 20)})` }}>
             {tv.tagName}
           </span>
@@ -206,16 +216,16 @@ export function Flags() {
         if (!newTv) {
           changes.push({
             field: `tag-removed-${tagId}`,
-            label: `Убран тег «${oldTv.tagName}»`,
-            group: 'Теги',
+            label: t('flags.diffTagRemoved', { name: oldTv.tagName }),
+            group: t('flags.diffGroupTags'),
             before: makeTagNode(oldTv),
             after: '',
           });
         } else if (oldTv.value !== newTv.value) {
           changes.push({
             field: `tag-${tagId}`,
-            label: `Тег «${oldTv.tagName}»`,
-            group: 'Теги',
+            label: t('flags.diffTagModified', { name: oldTv.tagName }),
+            group: t('flags.diffGroupTags'),
             before: oldTv.value || '∅',
             after: newTv.value || '∅',
           });
@@ -225,8 +235,8 @@ export function Flags() {
         if (!oldMap.has(tagId)) {
           changes.push({
             field: `tag-added-${tagId}`,
-            label: `Добавлен тег «${newTv.tagName}»`,
-            group: 'Теги',
+            label: t('flags.diffTagAdded', { name: newTv.tagName }),
+            group: t('flags.diffGroupTags'),
             before: '',
             after: makeTagNode(newTv),
           });
@@ -271,30 +281,38 @@ export function Flags() {
       );
     };
 
-    const formatConstraintLabel = (c: { contextDefId: number; operator: string; value: string }) => {
-      const ctx = contexts.find(cd => cd.id === c.contextDefId);
-      const attr = ctx?.name ?? `Атрибут #${c.contextDefId}`;
-      const op = OPERATOR_LABELS[c.operator] ?? c.operator;
-      return `${attr} ${op} ${c.value || '∅'}`;
+    const renderGroupNode = (g: ConstraintGroup): ReactNode => {
+      const ctx = contexts.find(cd => cd.id === g.contextDefId);
+      const attr = ctx?.name ?? `#${g.contextDefId}`;
+      const vals = g.values.length > 0 ? g.values.join(', ') : '∅';
+      return (
+        <span className="inline-flex items-center gap-1.5 text-xs flex-wrap">
+          <span className="font-semibold text-foreground/80">{attr}</span>
+          <OperatorBadge operator={g.operator} />
+          <code className="font-mono text-foreground/80 break-all">{vals}</code>
+        </span>
+      );
     };
+
+    const groupKey = (g: ConstraintGroup) => `${g.contextDefId}|${g.operator}`;
 
     const changes: DiffChange[] = [];
 
     if (initialEnvRuleEnabled !== envRuleEnabled) {
       changes.push({
-        field: 'enabled', label: 'Включён',
-        before: initialEnvRuleEnabled ? 'Да' : 'Нет',
-        after: envRuleEnabled ? 'Да' : 'Нет',
-        group: 'Стратегия активации',
+        field: 'enabled', label: t('flags.diffLabelEnabled'),
+        before: initialEnvRuleEnabled ? t('common.yes') : t('common.no'),
+        after: envRuleEnabled ? t('common.yes') : t('common.no'),
+        group: t('flags.diffGroupStrategy'),
       });
     }
 
     if (initialEnvRulePercent !== envRulePercent) {
       changes.push({
-        field: 'percentage', label: 'Процент раскатки',
+        field: 'percentage', label: t('flags.diffLabelPercentage'),
         before: `${initialEnvRulePercent}%`,
         after: `${envRulePercent}%`,
-        group: 'Стратегия активации',
+        group: t('flags.diffGroupStrategy'),
       });
     }
 
@@ -305,8 +323,8 @@ export function Flags() {
       for (const id of removed) {
         changes.push({
           field: `seg-removed-${id}`,
-          label: 'Убран сегмент',
-          group: 'Сегменты',
+          label: t('flags.diffSegmentRemoved'),
+          group: t('flags.diffGroupSegments'),
           before: makeSegNode(id),
           after: '',
         });
@@ -314,75 +332,65 @@ export function Flags() {
       for (const id of added) {
         changes.push({
           field: `seg-added-${id}`,
-          label: 'Добавлен сегмент',
-          group: 'Сегменты',
+          label: t('flags.diffSegmentAdded'),
+          group: t('flags.diffGroupSegments'),
           before: '',
           after: makeSegNode(id),
         });
       }
     }
 
-    if (JSON.stringify(initialEnvRuleConstraints) !== JSON.stringify(envRuleConstraints)) {
-      const maxLen = Math.max(initialEnvRuleConstraints.length, envRuleConstraints.length);
-      for (let i = 0; i < maxLen; i++) {
-        const oldC = initialEnvRuleConstraints[i];
-        const newC = envRuleConstraints[i];
+    const oldGroupMap = new Map<string, ConstraintGroup>();
+    for (const g of initialEnvRuleConstraints) {
+      if (g.contextDefId === 0) continue;
+      oldGroupMap.set(groupKey(g), g);
+    }
+    const newGroupMap = new Map<string, ConstraintGroup>();
+    for (const g of envRuleConstraints) {
+      if (g.contextDefId === 0) continue;
+      newGroupMap.set(groupKey(g), g);
+    }
 
-        if (!oldC && newC) {
+    const allKeys = new Set([...oldGroupMap.keys(), ...newGroupMap.keys()]);
+    let conIdx = 0;
+    for (const key of allKeys) {
+      conIdx++;
+      const oldG = oldGroupMap.get(key);
+      const newG = newGroupMap.get(key);
+
+      if (!oldG && newG) {
+        changes.push({
+          field: `con-added-${conIdx}`,
+          label: t('flags.diffConstraintAdded'),
+          group: t('flags.diffGroupConstraints'),
+          before: '',
+          after: renderGroupNode(newG),
+        });
+      } else if (oldG && !newG) {
+        changes.push({
+          field: `con-removed-${conIdx}`,
+          label: t('flags.diffConstraintRemoved'),
+          group: t('flags.diffGroupConstraints'),
+          before: renderGroupNode(oldG),
+          after: '',
+        });
+      } else if (oldG && newG) {
+        const oldVals = JSON.stringify(oldG.values);
+        const newVals = JSON.stringify(newG.values);
+        if (oldVals !== newVals) {
           changes.push({
-            field: `con-added-${i}`,
-            label: 'Добавлено условие',
-            group: 'Ограничения',
-            before: '',
-            after: formatConstraintLabel(newC),
+            field: `con-changed-${conIdx}`,
+            label: t('flags.diffConstraintValuesChanged'),
+            group: t('flags.diffGroupConstraints'),
+            before: renderGroupNode(oldG),
+            after: renderGroupNode(newG),
           });
-        } else if (oldC && !newC) {
-          changes.push({
-            field: `con-removed-${i}`,
-            label: 'Убрано условие',
-            group: 'Ограничения',
-            before: formatConstraintLabel(oldC),
-            after: '',
-          });
-        } else if (oldC && newC) {
-          const attrChanged = oldC.contextDefId !== newC.contextDefId;
-          const opChanged = oldC.operator !== newC.operator;
-          const valueChanged = oldC.value !== newC.value;
-
-          if (attrChanged || opChanged || valueChanged) {
-            const mkNode = (c: { contextDefId: number; operator: string; value: string }, isOld: boolean): ReactNode => {
-              const ctx = contexts.find(cd => cd.id === c.contextDefId);
-              const attrName = ctx?.name ?? `Атрибут #${c.contextDefId}`;
-              const op = OPERATOR_LABELS[c.operator] ?? c.operator;
-              const val = c.value || '∅';
-              return (
-                <span className="inline-flex items-baseline gap-1">
-                  <span className={attrChanged ? (isOld ? 'line-through text-muted-foreground/60' : 'font-medium text-foreground/90') : ''}>
-                    {attrName}
-                  </span>
-                  <span className="text-muted-foreground/40">·</span>
-                  <span className={opChanged ? (isOld ? 'line-through text-muted-foreground/60' : 'font-medium text-violet-600 dark:text-violet-400') : ''}>
-                    {op}
-                  </span>
-                  <span className="text-muted-foreground/40">·</span>
-                  <span className={valueChanged ? (isOld ? 'line-through text-muted-foreground/60' : 'font-medium text-foreground/90') : ''}>
-                    {val}
-                  </span>
-                </span>
-              );
-            };
-
-            changes.push({
-              field: `con-${i}`,
-              label: `Условие ${i + 1}`,
-              group: 'Ограничения',
-              before: mkNode(oldC, true),
-              after: mkNode(newC, false),
-            });
-          }
         }
       }
     }
+
+    const flatInitialConstraints = flattenConstraints(initialEnvRuleConstraints);
+    const flatCurrentConstraints = flattenConstraints(envRuleConstraints);
 
     const config = {
       mode: 'environment' as const,
@@ -392,11 +400,11 @@ export function Flags() {
         enabled: envRuleEnabled,
         percentage: envRulePercent,
         segmentIds: envRuleSegments,
-        constraints: envRuleConstraints,
+        constraints: flatCurrentConstraints,
         initialEnabled: initialEnvRuleEnabled,
         initialPercentage: initialEnvRulePercent,
         initialSegments: initialEnvRuleSegments,
-        initialConstraints: initialEnvRuleConstraints,
+        initialConstraints: flatInitialConstraints,
       },
     };
 
@@ -422,21 +430,25 @@ export function Flags() {
   const activeFormId = editing.mode === 'create' ? createFormId : editing.mode === 'general' ? editFormId : undefined;
 
   const saveLabel = t('common.saveChanges');
-  const saveDisabled = saving || (editing.mode === 'environment' && !isEnvDirty) || (editing.mode === 'general' && !generalDirty);
+  const hasInvalidConstraints = envRuleConstraints.some(g => {
+    if (g.contextDefId === 0) return false;
+    const ctx = contexts.find(c => c.id === g.contextDefId);
+    return !isConstraintValueValid(ctx?.type, g.values[0] ?? '', g.operator);
+  });
+  const saveDisabled = saving || (editing.mode === 'environment' && !isEnvDirty) || (editing.mode === 'general' && !generalDirty) || hasInvalidConstraints;
+
+  const closePanel = useCallback(() => {
+    setActiveGroupId(null);
+    setPanelOpen(false);
+  }, [setActiveGroupId, setPanelOpen]);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('flags.title')} description={t('flags.description')} />
         <GradientButton onClick={openCreate} icon={<Plus size={18} />}>{t('flags.create')}</GradientButton>
       </div>
 
-      
-      {(enrichedData?.totalItems != null) && (
-        <div className="text-xs text-muted-foreground/60">
-          {enrichedData.totalItems} flags total ({filtered.length} matching filters)
-        </div>
-      )}
       <FlagFiltersBar
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -531,22 +543,37 @@ export function Flags() {
 
       <SidePanel
         open={panelOpen}
-        onOpenChange={setPanelOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closePanel();
+            return;
+          }
+          setPanelOpen(true);
+        }}
         title={sidePanelTitle}
         description={sidePanelDescription}
+        diffSlot={diffOpen ? <InlineDiffBar changes={diffChanges} /> : undefined}
+        onDiffDismiss={diffOpen ? closeDiff : undefined}
         footer={
-          <>
-            <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-xl transition-colors">{t('common.cancel')}</button>
-            {(editing.mode === 'create' || editing.mode === 'general') ? (
-              <GradientButton type="submit" form={activeFormId} disabled={saveDisabled} loading={saving}>{saveLabel}</GradientButton>
-            ) : (
-              <GradientButton onClick={handleEnvironmentSave} disabled={saveDisabled} loading={saving}>{saveLabel}</GradientButton>
-            )}
-          </>
+          diffOpen ? (
+            <>
+              <button onClick={closeDiff} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors">{t('common.cancel')}</button>
+              <GradientButton onClick={confirmDiff} disabled={hasInvalidConstraints} loading={saving}>{t('common.applyChanges')}</GradientButton>
+            </>
+          ) : (
+            <>
+              <button onClick={closePanel} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors">{t('common.cancel')}</button>
+              {(editing.mode === 'create' || editing.mode === 'general') ? (
+                <GradientButton type="submit" form={activeFormId} disabled={saveDisabled} loading={saving}>{saveLabel}</GradientButton>
+              ) : (
+                <GradientButton onClick={handleEnvironmentSave} disabled={saveDisabled} loading={saving}>{saveLabel}</GradientButton>
+              )}
+            </>
+          )
         }
       >
         <div className="space-y-5">
-          {error && <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-sm text-red-700">{error}</div>}
+          {error && <ErrorBox>{error}</ErrorBox>}
 
           {editing.mode === 'create' && (
             <FlagCreatePanel
@@ -573,31 +600,18 @@ export function Flags() {
               onEnvRulePercentChange={setEnvRulePercent}
               envRuleSegments={envRuleSegments}
               onEnvRuleSegmentsChange={setEnvRuleSegments}
-              envRuleConstraints={envRuleConstraints}
-              onEnvRuleConstraintsChange={setEnvRuleConstraints}
+              envRuleConstraintGroups={envRuleConstraints}
+              onEnvRuleConstraintGroupsChange={setEnvRuleConstraints}
               envRuleEnabled={envRuleEnabled}
               onEnvRuleEnabledChange={setEnvRuleEnabled}
               segments={segments}
               contexts={contexts}
+              activeGroupId={activeGroupId}
+              onActiveGroupIdChange={setActiveGroupId}
             />
           )}
         </div>
       </SidePanel>
-
-      <ConfirmDialog
-        open={diffOpen}
-        onOpenChange={(open) => { if (!open) closeDiff(); }}
-        title={t('flags.applyChanges')}
-        description={t('common.reviewChanges')}
-        confirmLabel={t('common.applyChanges')}
-        cancelLabel={t('common.cancel')}
-        variant="default"
-        onConfirm={confirmDiff}
-        loading={false}
-        wide
-      >
-        <DiffView changes={diffChanges} />
-      </ConfirmDialog>
 
       <ConfirmDialog
         open={!!deleteTarget}

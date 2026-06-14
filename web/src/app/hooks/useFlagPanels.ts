@@ -1,9 +1,9 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import type { FlagView } from '@/app/hooks/flagTypes';
-import type { ConstraintEntry } from '@/app/components/flags/types';
+import type { ConstraintGroup } from '@/app/components/flags/types';
 import type { ContextDefinition } from '@/api';
-import { parseConstraintEntries } from '@/app/components/flags/parseConstraints';
+import { parseConstraintEntries, groupConstraintEntries, flattenConstraintGroups } from '@/app/components/flags/parseConstraints';
 import { getErrorMessage } from '@/shared/errorHandler';
 
 export interface PanelEditingState {
@@ -33,13 +33,14 @@ export function useFlagPanels(
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
 
   const [generalDirty, setGeneralDirty] = useState(false);
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [envRulePercent, setEnvRulePercent] = useState(100);
   const [envRuleSegments, setEnvRuleSegments] = useState<number[]>([]);
-  const [envRuleConstraints, setEnvRuleConstraints] = useState<ConstraintEntry[]>([]);
+  const [envRuleConstraints, setEnvRuleConstraints] = useState<ConstraintGroup[]>([]);
   const [envRuleEnabled, setEnvRuleEnabled] = useState(false);
   const [initialEnvRulePercent, setInitialEnvRulePercent] = useState(100);
   const [initialEnvRuleSegments, setInitialEnvRuleSegments] = useState<number[]>([]);
-  const [initialEnvRuleConstraints, setInitialEnvRuleConstraints] = useState<ConstraintEntry[]>([]);
+  const [initialEnvRuleConstraints, setInitialEnvRuleConstraints] = useState<ConstraintGroup[]>([]);
   const [initialEnvRuleEnabled, setInitialEnvRuleEnabled] = useState(false);
 
   const isEnvDirty =
@@ -75,6 +76,7 @@ export function useFlagPanels(
   const openEnvironment = useCallback((flag: FlagView, envId: number) => {
     setEditing({ flag, mode: 'environment', envId });
     setPanelOpen(true);
+    setActiveGroupId(null);
     const es = flag.environments[envId] ?? {
       enabled: false,
       percentage: 100,
@@ -84,13 +86,14 @@ export function useFlagPanels(
       contextValuesJson: null,
     };
     const constraints = parseConstraintEntries(es.contextValuesJson, es.contextDefinitionId, contexts);
+    const groups = groupConstraintEntries(constraints);
     setEnvRulePercent(es.percentage ?? 100);
     setEnvRuleSegments(es.segmentIds ?? []);
-    setEnvRuleConstraints(constraints.map(c => ({ ...c })));
+    setEnvRuleConstraints(groups);
     setEnvRuleEnabled(es.enabled ?? false);
     setInitialEnvRulePercent(es.percentage ?? 100);
     setInitialEnvRuleSegments(es.segmentIds ?? []);
-    setInitialEnvRuleConstraints(constraints.map(c => ({ ...c })));
+    setInitialEnvRuleConstraints(groups.map(g => ({ ...g, values: [...g.values] })));
     setInitialEnvRuleEnabled(es.enabled ?? false);
   }, [contexts]);
 
@@ -150,6 +153,7 @@ export function useFlagPanels(
     setPanelOpen(false);
     setEditing({ flag: null, mode: 'create', envId: null });
     setGeneralDirty(false);
+    setActiveGroupId(null);
   }, []);
 
   return {
@@ -161,6 +165,8 @@ export function useFlagPanels(
     setExpandedKeys,
     generalDirty,
     setGeneralDirty,
+    activeGroupId,
+    setActiveGroupId,
     envRulePercent,
     setEnvRulePercent,
     envRuleSegments,
@@ -198,5 +204,6 @@ export function useFlagPanels(
     doUnarchive,
     doToggleFlag,
     resetPanel,
+    flattenConstraintGroups,
   };
 }

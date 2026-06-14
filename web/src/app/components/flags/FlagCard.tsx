@@ -32,11 +32,11 @@ export function FlagCard(props: FlagCardProps) {
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
       layout
-      className="group bg-card border border-border rounded-xl shadow-sm hover:border-border hover:shadow-md transition-all overflow-hidden"
+      className="group bg-card rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden ring-1 ring-border"
       id={`flag-card-${flag.key}`}
     >
       <div className="flex gap-4 px-4 py-3 cursor-pointer" onClick={onToggleExpand}>
-        <FlagCardHeader flag={flag} expanded={expanded} environments={props.environments} tags={props.tags} onToggleFlag={props.onToggleFlag} />
+        <FlagCardHeader flag={flag} expanded={expanded} environments={props.environments} tags={props.tags} onToggleFlag={props.onToggleFlag} sparklineData={props.sparklineData} />
       </div>
 
       <AnimatePresence initial={false}>

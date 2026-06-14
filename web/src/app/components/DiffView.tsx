@@ -32,13 +32,13 @@ function renderValue(value: DiffChange['before'] | DiffChange['after'], isOld: b
   }
   if (isOld) {
     return (
-      <span className={compact ? 'text-[11px] text-muted-foreground/60 line-through' : 'text-xs text-muted-foreground/60 line-through'}>
+      <span className={compact ? 'text-xs text-muted-foreground/60 line-through' : 'text-xs text-muted-foreground/60 line-through'}>
         {String(value)}
       </span>
     );
   }
   return (
-    <span className={compact ? 'text-[11px] font-medium text-foreground/90' : 'text-xs font-medium text-foreground/90'}>
+    <span className={compact ? 'text-xs font-medium text-foreground/90' : 'text-xs font-medium text-foreground/90'}>
       {String(value)}
     </span>
   );
@@ -55,7 +55,7 @@ function DiffRow({ change, index, compact }: { change: DiffChange; index: number
       transition={{ duration: 0.15, delay: Math.min(index, 5) * 0.04 }}
       className={`pl-3 pr-3 ${rowClasses(hasRemoved, hasAdded, compact)}`}
     >
-      <div className={compact ? 'text-[11px] font-medium text-muted-foreground/70 mb-0.5' : 'text-[11px] font-medium text-muted-foreground/70 mb-0.5'}>
+      <div className={compact ? 'text-xs font-medium text-muted-foreground/70 mb-0.5' : 'text-xs font-medium text-muted-foreground/70 mb-0.5'}>
         {change.label}
       </div>
       <div className="flex items-start gap-2 min-w-0">
@@ -101,7 +101,7 @@ export function DiffView({ changes }: DiffViewProps) {
       {Array.from(groups.entries()).map(([group, items]) => (
         <div key={group ?? '__default'} className="space-y-2">
           {group && (
-            <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+            <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
               {group} · {items.length}
             </span>
           )}

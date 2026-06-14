@@ -8,6 +8,9 @@ vi.mock('../api', () => ({
     metrics: {
       get: vi.fn(),
     },
+    clientInstances: {
+      list: vi.fn().mockResolvedValue([]),
+    },
   },
 }));
 
@@ -34,7 +37,7 @@ describe('FlagMetricsDialog', () => {
       />
     );
     await waitFor(() => {
-      expect(screen.getByText('Test Flag в production')).toBeTruthy();
+      expect(screen.getByText('Test Flag')).toBeTruthy();
     });
   });
 
@@ -69,7 +72,7 @@ describe('FlagMetricsDialog', () => {
     );
 
     await waitFor(() => {
-      expect(api.metrics.get).toHaveBeenCalledWith(1, 1);
+      expect(api.metrics.get).toHaveBeenCalledWith(1, 1, undefined);
     });
   });
 
@@ -86,7 +89,7 @@ describe('FlagMetricsDialog', () => {
     );
 
     await waitFor(() => {
-      expect(api.metrics.get).toHaveBeenCalledWith(1, 2);
+      expect(api.metrics.get).toHaveBeenCalledWith(1, 2, undefined);
     });
   });
 
@@ -103,7 +106,7 @@ describe('FlagMetricsDialog', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('My Flag в staging')).toBeTruthy();
+      expect(screen.getByText('My Flag')).toBeTruthy();
     });
     expect(screen.queryByLabelText('Окружение')).toBeNull();
   });
@@ -120,7 +123,7 @@ describe('FlagMetricsDialog', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Окружение')).toBeTruthy();
+      expect(screen.getByText('production')).toBeTruthy();
     });
   });
 

@@ -2,16 +2,17 @@ import { useState, useMemo } from 'react';
 import { Plus, Users, Filter, Settings, X, PieChart, Upload, ChevronDown, Trash2 } from "@/shared/icons";
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { TipCard } from "@/app/components/TipCard";
 import { SidePanel } from "@/app/components/SidePanel";
 import { ConfirmDialog } from "@/app/components/ConfirmDialog";
-import { DiffConfirmDialog } from "@/app/components/DiffConfirmDialog";
+import { InlineDiffBar } from "@/app/components/InlineDiffBar";
 import { computeDiff, DiffChange } from "@/shared/diffUtils";
 import { SegmentIcon, SegmentIconPicker, SegmentColorPicker } from "@/app/components/SegmentIcon";
 import { SegmentResponse } from "@/api";
-import { getOperatorsForType, getDefaultOperator, isValidOperator, OPERATOR_LABELS } from "@/app/components/operators";
-import { SectionHeader, EmptyState, ColorBar, FormField, GradientButton, LoadingState } from "@/shared";
+import { getDefaultOperator, isValidOperator, getInputPlaceholder, getInputPattern, getInputHint, getInputMode, isConstraintValueValid } from "@/app/components/operators";
+import { OperatorBadge } from "@/app/components/OperatorBadge";
+import { ConstraintRow } from "@/app/components/ConstraintRow";
+import { SectionHeader, EmptyState, ColorBar, FormField, GradientButton, LoadingState, ErrorBox } from "@/shared";
 import { useT } from '@/i18n';
 
 import { useSegments } from "@/app/hooks/useSegments";
@@ -40,12 +41,12 @@ export function Segments() {
   const [formContexts, setFormContexts] = useState<SegmentContextEntry[]>([]);
   const [initialSegment, setInitialSegment] = useState<{ name: string; desc: string; icon: string; color: string; contexts: SegmentContextEntry[] } | null>(null);
   const [showCustomize, setShowCustomize] = useState(false);
+  const [activeConditionId, setActiveConditionId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [diffOpen, setDiffOpen] = useState(false);
   const [diffChanges, setDiffChanges] = useState<DiffChange[]>([]);
 
-  const openCreate = () => { setEditing(null); setFormName(''); setFormDesc(''); setFormIcon('Users'); setFormColor('#7c3aed'); setFormContexts([]); setError(''); setShowCustomize(false); setInitialSegment(null); setPanelOpen(true); };
+  const openCreate = () => { setEditing(null); setFormName(''); setFormDesc(''); setFormIcon('Users'); setFormColor('#7c3aed'); setFormContexts([]); setError(''); setShowCustomize(false); setActiveConditionId(null); setInitialSegment(null); setPanelOpen(true); };
   const openEdit = (s: SegmentResponse) => {
     setEditing(s); setFormName(s.name); setFormDesc(s.description ?? ''); setFormIcon(s.icon ?? 'Users'); setFormColor(s.color ?? '#7c3aed');
     const initContexts = (s.context ?? []).map((c, i) => {
@@ -60,7 +61,11 @@ export function Segments() {
     });
     setFormContexts(initContexts);
     setInitialSegment({ name: s.name, desc: s.description ?? '', icon: s.icon ?? 'Users', color: s.color ?? '#7c3aed', contexts: JSON.parse(JSON.stringify(initContexts)) });
-    setError(''); setShowCustomize(false); setPanelOpen(true);
+    setError(''); setShowCustomize(false); setActiveConditionId(null); setPanelOpen(true);
+  };
+
+  const addContext = () => {
+    setFormContexts(prev => [...prev, { id: `sc-${Date.now()}`, contextDefinitionId: 0, operator: 'in', contextValues: '' }]);
   };
 
   const doDelete = async () => {
@@ -69,18 +74,7 @@ export function Segments() {
     try { await handleDelete(deleteId); setDeleteId(null); setPanelOpen(false); } catch (e: unknown) { toast.error(e instanceof Error ? e.message : t('segments.errors.delete')); } finally { setDeleting(false); }
   };
 
-  const addContext = () => {
-    const defaultCtx = contexts[0];
-    const operator = getDefaultOperator(defaultCtx?.type);
-    setFormContexts(prev => [...prev, { id: `sc-${Date.now()}`, contextDefinitionId: defaultCtx?.id ?? 0, operator, contextValues: '' }]);
-  };
   const removeContext = (id: string) => setFormContexts(prev => prev.filter(c => c.id !== id));
-  const updateContextDef = (id: string, contextDefinitionId: number) => setFormContexts(prev => prev.map(c => {
-    if (c.id !== id) return c;
-    const ctx = contexts.find(x => x.id === contextDefinitionId);
-    return { ...c, contextDefinitionId, operator: getDefaultOperator(ctx?.type) };
-  }));
-  const updateOperator = (id: string, operator: string) => setFormContexts(prev => prev.map(c => c.id === id ? { ...c, operator } : c));
 
   const addValue = (id: string, value: string) => {
     const trimmed = value.trim();
@@ -125,46 +119,78 @@ export function Segments() {
       || formDesc !== initialSegment.desc
       || formIcon !== initialSegment.icon
       || formColor !== initialSegment.color
-      || JSON.stringify(formContexts.map(({ id, ...rest }) => rest)) !== JSON.stringify(initialSegment.contexts.map(({ id, ...rest }) => rest));
+      || JSON.stringify(formContexts.map(({ id: _id, ...rest }) => rest)) !== JSON.stringify(initialSegment.contexts.map(({ id: _id2, ...rest }) => rest));
   }, [formName, formDesc, formIcon, formColor, formContexts, editing, initialSegment]);
+
+  const hasInvalidConstraints = useMemo(() => {
+    return formContexts.some(c => {
+      if (c.contextDefinitionId === 0) return false;
+      const ctx = contexts.find(cd => cd.id === c.contextDefinitionId);
+      const type = ctx?.type ?? 'string';
+      const isMulti = c.operator === 'in' || c.operator === 'not_in';
+      if (isMulti || type === 'string') return false;
+      const vals = (c.contextValues ?? '').split(',').map(v => v.trim()).filter(Boolean);
+      if (vals.length === 0) return false;
+      return vals.some(v => !isConstraintValueValid(type, v, c.operator));
+    });
+  }, [formContexts, contexts]);
 
   const doSave = async () => {
     setError(''); setSaving(true);
     try {
       if (editing) {
-        const fmtContexts = (rules: { contextDefinitionId: number; operator: string; contextValues: string }[]) =>
-          rules.map(c => {
-            const ctx = contexts.find(cd => cd.id === c.contextDefinitionId);
-            const name = ctx?.name ?? t('segments.unknownField', { id: String(c.contextDefinitionId) });
-            const op = OPERATOR_LABELS[c.operator] ?? c.operator;
-            return `${name} в ${op} в ${c.contextValues}`;
-          }).join('; ') || '-';
+        const renderCtxLines = (rules: { contextDefinitionId: number; operator: string; contextValues: string }[]) => {
+          if (rules.length === 0) return <span className="text-muted-foreground/50 italic">—</span>;
+          return (
+            <div className="space-y-1">
+              {rules.map((r, i) => {
+                const ctx = contexts.find(cd => cd.id === r.contextDefinitionId);
+                return (
+                  <div key={i} className="flex items-center gap-1.5 text-xs">
+                    <span className="font-semibold text-foreground/80">{ctx?.name ?? t('segments.unknownField', { id: String(r.contextDefinitionId) })}</span>
+                    <OperatorBadge operator={r.operator ?? 'in'} />
+                    <code className="font-mono text-emerald-600 dark:text-emerald-400 break-all">{r.contextValues || '—'}</code>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        };
 
-        const before: Record<string, unknown> = {
+        const beforeSimple: Record<string, unknown> = {
           name: editing.name,
           description: editing.description ?? '',
           icon: editing.icon ?? 'Users',
           color: editing.color ?? '#7c3aed',
-          context: fmtContexts(editing.context ?? []),
         };
-        const contextAfter = formContexts.map(c => ({ contextDefinitionId: c.contextDefinitionId, operator: c.operator, contextValues: c.contextValues }));
-        const after: Record<string, unknown> = {
+        const afterSimple: Record<string, unknown> = {
           name: formName,
           description: formDesc,
           icon: formIcon,
           color: formColor,
-          context: fmtContexts(contextAfter),
         };
-        const changes = computeDiff(before, after, {
+        const changes = computeDiff(beforeSimple, afterSimple, {
           name: t('segments.diffFields.name'),
           description: t('segments.diffFields.description'),
           icon: t('segments.diffFields.icon'),
           color: t('segments.diffFields.color'),
-          context: t('segments.diffFields.context'),
         });
+
+        const contextAfter = formContexts.map(c => ({ contextDefinitionId: c.contextDefinitionId, operator: c.operator, contextValues: c.contextValues }));
+        const beforeCtxStr = (editing.context ?? []).map(c => `${c.contextDefinitionId}:${c.operator}:${c.contextValues}`).join('|');
+        const afterCtxStr = contextAfter.map(c => `${c.contextDefinitionId}:${c.operator}:${c.contextValues}`).join('|');
+
+        if (beforeCtxStr !== afterCtxStr) {
+          changes.push({
+            field: 'context',
+            label: t('segments.diffFields.context'),
+            before: renderCtxLines(editing.context ?? []),
+            after: renderCtxLines(contextAfter),
+          });
+        }
+
         if (changes.length > 0) {
           setDiffChanges(changes);
-          setDiffOpen(true);
           setSaving(false);
           return;
         }
@@ -175,9 +201,19 @@ export function Segments() {
           } catch (e: unknown) { setError(e instanceof Error ? e.message : t('segments.errors.save')); } finally { setSaving(false); }
   };
 
+  const confirmApplyDiff = async () => {
+    setDiffChanges([]);
+    setSaving(true);
+    try {
+      const context = formContexts.map(c => ({ contextDefinitionId: c.contextDefinitionId, operator: c.operator, contextValues: c.contextValues }));
+      await handleSave(editing, { name: formName, description: formDesc, icon: formIcon, color: formColor, context });
+      setPanelOpen(false);
+    } catch (e: unknown) { setError(e instanceof Error ? e.message : t('segments.errors.save')); } finally { setSaving(false); }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader
           title={t('segments.title')}
           description={t('segments.description')}
@@ -213,7 +249,7 @@ export function Segments() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.2, delay: idx * 0.03 }}
-              className="bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:border-border hover:shadow-md transition-all relative group"
+              className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 relative group"
             >
               <ColorBar color={s.color || '#7c3aed'} />
               <div className="p-5">
@@ -239,7 +275,7 @@ export function Segments() {
                         return (
                           <div key={ci} className="flex items-center gap-1.5 text-xs">
                             <span className="font-semibold text-muted-foreground">{ctxDef?.name ?? t('segments.unknownField', { id: String(c.contextDefinitionId) })}</span>
-                            <span className="text-muted-foreground/70 font-mono text-xs uppercase">{c.operator ?? 'in'}</span>
+                            <OperatorBadge operator={c.operator ?? 'in'} />
                             <code className="font-mono text-emerald-600 dark:text-emerald-400 break-all line-clamp-1">{c.contextValues}</code>
                           </div>
                         );
@@ -255,12 +291,27 @@ export function Segments() {
         </AnimatePresence>
       )}
 
-      <SidePanel open={panelOpen} onOpenChange={setPanelOpen} title={editing ? t('segments.panel.editTitle') : t('segments.panel.createTitle')} description={t('segments.panel.description')} footer={<>
-        <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-xl transition-colors">{t('segments.panel.cancel')}</button>
-        <GradientButton onClick={doSave} disabled={saving || !formName || (editing && !isSegmentDirty)} loading={saving}>{editing ? t('common.saveChanges') : t('segments.panel.create')}</GradientButton>
-      </>}>
+      <SidePanel
+        open={panelOpen}
+        onOpenChange={setPanelOpen}
+        title={editing ? t('segments.panel.editTitle') : t('segments.panel.createTitle')}
+        description={t('segments.panel.description')}
+        diffSlot={diffChanges.length > 0 ? <InlineDiffBar changes={diffChanges} /> : undefined}
+        onDiffDismiss={diffChanges.length > 0 ? () => setDiffChanges([]) : undefined}
+        footer={diffChanges.length > 0 ? (
+          <>
+            <button onClick={() => setDiffChanges([])} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors">{t('segments.panel.cancel')}</button>
+            <GradientButton onClick={confirmApplyDiff} disabled={hasInvalidConstraints} loading={saving}>{t('common.applyChanges')}</GradientButton>
+          </>
+        ) : (
+          <>
+            <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors">{t('segments.panel.cancel')}</button>
+            <GradientButton onClick={doSave} disabled={saving || !formName || (editing != null && !isSegmentDirty) || hasInvalidConstraints} loading={saving}>{editing ? t('common.saveChanges') : t('segments.panel.create')}</GradientButton>
+          </>
+        )}
+      >
         <div className="space-y-5">
-          {error && <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-sm text-red-700">{error}</div>}
+          {error && <ErrorBox>{error}</ErrorBox>}
 
           <FormField label={t('common.name')} maxLength={120} value={formName}>
             <input type="text" value={formName} onChange={e => setFormName(e.target.value)} maxLength={120} placeholder={t('segments.form.namePlaceholder')} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground" />
@@ -316,72 +367,107 @@ export function Segments() {
               </div>
               <button onClick={addContext} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center gap-1 font-medium"><Plus size={12} />{t('segments.targetingRules.add')}</button>
             </div>
-            <div className="space-y-3">
-              {formContexts.map((c, ci) => {
+            <div className="space-y-1.5">
+              {formContexts.map((c) => {
+                const isActive = activeConditionId === c.id;
                 const parsedValues = (c.contextValues ?? '').split(',').map(v => v.trim()).filter(Boolean);
+                const formatRowValues = (vals: string[]): string => {
+                  if (vals.length === 0) return '∅';
+                  if (vals.length === 1) return vals[0];
+                  const display = vals.slice(0, 3).join(', ');
+                  return vals.length > 3 ? `[${display}, ...]` : `[${display}]`;
+                };
+
+                const updateEntry = (upd: Partial<SegmentContextEntry>) => {
+                  setFormContexts(prev => prev.map(e => e.id === c.id ? { ...e, ...upd } : e));
+                };
+
+                const handleToggle = () => setActiveConditionId(isActive ? null : c.id);
+
+                const handleRemove = () => {
+                  removeContext(c.id);
+                  setActiveConditionId(null);
+                };
+
+                const handleContextChange = (ctxId: number) => {
+                  const ctx = contexts.find(cd => cd.id === ctxId);
+                  updateEntry({ contextDefinitionId: ctxId, operator: getDefaultOperator(ctx?.type) });
+                };
+
+                const handleOperatorChange = (op: string) => {
+                  updateEntry({ operator: op });
+                };
+
                 return (
-                  <div key={c.id} className="p-3 bg-white dark:bg-neutral-950 rounded-lg border border-border space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-muted-foreground">{t('segments.targetingRules.condition', { n: String(ci + 1) })}</span>
-                      <button onClick={() => removeContext(c.id)} className="text-muted-foreground hover:text-red-600 dark:hover:text-red-400"><X size={14} /></button>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wide">{t('segments.targetingRules.attribute')}</label>
-                        <Select value={String(c.contextDefinitionId)} onValueChange={(v) => updateContextDef(c.id, Number(v))}>
-                            <SelectTrigger size="sm" className="w-full text-xs [&>span]:text-xs rounded-md"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              {contexts.map(ctx => <SelectItem key={ctx.id} value={String(ctx.id)}>{ctx.name}</SelectItem>)}
-                            </SelectContent>
-                          </Select>
-                      </div>
-                        <div className="space-y-1">
-                        <label className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wide">{t('segments.targetingRules.operator')}</label>
-                        <Select value={c.operator} onValueChange={(v) => updateOperator(c.id, v)}>
-                          <SelectTrigger size="sm" className="w-full text-xs [&>span]:text-xs rounded-md"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            {getOperatorsForType(contexts.find(ctx => ctx.id === c.contextDefinitionId)?.type).map(op => (
-                              <SelectItem key={op.value} value={op.value}>{op.label}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wide flex items-center gap-1.5">{t('segments.targetingRules.values')}
-                        <label className="cursor-pointer text-indigo-500 hover:text-indigo-400 transition-colors" title={t('segments.targetingRules.uploadTooltip')}>
-                          <Upload size={11} />
+                  <ConstraintRow
+                    key={c.id}
+                    id={c.id}
+                    contextDefId={c.contextDefinitionId}
+                    operator={c.operator}
+                    valuesPreview={formatRowValues(parsedValues)}
+                    contexts={contexts}
+                    isActive={isActive}
+                    onToggle={handleToggle}
+                    onContextChange={handleContextChange}
+                    onOperatorChange={handleOperatorChange}
+                    onRemove={handleRemove}
+                  >
+                    {(contextType) => (
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-1.5">
+                        <div className="flex-1 space-y-1.5">
+                          <input
+                            type="text"
+                            inputMode={getInputMode(contextType) as React.HTMLAttributes<HTMLInputElement>['inputMode']}
+                            pattern={getInputPattern(contextType)}
+                            placeholder={getInputPlaceholder(contextType) || t('segments.targetingRules.valuePlaceholder')}
+                            className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
+                            onInput={(e) => {
+                              const input = e.target as HTMLInputElement;
+                              const v = input.value.trim();
+                              if (!v) { input.setCustomValidity(''); return; }
+                              if (contextType === 'number' && isNaN(Number(v))) input.setCustomValidity('invalid');
+                              else if (contextType === 'time' && !/^\d{2}:\d{2}$/.test(v)) input.setCustomValidity('invalid');
+                              else if (contextType === 'semver' && !/^\d+\.\d+\.\d+(-.*)?$/.test(v)) input.setCustomValidity('invalid');
+                              else input.setCustomValidity('');
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ',') {
+                                e.preventDefault();
+                                const v = (e.target as HTMLInputElement).value.trim();
+                                if (!v) return;
+                                if (contextType === 'number' && isNaN(Number(v))) return;
+                                if (contextType === 'time' && !/^\d{2}:\d{2}$/.test(v)) return;
+                                if (contextType === 'semver' && !/^\d+\.\d+\.\d+(-.*)?$/.test(v)) return;
+                                addValue(c.id, v);
+                                (e.target as HTMLInputElement).value = '';
+                                (e.target as HTMLInputElement).setCustomValidity('');
+                              }
+                            }}
+                          />
+                          {contextType !== 'string' && (
+                            <p className="text-[11px] text-muted-foreground/60 ml-0.5">{getInputHint(contextType)}</p>
+                          )}
+                        </div>
+                        <label className="cursor-pointer text-indigo-500 hover:text-indigo-400 transition-colors shrink-0" title={t('segments.targetingRules.uploadTooltip')}>
+                          <Upload size={14} />
                           <input type="file" accept=".txt,.csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileUpload(c.id, f); e.target.value = ''; }} />
                         </label>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder={t('segments.targetingRules.valuePlaceholder')}
-                        className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ',') {
-                            e.preventDefault();
-                            addValue(c.id, (e.target as HTMLInputElement).value);
-                            (e.target as HTMLInputElement).value = '';
-                          }
-                        }}
-                      />
-                    </div>
-                    {parsedValues.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">
-                        {parsedValues.map((v, vi) => (
-                          <span key={vi} className="inline-flex items-center gap-1 px-2 py-1 text-xs font-mono bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20 rounded-md break-all leading-none">
-                            {v}
-                            <button onClick={() => removeValue(c.id, vi)} className="text-emerald-500 hover:text-red-500 transition-colors"><X size={11} /></button>
-                          </span>
-                        ))}
-                        <span className="text-xs text-muted-foreground self-center ml-1">{t('segments.targetingRules.valueCount', { count: String(parsedValues.length) })}</span>
                       </div>
+                      {parsedValues.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {parsedValues.map((v, vi) => (
+                            <span key={vi} className="inline-flex items-center gap-1 px-2 py-1 text-xs font-mono bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20 rounded-md break-all leading-none">
+                              {v}
+                              <button onClick={(e) => { e.stopPropagation(); removeValue(c.id, vi); }} className="text-emerald-500 hover:text-red-500 transition-colors"><X size={11} /></button>
+                            </span>
+                          ))}
+                          <span className="text-xs text-muted-foreground self-center ml-1">{t('segments.targetingRules.valueCount', { count: String(parsedValues.length) })}</span>
+                        </div>
+                      )}
+                    </div>
                     )}
-                    {parsedValues.length === 0 && (
-                      <div className="text-xs text-muted-foreground italic">{t('segments.targetingRules.noValues')}</div>
-                    )}
-                  </div>
+                  </ConstraintRow>
                 );
               })}
               {formContexts.length === 0 && (
@@ -416,23 +502,6 @@ export function Segments() {
           )}
         </div>
       </SidePanel>
-
-      <DiffConfirmDialog
-        open={diffOpen}
-        onClose={() => setDiffOpen(false)}
-        changes={diffChanges}
-        description={t('common.reviewChanges')}
-        confirmLabel={t('common.applyChanges')}
-        onConfirm={async () => {
-          setDiffOpen(false);
-          setSaving(true);
-          try {
-            const context = formContexts.map(c => ({ contextDefinitionId: c.contextDefinitionId, operator: c.operator, contextValues: c.contextValues }));
-            await handleSave(editing, { name: formName, description: formDesc, icon: formIcon, color: formColor, context });
-            setPanelOpen(false);
-          } catch (e: unknown) { setError(e instanceof Error ? e.message : t('segments.errors.save')); } finally { setSaving(false); }
-        }}
-      />
 
       <ConfirmDialog
         open={!!deleteId}

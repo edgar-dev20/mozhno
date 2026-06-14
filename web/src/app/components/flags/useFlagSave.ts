@@ -165,7 +165,7 @@ export function useFlagSave(deps: SaveDeps) {
         const envFlags = await api.flags.list(envId);
         const envFlag = envFlags.find(f => f.key === flag.key);
         if (!envFlag) {
-          setError('Флаг не найден в окружении. Попробуйте обновить страницу.');
+          setError('Flag not found in environment. Please refresh the page.');
           setSaving(false);
           return;
         }

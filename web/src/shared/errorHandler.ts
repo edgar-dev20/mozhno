@@ -1,5 +1,5 @@
 import { AppError, isAppError } from "@/shared/errors";
-import { t } from "@/i18n";
+import { t, type MessageKey } from "@/i18n";
 
 const ERROR_CODE_TO_KEY: Record<string, string> = {
   NETWORK: 'errors.network',
@@ -15,7 +15,7 @@ const ERROR_CODE_TO_KEY: Record<string, string> = {
 export function getErrorMessage(error: unknown): string {
   if (isAppError(error)) {
     const key = ERROR_CODE_TO_KEY[error.code];
-    if (key) return t(key as never);
+    if (key) return t(key as MessageKey);
     return error.message;
   }
 

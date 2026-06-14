@@ -22,7 +22,9 @@ export class PageErrorBoundary extends Component<PageErrorBoundaryProps, PageErr
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('PageErrorBoundary caught:', error.message, info.componentStack);
+    if (import.meta.env.DEV) {
+      console.error('PageErrorBoundary caught:', error.message, info.componentStack);
+    }
   }
 
   handleRetry = () => {
@@ -34,7 +36,7 @@ export class PageErrorBoundary extends Component<PageErrorBoundaryProps, PageErr
       if (this.props.fallback) return this.props.fallback;
 
       return (
-        <div className="bg-card border border-border rounded-xl px-8 py-12 text-center shadow-sm">
+        <div className="bg-card rounded-xl px-8 py-12 text-center shadow-md">
           <div className="flex flex-col items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
               <AlertTriangle size={22} className="text-red-500" />

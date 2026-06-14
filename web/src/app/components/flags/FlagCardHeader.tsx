@@ -1,4 +1,5 @@
 import { Switch } from "@/app/components/ui/switch";
+import { FlagSparkline } from "@/app/components/FlagSparkline";
 import { getFlagTypeColor, getFlagTypeLabel, adjustColor } from "@/shared";
 import type { FlagView } from "@/app/hooks/flagTypes";
 import type { Tag as TagType } from "@/api";
@@ -30,17 +31,18 @@ interface FlagCardHeaderProps {
   environments: { id: number; name: string }[];
   tags: TagType[];
   onToggleFlag: (flag: FlagView, envId: number) => void;
+  sparklineData: Map<string, { trueCount: number; falseCount: number; timeBucket: string }[]>;
 }
 
-export function FlagCardHeader({ flag, expanded, environments, tags, onToggleFlag }: FlagCardHeaderProps) {
+export function FlagCardHeader({ flag, expanded, environments, tags, onToggleFlag, sparklineData }: FlagCardHeaderProps) {
   return (
     <>
       <div className="flex-1 min-w-0 flex items-center gap-3">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
-          <span className="font-semibold text-sm text-foreground truncate group-hover:bg-gradient-to-r group-hover:from-gradient-start group-hover:to-gradient-end group-hover:bg-clip-text group-hover:text-transparent transition-all">
+          <span className="font-semibold text-h3 text-foreground truncate group-hover:bg-gradient-to-r group-hover:from-gradient-start group-hover:to-gradient-end group-hover:bg-clip-text group-hover:text-transparent transition-all">
             {flag.name}
           </span>
-          <span className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-xs font-semibold border shrink-0 leading-none ${getFlagTypeColor(flag.flagType)}`}>
+          <span className={`inline-flex items-center gap-1 px-1.5 py-1 rounded-lg text-caption font-semibold border shrink-0 leading-none ${getFlagTypeColor(flag.flagType)}`}>
             {getTypeIcon(flag.flagType)}
             {getFlagTypeLabel(flag.flagType)}
           </span>
@@ -67,8 +69,15 @@ export function FlagCardHeader({ flag, expanded, environments, tags, onToggleFla
         {!expanded ? (
           environments.map((env) => {
             const es = flag.environments[env.id];
+            const sparkKey = `${flag.flagId}-${env.id}`;
+            const buckets = sparklineData.get(sparkKey) ?? [];
             return (
               <div key={env.id} className="flex items-center gap-1.5">
+                {buckets.length > 0 && (
+                  <div className="w-8 h-3.5">
+                    <FlagSparkline data={buckets} height={14} />
+                  </div>
+                )}
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{env.name}</span>
                 {es && (
                   <span onClick={(e) => e.stopPropagation()}>

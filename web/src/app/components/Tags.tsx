@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Plus, Tag as TagIcon, Palette, Hash, Info, Sparkles, Trash2 } from "@/shared/icons";
+import { Plus, Tag as TagIcon, Palette, Hash, Sparkles, Trash2 } from "@/shared/icons";
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { SidePanel } from "@/app/components/SidePanel";
 import { TipCard } from "@/app/components/TipCard";
 import { ConfirmDialog } from "@/app/components/ConfirmDialog";
 import { api, Tag } from "@/api";
-import { adjustColor, SectionHeader, EmptyState, ColorBar, FormField, GradientButton } from "@/shared";
+import { adjustColor, SectionHeader, EmptyState, ColorBar, FormField, GradientButton, ErrorBox } from "@/shared";
 import { useProjectQuery, useTagsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useT, type MessageKey } from '@/i18n';
@@ -127,7 +127,7 @@ export function Tags() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader
           title={t('tags.title')}
           description={t('tags.description')}
@@ -175,7 +175,7 @@ export function Tags() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2, delay: idx * 0.03 }}
-                className="group relative bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:border-border hover:shadow-md transition-all cursor-pointer"
+                className="group relative bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer"
                 onClick={() => openEdit(tag)}
               >
                 <ColorBar color={tag.color} />
@@ -231,16 +231,13 @@ export function Tags() {
           : t('tags.panel.createDescription')
         }
         footer={<>
-          <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-xl transition-colors">{t('tags.panel.cancel')}</button>
+          <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors">{t('tags.panel.cancel')}</button>
           <GradientButton onClick={handleSave} disabled={saving || !formName.trim() || (editing && !isTagDirty)} loading={saving}>{editing ? t('common.saveChanges') : t('tags.panel.saveCreate')}</GradientButton>
         </>}
       >
         <div className="space-y-6">
           {error && (
-            <div className="p-3.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-sm text-red-700 dark:text-red-400 flex items-start gap-2.5">
-              <Info size={18} className="text-red-500 shrink-0 mt-0.5" />
-              <span>{error}</span>
-            </div>
+            <ErrorBox>{error}</ErrorBox>
           )}
 
           <FormField label={t('tags.form.name.label')} hint={t('tags.form.name.hint')} maxLength={120} value={formName}>

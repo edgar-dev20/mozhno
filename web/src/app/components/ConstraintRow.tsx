@@ -1,0 +1,155 @@
+import { useCallback } from 'react';
+import { ChevronRight, Trash2 } from "@/shared/icons";
+import { getOperatorsForType, getOperatorShortCode } from "@/app/components/operators";
+import { OperatorBadge } from "@/app/components/OperatorBadge";
+import { OperatorSelector } from "@/app/components/OperatorSelector";
+import { useT } from '@/i18n';
+import type { ContextDefinition } from "@/api";
+
+interface ConstraintRowProps {
+  id: string;
+  contextDefId: number;
+  operator: string;
+  valuesPreview: string;
+  contexts: ContextDefinition[];
+  isActive: boolean;
+  onToggle: () => void;
+  onContextChange: (contextDefId: number) => void;
+  onOperatorChange: (op: string) => void;
+  onRemove: () => void;
+  children: (contextType: string) => React.ReactNode;
+}
+
+export function ConstraintRow({
+  id: _id,
+  contextDefId,
+  operator,
+  valuesPreview,
+  contexts,
+  isActive,
+  onToggle,
+  onContextChange,
+  onOperatorChange,
+  onRemove,
+  children,
+}: ConstraintRowProps) {
+  const t = useT();
+  const hasContext = contextDefId !== 0;
+  const ctxDef = hasContext ? contexts.find(c => c.id === contextDefId) : undefined;
+  const availableOps = getOperatorsForType(ctxDef?.type);
+  const shortOp = getOperatorShortCode(operator);
+  const isMulti = operator === 'in' || operator === 'not_in';
+
+  const handleContextChange = useCallback((ctxId: number) => {
+    onContextChange(ctxId);
+  }, [onContextChange]);
+
+  return (
+    <div>
+      <div
+        onClick={onToggle}
+        className={`group cursor-pointer flex items-center gap-3 px-3.5 py-2.5 rounded-lg border transition-all ${
+          isActive
+            ? 'bg-indigo-50/70 dark:bg-indigo-500/8 border-indigo-300 dark:border-indigo-500/30 shadow-sm rounded-b-none border-b-indigo-200 dark:border-b-indigo-500/20'
+            : 'bg-white dark:bg-neutral-950 border-border hover:border-indigo-200 dark:hover:border-indigo-500/20 hover:shadow-sm'
+        }`}
+      >
+        <span className="shrink-0 text-sm font-semibold text-foreground/80 min-w-0 truncate">
+          {contextDefId === 0 ? t('flags.noContext') : (ctxDef?.name ?? t('flags.unknownField', { id: String(contextDefId) }))}
+        </span>
+        <OperatorBadge operator={operator} />
+        <span className="flex-1 min-w-0 text-xs text-muted-foreground truncate">
+          {valuesPreview}
+        </span>
+        <span className={`shrink-0 transition-transform duration-200 ${isActive ? 'text-indigo-500 rotate-90' : 'text-muted-foreground/40 group-hover:text-muted-foreground'}`}>
+          <ChevronRight size={14} />
+        </span>
+      </div>
+
+      {isActive && (
+        <div className="bg-indigo-50/30 dark:bg-indigo-500/3 border border-t-0 border-indigo-300 dark:border-indigo-500/30 rounded-b-lg px-3.5 py-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+              {t('flags.detailCard.context')}
+            </label>
+            <div className="flex flex-wrap gap-1.5">
+              {contexts.map((ctx) => (
+                <button
+                  key={ctx.id}
+                  onClick={(e) => { e.stopPropagation(); handleContextChange(ctx.id); }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    hasContext && contextDefId === ctx.id
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border border-border'
+                  }`}
+                >
+                  {ctx.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {hasContext && (
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                {t('flags.detailCard.operator')}
+              </label>
+              <OperatorSelector
+                availableOps={availableOps}
+                currentOperator={operator}
+                onSelect={onOperatorChange}
+              />
+            </div>
+          )}
+
+          {hasContext && (
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                {isMulti ? t('flags.detailCard.values') : t('flags.detailCard.value')}
+              </label>
+              {children(ctxDef?.type ?? 'string')}
+            </div>
+          )}
+
+          {hasContext && (
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                {t('flags.detailCard.preview')}
+              </label>
+              <div className="p-3 bg-violet-50 dark:bg-violet-500/5 rounded-xl border border-violet-200 dark:border-violet-500/10">
+                <code className="text-sm font-mono text-violet-700 dark:text-violet-300 break-all">
+                  context['{ctxDef?.name ?? '?'}'] {shortOp} {valuesPreview}
+                </code>
+              </div>
+            </div>
+          )}
+
+          {!hasContext && (
+            <div className="p-4 bg-amber-50 dark:bg-amber-500/5 rounded-xl border border-amber-200 dark:border-amber-500/10 text-center">
+              <p className="text-xs text-amber-700 dark:text-amber-300">{t('flags.detailCard.selectContext')}</p>
+            </div>
+          )}
+
+          <div className="flex justify-between gap-3 pt-1">
+            <button
+              onClick={(e) => { e.stopPropagation(); onRemove(); }}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+            >
+              <Trash2 size={14} />
+              {t('flags.detailCard.removeCondition')}
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggle(); }}
+              className="inline-flex items-center px-4 py-2 text-xs font-semibold text-white rounded-lg transition-colors"
+              style={{
+                backgroundImage: 'linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end))',
+              }}
+            >
+              {t('flags.detailCard.done')}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -66,8 +66,8 @@ class FlagMetricsServiceTest extends BaseIntegrationTest {
         flag.setFlagType(FlagType.RELEASE);
         Flag saved = flagRepository.save(flag);
 
-        flagMetricRepository.recordEvaluation(projectId, saved.getId(), envId, true);
-        flagMetricRepository.recordEvaluation(projectId, saved.getId(), envId, false);
+        flagMetricRepository.recordEvaluation(projectId, saved.getId(), envId, true, null);
+        flagMetricRepository.recordEvaluation(projectId, saved.getId(), envId, false, null);
 
         List<FlagMetric> result = flagMetricsService.getMetrics(saved.getId(), envId);
         assertThat(result).isNotEmpty();

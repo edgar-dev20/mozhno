@@ -105,7 +105,8 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
     @Test
     void strategyConstraintOnly_shouldReturnConstraint() {
         ContextDefinition cd = new ContextDefinition();
-        cd.setName("userId");
+        cd.setName("User ID");
+        cd.setContextKey("userId");
         cd.setProjectId(projectId);
         Integer cdId = contextDefinitionRepository.save(cd).getId();
 
@@ -142,7 +143,8 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         Integer segId = segmentRepository.save(seg).getId();
 
         ContextDefinition cd = new ContextDefinition();
-        cd.setName("userId");
+        cd.setName("User ID");
+        cd.setContextKey("userId");
         cd.setProjectId(projectId);
         Integer cdId = contextDefinitionRepository.save(cd).getId();
 
@@ -184,7 +186,8 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         Integer segId = segmentRepository.save(seg).getId();
 
         ContextDefinition cd = new ContextDefinition();
-        cd.setName("userId");
+        cd.setName("User ID");
+        cd.setContextKey("userId");
         cd.setProjectId(projectId);
         Integer cdId = contextDefinitionRepository.save(cd).getId();
 
@@ -228,7 +231,8 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         Integer segId = segmentRepository.save(seg).getId();
 
         ContextDefinition countryCd = new ContextDefinition();
-        countryCd.setName("country");
+        countryCd.setName("Country");
+        countryCd.setContextKey("country");
         countryCd.setProjectId(projectId);
         Integer countryCdId = contextDefinitionRepository.save(countryCd).getId();
 
@@ -239,7 +243,8 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         segmentContextRepository.save(sc);
 
         ContextDefinition userIdCd = new ContextDefinition();
-        userIdCd.setName("userId");
+        userIdCd.setName("User ID");
+        userIdCd.setContextKey("userId");
         userIdCd.setProjectId(projectId);
         Integer userIdCdId = contextDefinitionRepository.save(userIdCd).getId();
 
@@ -280,12 +285,14 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         Integer segId = segmentRepository.save(seg).getId();
 
         ContextDefinition countryCd = new ContextDefinition();
-        countryCd.setName("country");
+        countryCd.setName("Country");
+        countryCd.setContextKey("country");
         countryCd.setProjectId(projectId);
         Integer countryCdId = contextDefinitionRepository.save(countryCd).getId();
 
         ContextDefinition platformCd = new ContextDefinition();
-        platformCd.setName("platform");
+        platformCd.setName("Platform");
+        platformCd.setContextKey("platform");
         platformCd.setProjectId(projectId);
         Integer platformCdId = contextDefinitionRepository.save(platformCd).getId();
 
@@ -334,7 +341,8 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         Integer segId = segmentRepository.save(seg).getId();
 
         ContextDefinition cd = new ContextDefinition();
-        cd.setName("region");
+        cd.setName("Region");
+        cd.setContextKey("region");
         cd.setProjectId(projectId);
         Integer cdId = contextDefinitionRepository.save(cd).getId();
 
@@ -376,7 +384,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         flag.setEnabled(true);
         flagRepository.save(flag);
 
-        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of());
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of(), null);
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getName()).isEqualTo("Simple Flag");
@@ -393,7 +401,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         flag.setEnabled(false);
         flagRepository.save(flag);
 
-        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of());
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of(), null);
 
         assertThat(results).isEmpty();
     }
@@ -401,7 +409,8 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
     @Test
     void evaluate_withConstraintMatches_shouldReturnFlag() {
         ContextDefinition cd = new ContextDefinition();
-        cd.setName("plan");
+        cd.setName("Plan");
+        cd.setContextKey("plan");
         cd.setProjectId(projectId);
         Integer cdId = contextDefinitionRepository.save(cd).getId();
 
@@ -421,7 +430,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         s.setContextValuesJson("[{\"cd\":" + cdId + ",\"op\":\"in\",\"val\":\"premium\"}]");
         flagStrategyRepository.save(s);
 
-        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of("plan", "premium"));
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of("plan", "premium"), null);
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getName()).isEqualTo("Premium Flag");
     }
@@ -429,7 +438,8 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
     @Test
     void evaluate_withConstraintMismatches_shouldNotReturn() {
         ContextDefinition cd = new ContextDefinition();
-        cd.setName("plan");
+        cd.setName("Plan");
+        cd.setContextKey("plan");
         cd.setProjectId(projectId);
         Integer cdId = contextDefinitionRepository.save(cd).getId();
 
@@ -449,13 +459,13 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         s.setContextValuesJson("[{\"cd\":" + cdId + ",\"op\":\"in\",\"val\":\"premium\"}]");
         flagStrategyRepository.save(s);
 
-        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of("plan", "free"));
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of("plan", "free"), null);
         assertThat(results).isEmpty();
     }
 
     @Test
     void evaluate_emptyProject_shouldReturnEmpty() {
-        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of());
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of(), null);
         assertThat(results).isEmpty();
     }
 
@@ -470,14 +480,17 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         flagRepository.save(flag);
 
         ClientMetricsRequest req = new ClientMetricsRequest();
-        req.setEvaluations(Map.of("metrics-flag", 3L));
+        ClientMetricsRequest.EvalCount ec = new ClientMetricsRequest.EvalCount();
+        ec.setTrueCount(2);
+        ec.setFalseCount(1);
+        req.setEvaluations(Map.of("metrics-flag", ec));
 
-        clientFlagService.recordMetrics(projectId, envId, req);
+        clientFlagService.recordMetrics(projectId, envId, req, null);
     }
 
     @Test
     void recordMetrics_empty_shouldNotThrow() {
         ClientMetricsRequest req = new ClientMetricsRequest();
-        clientFlagService.recordMetrics(projectId, envId, req);
+        clientFlagService.recordMetrics(projectId, envId, req, null);
     }
 }

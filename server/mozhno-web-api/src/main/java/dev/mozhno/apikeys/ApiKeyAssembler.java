@@ -14,7 +14,8 @@ public class ApiKeyAssembler {
             .environmentId(apiKey.getEnvironmentId())
             .name(apiKey.getName())
             .description(apiKey.getDescription())
-            .type(apiKey.getKeyType())
+            .apiKey(apiKey.getApiKey())
+            .keyType(apiKey.getKeyType())
             .lastUsedAt(apiKey.getLastUsedAt())
             .createdAt(apiKey.getCreatedAt())
             .build();

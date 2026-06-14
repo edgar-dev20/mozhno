@@ -1,7 +1,8 @@
+import { Settings, BarChart3 } from "@/shared/icons";
 import { Switch } from "@/app/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/app/components/ui/tooltip";
 import { SegmentIcon } from "@/app/components/SegmentIcon";
-import { FlagSparkline } from "@/app/components/FlagSparkline";
+import { FlagSparkline, SparklinePlaceholder } from "@/app/components/FlagSparkline";
 import { useT } from "@/i18n";
 import type { MessageKey } from "@/i18n";
 import type { FlagView } from "@/app/hooks/flagTypes";
@@ -87,12 +88,19 @@ function buildRule(
         }
         const collapsed: string[] = [];
         for (const [key, vals] of groups) {
-          collapsed.push(vals.length === 1 ? `${key.split(' ')[0]}=${vals[0]}` : `${key.split(' ')[0]}: ${vals.join(', ')}`);
+          const name = key.split(' ')[0];
+          if (vals.length === 1) {
+            collapsed.push(`${name}=${vals[0]}`);
+          } else {
+            const maxShow = 3;
+            const show = vals.slice(0, maxShow).join(', ');
+            collapsed.push(vals.length > maxShow ? `${name}: ${show} +${vals.length - maxShow}` : `${name}: ${show}`);
+          }
         }
         if (collapsed.length > 0) {
           parts.push(<span key="cdot" className="text-muted-foreground/60">·</span>);
           const extra = collapsed.length - 1;
-          parts.push(<span key="first" className={muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}>{collapsed[0]}</span>);
+          parts.push(<span key="first" className={`truncate max-w-[220px] ${muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}`}>{collapsed[0]}</span>);
           if (extra > 0) {
             parts.push(<span key="more" className={muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}>{t('flags.andMore', { count: String(extra) })}</span>);
           }
@@ -104,22 +112,6 @@ function buildRule(
   return <span className="inline-flex items-baseline flex-wrap gap-x-0.5">{parts}</span>;
 }
 
-function PlaceholderSparkline() {
-  return (
-    <div className="w-full h-full flex items-end justify-center gap-[3px] pb-1">
-      {[
-        { falsePct: 20, truePct: 10 },
-        { falsePct: 35, truePct: 25 },
-        { falsePct: 45, truePct: 40 },
-      ].map((col, i) => (
-        <div key={i} className="flex flex-col w-[6px]" style={{ height: `${col.falsePct + col.truePct}%` }}>
-          <div className="w-full rounded-t-[2px]" style={{ height: `${(col.truePct / (col.falsePct + col.truePct)) * 100}%`, backgroundColor: 'rgba(139, 92, 246, 0.18)' }} />
-          <div className="w-full flex-1" style={{ backgroundColor: 'rgba(196, 181, 253, 0.15)' }} />
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export function FlagCardEnvironmentColumn({
   env,
@@ -137,41 +129,43 @@ export function FlagCardEnvironmentColumn({
   const rule = buildRule(es, segments, contexts, muted, t);
 
   return (
-    <div
-      onClick={(e) => {
-        e.stopPropagation();
-        onOpenEnvironment(flag, env.id);
-      }}
-      className="flex-1 bg-secondary/60 border border-border rounded-xl px-4 pt-3 pb-2 cursor-pointer hover:bg-white dark:hover:bg-neutral-800/80 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-sm transition-all flex flex-col"
-    >
+    <div className="flex-1 bg-secondary/40 rounded-xl px-4 pt-3 pb-2 ring-1 ring-border shadow-sm transition-all flex flex-col">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{env.name}</span>
-        {es && (
-          <span onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onOpenEnvironment(flag, env.id)}
+            className="inline-flex items-center px-1.5 py-1 text-muted-foreground bg-secondary border border-border rounded-lg hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all"
+          >
+            <Settings size={12} />
+          </button>
+          {es && (
             <Switch
               checked={es.enabled}
               onCheckedChange={() => onToggleFlag(flag, env.id)}
               className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-gradient-start data-[state=checked]:to-gradient-end scale-75 origin-right"
             />
-          </span>
-        )}
+          )}
+        </div>
       </div>
       {es ? (
         <>
           <div className="text-xs leading-relaxed mb-2">{rule}</div>
-          <div className="flex-1 min-h-0 rounded-md overflow-hidden">
+          <div className="relative group flex-1 min-h-0 rounded-md overflow-hidden">
             {sparkBuckets.length > 0 ? (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onMetricsClick(flag.flagId, flag.name, env.id);
-                }}
-                className="w-full h-full cursor-pointer border border-transparent hover:border-indigo-200 dark:hover:border-indigo-700 hover:bg-indigo-50/30 dark:hover:bg-indigo-500/5 rounded-md transition-all"
-              >
-                <FlagSparkline data={sparkBuckets} height={52} />
-              </button>
+              <>
+                <button
+                  onClick={() => onMetricsClick(flag.flagId, flag.name, env.id)}
+                  className="w-full h-full cursor-pointer rounded-md transition-all hover:bg-sparkline-true/[0.08] dark:hover:bg-sparkline-true/[0.10]"
+                >
+                  <FlagSparkline data={sparkBuckets} height={56} />
+                </button>
+                <span className="absolute bottom-1 right-1 text-muted-foreground/40 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                  <BarChart3 size={12} />
+                </span>
+              </>
             ) : (
-              <PlaceholderSparkline />
+              <SparklinePlaceholder height={56} />
             )}
           </div>
         </>

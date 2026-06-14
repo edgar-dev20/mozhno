@@ -1,58 +1,58 @@
 import * as Slider from '@radix-ui/react-slider';
 import { Switch } from "@/app/components/ui/switch";
-import { Plus, Percent, Users, Settings, X, Filter, Zap } from "@/shared/icons";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
+import { Plus, Percent, Users, Settings, Filter, Zap } from "@/shared/icons";
 import { SegmentIcon } from "@/app/components/SegmentIcon";
-import { getOperatorsForType, getDefaultOperator, OPERATOR_LABELS } from "@/app/components/operators";
+import { MultiValueChips } from "@/app/components/flags/MultiValueChips";
+import { getDefaultOperator, getInputPlaceholder, getInputPattern, getInputHint, getInputMode } from "@/app/components/operators";
+import { OperatorBadge } from "@/app/components/OperatorBadge";
+import { ConstraintRow } from "@/app/components/ConstraintRow";
 import { useT } from '@/i18n';
 import type { SegmentResponse, ContextDefinition } from "@/api";
-import type { ConstraintEntry } from "@/app/components/flags/types";
+import type { ConstraintGroup } from "@/app/components/flags/types";
 
 interface FlagEnvironmentPanelProps {
   envRulePercent: number;
   onEnvRulePercentChange: (v: number) => void;
   envRuleSegments: number[];
   onEnvRuleSegmentsChange: (v: number[]) => void;
-  envRuleConstraints: ConstraintEntry[];
-  onEnvRuleConstraintsChange: (v: ConstraintEntry[]) => void;
+  envRuleConstraintGroups: ConstraintGroup[];
+  onEnvRuleConstraintGroupsChange: (v: ConstraintGroup[]) => void;
   envRuleEnabled: boolean;
   onEnvRuleEnabledChange: (v: boolean) => void;
   segments: SegmentResponse[];
   contexts: ContextDefinition[];
+  activeGroupId: string | null;
+  onActiveGroupIdChange: (id: string | null) => void;
+}
+
+function newGroupId(): string {
+  return `g_${Math.random().toString(36).slice(2, 7)}_${Math.random().toString(36).slice(2, 5)}`;
 }
 
 export function FlagEnvironmentPanel({
   envRulePercent, onEnvRulePercentChange,
   envRuleSegments, onEnvRuleSegmentsChange,
-  envRuleConstraints, onEnvRuleConstraintsChange,
+  envRuleConstraintGroups, onEnvRuleConstraintGroupsChange,
   envRuleEnabled, onEnvRuleEnabledChange,
   segments, contexts,
+  activeGroupId, onActiveGroupIdChange,
 }: FlagEnvironmentPanelProps) {
   const t = useT();
 
-  const addConstraint = () => {
-    const defaultCtx = contexts[0];
-    const operator = getDefaultOperator(defaultCtx?.type);
-    onEnvRuleConstraintsChange([...envRuleConstraints, { contextDefId: defaultCtx?.id ?? 0, operator, value: '' }]);
-  };
-
-  const removeConstraint = (idx: number) => {
-    onEnvRuleConstraintsChange(envRuleConstraints.filter((_, i) => i !== idx));
-  };
-
-  const updateConstraint = (idx: number, field: keyof ConstraintEntry, val: string | number) => {
-    onEnvRuleConstraintsChange(envRuleConstraints.map((c, i) => {
-      if (i !== idx) return c;
-      if (field === 'contextDefId') {
-        const ctx = contexts.find(x => x.id === Number(val));
-        return { ...c, contextDefId: Number(val), operator: getDefaultOperator(ctx?.type) };
-      }
-      return { ...c, [field]: val };
-    }));
+  const addGroup = () => {
+    onEnvRuleConstraintGroupsChange([
+      ...envRuleConstraintGroups,
+      {
+        id: newGroupId(),
+        contextDefId: 0,
+        operator: 'in',
+        values: [],
+      },
+    ]);
   };
 
   const hasSegments = envRuleSegments.length > 0;
-  const hasConstraints = envRuleConstraints.length > 0;
+  const hasConstraints = envRuleConstraintGroups.length > 0;
   const selectedSegs = envRuleSegments.map(sid => segments.find(s => s.id === sid)).filter((s): s is SegmentResponse => !!s);
 
   interface SummaryLine { field: string; operator: string; values: string[]; source: string; }
@@ -70,19 +70,27 @@ export function FlagEnvironmentPanel({
       }
     }
   }
-  for (const c of envRuleConstraints) {
-    const ctxDef = contexts.find(cd => cd.id === c.contextDefId);
-    const field = ctxDef?.name ?? t('flags.unknownField', { id: String(c.contextDefId) });
-    const existing = lines.find(l => l.field === field && l.operator === c.operator);
+  for (const g of envRuleConstraintGroups) {
+    if (g.contextDefId === 0) continue;
+    const ctxDef = contexts.find(cd => cd.id === g.contextDefId);
+    const field = ctxDef?.name ?? t('flags.unknownField', { id: String(g.contextDefId) });
+    const existing = lines.find(l => l.field === field && l.operator === g.operator);
     if (existing) {
-      if (!existing.values.includes(c.value)) existing.values.push(c.value);
+      for (const v of g.values) { if (!existing.values.includes(v)) existing.values.push(v); }
       if (existing.source !== 'custom') existing.source = existing.source + ' + custom';
     } else {
-      lines.push({ field, operator: c.operator, values: [c.value], source: 'custom' });
+      lines.push({ field, operator: g.operator, values: [...g.values], source: 'custom' });
     }
   }
 
   const hasSummary = envRulePercent !== 100 || hasSegments || hasConstraints;
+
+  const formatValues = (values: string[]): string => {
+    if (values.length === 0) return '∅';
+    if (values.length === 1) return values[0];
+    const display = values.slice(0, 3).join(', ');
+    return values.length > 3 ? `[${display}, ...]` : `[${display}]`;
+  };
 
   return (
     <div className="space-y-5">
@@ -91,10 +99,14 @@ export function FlagEnvironmentPanel({
           <h4 className="text-sm font-medium text-foreground">{t('flags.environmentTitle')}</h4>
           <p className="text-xs text-muted-foreground/80 mt-0.5">{t('flags.environmentDescription')}</p>
         </div>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <span className="text-xs text-muted-foreground/80">{envRuleEnabled ? t('common.enabled') : t('flags.off')}</span>
-          <Switch checked={envRuleEnabled} onCheckedChange={onEnvRuleEnabledChange} />
-        </label>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <span className="text-xs font-medium text-muted-foreground/80">{envRuleEnabled ? t('common.enabled') : t('flags.off')}</span>
+          <Switch
+            checked={envRuleEnabled}
+            onCheckedChange={onEnvRuleEnabledChange}
+            className="!bg-switch-background data-[state=checked]:!bg-indigo-600 dark:data-[state=checked]:!bg-indigo-500"
+          />
+        </div>
       </div>
 
       <div className="p-5 bg-secondary/50 rounded-xl border border-border space-y-5">
@@ -158,7 +170,7 @@ export function FlagEnvironmentPanel({
                         return (
                           <div key={ci} className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border" style={{ backgroundColor: segColor + '0F', borderColor: segColor + '1A' }}>
                             <span className="font-semibold shrink-0" style={{ color: segColor }}>{ctxDef?.name ?? `#${c.contextDefinitionId}`}</span>
-                            <span className="text-xs uppercase font-mono tracking-wider opacity-60" style={{ color: segColor }}>{c.operator ?? 'in'}</span>
+                            <OperatorBadge operator={c.operator ?? 'in'} className="opacity-60" />
                             <code className="font-mono break-all min-w-0 opacity-90" style={{ color: segColor }}>{c.contextValues}</code>
                           </div>
                         );
@@ -179,42 +191,97 @@ export function FlagEnvironmentPanel({
               <label className="text-sm font-medium text-foreground/80">{t('flags.additionalConditions')}</label>
               <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-medium leading-none">{t('flags.configurable')}</span>
             </div>
-            <button onClick={addConstraint} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center gap-1 font-medium"><Plus size={12} />{t('common.add')}</button>
+            <button onClick={addGroup} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center gap-1 font-medium"><Plus size={12} />{t('common.add')}</button>
           </div>
-          <div className="space-y-2">
-            {envRuleConstraints.map((c, ci) => (
-              <div key={ci} className="p-3 bg-white dark:bg-neutral-950 rounded-lg border border-border space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground">{t('flags.constraintCondition', { n: String(ci + 1) })}</span>
-                  <button onClick={() => removeConstraint(ci)} className="text-muted-foreground hover:text-red-600 dark:hover:text-red-400"><X size={14} /></button>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wide">{t('flags.attribute')}</label>
-                    <Select value={String(c.contextDefId)} onValueChange={(v) => updateConstraint(ci, 'contextDefId', Number(v))}>
-                      <SelectTrigger size="sm" className="w-full text-xs [&>span]:text-xs rounded-md"><SelectValue /></SelectTrigger>
-                      <SelectContent>{contexts.map(ctx => <SelectItem key={ctx.id} value={String(ctx.id)}>{ctx.name}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wide">{t('flags.condition')}</label>
-                    <Select value={c.operator} onValueChange={(v) => updateConstraint(ci, 'operator', v)}>
-                      <SelectTrigger size="sm" className="w-full text-xs [&>span]:text-xs rounded-md"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {getOperatorsForType(contexts.find(ctx => ctx.id === c.contextDefId)?.type).map(op => (
-                          <SelectItem key={op.value} value={op.value}>{op.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-medium text-muted-foreground/80 uppercase tracking-wide">{t('flags.valueLabel')}</label>
-                    <input type="text" value={c.value} onChange={e => updateConstraint(ci, 'value', e.target.value)} placeholder={t('flags.valuePlaceholder')} className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all" />
-                  </div>
-                </div>
+          <div className="space-y-1.5">
+            {envRuleConstraintGroups.map((g) => {
+              const isActive = activeGroupId === g.id;
+              const isMulti = g.operator === 'in' || g.operator === 'not_in';
+
+              const updateGroup = (upd: Partial<ConstraintGroup>) => {
+                onEnvRuleConstraintGroupsChange(
+                  envRuleConstraintGroups.map(c => c.id === g.id ? { ...c, ...upd } : c),
+                );
+              };
+
+              const handleToggle = () => onActiveGroupIdChange(isActive ? null : g.id);
+
+              const handleRemove = () => {
+                onEnvRuleConstraintGroupsChange(
+                  envRuleConstraintGroups.filter(c => c.id !== g.id),
+                );
+                if (isActive) onActiveGroupIdChange(null);
+              };
+
+              const handleContextChange = (ctxId: number) => {
+                const ctx = contexts.find(c => c.id === ctxId);
+                updateGroup({ contextDefId: ctxId, operator: getDefaultOperator(ctx?.type) });
+              };
+
+              const handleOperatorChange = (op: string) => {
+                const newIsMulti = op === 'in' || op === 'not_in';
+                const values = (!newIsMulti && g.values.length > 1)
+                  ? [g.values[0]]
+                  : g.values;
+                updateGroup({ operator: op, values });
+              };
+
+              return (
+                <ConstraintRow
+                  key={g.id}
+                  id={g.id}
+                  contextDefId={g.contextDefId}
+                  operator={g.operator}
+                  valuesPreview={formatValues(g.values)}
+                  contexts={contexts}
+                  isActive={isActive}
+                  onToggle={handleToggle}
+                  onContextChange={handleContextChange}
+                  onOperatorChange={handleOperatorChange}
+                  onRemove={handleRemove}
+                >
+                  {(contextType) => isMulti ? (
+                    <div className="p-3 bg-secondary/50 rounded-xl border border-border">
+                      <MultiValueChips
+                        values={g.values}
+                        onChange={(vals) => updateGroup({ values: vals })}
+                        autoFocus
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <input
+                        type="text"
+                        inputMode={getInputMode(contextType) as React.HTMLAttributes<HTMLInputElement>['inputMode']}
+                        pattern={getInputPattern(contextType)}
+                        placeholder={getInputPlaceholder(contextType) || t('flags.valuePlaceholder')}
+                        value={g.values[0] ?? ''}
+                        onChange={(e) => updateGroup({ values: [e.target.value] })}
+                        onInput={(e) => {
+                          const input = e.target as HTMLInputElement;
+                          const v = input.value.trim();
+                          if (!v) { input.setCustomValidity(''); return; }
+                          if (contextType === 'number' && isNaN(Number(v))) input.setCustomValidity('invalid');
+                          else if (contextType === 'time' && !/^\d{2}:\d{2}$/.test(v)) input.setCustomValidity('invalid');
+                          else if (contextType === 'semver' && !/^\d+\.\d+\.\d+(-.*)?$/.test(v)) input.setCustomValidity('invalid');
+                          else input.setCustomValidity('');
+                        }}
+                        className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
+                        autoFocus
+                      />
+                      {contextType !== 'string' && (
+                        <p className="text-[11px] text-muted-foreground/60 ml-0.5">{getInputHint(contextType)}</p>
+                      )}
+                    </div>
+                  )}
+                </ConstraintRow>
+              );
+            })}
+            {envRuleConstraintGroups.length === 0 && (
+              <div className="p-4 bg-white dark:bg-neutral-950 rounded-lg border border-dashed border-border dark:border-neutral-700 text-center">
+                <p className="text-xs text-muted-foreground">{t('flags.noConstraints')}</p>
               </div>
-            ))}
-            {envRuleConstraints.length === 0 && <div className="p-4 bg-white dark:bg-neutral-950 rounded-lg border border-dashed border-border dark:border-neutral-700 text-center"><p className="text-xs text-muted-foreground">{t('flags.noConstraints')}</p></div>}
+            )}
           </div>
         </div>
       </div>
@@ -247,9 +314,14 @@ export function FlagEnvironmentPanel({
                     {lines.map((line, li) => (
                       <div key={li} className="flex items-center gap-2 text-xs bg-white/70 dark:bg-neutral-900/50 rounded-lg px-3 py-2 border border-violet-100 dark:border-violet-500/10">
                         <span className="font-semibold text-foreground/80 shrink-0">{line.field}</span>
-                        <span className="inline-flex items-center font-mono text-xs font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 px-1.5 py-1 rounded shrink-0 leading-none">{OPERATOR_LABELS[line.operator] ?? line.operator}</span>
+                        <OperatorBadge operator={line.operator} />
                         <code className="font-mono text-foreground/80 break-all min-w-0">
-                          {line.values.length === 1 ? line.values[0] : `[${line.values.join(', ')}]`}
+                          {line.values.length === 1
+                            ? line.values[0]
+                            : line.values.length <= 3
+                              ? `[${line.values.join(', ')}]`
+                              : `[${line.values.slice(0, 3).join(', ')}, +${line.values.length - 3}]`
+                          }
                         </code>
                         <span className="text-xs text-muted-foreground shrink-0 ml-auto" title={line.source}>← {line.source === 'custom' ? t('flags.customSource') : line.source}</span>
                       </div>

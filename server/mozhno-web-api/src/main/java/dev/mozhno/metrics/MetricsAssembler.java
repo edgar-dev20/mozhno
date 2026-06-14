@@ -15,6 +15,7 @@ public class MetricsAssembler {
             .environmentId(metric.getEnvironmentId())
             .evaluationTrueCount(metric.getEvaluationTrueCount())
             .evaluationFalseCount(metric.getEvaluationFalseCount())
+            .clientInstanceId(metric.getClientInstanceId())
             .timeBucket(metric.getTimeBucket())
             .createdAt(metric.getCreatedAt())
             .build();

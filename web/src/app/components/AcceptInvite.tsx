@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { Lock, UserRound, AlertCircle } from "@/shared/icons";
-import { GradientButton } from "@/shared";
+import { Lock, UserRound } from "@/shared/icons";
+import { GradientButton, ErrorBox } from "@/shared";
+import { Input } from "@/app/components/ui/input";
+import { Wordmark } from '@/shared/components/Wordmark';
 import { api } from "@/api";
 import { useT } from '@/i18n';
 
@@ -54,13 +56,10 @@ export function AcceptInvite() {
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-violet-300/20 to-blue-300/20 dark:from-violet-600/10 dark:to-blue-600/10 rounded-full blur-3xl"></div>
 
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 dark:border-neutral-800/50 transition-colors animate-[fadeIn_0.5s_ease-out]">
+        <div className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/60 dark:border-neutral-800/50 transition-colors animate-[fadeIn_0.5s_ease-out]">
           <div className="p-8">
             <div className="flex justify-center mb-4">
-              <div className="text-4xl font-semibold tracking-[0.2em]" style={{ fontFamily: '"JetBrains Mono", "Fira Code", "Consolas", monospace' }}>
-                <span className="bg-gradient-to-r from-gradient-start to-gradient-end bg-clip-text text-transparent">{t('common.appName')}</span>
-                <span className="bg-gradient-to-r from-gradient-start to-gradient-end bg-clip-text text-transparent text-[0.55em] -ml-[0.35em]">.</span>
-              </div>
+              <Wordmark text={t('common.appName')} size="xl" />
             </div>
 
             <div className="text-center mb-10">
@@ -68,9 +67,8 @@ export function AcceptInvite() {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl flex items-center gap-2 text-sm text-red-700 dark:text-red-400">
-                <AlertCircle size={16} />
-                {error}
+              <div className="mb-4">
+                <ErrorBox>{error}</ErrorBox>
               </div>
             )}
 
@@ -91,20 +89,20 @@ export function AcceptInvite() {
                   <label className="text-sm font-medium text-foreground/80" htmlFor="name">
                     {t('auth.name')}
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <UserRound size={18} className="text-muted-foreground/70" />
-                    </div>
-                    <input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      maxLength={120}
-                      className="w-full bg-card border border-border text-foreground rounded-xl pl-11 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
-                      placeholder={t('auth.namePlaceholder')}
-                      required
-                    />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
+                    <UserRound size={18} className="text-muted-foreground/70" />
+                  </div>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    maxLength={120}
+                    className="pl-11"
+                    placeholder={t('auth.namePlaceholder')}
+                    required
+                  />
                   </div>
                 </div>
 
@@ -112,20 +110,20 @@ export function AcceptInvite() {
                   <label className="text-sm font-medium text-foreground/80" htmlFor="password">
                     {t('auth.password')}
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Lock size={18} className="text-muted-foreground/70" />
-                    </div>
-                    <input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      maxLength={128}
-                      className="w-full bg-card border border-border text-foreground rounded-xl pl-11 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
-                      placeholder={t('auth.passwordPlaceholder')}
-                      required
-                    />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
+                    <Lock size={18} className="text-muted-foreground/70" />
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    maxLength={128}
+                    className="pl-11"
+                    placeholder={t('auth.passwordPlaceholder')}
+                    required
+                  />
                   </div>
                 </div>
 
@@ -133,20 +131,20 @@ export function AcceptInvite() {
                   <label className="text-sm font-medium text-foreground/80" htmlFor="confirm">
                     {t('auth.confirmPassword')}
                   </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <Lock size={18} className="text-muted-foreground/70" />
-                    </div>
-                    <input
-                      id="confirm"
-                      type="password"
-                      value={confirm}
-                      onChange={(e) => setConfirm(e.target.value)}
-                      maxLength={128}
-                      className="w-full bg-card border border-border text-foreground rounded-xl pl-11 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
-                      placeholder={t('auth.passwordPlaceholder')}
-                      required
-                    />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
+                    <Lock size={18} className="text-muted-foreground/70" />
+                  </div>
+                  <Input
+                    id="confirm"
+                    type="password"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    maxLength={128}
+                    className="pl-11"
+                    placeholder={t('auth.passwordPlaceholder')}
+                    required
+                  />
                   </div>
                 </div>
 

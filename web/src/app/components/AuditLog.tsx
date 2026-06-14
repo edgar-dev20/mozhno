@@ -7,6 +7,7 @@ import { SectionHeader, EmptyState, LoadingState, DateRangePicker } from "@/shar
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
 import { useT } from '@/i18n';
+import { loadLocale, toIntlLocale } from '@/i18n/locale';
 
 const PAGE_SIZE = 50;
 
@@ -67,7 +68,7 @@ export function AuditLog() {
       }
       setHasMore(data.length === PAGE_SIZE);
     } catch (e) {
-      console.error(e);
+      if (import.meta.env.DEV) console.error(e);
     } finally {
       setLoadingMore(false);
     }
@@ -160,15 +161,15 @@ export function AuditLog() {
   };
 
   const formatDateTime = (d: string) => {
-    return new Date(d).toLocaleString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return new Date(d).toLocaleString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
   const formatDateOnly = (d: string) => {
-    return new Date(d).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+    return new Date(d).toLocaleDateString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const formatTimeOnly = (d: string) => {
-    return new Date(d).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    return new Date(d).toLocaleTimeString(toIntlLocale(loadLocale()), { hour: '2-digit', minute: '2-digit' });
   };
 
   const displayedEvents = filterType ? events.filter(e => e.resourceType === filterType) : events;
@@ -187,7 +188,7 @@ export function AuditLog() {
         storageKey="auditlog"
       />
 
-      <div className="bg-card border border-border rounded-2xl p-4 shadow-sm space-y-4">
+      <div className="bg-card rounded-2xl p-4 shadow-md space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider mr-1">{t('audit.filterType')}</span>
@@ -251,8 +252,8 @@ export function AuditLog() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.18, delay: Math.min(idx % PAGE_SIZE, 10) * 0.02 }}
-                  className="group bg-card border border-border rounded-xl shadow-sm hover:border-border hover:shadow-md transition-all overflow-hidden"
+                  transition={{ duration: 0.2, delay: Math.min(idx % PAGE_SIZE, 10) * 0.03 }}
+                  className="group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
                   id={`audit-card-${event.id}`}
                 >
                   <div
@@ -317,7 +318,7 @@ export function AuditLog() {
                               <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">{t('audit.expanded.resource')}</span>
                               <span className="text-xs font-semibold text-foreground/80 truncate block">{event.resourceName}</span>
                               <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className={`inline-flex items-center px-1.5 py-0 rounded text-[9px] font-semibold border ${getResourceColor(event.resourceType)}`}>{getResourceLabel(event.resourceType)}</span>
+                                <span className={`inline-flex items-center px-1.5 py-0 rounded text-xs font-semibold border ${getResourceColor(event.resourceType)}`}>{getResourceLabel(event.resourceType)}</span>
                                 {event.resourceId && <span className="text-xs font-mono text-muted-foreground">ID:{event.resourceId}</span>}
                               </div>
                             </div>

@@ -44,7 +44,7 @@ class ClientInstanceRepositoryTest extends BaseIntegrationTest {
 
     @Test
     void upsert_shouldCreateAndMerge() {
-        repository.upsert(projectId, envId, apiKeyId, "AppOne", "inst-a", "web", "SERVER");
+        repository.upsert(projectId, envId, apiKeyId, "AppOne", "inst-a", "web", "1.0.0", "SERVER");
 
         List<ClientInstance> results = repository.findByProjectId(projectId);
         assertThat(results).hasSize(1);
@@ -55,11 +55,12 @@ class ClientInstanceRepositoryTest extends BaseIntegrationTest {
         assertThat(ci.getAppName()).isEqualTo("AppOne");
         assertThat(ci.getInstanceId()).isEqualTo("inst-a");
         assertThat(ci.getAppType()).isEqualTo("web");
+        assertThat(ci.getSdkVersion()).isEqualTo("1.0.0");
         assertThat(ci.getKeyType()).isEqualTo("SERVER");
         assertThat(ci.getFirstSeenAt()).isNotNull();
         assertThat(ci.getLastSeenAt()).isNotNull();
 
-        repository.upsert(projectId, envId, null, "AppOne", "inst-a", "web", "FRONTEND");
+        repository.upsert(projectId, envId, null, "AppOne", "inst-a", "web", "2.0.0", "FRONTEND");
         List<ClientInstance> afterMerge = repository.findByProjectId(projectId);
         assertThat(afterMerge).hasSize(1);
         assertThat(afterMerge.get(0).getLastSeenAt()).isNotNull();
@@ -67,13 +68,13 @@ class ClientInstanceRepositoryTest extends BaseIntegrationTest {
 
     @Test
     void findByProjectId_shouldReturnOrderedByLastSeen() {
-        repository.upsert(projectId, envId, apiKeyId, "AppOne", "inst-a", "web", "SERVER");
+        repository.upsert(projectId, envId, apiKeyId, "AppOne", "inst-a", "web", "1.0.0", "SERVER");
 
         Environment env2 = new Environment();
         env2.setName("staging");
         env2.setProjectId(projectId);
         Integer env2Id = environmentRepository.save(env2).getId();
-        repository.upsert(projectId, env2Id, apiKeyId, "AppTwo", "inst-b", "mobile", "FRONTEND");
+        repository.upsert(projectId, env2Id, apiKeyId, "AppTwo", "inst-b", "mobile", "1.0.0", "FRONTEND");
 
         List<ClientInstance> results = repository.findByProjectId(projectId);
         assertThat(results).hasSize(2);
@@ -88,13 +89,13 @@ class ClientInstanceRepositoryTest extends BaseIntegrationTest {
 
     @Test
     void findByProjectIdAndEnvironmentId_shouldFilter() {
-        repository.upsert(projectId, envId, apiKeyId, "AppOne", "inst-a", "web", "SERVER");
+        repository.upsert(projectId, envId, apiKeyId, "AppOne", "inst-a", "web", "1.0.0", "SERVER");
 
         Environment env2 = new Environment();
         env2.setName("staging");
         env2.setProjectId(projectId);
         Integer env2Id = environmentRepository.save(env2).getId();
-        repository.upsert(projectId, env2Id, apiKeyId, "AppTwo", "inst-b", "mobile", "FRONTEND");
+        repository.upsert(projectId, env2Id, apiKeyId, "AppTwo", "inst-b", "mobile", "1.0.0", "FRONTEND");
 
         List<ClientInstance> results = repository.findByProjectIdAndEnvironmentId(projectId, envId);
         assertThat(results).hasSize(1);

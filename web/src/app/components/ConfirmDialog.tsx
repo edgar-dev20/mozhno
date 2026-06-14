@@ -1,5 +1,5 @@
 import React from 'react';
-import { useT } from '@/i18n';
+import { useT, type MessageKey } from '@/i18n';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -88,7 +88,7 @@ export function ConfirmDialog({
 
         <AlertDialogFooter className="py-4 border-t border-border bg-secondary/50 gap-3 flex-row justify-end">
           <AlertDialogCancel className="px-4 py-2.5 text-sm font-medium text-foreground/80 bg-card border border-border rounded-lg hover:bg-accent transition-colors">
-            {t(cancelLabel as any)}
+            {t(cancelLabel as MessageKey)}
           </AlertDialogCancel>
           <GradientButton
             variant={isDestructive ? 'danger' : 'primary'}
@@ -97,7 +97,7 @@ export function ConfirmDialog({
             loading={loading}
             size="md"
           >
-            {loading ? t('common.loading') : t(confirmLabel as any)}
+            {loading ? t('common.loading') : t(confirmLabel as MessageKey)}
           </GradientButton>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -2,6 +2,7 @@ import org.springframework.boot.gradle.plugin.SpringBootPlugin
 
 plugins {
     id 'java'
+    id 'maven-publish'
     id 'org.springframework.boot' version '4.0.5'
     id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -53,6 +54,18 @@ jacocoTestCoverageVerification {
             limit {
                 minimum = 0.60
             }
+        }
+    }
+}
+
+group = 'dev.mozhno'
+version = '1.0.0'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact bootJar
         }
     }
 }

@@ -59,7 +59,6 @@ export const router = createBrowserRouter([
               { index: true, element: <Navigate to="/flags" replace /> },
               { path: "flags", element: <LazyPage Component={Flags} /> },
               { path: "segments", element: <LazyPage Component={Segments} /> },
-              { path: "constraints", element: <LazyPage Component={Constraints} /> },
               { path: "contexts", element: <LazyPage Component={Constraints} /> },
               { path: "strategies", element: <LazyPage Component={Strategies} /> },
               { path: "tags", element: <LazyPage Component={Tags} /> },

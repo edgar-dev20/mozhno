@@ -2,6 +2,8 @@ import type { ConstraintEntry } from "@/app/components/flags/types";
 import type { ContextDefinition } from "@/api";
 import { isValidOperator, getDefaultOperator } from "@/app/components/operators";
 
+export { groupConstraintEntries, flattenConstraintGroups } from "@/app/components/flags/groupConstraints";
+
 export function parseConstraintEntries(
   contextValuesJson: string | null,
   contextDefinitionId: number | null,

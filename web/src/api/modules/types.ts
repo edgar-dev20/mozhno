@@ -22,7 +22,7 @@ export type IntegrationRequest = { type: string; name: string; enabled: boolean;
 export type ProjectSettings = { id: number; projectId: number; requireMfa: boolean; sessionTimeoutHours: number; ipWhitelist: string; accentColor: string | null; createdAt: string; updatedAt: string };
 export type SettingsUpdateRequest = { requireMfa?: boolean; sessionTimeoutHours?: number; ipWhitelist?: string; accentColor?: string | null };
 export type ClientInstance = { id: number; projectId: number; environmentId: number; apiKeyId: number | null; appName: string; instanceId: string; appType: string; sdkVersion: string | null; keyType: string; firstSeenAt: string; lastSeenAt: string };
-export type FlagMetric = { flagId: number; environmentId: number; evaluationTrueCount: number; evaluationFalseCount: number; timeBucket: string };
+export type FlagMetric = { id?: number; projectId?: number; flagId: number; environmentId: number; evaluationTrueCount: number; evaluationFalseCount: number; clientInstanceId?: number; timeBucket: string };
 
 export type PaginatedDashboardResponse = {
   flags: EnrichedFlagResponse[];

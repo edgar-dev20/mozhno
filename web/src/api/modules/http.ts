@@ -28,7 +28,20 @@ export function setRefreshToken(rt: string | null) {
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
+function syncTokensFromStorage(): boolean {
+  const storedRt = localStorage.getItem('mozhno_refresh_token');
+  const storedT = localStorage.getItem('mozhno_token');
+  if (storedRt && storedT && (storedRt !== refreshToken || storedT !== token)) {
+    refreshToken = storedRt;
+    token = storedT;
+    return true;
+  }
+  return false;
+}
+
 async function tryRefreshToken(): Promise<boolean> {
+  syncTokensFromStorage();
+
   if (!refreshToken) return false;
 
   if (isRefreshing && refreshPromise) {
@@ -36,6 +49,7 @@ async function tryRefreshToken(): Promise<boolean> {
   }
 
   isRefreshing = true;
+  const attemptedRefreshToken = refreshToken;
   refreshPromise = (async () => {
     try {
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -45,15 +59,21 @@ async function tryRefreshToken(): Promise<boolean> {
       const res = await fetch(`${BASE_URL}/auth/refresh`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ refreshToken }),
+        body: JSON.stringify({ refreshToken: attemptedRefreshToken }),
       });
-      if (!res.ok) return false;
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 400) {
+          refreshToken = null;
+          localStorage.removeItem('mozhno_refresh_token');
+        }
+        return syncTokensFromStorage();
+      }
       const data = await res.json();
       setToken(data.token);
       setRefreshToken(data.refreshToken);
       return true;
     } catch {
-      return false;
+      return syncTokensFromStorage();
     } finally {
       isRefreshing = false;
       refreshPromise = null;
@@ -108,14 +128,18 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
             signal: controller.signal,
           });
           if (!retryRes.ok) {
-            clearAuth();
+            if (retryRes.status === 401 && !syncTokensFromStorage()) {
+              clearAuth();
+            }
             const body = await retryRes.json().catch(() => ({}));
             throw createAppError(body.error || body.message || `HTTP ${retryRes.status}`, retryRes.status, body);
           }
           if (retryRes.status === 204) return undefined as T;
           return retryRes.json();
         }
-        clearAuth();
+        if (!getRefreshToken()) {
+          clearAuth();
+        }
       }
       const body = await res.json().catch(() => ({}));
       throw createAppError(body.error || body.message || `HTTP ${res.status}`, res.status, body);
@@ -125,9 +149,9 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
   } catch (e) {
     if (e instanceof AppError) throw e;
     if (e instanceof DOMException && e.name === 'AbortError') {
-      throw new AppError('Таймаут запроса', 'TIMEOUT');
+      throw new AppError('Request timed out', 'TIMEOUT');
     }
-    throw new AppError(e instanceof Error ? e.message : 'Сетевая ошибка', 'NETWORK');
+    throw new AppError('Network error', 'NETWORK');
   } finally {
     clearTimeout(timeout);
   }

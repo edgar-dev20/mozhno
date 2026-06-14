@@ -48,7 +48,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             } catch {}
           }
           clearAuth();
-          resetOnboardingComplete();
           setUser(null);
         })
         .finally(() => setLoading(false));

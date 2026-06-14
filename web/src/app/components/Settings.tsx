@@ -283,7 +283,7 @@ export function Settings() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden"
+          className="bg-card border border-border rounded-2xl shadow-lg overflow-hidden"
         >
           <div className="p-6">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection('project')}>
@@ -393,7 +393,7 @@ export function Settings() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, delay: 0.1 }}
-          className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden"
+          className="bg-card border border-border rounded-2xl shadow-lg overflow-hidden"
         >
           <div className="p-6">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection('environments')}>
@@ -458,8 +458,8 @@ export function Settings() {
                           initial={{ opacity: 0, y: 12 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, x: -20 }}
-                          transition={{ duration: 0.2, delay: idx * 0.025 }}
-                          className="group bg-card border border-border rounded-xl shadow-sm hover:border-border hover:shadow-md transition-all overflow-hidden"
+                          transition={{ duration: 0.2, delay: idx * 0.03 }}
+                          className="group bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
                         >
                           <div
                             className="flex items-center justify-between px-4 py-3 cursor-pointer"
@@ -520,7 +520,7 @@ export function Settings() {
                                       />
                                       <GradientButton onClick={saveEditEnv} disabled={savingEnvEdit || !editEnvName.trim() || editEnvName.trim() === initialEditEnvName} loading={savingEnvEdit} size="sm">{t('common.saveChanges')}</GradientButton>
                                       <button onClick={cancelEditEnv}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-foreground/60 bg-secondary border border-border rounded-xl hover:bg-neutral-100 dark:text-muted-foreground/60 dark:bg-neutral-900 dark:border-neutral-800 dark:hover:bg-neutral-800 transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-foreground/60 bg-secondary border border-border rounded-lg hover:bg-neutral-100 dark:text-muted-foreground/60 dark:bg-neutral-900 dark:border-neutral-800 dark:hover:bg-neutral-800 transition-colors"
                                       >
                                         {t('common.cancel')}
                                       </button>
@@ -528,12 +528,12 @@ export function Settings() {
                                   ) : (
                                     <div className="flex items-center gap-2 border-t border-border pt-3">
                                       <button onClick={(e) => { e.stopPropagation(); startEditEnv(env); }}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-foreground/60 bg-secondary border border-border rounded-xl hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 dark:text-muted-foreground/60 dark:bg-neutral-900 dark:border-neutral-800 dark:hover:text-rose-400 dark:hover:border-rose-500/20 dark:hover:bg-rose-500/10 transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-foreground/60 bg-secondary border border-border rounded-lg hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 dark:text-muted-foreground/60 dark:bg-neutral-900 dark:border-neutral-800 dark:hover:text-rose-400 dark:hover:border-rose-500/20 dark:hover:bg-rose-500/10 transition-colors"
                                       >
                                         <Edit2 size={12} />{t('common.edit')}
                                       </button>
                                       <button onClick={(e) => { e.stopPropagation(); setDeleteEnvId(env.id); }}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-foreground/60 bg-secondary border border-border rounded-xl hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:text-muted-foreground/60 dark:bg-neutral-900 dark:border-neutral-800 dark:hover:text-red-400 dark:hover:border-red-500/20 dark:hover:bg-red-500/10 transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-foreground/60 bg-secondary border border-border rounded-lg hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:text-muted-foreground/60 dark:bg-neutral-900 dark:border-neutral-800 dark:hover:text-red-400 dark:hover:border-red-500/20 dark:hover:bg-red-500/10 transition-colors"
                                       >
                                         <Trash2 size={12} />{t('common.delete')}
                                       </button>
@@ -568,7 +568,7 @@ export function Settings() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, delay: 0.3 }}
-          className="bg-card border border-red-200 dark:border-red-900/50 rounded-2xl shadow-sm overflow-hidden"
+          className="bg-card border border-red-200 dark:border-red-900/50 rounded-2xl shadow-lg overflow-hidden"
         >
           <div className="p-6">
             <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleSection('danger')}>

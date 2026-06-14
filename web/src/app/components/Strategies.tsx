@@ -1,5 +1,5 @@
 import { Percent, Split, AlertTriangle } from "@/shared/icons";
-import { SectionHeader } from "@/shared";
+import { SectionHeader, Card } from "@/shared";
 import { TipCard } from "@/app/components/TipCard";
 import { useT } from '@/i18n';
 
@@ -27,11 +27,11 @@ export function Strategies() {
         {BUILTIN.map((s, i) => {
           const Icon = s.icon;
           return (
-            <div key={i} className="bg-card border border-border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
+            <Card key={i} variant="elevated" padded className="p-5 hover:shadow-xl transition-shadow">
               <div className={`w-10 h-10 rounded-lg ${s.bg} flex items-center justify-center mb-3`}><Icon size={22} className={s.color} /></div>
               <h3 className="font-semibold text-foreground">{t(s.nameKey)}</h3>
               <p className="text-sm text-muted-foreground/80 mt-1">{t(s.descKey)}</p>
-            </div>
+            </Card>
           );
         })}
       </div>

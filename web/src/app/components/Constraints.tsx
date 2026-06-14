@@ -5,11 +5,11 @@ import { toast } from 'sonner';
 import { SidePanel } from "@/app/components/SidePanel";
 import { TipCard } from "@/app/components/TipCard";
 import { ConfirmDialog } from "@/app/components/ConfirmDialog";
-import { DiffConfirmDialog } from "@/app/components/DiffConfirmDialog";
+import { InlineDiffBar } from "@/app/components/InlineDiffBar";
 import type { DiffChange } from "@/shared/diffUtils";
 import { SegmentIcon } from "@/app/components/SegmentIcon";
 import { api, ContextDefinition, SegmentResponse } from "@/api";
-import { SectionHeader, EmptyState, FormField, GradientButton, LoadingState } from "@/shared";
+import { SectionHeader, EmptyState, FormField, GradientButton, LoadingState, ErrorBox } from "@/shared";
 import { useProjectQuery, useContextsQuery, useSegmentsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useT } from '@/i18n';
@@ -24,9 +24,11 @@ const TYPE_COLORS_BAR: Record<string, string> = {
   '#8b5cf6': 'linear-gradient(to right, #8b5cf6, #6ee7b7)',
 };
 
+import { loadLocale, toIntlLocale } from '@/i18n/locale';
+
 function formatDate(iso: string | null): string {
   if (!iso) return '';
-  return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+  return new Date(iso).toLocaleDateString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short' });
 }
 
 export function Constraints() {
@@ -52,7 +54,6 @@ export function Constraints() {
   const [keyError, setKeyError] = useState('');
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [diffOpen, setDiffOpen] = useState(false);
   const [diffChanges, setDiffChanges] = useState<DiffChange[]>([]);
 
   const typeLabels: Record<string, string> = {
@@ -145,7 +146,6 @@ export function Constraints() {
 
       if (changes.length > 0) {
         setDiffChanges(changes);
-        setDiffOpen(true);
         return;
       }
     }
@@ -155,14 +155,14 @@ export function Constraints() {
   };
 
   const confirmSave = () => {
-    setDiffOpen(false);
+    setDiffChanges([]);
     setSaving(true);
     saveMutation.mutate();
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader
           title={t('constraints.title')}
           description={t('constraints.description')}
@@ -188,7 +188,7 @@ export function Constraints() {
             {contexts.map((c, idx) => {
               const usage = segmentUsage.get(c.id);
               return (
-              <motion.div key={c.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2, delay: idx * 0.04 }} className="group bg-card border border-border rounded-xl overflow-hidden shadow-sm hover:border-border hover:shadow-md transition-all duration-200 cursor-pointer" onClick={() => openEdit(c)}>
+              <motion.div key={c.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2, delay: idx * 0.03 }} className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer" onClick={() => openEdit(c)}>
                 <div className="h-1.5" style={{ background: TYPE_COLORS_BAR[TYPE_COLORS[c.type ?? 'string']] ?? `linear-gradient(to right, ${TYPE_COLORS[c.type ?? 'string']}, ${TYPE_COLORS[c.type ?? 'string']}88)` }} />
                 <div className="p-5">
                   <div className="flex gap-3">
@@ -230,22 +230,30 @@ export function Constraints() {
         onOpenChange={setPanelOpen}
         title={editing ? editing.name : t('constraints.panelTitleNew')}
         description=""
-        footer={<>
-          <div className="flex items-center gap-2">
+        diffSlot={diffChanges.length > 0 ? <InlineDiffBar changes={diffChanges} /> : undefined}
+        onDiffDismiss={diffChanges.length > 0 ? () => setDiffChanges([]) : undefined}
+        footer={diffChanges.length > 0 ? (
+          <div className="flex items-center gap-2 w-full">
             <div className="flex-1" />
-            <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground/60 hover:bg-accent rounded-xl transition-colors">{t('common.cancel')}</button>
+            <button onClick={() => setDiffChanges([])} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground/60 hover:bg-accent rounded-lg transition-colors">{t('common.cancel')}</button>
+            <GradientButton onClick={confirmSave} loading={saving}>{t('common.applyChanges')}</GradientButton>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 w-full">
+            <div className="flex-1" />
+            <button onClick={() => setPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground/60 hover:bg-accent rounded-lg transition-colors">{t('common.cancel')}</button>
             <GradientButton onClick={handleSave} disabled={saving || !formName || !formKey || !isDirty} loading={saving}>{editing ? t('common.saveChanges') : t('common.create')}</GradientButton>
           </div>
-        </>}
+        )}
       >
-        {error && <div className="p-3.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-sm text-red-700 dark:text-red-400 mb-5 leading-relaxed">{error}</div>}
+        {error && <ErrorBox className="mb-5">{error}</ErrorBox>}
 
         <div className="space-y-5">
           <FormField label={t('common.name')} maxLength={120} value={formName}>
             <input type="text" value={formName} onChange={e => setFormName(e.target.value)} maxLength={120} placeholder="User ID" className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground" />
           </FormField>
           <FormField label={t('common.key')} hint={editing ? <>{t('constraints.keyHintEditPrefix')}<code className="text-xs font-mono text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-1 py-0.5 rounded">context['{formKey}']</code></> : <>{t('constraints.keyHintCreatePrefix')}<code className="text-xs font-mono text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-1 py-0.5 rounded">context['user_id']</code></>} maxLength={100} value={formKey}>
-            <input type="text" value={formKey} onChange={e => { setFormKey(e.target.value); setKeyError(''); }} maxLength={100} placeholder="user_id" disabled={!!editing} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-sans placeholder:font-normal placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-secondary/50" />
+            <input type="text" value={formKey} onChange={e => { setFormKey(e.target.value); setKeyError(''); }} maxLength={100} placeholder="user_id" disabled={!!editing} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-secondary/50" />
             {keyError && <p className="text-xs text-red-500 mt-1">{keyError}</p>}
           </FormField>
           <div className="space-y-2">
@@ -278,7 +286,7 @@ export function Constraints() {
                     <div className="text-sm font-semibold" style={{ color: s.color }}>{s.name}</div>
                     {s.description && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{s.description}</div>}
                   </div>
-                  <span className="inline-flex items-center text-[9px] font-semibold uppercase px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 shrink-0">{t('constraints.badgeInUse')}</span>
+                  <span className="inline-flex items-center text-xs font-semibold uppercase px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 shrink-0">{t('constraints.badgeInUse')}</span>
                 </div>
               ))}
             </div>
@@ -296,15 +304,6 @@ export function Constraints() {
       </SidePanel>
 
       <ConfirmDialog open={!!deleteId} onOpenChange={(open) => { if (!open) setDeleteId(null); }} title={t('constraints.confirmDeleteTitle')} description={t('constraints.confirmDeleteDescription', { name: contexts.find(c => c.id === deleteId)?.name ?? '' })} confirmLabel={t('common.delete')} onConfirm={handleDelete} loading={deleting} />
-
-      <DiffConfirmDialog
-        open={diffOpen}
-        onClose={() => setDiffOpen(false)}
-        changes={diffChanges}
-        description={t('common.reviewChanges')}
-        confirmLabel={t('common.apply')}
-        onConfirm={confirmSave}
-      />
     </div>
   );
 }

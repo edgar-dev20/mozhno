@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import * as LucideIcons from 'lucide-react';
 import { adjustColor } from "@/shared/color";
 import { GradientButton } from "@/shared";
-import { useT } from '@/i18n';
+import { useT, type MessageKey } from '@/i18n';
 
 export const SEGMENT_ICONS = [
   'Users', 'UserCheck', 'UserCog', 'UserRound', 'UserPlus',
@@ -149,7 +149,7 @@ export function SegmentColorPicker({ value, onChange }: { value: string; onChang
         {COLOR_CATEGORIES.map((cat) => (
           <div key={cat.label}>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">{t(cat.label as any)}</span>
+              <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">{t(cat.label as MessageKey)}</span>
               <div className="h-px flex-1 bg-accent" />
             </div>
             <div className="flex gap-1.5 flex-wrap">

@@ -34,8 +34,7 @@ export function DatePicker({
 
   const presets = [
     { label: t("common.today"), getValue: () => new Date() },
-    { label: t("common.yesterday"), getValue: () => { const d = new Date(); d.setDate(d.getDate() + 1); return d; } },
-    { label: t("common.clearFilter"), getValue: () => { const d = new Date(); d.setDate(d.getDate() + 7); return d; } },
+    { label: t("common.yesterday"), getValue: () => { const d = new Date(); d.setDate(d.getDate() - 1); return d; } },
   ];
 
   const handleSelect = (date: Date | undefined) => {
@@ -56,7 +55,8 @@ export function DatePicker({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-xl px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
+          aria-label={placeholder ?? t("common.selectDate")}
+          className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-lg px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
         >
           <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
           <span className={displayDate ? "text-foreground/80" : "text-muted-foreground"}>
@@ -72,7 +72,7 @@ export function DatePicker({
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="rounded-2xl w-auto p-0" align="center">
+      <PopoverContent className="rounded-xl w-auto p-0" align="center">
         <CalendarComponent
           mode="single"
           selected={value ?? undefined}
@@ -89,11 +89,20 @@ export function DatePicker({
                 key={preset.label}
                 type="button"
                 onClick={() => handleSelect(preset.getValue())}
-                className="px-3 py-1.5 text-xs font-semibold rounded-xl transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
               >
                 {preset.label}
               </button>
             ))}
+            {value && (
+              <button
+                type="button"
+                onClick={() => handleSelect(undefined)}
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
+              >
+                {t("common.clearFilter")}
+              </button>
+            )}
           </div>
         )}
       </PopoverContent>

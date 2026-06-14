@@ -6,8 +6,9 @@ import { SidePanel } from "@/app/components/SidePanel";
 import { TipCard } from "@/app/components/TipCard";
 import { ConfirmDialog } from "@/app/components/ConfirmDialog";
 import { api, UserDto } from "@/api";
-import { SectionHeader, GradientButton, EmptyState, LoadingState, SearchInput } from "@/shared";
+import { SectionHeader, GradientButton, EmptyState, LoadingState, SearchInput, ErrorBox } from "@/shared";
 import { useT } from '@/i18n';
+import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import { Avatar, AvatarImage, AvatarFallback } from "@/app/components/ui/avatar";
 
 export function Users() {
@@ -35,7 +36,7 @@ export function Users() {
       const data = await api.users.list();
       setUsers(data);
     } catch (e) {
-      console.error(e);
+      if (import.meta.env.DEV) console.error(e);
     } finally {
       setLoading(false);
     }
@@ -206,12 +207,12 @@ export function Users() {
 
   const formatDate = (d: string) => {
     if (!d) return '—';
-    return new Date(d).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
+    return new Date(d).toLocaleDateString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric' });
   };
 
   const formatDateTime = (d: string) => {
     if (!d) return t('users.time.never');
-    return new Date(d).toLocaleString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return new Date(d).toLocaleString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
 
   const timeAgo = (d: string) => {
@@ -241,7 +242,7 @@ export function Users() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader
           title={t('users.title')}
           description={t('users.description')}
@@ -314,8 +315,8 @@ export function Users() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2, delay: idx * 0.025 }}
-                  className="group bg-card border border-border rounded-xl shadow-sm hover:border-border hover:shadow-md transition-all overflow-hidden"
+                  transition={{ duration: 0.2, delay: idx * 0.03 }}
+                  className="group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
                   id={`user-card-${user.id}`}
                 >
                   <div
@@ -444,11 +445,11 @@ export function Users() {
 
       <SidePanel open={isPanelOpen} onOpenChange={setIsPanelOpen} title={editingUser ? t('users.panel.editTitle') : t('users.panel.createTitle')} description={editingUser ? t('users.panel.editDescription') : t('users.panel.createDescription')}
         footer={<>
-          <button onClick={() => setIsPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-xl transition-colors">{t('common.cancel')}</button>
+          <button onClick={() => setIsPanelOpen(false)} className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors">{t('common.cancel')}</button>
           <GradientButton onClick={handleSave} disabled={saving || !formData.email || (!editingUser && !formData.password) || (editingUser && !isDirty)} loading={saving}>{editingUser ? t('common.saveChanges') : t('users.panel.invite')}</GradientButton>
         </>}>
         <div className="space-y-5">
-          {error && <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-sm text-red-700 dark:text-red-400">{error}</div>}
+          {error && <ErrorBox>{error}</ErrorBox>}
 
           {!editingUser && (
             <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg">
