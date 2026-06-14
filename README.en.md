@@ -2,7 +2,7 @@
   <img src="logo.svg" width="360" alt="mozhno.">
 </p>
 
-<p align="center"><b>Enable without fear.</b></p>
+<p align="center" style="font-family:'JetBrains Mono','Fira Code','Consolas',monospace;font-size:15px;font-weight:400;color:#8b80a8;letter-spacing:0.05em;margin-top:-4px;">enable without fear.</p>
 
 <p align="center">Open-source feature flag management platform.</p>
 

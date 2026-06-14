@@ -1,11 +1,18 @@
-<svg width="640" height="104" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="можно.">
+<svg width="640" height="120" viewBox="0 0 640 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="можно.">
   <defs>
     <linearGradient id="mozhno-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#7c3aed"/>
-      <stop offset="100%" stop-color="#a855f7"/>
+      <stop offset="0%" stop-color="#6c3ed0"/>
+      <stop offset="100%" stop-color="#9e62e6"/>
     </linearGradient>
   </defs>
-  <text x="320" y="84" text-anchor="middle"
-        font-family="monospace" font-size="76" font-weight="bold"
-        letter-spacing="0.2em" fill="url(#mozhno-grad)">можно.</text>
+  <g transform="translate(320, 0)">
+    <text x="-16" y="78" text-anchor="end"
+          font-family="'JetBrains Mono', 'Fira Code', 'Consolas', monospace"
+          font-size="64" font-weight="600"
+          letter-spacing="0.2em" fill="url(#mozhno-grad)">можно</text>
+    <text x="-38" y="78" text-anchor="start"
+          font-family="'JetBrains Mono', 'Fira Code', 'Consolas', monospace"
+          font-size="35" font-weight="600"
+          fill="url(#mozhno-grad)">.</text>
+  </g>
 </svg>

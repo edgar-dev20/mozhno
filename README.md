@@ -2,7 +2,7 @@
   <img src="logo.svg" width="360" alt="можно.">
 </p>
 
-<p align="center"><b>Включай без страха.</b></p>
+<p align="center" style="font-family:'JetBrains Mono','Fira Code','Consolas',monospace;font-size:15px;font-weight:400;color:#8b80a8;letter-spacing:0.05em;margin-top:-4px;">включай без страха.</p>
 
 <p align="center">Платформа управления фиче-флагами с открытым кодом.</p>
 
