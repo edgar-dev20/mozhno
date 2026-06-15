@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Filter,
   Clock,
@@ -20,7 +20,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { api, AuditEvent } from '@/api';
 import { TipCard } from '@/app/components/TipCard';
-import { SectionHeader, EmptyState, LoadingState, DateRangePicker } from '@/shared';
+import { SectionHeader, EmptyState, LoadingState, DateRangePicker, SearchInput } from '@/shared';
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
 import { useT } from '@/i18n';
@@ -36,6 +36,7 @@ export function AuditLog() {
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
   const [filterType, setFilterType] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [hasMore, setHasMore] = useState(true);
@@ -243,7 +244,24 @@ export function AuditLog() {
     });
   };
 
-  const displayedEvents = filterType ? events.filter((e) => e.resourceType === filterType) : events;
+  const displayedEvents = useMemo(() => {
+    let filtered = events;
+    if (filterType) {
+      filtered = filtered.filter((e) => e.resourceType === filterType);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (e) =>
+          (e.userName ?? '').toLowerCase().includes(q) ||
+          (e.userEmail ?? '').toLowerCase().includes(q) ||
+          (e.resourceName ?? '').toLowerCase().includes(q) ||
+          (e.action ?? '').toLowerCase().includes(q) ||
+          (e.details ?? '').toLowerCase().includes(q),
+      );
+    }
+    return filtered;
+  }, [events, filterType, searchQuery]);
 
   return (
     <div className="space-y-6">
@@ -254,6 +272,12 @@ export function AuditLog() {
         label={t('audit.tipLabel')}
         icon={<ScanSearch />}
         storageKey="auditlog"
+      />
+
+      <SearchInput
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder={t('audit.searchPlaceholder')}
       />
 
       <div className="bg-card rounded-2xl p-4 shadow-md space-y-4">
@@ -313,7 +337,7 @@ export function AuditLog() {
             icon={<Activity size={24} className="text-violet-500 dark:text-violet-400" />}
             title={t('audit.emptyTitle')}
             description={
-              filterType || dateFrom || dateTo
+              filterType || dateFrom || dateTo || searchQuery
                 ? t('audit.emptyFiltered')
                 : t('audit.emptyDescription')
             }
