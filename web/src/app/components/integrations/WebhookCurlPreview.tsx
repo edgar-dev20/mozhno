@@ -34,13 +34,13 @@ export function WebhookCurlPreview({ formUrl, formHeaders, formBody }: WebhookCu
         <button
           type="button"
           onClick={copyCurl}
-          className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-lg transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-brand hover:bg-brand/10 rounded-lg transition-colors"
         >
           {copied ? <Check size={11} /> : <Clipboard size={11} />}
           {copied ? t('integrations.copied') : t('integrations.copy')}
         </button>
       </div>
-      <pre className="p-3 bg-white dark:bg-neutral-950 text-xs text-foreground/80 font-mono whitespace-pre-wrap break-all m-0 overflow-x-auto">
+      <pre className="p-3 bg-input-background text-xs text-foreground/80 font-mono whitespace-pre-wrap break-all m-0 overflow-x-auto">
         {curlCommand}
       </pre>
     </div>

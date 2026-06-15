@@ -290,7 +290,7 @@ export function Settings() {
           <div className="p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="p-2.5 rounded-xl bg-muted border border-border">
-                <Building2 size={20} className="text-blue-600 dark:text-blue-400" />
+                <Building2 size={20} className="text-info" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-foreground">{t('settings.project')}</h2>
@@ -332,7 +332,7 @@ export function Settings() {
                   onChange={(e) => setProjectName(e.target.value)}
                   maxLength={120}
                   placeholder={t('settings.projectNamePlaceholder')}
-                  className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                  className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                 />
               </div>
 
@@ -346,7 +346,7 @@ export function Settings() {
                   maxLength={160}
                   rows={2}
                   placeholder={t('settings.descriptionPlaceholder')}
-                  className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
+                  className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
                 />
               </div>
 
@@ -367,7 +367,7 @@ export function Settings() {
                     />
                   ) : (
                     <div className="w-16 h-16 rounded-xl bg-muted border border-border flex items-center justify-center shrink-0">
-                      <Image size={24} className="text-amber-500 dark:text-amber-400" />
+                      <Image size={24} className="text-warning" />
                     </div>
                   )}
                   <div>
@@ -421,7 +421,7 @@ export function Settings() {
           <div className="p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="p-2.5 rounded-xl bg-muted border border-border">
-                <Globe size={20} className="text-violet-600 dark:text-violet-400" />
+                <Globe size={20} className="text-brand" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-foreground">
@@ -435,7 +435,7 @@ export function Settings() {
 
             <div className="space-y-4">
               {maxEnvironments != null && environments.length >= maxEnvironments ? (
-                <div className="p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl text-sm text-amber-700 dark:text-amber-300">
+                <div className="p-3 bg-warning/10 border border-warning/20 rounded-xl text-sm text-warning">
                   {t('settings.envLimitReached', {
                     count: String(maxEnvironments),
                     max: String(maxEnvironments),
@@ -450,7 +450,7 @@ export function Settings() {
                     maxLength={120}
                     onKeyDown={(e) => e.key === 'Enter' && addEnv()}
                     placeholder={t('settings.addEnvPlaceholder')}
-                    className="flex-1 bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                    className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                   />
                   <GradientButton
                     onClick={addEnv}
@@ -498,7 +498,7 @@ export function Settings() {
                           >
                             <div className="flex items-center gap-3 min-w-0">
                               <div className="p-2 rounded-lg bg-muted border border-border shrink-0">
-                                <Globe size={16} className="text-violet-600 dark:text-violet-400" />
+                                <Globe size={16} className="text-brand" />
                               </div>
                               <div className="min-w-0">
                                 <div className="text-sm font-semibold text-foreground truncate">
@@ -513,12 +513,12 @@ export function Settings() {
                               {isExpanded ? (
                                 <ChevronUp
                                   size={16}
-                                  className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+                                  className="text-muted-foreground group-hover:text-brand transition-colors"
                                 />
                               ) : (
                                 <ChevronDown
                                   size={16}
-                                  className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+                                  className="text-muted-foreground group-hover:text-brand transition-colors"
                                 />
                               )}
                             </div>
@@ -565,7 +565,7 @@ export function Settings() {
                                           if (e.key === 'Escape') cancelEditEnv();
                                         }}
                                         autoFocus
-                                        className="flex-1 bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
+                                        className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
                                       />
                                       <GradientButton
                                         onClick={saveEditEnv}
@@ -603,7 +603,7 @@ export function Settings() {
                                           e.stopPropagation();
                                           setDeleteEnvId(env.id);
                                         }}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:text-red-400 dark:hover:border-red-500/20 dark:hover:bg-red-500/10 transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-colors"
                                       >
                                         <Trash2 size={12} />
                                         {t('common.delete')}
@@ -621,7 +621,7 @@ export function Settings() {
                 </div>
               ) : (
                 <EmptyState
-                  icon={<Globe size={28} className="text-violet-500 dark:text-violet-400" />}
+                  icon={<Globe size={28} className="text-brand" />}
                   title={t('settings.noEnvs')}
                   description={t('settings.noEnvsDescription')}
                 />
@@ -635,12 +635,12 @@ export function Settings() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, delay: 0.3 }}
-          className="bg-card border border-red-200 dark:border-red-900/50 rounded-xl shadow-md overflow-hidden"
+          className="bg-card border border-destructive/20 rounded-xl shadow-md overflow-hidden"
         >
           <div className="p-6">
             <div className="flex items-center gap-3 mb-5">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-red-50 to-red-100 dark:from-red-500/10 dark:to-red-500/20 border border-red-200/50 dark:border-red-500/20">
-                <AlertTriangle size={20} className="text-red-600 dark:text-red-400" />
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-destructive/10 to-destructive/10 border border-destructive/20">
+                <AlertTriangle size={20} className="text-destructive" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-foreground">
@@ -652,7 +652,7 @@ export function Settings() {
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20">
+            <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="font-medium text-foreground text-sm">

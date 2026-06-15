@@ -174,7 +174,7 @@ export function OnboardingWizard({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/60 dark:bg-black/70 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/60 backdrop-blur-md"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -243,7 +243,7 @@ export function OnboardingWizard({
                           onChange={(e) => setProjectName(e.target.value)}
                           maxLength={120}
                           placeholder={t('onboarding.projectNamePlaceholder')}
-                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                         />
                         <textarea
                           value={projectDesc}
@@ -251,7 +251,7 @@ export function OnboardingWizard({
                           maxLength={500}
                           rows={2}
                           placeholder={t('onboarding.projectDescPlaceholder')}
-                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
+                          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
                         />
                         <input
                           ref={fileInputRef}
@@ -278,7 +278,7 @@ export function OnboardingWizard({
                           </button>
                         </div>
                         <p className="text-xs text-muted-foreground">{t('onboarding.logoHint')}</p>
-                        {projectError && <p className="text-xs text-red-500">{projectError}</p>}
+                        {projectError && <p className="text-xs text-destructive">{projectError}</p>}
                         <GradientButton
                           onClick={handleCreateProject}
                           disabled={creatingProject}
@@ -298,7 +298,7 @@ export function OnboardingWizard({
                           onChange={(e) => setFlagName(e.target.value)}
                           maxLength={120}
                           placeholder={t('onboarding.flagNamePlaceholder')}
-                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                         />
                         <input
                           type="text"
@@ -306,9 +306,9 @@ export function OnboardingWizard({
                           onChange={(e) => setFlagKey(e.target.value)}
                           maxLength={100}
                           placeholder={t('onboarding.flagKeyPlaceholder')}
-                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
+                          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
                         />
-                        {flagError && <p className="text-xs text-red-500">{flagError}</p>}
+                        {flagError && <p className="text-xs text-destructive">{flagError}</p>}
                         <GradientButton
                           onClick={handleCreateFlag}
                           disabled={creatingFlag}

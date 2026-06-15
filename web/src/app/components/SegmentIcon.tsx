@@ -188,7 +188,7 @@ export function SegmentColorPicker({ value, onChange, icon = 'Users' }: { value:
       </div>
 
       <p className="text-xs text-muted-foreground/70 flex items-center gap-1">
-        <LucideIcons.Sparkles size={12} className="text-amber-400" />
+        <LucideIcons.Sparkles size={12} className="text-warning" />
         {t('tags.form.color.hint')}
       </p>
     </div>

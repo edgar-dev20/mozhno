@@ -39,7 +39,7 @@ function buildRule(
   parts.push(
     <span
       key="pct"
-      className={`font-bold text-xs text-violet-600 dark:text-violet-400 ${pctClass}`}
+      className={`font-bold text-xs text-brand ${pctClass}`}
     >
       {isFull ? '100%' : `${pct}%`}
     </span>,
@@ -93,7 +93,7 @@ function buildRule(
               +{overflow}
             </span>
           </TooltipTrigger>
-          <TooltipContent className="text-xs bg-white dark:bg-neutral-800 text-foreground/90 border border-border shadow-lg rounded-xl px-3 py-2">
+          <TooltipContent className="text-xs bg-popover text-foreground/90 border border-border shadow-lg rounded-xl px-3 py-2">
             {restNames}
           </TooltipContent>
         </Tooltip>,

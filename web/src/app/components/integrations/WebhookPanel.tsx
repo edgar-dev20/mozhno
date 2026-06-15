@@ -30,7 +30,7 @@ export function WebhookPanel({ form, limitRemaining, showError, editingLastError
           <div className="text-xs text-muted-foreground mt-0.5">
             {t('integrations.enableHint')}
             {limitRemaining < Number.MAX_SAFE_INTEGER && (
-              <span className="ml-2 text-violet-500">
+              <span className="ml-2 text-brand">
                 · {t('integrations.enableRemaining')}: {limitRemaining}
               </span>
             )}
@@ -56,7 +56,7 @@ export function WebhookPanel({ form, limitRemaining, showError, editingLastError
           maxLength={120}
           placeholder={t('integrations.namePlaceholder')}
           autoFocus={!form.editing}
-          className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
         />
       </FormField>
 
@@ -74,9 +74,9 @@ export function WebhookPanel({ form, limitRemaining, showError, editingLastError
             onChange={(e) => form.setFormUrl(e.target.value)}
             maxLength={2048}
             placeholder={t('integrations.urlPlaceholder')}
-            className={`w-full bg-white dark:bg-neutral-950 border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground ${
+            className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground ${
               form.urlError
-                ? 'border-amber-300 dark:border-amber-500/30'
+                ? 'border-warning/30'
                 : 'border-border'
             }`}
           />
@@ -84,20 +84,20 @@ export function WebhookPanel({ form, limitRemaining, showError, editingLastError
       </FormField>
 
       {showError && editingLastError && (
-        <div className="p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl">
+        <div className="p-4 bg-warning/10 border border-warning/20 rounded-xl">
           <div className="flex items-start gap-3">
             <AlertTriangle
               size={18}
-              className="text-amber-500 shrink-0 mt-0.5"
+              className="text-warning shrink-0 mt-0.5"
             />
             <div className="min-w-0">
-              <div className="text-sm font-medium text-amber-800 dark:text-amber-300">
+              <div className="text-sm font-medium text-warning">
                 {t('integrations.lastDeliveryError')}
               </div>
-              <div className="text-xs text-amber-700 dark:text-amber-400 mt-1 font-mono whitespace-pre-wrap break-all">
+              <div className="text-xs text-warning mt-1 font-mono whitespace-pre-wrap break-all">
                 {editingLastError}
               </div>
-              <div className="flex items-center gap-1 mt-2 text-xs text-amber-600 dark:text-amber-400/70">
+              <div className="flex items-center gap-1 mt-2 text-xs text-warning">
                 <Clock size={11} />
                 {t('integrations.deliveryErrorHint')}
               </div>

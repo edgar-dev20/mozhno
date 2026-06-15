@@ -104,7 +104,7 @@ export function Auth() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-border dark:text-muted-foreground/70 bg-white dark:bg-neutral-800 accent-gradient-start"
+                    className="h-4 w-4 rounded border-border dark:text-muted-foreground/70 bg-input-background accent-gradient-start"
                   />
                   <label htmlFor="remember" className="ml-2 block text-sm text-muted-foreground">
                     {t('auth.rememberMe')}

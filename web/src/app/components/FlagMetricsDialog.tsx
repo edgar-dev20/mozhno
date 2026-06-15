@@ -255,14 +255,14 @@ export function FlagMetricsDialog({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-neutral-900/40 dark:bg-black/60 backdrop-blur-sm z-40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-300" />
+        <Dialog.Overlay className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-300" />
         <Dialog.Content className="fixed right-4 top-4 bottom-4 w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:[--tw-exit-translate-x:calc(100%+1rem)] data-[state=open]:slide-in-from-right-full duration-300">
           {/* Header */}
           <div className="flex-shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="relative shrink-0">
                 <div className="bg-gradient-to-r from-gradient-start/10 to-gradient-end/10 dark:from-blue-500/5 dark:to-violet-500/5 rounded-lg p-1.5">
-                  <BarChart3 size={18} className="text-violet-600 dark:text-violet-400" />
+                  <BarChart3 size={18} className="text-brand" />
                 </div>
               </div>
               <span className="text-sm font-semibold text-foreground truncate">{flagName}</span>
@@ -543,10 +543,10 @@ export function FlagMetricsDialog({
                                 const envName =
                                   environments.find((e) => e.id === inst.environmentId)?.name ?? '';
                                 const envColor = (() => {
-                                  if (envName === 'Production') return 'bg-emerald-500';
-                                  if (envName === 'Development') return 'bg-amber-500';
-                                  if (envName === 'staging') return 'bg-violet-500';
-                                  return 'bg-blue-500';
+                                  if (envName === 'Production') return 'bg-success';
+                                  if (envName === 'Development') return 'bg-warning';
+                                  if (envName === 'staging') return 'bg-brand';
+                                  return 'bg-info';
                                 })();
 
                                 return (

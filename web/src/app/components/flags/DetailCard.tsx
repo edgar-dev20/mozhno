@@ -212,16 +212,16 @@ export function DetailCard({ group, contexts, initialGroup, onChange, onRemove, 
                   <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
                     {t('flags.detailCard.preview')}
                   </label>
-                  <div className="p-3 bg-violet-50 dark:bg-violet-500/5 rounded-xl border border-violet-200 dark:border-violet-500/10">
-                    <code className="text-sm font-mono text-violet-700 dark:text-violet-300 break-all">
+                  <div className="p-3 bg-brand/5 rounded-xl border border-brand/10">
+                    <code className="text-sm font-mono text-brand break-all">
                       context['{ctxDef?.name ?? '?'}'] {previewOp} {previewValues}
                     </code>
                   </div>
                 </div>
               )}
               {!hasContext && group && (
-                <div className="p-4 bg-amber-50 dark:bg-amber-500/5 rounded-xl border border-amber-200 dark:border-amber-500/10 text-center">
-                  <p className="text-xs text-amber-700 dark:text-amber-300">{t('flags.detailCard.selectContext')}</p>
+                <div className="p-4 bg-warning/5 rounded-xl border border-warning/10 text-center">
+                  <p className="text-xs text-warning">{t('flags.detailCard.selectContext')}</p>
                 </div>
               )}
             </div>
@@ -229,7 +229,7 @@ export function DetailCard({ group, contexts, initialGroup, onChange, onRemove, 
             <div className="flex-shrink-0 px-5 py-4 border-t border-border flex justify-between gap-3 bg-secondary/30">
               <button
                 onClick={onRemove}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
               >
                 <Trash2 size={14} />
                 {t('flags.detailCard.removeCondition')}

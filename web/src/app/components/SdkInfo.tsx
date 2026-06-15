@@ -29,9 +29,9 @@ function CodeBlock({ code, lang }: CodeBlockProps) {
       )}
       <button
         onClick={handleCopy}
-        className="absolute top-2 right-2 p-1.5 rounded-lg bg-white/60 dark:bg-neutral-800/60 hover:bg-white dark:hover:bg-neutral-800 text-muted-foreground hover:text-foreground/70 dark:hover:text-neutral-200 transition-colors"
+        className="absolute top-2 right-2 p-1.5 rounded-lg bg-popover/60 hover:bg-white dark:hover:bg-neutral-800 text-muted-foreground hover:text-foreground/70 dark:hover:text-neutral-200 transition-colors"
       >
-        {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+        {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
       </button>
       <pre className="bg-neutral-950 dark:bg-neutral-950 border border-border rounded-xl p-5 overflow-x-auto text-sm leading-relaxed">
         <code className="text-neutral-200 font-mono text-sm whitespace-pre">{code}</code>
@@ -194,7 +194,7 @@ export function SdkInfo() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-all ${
                   activeTab === tab.id
-                    ? 'bg-white dark:bg-neutral-800 shadow-sm text-foreground'
+                    ? 'bg-popover shadow-sm text-foreground'
                     : 'text-muted-foreground hover:text-foreground/70 dark:hover:text-neutral-300'
                 }`}
               >
@@ -215,13 +215,13 @@ export function SdkInfo() {
                 className={`shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border ${
                   active.keyType === 'SERVER'
                     ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20'
-                    : 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20'
+                    : 'text-success bg-success/10 border-success/20'
                 }`}
               >
                 {active.keyType === 'SERVER' ? (
-                  <Server size={12} className={active.keyType === 'SERVER' ? 'text-indigo-500' : 'text-emerald-500'} />
+                  <Server size={12} className={active.keyType === 'SERVER' ? 'text-indigo-500' : 'text-success'} />
                 ) : (
-                  <Globe size={12} className="text-emerald-500" />
+                  <Globe size={12} className="text-success" />
                 )}
                 {active.keyType === 'SERVER' ? t('sdkInfo.serverKey') : t('sdkInfo.frontendKey')}
               </span>

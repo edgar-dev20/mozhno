@@ -44,8 +44,8 @@ const getTypeIcon = (t: string, size = 10) => {
 
 const getIconColor = (t: string) =>
   t === 'RELEASE'
-    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10'
-    : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10';
+    ? 'text-info bg-info/10'
+    : 'text-destructive bg-destructive/10';
 
 interface FlagCardHeaderProps {
   flag: FlagView;
@@ -115,12 +115,12 @@ export function FlagCardHeader({
         {expanded ? (
           <ChevronUp
             size={16}
-            className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+            className="text-muted-foreground group-hover:text-brand transition-colors"
           />
         ) : (
           <ChevronDown
             size={16}
-            className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+            className="text-muted-foreground group-hover:text-brand transition-colors"
           />
         )}
       </div>

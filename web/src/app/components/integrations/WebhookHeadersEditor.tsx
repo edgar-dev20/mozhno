@@ -82,7 +82,7 @@ export function WebhookHeadersEditor({
         <button
           type="button"
           onClick={onAdd}
-          className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium flex items-center gap-1 transition-colors"
+          className="text-xs text-brand hover:text-brand font-medium flex items-center gap-1 transition-colors"
         >
           <Plus size={12} />
           {t('integrations.addHeader')}
@@ -105,7 +105,7 @@ export function WebhookHeadersEditor({
                   onBlur={handleBlur}
                   maxLength={500}
                   placeholder={t('integrations.headerKeyPlaceholder')}
-                  className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                  className="w-full bg-input-background border border-border rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                 />
                 {showKeySuggestions && filteredSuggestions.length > 0 && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-10 py-1 max-h-40 overflow-y-auto">
@@ -114,7 +114,7 @@ export function WebhookHeadersEditor({
                         key={s}
                         type="button"
                         onClick={() => applySuggestion(h.id, s)}
-                        className="w-full text-left px-3 py-1.5 text-xs font-mono text-foreground/80 hover:bg-violet-50 dark:hover:bg-violet-500/10 hover:text-violet-600 dark:hover:text-violet-400 transition-colors flex items-center gap-2"
+                        className="w-full text-left px-3 py-1.5 text-xs font-mono text-foreground/80 hover:bg-brand/10 hover:text-brand transition-colors flex items-center gap-2"
                       >
                         <ChevronDown size={10} className="text-muted-foreground shrink-0" />
                         {s}
@@ -131,13 +131,13 @@ export function WebhookHeadersEditor({
                   onFocus={() => handleValueFocus(h.id)}
                   maxLength={500}
                   placeholder={t('integrations.headerValuePlaceholder')}
-                  className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                  className="w-full bg-input-background border border-border rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                 />
               </div>
               <button
                 type="button"
                 onClick={() => onRemove(h.id)}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors shrink-0"
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
               >
                 <X size={14} />
               </button>

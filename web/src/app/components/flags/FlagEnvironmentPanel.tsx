@@ -121,7 +121,7 @@ export function FlagEnvironmentPanel({
             <Slider.Track className="bg-accent relative grow rounded-full h-2.5">
               <Slider.Range className="absolute bg-indigo-600 dark:bg-indigo-500 rounded-full h-full" />
             </Slider.Track>
-            <Slider.Thumb className="block w-6 h-6 bg-white border-2 border-violet-600 dark:border-violet-500 rounded-full shadow-lg hover:bg-violet-50 dark:hover:bg-violet-950 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2" />
+            <Slider.Thumb className="block w-6 h-6 bg-white border-2 border-brand rounded-full shadow-lg hover:bg-brand/10 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2" />
           </Slider.Root>
           <p className="text-xs text-muted-foreground/80">
             {envRulePercent === 100 ? t('flags.fullRollout') : envRulePercent === 0 ? t('flags.flagOff') : t('flags.percentUsers', { percent: String(envRulePercent) })}
@@ -278,7 +278,7 @@ export function FlagEnvironmentPanel({
               );
             })}
             {envRuleConstraintGroups.length === 0 && (
-              <div className="p-4 bg-white dark:bg-neutral-950 rounded-lg border border-dashed border-border dark:border-neutral-700 text-center">
+              <div className="p-4 bg-input-background rounded-lg border border-dashed border-border dark:border-neutral-700 text-center">
                 <p className="text-xs text-muted-foreground">{t('flags.noConstraints')}</p>
               </div>
             )}
@@ -289,18 +289,18 @@ export function FlagEnvironmentPanel({
       {hasSummary && (
         <div className="pt-4 border-t border-border">
           <div className="flex items-center gap-2 mb-3">
-            <Zap size={16} className="text-violet-600 dark:text-violet-400" />
+            <Zap size={16} className="text-brand" />
             <label className="text-sm font-medium text-foreground/80">{t('flags.summaryExpression')}</label>
-            <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-violet-100 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 font-medium leading-none">{t('flags.tactic')}</span>
+            <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">{t('flags.tactic')}</span>
           </div>
-          <div className="bg-gradient-to-br from-violet-50 to-indigo-50 dark:from-violet-500/5 dark:to-indigo-500/5 rounded-xl border border-violet-200 dark:border-violet-500/20 overflow-hidden">
+          <div className="bg-gradient-to-br from-brand/10 to-indigo-50 dark:from-brand/5 dark:to-indigo-500/5 rounded-xl border border-brand/20 overflow-hidden">
             <div className="p-4 space-y-3">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-violet-600/10 dark:bg-violet-500/20 flex items-center justify-center">
-                  <Percent size={16} className="text-violet-600 dark:text-violet-400" />
+                <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center">
+                  <Percent size={16} className="text-brand" />
                 </div>
                 <div>
-                  <span className="text-2xl font-bold text-violet-700 dark:text-violet-300">{envRulePercent}%</span>
+                  <span className="text-2xl font-bold text-brand">{envRulePercent}%</span>
                   <span className="text-sm text-muted-foreground ml-1.5">{t('flags.of')} {hasSegments ? selectedSegs.map(s => s.name).join(', ') : t('flags.allUsers')}</span>
                 </div>
               </div>
@@ -312,7 +312,7 @@ export function FlagEnvironmentPanel({
                   </div>
                   <div className="space-y-1.5">
                     {lines.map((line, li) => (
-                      <div key={li} className="flex items-center gap-2 text-xs bg-white/70 dark:bg-neutral-900/50 rounded-lg px-3 py-2 border border-violet-100 dark:border-violet-500/10">
+                      <div key={li} className="flex items-center gap-2 text-xs bg-input-background/70 rounded-lg px-3 py-2 border border-brand/10">
                         <span className="font-semibold text-foreground/80 shrink-0">{line.field}</span>
                         <OperatorBadge operator={line.operator} />
                         <code className="font-mono text-foreground/80 break-all min-w-0">

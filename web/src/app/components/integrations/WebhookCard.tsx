@@ -28,16 +28,16 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
       onClick={() => onEdit(item)}
     >
       <div
-        className={`h-1.5 bg-gradient-to-r ${hasError ? 'from-red-500 to-amber-500' : 'from-gradient-start to-gradient-end'}`}
+        className={`h-1.5 bg-gradient-to-r ${hasError ? 'from-destructive to-warning' : 'from-gradient-start to-gradient-end'}`}
       />
       <div className="p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gradient-subtle-start to-gradient-subtle-end border border-blue-200/50 dark:border-violet-500/20 shrink-0">
+            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gradient-subtle-start to-gradient-subtle-end border border-blue-200/50 dark:border-brand/20 shrink-0">
               {hasError ? (
-                <AlertTriangle size={18} className="text-amber-500" />
+                <AlertTriangle size={18} className="text-warning" />
               ) : (
-                <Webhook size={18} className="text-blue-600 dark:text-blue-400" />
+                <Webhook size={18} className="text-info" />
               )}
             </div>
             <div className="min-w-0">
@@ -51,8 +51,8 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
 
         <div className="flex items-center gap-2 flex-wrap">
           {item.enabled ? (
-            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full leading-none bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full leading-none bg-success/10 text-success border border-success/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-success" />
               {t('integrations.status.connected')}
             </span>
           ) : (
@@ -63,10 +63,10 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
           )}
           {hasError && (
             <span
-              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full leading-none bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200/50 dark:border-amber-500/20"
+              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full leading-none bg-warning/10 text-warning border border-warning/20"
               title={item.lastError!}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              <span className="w-1.5 h-1.5 rounded-full bg-warning" />
               {t('integrations.status.error')}
             </span>
           )}

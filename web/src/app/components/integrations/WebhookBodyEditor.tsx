@@ -52,9 +52,9 @@ export function WebhookBodyEditor({
           {jsonContentType && jsonValid !== null && (
             <span className="ml-1">
               {jsonValid ? (
-                <Check size={12} className="text-emerald-500 inline" />
+                <Check size={12} className="text-success inline" />
               ) : (
-                <AlertTriangle size={12} className="text-amber-500 inline" />
+                <AlertTriangle size={12} className="text-warning inline" />
               )}
             </span>
           )}
@@ -62,7 +62,7 @@ export function WebhookBodyEditor({
         <button
           type="button"
           onClick={onToggleTemplateHelp}
-          className="text-xs text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 font-medium flex items-center gap-1 transition-colors"
+          className="text-xs text-brand hover:text-brand font-medium flex items-center gap-1 transition-colors"
         >
           {showTemplateHelp ? <Code2 size={12} /> : <Braces size={12} />}
           {showTemplateHelp
@@ -79,13 +79,13 @@ export function WebhookBodyEditor({
                 key={v.key}
                 type="button"
                 onClick={() => onCopyTemplateVar(v.key)}
-                className="w-full flex items-center justify-between text-left text-xs px-2 py-1.5 rounded-lg hover:bg-violet-50 dark:hover:bg-violet-500/10 transition-colors group"
+                className="w-full flex items-center justify-between text-left text-xs px-2 py-1.5 rounded-lg hover:bg-brand/10 transition-colors group"
               >
-                <code className="text-violet-600 dark:text-violet-400 font-mono">{`{{${v.key}}}`}</code>
+                <code className="text-brand font-mono">{`{{${v.key}}}`}</code>
                 <span className="text-muted-foreground flex items-center gap-1.5">
                   {v.label}
                   {isCopied ? (
-                    <Check size={12} className="text-emerald-500 shrink-0" />
+                    <Check size={12} className="text-success shrink-0" />
                   ) : (
                     <Copy
                       size={12}
@@ -104,9 +104,9 @@ export function WebhookBodyEditor({
         maxLength={10000}
         placeholder={t('integrations.bodyPlaceholder')}
         rows={7}
-        className={`w-full bg-white dark:bg-neutral-950 border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-y whitespace-pre overflow-x-auto ${
+        className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-y whitespace-pre overflow-x-auto ${
           jsonContentType && jsonValid === false
-            ? 'border-amber-300 dark:border-amber-500/30'
+            ? 'border-warning/30'
             : 'border-border'
         }`}
       />

@@ -5,7 +5,7 @@ interface StatusDotProps {
 
 const stateClasses: Record<string, string> = {
   active: 'bg-success shadow-sm shadow-success/40',
-  recent: 'bg-warning',
+  recent: 'bg-warning shadow-sm shadow-warning/40',
   stale: 'bg-muted-foreground/20',
   neutral: 'bg-muted-foreground/20',
 };

@@ -7,7 +7,8 @@ import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { InlineDiffBar } from '@/app/components/InlineDiffBar';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
 import { FlagMetricsDialog } from '@/app/components/FlagMetricsDialog';
-import { SectionHeader, EmptyState, GradientButton, LoadingState, ErrorBox, adjustColor } from '@/shared';
+import { SectionHeader, EmptyState, GradientButton, ErrorBox, adjustColor } from '@/shared';
+import { FlagCardSkeletonList } from '@/app/components/flags/FlagCardSkeleton';
 import type { FlagTagValue } from '@/api';
 import type { ConstraintGroup } from '@/app/components/flags/types';
 import { useT } from '@/i18n';
@@ -476,10 +477,10 @@ export function Flags() {
 
       <div className="space-y-3">
         {loading ? (
-          <LoadingState text={t('flags.loadingFlags')} />
+          <FlagCardSkeletonList count={3} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Rocket size={28} className="text-violet-500 dark:text-violet-400" />}
+            icon={<Rocket size={28} className="text-brand" />}
             title={t('flags.noFlags')}
             description={t('flags.noFlagsDescription')}
             buttonLabel={t('flags.create')}
@@ -515,7 +516,7 @@ export function Flags() {
             {hasMoreFlags && (
               <div className="flex items-center justify-center gap-3 pt-3 pb-1">
                 <GradientButton variant="secondary" onClick={showMoreFlags}>{t('flags.showMore')} ({filtered.length - visibleFlags.length})</GradientButton>
-                <GradientButton variant="secondary" onClick={showAllFlags} className="bg-violet-50 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20">{t('flags.showAll')} ({filtered.length})</GradientButton>
+                <GradientButton variant="secondary" onClick={showAllFlags} className="bg-brand/10 border-brand/20 text-brand hover:bg-brand/20">{t('flags.showAll')} ({filtered.length})</GradientButton>
               </div>
             )}
           </>

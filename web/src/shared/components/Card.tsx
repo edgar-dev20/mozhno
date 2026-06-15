@@ -22,13 +22,13 @@ export const Card = React.forwardRef<HTMLDivElement | HTMLButtonElement, CardPro
       if (selected) {
         classes = 'rounded-2xl transition-all overflow-hidden bg-gradient-to-br from-sparkline-true/[0.04] to-transparent ring-1 ring-sparkline-true/25 shadow-md';
       } else {
-        classes = 'rounded-2xl transition-all overflow-hidden bg-card shadow-sm hover:shadow-md ring-1 ring-border';
+        classes = 'rounded-2xl transition-all overflow-hidden bg-card shadow-sm hover:shadow-md border border-border';
       }
     } else {
       const variantBase: Record<string, string> = {
-        default: 'bg-card rounded-2xl shadow-sm ring-1 ring-border',
-        elevated: 'bg-card rounded-2xl shadow-md ring-1 ring-border',
-        panel: 'bg-card rounded-2xl shadow-lg ring-1 ring-border',
+        default: 'bg-card rounded-2xl shadow-sm border border-border',
+        elevated: 'bg-card rounded-2xl shadow-md border border-border',
+        panel: 'bg-card rounded-2xl shadow-lg border border-border',
       };
       classes = variantBase[variant];
     }

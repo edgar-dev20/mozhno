@@ -1,19 +1,17 @@
 <svg width="640" height="140" viewBox="0 0 640 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="можно. включай без страха.">
   <defs>
     <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#6c3ed0"/>
-      <stop offset="100%" stop-color="#9e62e6"/>
+      <stop offset="0%" stop-color="#7150d0"/>
+      <stop offset="100%" stop-color="#6748c2"/>
     </linearGradient>
   </defs>
 
-  <text x="320" y="72" text-anchor="middle"
-        font-family="'JetBrains Mono','Fira Code','Consolas',monospace"
-        font-size="64" font-weight="600" fill="url(#g)">
-    <tspan letter-spacing="0.2em">можно</tspan><tspan font-size="35" letter-spacing="0">.</tspan>
+  <text x="320" y="72" text-anchor="middle" font-size="64" fill="url(#g)">
+    <tspan font-family="'Inter',-apple-system,'Helvetica Neue',Arial,sans-serif" font-weight="700" letter-spacing="0.02em">можно</tspan><tspan font-family="'JetBrains Mono','Fira Code','Consolas',monospace" font-weight="600" font-size="35" letter-spacing="0">.</tspan>
   </text>
 
   <text x="320" y="108" text-anchor="middle"
-        font-family="'JetBrains Mono','Fira Code','Consolas',monospace"
+        font-family="'Inter',-apple-system,'Helvetica Neue',Arial,sans-serif"
         font-size="17" font-weight="400"
         letter-spacing="0.04em" fill="#8b80a8">включай без страха.</text>
 </svg>

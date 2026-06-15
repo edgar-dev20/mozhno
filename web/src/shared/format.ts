@@ -29,9 +29,9 @@ export function timeAgo(d: string | null): string {
 
 export function getFlagTypeColor(t: string): string {
   switch (t) {
-    case 'RELEASE': return 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20';
-    case 'KILLSWITCH': return 'text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20';
-    default: return 'text-neutral-700 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-500/10 border-neutral-200 dark:border-neutral-500/20';
+    case 'RELEASE': return 'text-info bg-info/10 border-info/20';
+    case 'KILLSWITCH': return 'text-destructive bg-destructive/10 border-destructive/20';
+    default: return 'text-muted-foreground bg-muted border-border';
   }
 }
 

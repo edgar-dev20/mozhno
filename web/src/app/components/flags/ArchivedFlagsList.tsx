@@ -31,16 +31,16 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
     <motion.div
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-card rounded-xl overflow-hidden shadow-md ring-1 ring-violet-200 dark:ring-violet-500/20"
+      className="bg-card rounded-xl overflow-hidden shadow-md ring-1 ring-brand/20"
     >
-      <div className="px-6 py-4 bg-violet-50 dark:bg-violet-500/10 border-b border-violet-200 dark:border-violet-500/20">
+      <div className="px-6 py-4 bg-brand/10 border-b border-brand/20">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center">
-            <Archive size={16} className="text-violet-600 dark:text-violet-400" />
+          <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center">
+            <Archive size={16} className="text-brand" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-violet-800 dark:text-violet-200">{t('flags.archivedFlagsTitle')}</h3>
-            <p className="text-xs text-violet-600 dark:text-violet-400">{t('flags.archivedFlagsDesc')}</p>
+            <h3 className="text-sm font-semibold text-brand">{t('flags.archivedFlagsTitle')}</h3>
+            <p className="text-xs text-brand">{t('flags.archivedFlagsDesc')}</p>
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
                   {flag.createdAt && <span className="flex items-center gap-1"><Clock size={10} />{formatDate(flag.createdAt)}</span>}
                 </div>
                 {flag.archivedBy && (
-                  <div className="flex items-center gap-2 mt-1 text-xs text-violet-600 dark:text-violet-400">
+                  <div className="flex items-center gap-2 mt-1 text-xs text-brand">
                     <span className="flex items-center gap-1"><Archive size={10} />{flag.archivedBy}</span>
                     {flag.archivedAt && <span className="flex items-center gap-1"><Clock size={10} />{formatDate(flag.archivedAt)}</span>}
                   </div>
@@ -87,7 +87,7 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
               <div className="flex items-center gap-1.5 ml-4 shrink-0">
                 <button
                   onClick={() => onUnarchive(flag)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand hover:bg-brand/10 rounded-lg transition-colors"
                 >
                   <ArchiveRestore size={13} />{t('flags.restore')}
                 </button>

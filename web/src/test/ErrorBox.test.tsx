@@ -8,12 +8,12 @@ describe('ErrorBox', () => {
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });
 
-  it('has red styling classes', () => {
+  it('has destructive styling classes', () => {
     const { container } = render(<ErrorBox>Error message</ErrorBox>);
     const root = container.firstElementChild as HTMLElement;
-    expect(root.className).toContain('bg-red-50');
-    expect(root.className).toContain('border-red-200');
-    expect(root.className).toContain('text-red-700');
+    expect(root.className).toContain('bg-destructive/10');
+    expect(root.className).toContain('border-destructive/20');
+    expect(root.className).toContain('text-destructive');
   });
 
   it('applies custom className', () => {

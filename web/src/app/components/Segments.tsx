@@ -149,7 +149,7 @@ export function Segments() {
                   <div key={i} className="flex items-center gap-1.5 text-xs">
                     <span className="font-semibold text-foreground/80">{ctx?.name ?? t('segments.unknownField', { id: String(r.contextDefinitionId) })}</span>
                     <OperatorBadge operator={r.operator ?? 'in'} />
-                    <code className="font-mono text-emerald-600 dark:text-emerald-400 break-all">{r.contextValues || '—'}</code>
+                    <code className="font-mono text-success break-all">{r.contextValues || '—'}</code>
                   </div>
                 );
               })}
@@ -276,7 +276,7 @@ export function Segments() {
                           <div key={ci} className="flex items-center gap-1.5 text-xs">
                             <span className="font-semibold text-muted-foreground">{ctxDef?.name ?? t('segments.unknownField', { id: String(c.contextDefinitionId) })}</span>
                             <OperatorBadge operator={c.operator ?? 'in'} />
-                            <code className="font-mono text-emerald-600 dark:text-emerald-400 break-all line-clamp-1">{c.contextValues}</code>
+                            <code className="font-mono text-success break-all line-clamp-1">{c.contextValues}</code>
                           </div>
                         );
                       })}
@@ -314,17 +314,17 @@ export function Segments() {
           {error && <ErrorBox>{error}</ErrorBox>}
 
           <FormField label={t('common.name')} maxLength={120} value={formName}>
-            <input type="text" value={formName} onChange={e => setFormName(e.target.value)} maxLength={120} placeholder={t('segments.form.namePlaceholder')} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground" />
+            <input type="text" value={formName} onChange={e => setFormName(e.target.value)} maxLength={120} placeholder={t('segments.form.namePlaceholder')} className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground" />
           </FormField>
           <FormField label={t('common.description')} maxLength={160} value={formDesc}>
-            <textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} maxLength={160} placeholder={t('segments.form.descriptionPlaceholder')} rows={2} ref={el => { if (el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 64) + 'px'; } }} onInput={e => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 64) + 'px'; }} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden" />
+            <textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} maxLength={160} placeholder={t('segments.form.descriptionPlaceholder')} rows={2} ref={el => { if (el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 64) + 'px'; } }} onInput={e => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 64) + 'px'; }} className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden" />
           </FormField>
 
           <div className="pt-4 border-t border-border">
             <button
               type="button"
               onClick={() => setShowCustomize(!showCustomize)}
-              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-secondary dark:hover:bg-neutral-900 transition-colors group"
+              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-secondary transition-colors group"
             >
               <div className="flex items-center gap-3">
                 <div
@@ -457,7 +457,7 @@ export function Segments() {
                       {parsedValues.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
                           {parsedValues.map((v, vi) => (
-                            <span key={vi} className="inline-flex items-center gap-1 px-2 py-1 text-xs font-mono bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/20 rounded-md break-all leading-none">
+                            <span key={vi} className="inline-flex items-center gap-1 px-2 py-1 text-xs font-mono bg-success/10 text-success border border-success/20 rounded-md break-all leading-none">
                               {v}
                               <button onClick={(e) => { e.stopPropagation(); removeValue(c.id, vi); }} className="text-emerald-500 hover:text-red-500 transition-colors"><X size={11} /></button>
                             </span>
@@ -471,7 +471,7 @@ export function Segments() {
                 );
               })}
               {formContexts.length === 0 && (
-                <div className="p-4 bg-white dark:bg-neutral-950 rounded-lg border border-dashed border-border dark:border-neutral-700 text-center">
+                <div className="p-4 bg-input-background rounded-lg border border-dashed border-border dark:border-neutral-700 text-center">
                   <p className="text-xs text-muted-foreground">{t('segments.targetingRules.emptyRules')}</p>
                 </div>
               )}
@@ -493,7 +493,7 @@ export function Segments() {
               <button
                 type="button"
                 onClick={() => setDeleteId(editing.id)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
               >
                 <Trash2 size={16} />
                 {t('segments.deleteButton')}

@@ -104,7 +104,7 @@ export function WebhookEventsPicker({
           <button
             type="button"
             onClick={toggleAllEvents}
-            className="text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
+            className="text-xs font-medium text-brand hover:text-brand transition-colors"
           >
             {formEvents.length === ALL_EVENTS.length
               ? t('integrations.deselectAll')
@@ -125,7 +125,7 @@ export function WebhookEventsPicker({
               <button
                 type="button"
                 onClick={() => onToggleCatExpand(cat.catKey)}
-                className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-secondary dark:hover:bg-neutral-900 transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-secondary transition-colors"
               >
                 <div className="flex items-center gap-2.5">
                   <ChevronDown
@@ -146,7 +146,7 @@ export function WebhookEventsPicker({
                     e.stopPropagation();
                     toggleCatAll(cat.catKey);
                   }}
-                  className="text-xs font-medium text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors"
+                  className="text-xs font-medium text-brand hover:text-brand transition-colors"
                 >
                   {allInCat
                     ? t('integrations.deselectCategory')
@@ -160,7 +160,7 @@ export function WebhookEventsPicker({
                     return (
                       <label
                         key={evt.key}
-                        className={`flex items-start gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors group ${checked ? 'bg-violet-50/70 dark:bg-violet-500/10' : 'hover:bg-secondary dark:hover:bg-neutral-900'}`}
+                        className={`flex items-start gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors group ${checked ? 'bg-brand/10' : 'hover:bg-secondary'}`}
                       >
                         <Checkbox
                           checked={checked}

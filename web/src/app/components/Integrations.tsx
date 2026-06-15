@@ -167,7 +167,7 @@ export function Integrations() {
         </div>
       ) : items.length === 0 ? (
         <EmptyState
-          icon={<Webhook size={28} className="text-blue-600 dark:text-blue-400" />}
+          icon={<Webhook size={28} className="text-info" />}
           title={t('integrations.emptyTitle')}
           description={t('integrations.emptyDescription')}
           buttonLabel={t('integrations.connect')}
@@ -209,7 +209,7 @@ export function Integrations() {
                 onClick={() => {
                   setDeleteId(form.editing!.id);
                 }}
-                className="px-5 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20 transition-all mr-auto"
+                className="px-5 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all mr-auto"
               >
                 <Trash2 size={16} className="inline mr-1.5" />
                 {t('common.delete')}

@@ -49,8 +49,8 @@ export function UserProfileMenu() {
 
   const getRoleBadge = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-500/20';
-      case 'developer': return 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-500/20';
+      case 'admin': return 'bg-warning/10 text-warning border-warning/20';
+      case 'developer': return 'bg-info/10 text-info border-info/20';
       default: return 'bg-secondary dark:bg-secondary/10 text-foreground/70 dark:text-muted-foreground/70 border-border dark:border-neutral-500/20';
     }
   };
@@ -147,7 +147,7 @@ export function UserProfileMenu() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
+        <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:text-destructive">
           <LogOut size={16} />
           {t('auth.logout')}
         </DropdownMenuItem>

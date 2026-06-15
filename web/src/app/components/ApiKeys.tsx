@@ -167,25 +167,25 @@ export function ApiKeys() {
   const envName = (id: number | null) => environments.find((e) => e.id === id)?.name ?? '—';
   const envColor = (id: number | null) => {
     const name = envName(id);
-    if (name === 'Production') return 'bg-emerald-500';
+    if (name === 'Production') return 'bg-success';
     if (name === 'Development') return 'bg-yellow-500';
-    return 'bg-blue-500';
+    return 'bg-info';
   };
   const envBadgeStyle = (id: number | null) => {
     const name = envName(id);
     if (name === 'Production')
-      return 'text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20';
+      return 'text-success bg-success/10 border-success/20';
     if (name === 'Development')
       return 'text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20';
-    return 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20';
+    return 'text-info bg-info/10 border-info/20';
   };
   const envFilterActive = (id: number | null) => {
     const name = envName(id);
     if (name === 'Production')
-      return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20';
+      return 'bg-success/10 text-success border-success/20';
     if (name === 'Development')
-      return 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20';
-    return 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20';
+      return 'bg-warning/10 text-warning border-warning/20';
+    return 'bg-info/10 text-info border-info/20';
   };
   const getKeyTypeColor = (t: string) =>
     t === 'FRONTEND'
@@ -237,7 +237,7 @@ export function ApiKeys() {
     const style =
       type === 'FRONTEND'
         ? {
-            on: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
+            on: 'bg-success/10 text-success border-success/20',
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
           }
         : {
@@ -299,7 +299,7 @@ export function ApiKeys() {
             onClick={() => setTypeFilter(null)}
             className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
               !typeFilter
-                ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20'
+                ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
             }`}
           >
@@ -313,7 +313,7 @@ export function ApiKeys() {
             onClick={() => setEnvFilter(null)}
             className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
               envFilter === null
-                ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20'
+                ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
             }`}
           >
@@ -328,7 +328,7 @@ export function ApiKeys() {
           <LoadingState text={t('apiKeys.loading')} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Key size={24} className="text-violet-500 dark:text-violet-400" />}
+            icon={<Key size={24} className="text-brand" />}
             title={t('apiKeys.emptyTitle')}
             description={
               searchQuery || typeFilter || envFilter !== null
@@ -387,12 +387,12 @@ export function ApiKeys() {
                         {expanded ? (
                           <ChevronUp
                             size={16}
-                            className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+                            className="text-muted-foreground group-hover:text-brand transition-colors"
                           />
                         ) : (
                           <ChevronDown
                             size={16}
-                            className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+                            className="text-muted-foreground group-hover:text-brand transition-colors"
                           />
                         )}
                       </div>
@@ -409,9 +409,9 @@ export function ApiKeys() {
                         >
                           <div className="border-t border-border">
                             <div className="p-4 pb-3">
-                              <div className="bg-amber-50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/15 rounded-xl p-4">
+                              <div className="bg-warning/10 border border-warning/20 rounded-xl p-4">
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                                  <span className="text-xs font-semibold text-warning uppercase tracking-wider">
                                     {t('apiKeys.secretKey')}
                                   </span>
                                   <div className="flex items-center gap-1">
@@ -420,7 +420,7 @@ export function ApiKeys() {
                                         e.stopPropagation();
                                         setShowKey(showKey === k.id ? null : k.id);
                                       }}
-                                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-xl text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20 transition-colors"
+                                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-xl text-warning bg-warning/10 hover:bg-warning/10 transition-colors"
                                     >
                                       {showKey === k.id ? (
                                         <>
@@ -443,12 +443,12 @@ export function ApiKeys() {
                                       disabled={copiedKeyId === k.id}
                                       className={`flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-xl transition-colors ${
                                         copiedKeyId === k.id
-                                          ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 cursor-default'
-                                          : 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20'
+                                          ? 'text-success bg-success/10 cursor-default'
+                                          : 'text-warning bg-warning/10 hover:bg-warning/10'
                                       }`}
                                     >
                                       {copiedKeyId === k.id ? (
-                                        <Check size={12} className="text-emerald-500" />
+                                        <Check size={12} className="text-success" />
                                       ) : (
                                         <Copy size={12} />
                                       )}
@@ -458,7 +458,7 @@ export function ApiKeys() {
                                     </button>
                                   </div>
                                 </div>
-                                <div className="bg-white dark:bg-neutral-950 border border-amber-200/60 dark:border-amber-500/10 rounded-lg px-4 py-3">
+                                <div className="bg-input-background border border-warning/20 rounded-lg px-4 py-3">
                                   <span className="text-sm font-mono font-medium text-foreground/90 break-all select-all">
                                     {showKey === k.id
                                       ? k.apiKey
@@ -477,7 +477,7 @@ export function ApiKeys() {
                                     size={11}
                                     className={
                                       k.keyType === 'FRONTEND'
-                                        ? 'text-emerald-500'
+                                        ? 'text-success'
                                         : 'text-indigo-500'
                                     }
                                   />
@@ -508,7 +508,7 @@ export function ApiKeys() {
                                   e.stopPropagation();
                                   setDeleteId(k.id);
                                 }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-all"
                               >
                                 <Trash2 size={12} />
                                 {t('common.delete')}
@@ -530,7 +530,7 @@ export function ApiKeys() {
                 <GradientButton
                   variant="secondary"
                   onClick={showAllKeys}
-                  className="bg-violet-50 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20"
+                  className="bg-brand/10 border-brand/20 text-brand hover:bg-brand/20"
                 >
                   {t('users.list.showAll', { n: String(filtered.length) })}
                 </GradientButton>
@@ -613,8 +613,8 @@ export function ApiKeys() {
         <div className="space-y-5">
           {error && <ErrorBox>{error}</ErrorBox>}
 
-          <div className="p-4 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-lg">
-            <p className="text-xs text-amber-700 dark:text-amber-300">
+          <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
+            <p className="text-xs text-warning">
               {t('apiKeys.panelWarning')}
             </p>
           </div>
@@ -627,7 +627,7 @@ export function ApiKeys() {
               onChange={(e) => setFormName(e.target.value)}
               maxLength={120}
               placeholder={t('apiKeys.formNamePlaceholder')}
-              className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
             />
           </div>
 
@@ -676,9 +676,9 @@ export function ApiKeys() {
                     value: 'FRONTEND',
                     icon: Globe,
                     color: 'from-emerald-600 to-emerald-500',
-                    borderColor: 'border-emerald-500',
-                    bgSelected: 'bg-emerald-50 dark:bg-emerald-500/10',
-                    textSelected: 'text-emerald-700 dark:text-emerald-300',
+                    borderColor: 'border-success',
+                    bgSelected: 'bg-success/10',
+                    textSelected: 'text-success',
                     label: 'Frontend',
                     description: t('apiKeys.formFrontendDesc'),
                   },

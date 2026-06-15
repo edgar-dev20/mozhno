@@ -27,7 +27,7 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode; 
       return (
         <div className="flex items-center justify-center min-h-screen bg-background">
           <div className="text-center p-8 max-w-md">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-destructive/10 flex items-center justify-center">
               <AlertTriangle size={28} className="text-red-500" />
             </div>
             <h2 className="text-lg font-semibold text-foreground mb-2">{t('errors.somethingWentWrong')}</h2>

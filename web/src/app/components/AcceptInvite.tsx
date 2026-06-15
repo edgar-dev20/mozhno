@@ -56,7 +56,7 @@ export function AcceptInvite() {
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-violet-300/20 to-blue-300/20 dark:from-violet-600/10 dark:to-blue-600/10 rounded-full blur-3xl"></div>
 
       <div className="w-full max-w-md relative z-10">
-        <div className="bg-white/80 dark:bg-neutral-900/80 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/60 dark:border-neutral-800/50 transition-colors animate-[fadeIn_0.5s_ease-out]">
+        <div className="bg-card/80 backdrop-blur-2xl rounded-2xl shadow-2xl border border-border transition-colors animate-[fadeIn_0.5s_ease-out]">
           <div className="p-8">
             <div className="flex justify-center mb-4">
               <Wordmark text={t('common.appName')} size="xl" />

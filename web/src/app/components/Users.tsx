@@ -183,9 +183,9 @@ export function Users() {
   const getRoleStyle = (role: string) => {
     switch (role) {
       case 'admin':
-        return 'text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20';
+        return 'text-destructive bg-destructive/10 border-destructive/20';
       case 'developer':
-        return 'text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20';
+        return 'text-info bg-info/10 border-info/20';
       default:
         return 'text-foreground/80 bg-secondary dark:bg-neutral-500/10 border-border dark:border-neutral-500/20';
     }
@@ -209,11 +209,11 @@ export function Users() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20';
+        return 'text-success bg-success/10 border-success/20';
       case 'invited':
-        return 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20';
+        return 'text-warning bg-warning/10 border-warning/20';
       case 'suspended':
-        return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20';
+        return 'text-destructive bg-destructive/10 border-destructive/20';
       default:
         return '';
     }
@@ -238,13 +238,13 @@ export function Users() {
     const style =
       role === 'admin'
         ? {
-            on: 'bg-gradient-to-r from-red-500/10 to-rose-500/10 text-red-700 dark:text-red-300 border-red-500/20',
+            on: 'bg-gradient-to-r from-destructive/10 to-destructive/10 text-destructive border-destructive/20',
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
             icon: 'text-red-500',
           }
         : role === 'developer'
           ? {
-              on: 'bg-gradient-to-r from-gradient-start/10 to-gradient-end/10 text-blue-700 dark:text-blue-300 border-blue-500/20',
+              on: 'bg-gradient-to-r from-gradient-start/10 to-gradient-end/10 text-info border-info/20',
               off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
               icon: 'text-blue-500',
             }
@@ -269,14 +269,14 @@ export function Users() {
     const style =
       status === 'active'
         ? {
-            on: 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
+            on: 'bg-success/10 text-success border-success/20',
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
-            dot: 'bg-emerald-500',
+            dot: 'bg-success',
           }
         : {
-            on: 'bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 border-red-500/20',
+            on: 'bg-destructive/10 text-destructive border-destructive/20',
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
-            dot: 'bg-red-500',
+            dot: 'bg-destructive',
           };
     return (
       <button
@@ -359,7 +359,7 @@ export function Users() {
             onClick={() => setRoleFilter(null)}
             className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
               !roleFilter
-                ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20'
+                ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
             }`}
           >
@@ -374,7 +374,7 @@ export function Users() {
             onClick={() => setStatusFilter(null)}
             className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
               !statusFilter
-                ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20'
+                ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
             }`}
           >
@@ -390,7 +390,7 @@ export function Users() {
           <LoadingState text={t('users.loading')} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Shield size={24} className="text-violet-500 dark:text-violet-400" />}
+            icon={<Shield size={24} className="text-brand" />}
             title={t('users.emptyTitle')}
             description={
               filter || roleFilter || statusFilter
@@ -472,12 +472,12 @@ export function Users() {
                         {expanded ? (
                           <ChevronUp
                             size={16}
-                            className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+                            className="text-muted-foreground group-hover:text-brand transition-colors"
                           />
                         ) : (
                           <ChevronDown
                             size={16}
-                            className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+                            className="text-muted-foreground group-hover:text-brand transition-colors"
                           />
                         )}
                       </div>
@@ -560,7 +560,7 @@ export function Users() {
                                   e.stopPropagation();
                                   setDeleteId(user.id);
                                 }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-all"
                               >
                                 <Trash2 size={12} />
                                 {t('users.card.delete')}
@@ -582,7 +582,7 @@ export function Users() {
                 <GradientButton
                   variant="secondary"
                   onClick={showAllUsers}
-                  className="bg-violet-50 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/20 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-500/20"
+                  className="bg-brand/10 border-brand/20 text-brand hover:bg-brand/20"
                 >
                   {t('users.list.showAll', { n: String(filtered.length) })}
                 </GradientButton>
@@ -634,7 +634,7 @@ export function Users() {
           )}
 
           {editingUser && (
-            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-gradient-subtle-start to-gradient-subtle-end dark:from-blue-500/5 dark:to-violet-500/5 border border-blue-100 dark:border-violet-500/10 rounded-xl">
+            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-gradient-subtle-start to-gradient-subtle-end dark:from-info/5 dark:to-brand/5 border border-info/20 dark:border-brand/20 rounded-xl">
               <Avatar className="w-10 h-10 shadow-md shrink-0">
                 <AvatarImage
                   src={editingUser.avatar ? api.users.getAvatarUrl(editingUser.id) : undefined}
@@ -666,7 +666,7 @@ export function Users() {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               maxLength={120}
               placeholder={t('users.form.namePlaceholder')}
-              className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
             />
           </div>
 
@@ -678,7 +678,7 @@ export function Users() {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               maxLength={254}
               placeholder="email@company.com"
-              className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
             />
           </div>
 
@@ -693,7 +693,7 @@ export function Users() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 maxLength={128}
                 placeholder="••••••••"
-                className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+                className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
               />
             </div>
           )}
@@ -715,19 +715,19 @@ export function Users() {
                   {
                     value: 'admin',
                     color: 'from-red-600 to-red-500',
-                    borderColor: 'border-red-500',
-                    bgHover: 'group-hover:bg-red-50 dark:group-hover:bg-red-500/10',
-                    bgSelected: 'bg-red-50 dark:bg-red-500/10',
-                    textSelected: 'text-red-700 dark:text-red-300',
+                    borderColor: 'border-destructive',
+                    bgHover: 'group-hover:bg-destructive/10',
+                    bgSelected: 'bg-destructive/10',
+                    textSelected: 'text-destructive',
                     description: t('users.roleDescriptions.admin'),
                   },
                   {
                     value: 'developer',
                     color: 'from-blue-600 to-violet-500',
-                    borderColor: 'border-blue-500',
-                    bgHover: 'group-hover:bg-blue-50 dark:group-hover:bg-blue-500/10',
-                    bgSelected: 'bg-blue-50 dark:bg-blue-500/10',
-                    textSelected: 'text-blue-700 dark:text-blue-300',
+                    borderColor: 'border-info',
+                    bgHover: 'group-hover:bg-info/10',
+                    bgSelected: 'bg-info/10',
+                    textSelected: 'text-info',
                     description: t('users.roleDescriptions.developer'),
                   },
                   {
@@ -794,13 +794,13 @@ export function Users() {
                     {
                       value: 'active',
                       label: t('users.status.active'),
-                      dotClass: 'bg-emerald-500',
+                      dotClass: 'bg-success',
                       description: t('users.statusDescriptions.active'),
                     },
                     {
                       value: 'suspended',
                       label: t('users.status.suspended'),
-                      dotClass: 'bg-red-500',
+                      dotClass: 'bg-destructive',
                       description: t('users.statusDescriptions.suspended'),
                     },
                   ] as const
@@ -809,18 +809,18 @@ export function Users() {
                   const isActive = value === 'active';
                   const borderColor = selected
                     ? isActive
-                      ? 'border-emerald-500'
-                      : 'border-red-500'
+                      ? 'border-success'
+                      : 'border-destructive'
                     : 'border-border';
                   const bgSelected = selected
                     ? isActive
-                      ? 'bg-emerald-50 dark:bg-emerald-500/10'
-                      : 'bg-red-50 dark:bg-red-500/10'
+                      ? 'bg-success/10'
+                      : 'bg-destructive/10'
                     : '';
                   const textSelected = selected
                     ? isActive
-                      ? 'text-emerald-700 dark:text-emerald-300'
-                      : 'text-red-700 dark:text-red-300'
+                      ? 'text-success'
+                      : 'text-destructive'
                     : '';
                   return (
                     <button
@@ -846,7 +846,7 @@ export function Users() {
                       </div>
                       {selected && (
                         <div
-                          className={`w-5 h-5 rounded-md ${isActive ? 'bg-emerald-500' : 'bg-red-500'} flex items-center justify-center shrink-0`}
+                          className={`w-5 h-5 rounded-md ${isActive ? 'bg-success' : 'bg-destructive'} flex items-center justify-center shrink-0`}
                         >
                           <Check size={12} className="text-white" strokeWidth={3} />
                         </div>
@@ -910,7 +910,7 @@ export function Users() {
                 onClick={() => {
                   setDeleteId(editingUser.id);
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
               >
                 <Trash2 size={16} />
                 {t('users.panel.deleteUser')}

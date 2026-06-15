@@ -159,13 +159,13 @@ export function AuditLog() {
   const getResourceColor = (type: string) => {
     switch (type) {
       case 'flag':
-        return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20';
+        return 'text-info bg-info/10 border-info/20';
       case 'user':
-        return 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/20';
+        return 'text-brand bg-brand/10 border-brand/20';
       case 'tag':
-        return 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20';
+        return 'text-success bg-success/10 border-success/20';
       case 'apikey':
-        return 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/20';
+        return 'text-warning bg-warning/10 border-warning/20';
       case 'segment':
         return 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20';
       case 'project':
@@ -175,11 +175,11 @@ export function AuditLog() {
       case 'context':
         return 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border-sky-200 dark:border-sky-500/20';
       case 'strategy':
-        return 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20';
+        return 'text-destructive bg-destructive/10 border-destructive/20';
       case 'integration':
         return 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20';
       default:
-        return 'text-muted-foreground bg-secondary dark:bg-neutral-500/10 border-border dark:border-neutral-500/20';
+        return 'text-muted-foreground bg-muted border-border';
     }
   };
 
@@ -290,7 +290,7 @@ export function AuditLog() {
               onClick={() => setFilterType(null)}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
                 !filterType
-                  ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20'
+                  ? 'bg-brand/10 text-brand border-brand/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
               }`}
             >
@@ -334,7 +334,7 @@ export function AuditLog() {
           <LoadingState text={t('audit.loading')} />
         ) : displayedEvents.length === 0 ? (
           <EmptyState
-            icon={<Activity size={24} className="text-violet-500 dark:text-violet-400" />}
+            icon={<Activity size={24} className="text-brand" />}
             title={t('audit.emptyTitle')}
             description={
               filterType || dateFrom || dateTo || searchQuery
@@ -393,12 +393,12 @@ export function AuditLog() {
                         {expanded ? (
                           <ChevronUp
                             size={16}
-                            className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+                            className="text-muted-foreground group-hover:text-brand transition-colors"
                           />
                         ) : (
                           <ChevronDown
                             size={16}
-                            className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+                            className="text-muted-foreground group-hover:text-brand transition-colors"
                           />
                         )}
                       </div>
@@ -511,11 +511,11 @@ export function AuditLog() {
                 <button
                   onClick={handleLoadMore}
                   disabled={loadingMore}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-xl hover:border-violet-400 dark:hover:border-violet-600 hover:text-violet-600 dark:hover:text-violet-400 transition-all shadow-sm disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-xl hover:border-brand hover:text-brand transition-all shadow-sm disabled:opacity-50"
                 >
                   {loadingMore ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-neutral-300 border-t-violet-500 rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-neutral-300 border-t-brand rounded-full animate-spin" />
                       {t('common.loading')}
                     </>
                   ) : (

@@ -250,11 +250,11 @@ export function Constraints() {
 
         <div className="space-y-5">
           <FormField label={t('common.name')} maxLength={120} value={formName}>
-            <input type="text" value={formName} onChange={e => setFormName(e.target.value)} maxLength={120} placeholder="User ID" className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground" />
+            <input type="text" value={formName} onChange={e => setFormName(e.target.value)} maxLength={120} placeholder="User ID" className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground" />
           </FormField>
           <FormField label={t('common.key')} hint={editing ? <>{t('constraints.keyHintEditPrefix')}<code className="text-xs font-mono text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-1 py-0.5 rounded">context['{formKey}']</code></> : <>{t('constraints.keyHintCreatePrefix')}<code className="text-xs font-mono text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-1 py-0.5 rounded">context['user_id']</code></>} maxLength={100} value={formKey}>
-            <input type="text" value={formKey} onChange={e => { setFormKey(e.target.value); setKeyError(''); }} maxLength={100} placeholder="user_id" disabled={!!editing} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-secondary/50" />
-            {keyError && <p className="text-xs text-red-500 mt-1">{keyError}</p>}
+            <input type="text" value={formKey} onChange={e => { setFormKey(e.target.value); setKeyError(''); }} maxLength={100} placeholder="user_id" disabled={!!editing} className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-secondary/50" />
+            {keyError && <p className="text-xs text-destructive mt-1">{keyError}</p>}
           </FormField>
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground/80">{t('common.type')}</label>
@@ -269,7 +269,7 @@ export function Constraints() {
             <p className="text-xs text-muted-foreground leading-relaxed">{t('constraints.typeHelpText')}</p>
           </div>
           <FormField label={t('common.description')} maxLength={160} value={formDesc}>
-            <textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} maxLength={160} rows={2} ref={el => { if (el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 72) + 'px'; } }} onInput={e => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 72) + 'px'; }} placeholder={t('constraints.placeholderDescription')} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden leading-relaxed" />
+            <textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} maxLength={160} rows={2} ref={el => { if (el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 72) + 'px'; } }} onInput={e => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 72) + 'px'; }} placeholder={t('constraints.placeholderDescription')} className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden leading-relaxed" />
           </FormField>
         </div>
 
@@ -286,7 +286,7 @@ export function Constraints() {
                     <div className="text-sm font-semibold" style={{ color: s.color }}>{s.name}</div>
                     {s.description && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{s.description}</div>}
                   </div>
-                  <span className="inline-flex items-center text-xs font-semibold uppercase px-2 py-0.5 rounded-full bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 shrink-0">{t('constraints.badgeInUse')}</span>
+                  <span className="inline-flex items-center text-xs font-semibold uppercase px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 shrink-0">{t('constraints.badgeInUse')}</span>
                 </div>
               ))}
             </div>
@@ -296,7 +296,7 @@ export function Constraints() {
 
         {editing && <div className="pt-6 border-t border-border space-y-3">
           {canDelete ? (
-            <button onClick={() => setDeleteId(editing.id)} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20"><Trash2 size={16} />{t('constraints.deleteButton')}</button>
+            <button onClick={() => setDeleteId(editing.id)} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20"><Trash2 size={16} />{t('constraints.deleteButton')}</button>
           ) : (
             <button disabled className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground/60 dark:text-muted-foreground/60 rounded-lg border border-border cursor-not-allowed"><Trash2 size={16} />{t('constraints.deleteButton')}</button>
           )}

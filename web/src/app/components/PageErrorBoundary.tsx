@@ -38,7 +38,7 @@ export class PageErrorBoundary extends Component<PageErrorBoundaryProps, PageErr
       return (
         <div className="bg-card rounded-xl px-8 py-12 text-center shadow-md">
           <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
               <AlertTriangle size={22} className="text-red-500" />
             </div>
             <div>

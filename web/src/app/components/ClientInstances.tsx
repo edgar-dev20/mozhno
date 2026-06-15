@@ -123,10 +123,10 @@ export function ClientInstances() {
         to: '#10b981',
         bg: 'from-emerald-500/10 to-emerald-600/5',
         bgFlat:
-          'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
-        border: 'border-emerald-500/20',
-        dot: 'bg-emerald-500',
-        text: 'text-emerald-600 dark:text-emerald-400',
+          'bg-success/10 text-success border-success/20',
+        border: 'border-success/20',
+        dot: 'bg-success',
+        text: 'text-success',
       };
     if (name === 'Development')
       return {
@@ -134,10 +134,10 @@ export function ClientInstances() {
         to: '#f59e0b',
         bg: 'from-amber-500/10 to-amber-600/5',
         bgFlat:
-          'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20',
-        border: 'border-amber-500/20',
-        dot: 'bg-amber-500',
-        text: 'text-amber-600 dark:text-amber-400',
+          'bg-warning/10 text-warning border-warning/20',
+        border: 'border-warning/20',
+        dot: 'bg-warning',
+        text: 'text-warning',
       };
     if (name === 'staging')
       return {
@@ -145,31 +145,31 @@ export function ClientInstances() {
         to: '#8b5cf6',
         bg: 'from-violet-500/10 to-violet-600/5',
         bgFlat:
-          'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/20',
-        border: 'border-violet-500/20',
-        dot: 'bg-violet-500',
-        text: 'text-violet-600 dark:text-violet-400',
+          'bg-brand/10 text-brand border-brand/20',
+        border: 'border-brand/20',
+        dot: 'bg-brand',
+        text: 'text-brand',
       };
     return {
       from: '#2563eb',
       to: '#3b82f6',
       bg: 'from-blue-500/10 to-blue-600/5',
-      bgFlat: 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20',
-      border: 'border-blue-500/20',
-      dot: 'bg-blue-500',
-      text: 'text-blue-600 dark:text-blue-400',
+      bgFlat: 'bg-info/10 text-info border-info/20',
+      border: 'border-info/20',
+      dot: 'bg-info',
+      text: 'text-info',
     };
   };
 
   const envCardStyle = (envId: number | null) => {
     const name = envName(envId);
     if (name === 'Production')
-      return 'bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/40 dark:border-emerald-500/10';
+      return 'bg-success/10 border border-success/20';
     if (name === 'Development')
-      return 'bg-amber-50 dark:bg-amber-500/10 border border-amber-200/40 dark:border-amber-500/10';
+      return 'bg-warning/10 border border-warning/20';
     if (name === 'Staging')
-      return 'bg-violet-50 dark:bg-violet-500/10 border border-violet-200/40 dark:border-violet-500/10';
-    return 'bg-blue-50 dark:bg-blue-500/10 border border-blue-200/40 dark:border-blue-500/10';
+      return 'bg-brand/10 border border-brand/20';
+    return 'bg-info/10 border border-info/20';
   };
 
   const getAppIcon = (appType: string, size = 14) => {
@@ -253,7 +253,7 @@ export function ClientInstances() {
               onClick={() => setLangFilter('all')}
               className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                 langFilter === 'all'
-                  ? 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-500/20'
+                  ? 'bg-brand/10 text-brand border border-brand/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border border-transparent'
               }`}
             >
@@ -263,7 +263,7 @@ export function ClientInstances() {
               onClick={() => setLangFilter('java')}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
                 langFilter === 'java'
-                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20'
+                  ? 'bg-warning/10 text-warning border-warning/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
               }`}
             >
@@ -274,7 +274,7 @@ export function ClientInstances() {
               onClick={() => setLangFilter('js')}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
                 langFilter === 'js'
-                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20'
+                  ? 'bg-warning/10 text-warning border-warning/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
               }`}
             >
@@ -311,7 +311,7 @@ export function ClientInstances() {
           <div className="bg-card rounded-xl px-6 py-16 text-center shadow-md">
             <div className="flex flex-col items-center gap-3">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-500/10 dark:to-purple-500/10 flex items-center justify-center">
-                <Activity size={24} className="text-violet-500 dark:text-violet-400" />
+                <Activity size={24} className="text-brand" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-foreground/80">
@@ -415,12 +415,12 @@ export function ClientInstances() {
                       {expanded ? (
                         <ChevronUp
                           size={16}
-                          className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+                          className="text-muted-foreground group-hover:text-brand transition-colors"
                         />
                       ) : (
                         <ChevronDown
                           size={16}
-                          className="text-muted-foreground group-hover:text-violet-500 transition-colors"
+                          className="text-muted-foreground group-hover:text-brand transition-colors"
                         />
                       )}
                     </div>
@@ -498,7 +498,7 @@ export function ClientInstances() {
                                 </div>
                                 {!flags ? (
                                   <div className="flex items-center justify-center py-4">
-                                    <div className="w-4 h-4 border-2 border-border border-t-violet-500 rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-border border-t-brand rounded-full animate-spin" />
                                   </div>
                                 ) : flags.filter((f) => !f.archived).length === 0 ? (
                                   <p className="text-xs text-muted-foreground py-2">
@@ -519,8 +519,8 @@ export function ClientInstances() {
                                               flag.flagType === 'KILLSWITCH' ? ShieldOff : Rocket;
                                             const typeColor =
                                               flag.flagType === 'KILLSWITCH'
-                                                ? 'text-red-500'
-                                                : 'text-blue-500';
+                                                ? 'text-destructive'
+                                                : 'text-info';
                                             return (
                                               <NavLink
                                                 key={flag.id}
@@ -529,7 +529,7 @@ export function ClientInstances() {
                                               >
                                                 <div className="flex items-center gap-1.5 min-w-0">
                                                   <span
-                                                    className={`shrink-0 w-1.5 h-1.5 rounded-full ${flag.enabled ? 'bg-primary shadow-sm shadow-black/10 dark:shadow-black/20' : 'bg-neutral-300 dark:bg-neutral-600'}`}
+                                                    className={`shrink-0 w-1.5 h-1.5 rounded-full ${flag.enabled ? 'bg-primary shadow-sm shadow-black/10 dark:shadow-black/20' : 'bg-muted-foreground/30'}`}
                                                   />
                                                   <span className="text-xs font-semibold text-foreground/90 truncate">
                                                     {flag.name}
@@ -542,7 +542,7 @@ export function ClientInstances() {
                                                   />
                                                   {flag.percentage != null &&
                                                     flag.percentage < 100 && (
-                                                      <span className="shrink-0 text-xs text-violet-500 dark:text-violet-400 font-medium">
+                                                      <span className="shrink-0 text-xs text-brand font-medium">
                                                         {flag.percentage}%
                                                       </span>
                                                     )}

@@ -51,7 +51,7 @@ export function ConstraintRow({
         className={`group cursor-pointer flex items-center gap-3 px-3.5 py-2.5 rounded-lg border transition-all ${
           isActive
             ? 'bg-indigo-50/70 dark:bg-indigo-500/8 border-indigo-300 dark:border-indigo-500/30 shadow-sm rounded-b-none border-b-indigo-200 dark:border-b-indigo-500/20'
-            : 'bg-white dark:bg-neutral-950 border-border hover:border-indigo-200 dark:hover:border-indigo-500/20 hover:shadow-sm'
+            : 'bg-input-background border-border hover:border-indigo-200 dark:hover:border-indigo-500/20 hover:shadow-sm'
         }`}
       >
         <span className="shrink-0 text-sm font-semibold text-foreground/80 min-w-0 truncate">
@@ -116,8 +116,8 @@ export function ConstraintRow({
               <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
                 {t('flags.detailCard.preview')}
               </label>
-              <div className="p-3 bg-violet-50 dark:bg-violet-500/5 rounded-xl border border-violet-200 dark:border-violet-500/10">
-                <code className="text-sm font-mono text-violet-700 dark:text-violet-300 break-all">
+              <div className="p-3 bg-brand/10 rounded-xl border border-brand/20">
+                <code className="text-sm font-mono text-brand break-all">
                   context['{ctxDef?.name ?? '?'}'] {shortOp} {valuesPreview}
                 </code>
               </div>
@@ -125,15 +125,15 @@ export function ConstraintRow({
           )}
 
           {!hasContext && (
-            <div className="p-4 bg-amber-50 dark:bg-amber-500/5 rounded-xl border border-amber-200 dark:border-amber-500/10 text-center">
-              <p className="text-xs text-amber-700 dark:text-amber-300">{t('flags.detailCard.selectContext')}</p>
+            <div className="p-4 bg-warning/10 rounded-xl border border-warning/20 text-center">
+              <p className="text-xs text-warning">{t('flags.detailCard.selectContext')}</p>
             </div>
           )}
 
           <div className="flex justify-between gap-3 pt-1">
             <button
               onClick={(e) => { e.stopPropagation(); onRemove(); }}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
             >
               <Trash2 size={14} />
               {t('flags.detailCard.removeCondition')}

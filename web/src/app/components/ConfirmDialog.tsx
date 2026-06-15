@@ -50,7 +50,7 @@ export function ConfirmDialog({
             <div
               className={
                 isDestructive
-                  ? 'flex-shrink-0 w-12 h-12 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center'
+                  ? 'flex-shrink-0 w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center'
                   : 'flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center'
               }
             >

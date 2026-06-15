@@ -158,7 +158,7 @@ export function Tags() {
         </div>
       ) : tags.length === 0 ? (
         <EmptyState
-          icon={<TagIcon size={28} className="text-blue-600 dark:text-blue-400" />}
+          icon={<TagIcon size={28} className="text-info" />}
           title={t('tags.emptyTitle')}
           description={t('tags.emptyDescription')}
           buttonLabel={t('tags.create')}
@@ -248,7 +248,7 @@ export function Tags() {
               maxLength={120}
               placeholder={t('tags.form.name.placeholder')}
               autoFocus={!editing}
-              className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
             />
           </FormField>
 
@@ -259,13 +259,13 @@ export function Tags() {
               maxLength={160}
               placeholder={t('tags.form.description.placeholder')}
               rows={3}
-              className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
             />
           </FormField>
 
           <div className="space-y-3">
             <label className="text-sm font-medium text-foreground/80 flex items-center gap-1.5">
-              <Palette size={14} className="text-violet-500" />{t('tags.form.color.label')}
+              <Palette size={14} className="text-brand" />{t('tags.form.color.label')}
             </label>
 
             <div className="p-4 bg-secondary rounded-2xl border border-border space-y-4">
@@ -357,7 +357,7 @@ export function Tags() {
             </div>
 
             <p className="text-xs text-muted-foreground/70 flex items-center gap-1">
-              <Sparkles size={12} className="text-amber-400" />
+              <Sparkles size={12} className="text-warning" />
               {t('tags.form.color.hint')}
             </p>
           </div>
@@ -367,7 +367,7 @@ export function Tags() {
               <button
                 type="button"
                 onClick={() => setDeleteId(editing.id)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
               >
                 <Trash2 size={16} />
                 {t('tags.delete.button')}

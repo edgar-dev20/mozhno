@@ -4,9 +4,9 @@ import { TipCard } from "@/app/components/TipCard";
 import { useT } from '@/i18n';
 
 const BUILTIN = [
-  { nameKey: 'strategies.gradualName' as const, descKey: 'strategies.gradualDesc' as const, icon: Percent, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-500/10' },
+  { nameKey: 'strategies.gradualName' as const, descKey: 'strategies.gradualDesc' as const, icon: Percent, color: 'text-info', bg: 'bg-info/10' },
   { nameKey: 'strategies.abName' as const, descKey: 'strategies.abDesc' as const, icon: Split, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-500/10' },
-  { nameKey: 'strategies.killswitchName' as const, descKey: 'strategies.killswitchDesc' as const, icon: AlertTriangle, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-500/10' },
+  { nameKey: 'strategies.killswitchName' as const, descKey: 'strategies.killswitchDesc' as const, icon: AlertTriangle, color: 'text-destructive', bg: 'bg-destructive/10' },
 ];
 
 export function Strategies() {

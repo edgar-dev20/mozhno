@@ -13,7 +13,7 @@ const variantClasses: Record<string, string> = {
   danger: 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white',
   amber: 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white',
   secondary: 'bg-card border border-border text-foreground/80 hover:bg-accent hover:text-foreground',
-  muted: 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-500/20 hover:bg-violet-100 dark:hover:bg-violet-500/20',
+  muted: 'bg-brand/10 text-brand border border-brand/20 hover:bg-brand/20',
   outline: 'border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground',
   ghost: 'text-muted-foreground hover:bg-accent hover:text-foreground',
   link: 'text-primary underline-offset-4 hover:underline',
