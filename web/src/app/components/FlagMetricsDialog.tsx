@@ -1,10 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { BarChart3, X, Server } from "@/shared/icons";
-import * as Dialog from "@radix-ui/react-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
-import { api, Environment, FlagMetric, ClientInstance } from "@/api";
-import { timeAgo, Card, CardHeader, Hairline, StatusDot, TruncatedCopyTooltip } from "@/shared";
+import { BarChart3, X, Server } from '@/shared/icons';
+import * as Dialog from '@radix-ui/react-dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/app/components/ui/select';
+import { api, Environment, FlagMetric, ClientInstance } from '@/api';
+import { timeAgo, Card, CardHeader, Hairline, StatusDot, TruncatedCopyTooltip } from '@/shared';
 import { motion, AnimatePresence } from 'motion/react';
 import { useT } from '@/i18n';
 
@@ -53,7 +59,14 @@ function getStaleness(lastSeenAt: string): 'active' | 'recent' | 'stale' {
   return 'stale';
 }
 
-export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, environments, defaultEnvId }: FlagMetricsDialogProps) {
+export function FlagMetricsDialog({
+  open,
+  onOpenChange,
+  flagId,
+  flagName,
+  environments,
+  defaultEnvId,
+}: FlagMetricsDialogProps) {
   const t = useT();
   const [selectedEnvId, setSelectedEnvId] = useState<number | null>(null);
   const [metrics, setMetrics] = useState<FlagMetric[]>([]);
@@ -89,10 +102,16 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
     setLoading(true);
     if (loadTimerRef.current) clearTimeout(loadTimerRef.current);
     loadTimerRef.current = setTimeout(() => {
-      api.metrics.get(flagId, selectedEnvId,
-        filterInstanceId ? { instanceId: filterInstanceId }
-        : filterAppName ? { appName: filterAppName }
-        : undefined)
+      api.metrics
+        .get(
+          flagId,
+          selectedEnvId,
+          filterInstanceId
+            ? { instanceId: filterInstanceId }
+            : filterAppName
+              ? { appName: filterAppName }
+              : undefined,
+        )
         .then((metricsData) => {
           setMetrics(metricsData);
           setStaleMetrics(metricsData);
@@ -113,9 +132,12 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
     if (!open || !projectId || !selectedEnvId) return;
 
     setInstancesLoading(true);
-    api.clientInstances.list(projectId, selectedEnvId)
+    api.clientInstances
+      .list(projectId, selectedEnvId)
       .then((data) => {
-        setInstances(data.filter(i => Date.now() - new Date(i.lastSeenAt).getTime() < 24 * 60 * 60 * 1000));
+        setInstances(
+          data.filter((i) => Date.now() - new Date(i.lastSeenAt).getTime() < 24 * 60 * 60 * 1000),
+        );
       })
       .catch(() => {
         setInstances([]);
@@ -133,7 +155,12 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
       buckets.set(Date.parse(m.timeBucket), m);
     }
     const now = new Date();
-    const currentHourMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours());
+    const currentHourMs = Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      now.getUTCHours(),
+    );
     const result = [];
     for (let i = 47; i >= 0; i--) {
       const t = currentHourMs - i * 3600000;
@@ -152,26 +179,36 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
   const totalFalse = displayMetrics.reduce((sum, m) => sum + m.evaluationFalseCount, 0);
   const totalEvaluations = totalTrue + totalFalse;
 
-  const trueRate = totalEvaluations > 0
-    ? `${((totalTrue / totalEvaluations) * 100).toFixed(1)}%`
-    : '—';
+  const trueRate =
+    totalEvaluations > 0 ? `${((totalTrue / totalEvaluations) * 100).toFixed(1)}%` : '—';
 
-  const peakMetric = displayMetrics.length > 0
-    ? displayMetrics.reduce((a, b) =>
-        (a.evaluationTrueCount + a.evaluationFalseCount) > (b.evaluationTrueCount + b.evaluationFalseCount) ? a : b)
-    : null;
+  const peakMetric =
+    displayMetrics.length > 0
+      ? displayMetrics.reduce((a, b) =>
+          a.evaluationTrueCount + a.evaluationFalseCount >
+          b.evaluationTrueCount + b.evaluationFalseCount
+            ? a
+            : b,
+        )
+      : null;
   const peakTime = peakMetric ? formatHourBucket(peakMetric.timeBucket) : '—';
 
-  const activeBuckets = chartData.filter(d => d.trueCount + d.falseCount > 0).length;
+  const activeBuckets = chartData.filter((d) => d.trueCount + d.falseCount > 0).length;
   const avgPerHour = activeBuckets > 0 ? Math.round(totalEvaluations / activeBuckets) : 0;
 
-  const selectedEnvName = environments.find(e => e.id === selectedEnvId)?.name ?? '';
+  const selectedEnvName = environments.find((e) => e.id === selectedEnvId)?.name ?? '';
 
   const stats = [
-    { value: totalEvaluations > 0 ? formatNumber(totalEvaluations) : '—', label: t('flags.metrics.totalEvals') },
+    {
+      value: totalEvaluations > 0 ? formatNumber(totalEvaluations) : '—',
+      label: t('flags.metrics.totalEvals'),
+    },
     { value: trueRate, label: t('flags.metrics.trueRate') },
     { value: peakTime, label: t('flags.metrics.peak') },
-    { value: avgPerHour > 0 ? formatNumber(avgPerHour) : '—', label: t('flags.metrics.avgPerHour') },
+    {
+      value: avgPerHour > 0 ? formatNumber(avgPerHour) : '—',
+      label: t('flags.metrics.avgPerHour'),
+    },
   ];
 
   const instanceGroups = (() => {
@@ -190,7 +227,7 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
       .sort((a, b) => a.appName.localeCompare(b.appName));
   })();
 
-  const filterInstance = filterInstanceId ? instances.find(i => i.id === filterInstanceId) : null;
+  const filterInstance = filterInstanceId ? instances.find((i) => i.id === filterInstanceId) : null;
 
   const clearFilters = () => {
     setFilterAppName(null);
@@ -224,15 +261,16 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
           <div className="flex-shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="relative shrink-0">
-                <div className="absolute inset-0 bg-gradient-to-r from-gradient-start to-gradient-end rounded-lg blur opacity-30" />
-                <div className="relative bg-gradient-to-r from-gradient-start/10 to-gradient-end/10 dark:from-blue-500/5 dark:to-violet-500/5 rounded-lg p-1.5">
+                <div className="bg-gradient-to-r from-gradient-start/10 to-gradient-end/10 dark:from-blue-500/5 dark:to-violet-500/5 rounded-lg p-1.5">
                   <BarChart3 size={18} className="text-violet-600 dark:text-violet-400" />
                 </div>
               </div>
               <span className="text-sm font-semibold text-foreground truncate">{flagName}</span>
               <span className="text-muted-foreground/30 shrink-0">·</span>
               {defaultEnvId ? (
-                <span className="text-xs font-medium text-muted-foreground truncate">{selectedEnvName}</span>
+                <span className="text-xs font-medium text-muted-foreground truncate">
+                  {selectedEnvName}
+                </span>
               ) : (
                 <Select
                   value={selectedEnvId?.toString() ?? ''}
@@ -242,8 +280,10 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
                     <SelectValue placeholder={t('flags.metrics.selectEnv')} />
                   </SelectTrigger>
                   <SelectContent>
-                    {environments.map(e => (
-                      <SelectItem key={e.id} value={e.id.toString()}>{e.name}</SelectItem>
+                    {environments.map((e) => (
+                      <SelectItem key={e.id} value={e.id.toString()}>
+                        {e.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -265,7 +305,9 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
                   key={i}
                   className="flex-1 flex flex-col items-center justify-center py-2.5 px-1"
                 >
-                  <span className={`text-base font-medium leading-none tracking-tight ${totalEvaluations > 0 ? 'text-foreground/85' : 'text-muted-foreground/40'}`}>
+                  <span
+                    className={`text-base font-medium leading-none tracking-tight ${totalEvaluations > 0 ? 'text-foreground/85' : 'text-muted-foreground/40'}`}
+                  >
                     {s.value}
                   </span>
                   <span className="text-xs text-muted-foreground/45 uppercase tracking-widest mt-1 leading-none">
@@ -276,7 +318,7 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
             </div>
 
             {/* Chart card */}
-            <div className="flex-shrink-0 mx-5 mt-4 h-[280px] min-h-[280px] flex flex-col rounded-xl shadow-md bg-gradient-to-br from-gradient-subtle-start/80 to-gradient-subtle-end/50 dark:from-neutral-900/80 dark:to-neutral-900/60 p-4">
+            <div className="flex-shrink-0 mx-5 mt-4 h-[280px] min-h-[280px] flex flex-col rounded-xl shadow-md bg-card ring-1 ring-border p-4">
               <div className="flex-shrink-0 flex flex-col gap-2 mb-3">
                 <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
                   {t('flags.metrics.chartTitle')}
@@ -284,11 +326,15 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
                 <div className="flex items-center gap-4 text-xs">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-sm bg-sparkline-true" />
-                    <span className="text-muted-foreground/60">true {totalTrue > 0 ? formatNumber(totalTrue) : '—'}</span>
+                    <span className="text-muted-foreground/60">
+                      true {totalTrue > 0 ? formatNumber(totalTrue) : '—'}
+                    </span>
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-sm bg-sparkline-false/45" />
-                    <span className="text-muted-foreground/60">false {totalFalse > 0 ? formatNumber(totalFalse) : '—'}</span>
+                    <span className="text-muted-foreground/60">
+                      false {totalFalse > 0 ? formatNumber(totalFalse) : '—'}
+                    </span>
                   </span>
                 </div>
               </div>
@@ -301,13 +347,17 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
                   </div>
                 ) : totalTrue === 0 && totalFalse === 0 ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-gradient-subtle-start/10 to-gradient-subtle-end/6">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-muted">
                       <BarChart3 size={28} className="text-muted-foreground/30" />
                     </div>
-                    <span className="text-sm text-muted-foreground/40">{t('flags.metrics.noData')}</span>
+                    <span className="text-sm text-muted-foreground/40">
+                      {t('flags.metrics.noData')}
+                    </span>
                   </div>
                 ) : (
-                  <div className={`absolute inset-0 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
+                  <div
+                    className={`absolute inset-0 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}
+                  >
                     {loading && (
                       <div className="absolute top-2 right-2 z-10">
                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-sparkline-true/30 border-t-sparkline-true" />
@@ -315,16 +365,29 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
                     )}
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-                        <CartesianGrid strokeDasharray="4 4" stroke="var(--color-border)" strokeOpacity={0.12} vertical={false} />
+                        <CartesianGrid
+                          strokeDasharray="4 4"
+                          stroke="var(--color-border)"
+                          strokeOpacity={0.12}
+                          vertical={false}
+                        />
                         <XAxis
                           dataKey="time"
                           tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }}
                           interval={Math.max(0, Math.floor(chartData.length / 6))}
                           height={30}
                         />
-                        <YAxis tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }} allowDecimals={false} width={40} />
+                        <YAxis
+                          tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }}
+                          allowDecimals={false}
+                          width={40}
+                        />
                         <Tooltip
-                          cursor={{ stroke: 'var(--color-sparkline-false)', strokeWidth: 1, strokeOpacity: 0.25 }}
+                          cursor={{
+                            stroke: 'var(--color-sparkline-false)',
+                            strokeWidth: 1,
+                            strokeOpacity: 0.25,
+                          }}
                           contentStyle={{
                             backgroundColor: 'var(--color-popover)',
                             border: '1px solid var(--color-border)',
@@ -335,8 +398,21 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
                             padding: '10px 14px',
                           }}
                         />
-                        <Bar dataKey="falseCount" stackId="a" fill="var(--sparkline-false)" fillOpacity={0.45} name="false" radius={[3, 3, 0, 0]} />
-                        <Bar dataKey="trueCount" stackId="a" fill="var(--sparkline-true)" name="true" radius={[3, 3, 0, 0]} />
+                        <Bar
+                          dataKey="falseCount"
+                          stackId="a"
+                          fill="var(--sparkline-false)"
+                          fillOpacity={0.45}
+                          name="false"
+                          radius={[3, 3, 0, 0]}
+                        />
+                        <Bar
+                          dataKey="trueCount"
+                          stackId="a"
+                          fill="var(--sparkline-true)"
+                          name="true"
+                          radius={[3, 3, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -358,7 +434,10 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
                   <>
                     <span className="text-muted-foreground/30">→</span>
                     <button
-                      onClick={() => { setFilterAppName(null); setFilterInstanceId(null); }}
+                      onClick={() => {
+                        setFilterAppName(null);
+                        setFilterInstanceId(null);
+                      }}
                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-medium transition-colors ${filterInstanceId ? 'bg-sparkline-true/10 text-sparkline-true' : 'bg-sparkline-true/10 text-sparkline-true'}`}
                     >
                       {filterAppName}
@@ -398,15 +477,17 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
 
               {instancesLoading && instances.length === 0 ? (
                 <div className="space-y-2">
-                  {[1, 2, 3].map(i => (
+                  {[1, 2, 3].map((i) => (
                     <div key={i} className="h-14 bg-secondary/60 rounded-xl animate-pulse" />
                   ))}
                 </div>
               ) : instances.length === 0 ? (
-                <div className="rounded-xl shadow-md bg-gradient-to-br from-gradient-subtle-start/80 to-gradient-subtle-end/50 dark:from-neutral-900/80 dark:to-neutral-900/60 px-4 py-8 text-center">
+                <div className="rounded-xl bg-muted px-4 py-8 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <Server size={24} className="text-muted-foreground/25" />
-                    <p className="text-xs text-muted-foreground/50">{t('clientInstances.emptyDescription')}</p>
+                    <p className="text-xs text-muted-foreground/50">
+                      {t('clientInstances.emptyDescription')}
+                    </p>
                   </div>
                 </div>
               ) : (
@@ -427,8 +508,12 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
 
                   <AnimatePresence mode="popLayout">
                     {instanceGroups.map((group, idx) => {
-                      const isAppSelected = filterAppName === group.appName && filterInstanceId === null;
-                      const isDimmed = (filterAppName || filterInstanceId) && !isAppSelected && filterAppName !== group.appName;
+                      const isAppSelected =
+                        filterAppName === group.appName && filterInstanceId === null;
+                      const isDimmed =
+                        (filterAppName || filterInstanceId) &&
+                        !isAppSelected &&
+                        filterAppName !== group.appName;
 
                       return (
                         <motion.div
@@ -452,10 +537,11 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
                             <Hairline />
 
                             <div className="px-3 py-2 space-y-1.5">
-                              {group.instances.map(inst => {
+                              {group.instances.map((inst) => {
                                 const isInstSelected = filterInstanceId === inst.id;
                                 const staleness = getStaleness(inst.lastSeenAt);
-                                const envName = environments.find(e => e.id === inst.environmentId)?.name ?? '';
+                                const envName =
+                                  environments.find((e) => e.id === inst.environmentId)?.name ?? '';
                                 const envColor = (() => {
                                   if (envName === 'Production') return 'bg-emerald-500';
                                   if (envName === 'Development') return 'bg-amber-500';
@@ -466,7 +552,10 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
                                 return (
                                   <button
                                     key={inst.id}
-                                    onClick={(e) => { e.stopPropagation(); selectInstance(group.appName, inst.id); }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      selectInstance(group.appName, inst.id);
+                                    }}
                                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${
                                       isInstSelected
                                         ? 'bg-sparkline-true/10 ring-1 ring-sparkline-true/20'
@@ -488,7 +577,9 @@ export function FlagMetricsDialog({ open, onOpenChange, flagId, flagName, enviro
                                         </span>
                                       )}
                                       {inst.sdkVersion && (
-                                        <span className="text-muted-foreground/35 font-mono text-xs shrink-0">v{inst.sdkVersion}</span>
+                                        <span className="text-muted-foreground/35 font-mono text-xs shrink-0">
+                                          v{inst.sdkVersion}
+                                        </span>
                                       )}
                                       <span className="text-muted-foreground/30 text-xs w-14 text-right tabular-nums shrink-0">
                                         {timeAgo(inst.lastSeenAt)}

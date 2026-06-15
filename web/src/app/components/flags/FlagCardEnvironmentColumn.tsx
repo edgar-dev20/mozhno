@@ -1,12 +1,12 @@
-import { Settings, BarChart3 } from "@/shared/icons";
-import { Switch } from "@/app/components/ui/switch";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/app/components/ui/tooltip";
-import { SegmentIcon } from "@/app/components/SegmentIcon";
-import { FlagSparkline, SparklinePlaceholder } from "@/app/components/FlagSparkline";
-import { useT } from "@/i18n";
-import type { MessageKey } from "@/i18n";
-import type { FlagView } from "@/app/hooks/flagTypes";
-import type { SegmentResponse, ContextDefinition } from "@/api";
+import { Settings, BarChart3 } from '@/shared/icons';
+import { Switch } from '@/app/components/ui/switch';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
+import { SegmentIcon } from '@/app/components/SegmentIcon';
+import { FlagSparkline, SparklinePlaceholder } from '@/app/components/FlagSparkline';
+import { useT } from '@/i18n';
+import type { MessageKey } from '@/i18n';
+import type { FlagView } from '@/app/hooks/flagTypes';
+import type { SegmentResponse, ContextDefinition } from '@/api';
 
 interface FlagCardEnvironmentColumnProps {
   env: { id: number; name: string };
@@ -37,38 +37,65 @@ function buildRule(
   const pctClass = muted ? 'opacity-40' : '';
 
   parts.push(
-    <span key="pct" className={`font-bold text-xs text-violet-600 dark:text-violet-400 ${pctClass}`}>
+    <span
+      key="pct"
+      className={`font-bold text-xs text-violet-600 dark:text-violet-400 ${pctClass}`}
+    >
       {isFull ? '100%' : `${pct}%`}
     </span>,
   );
 
   if (isFull) {
-  parts.push(
-    <span key="all" className={`text-xs ${muted ? 'text-muted-foreground/40' : 'text-muted-foreground'}`}>
-      {t('environment.all')}
-    </span>,
-  );
+    parts.push(
+      <span
+        key="all"
+        className={`text-xs ${muted ? 'text-muted-foreground/40' : 'text-muted-foreground'}`}
+      >
+        {t('environment.all')}
+      </span>,
+    );
   } else if (activeSegs.length > 0) {
-    parts.push(<span key="sdot" className={`text-xs text-muted-foreground/60 ${muted ? 'opacity-30' : ''}`}>·</span>);
+    parts.push(
+      <span key="sdot" className={`text-xs text-muted-foreground/60 ${muted ? 'opacity-30' : ''}`}>
+        ·
+      </span>,
+    );
     const visibleSegs = activeSegs.slice(0, 2);
     const overflow = activeSegs.length - visibleSegs.length;
     visibleSegs.forEach((seg, si) => {
-      if (si > 0) parts.push(<span key={`sc${si}`} className="text-muted-foreground/60">, </span>);
+      if (si > 0)
+        parts.push(
+          <span key={`sc${si}`} className="text-muted-foreground/60">
+            ,{' '}
+          </span>,
+        );
       parts.push(
-        <span key={`s${si}`} className="inline-flex items-center gap-0.5" style={{ color: muted ? '#d4d4d8' : seg.color, opacity: muted ? 0.5 : 1 }}>
+        <span
+          key={`s${si}`}
+          className="inline-flex items-center gap-0.5"
+          style={{ color: muted ? '#d4d4d8' : seg.color, opacity: muted ? 0.5 : 1 }}
+        >
           <SegmentIcon name={seg.icon} size={10} />
           <span className="text-xs">{seg.name}</span>
         </span>,
       );
     });
     if (overflow > 0) {
-      const restNames = activeSegs.slice(2).map((s) => s.name).join(', ');
+      const restNames = activeSegs
+        .slice(2)
+        .map((s) => s.name)
+        .join(', ');
       parts.push(
         <Tooltip key="segovf">
           <TooltipTrigger asChild>
-            <span className={muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}> +{overflow}</span>
+            <span className={muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}>
+              {' '}
+              +{overflow}
+            </span>
           </TooltipTrigger>
-          <TooltipContent className="text-xs bg-white dark:bg-neutral-800 text-foreground/90 border border-border shadow-lg rounded-xl px-3 py-2">{restNames}</TooltipContent>
+          <TooltipContent className="text-xs bg-white dark:bg-neutral-800 text-foreground/90 border border-border shadow-lg rounded-xl px-3 py-2">
+            {restNames}
+          </TooltipContent>
         </Tooltip>,
       );
     }
@@ -94,24 +121,47 @@ function buildRule(
           } else {
             const maxShow = 3;
             const show = vals.slice(0, maxShow).join(', ');
-            collapsed.push(vals.length > maxShow ? `${name}: ${show} +${vals.length - maxShow}` : `${name}: ${show}`);
+            collapsed.push(
+              vals.length > maxShow
+                ? `${name}: ${show} +${vals.length - maxShow}`
+                : `${name}: ${show}`,
+            );
           }
         }
         if (collapsed.length > 0) {
-          parts.push(<span key="cdot" className="text-muted-foreground/60">·</span>);
+          parts.push(
+            <span key="cdot" className="text-muted-foreground/60">
+              ·
+            </span>,
+          );
           const extra = collapsed.length - 1;
-          parts.push(<span key="first" className={`truncate max-w-[220px] ${muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}`}>{collapsed[0]}</span>);
+          parts.push(
+            <span
+              key="first"
+              className={`truncate max-w-[220px] ${muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}`}
+            >
+              {collapsed[0]}
+            </span>,
+          );
           if (extra > 0) {
-            parts.push(<span key="more" className={muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}>{t('flags.andMore', { count: String(extra) })}</span>);
+            parts.push(
+              <span
+                key="more"
+                className={muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}
+              >
+                {t('flags.andMore', { count: String(extra) })}
+              </span>,
+            );
           }
         }
       }
-    } catch { /* ignore parse errors */ }
+    } catch {
+      /* ignore parse errors */
+    }
   }
 
   return <span className="inline-flex items-baseline flex-wrap gap-x-0.5">{parts}</span>;
 }
-
 
 export function FlagCardEnvironmentColumn({
   env,
@@ -131,7 +181,9 @@ export function FlagCardEnvironmentColumn({
   return (
     <div className="flex-1 bg-secondary/40 rounded-xl px-4 pt-3 pb-2 ring-1 ring-border shadow-sm transition-all flex flex-col">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{env.name}</span>
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {env.name}
+        </span>
         <div className="flex items-center gap-1">
           <button
             onClick={() => onOpenEnvironment(flag, env.id)}
@@ -143,7 +195,7 @@ export function FlagCardEnvironmentColumn({
             <Switch
               checked={es.enabled}
               onCheckedChange={() => onToggleFlag(flag, env.id)}
-              className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-gradient-start data-[state=checked]:to-gradient-end scale-75 origin-right"
+              className="data-[state=checked]:bg-primary scale-75 origin-right"
             />
           )}
         </div>
@@ -170,7 +222,9 @@ export function FlagCardEnvironmentColumn({
           </div>
         </>
       ) : (
-        <span className="text-xs text-muted-foreground/50 italic">{t('environment.noStrategy')}</span>
+        <span className="text-xs text-muted-foreground/50 italic">
+          {t('environment.noStrategy')}
+        </span>
       )}
     </div>
   );

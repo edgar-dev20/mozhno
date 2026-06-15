@@ -314,17 +314,17 @@ export function Segments() {
           {error && <ErrorBox>{error}</ErrorBox>}
 
           <FormField label={t('common.name')} maxLength={120} value={formName}>
-            <input type="text" value={formName} onChange={e => setFormName(e.target.value)} maxLength={120} placeholder={t('segments.form.namePlaceholder')} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground" />
+            <input type="text" value={formName} onChange={e => setFormName(e.target.value)} maxLength={120} placeholder={t('segments.form.namePlaceholder')} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground" />
           </FormField>
           <FormField label={t('common.description')} maxLength={160} value={formDesc}>
-            <textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} maxLength={160} placeholder={t('segments.form.descriptionPlaceholder')} rows={2} ref={el => { if (el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 64) + 'px'; } }} onInput={e => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 64) + 'px'; }} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden" />
+            <textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} maxLength={160} placeholder={t('segments.form.descriptionPlaceholder')} rows={2} ref={el => { if (el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 64) + 'px'; } }} onInput={e => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 64) + 'px'; }} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden" />
           </FormField>
 
           <div className="pt-4 border-t border-border">
             <button
               type="button"
               onClick={() => setShowCustomize(!showCustomize)}
-              className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-secondary dark:hover:bg-neutral-900 transition-colors group"
+              className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-secondary dark:hover:bg-neutral-900 transition-colors group"
             >
               <div className="flex items-center gap-3">
                 <div
@@ -493,7 +493,7 @@ export function Segments() {
               <button
                 type="button"
                 onClick={() => setDeleteId(editing.id)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl border border-red-200 dark:border-red-500/20 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20 transition-all"
               >
                 <Trash2 size={16} />
                 {t('segments.deleteButton')}

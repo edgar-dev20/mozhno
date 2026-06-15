@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { Mail, Lock } from "@/shared/icons";
-import { GradientButton, ErrorBox } from "@/shared";
-import { Input } from "@/app/components/ui/input";
+import { Mail, Lock } from '@/shared/icons';
+import { GradientButton, ErrorBox } from '@/shared';
+import { Input } from '@/app/components/ui/input';
 import { Wordmark } from '@/shared/components/Wordmark';
-import { useAuth } from "@/app/auth/useAuth";
+import { useAuth } from '@/app/auth/useAuth';
 import { useT } from '@/i18n';
 
 export function Auth() {
@@ -43,7 +43,9 @@ export function Auth() {
             </div>
 
             <div className="text-center mb-10">
-              <p className="text-base font-medium text-muted-foreground">{t('auth.loginTagline')}</p>
+              <p className="text-base font-medium text-muted-foreground">
+                {t('auth.loginTagline')}
+              </p>
             </div>
 
             {error && (
@@ -104,10 +106,17 @@ export function Auth() {
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className="h-4 w-4 rounded border-border dark:text-muted-foreground/70 bg-white dark:bg-neutral-800 accent-gradient-start"
                   />
-                  <label htmlFor="remember" className="ml-2 block text-sm text-muted-foreground">{t('auth.rememberMe')}</label>
+                  <label htmlFor="remember" className="ml-2 block text-sm text-muted-foreground">
+                    {t('auth.rememberMe')}
+                  </label>
                 </div>
                 <div className="text-sm">
-                  <Link to="/forgot-password" className="text-muted-foreground hover:text-foreground transition-colors">{t('auth.forgotPassword')}</Link>
+                  <Link
+                    to="/forgot-password"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {t('auth.forgotPassword')}
+                  </Link>
                 </div>
               </div>
 
@@ -120,8 +129,6 @@ export function Auth() {
                 {t('auth.login')}
               </GradientButton>
             </form>
-
-
           </div>
         </div>
       </div>

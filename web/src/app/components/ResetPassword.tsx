@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { Lock } from "@/shared/icons";
-import { GradientButton, ErrorBox } from "@/shared";
-import { Input } from "@/app/components/ui/input";
+import { Lock } from '@/shared/icons';
+import { GradientButton, ErrorBox } from '@/shared';
+import { Input } from '@/app/components/ui/input';
 import { Wordmark } from '@/shared/components/Wordmark';
-import { api } from "@/api";
+import { api } from '@/api';
 import { useT } from '@/i18n';
 
 export function ResetPassword() {
@@ -47,7 +47,7 @@ export function ResetPassword() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gradient-subtle-start to-gradient-subtle-end dark:from-neutral-950 dark:to-blue-950/20 flex flex-col items-center justify-center p-4 relative overflow-hidden transition-colors">
-      <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-gradient-to-br from-blue-300/20 to-violet-300/20 dark:from-blue-600/10 dark:to-violet-600/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-[-180px] right-[-100px] w-[450px] h-[450px] bg-gradient-to-br from-gradient-start/10 to-gradient-end/5 dark:from-gradient-start/8 dark:to-gradient-end/4 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-violet-300/20 to-blue-300/20 dark:from-violet-600/10 dark:to-blue-600/10 rounded-full blur-3xl"></div>
 
       <div className="w-full max-w-md relative z-10">
@@ -58,7 +58,9 @@ export function ResetPassword() {
             </div>
 
             <div className="text-center mb-10">
-              <p className="text-base font-medium text-muted-foreground">{t('auth.loginTagline')}</p>
+              <p className="text-base font-medium text-muted-foreground">
+                {t('auth.loginTagline')}
+              </p>
             </div>
 
             {error && (
@@ -74,7 +76,10 @@ export function ResetPassword() {
                     {t('auth.passwordChanged')}
                   </p>
                 </div>
-                <Link to="/login" className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-gradient-to-r from-gradient-start to-gradient-end px-6 py-3 rounded-xl hover:shadow-xl transition-shadow">
+                <Link
+                  to="/login"
+                  className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-gradient-to-r from-gradient-start to-gradient-end px-6 py-3 rounded-lg hover:shadow-xl transition-shadow"
+                >
                   {t('auth.login')}
                 </Link>
               </div>
@@ -84,20 +89,20 @@ export function ResetPassword() {
                   <label className="text-sm font-medium text-foreground/80" htmlFor="password">
                     {t('auth.newPassword')}
                   </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
-                    <Lock size={18} className="text-muted-foreground/70" />
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    maxLength={128}
-                    className="pl-11"
-                    placeholder={t('auth.passwordPlaceholder')}
-                    required
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
+                      <Lock size={18} className="text-muted-foreground/70" />
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      maxLength={128}
+                      className="pl-11"
+                      placeholder={t('auth.passwordPlaceholder')}
+                      required
+                    />
                   </div>
                 </div>
 
@@ -105,20 +110,20 @@ export function ResetPassword() {
                   <label className="text-sm font-medium text-foreground/80" htmlFor="confirm">
                     {t('auth.confirmPassword')}
                   </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
-                    <Lock size={18} className="text-muted-foreground/70" />
-                  </div>
-                  <Input
-                    id="confirm"
-                    type="password"
-                    value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                    maxLength={128}
-                    className="pl-11"
-                    placeholder={t('auth.passwordPlaceholder')}
-                    required
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
+                      <Lock size={18} className="text-muted-foreground/70" />
+                    </div>
+                    <Input
+                      id="confirm"
+                      type="password"
+                      value={confirm}
+                      onChange={(e) => setConfirm(e.target.value)}
+                      maxLength={128}
+                      className="pl-11"
+                      placeholder={t('auth.passwordPlaceholder')}
+                      required
+                    />
                   </div>
                 </div>
 

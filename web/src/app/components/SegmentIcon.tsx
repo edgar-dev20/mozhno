@@ -133,7 +133,7 @@ export function SegmentColorPicker({ value, onChange, icon = 'Users' }: { value:
               onKeyDown={e => { if (e.key === 'Enter') applyCustomHex(); }}
               placeholder={t('tags.form.color.hexPlaceholder')}
               maxLength={7}
-              className="w-full bg-card border border-border rounded-xl pl-8 pr-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:ring-border transition-all placeholder:text-muted-foreground"
+              className="w-full bg-card border border-border rounded-lg pl-8 pr-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:ring-border transition-all placeholder:text-muted-foreground"
             />
           </div>
           <GradientButton
@@ -163,7 +163,7 @@ export function SegmentColorPicker({ value, onChange, icon = 'Users' }: { value:
                     type="button"
                     onClick={() => onChange(c)}
                     title={getColorName(c)}
-                    className="w-9 h-9 rounded-xl transition-all relative group"
+                    className="w-9 h-9 rounded-lg transition-all relative group"
                     style={{
                       backgroundColor: c,
                       transform: active ? 'scale(1.15)' : 'scale(1)',

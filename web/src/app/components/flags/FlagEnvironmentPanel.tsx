@@ -142,7 +142,7 @@ export function FlagEnvironmentPanel({
                 <div
                   key={seg.id}
                   onClick={() => onEnvRuleSegmentsChange(checked ? envRuleSegments.filter(id => id !== seg.id) : [...envRuleSegments, seg.id])}
-                  className={`group cursor-pointer flex flex-col p-3.5 rounded-xl transition-all border ${checked ? 'shadow-sm' : 'bg-input-bg border-border hover:border-border hover:shadow-sm'}`}
+                  className={`group cursor-pointer flex flex-col p-3.5 rounded-lg transition-all border ${checked ? 'shadow-sm' : 'bg-input-bg border-border hover:border-border hover:shadow-sm'}`}
                   style={checked ? { backgroundColor: segColor + '0D', borderColor: segColor + '40' } : undefined}
                 >
                   <div className="flex gap-3">

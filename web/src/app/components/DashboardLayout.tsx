@@ -10,7 +10,11 @@ import { UserProfileMenu } from '@/app/components/UserProfileMenu';
 import { Flag, GitBranch, UserCog } from '@/shared/icons';
 import { PageErrorBoundary } from '@/app/components/PageErrorBoundary';
 import { OnboardingWizard } from '@/app/components/OnboardingWizard';
-import { isOnboardingComplete, markOnboardingComplete, resetOnboardingComplete } from '@/shared/onboardingUtils';
+import {
+  isOnboardingComplete,
+  markOnboardingComplete,
+  resetOnboardingComplete,
+} from '@/shared/onboardingUtils';
 import { extractDominantColor, lightenForDarkMode } from '@/shared/extractLogoColor';
 import { SkipLink } from '@/shared/components/SkipLink';
 import { AppSidebar, AppSidebarProvider } from '@/app/components/AppSidebar';
@@ -72,7 +76,7 @@ export function DashboardLayout() {
   useEffect(() => {
     const handler = () => {
       invalidateProjects();
-      setLogoVersion(v => v + 1);
+      setLogoVersion((v) => v + 1);
     };
     window.addEventListener('project-updated', handler);
     return () => window.removeEventListener('project-updated', handler);
@@ -143,7 +147,9 @@ export function DashboardLayout() {
                 )}
                 <span
                   className="text-h2 font-semibold bg-clip-text text-transparent truncate"
-                  style={{ backgroundImage: `linear-gradient(to right, ${displayColor}, ${displayColor}cc)` }}
+                  style={{
+                    backgroundImage: `linear-gradient(to right, ${displayColor}, ${displayColor}cc)`,
+                  }}
                 >
                   {projectName ?? '—'}
                 </span>
@@ -157,7 +163,9 @@ export function DashboardLayout() {
                         <span className="tabular-nums font-mono text-body-sm">{stats.flags}</span>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-caption">{t('navigation.flags')}</TooltipContent>
+                    <TooltipContent side="bottom" className="text-caption">
+                      {t('navigation.flags')}
+                    </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -166,16 +174,22 @@ export function DashboardLayout() {
                         <span className="tabular-nums font-mono text-body-sm">{stats.users}</span>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-caption">{t('navigation.users')}</TooltipContent>
+                    <TooltipContent side="bottom" className="text-caption">
+                      {t('navigation.users')}
+                    </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent">
                         <GitBranch size={12} />
-                        <span className="tabular-nums font-mono text-body-sm">{stats.segments}</span>
+                        <span className="tabular-nums font-mono text-body-sm">
+                          {stats.segments}
+                        </span>
                       </span>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-caption">{t('navigation.segments')}</TooltipContent>
+                    <TooltipContent side="bottom" className="text-caption">
+                      {t('navigation.segments')}
+                    </TooltipContent>
                   </Tooltip>
                 </div>
               </div>
@@ -184,24 +198,27 @@ export function DashboardLayout() {
               </div>
             </header>
 
-          <main id="main-content" className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-br from-background to-secondary p-8 transition-colors min-w-0">
-            <div className="max-w-[90rem] mx-auto">
-              <PageErrorBoundary>
-                <Outlet />
-              </PageErrorBoundary>
-            </div>
-          </main>
-        </div>
+            <main
+              id="main-content"
+              className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-br from-background to-secondary p-8 transition-colors min-w-0"
+            >
+              <div className="max-w-[90rem] mx-auto">
+                <PageErrorBoundary>
+                  <Outlet />
+                </PageErrorBoundary>
+              </div>
+            </main>
+          </div>
 
-        {showOnboarding && (
-          <OnboardingWizard
-            open={showOnboarding}
-            startStep={projectId === null ? 0 : 1}
-            onDismiss={handleDismiss}
-            onProjectCreated={handleProjectCreated}
-          />
-        )}
-      </div>
+          {showOnboarding && (
+            <OnboardingWizard
+              open={showOnboarding}
+              startStep={projectId === null ? 0 : 1}
+              onDismiss={handleDismiss}
+              onProjectCreated={handleProjectCreated}
+            />
+          )}
+        </div>
       </div>
     </AppSidebarProvider>
   );

@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { FlagCardHeader } from "@/app/components/flags/FlagCardHeader";
-import { FlagCardDetail } from "@/app/components/flags/FlagCardDetail";
-import type { FlagView } from "@/app/hooks/flagTypes";
-import type { SegmentResponse, Tag as TagType, ContextDefinition } from "@/api";
+import { FlagCardHeader } from '@/app/components/flags/FlagCardHeader';
+import { FlagCardDetail } from '@/app/components/flags/FlagCardDetail';
+import type { FlagView } from '@/app/hooks/flagTypes';
+import type { SegmentResponse, Tag as TagType, ContextDefinition } from '@/api';
 
 export interface FlagCardProps {
   flag: FlagView;
@@ -20,9 +20,7 @@ export interface FlagCardProps {
 }
 
 export function FlagCard(props: FlagCardProps) {
-  const {
-    flag, expanded, onToggleExpand,
-  } = props;
+  const { flag, expanded, onToggleExpand } = props;
 
   return (
     <motion.div
@@ -32,11 +30,17 @@ export function FlagCard(props: FlagCardProps) {
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
       layout
-      className="group bg-card rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden ring-1 ring-border"
+      className="group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
       id={`flag-card-${flag.key}`}
     >
       <div className="flex gap-4 px-4 py-3 cursor-pointer" onClick={onToggleExpand}>
-        <FlagCardHeader flag={flag} expanded={expanded} environments={props.environments} tags={props.tags} onToggleFlag={props.onToggleFlag} sparklineData={props.sparklineData} />
+        <FlagCardHeader
+          flag={flag}
+          expanded={expanded}
+          environments={props.environments}
+          tags={props.tags}
+          onToggleFlag={props.onToggleFlag}
+        />
       </div>
 
       <AnimatePresence initial={false}>

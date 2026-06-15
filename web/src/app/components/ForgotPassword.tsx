@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
-import { Mail, ArrowLeft } from "@/shared/icons";
-import { GradientButton, ErrorBox } from "@/shared";
-import { Input } from "@/app/components/ui/input";
+import { Mail, ArrowLeft } from '@/shared/icons';
+import { GradientButton, ErrorBox } from '@/shared';
+import { Input } from '@/app/components/ui/input';
 import { Wordmark } from '@/shared/components/Wordmark';
-import { api } from "@/api";
+import { api } from '@/api';
 import { useT } from '@/i18n';
 
 export function ForgotPassword() {
@@ -31,7 +31,7 @@ export function ForgotPassword() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gradient-subtle-start to-gradient-subtle-end dark:from-neutral-950 dark:to-blue-950/20 flex flex-col items-center justify-center p-4 relative overflow-hidden transition-colors">
-      <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-gradient-to-br from-blue-300/20 to-violet-300/20 dark:from-blue-600/10 dark:to-violet-600/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-[-180px] right-[-100px] w-[450px] h-[450px] bg-gradient-to-br from-gradient-start/10 to-gradient-end/5 dark:from-gradient-start/8 dark:to-gradient-end/4 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-violet-300/20 to-blue-300/20 dark:from-violet-600/10 dark:to-blue-600/10 rounded-full blur-3xl"></div>
 
       <div className="w-full max-w-md relative z-10">
@@ -42,7 +42,9 @@ export function ForgotPassword() {
             </div>
 
             <div className="text-center mb-10">
-              <p className="text-base font-medium text-muted-foreground">{t('auth.loginTagline')}</p>
+              <p className="text-base font-medium text-muted-foreground">
+                {t('auth.loginTagline')}
+              </p>
             </div>
 
             {error && (
@@ -58,7 +60,10 @@ export function ForgotPassword() {
                     {t('auth.forgotPasswordSent')}
                   </p>
                 </div>
-                <Link to="/login" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                  to="/login"
+                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
                   <ArrowLeft size={16} />
                   {t('auth.backToLogin')}
                 </Link>
@@ -69,20 +74,20 @@ export function ForgotPassword() {
                   <label className="text-sm font-medium text-foreground/80" htmlFor="email">
                     {t('auth.email')}
                   </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
-                    <Mail size={18} className="text-muted-foreground/70" />
-                  </div>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    maxLength={254}
-                    className="pl-11"
-                    placeholder={t('auth.emailPlaceholder')}
-                    required
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none z-10">
+                      <Mail size={18} className="text-muted-foreground/70" />
+                    </div>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      maxLength={254}
+                      className="pl-11"
+                      placeholder={t('auth.emailPlaceholder')}
+                      required
+                    />
                   </div>
                 </div>
 
@@ -96,7 +101,10 @@ export function ForgotPassword() {
                 </GradientButton>
 
                 <div className="text-center">
-                  <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  <Link
+                    to="/login"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
                     {t('auth.backToLogin')}
                   </Link>
                 </div>

@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Check, Rocket, ChevronLeft, Building2, Upload } from "@/shared/icons";
-import { GradientButton } from "@/shared";
-import { api, setToken, setRefreshToken } from "@/api";
+import { Plus, Check, Rocket, ChevronLeft, Building2, Upload } from '@/shared/icons';
+import { GradientButton } from '@/shared';
+import { api, setToken, setRefreshToken } from '@/api';
 import { useT } from '@/i18n';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
@@ -15,11 +15,22 @@ interface OnboardingWizardProps {
 }
 
 const STEPS = [
-  { title: 'onboarding.step0.title' as const, description: 'onboarding.step0.description' as const },
-  { title: 'onboarding.step1.title' as const, description: 'onboarding.step1.description' as const },
+  {
+    title: 'onboarding.step0.title' as const,
+    description: 'onboarding.step0.description' as const,
+  },
+  {
+    title: 'onboarding.step1.title' as const,
+    description: 'onboarding.step1.description' as const,
+  },
 ];
 
-export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated }: OnboardingWizardProps) {
+export function OnboardingWizard({
+  open,
+  startStep,
+  onDismiss,
+  onProjectCreated,
+}: OnboardingWizardProps) {
   const t = useT();
   const queryClient = useQueryClient();
   const [step, setStep] = useState(startStep);
@@ -88,7 +99,10 @@ export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated 
     setCreatingProject(true);
     setProjectError('');
     try {
-      const project = await api.projects.create({ name: projectName.trim(), description: projectDesc.trim() || undefined });
+      const project = await api.projects.create({
+        name: projectName.trim(),
+        description: projectDesc.trim() || undefined,
+      });
       if (pendingLogoFile) {
         try {
           await api.projects.uploadLogo(project.id, pendingLogoFile);
@@ -131,7 +145,11 @@ export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated 
         flagType: 'RELEASE',
       });
       for (const env of environments) {
-        await api.strategies.create(created.id, { environmentId: env.id, enabled: false, percentage: 100 });
+        await api.strategies.create(created.id, {
+          environmentId: env.id,
+          enabled: false,
+          percentage: 100,
+        });
       }
       queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
       setFlagCreated(true);
@@ -163,10 +181,10 @@ export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated 
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="bg-card border border-border rounded-3xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden"
+            className="bg-card border border-border rounded-2xl shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_2px_4px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.12)] w-full max-w-2xl mx-4 overflow-hidden"
           >
             <div className="flex">
-              <div className="w-1/2 bg-gradient-to-br from-gradient-subtle-start to-gradient-subtle-end p-8 flex items-center justify-center hidden md:flex">
+              <div className="w-2/5 bg-gradient-to-br from-gradient-subtle-start to-gradient-subtle-end p-8 items-center justify-center hidden md:flex">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={step}
@@ -181,7 +199,9 @@ export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated 
                         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gradient-start to-gradient-end flex items-center justify-center">
                           <Building2 size={28} className="text-white" />
                         </div>
-                        <div className="text-xs text-muted-foreground">{t('onboarding.createProject')}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {t('onboarding.createProject')}
+                        </div>
                       </div>
                     )}
                     {step === 1 && (
@@ -197,7 +217,8 @@ export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated 
                 </AnimatePresence>
               </div>
 
-              <div className="flex-1 p-8 flex flex-col">
+              <div className="flex-1 p-8 flex flex-col relative overflow-hidden">
+                <div className="absolute top-[-120px] right-[-80px] w-[350px] h-[350px] bg-gradient-to-br from-gradient-start/6 to-gradient-end/3 dark:from-gradient-start/4 dark:to-gradient-end/2 rounded-full blur-3xl md:hidden" />
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={step}
@@ -219,18 +240,18 @@ export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated 
                         <input
                           type="text"
                           value={projectName}
-                          onChange={e => setProjectName(e.target.value)}
+                          onChange={(e) => setProjectName(e.target.value)}
                           maxLength={120}
                           placeholder={t('onboarding.projectNamePlaceholder')}
-                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                         />
                         <textarea
                           value={projectDesc}
-                          onChange={e => setProjectDesc(e.target.value)}
+                          onChange={(e) => setProjectDesc(e.target.value)}
                           maxLength={500}
                           rows={2}
                           placeholder={t('onboarding.projectDescPlaceholder')}
-                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
+                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
                         />
                         <input
                           ref={fileInputRef}
@@ -250,16 +271,14 @@ export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated 
                           <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground bg-secondary border border-border rounded-xl transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground bg-secondary border border-border rounded-lg transition-colors"
                           >
                             <Upload size={12} />
                             {pendingLogoFile ? pendingLogoFile.name : t('onboarding.uploadLogo')}
                           </button>
                         </div>
                         <p className="text-xs text-muted-foreground">{t('onboarding.logoHint')}</p>
-                        {projectError && (
-                          <p className="text-xs text-red-500">{projectError}</p>
-                        )}
+                        {projectError && <p className="text-xs text-red-500">{projectError}</p>}
                         <GradientButton
                           onClick={handleCreateProject}
                           disabled={creatingProject}
@@ -276,22 +295,20 @@ export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated 
                         <input
                           type="text"
                           value={flagName}
-                          onChange={e => setFlagName(e.target.value)}
+                          onChange={(e) => setFlagName(e.target.value)}
                           maxLength={120}
                           placeholder={t('onboarding.flagNamePlaceholder')}
-                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                         />
                         <input
                           type="text"
                           value={flagKey}
-                          onChange={e => setFlagKey(e.target.value)}
+                          onChange={(e) => setFlagKey(e.target.value)}
                           maxLength={100}
                           placeholder={t('onboarding.flagKeyPlaceholder')}
-                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
+                          className="w-full bg-white dark:bg-neutral-950 border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
                         />
-                        {flagError && (
-                          <p className="text-xs text-red-500">{flagError}</p>
-                        )}
+                        {flagError && <p className="text-xs text-red-500">{flagError}</p>}
                         <GradientButton
                           onClick={handleCreateFlag}
                           disabled={creatingFlag}
@@ -309,8 +326,12 @@ export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated 
                         <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
                           <Check size={24} className="text-green-600 dark:text-green-400" />
                         </div>
-                        <p className="text-sm font-medium text-foreground">{t('onboarding.flagCreated')}</p>
-                        <p className="text-xs text-muted-foreground">{t('onboarding.flagCreatedDescription')}</p>
+                        <p className="text-sm font-medium text-foreground">
+                          {t('onboarding.flagCreated')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {t('onboarding.flagCreatedDescription')}
+                        </p>
                       </div>
                     )}
                   </motion.div>
@@ -329,9 +350,7 @@ export function OnboardingWizard({ open, startStep, onDismiss, onProjectCreated 
                   </div>
                   <div className="flex items-center gap-2">
                     {step === 1 && flagCreated ? (
-                      <GradientButton onClick={onDismiss}>
-                        {t('onboarding.finish')}
-                      </GradientButton>
+                      <GradientButton onClick={onDismiss}>{t('onboarding.finish')}</GradientButton>
                     ) : (
                       <>
                         {step > 0 && (

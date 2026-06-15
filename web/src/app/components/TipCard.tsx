@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from "@/shared/icons";
+import { X } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
 import { useT } from '@/i18n';
 
@@ -39,21 +39,24 @@ export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProp
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -10, scale: 0.97 }}
           transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative overflow-hidden rounded-xl border border-primary/10 bg-gradient-to-br from-gradient-subtle-start/10 to-gradient-subtle-end/8 shadow-sm"
+          className="relative overflow-hidden rounded-xl border border-border bg-card shadow-sm"
         >
           <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-gradient-start to-gradient-end" />
           <div className="p-4 pl-6 flex items-start gap-3">
             {showIcon && (
               <div className="shrink-0 rounded-xl overflow-hidden">
                 {imageSrc ? (
-                  <img
-                    src={imageSrc}
-                    alt=""
-                    className="w-10 h-10 object-cover"
-                  />
+                  <img src={imageSrc} alt="" className="w-10 h-10 object-cover" />
                 ) : icon ? (
-                  <div className="p-2.5 bg-gradient-to-br from-gradient-start/10 to-gradient-end/7">
-                    {React.cloneElement(icon as React.ReactElement<{ size?: number; className?: string; style?: React.CSSProperties }>, { size: 16, className: 'text-primary' })}
+                  <div className="p-2.5 bg-muted">
+                    {React.cloneElement(
+                      icon as React.ReactElement<{
+                        size?: number;
+                        className?: string;
+                        style?: React.CSSProperties;
+                      }>,
+                      { size: 16, className: 'text-primary' },
+                    )}
                   </div>
                 ) : null}
               </div>

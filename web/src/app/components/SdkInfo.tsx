@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Copy, Check, ChevronDown, ChevronUp, Server, Globe } from "@/shared/icons";
 import { JavaIcon } from "@/app/components/LanguageIcons";
@@ -29,7 +29,7 @@ function CodeBlock({ code, lang }: CodeBlockProps) {
       )}
       <button
         onClick={handleCopy}
-        className="absolute top-2 right-2 p-1.5 rounded-xl bg-white/60 dark:bg-neutral-800/60 hover:bg-white dark:hover:bg-neutral-800 text-muted-foreground hover:text-foreground/70 dark:hover:text-neutral-200 transition-colors"
+        className="absolute top-2 right-2 p-1.5 rounded-lg bg-white/60 dark:bg-neutral-800/60 hover:bg-white dark:hover:bg-neutral-800 text-muted-foreground hover:text-foreground/70 dark:hover:text-neutral-200 transition-colors"
       >
         {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
       </button>

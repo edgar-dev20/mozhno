@@ -60,26 +60,26 @@ export function FlagCreatePanel({
       </div>
 
       <FormField label={t('common.name')} maxLength={120} value={watch('name')}>
-        <input type="text" {...register('name')} maxLength={120} placeholder={t('flags.namePlaceholderEdit')} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground" />
+        <input type="text" {...register('name')} maxLength={120} placeholder={t('flags.namePlaceholderEdit')} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground" />
         {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
       </FormField>
 
       <FormField label={t('common.key')} hint={t('flags.keyHint')} maxLength={100} value={watch('key')}>
-        <input type="text" {...register('key')} maxLength={100} placeholder="new-checkout-flow" className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono" />
+        <input type="text" {...register('key')} maxLength={100} placeholder="new-checkout-flow" className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono" />
         {errors.key && <p className="text-xs text-red-500 mt-1">{errors.key.message}</p>}
       </FormField>
 
       <FormField label={t('common.description')} maxLength={160} value={watch('description')}>
-        <textarea {...descReg} maxLength={160} placeholder={t('flags.descriptionPlaceholder')} rows={3} ref={(el) => { descRef(el); if (el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 80) + 'px'; } }} onInput={e => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 80) + 'px'; }} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden" />
+        <textarea {...descReg} maxLength={160} placeholder={t('flags.descriptionPlaceholder')} rows={3} ref={(el) => { descRef(el); if (el) { el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 80) + 'px'; } }} onInput={e => { const el = e.currentTarget; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 80) + 'px'; }} className="w-full bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden" />
       </FormField>
 
       <div className="space-y-1.5">
         <label className="text-sm font-medium text-foreground/80">{t('flags.flagType')}</label>
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => setValue('flagType', 'RELEASE')} className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 text-sm font-semibold transition-all ${flagType === 'RELEASE' ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 shadow-sm' : 'border-border text-muted-foreground hover:border-blue-300 dark:hover:border-blue-700'}`}>
+          <button type="button" onClick={() => setValue('flagType', 'RELEASE')} className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-sm font-semibold transition-all ${flagType === 'RELEASE' ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 shadow-sm' : 'border-border text-muted-foreground hover:border-blue-300 dark:hover:border-blue-700'}`}>
             <Rocket size={18} className={flagType === 'RELEASE' ? 'text-blue-500' : 'text-muted-foreground'} />{t('flags.release')}
           </button>
-          <button type="button" onClick={() => setValue('flagType', 'KILLSWITCH')} className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 text-sm font-semibold transition-all ${flagType === 'KILLSWITCH' ? 'border-red-500 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 shadow-sm' : 'border-border text-muted-foreground hover:border-red-300 dark:hover:border-red-700'}`}>
+          <button type="button" onClick={() => setValue('flagType', 'KILLSWITCH')} className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-sm font-semibold transition-all ${flagType === 'KILLSWITCH' ? 'border-red-500 bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 shadow-sm' : 'border-border text-muted-foreground hover:border-red-300 dark:hover:border-red-700'}`}>
             <ShieldOff size={18} className={flagType === 'KILLSWITCH' ? 'text-red-500' : 'text-muted-foreground'} />{t('flags.killswitch')}
           </button>
         </div>
@@ -102,7 +102,7 @@ export function FlagCreatePanel({
           </div>
         )}
         {!addingTag ? (
-          <button type="button" onClick={() => setAddingTag(true)} disabled={formTags.length >= 10} title={formTags.length >= 10 ? t('flags.maxTagsReached') : undefined} className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-xl border border-dashed border-violet-300 dark:border-violet-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+          <button type="button" onClick={() => setAddingTag(true)} disabled={formTags.length >= 10} title={formTags.length >= 10 ? t('flags.maxTagsReached') : undefined} className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium text-violet-600 dark:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-500/10 rounded-lg border border-dashed border-violet-300 dark:border-violet-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
             <Plus size={14} />{t('flags.addTag')}
           </button>
         ) : (
@@ -111,7 +111,7 @@ export function FlagCreatePanel({
               <label className="text-xs font-medium text-muted-foreground">{t('flags.selectTagType')}</label>
               <div className="grid grid-cols-2 gap-2">
                 {allTags.map(tg => (
-                  <button type="button" key={tg.id} onClick={() => setNewTagId(tg.id)} className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border ${newTagId === tg.id ? 'shadow-sm' : 'hover:shadow-sm border-border'}`} style={newTagId === tg.id ? { borderColor: tg.color, borderWidth: '2px' } : {}}>
+                  <button type="button" key={tg.id} onClick={() => setNewTagId(tg.id)} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border ${newTagId === tg.id ? 'shadow-sm' : 'hover:shadow-sm border-border'}`} style={newTagId === tg.id ? { borderColor: tg.color, borderWidth: '2px' } : {}}>
                     <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }} />
                     <span className="text-foreground/80">{tg.name}</span>
                   </button>
@@ -120,11 +120,11 @@ export function FlagCreatePanel({
             </div>
             {newTagId && (
               <div className="flex gap-2 items-center pt-1">
-                <input type="text" value={newTagVal} onChange={e => setNewTagVal(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && newTagVal.trim()) addTag(); else if (e.key === 'Escape') { setAddingTag(false); setNewTagId(null); setNewTagVal(''); } }} placeholder={t('flags.enterTagValue')} maxLength={255} autoFocus className="flex-1 bg-white dark:bg-neutral-950 border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground" />
+                <input type="text" value={newTagVal} onChange={e => setNewTagVal(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && newTagVal.trim()) addTag(); else if (e.key === 'Escape') { setAddingTag(false); setNewTagId(null); setNewTagVal(''); } }} placeholder={t('flags.enterTagValue')} maxLength={255} autoFocus className="flex-1 bg-white dark:bg-neutral-950 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground" />
                 <GradientButton type="button" onClick={addTag} disabled={!newTagVal.trim()} size="sm">{t('common.add')}</GradientButton>
               </div>
             )}
-            <button type="button" onClick={() => { setAddingTag(false); setNewTagId(null); setNewTagVal(''); }} className="w-full px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent rounded-xl">{t('common.cancel')}</button>
+            <button type="button" onClick={() => { setAddingTag(false); setNewTagId(null); setNewTagVal(''); }} className="w-full px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent rounded-lg">{t('common.cancel')}</button>
           </div>
         )}
       </div>

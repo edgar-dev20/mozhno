@@ -30,7 +30,7 @@ export function SidePanel({ open, onOpenChange, title, description, children, fo
               </Dialog.Description>
             </div>
             <Dialog.Close asChild>
-              <button className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-accent transition-all">
+              <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all">
                 <X size={18} />
               </button>
             </Dialog.Close>
