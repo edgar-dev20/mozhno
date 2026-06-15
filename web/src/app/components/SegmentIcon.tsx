@@ -67,30 +67,32 @@ export function SegmentIcon({ name, className = '', size = 20 }: SegmentIconProp
 
 export function SegmentIconPicker({ value, onChange }: { value: string; onChange: (icon: string) => void }) {
   return (
-    <div className="grid grid-cols-6 gap-1.5 max-h-[240px] overflow-y-auto pr-0.5">
-      {SEGMENT_ICONS.map((icon) => {
-        const isSelected = value === icon;
-        return (
-          <button
-            key={icon}
-            type="button"
-            onClick={() => onChange(icon)}
-            className={`p-2 rounded-lg transition-all flex items-center justify-center ${
-              isSelected
-                ? 'bg-indigo-100 dark:bg-indigo-500/20 ring-2 ring-indigo-500 dark:ring-indigo-400'
-                : 'bg-secondary hover:bg-accent text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground/60'
-            }`}
-            title={icon}
-          >
-            <SegmentIcon name={icon} size={18} />
-          </button>
-        );
-      })}
+    <div className="max-h-[240px] overflow-hidden rounded-xl">
+      <div className="grid grid-cols-6 gap-1.5 max-h-[240px] overflow-y-auto p-1.5">
+        {SEGMENT_ICONS.map((icon) => {
+          const isSelected = value === icon;
+          return (
+            <button
+              key={icon}
+              type="button"
+              onClick={() => onChange(icon)}
+              className={`p-2 rounded-lg transition-all flex items-center justify-center ${
+                isSelected
+                  ? 'bg-indigo-100 dark:bg-indigo-500/20 ring-2 ring-indigo-500 dark:ring-indigo-400'
+                  : 'bg-secondary hover:bg-accent text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground/60'
+              }`}
+              title={icon}
+            >
+              <SegmentIcon name={icon} size={18} />
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-export function SegmentColorPicker({ value, onChange }: { value: string; onChange: (color: string) => void }) {
+export function SegmentColorPicker({ value, onChange, icon = 'Users' }: { value: string; onChange: (color: string) => void; icon?: string }) {
   const t = useT();
   const [customHex, setCustomHex] = useState('');
 
@@ -113,7 +115,7 @@ export function SegmentColorPicker({ value, onChange }: { value: string; onChang
               boxShadow: `0 8px 24px ${value}40`,
             }}
           >
-            <SegmentIcon name="Users" size={20} className="text-white" />
+            <SegmentIcon name={icon} size={20} className="text-white" />
           </div>
           <div className="space-y-1 min-w-0">
             <div className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">{t('tags.form.color.preview')}</div>

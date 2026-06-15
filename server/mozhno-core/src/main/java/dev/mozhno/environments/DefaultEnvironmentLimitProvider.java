@@ -6,6 +6,6 @@ import org.springframework.stereotype.Component;
 public class DefaultEnvironmentLimitProvider implements EnvironmentLimitProvider {
     @Override
     public int getMaxEnvironments() {
-        return 6;
+        return 3;
     }
 }

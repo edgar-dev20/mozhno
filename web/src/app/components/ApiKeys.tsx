@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useT } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
-import { Key, Copy, Eye, EyeOff, Shield, Server, Globe, Plus, Trash2, BadgeCheck, Monitor, ExternalLink, ChevronDown, ChevronUp, Clock } from "@/shared/icons";
+import { Key, Copy, Check, Eye, EyeOff, Shield, Server, Globe, Plus, Trash2, BadgeCheck, Monitor, ExternalLink, ChevronDown, ChevronUp, Clock } from "@/shared/icons";
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { api, Environment } from "@/api";
@@ -40,6 +40,7 @@ export function ApiKeys() {
 
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [showKey, setShowKey] = useState<number | null>(null);
+  const [copiedKeyId, setCopiedKeyId] = useState<number | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -117,7 +118,11 @@ export function ApiKeys() {
     deleteMutation.mutate(deleteId);
   };
 
-  const copyKey = (key: string) => { navigator.clipboard.writeText(key); };
+  const copyKey = async (id: number, key: string) => {
+    await navigator.clipboard.writeText(key);
+    setCopiedKeyId(id);
+    setTimeout(() => setCopiedKeyId(null), 2000);
+  };
 
   const envName = (id: number | null) => environments.find(e => e.id === id)?.name ?? '—';
   const envColor = (id: number | null) => {
@@ -342,13 +347,19 @@ export function ApiKeys() {
                                   >
                                     {showKey === k.id ? <><EyeOff size={12} />{t('apiKeys.hide')}</> : <><Eye size={12} />{t('apiKeys.show')}</>}
                                   </button>
-                                  <GradientButton
-                                    onClick={(e) => { e.stopPropagation(); copyKey(k.apiKey); }}
-                                    size="sm"
-                                    icon={<Copy size={12} />}
->
-                                    {t('apiKeys.copyKey')}
-                                  </GradientButton>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); copyKey(k.id, k.apiKey); }}
+                                    disabled={copiedKeyId === k.id}
+                                    className={`flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-xl transition-colors ${
+                                      copiedKeyId === k.id
+                                        ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 cursor-default'
+                                        : 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/10 hover:bg-amber-200 dark:hover:bg-amber-500/20'
+                                    }`}
+                                  >
+                                    {copiedKeyId === k.id ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                                    {copiedKeyId === k.id ? t('apiKeys.copied') : t('apiKeys.copyKey')}
+                                  </button>
                                 </div>
                               </div>
                               <div className="bg-white dark:bg-neutral-950 border border-amber-200/60 dark:border-amber-500/10 rounded-lg px-4 py-3">

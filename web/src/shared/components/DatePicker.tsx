@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { ru } from "date-fns/locale/ru";
+import { enUS, ru } from "date-fns/locale";
 import { Calendar, X } from "@/shared/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/app/components/ui/calendar";
-import { useT } from "@/i18n";
+import { useLocale, useT } from "@/i18n";
+import type { Locale } from "date-fns/locale";
+
+const dateLocales: Record<string, Locale> = { en: enUS, ru };
 
 interface DatePickerProps {
   value?: Date | null;
@@ -16,8 +19,8 @@ interface DatePickerProps {
   className?: string;
 }
 
-function formatDisplay(date: Date): string {
-  return format(date, "d MMM yyyy", { locale: ru });
+function formatDisplay(date: Date, locale: Locale): string {
+  return format(date, "d MMM yyyy", { locale });
 }
 
 export function DatePicker({
@@ -29,8 +32,10 @@ export function DatePicker({
   maxDate,
   className = "",
 }: DatePickerProps) {
+  const { locale } = useLocale();
   const t = useT();
   const [open, setOpen] = useState(false);
+  const dateLocale = dateLocales[locale] ?? enUS;
 
   const presets = [
     { label: t("common.today"), getValue: () => new Date() },
@@ -60,7 +65,7 @@ export function DatePicker({
         >
           <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
           <span className={displayDate ? "text-foreground/80" : "text-muted-foreground"}>
-            {displayDate ? formatDisplay(value!) : placeholder ?? t("common.selectDate")}
+            {displayDate ? formatDisplay(value!, dateLocale) : placeholder ?? t("common.selectDate")}
           </span>
           {displayDate && (
             <span
@@ -79,7 +84,7 @@ export function DatePicker({
           onSelect={handleSelect}
           fromDate={minDate}
           toDate={maxDate}
-          locale={ru}
+          locale={dateLocale}
           initialFocus
         />
         {showPresets && (

@@ -43,7 +43,7 @@ function removeLockStyle() {
 export function AppSidebarProvider({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsedState] = useState(() => {
     if (typeof document === 'undefined') return false;
-    return document.cookie.includes(`${SIDEBAR_COOKIE}=false`);
+    return document.cookie.includes(`${SIDEBAR_COOKIE}=true`);
   });
   const [mobileOpen, setMobileOpen] = useState(false);
   const fallbackTimerRef = useRef<number>(0);

@@ -1,5 +1,6 @@
 package dev.mozhno.contexts;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -48,7 +49,7 @@ public class ContextValueRepository {
     public ContextValue findById(Integer id) {
         try {
             return jdbc.queryForObject("SELECT id, context_definition_id, context_values, created_at FROM context_values WHERE id = ?", ROW_MAPPER, id);
-        } catch (org.springframework.dao.EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             return null;
         }
     }

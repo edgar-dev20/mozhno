@@ -345,14 +345,14 @@ export function Segments() {
             </button>
 
             {showCustomize && (
-              <div className="mt-3 space-y-4 pl-2">
+              <div className="mt-3 space-y-4 px-2">
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-2 block">{t('common.icon')}</label>
                   <SegmentIconPicker value={formIcon} onChange={setFormIcon} />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-2 block">{t('common.color')}</label>
-                  <SegmentColorPicker value={formColor} onChange={setFormColor} />
+                    <SegmentColorPicker value={formColor} onChange={setFormColor} icon={formIcon} />
                 </div>
               </div>
             )}
