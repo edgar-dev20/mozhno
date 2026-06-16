@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Trash2 } from "@/shared/icons";
 import { MultiValueChips } from "@/app/components/flags/MultiValueChips";
-import { getOperatorsForType, getDefaultOperator, getOperatorShortCode, getInputPlaceholder, getInputPattern, getInputHint, getInputMode, getInlineValidationError } from "@/app/components/operators";
+import { getOperatorsForType, getInputPlaceholder, getInputPattern, getInputHint, getInputMode, getInlineValidationError } from "@/app/components/operators";
 import { OperatorSelector } from "@/app/components/OperatorSelector";
+import { OperatorBadge } from "@/app/components/OperatorBadge";
 import { DateTimePicker } from "@/shared/components/DateTimePicker";
+import { formatTimeConstraintValue } from '@/shared/format';
 import { useT } from '@/i18n';
 import type { ConstraintGroup } from "@/app/components/flags/types";
 import type { ContextDefinition } from "@/api";
@@ -30,76 +32,14 @@ export function DetailCard({ group, contexts, initialGroup, onChange, onRemove, 
   const hasContext = group !== null && group.contextDefId !== 0;
   const isMulti = group?.operator === 'in' || group?.operator === 'not_in';
   const ctxDef = hasContext ? contexts.find(c => c.id === group?.contextDefId) : undefined;
+  const contextType = ctxDef?.type;
 
-  useEffect(() => {
-    if (group) {
-      setShouldRender(true);
-      const raf = requestAnimationFrame(() => {
-        setIsOpen(true);
-        if (!isMulti) {
-          singleInputRef.current?.focus();
-        }
-      });
-      return () => cancelAnimationFrame(raf);
-    } else if (shouldRender) {
-      setIsOpen(false);
-    }
-  }, [group, shouldRender, isMulti]);
-
-  const handleTransitionEnd = () => {
-    if (!isOpen && !group) {
-      setShouldRender(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!group) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [group, onClose]);
-
-  const isDirty =
-    group !== null &&
-    initialGroup !== null &&
-    (group.contextDefId !== initialGroup.contextDefId ||
-     group.operator !== initialGroup.operator ||
-     JSON.stringify(group.values) !== JSON.stringify(initialGroup.values));
-
-  const isEmpty = !group || group.contextDefId === 0 || group.values.length === 0;
-  const canDone = isDirty || !isEmpty;
-
-  if (!shouldRender && !group) return null;
-
-  const handleContextChange = (contextDefId: number) => {
-    if (!group) return;
-    setFocusedKey(k => k + 1);
-    const ctx = contexts.find(c => c.id === contextDefId);
-    onChange({ ...group, contextDefId, operator: getDefaultOperator(ctx?.type) });
-  };
-
-  const handleOperatorChange = (op: string) => {
-    if (!group) return;
-    if (op !== group.operator) {
-      const newIsMulti = op === 'in' || op === 'not_in';
-      const values = (!newIsMulti && group.values.length > 1)
-        ? [group.values[0]]
-        : group.values;
-      onChange({ ...group, operator: op, values });
-    }
-  };
-
-  const previewOp = getOperatorShortCode(group?.operator ?? '');
   const previewValues = group?.values.length
     ? group.values.length === 1
-      ? group.values[0]
+      ? (contextType === 'time' ? formatTimeConstraintValue(group.values[0]) : group.values[0])
       : group.values.length <= 3
-        ? `(${group.values.join(', ')})`
-        : `(${group.values.slice(0, 3).join(', ')}, +${group.values.length - 3})`
+        ? `(${(contextType === 'time' ? group.values.map(formatTimeConstraintValue) : group.values).join(', ')})`
+        : `(${(contextType === 'time' ? group.values.slice(0, 3).map(formatTimeConstraintValue) : group.values.slice(0, 3)).join(', ')}, +${group.values.length - 3})`
     : '∅';
 
   const cardStyle: React.CSSProperties = {
@@ -158,9 +98,10 @@ export function DetailCard({ group, contexts, initialGroup, onChange, onRemove, 
                     {t('flags.detailCard.operator')}
                   </label>
                   <OperatorSelector
-                    availableOps={getOperatorsForType(ctxDef?.type)}
+                    availableOps={getOperatorsForType(contextType)}
                     currentOperator={group.operator}
                     onSelect={handleOperatorChange}
+                    contextType={contextType}
                   />
                 </div>
               )}
@@ -216,10 +157,14 @@ export function DetailCard({ group, contexts, initialGroup, onChange, onRemove, 
                   <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
                     {t('flags.detailCard.preview')}
                   </label>
-                  <div className="p-3 bg-brand/5 rounded-xl border border-brand/10">
-                    <code className="text-sm font-mono text-brand break-all">
-                      context['{ctxDef?.name ?? '?'}'] {previewOp} {previewValues}
-                    </code>
+                  <div className="p-2.5 bg-brand/5 rounded-lg border border-brand/10">
+                    <div className="flex items-center gap-1.5 text-[11px]">
+                      <span className="font-semibold text-foreground/80">{ctxDef?.name ?? '?'}</span>
+                      <OperatorBadge operator={group.operator} contextType={contextType} />
+                      <code className={`break-all min-w-0 ${contextType === 'time' ? 'text-foreground/80' : 'font-mono text-foreground/80'}`}>
+                        {previewValues}
+                      </code>
+                    </div>
                   </div>
                 </div>
               )}

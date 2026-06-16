@@ -113,7 +113,7 @@ export function DateTimePicker({
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="rounded-xl w-auto p-0" align="center">
+      <PopoverContent className="rounded-xl w-auto p-0" align="center" avoidCollisions={false}>
         <CalendarComponent
           mode="single"
           selected={date}

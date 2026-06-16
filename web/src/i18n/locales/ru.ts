@@ -877,6 +877,8 @@ const ru = {
     notIn: 'не в списке',
     contains: 'содержит',
     notContains: 'не содержит',
+    after: 'после',
+    before: 'до',
   },
 } as const;
 

@@ -869,6 +869,8 @@ const en = {
     notIn: 'not in list',
     contains: 'contains',
     notContains: 'does not contain',
+    after: 'after',
+    before: 'before',
   },
 } satisfies MessagesShape;
 

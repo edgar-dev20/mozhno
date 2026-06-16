@@ -87,7 +87,7 @@ export function DateRangePicker({
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent className="rounded-xl w-auto p-0" align="center">
+      <PopoverContent className="rounded-xl w-auto p-0" align="center" avoidCollisions={false}>
         <CalendarComponent
           mode="range"
           selected={hasValue ? { from: from ?? undefined, to: to ?? undefined } : undefined}

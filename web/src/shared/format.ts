@@ -13,6 +13,12 @@ export function formatDateTime(d: string | null): string | null {
   return date.toLocaleDateString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
+export function formatTimeConstraintValue(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
 export function timeAgo(d: string | null): string {
   if (!d) return ti('common.noTimeData');
   const diff = Date.now() - new Date(d).getTime();

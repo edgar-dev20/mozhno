@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import { ChevronRight, Trash2 } from "@/shared/icons";
-import { getOperatorsForType, getOperatorShortCode } from "@/app/components/operators";
+import { getOperatorsForType } from "@/app/components/operators";
 import { OperatorBadge } from "@/app/components/OperatorBadge";
 import { OperatorSelector } from "@/app/components/OperatorSelector";
 import { useT } from '@/i18n';
+import { formatTimeConstraintValue } from '@/shared/format';
 import type { ContextDefinition } from "@/api";
 
 interface ConstraintRowProps {
@@ -36,9 +37,12 @@ export function ConstraintRow({
   const t = useT();
   const hasContext = contextDefId !== 0;
   const ctxDef = hasContext ? contexts.find(c => c.id === contextDefId) : undefined;
-  const availableOps = getOperatorsForType(ctxDef?.type);
-  const shortOp = getOperatorShortCode(operator);
+  const contextType = ctxDef?.type;
+  const availableOps = getOperatorsForType(contextType);
   const isMulti = operator === 'in' || operator === 'not_in';
+  const displayValues = contextType === 'time' && valuesPreview !== '∅'
+    ? valuesPreview.split(', ').map(v => formatTimeConstraintValue(v)).join(', ')
+    : valuesPreview;
 
   const handleContextChange = useCallback((ctxId: number) => {
     onContextChange(ctxId);
@@ -57,9 +61,9 @@ export function ConstraintRow({
         <span className="shrink-0 text-sm font-semibold text-foreground/80 min-w-0 truncate">
           {contextDefId === 0 ? t('flags.noContext') : (ctxDef?.name ?? t('flags.unknownField', { id: String(contextDefId) }))}
         </span>
-        <OperatorBadge operator={operator} />
-        <span className="flex-1 min-w-0 text-xs text-muted-foreground truncate">
-          {valuesPreview}
+        <OperatorBadge operator={operator} contextType={contextType} />
+        <span className="flex-1 min-w-0 text-[11px] text-muted-foreground truncate">
+          {displayValues}
         </span>
         <span className={`shrink-0 transition-transform duration-200 ${isActive ? 'text-indigo-500 rotate-90' : 'text-muted-foreground/40 group-hover:text-muted-foreground'}`}>
           <ChevronRight size={14} />
@@ -98,6 +102,7 @@ export function ConstraintRow({
                 availableOps={availableOps}
                 currentOperator={operator}
                 onSelect={onOperatorChange}
+                contextType={contextType}
               />
             </div>
           )}
@@ -116,10 +121,14 @@ export function ConstraintRow({
               <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
                 {t('flags.detailCard.preview')}
               </label>
-              <div className="p-3 bg-brand/10 rounded-xl border border-brand/20">
-                <code className="text-sm font-mono text-brand break-all">
-                  context['{ctxDef?.name ?? '?'}'] {shortOp} {valuesPreview}
-                </code>
+              <div className="p-2.5 bg-brand/5 rounded-lg border border-brand/10">
+                <div className="flex items-center gap-1.5 text-[11px]">
+                  <span className="font-semibold text-foreground/80">{ctxDef?.name ?? '?'}</span>
+                  <OperatorBadge operator={operator} contextType={contextType} />
+                  <code className={`break-all min-w-0 ${contextType === 'time' ? 'text-foreground/80' : 'font-mono text-foreground/80'}`}>
+                    {displayValues}
+                  </code>
+                </div>
               </div>
             </div>
           )}

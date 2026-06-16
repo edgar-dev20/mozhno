@@ -6,9 +6,10 @@ interface OperatorSelectorProps {
   availableOps: OperatorDef[];
   currentOperator: string;
   onSelect: (op: string) => void;
+  contextType?: string;
 }
 
-export function OperatorSelector({ availableOps, currentOperator, onSelect }: OperatorSelectorProps) {
+export function OperatorSelector({ availableOps, currentOperator, onSelect, contextType }: OperatorSelectorProps) {
   const t = useT();
 
   return (
@@ -23,13 +24,13 @@ export function OperatorSelector({ availableOps, currentOperator, onSelect }: Op
               : 'bg-secondary/60 text-foreground/70 hover:bg-secondary hover:text-foreground border border-border'
           }`}
         >
-          <span className="leading-none">{t(getOperatorI18nKey(op.value) as never)}</span>
+          <span className="leading-none">{t(getOperatorI18nKey(op.value, contextType) as never)}</span>
           <span className={`inline-flex items-center font-mono text-[10px] font-bold px-1.5 py-0.5 rounded leading-none uppercase border ${
             currentOperator === op.value
               ? 'bg-primary text-primary-foreground border-primary'
               : OPERATOR_COLORS[op.value] ?? 'bg-muted text-muted-foreground border-border'
           }`}>
-            {getOperatorShortCode(op.value)}
+            {getOperatorShortCode(op.value, contextType)}
           </span>
         </button>
       ))}

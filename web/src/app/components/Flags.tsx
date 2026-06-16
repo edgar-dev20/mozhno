@@ -6,6 +6,7 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { InlineDiffBar } from '@/app/components/InlineDiffBar';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
+import { formatTimeConstraintValue } from '@/shared/format';
 const FlagMetricsDialog = lazy(() => import('@/app/components/FlagMetricsDialog').then(m => ({ default: m.FlagMetricsDialog })));
 import { SectionHeader, EmptyState, GradientButton, ErrorBox, adjustColor } from '@/shared';
 import { FlagCardSkeletonList } from '@/app/components/skeletons';
@@ -285,11 +286,13 @@ export function Flags() {
     const renderGroupNode = (g: ConstraintGroup): ReactNode => {
       const ctx = contexts.find(cd => cd.id === g.contextDefId);
       const attr = ctx?.name ?? `#${g.contextDefId}`;
-      const vals = g.values.length > 0 ? g.values.join(', ') : '∅';
+      const vals = g.values.length > 0
+        ? (ctx?.type === 'time' ? g.values.map(formatTimeConstraintValue) : g.values).join(', ')
+        : '∅';
       return (
         <span className="inline-flex items-center gap-1.5 text-xs flex-wrap">
           <span className="font-semibold text-foreground/80">{attr}</span>
-          <OperatorBadge operator={g.operator} />
+          <OperatorBadge operator={g.operator} contextType={ctx?.type} />
           <code className="font-mono text-foreground/80 break-all">{vals}</code>
         </span>
       );

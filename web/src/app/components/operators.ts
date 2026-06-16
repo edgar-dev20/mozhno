@@ -19,17 +19,22 @@ const COMPARABLE_OPERATORS: OperatorDef[] = [
   { value: 'lte', label: t('operators.lte') },
 ];
 
+const TIME_OPERATORS: OperatorDef[] = [
+  { value: 'gt', label: t('operators.after') },
+  { value: 'lt', label: t('operators.before') },
+];
+
 export const OPERATORS_BY_TYPE: Record<string, OperatorDef[]> = {
   string: STRING_OPERATORS,
   number: COMPARABLE_OPERATORS,
-  time: COMPARABLE_OPERATORS,
+  time: TIME_OPERATORS,
   semver: COMPARABLE_OPERATORS,
 };
 
 export const DEFAULT_OPERATOR_BY_TYPE: Record<string, string> = {
   string: 'in',
   number: 'eq',
-  time: 'eq',
+  time: 'gt',
   semver: 'eq',
 };
 
@@ -43,6 +48,8 @@ export const OPERATOR_LABELS: Record<string, string> = {
   lt: t('operators.lt'),
   lte: t('operators.lte'),
   contains: t('operators.contains'),
+  after: t('operators.after'),
+  before: t('operators.before'),
 };
 
 export const OPERATOR_COLORS: Record<string, string> = {
@@ -55,6 +62,8 @@ export const OPERATOR_COLORS: Record<string, string> = {
   lt: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
   lte: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
   contains: 'text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 border-cyan-200 dark:border-cyan-500/20',
+  after: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
+  before: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
 };
 
 export function getOperatorsForType(type: string | undefined): OperatorDef[] {
@@ -77,14 +86,26 @@ const OPERATOR_I18N_KEYS: Record<string, string> = {
   contains: 'operators.contains',
 };
 
-export function getOperatorI18nKey(op: string): string {
+const TIME_OPERATOR_I18N_KEYS: Record<string, string> = {
+  gt: 'operators.after',
+  lt: 'operators.before',
+};
+
+export function getOperatorI18nKey(op: string, contextType?: string): string {
+  if (contextType === 'time' && TIME_OPERATOR_I18N_KEYS[op]) {
+    return TIME_OPERATOR_I18N_KEYS[op];
+  }
   return OPERATOR_I18N_KEYS[op] ?? op;
 }
 
-export function getOperatorShortCode(op: string): string {
+export function getOperatorShortCode(op: string, contextType?: string): string {
   if (op === 'in') return 'IN';
   if (op === 'not_in') return 'NOT IN';
   if (op === 'contains') return 'CONTAINS';
+  if (contextType === 'time') {
+    if (op === 'gt') return 'AFTER';
+    if (op === 'lt') return 'BEFORE';
+  }
   return op.toUpperCase();
 }
 

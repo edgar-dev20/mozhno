@@ -13,6 +13,7 @@ import { SegmentResponse } from "@/api";
 import { getDefaultOperator, isValidOperator, getInputPlaceholder, getInputPattern, getInputHint, getInputMode, isConstraintValueValid, getInlineValidationError } from "@/app/components/operators";
 import { OperatorBadge } from "@/app/components/OperatorBadge";
 import { ConstraintRow } from "@/app/components/ConstraintRow";
+import { formatTimeConstraintValue } from '@/shared/format';
 import { SectionHeader, EmptyState, ColorBar, FormField, GradientButton, ErrorBox, Badge } from "@/shared";
 import { SegmentCardSkeletonList } from '@/app/components/skeletons';
 import { useT } from '@/i18n';
@@ -147,11 +148,15 @@ export function Segments() {
             <div className="space-y-1">
               {rules.map((r, i) => {
                 const ctx = contexts.find(cd => cd.id === r.contextDefinitionId);
+                const sCtxType = ctx?.type;
+                const sDisplayValues = sCtxType === 'time'
+                  ? (r.contextValues || '').split(',').map(v => formatTimeConstraintValue(v.trim())).join(', ')
+                  : (r.contextValues || '—');
                 return (
                   <div key={i} className="flex items-center gap-1.5 text-xs">
                     <span className="font-semibold text-foreground/80">{ctx?.name ?? t('segments.unknownField', { id: String(r.contextDefinitionId) })}</span>
-                    <OperatorBadge operator={r.operator ?? 'in'} />
-                    <code className="font-mono text-success break-all">{r.contextValues || '—'}</code>
+                    <OperatorBadge operator={r.operator ?? 'in'} contextType={sCtxType} />
+                    <code className="font-mono text-success break-all">{sDisplayValues}</code>
                   </div>
                 );
               })}
@@ -274,11 +279,15 @@ export function Segments() {
                     <div className="space-y-1">
                       {s.context.map((c, ci) => {
                         const ctxDef = contexts.find(cd => cd.id === c.contextDefinitionId);
+                        const sCtxType = ctxDef?.type;
+                        const sDisplayValues = sCtxType === 'time'
+                          ? (c.contextValues || '').split(',').map(v => formatTimeConstraintValue(v.trim())).join(', ')
+                          : c.contextValues;
                         return (
                           <div key={ci} className="flex items-center gap-1.5 text-xs">
                             <span className="font-semibold text-muted-foreground">{ctxDef?.name ?? t('segments.unknownField', { id: String(c.contextDefinitionId) })}</span>
-                            <OperatorBadge operator={c.operator ?? 'in'} />
-                            <code className="font-mono text-success break-all line-clamp-1">{c.contextValues}</code>
+                            <OperatorBadge operator={c.operator ?? 'in'} contextType={sCtxType} />
+                            <code className="font-mono text-success break-all line-clamp-1">{sDisplayValues}</code>
                           </div>
                         );
                       })}
@@ -373,11 +382,14 @@ export function Segments() {
               {formContexts.map((c) => {
                 const isActive = activeConditionId === c.id;
                 const parsedValues = (c.contextValues ?? '').split(',').map(v => v.trim()).filter(Boolean);
+                const ctxDef = contexts.find(cd => cd.id === c.contextDefinitionId);
+                const sCtxType = ctxDef?.type;
                 const formatRowValues = (vals: string[]): string => {
                   if (vals.length === 0) return '∅';
-                  if (vals.length === 1) return vals[0];
-                  const display = vals.slice(0, 3).join(', ');
-                  return vals.length > 3 ? `[${display}, ...]` : `[${display}]`;
+                  const displayed = sCtxType === 'time' ? vals.map(formatTimeConstraintValue) : vals;
+                  if (displayed.length === 1) return displayed[0];
+                  const display = displayed.slice(0, 3).join(', ');
+                  return displayed.length > 3 ? `[${display}, ...]` : `[${display}]`;
                 };
 
                 const updateEntry = (upd: Partial<SegmentContextEntry>) => {

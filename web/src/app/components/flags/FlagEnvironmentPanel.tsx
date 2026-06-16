@@ -7,6 +7,7 @@ import { getDefaultOperator, getInputPlaceholder, getInputPattern, getInputHint,
 import { OperatorBadge } from "@/app/components/OperatorBadge";
 import { ConstraintRow } from "@/app/components/ConstraintRow";
 import { DateTimePicker } from "@/shared/components/DateTimePicker";
+import { formatTimeConstraintValue } from '@/shared/format';
 import { useT } from '@/i18n';
 import type { SegmentResponse, ContextDefinition } from "@/api";
 import type { ConstraintGroup } from "@/app/components/flags/types";
@@ -56,7 +57,7 @@ export function FlagEnvironmentPanel({
   const hasConstraints = envRuleConstraintGroups.length > 0;
   const selectedSegs = envRuleSegments.map(sid => segments.find(s => s.id === sid)).filter((s): s is SegmentResponse => !!s);
 
-  interface SummaryLine { field: string; operator: string; values: string[]; source: string; }
+  interface SummaryLine { field: string; operator: string; values: string[]; source: string; contextType?: string; }
   const lines: SummaryLine[] = [];
   for (const seg of selectedSegs) {
     for (const c of (seg.context ?? [])) {
@@ -67,7 +68,7 @@ export function FlagEnvironmentPanel({
       if (existing) {
         for (const v of vals) { if (!existing.values.includes(v)) existing.values.push(v); }
       } else {
-        lines.push({ field, operator: c.operator ?? 'in', values: vals, source: seg.name });
+        lines.push({ field, operator: c.operator ?? 'in', values: vals, source: seg.name, contextType: ctxDef?.type });
       }
     }
   }
@@ -80,7 +81,7 @@ export function FlagEnvironmentPanel({
       for (const v of g.values) { if (!existing.values.includes(v)) existing.values.push(v); }
       if (existing.source !== 'custom') existing.source = existing.source + ' + custom';
     } else {
-      lines.push({ field, operator: g.operator, values: [...g.values], source: 'custom' });
+      lines.push({ field, operator: g.operator, values: [...g.values], source: 'custom', contextType: ctxDef?.type });
     }
   }
 
@@ -164,20 +165,24 @@ export function FlagEnvironmentPanel({
                       </div>
                     </div>
                   </div>
-                  {checked && hasContext && (
-                    <div className="mt-2.5 space-y-1">
-                      {seg.context!.map((c, ci) => {
-                        const ctxDef = contexts.find(cd => cd.id === c.contextDefinitionId);
-                        return (
-                          <div key={ci} className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border" style={{ backgroundColor: segColor + '0F', borderColor: segColor + '1A' }}>
+                      {checked && hasContext && (
+                        <div className="mt-2.5 space-y-1">
+                          {seg.context!.map((c, ci) => {
+                            const ctxDef = contexts.find(cd => cd.id === c.contextDefinitionId);
+                            const sCtxType = ctxDef?.type;
+                            const sDisplayValues = sCtxType === 'time'
+                              ? (c.contextValues ?? '').split(',').map(v => formatTimeConstraintValue(v.trim())).join(', ')
+                              : c.contextValues;
+                            return (
+                          <div key={ci} className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg border" style={{ backgroundColor: segColor + '0F', borderColor: segColor + '1A' }}>
                             <span className="font-semibold shrink-0" style={{ color: segColor }}>{ctxDef?.name ?? `#${c.contextDefinitionId}`}</span>
-                            <OperatorBadge operator={c.operator ?? 'in'} className="opacity-60" />
-                            <code className="font-mono break-all min-w-0 opacity-90" style={{ color: segColor }}>{c.contextValues}</code>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                            <OperatorBadge operator={c.operator ?? 'in'} contextType={sCtxType} className="opacity-60" />
+                            <code className="break-all min-w-0 opacity-90" style={{ color: segColor }}>{sDisplayValues}</code>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                 </div>
               );
             })}
@@ -315,21 +320,27 @@ export function FlagEnvironmentPanel({
                     {t('flags.and')}
                   </div>
                   <div className="space-y-1.5">
-                    {lines.map((line, li) => (
-                      <div key={li} className="flex items-center gap-2 text-xs bg-input-background/70 rounded-lg px-3 py-2 border border-brand/10">
-                        <span className="font-semibold text-foreground/80 shrink-0">{line.field}</span>
-                        <OperatorBadge operator={line.operator} />
-                        <code className="font-mono text-foreground/80 break-all min-w-0">
-                          {line.values.length === 1
-                            ? line.values[0]
-                            : line.values.length <= 3
-                              ? `[${line.values.join(', ')}]`
-                              : `[${line.values.slice(0, 3).join(', ')}, +${line.values.length - 3}]`
-                          }
-                        </code>
-                        <span className="text-xs text-muted-foreground shrink-0 ml-auto" title={line.source}>← {line.source === 'custom' ? t('flags.customSource') : line.source}</span>
-                      </div>
-                    ))}
+                    {lines.map((line, li) => {
+                      const isTimeType = line.contextType === 'time';
+                      const displayValues = isTimeType
+                        ? line.values.map(v => formatTimeConstraintValue(v))
+                        : line.values;
+                      return (
+                        <div key={li} className="flex items-center gap-1.5 text-[11px] bg-input-background/70 rounded-lg px-2.5 py-1.5 border border-brand/10">
+                          <span className="font-semibold text-foreground/80 shrink-0">{line.field}</span>
+                          <OperatorBadge operator={line.operator} contextType={line.contextType} />
+                          <code className={`break-all min-w-0 ${isTimeType ? 'text-foreground/80' : 'font-mono text-foreground/80'}`}>
+                            {displayValues.length === 1
+                              ? displayValues[0]
+                              : displayValues.length <= 3
+                                ? `[${displayValues.join(', ')}]`
+                                : `[${displayValues.slice(0, 3).join(', ')}, +${displayValues.length - 3}]`
+                            }
+                          </code>
+                          <span className="text-[11px] text-muted-foreground shrink-0 ml-auto" title={line.source}>← {line.source === 'custom' ? t('flags.customSource') : line.source}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
