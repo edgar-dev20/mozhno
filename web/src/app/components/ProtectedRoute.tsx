@@ -11,9 +11,9 @@ export function ProtectedRoute() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gradient-subtle-start to-gradient-subtle-end dark:from-neutral-950 dark:to-blue-950/20">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-gradient-subtle-start to-gradient-subtle-end animate-pulse" />
+          <div className="w-14 h-14 rounded-2xl bg-muted animate-pulse" />
           <span className="text-sm text-muted-foreground">{t('common.loading')}</span>
         </div>
       </div>

@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/too
 import { UserProfileMenu } from '@/app/components/UserProfileMenu';
 import { Flag, GitBranch, UserCog } from '@/shared/icons';
 import { PageErrorBoundary } from '@/app/components/PageErrorBoundary';
-import { OnboardingWizard } from '@/app/components/OnboardingWizard';
+import { OnboardingWizard } from '@/app/components/onboarding';
 import {
   isOnboardingComplete,
   markOnboardingComplete,
@@ -141,7 +141,7 @@ export function DashboardLayout() {
                     className="w-7 h-7 rounded-lg object-cover shrink-0"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-gradient-start to-gradient-end flex items-center justify-center text-caption font-bold shadow-sm text-white">
+                  <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-caption font-bold shadow-sm text-white">
                     {(projectName ?? '?')[0].toUpperCase()}
                   </div>
                 )}

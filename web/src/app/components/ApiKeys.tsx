@@ -26,13 +26,14 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SidePanel } from '@/app/components/SidePanel';
 import { SdkInfo } from '@/app/components/SdkInfo';
+import { ApiKeyTableSkeleton } from '@/app/components/skeletons';
 import {
   SectionHeader,
   GradientButton,
   EmptyState,
-  LoadingState,
   SearchInput,
   ErrorBox,
+  Badge,
 } from '@/shared';
 import {
   Select,
@@ -165,19 +166,17 @@ export function ApiKeys() {
   };
 
   const envName = (id: number | null) => environments.find((e) => e.id === id)?.name ?? '—';
+  const getEnvVariant = (id: number | null) => {
+    const name = envName(id);
+    if (name === 'Production') return 'success' as const;
+    if (name === 'Development') return 'warning' as const;
+    return 'default' as const;
+  };
   const envColor = (id: number | null) => {
     const name = envName(id);
     if (name === 'Production') return 'bg-success';
     if (name === 'Development') return 'bg-yellow-500';
     return 'bg-info';
-  };
-  const envBadgeStyle = (id: number | null) => {
-    const name = envName(id);
-    if (name === 'Production')
-      return 'text-success bg-success/10 border-success/20';
-    if (name === 'Development')
-      return 'text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20';
-    return 'text-info bg-info/10 border-info/20';
   };
   const envFilterActive = (id: number | null) => {
     const name = envName(id);
@@ -325,7 +324,7 @@ export function ApiKeys() {
 
       <div className="space-y-3">
         {loading ? (
-          <LoadingState text={t('apiKeys.loading')} />
+          <ApiKeyTableSkeleton count={3} />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<Key size={24} className="text-brand" />}
@@ -367,14 +366,9 @@ export function ApiKeys() {
                           <span className="font-semibold text-sm text-foreground truncate transition-all">
                             {k.name}
                           </span>
-                          <span
-                            className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-xs font-semibold border shrink-0 leading-none ${envBadgeStyle(k.environmentId)}`}
-                          >
-                            <span
-                              className={`w-1.5 h-1.5 rounded-full ${envColor(k.environmentId)}`}
-                            />
+                          <Badge variant={getEnvVariant(k.environmentId)} size="sm" icon={<span className={`w-1.5 h-1.5 rounded-full ${envColor(k.environmentId)}`} />}>
                             {envName(k.environmentId)}
-                          </span>
+                          </Badge>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">

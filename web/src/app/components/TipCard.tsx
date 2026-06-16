@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
+import { Badge } from '@/shared/components/Badge';
 import { useT } from '@/i18n';
 
 interface TipCardProps {
@@ -62,9 +63,9 @@ export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProp
               </div>
             )}
             <div className="flex-1 min-w-0 pt-0.5">
-              <span className="inline-block text-xs font-semibold uppercase tracking-[0.2em] px-2 py-0.5 rounded-md mb-1.5 text-primary bg-primary/10 border border-primary/10">
-                {displayLabel}
-              </span>
+              <div className="mb-1.5">
+                <Badge variant="primary" uppercase>{displayLabel}</Badge>
+              </div>
               <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
             </div>
             <button

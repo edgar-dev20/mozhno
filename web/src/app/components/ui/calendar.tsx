@@ -41,11 +41,11 @@ function Calendar({
         day_button:
           "size-8 rounded-xl p-0 font-normal hover:bg-accent text-foreground/80 inline-flex items-center justify-center group-aria-[selected]:text-white",
         selected:
-          "bg-gradient-to-r from-gradient-start to-gradient-end text-white shadow-sm",
+          "bg-primary text-white shadow-sm",
         range_start:
-          "bg-gradient-to-r from-gradient-start to-gradient-end text-white rounded-l-xl",
+          "bg-primary text-white rounded-l-xl",
         range_end:
-          "bg-gradient-to-r from-gradient-start to-gradient-end text-white rounded-r-xl",
+          "bg-primary text-white rounded-r-xl",
         range_middle:
           "bg-primary/10 dark:bg-primary/20 text-foreground rounded-none",
         today:

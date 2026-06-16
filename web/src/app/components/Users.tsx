@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { SidePanel } from '@/app/components/SidePanel';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
+import { UserTableSkeleton } from '@/app/components/skeletons';
 import { api, UserDto } from '@/api';
 import {
   SectionHeader,
@@ -26,6 +27,7 @@ import {
   LoadingState,
   SearchInput,
   ErrorBox,
+  Badge,
 } from '@/shared';
 import { useT } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
@@ -169,27 +171,22 @@ export function Users() {
     }
   };
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'from-red-600 to-red-500';
-      case 'developer':
-        return 'from-blue-600 to-violet-500';
-      default:
-        return 'from-neutral-600 to-neutral-500';
-    }
+  const roleVariantMap: Record<string, 'destructive' | 'info' | 'default'> = {
+    admin: 'destructive',
+    developer: 'info',
   };
 
-  const getRoleStyle = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'text-destructive bg-destructive/10 border-destructive/20';
-      case 'developer':
-        return 'text-info bg-info/10 border-info/20';
-      default:
-        return 'text-foreground/80 bg-secondary dark:bg-neutral-500/10 border-border dark:border-neutral-500/20';
-    }
+  const getRoleVariant = (role: string): 'destructive' | 'info' | 'default' =>
+    roleVariantMap[role] ?? 'default';
+
+  const statusVariantMap: Record<string, 'success' | 'warning' | 'destructive' | 'default'> = {
+    active: 'success',
+    invited: 'warning',
+    suspended: 'destructive',
   };
+
+  const getStatusVariant = (status: string): 'success' | 'warning' | 'destructive' | 'default' =>
+    statusVariantMap[status] ?? 'default';
 
   const getRoleLabel = (role: string) => {
     switch (role) {
@@ -203,19 +200,6 @@ export function Users() {
         return t('users.role.viewer');
       default:
         return role;
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return 'text-success bg-success/10 border-success/20';
-      case 'invited':
-        return 'text-warning bg-warning/10 border-warning/20';
-      case 'suspended':
-        return 'text-destructive bg-destructive/10 border-destructive/20';
-      default:
-        return '';
     }
   };
 
@@ -387,7 +371,7 @@ export function Users() {
 
       <div className="space-y-3">
         {loading ? (
-          <LoadingState text={t('users.loading')} />
+          <UserTableSkeleton count={4} />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={<Shield size={24} className="text-brand" />}
@@ -431,7 +415,7 @@ export function Users() {
                               src={hasAvatar ? avatarUrl : undefined}
                               alt={user.name ?? ''}
                             />
-                            <AvatarFallback className="bg-gradient-to-br from-gradient-start to-gradient-end text-xs font-bold text-white">
+                            <AvatarFallback className="bg-primary text-xs font-bold text-white">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
@@ -446,20 +430,8 @@ export function Users() {
                               </div>
                             )}
                           </div>
-                          <span
-                            className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-xs font-semibold border shrink-0 leading-none ${getRoleStyle(user.role)}`}
-                          >
-                            <span
-                              className={`bg-gradient-to-r ${getRoleColor(user.role)} bg-clip-text text-transparent`}
-                            >
-                              {getRoleLabel(user.role)}
-                            </span>
-                          </span>
-                          <span
-                            className={`inline-flex items-center px-1.5 py-1 rounded text-xs font-semibold border shrink-0 leading-none ${getStatusBadge(user.status)}`}
-                          >
-                            {getStatusLabel(user.status)}
-                          </span>
+                          <Badge variant={getRoleVariant(user.role)} size="sm">{getRoleLabel(user.role)}</Badge>
+                          <Badge variant={getStatusVariant(user.status)} size="sm">{getStatusLabel(user.status)}</Badge>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
@@ -509,22 +481,14 @@ export function Users() {
                                 </span>
                                 <span className="text-xs font-medium flex items-center gap-1.5">
                                   <Shield size={11} className="text-muted-foreground shrink-0" />
-                                  <span
-                                    className={`bg-gradient-to-r ${getRoleColor(user.role)} bg-clip-text text-transparent truncate`}
-                                  >
-                                    {getRoleLabel(user.role)}
-                                  </span>
+                                  <Badge variant={getRoleVariant(user.role)} size="sm">{getRoleLabel(user.role)}</Badge>
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
                                 <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('users.card.status')}
                                 </span>
-                                <span
-                                  className={`inline-flex items-center px-1.5 py-1 rounded text-xs font-semibold border leading-none ${getStatusBadge(user.status)}`}
-                                >
-                                  {getStatusLabel(user.status)}
-                                </span>
+                                <Badge variant={getStatusVariant(user.status)} size="sm">{getStatusLabel(user.status)}</Badge>
                               </div>
                               <div className="px-3 py-2.5">
                                 <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
@@ -640,7 +604,7 @@ export function Users() {
                   src={editingUser.avatar ? api.users.getAvatarUrl(editingUser.id) : undefined}
                   alt={editingUser.name ?? ''}
                 />
-                <AvatarFallback className="bg-gradient-to-br from-gradient-start to-gradient-end text-sm font-bold text-white">
+                <AvatarFallback className="bg-primary text-sm font-bold text-white">
                   {(editingUser.name ?? editingUser.email).substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>

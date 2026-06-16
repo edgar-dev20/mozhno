@@ -14,6 +14,7 @@ import {
   DropdownMenuRadioItem,
 } from "@/app/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/app/components/ui/avatar";
+import { Badge } from "@/shared/components/Badge";
 
 export function UserProfileMenu() {
   const { theme, setTheme } = useTheme();
@@ -47,13 +48,13 @@ export function UserProfileMenu() {
     e.target.value = '';
   };
 
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case 'admin': return 'bg-warning/10 text-warning border-warning/20';
-      case 'developer': return 'bg-info/10 text-info border-info/20';
-      default: return 'bg-secondary dark:bg-secondary/10 text-foreground/70 dark:text-muted-foreground/70 border-border dark:border-neutral-500/20';
-    }
+  const roleVariantMap: Record<string, 'warning' | 'info' | 'default'> = {
+    admin: 'warning',
+    developer: 'info',
   };
+
+  const getRoleVariant = (role: string): 'warning' | 'info' | 'default' =>
+    roleVariantMap[role] ?? 'default';
 
   const getRoleLabel = (role: string) => {
     switch (role) {
@@ -71,7 +72,7 @@ export function UserProfileMenu() {
           <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full" aria-label={t('common.openUserMenu')}>
           <Avatar className="w-8 h-8 ring-2 ring-white dark:ring-neutral-700 shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-gradient-to-br from-gradient-start to-gradient-end text-xs font-bold text-white">
+            <AvatarFallback className="bg-primary text-xs font-bold text-white">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -84,7 +85,7 @@ export function UserProfileMenu() {
         <div className="flex items-center gap-3 px-2 py-2">
           <Avatar className="w-12 h-12 ring-2 ring-neutral-200 dark:ring-neutral-700 shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-gradient-to-br from-gradient-start to-gradient-end text-sm font-bold text-white">
+            <AvatarFallback className="bg-primary text-sm font-bold text-white">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -95,9 +96,9 @@ export function UserProfileMenu() {
             <div className="text-xs text-muted-foreground truncate">
               {user?.email}
             </div>
-            <span className={`inline-flex items-center mt-1 px-1.5 py-1 rounded text-xs font-semibold border leading-none ${getRoleBadge(user?.role ?? 'viewer')}`}>
+            <Badge variant={getRoleVariant(user?.role ?? 'viewer')} size="sm">
               {getRoleLabel(user?.role ?? 'viewer')}
-            </span>
+            </Badge>
           </div>
         </div>
 

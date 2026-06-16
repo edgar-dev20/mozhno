@@ -20,7 +20,7 @@ export function EmptyState({ icon, title, description, buttonLabel, onAction }: 
     >
       <Card padded className="px-6 py-20 text-center">
         <div className="flex flex-col items-center gap-5 max-w-xs mx-auto">
-          <div className="w-16 h-16 rounded-3xl flex items-center justify-center bg-gradient-to-br from-gradient-subtle-start/20 to-gradient-subtle-end/10 ring-1 ring-border/50">
+          <div className="w-16 h-16 rounded-3xl flex items-center justify-center bg-secondary/30 ring-1 ring-border/50">
             {icon}
           </div>
           <div>

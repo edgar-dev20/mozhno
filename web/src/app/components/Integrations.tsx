@@ -8,6 +8,7 @@ import { SidePanel } from '@/app/components/SidePanel';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SectionHeader, EmptyState, GradientButton } from '@/shared';
+import { IntegrationCardSkeletonList } from '@/app/components/skeletons';
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { WebhookCard } from './integrations/WebhookCard';
@@ -149,22 +150,7 @@ export function Integrations() {
       />
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="bg-card border border-border rounded-xl p-5 animate-pulse"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-accent" />
-                <div className="space-y-2 flex-1">
-                  <div className="h-4 bg-accent rounded w-2/3" />
-                  <div className="h-3 bg-accent rounded w-full" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <IntegrationCardSkeletonList count={3} />
       ) : items.length === 0 ? (
         <EmptyState
           icon={<Webhook size={28} className="text-info" />}

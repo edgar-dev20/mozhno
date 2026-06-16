@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { Webhook, AlertTriangle } from '@/shared/icons';
+import { Badge } from '@/shared/components/Badge';
 import { type Integration } from '@/api';
 import { useT } from '@/i18n';
 import { migrateEventKeys, parseWebhookConfig, parseEvents } from './webhookUtils';
@@ -33,7 +34,7 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
       <div className="p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gradient-subtle-start to-gradient-subtle-end border border-blue-200/50 dark:border-brand/20 shrink-0">
+            <div className="p-2.5 rounded-xl bg-accent border border-border shrink-0">
               {hasError ? (
                 <AlertTriangle size={18} className="text-warning" />
               ) : (
@@ -51,24 +52,23 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
 
         <div className="flex items-center gap-2 flex-wrap">
           {item.enabled ? (
-            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full leading-none bg-success/10 text-success border border-success/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-success" />
+            <Badge variant="success" shape="pill" icon={<span className="w-1.5 h-1.5 rounded-full bg-success" />}>
               {t('integrations.status.connected')}
-            </span>
+            </Badge>
           ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full leading-none bg-accent text-muted-foreground border border-border">
-              <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />
+            <Badge variant="accent" shape="pill" icon={<span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />}>
               {t('integrations.status.disconnected')}
-            </span>
+            </Badge>
           )}
           {hasError && (
-            <span
-              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full leading-none bg-warning/10 text-warning border border-warning/20"
+            <Badge
+              variant="warning"
+              shape="pill"
+              icon={<span className="w-1.5 h-1.5 rounded-full bg-warning" />}
               title={item.lastError!}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-warning" />
               {t('integrations.status.error')}
-            </span>
+            </Badge>
           )}
           <span className="text-xs text-muted-foreground/70">
             {evts.length > 0

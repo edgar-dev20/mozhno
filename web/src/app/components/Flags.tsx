@@ -8,7 +8,7 @@ import { InlineDiffBar } from '@/app/components/InlineDiffBar';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
 import { FlagMetricsDialog } from '@/app/components/FlagMetricsDialog';
 import { SectionHeader, EmptyState, GradientButton, ErrorBox, adjustColor } from '@/shared';
-import { FlagCardSkeletonList } from '@/app/components/flags/FlagCardSkeleton';
+import { FlagCardSkeletonList } from '@/app/components/skeletons';
 import type { FlagTagValue } from '@/api';
 import type { ConstraintGroup } from '@/app/components/flags/types';
 import { useT } from '@/i18n';

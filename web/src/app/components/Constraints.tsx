@@ -9,7 +9,8 @@ import { InlineDiffBar } from "@/app/components/InlineDiffBar";
 import type { DiffChange } from "@/shared/diffUtils";
 import { SegmentIcon } from "@/app/components/SegmentIcon";
 import { api, ContextDefinition, SegmentResponse } from "@/api";
-import { SectionHeader, EmptyState, FormField, GradientButton, LoadingState, ErrorBox } from "@/shared";
+import { SectionHeader, EmptyState, FormField, GradientButton, ErrorBox, Badge } from "@/shared";
+import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useContextsQuery, useSegmentsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useT } from '@/i18n';
@@ -173,7 +174,7 @@ export function Constraints() {
       <TipCard text={t('constraints.tipText')} label={t('constraints.tipLabel')} icon={<Braces />} storageKey="constraints" />
 
       {loading ? (
-        <LoadingState text={t('constraints.loading')} />
+        <TableSkeleton rows={4} cols={4} />
       ) : contexts.length === 0 ? (
         <EmptyState
           icon={<Box size={28} className="text-sky-400 dark:text-sky-500" />}
@@ -286,7 +287,7 @@ export function Constraints() {
                     <div className="text-sm font-semibold" style={{ color: s.color }}>{s.name}</div>
                     {s.description && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{s.description}</div>}
                   </div>
-                  <span className="inline-flex items-center text-xs font-semibold uppercase px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 shrink-0">{t('constraints.badgeInUse')}</span>
+                  <Badge variant="destructive" shape="pill" uppercase>{t('constraints.badgeInUse')}</Badge>
                 </div>
               ))}
             </div>

@@ -17,5 +17,6 @@ export { Hairline } from "@/shared/components/Hairline";
 export { StatusDot } from "@/shared/components/StatusDot";
 export { TruncatedCopyTooltip } from "@/shared/components/TruncatedCopyTooltip";
 export { ErrorBox } from "@/shared/components/ErrorBox";
+export { Badge } from "@/shared/components/Badge";
 export { Wordmark } from "@/shared/components/Wordmark";
 export { formatDate, formatDateTime, timeAgo, getFlagTypeColor, getFlagTypeLabel } from "@/shared/format";

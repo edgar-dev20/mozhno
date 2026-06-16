@@ -20,7 +20,8 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { api, AuditEvent } from '@/api';
 import { TipCard } from '@/app/components/TipCard';
-import { SectionHeader, EmptyState, LoadingState, DateRangePicker, SearchInput } from '@/shared';
+import { SectionHeader, EmptyState, DateRangePicker, SearchInput } from '@/shared';
+import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
 import { useT } from '@/i18n';
@@ -331,7 +332,7 @@ export function AuditLog() {
 
       <div className="space-y-3">
         {loading ? (
-          <LoadingState text={t('audit.loading')} />
+          <TableSkeleton rows={5} cols={5} />
         ) : displayedEvents.length === 0 ? (
           <EmptyState
             icon={<Activity size={24} className="text-brand" />}

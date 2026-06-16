@@ -12,7 +12,8 @@ import { SegmentResponse } from "@/api";
 import { getDefaultOperator, isValidOperator, getInputPlaceholder, getInputPattern, getInputHint, getInputMode, isConstraintValueValid } from "@/app/components/operators";
 import { OperatorBadge } from "@/app/components/OperatorBadge";
 import { ConstraintRow } from "@/app/components/ConstraintRow";
-import { SectionHeader, EmptyState, ColorBar, FormField, GradientButton, LoadingState, ErrorBox } from "@/shared";
+import { SectionHeader, EmptyState, ColorBar, FormField, GradientButton, ErrorBox, Badge } from "@/shared";
+import { SegmentCardSkeletonList } from '@/app/components/skeletons';
 import { useT } from '@/i18n';
 
 import { useSegments } from "@/app/hooks/useSegments";
@@ -229,7 +230,7 @@ export function Segments() {
       />
 
       {loading ? (
-        <LoadingState text={t('segments.loading')} />
+        <SegmentCardSkeletonList count={3} />
       ) : segments.length === 0 ? (
         <EmptyState
           icon={<SegmentIcon name="Users" size={28} className="text-teal-500 dark:text-teal-400" />}
@@ -363,7 +364,7 @@ export function Segments() {
               <div className="flex items-center gap-2">
                 <Settings size={16} className="text-indigo-600 dark:text-indigo-400" />
                 <label className="text-sm font-medium text-foreground/80">{t('segments.targetingRules.title')}</label>
-                <span className="inline-flex items-center text-xs px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-medium">{t('segments.targetingRules.badge')}</span>
+                <Badge variant="primary" size="sm">{t('segments.targetingRules.badge')}</Badge>
               </div>
               <button onClick={addContext} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center gap-1 font-medium"><Plus size={12} />{t('segments.targetingRules.add')}</button>
             </div>

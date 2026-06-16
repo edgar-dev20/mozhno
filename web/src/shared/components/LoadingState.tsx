@@ -10,7 +10,7 @@ export function LoadingState({ text }: LoadingStateProps) {
   return (
     <Card padded className="px-6 py-20 text-center">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-gradient-subtle-start/60 to-gradient-subtle-end/40 animate-pulse ring-1 ring-border/50" />
+        <div className="w-16 h-16 rounded-3xl bg-muted animate-pulse ring-1 ring-border/50" />
         <span className="text-body-sm text-muted-foreground">{text ?? t('common.loading')}</span>
       </div>
     </Card>

@@ -32,6 +32,21 @@
 | **SDK** | Нативные клиенты для Java и JavaScript — оценка флагов локально, без сетевого вызова |
 
 ---
+### Дизайн-бук (Storybook)
+
+Run: cd web && npm run storybook
+
+Запустите Storybook на http://localhost:6006 чтобы увидеть все UI-компоненты в изолированном каталоге с документацией.
+
+### Скриншоты
+
+| Flags | Flag detail | Settings |
+|---|---|---|
+| ![Flags](docs/screenshots/flags.svg) | ![Flag](docs/screenshots/flag-detail.svg) | ![Settings](docs/screenshots/settings.svg) |
+
+> Запустите npm run dev и сделайте скриншоты. Чтобы увидеть интерфейс сейчас, запустите проект локально.
+
+---
 
 ### Быстрый старт
 

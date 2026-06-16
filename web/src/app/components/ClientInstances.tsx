@@ -16,7 +16,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { api, ClientInstance, FlagResponse } from '@/api';
 import { NavLink } from 'react-router';
 import { JavaIcon, JavaScriptIcon } from '@/app/components/LanguageIcons';
-import { SectionHeader, LoadingState, TruncatedCopyTooltip } from '@/shared';
+import { SectionHeader, TruncatedCopyTooltip } from '@/shared';
+import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
 import { useT } from '@/i18n';
@@ -306,7 +307,7 @@ export function ClientInstances() {
 
       <div className="space-y-3">
         {loading ? (
-          <LoadingState text={t('clientInstances.loading')} />
+          <TableSkeleton rows={4} cols={4} />
         ) : recentInstances.length === 0 ? (
           <div className="bg-card rounded-xl px-6 py-16 text-center shadow-md">
             <div className="flex flex-col items-center gap-3">
