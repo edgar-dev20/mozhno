@@ -1,6 +1,6 @@
 export type UserDto = { id: number; email: string; name: string; role: string; status: string; avatar: string | null; createdAt: string; lastActiveAt: string };
 export type Project = { id: number; name: string; description: string; logo: string | null; createdAt: string };
-export type Environment = { id: number; projectId: number; name: string; createdAt: string };
+export type Environment = { id: number; projectId: number; name: string; color?: string; createdAt: string };
 export type FlagResponse = { id: number; projectId: number; name: string; key: string; description: string; flagType: string; createdAt: string; createdBy: string | null; lastUsedAt: string | null; archivedBy: string | null; archivedAt: string | null; tags: FlagTagValue[]; enabled: boolean; strategyId: number; percentage: number; contextDefinitionId: number; contextValuesJson: string; segmentIds: number[]; archived: boolean };
 export type FlagTagValue = { tagId: number; tagName: string; tagColor: string; value: string };
 export type FlagRequest = { name: string; key: string; description?: string; flagType?: string; enabled?: boolean; tags?: { tagId: number; value: string }[] };

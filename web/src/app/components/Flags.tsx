@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router';
 import { Plus, Zap, Rocket, Archive } from '@/shared/icons';
 import { SidePanel } from '@/app/components/SidePanel';
@@ -6,7 +6,7 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { InlineDiffBar } from '@/app/components/InlineDiffBar';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
-import { FlagMetricsDialog } from '@/app/components/FlagMetricsDialog';
+const FlagMetricsDialog = lazy(() => import('@/app/components/FlagMetricsDialog').then(m => ({ default: m.FlagMetricsDialog })));
 import { SectionHeader, EmptyState, GradientButton, ErrorBox, adjustColor } from '@/shared';
 import { FlagCardSkeletonList } from '@/app/components/skeletons';
 import type { FlagTagValue } from '@/api';
@@ -533,14 +533,16 @@ export function Flags() {
 
       {archiveOpen && <ArchivedFlagsList flags={archivedFlags} onUnarchive={doUnarchive} tags={tags} />}
 
-      <FlagMetricsDialog
-        open={metricsDialogOpen}
-        onOpenChange={setMetricsDialogOpen}
-        flagId={metricsTarget?.flagId ?? 0}
-        flagName={metricsTarget?.flagName ?? ''}
-        environments={environments}
-        defaultEnvId={metricsTarget?.envId}
-      />
+      <Suspense fallback={null}>
+        <FlagMetricsDialog
+          open={metricsDialogOpen}
+          onOpenChange={setMetricsDialogOpen}
+          flagId={metricsTarget?.flagId ?? 0}
+          flagName={metricsTarget?.flagName ?? ''}
+          environments={environments}
+          defaultEnvId={metricsTarget?.envId}
+        />
+      </Suspense>
 
       <SidePanel
         open={panelOpen}

@@ -72,6 +72,11 @@ export function FlagCardHeader({
           <span className="font-semibold text-h3 text-foreground truncate transition-all">
             {flag.name}
           </span>
+          {flag.archived && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground/70 border border-border/50 shrink-0">
+              Archived
+            </span>
+          )}
           {!expanded &&
             flag.tags.length > 0 &&
             flag.tags.slice(0, 5).map((tv, i) => {

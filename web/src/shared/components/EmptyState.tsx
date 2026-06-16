@@ -5,14 +5,15 @@ import { motion } from 'motion/react';
 import { Card } from "@/shared/components/Card";
 
 interface EmptyStateProps {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
+  illustration?: React.ReactNode;
   title: string;
   description: string;
   buttonLabel?: string;
   onAction?: () => void;
 }
 
-export function EmptyState({ icon, title, description, buttonLabel, onAction }: EmptyStateProps) {
+export function EmptyState({ icon, illustration, title, description, buttonLabel, onAction }: EmptyStateProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -20,9 +21,15 @@ export function EmptyState({ icon, title, description, buttonLabel, onAction }: 
     >
       <Card padded className="px-6 py-20 text-center">
         <div className="flex flex-col items-center gap-5 max-w-xs mx-auto">
-          <div className="w-16 h-16 rounded-3xl flex items-center justify-center bg-secondary/30 ring-1 ring-border/50">
-            {icon}
-          </div>
+          {illustration ? (
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center bg-secondary/20 ring-1 ring-border/30">
+              {illustration}
+            </div>
+          ) : icon ? (
+            <div className="w-16 h-16 rounded-3xl flex items-center justify-center bg-secondary/30 ring-1 ring-border/50">
+              {icon}
+            </div>
+          ) : null}
           <div>
             <p className="text-h3 font-heading text-foreground">{title}</p>
             <p className="text-body-sm text-muted-foreground mt-1.5 leading-body">{description}</p>

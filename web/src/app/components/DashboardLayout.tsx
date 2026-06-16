@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Outlet } from 'react-router';
+import { Outlet, useLocation } from 'react-router';
+import { AnimatePresence, motion } from 'motion/react';
+import { fadeUp } from '@/shared/motion';
 import { useTheme } from 'next-themes';
 import { useT } from '@/i18n';
 import { useAuth } from '@/app/auth/useAuth';
@@ -29,6 +31,7 @@ import {
 export function DashboardLayout() {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const location = useLocation();
   const t = useT();
   const [accentColor, setAccentColor] = useState('#7c3aed');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -204,7 +207,18 @@ export function DashboardLayout() {
             >
               <div className="max-w-[90rem] mx-auto">
                 <PageErrorBoundary>
-                  <Outlet />
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={location.pathname}
+                      variants={fadeUp}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Outlet />
+                    </motion.div>
+                  </AnimatePresence>
                 </PageErrorBoundary>
               </div>
             </main>

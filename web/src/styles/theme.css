@@ -27,6 +27,10 @@
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --ring: oklch(0.52 0.22 264 / 0.45);
+  --ring-success: oklch(0.52 0.16 155 / 0.45);
+  --ring-destructive: oklch(0.53 0.20 20 / 0.45);
+  --ring-warning: oklch(0.55 0.16 82 / 0.45);
+  --ring-brand: oklch(0.52 0.20 275 / 0.45);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -62,12 +66,16 @@
   --sparkline-true: oklch(0.52 0.15 266);
   --sparkline-false: oklch(0.76 0.012 264);
 
+  --disabled-bg: oklch(0.93 0.003 264);
+  --disabled-fg: oklch(0.60 0.010 264);
+  --disabled-border: oklch(0 0 0 / 0.06);
+
   --font-weight-display: 750;
   --font-weight-heading: 700;
   --text-display: clamp(2rem, 5vw, 2.75rem);
-  --text-h1: 2rem;
-  --text-h2: 1.25rem;
-  --text-h3: 1rem;
+  --text-h1: clamp(1.5rem, 3.5vw, 2rem);
+  --text-h2: clamp(1.125rem, 2.5vw, 1.25rem);
+  --text-h3: clamp(0.9375rem, 2vw, 1rem);
   --text-body: 0.875rem;
   --text-body-sm: 0.8125rem;
   --text-caption: 0.75rem;
@@ -78,6 +86,9 @@
   --leading-body: 1.5;
   --leading-ui: 1.45;
   --leading-caption: 1.4;
+
+  --feature-tabular: 'tnum' on;
+  --tracking-overline: 0.05em;
 }
 
 .dark {
@@ -102,6 +113,10 @@
   --input-background: oklch(0.20 0.003 264);
   --switch-background: oklch(0.35 0 0);
   --ring: oklch(0.58 0.18 264 / 0.45);
+  --ring-success: oklch(0.58 0.13 155 / 0.45);
+  --ring-destructive: oklch(0.58 0.16 20 / 0.45);
+  --ring-warning: oklch(0.60 0.14 80 / 0.45);
+  --ring-brand: oklch(0.55 0.16 275 / 0.45);
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --chart-1: oklch(0.52 0.20 264);
@@ -137,6 +152,13 @@
 
   --sparkline-true: oklch(0.65 0.08 268);
   --sparkline-false: oklch(0.36 0.008 264);
+
+  --disabled-bg: oklch(0.20 0.002 264);
+  --disabled-fg: oklch(0.42 0.005 264);
+  --disabled-border: oklch(1 0 0 / 0.06);
+
+  --feature-tabular: 'tnum' on;
+  --tracking-overline: 0.05em;
 }
 
 @theme inline {
@@ -163,6 +185,10 @@
   --color-input-background: var(--input-background);
   --color-switch-background: var(--switch-background);
   --color-ring: var(--ring);
+  --color-ring-success: var(--ring-success);
+  --color-ring-destructive: var(--ring-destructive);
+  --color-ring-warning: var(--ring-warning);
+  --color-ring-brand: var(--ring-brand);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -196,6 +222,9 @@
   --color-gradient-subtle-end: var(--gradient-subtle-end);
   --color-sparkline-true: var(--sparkline-true);
   --color-sparkline-false: var(--sparkline-false);
+  --color-disabled-bg: var(--disabled-bg);
+  --color-disabled-fg: var(--disabled-fg);
+  --color-disabled-border: var(--disabled-border);
   --font-size-display: var(--text-display);
   --font-size-h1: var(--text-h1);
   --font-size-h2: var(--text-h2);
@@ -209,6 +238,7 @@
   --font-weight-medium: var(--font-weight-medium);
   --font-weight-normal: var(--font-weight-normal);
   --tracking-logo: 0.2em;
+  --tracking-overline: var(--tracking-overline);
   --leading-display: var(--leading-display);
   --leading-heading: var(--leading-heading);
   --leading-body: var(--leading-body);
@@ -305,4 +335,16 @@
 
 @utility gradient-ring-brand {
   --tw-ring-color: oklch(0.52 0.22 264 / 0.20);
+}
+
+@utility tabular-nums-feature {
+  font-variant-numeric: var(--feature-tabular);
+}
+
+@utility proportional-nums-feature {
+  font-variant-numeric: normal;
+}
+
+@utility tracking-overline {
+  letter-spacing: var(--tracking-overline);
 }

@@ -540,12 +540,16 @@ export function FlagMetricsDialog({
                               {group.instances.map((inst) => {
                                 const isInstSelected = filterInstanceId === inst.id;
                                 const staleness = getStaleness(inst.lastSeenAt);
-                                const envName =
-                                  environments.find((e) => e.id === inst.environmentId)?.name ?? '';
+                                const env = environments.find((e) => e.id === inst.environmentId);
+                                const envName = env?.name ?? '';
                                 const envColor = (() => {
-                                  if (envName === 'Production') return 'bg-success';
-                                  if (envName === 'Development') return 'bg-warning';
-                                  if (envName === 'staging') return 'bg-brand';
+                                  if (env?.color) {
+                                    return `bg-[${env.color}]`;
+                                  }
+                                  const n = envName.toLowerCase();
+                                  if (n.includes('prod') || n.includes('production')) return 'bg-success';
+                                  if (n.includes('dev') || n.includes('development')) return 'bg-warning';
+                                  if (n.includes('stag') || n.includes('staging')) return 'bg-brand';
                                   return 'bg-info';
                                 })();
 

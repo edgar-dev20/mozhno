@@ -11,6 +11,7 @@ import {
 } from "@/app/components/ui/alert-dialog";
 import { Info, Trash2 } from "@/shared/icons";
 import { GradientButton } from "@/shared";
+import { StatusIcon } from "@/shared/components/StatusIcon";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -47,23 +48,10 @@ export function ConfirmDialog({
       <AlertDialogContent className={wide ? 'sm:max-w-3xl' : 'sm:max-w-md'}>
         <div className="pt-0 pb-5">
           <div className="flex gap-4">
-            <div
-              className={
-                isDestructive
-                  ? 'flex-shrink-0 w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center'
-                  : 'flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center'
-              }
-            >
-              {isDestructive ? (
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
-                  <Trash2 size={14} className="text-white" />
-                </div>
-              ) : (
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gradient-start to-gradient-end flex items-center justify-center">
-                  <Info size={14} className="text-white" />
-                </div>
-              )}
-            </div>
+            <StatusIcon
+              variant={isDestructive ? 'destructive' : 'brand'}
+              icon={isDestructive ? <Trash2 /> : <Info />}
+            />
 
             <div className="flex-1 min-w-0">
               <AlertDialogHeader className="gap-1.5 p-0">

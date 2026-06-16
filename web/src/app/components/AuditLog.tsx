@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import {
   Filter,
   Clock,
@@ -20,7 +20,9 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { api, AuditEvent } from '@/api';
 import { TipCard } from '@/app/components/TipCard';
-import { SectionHeader, EmptyState, DateRangePicker, SearchInput } from '@/shared';
+import { SectionHeader, EmptyState, SearchInput } from '@/shared';
+
+const DateRangePicker = lazy(() => import('@/shared/components/DateRangePicker').then(m => ({ default: m.DateRangePicker })));
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
@@ -321,12 +323,14 @@ export function AuditLog() {
           <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
             {t('audit.period')}
           </span>
-          <DateRangePicker
-            from={dateFrom ? new Date(dateFrom) : null}
-            to={dateTo ? new Date(dateTo) : null}
-            onChange={handleDateChange}
-            presets
-          />
+          <Suspense fallback={<div className="h-9 w-48 bg-muted rounded-lg animate-pulse" />}>
+            <DateRangePicker
+              from={dateFrom ? new Date(dateFrom) : null}
+              to={dateTo ? new Date(dateTo) : null}
+              onChange={handleDateChange}
+              presets
+            />
+          </Suspense>
         </div>
       </div>
 

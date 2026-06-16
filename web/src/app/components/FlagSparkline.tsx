@@ -91,6 +91,16 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
               </g>
             );
           })}
+          <line
+            x1="0"
+            y1={height / 2}
+            x2={width}
+            y2={height / 2}
+            stroke="var(--color-muted-foreground)"
+            strokeOpacity="0.08"
+            strokeDasharray="3 4"
+            strokeWidth="1"
+          />
         </svg>
       </motion.div>
     </div>

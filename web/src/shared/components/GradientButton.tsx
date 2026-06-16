@@ -51,7 +51,7 @@ export function GradientButton({
   return (
     <button
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center font-semibold rounded-lg transition-[transform,box-shadow,filter] duration-200 outline-none active:scale-95 disabled:pointer-events-none disabled:opacity-50 ${variantClasses[variant]} ${sizeClasses[size]} ${hasShadow ? 'shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30' : ''} ${focusRing} ${className}`}
+      className={`inline-flex items-center justify-center font-semibold rounded-lg transition-[transform,box-shadow,filter] duration-200 outline-none active:scale-95 disabled:pointer-events-none disabled:bg-disabled-bg disabled:text-disabled-fg disabled:border-disabled-border disabled:shadow-none ${variantClasses[variant]} ${sizeClasses[size]} ${hasShadow ? 'shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30' : ''} ${focusRing} ${className}`}
       {...props}
     >
       {loading ? (

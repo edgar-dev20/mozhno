@@ -1,7 +1,10 @@
+import { lazy, Suspense } from 'react';
 import { Rocket, ShieldOff } from '@/shared/icons';
-import { SearchInput, DateRangePicker, adjustColor } from '@/shared';
+import { SearchInput, adjustColor } from '@/shared';
 import type { Tag as TagType } from '@/api';
 import { useT } from '@/i18n';
+
+const DateRangePicker = lazy(() => import('@/shared/components/DateRangePicker').then(m => ({ default: m.DateRangePicker })));
 
 interface FlagFiltersBarProps {
   searchQuery: string;
@@ -74,15 +77,17 @@ export function FlagFiltersBar({
 
       <div className="flex items-center gap-2">
         <span className="text-xs font-medium text-muted-foreground">{t('flags.created')}</span>
-        <DateRangePicker
-          from={dateFrom ? new Date(dateFrom) : null}
-          to={dateTo ? new Date(dateTo) : null}
-          onChange={(from, to) => {
-            onDateChange(from ? from.toISOString().slice(0, 10) : '', to ? to.toISOString().slice(0, 10) : '');
-          }}
-          presets
-          className="min-w-[260px]"
-        />
+        <Suspense fallback={<div className="min-w-[260px] h-9 bg-muted rounded-lg animate-pulse" />}>
+          <DateRangePicker
+            from={dateFrom ? new Date(dateFrom) : null}
+            to={dateTo ? new Date(dateTo) : null}
+            onChange={(from, to) => {
+              onDateChange(from ? from.toISOString().slice(0, 10) : '', to ? to.toISOString().slice(0, 10) : '');
+            }}
+            presets
+            className="min-w-[260px]"
+          />
+        </Suspense>
         <span className="text-foreground/20 dark:text-foreground/70 mx-1">|</span>
         <button onClick={() => onSortByChange('name')} className={`inline-flex items-center text-xs px-3 py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'name' ? 'bg-brand/10 text-brand border-violet-500/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}>{t('flags.sortByName')}</button>
         <button onClick={() => onSortByChange('createdAt')} className={`inline-flex items-center text-xs px-3 py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'createdAt' ? 'bg-brand/10 text-brand border-violet-500/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}>{t('flags.sortByDate')}</button>

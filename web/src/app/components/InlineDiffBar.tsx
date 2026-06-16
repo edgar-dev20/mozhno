@@ -24,11 +24,12 @@ export function InlineDiffBar({ changes }: InlineDiffBarProps) {
         <motion.div
           ref={ref}
           key="diff-bar"
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 'auto', opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
+          initial={{ scaleY: 0 }}
+          animate={{ scaleY: 1 }}
+          exit={{ scaleY: 0 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="overflow-hidden"
+          style={{ transformOrigin: 'top' }}
+          className="will-change-transform"
         >
           <div className="border-t border-border bg-secondary/30 dark:bg-secondary/10">
             <div className="px-6 pt-4 pb-1 flex items-center gap-2">

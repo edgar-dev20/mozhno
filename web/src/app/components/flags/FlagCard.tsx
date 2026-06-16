@@ -30,7 +30,7 @@ export function FlagCard(props: FlagCardProps) {
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
       layout
-      className="group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
+      className={`group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden ${flag.archived ? 'opacity-50 grayscale-[0.3]' : ''}`}
       id={`flag-card-${flag.key}`}
     >
       <div className="flex gap-4 px-4 py-3 cursor-pointer" onClick={onToggleExpand}>
