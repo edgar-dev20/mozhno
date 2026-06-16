@@ -58,11 +58,11 @@ export function ConstraintRow({
             : 'bg-input-background border-border hover:border-indigo-200 dark:hover:border-indigo-500/20 hover:shadow-sm'
         }`}
       >
-        <span className="shrink-0 text-sm font-semibold text-foreground/80 min-w-0 truncate">
+        <span className="shrink-0 text-[11px] font-semibold text-foreground/80 min-w-0 truncate">
           {contextDefId === 0 ? t('flags.noContext') : (ctxDef?.name ?? t('flags.unknownField', { id: String(contextDefId) }))}
         </span>
         <OperatorBadge operator={operator} contextType={contextType} />
-        <span className="flex-1 min-w-0 text-[11px] text-muted-foreground truncate">
+        <span className="flex-1 min-w-0 text-[11px] text-foreground/80 truncate">
           {displayValues}
         </span>
         <span className={`shrink-0 transition-transform duration-200 ${isActive ? 'text-indigo-500 rotate-90' : 'text-muted-foreground/40 group-hover:text-muted-foreground'}`}>
@@ -121,13 +121,13 @@ export function ConstraintRow({
               <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
                 {t('flags.detailCard.preview')}
               </label>
-              <div className="p-2.5 bg-brand/5 rounded-lg border border-brand/10">
+              <div className="px-2.5 py-1.5 bg-brand/5 rounded-lg border border-brand/10">
                 <div className="flex items-center gap-1.5 text-[11px]">
                   <span className="font-semibold text-foreground/80">{ctxDef?.name ?? '?'}</span>
                   <OperatorBadge operator={operator} contextType={contextType} />
-                  <code className={`break-all min-w-0 ${contextType === 'time' ? 'text-foreground/80' : 'font-mono text-foreground/80'}`}>
+                  <span className={`break-all min-w-0 text-foreground/80`}>
                     {displayValues}
-                  </code>
+                  </span>
                 </div>
               </div>
             </div>

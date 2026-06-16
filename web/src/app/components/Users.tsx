@@ -621,8 +621,9 @@ export function Users() {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80">
-              {t('users.form.nameLabel')}
+            <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+              <span>{t('users.form.nameLabel')}</span>
+              <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{formData.name.length}/120</span>
             </label>
             <input
               type="text"
@@ -635,7 +636,10 @@ export function Users() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80">Email</label>
+            <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+              <span>Email</span>
+              <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{formData.email.length}/254</span>
+            </label>
             <input
               type="email"
               value={formData.email}
@@ -648,8 +652,9 @@ export function Users() {
 
           {!editingUser && (
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground/80">
-                {t('users.form.passwordLabel')}
+              <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+                <span>{t('users.form.passwordLabel')}</span>
+                <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{formData.password.length}/128</span>
               </label>
               <input
                 type="password"

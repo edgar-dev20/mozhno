@@ -614,7 +614,10 @@ export function ApiKeys() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80">{t('common.name')}</label>
+            <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+              <span>{t('common.name')}</span>
+              <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{formName.length}/120</span>
+            </label>
             <input
               type="text"
               value={formName}

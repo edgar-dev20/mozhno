@@ -46,18 +46,21 @@ export function WebhookBodyEditor({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-foreground/80 flex items-center gap-1.5">
-          <FileText size={14} className="text-muted-foreground" />
-          {t('integrations.body')}
-          {jsonContentType && jsonValid !== null && (
-            <span className="ml-1">
-              {jsonValid ? (
-                <Check size={12} className="text-success inline" />
-              ) : (
-                <AlertTriangle size={12} className="text-warning inline" />
-              )}
-            </span>
-          )}
+        <label className="text-sm font-medium text-foreground/80 flex items-center gap-1.5 justify-between">
+          <span className="flex items-center gap-1.5">
+            <FileText size={14} className="text-muted-foreground" />
+            {t('integrations.body')}
+            {jsonContentType && jsonValid !== null && (
+              <span className="ml-1">
+                {jsonValid ? (
+                  <Check size={12} className="text-success inline" />
+                ) : (
+                  <AlertTriangle size={12} className="text-warning inline" />
+                )}
+              </span>
+            )}
+          </span>
+          <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{body.length}/10000</span>
         </label>
         <button
           type="button"

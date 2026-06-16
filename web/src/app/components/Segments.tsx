@@ -284,10 +284,10 @@ export function Segments() {
                           ? (c.contextValues || '').split(',').map(v => formatTimeConstraintValue(v.trim())).join(', ')
                           : c.contextValues;
                         return (
-                          <div key={ci} className="flex items-center gap-1.5 text-xs">
-                            <span className="font-semibold text-muted-foreground">{ctxDef?.name ?? t('segments.unknownField', { id: String(c.contextDefinitionId) })}</span>
+                          <div key={ci} className="flex items-center gap-1.5 text-[11px]">
+                            <span className="font-semibold text-foreground/80">{ctxDef?.name ?? t('segments.unknownField', { id: String(c.contextDefinitionId) })}</span>
                             <OperatorBadge operator={c.operator ?? 'in'} contextType={sCtxType} />
-                            <code className="font-mono text-success break-all line-clamp-1">{sDisplayValues}</code>
+                            <span className="text-foreground/80 break-all line-clamp-1">{sDisplayValues}</span>
                           </div>
                         );
                       })}

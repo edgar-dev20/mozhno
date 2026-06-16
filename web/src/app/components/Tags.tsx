@@ -293,6 +293,7 @@ export function Tags() {
                     maxLength={7}
                     className="w-full bg-card border border-border rounded-xl pl-8 pr-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                   />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-normal text-muted-foreground/50 tabular-nums">{customHex.length}/7</span>
                 </div>
                 <GradientButton
                   onClick={applyCustomHex}

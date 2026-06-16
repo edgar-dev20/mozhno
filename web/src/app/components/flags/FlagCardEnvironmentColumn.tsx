@@ -1,4 +1,4 @@
-import { Settings, BarChart3 } from '@/shared/icons';
+import { Settings } from '@/shared/icons';
 import { Switch } from '@/app/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
@@ -212,10 +212,7 @@ export function FlagCardEnvironmentColumn({
                 >
                   <FlagSparkline data={sparkBuckets} height={56} />
                 </button>
-                <span className="absolute bottom-1 right-1 text-muted-foreground/40 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                  <BarChart3 size={12} />
-                </span>
-              </>
+                </>
             ) : (
               <SparklinePlaceholder height={56} />
             )}

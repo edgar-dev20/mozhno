@@ -323,8 +323,9 @@ export function Settings() {
 
             <div className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground/80">
-                  {t('settings.projectName')}
+                <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+                  <span>{t('settings.projectName')}</span>
+                  <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{projectName.length}/120</span>
                 </label>
                 <input
                   type="text"
@@ -337,8 +338,9 @@ export function Settings() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground/80">
-                  {t('settings.descriptionField')}
+                <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+                  <span>{t('settings.descriptionField')}</span>
+                  <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{projectDesc.length}/160</span>
                 </label>
                 <textarea
                   value={projectDesc}
@@ -442,7 +444,12 @@ export function Settings() {
                   })}
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+                    <span>{t('settings.addEnvPlaceholder')}</span>
+                    <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{newEnvName.length}/120</span>
+                  </label>
+                  <div className="flex items-center gap-2">
                   <input
                     type="text"
                     value={newEnvName}
@@ -461,6 +468,7 @@ export function Settings() {
                   >
                     {t('common.add')}
                   </GradientButton>
+                </div>
                 </div>
               )}
 
@@ -554,7 +562,12 @@ export function Settings() {
                                   </div>
 
                                   {isEditing ? (
-                                    <div className="flex items-center gap-2">
+                                    <div className="space-y-1.5">
+                                      <label className="text-xs font-medium text-muted-foreground flex items-center justify-between">
+                                        <span>{t('settings.editEnvName')}</span>
+                                        <span className="text-[10px] font-normal text-muted-foreground/50 tabular-nums">{editEnvName.length}/120</span>
+                                      </label>
+                                      <div className="flex items-center gap-2">
                                       <input
                                         type="text"
                                         value={editEnvName}
@@ -585,6 +598,7 @@ export function Settings() {
                                       >
                                         {t('common.cancel')}
                                       </button>
+                                    </div>
                                     </div>
                                   ) : (
                                     <div className="flex items-center gap-2 border-t border-border pt-3">

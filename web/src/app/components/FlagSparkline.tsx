@@ -93,12 +93,11 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
           })}
           <line
             x1="0"
-            y1={height / 2}
+            y1={height}
             x2={width}
-            y2={height / 2}
+            y2={height}
             stroke="var(--color-muted-foreground)"
-            strokeOpacity="0.08"
-            strokeDasharray="3 4"
+            strokeOpacity="0.12"
             strokeWidth="1"
           />
         </svg>

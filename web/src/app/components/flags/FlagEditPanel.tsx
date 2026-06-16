@@ -133,9 +133,12 @@ export function FlagEditPanel({
               </div>
             </div>
             {newTagId && (
-              <div className="flex gap-2 items-center pt-1">
+              <div className="space-y-1">
+                <div className="flex gap-2 items-center pt-1">
                 <input type="text" value={newTagVal} onChange={e => setNewTagVal(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && newTagVal.trim()) addTag(); else if (e.key === 'Escape') { setAddingTag(false); setNewTagId(null); setNewTagVal(''); } }} placeholder={t('flags.enterTagValue')} maxLength={255} autoFocus className="flex-1 bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground" />
                 <GradientButton type="button" onClick={addTag} disabled={!newTagVal.trim()} size="sm">{t('common.add')}</GradientButton>
+                </div>
+                <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right">{newTagVal.length}/255</div>
               </div>
             )}
             <button type="button" onClick={() => { setAddingTag(false); setNewTagId(null); setNewTagVal(''); }} className="w-full px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent rounded-lg">{t('common.cancel')}</button>

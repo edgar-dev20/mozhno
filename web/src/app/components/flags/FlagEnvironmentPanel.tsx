@@ -123,7 +123,7 @@ export function FlagEnvironmentPanel({
             <Slider.Track className="bg-accent relative grow rounded-full h-2.5">
               <Slider.Range className="absolute bg-indigo-600 dark:bg-indigo-500 rounded-full h-full" />
             </Slider.Track>
-            <Slider.Thumb className="block w-6 h-6 bg-white border-2 border-brand rounded-full shadow-lg hover:bg-brand/10 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2" />
+            <Slider.Thumb className="block w-6 h-6 bg-white border-2 border-brand rounded-full shadow-lg focus:outline-none" />
           </Slider.Root>
           <p className="text-xs text-muted-foreground/80">
             {envRulePercent === 100 ? t('flags.fullRollout') : envRulePercent === 0 ? t('flags.flagOff') : t('flags.percentUsers', { percent: String(envRulePercent) })}
@@ -177,7 +177,7 @@ export function FlagEnvironmentPanel({
                           <div key={ci} className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg border" style={{ backgroundColor: segColor + '0F', borderColor: segColor + '1A' }}>
                             <span className="font-semibold shrink-0" style={{ color: segColor }}>{ctxDef?.name ?? `#${c.contextDefinitionId}`}</span>
                             <OperatorBadge operator={c.operator ?? 'in'} contextType={sCtxType} className="opacity-60" />
-                            <code className="break-all min-w-0 opacity-90" style={{ color: segColor }}>{sDisplayValues}</code>
+                            <span className="break-all min-w-0 opacity-90" style={{ color: segColor }}>{sDisplayValues}</span>
                               </div>
                             );
                           })}
@@ -326,17 +326,17 @@ export function FlagEnvironmentPanel({
                         ? line.values.map(v => formatTimeConstraintValue(v))
                         : line.values;
                       return (
-                        <div key={li} className="flex items-center gap-1.5 text-[11px] bg-input-background/70 rounded-lg px-2.5 py-1.5 border border-brand/10">
+                        <div key={li} className="flex items-center gap-1.5 text-[11px] bg-input-background/70 rounded-lg p-2.5 border border-brand/10">
                           <span className="font-semibold text-foreground/80 shrink-0">{line.field}</span>
                           <OperatorBadge operator={line.operator} contextType={line.contextType} />
-                          <code className={`break-all min-w-0 ${isTimeType ? 'text-foreground/80' : 'font-mono text-foreground/80'}`}>
+                          <span className={`break-all min-w-0 text-foreground/80`}>
                             {displayValues.length === 1
                               ? displayValues[0]
                               : displayValues.length <= 3
                                 ? `[${displayValues.join(', ')}]`
                                 : `[${displayValues.slice(0, 3).join(', ')}, +${displayValues.length - 3}]`
                             }
-                          </code>
+                          </span>
                           <span className="text-[11px] text-muted-foreground shrink-0 ml-auto" title={line.source}>← {line.source === 'custom' ? t('flags.customSource') : line.source}</span>
                         </div>
                       );

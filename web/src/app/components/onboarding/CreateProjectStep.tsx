@@ -33,22 +33,28 @@ export function CreateProjectStep({
   const t = useT();
   return (
     <div className="space-y-3 flex-1">
-      <input
-        type="text"
-        value={projectName}
-        onChange={(e) => setProjectName(e.target.value)}
-        maxLength={120}
-        placeholder={t('onboarding.projectNamePlaceholder')}
-        className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
-      />
-      <textarea
-        value={projectDesc}
-        onChange={(e) => setProjectDesc(e.target.value)}
-        maxLength={500}
-        rows={2}
-        placeholder={t('onboarding.projectDescPlaceholder')}
-        className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
-      />
+      <div>
+        <input
+          type="text"
+          value={projectName}
+          onChange={(e) => setProjectName(e.target.value)}
+          maxLength={120}
+          placeholder={t('onboarding.projectNamePlaceholder')}
+          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+        />
+        <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">{projectName.length}/120</div>
+      </div>
+      <div>
+        <textarea
+          value={projectDesc}
+          onChange={(e) => setProjectDesc(e.target.value)}
+          maxLength={500}
+          rows={2}
+          placeholder={t('onboarding.projectDescPlaceholder')}
+          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
+        />
+        <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">{projectDesc.length}/500</div>
+      </div>
       <input
         ref={fileInputRef}
         type="file"
