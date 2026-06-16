@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, type FlagRequest } from '@/api';
 
-interface UpdateFlagInput {
+export interface UpdateFlagInput {
   flagId: number;
   name: string;
   key: string;
@@ -25,7 +25,7 @@ export function useFlagUpdate() {
       return api.flags.update(input.flagId, req);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags'] });
+      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
     },
   });
 }

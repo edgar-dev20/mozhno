@@ -7,7 +7,7 @@ export function useFlagDelete() {
   return useMutation({
     mutationFn: (flagId: number) => api.flags.delete(flagId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags'] });
+      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
     },
   });
 }

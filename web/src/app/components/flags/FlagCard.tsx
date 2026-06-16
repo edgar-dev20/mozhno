@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { FlagCardHeader } from '@/app/components/flags/FlagCardHeader';
 import { FlagCardDetail } from '@/app/components/flags/FlagCardDetail';
 import type { FlagView } from '@/app/hooks/flagTypes';
-import type { SegmentResponse, Tag as TagType, ContextDefinition } from '@/api';
+import type { SegmentResponse, Tag as TagType } from '@/api';
 
 export interface FlagCardProps {
   flag: FlagView;
@@ -15,7 +15,6 @@ export interface FlagCardProps {
   environments: { id: number; name: string }[];
   segments: SegmentResponse[];
   tags: TagType[];
-  contexts: ContextDefinition[];
   sparklineData: Map<string, { trueCount: number; falseCount: number; timeBucket: string }[]>;
 }
 
@@ -57,7 +56,6 @@ export function FlagCard(props: FlagCardProps) {
               environments={props.environments}
               segments={props.segments}
               tags={props.tags}
-              contexts={props.contexts}
               sparklineData={props.sparklineData}
               onOpenGeneral={props.onOpenGeneral}
               onOpenEnvironment={props.onOpenEnvironment}

@@ -7,7 +7,7 @@ export function useFlagUnarchive() {
   return useMutation({
     mutationFn: (flagId: number) => api.flags.unarchive(flagId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags'] });
+      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
     },
   });
 }

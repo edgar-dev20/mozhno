@@ -512,7 +512,6 @@ export function Flags() {
                   environments={environments}
                   segments={segments}
                   tags={tags}
-                  contexts={contexts}
                   sparklineData={sparklineData}
                 />
               ))}
@@ -614,6 +613,7 @@ export function Flags() {
               contexts={contexts}
               activeGroupId={activeGroupId}
               onActiveGroupIdChange={setActiveGroupId}
+              envName={environments.find(e => e.id === editing.envId)?.name}
             />
           )}
         </div>

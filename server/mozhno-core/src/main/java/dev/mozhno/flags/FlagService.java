@@ -121,7 +121,7 @@ public class FlagService {
 
     @Transactional(readOnly = true)
     public PageResponse<FlagWithStrategy> findByProjectIdWithAllEnvironmentStrategiesPaginated(Integer projectId, int page, int size) {
-        long total = flagRepository.countByProjectId(projectId, false);
+        long total = flagRepository.countByProjectId(projectId, true);
         int offset = page * size;
         List<FlagWithStrategy> items = flagRepository.findByProjectIdWithAllEnvironmentStrategiesPaginated(projectId, offset, size);
         return new PageResponse<>(items, page, size, total);

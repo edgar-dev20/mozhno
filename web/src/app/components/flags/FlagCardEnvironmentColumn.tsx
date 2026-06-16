@@ -6,13 +6,12 @@ import { FlagSparkline, SparklinePlaceholder } from '@/app/components/FlagSparkl
 import { useT } from '@/i18n';
 import type { MessageKey } from '@/i18n';
 import type { FlagView } from '@/app/hooks/flagTypes';
-import type { SegmentResponse, ContextDefinition } from '@/api';
+import type { SegmentResponse } from '@/api';
 
 interface FlagCardEnvironmentColumnProps {
   env: { id: number; name: string };
   flag: FlagView;
   segments: SegmentResponse[];
-  contexts: ContextDefinition[];
   sparkBuckets: { trueCount: number; falseCount: number; timeBucket: string }[];
   onOpenEnvironment: (flag: FlagView, envId: number) => void;
   onToggleFlag: (flag: FlagView, envId: number) => void;
@@ -22,7 +21,6 @@ interface FlagCardEnvironmentColumnProps {
 function buildRule(
   es: FlagView['environments'][number],
   segments: SegmentResponse[],
-  contexts: ContextDefinition[],
   muted: boolean,
   t: (key: MessageKey) => string,
 ) {
@@ -103,71 +101,34 @@ function buildRule(
 
   if (es.contextValuesJson) {
     try {
-      const parsed: { cd: number; op: string; val: string }[] = JSON.parse(es.contextValuesJson);
+      const parsed: unknown = JSON.parse(es.contextValuesJson);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        const groups = new Map<string, string[]>();
-        for (const c of parsed) {
-          const ctx = contexts.find((x) => x.id === c.cd);
-          if (!ctx) continue;
-          const key = `${ctx.name} ${c.op || 'in'}`;
-          if (!groups.has(key)) groups.set(key, []);
-          groups.get(key)!.push(c.val || '');
-        }
-        const collapsed: string[] = [];
-        for (const [key, vals] of groups) {
-          const name = key.split(' ')[0];
-          if (vals.length === 1) {
-            collapsed.push(`${name}=${vals[0]}`);
-          } else {
-            const maxShow = 3;
-            const show = vals.slice(0, maxShow).join(', ');
-            collapsed.push(
-              vals.length > maxShow
-                ? `${name}: ${show} +${vals.length - maxShow}`
-                : `${name}: ${show}`,
-            );
-          }
-        }
-        if (collapsed.length > 0) {
-          parts.push(
-            <span key="cdot" className="text-muted-foreground/60">
-              ·
-            </span>,
-          );
-          const extra = collapsed.length - 1;
-          parts.push(
-            <span
-              key="first"
-              className={`truncate max-w-[220px] ${muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}`}
-            >
-              {collapsed[0]}
-            </span>,
-          );
-          if (extra > 0) {
-            parts.push(
-              <span
-                key="more"
-                className={muted ? 'text-muted-foreground/50' : 'text-muted-foreground'}
-              >
-                {t('flags.andMore', { count: String(extra) })}
-              </span>,
-            );
-          }
-        }
+        parts.push(
+          <span key="cdot" className="text-muted-foreground/60">
+            ·
+          </span>,
+        );
+        parts.push(
+          <span
+            key="customConds"
+            className={`inline-flex items-center px-1 py-0 rounded text-[9px] font-semibold tracking-wide ${muted ? 'bg-muted text-muted-foreground/50' : 'bg-brand/10 text-brand'}`}
+          >
+            +{parsed.length}
+          </span>,
+        );
       }
     } catch {
       /* ignore parse errors */
     }
   }
 
-  return <span className="inline-flex items-baseline flex-wrap gap-x-0.5">{parts}</span>;
+  return <span className="inline-flex items-center flex-wrap gap-x-0.5">{parts}</span>;
 }
 
 export function FlagCardEnvironmentColumn({
   env,
   flag,
   segments,
-  contexts,
   sparkBuckets,
   onOpenEnvironment,
   onToggleFlag,
@@ -176,7 +137,7 @@ export function FlagCardEnvironmentColumn({
   const t = useT();
   const es = flag.environments[env.id];
   const muted = !es || !es.enabled;
-  const rule = buildRule(es, segments, contexts, muted, t);
+  const rule = buildRule(es, segments, muted, t);
 
   return (
     <div className="flex-1 bg-secondary/40 rounded-xl px-4 pt-3 pb-2 ring-1 ring-border shadow-sm transition-all flex flex-col">
@@ -187,7 +148,7 @@ export function FlagCardEnvironmentColumn({
         <div className="flex items-center gap-1">
           <button
             onClick={() => onOpenEnvironment(flag, env.id)}
-            className="inline-flex items-center px-1.5 py-1 text-muted-foreground bg-secondary border border-border rounded-lg hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all"
+            className="inline-flex items-center px-1.5 py-1 text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand dark:hover:text-brand hover:border-brand/20 dark:hover:border-brand/30 hover:bg-brand/5 dark:hover:bg-brand/10 transition-all"
           >
             <Settings size={12} />
           </button>
@@ -195,7 +156,7 @@ export function FlagCardEnvironmentColumn({
             <Switch
               checked={es.enabled}
               onCheckedChange={() => onToggleFlag(flag, env.id)}
-              className="data-[state=checked]:bg-primary scale-75 origin-right"
+              className="data-[state=checked]:bg-brand scale-75 origin-right"
             />
           )}
         </div>

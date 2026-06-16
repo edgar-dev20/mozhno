@@ -1,6 +1,6 @@
 import * as Slider from '@radix-ui/react-slider';
 import { Switch } from "@/app/components/ui/switch";
-import { Plus, Percent, Users, Settings, Filter, Zap } from "@/shared/icons";
+import { Plus, Percent, Users, Settings, Filter } from "@/shared/icons";
 import { SegmentIcon } from "@/app/components/SegmentIcon";
 import { MultiValueChips } from "@/app/components/flags/MultiValueChips";
 import { getDefaultOperator, getInputPlaceholder, getInputPattern, getInputHint, getInputMode, getInlineValidationError } from "@/app/components/operators";
@@ -25,10 +25,7 @@ interface FlagEnvironmentPanelProps {
   contexts: ContextDefinition[];
   activeGroupId: string | null;
   onActiveGroupIdChange: (id: string | null) => void;
-}
-
-function newGroupId(): string {
-  return `g_${Math.random().toString(36).slice(2, 7)}_${Math.random().toString(36).slice(2, 5)}`;
+  envName?: string;
 }
 
 export function FlagEnvironmentPanel({
@@ -38,8 +35,13 @@ export function FlagEnvironmentPanel({
   envRuleEnabled, onEnvRuleEnabledChange,
   segments, contexts,
   activeGroupId, onActiveGroupIdChange,
+  envName,
 }: FlagEnvironmentPanelProps) {
   const t = useT();
+
+  function newGroupId(): string {
+    return `g_${Math.random().toString(36).slice(2, 7)}_${Math.random().toString(36).slice(2, 5)}`;
+  }
 
   const addGroup = () => {
     onEnvRuleConstraintGroupsChange([
@@ -85,7 +87,7 @@ export function FlagEnvironmentPanel({
     }
   }
 
-  const hasSummary = envRulePercent !== 100 || hasSegments || hasConstraints;
+  const hasSummary = true;
 
   const formatValues = (values: string[]): string => {
     if (values.length === 0) return '∅';
@@ -98,7 +100,7 @@ export function FlagEnvironmentPanel({
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h4 className="text-sm font-medium text-foreground">{t('flags.environmentTitle')}</h4>
+          <h4 className="text-sm font-medium text-foreground">{t('flags.environmentTitle')}{envName ? ` ${envName}` : ''}</h4>
           <p className="text-xs text-muted-foreground/80 mt-0.5">{t('flags.environmentDescription')}</p>
         </div>
         <div className="flex items-center gap-2.5 shrink-0">
@@ -106,22 +108,114 @@ export function FlagEnvironmentPanel({
           <Switch
             checked={envRuleEnabled}
             onCheckedChange={onEnvRuleEnabledChange}
-            className="!bg-switch-background data-[state=checked]:!bg-indigo-600 dark:data-[state=checked]:!bg-indigo-500"
+            className="!bg-switch-background data-[state=checked]:!bg-brand dark:data-[state=checked]:!bg-brand"
           />
         </div>
       </div>
+
+      {hasSummary && (
+        <div className="bg-gradient-to-br from-brand/10 to-brand/5 dark:from-brand/5 dark:to-brand/[0.02] rounded-xl border border-brand/20 overflow-hidden">
+          <div className="p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              {envRulePercent === 0 ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-full bg-muted text-muted-foreground/80">
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+                  {t('flags.summaryFlagOff')}
+                </span>
+              ) : envRuleEnabled ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-full bg-success/10 text-success">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                  {t('flags.summaryActive')}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-full bg-muted text-muted-foreground/80">
+                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+                  {t('flags.summaryManuallyDisabled')}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center">
+                <Percent size={16} className="text-brand" />
+              </div>
+              <div>
+                {envRulePercent === 0 ? (
+                  <span className="text-sm font-semibold text-muted-foreground">{t('flags.flagOff')}</span>
+                ) : envRulePercent === 100 && !hasSegments && !hasConstraints ? (
+                  <span className="text-sm font-semibold text-foreground/80">{t('flags.summaryFullTraffic')}</span>
+                ) : (
+                  <>
+                    <span className="text-2xl font-bold text-brand">{envRulePercent}%</span>
+                    <span className="text-sm text-muted-foreground ml-1.5">
+                      {hasSegments
+                        ? `${t('flags.summaryFromSegments')} ${selectedSegs.map(s => s.name).join(', ')}`
+                        : t('flags.of') + ' ' + t('flags.allUsers')}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {lines.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                  <Filter size={10} />
+                  {t('flags.summaryUnderConditions')}
+                </div>
+                <div className="space-y-1.5">
+                  {lines.map((line, li) => {
+                    const isTimeType = line.contextType === 'time';
+                    const displayValues = isTimeType
+                      ? line.values.map(v => formatTimeConstraintValue(v))
+                      : line.values;
+                    return (
+                      <div key={li} className="flex items-center gap-1.5 text-[11px] bg-input-background/70 rounded-lg p-2.5 border border-brand/10">
+                        <span className="font-semibold text-foreground/80 shrink-0">{line.field}</span>
+                        <OperatorBadge operator={line.operator} contextType={line.contextType} />
+                        <span className="break-all min-w-0 text-foreground/80">
+                          {displayValues.length === 1
+                            ? displayValues[0]
+                            : displayValues.length <= 3
+                              ? `[${displayValues.join(', ')}]`
+                              : `[${displayValues.slice(0, 3).join(', ')}, +${displayValues.length - 3}]`
+                          }
+                        </span>
+                        <span className="text-[11px] text-muted-foreground shrink-0 ml-auto" title={line.source}>← {line.source === 'custom' ? t('flags.customSource') : line.source}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {!hasSegments && !hasConstraints && envRulePercent !== 100 && envRulePercent !== 0 && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
+                <Filter size={12} />
+                {t('flags.noConditionsGlobal')}
+              </div>
+            )}
+
+            <div className="flex items-center gap-4 text-[11px] text-muted-foreground pt-2 border-t border-brand/10">
+              <span>{t('flags.summaryStatsSegments')}: <strong className="text-foreground/80">{hasSegments ? selectedSegs.length : 0}</strong></span>
+              <span>{t('flags.summaryStatsConditions')}: <strong className="text-foreground/80">{lines.length}</strong></span>
+              <span>{selectedSegs.length > 1 ? t('flags.summaryLogicOrSegments') : 'AND'}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="p-5 bg-secondary/50 rounded-xl border border-border space-y-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-foreground/80 flex items-center gap-2">
-              <Percent size={14} className="text-indigo-600 dark:text-indigo-400" />{t('flags.rolloutPercentage')}
+              <Percent size={14} className="text-brand" />{t('flags.rolloutPercentage')}
             </label>
-            <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{envRulePercent}%</span>
+            <span className="text-lg font-bold text-brand">{envRulePercent}%</span>
           </div>
           <Slider.Root value={[envRulePercent]} onValueChange={([v]) => onEnvRulePercentChange(v)} max={100} step={1} className="relative flex items-center select-none touch-none w-full h-5">
             <Slider.Track className="bg-accent relative grow rounded-full h-2.5">
-              <Slider.Range className="absolute bg-indigo-600 dark:bg-indigo-500 rounded-full h-full" />
+              <Slider.Range className="absolute bg-brand rounded-full h-full" />
             </Slider.Track>
             <Slider.Thumb className="block w-6 h-6 bg-white border-2 border-brand rounded-full shadow-lg focus:outline-none" />
           </Slider.Root>
@@ -132,7 +226,7 @@ export function FlagEnvironmentPanel({
 
         <div className="pt-4 border-t border-border">
           <div className="flex items-center gap-2 mb-3">
-            <Users size={16} className="text-indigo-600 dark:text-indigo-400" />
+            <Users size={16} className="text-brand" />
             <label className="text-sm font-medium text-foreground/80">{t('flags.targetSegments')}</label>
           </div>
           <div className="grid grid-cols-1 gap-2">
@@ -193,11 +287,11 @@ export function FlagEnvironmentPanel({
         <div>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Settings size={16} className="text-indigo-600 dark:text-indigo-400" />
+              <Settings size={16} className="text-brand" />
               <label className="text-sm font-medium text-foreground/80">{t('flags.additionalConditions')}</label>
-              <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-medium leading-none">{t('flags.configurable')}</span>
+              <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">{t('flags.configurable')}</span>
             </div>
-            <button onClick={addGroup} className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center gap-1 font-medium"><Plus size={12} />{t('common.add')}</button>
+            <button onClick={addGroup} className="text-xs text-brand hover:text-brand/70 flex items-center gap-1 font-medium"><Plus size={12} />{t('common.add')}</button>
           </div>
           <div className="space-y-1.5">
             {envRuleConstraintGroups.map((g) => {
@@ -295,76 +389,16 @@ export function FlagEnvironmentPanel({
         </div>
       </div>
 
-      {hasSummary && (
-        <div className="pt-4 border-t border-border">
-          <div className="flex items-center gap-2 mb-3">
-            <Zap size={16} className="text-brand" />
-            <label className="text-sm font-medium text-foreground/80">{t('flags.summaryExpression')}</label>
-            <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">{t('flags.tactic')}</span>
-          </div>
-          <div className="bg-gradient-to-br from-brand/10 to-indigo-50 dark:from-brand/5 dark:to-indigo-500/5 rounded-xl border border-brand/20 overflow-hidden">
-            <div className="p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center">
-                  <Percent size={16} className="text-brand" />
-                </div>
-                <div>
-                  <span className="text-2xl font-bold text-brand">{envRulePercent}%</span>
-                  <span className="text-sm text-muted-foreground ml-1.5">{t('flags.of')} {hasSegments ? selectedSegs.map(s => s.name).join(', ') : t('flags.allUsers')}</span>
-                </div>
-              </div>
-              {lines.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
-                    <Filter size={10} />
-                    {t('flags.and')}
-                  </div>
-                  <div className="space-y-1.5">
-                    {lines.map((line, li) => {
-                      const isTimeType = line.contextType === 'time';
-                      const displayValues = isTimeType
-                        ? line.values.map(v => formatTimeConstraintValue(v))
-                        : line.values;
-                      return (
-                        <div key={li} className="flex items-center gap-1.5 text-[11px] bg-input-background/70 rounded-lg p-2.5 border border-brand/10">
-                          <span className="font-semibold text-foreground/80 shrink-0">{line.field}</span>
-                          <OperatorBadge operator={line.operator} contextType={line.contextType} />
-                          <span className={`break-all min-w-0 text-foreground/80`}>
-                            {displayValues.length === 1
-                              ? displayValues[0]
-                              : displayValues.length <= 3
-                                ? `[${displayValues.join(', ')}]`
-                                : `[${displayValues.slice(0, 3).join(', ')}, +${displayValues.length - 3}]`
-                            }
-                          </span>
-                          <span className="text-[11px] text-muted-foreground shrink-0 ml-auto" title={line.source}>← {line.source === 'custom' ? t('flags.customSource') : line.source}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-              {!hasSegments && !hasConstraints && envRulePercent !== 100 && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
-                  <Filter size={12} />
-                  {t('flags.noConditionsGlobal')}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg">
+      <div className="p-4 bg-brand/5 dark:bg-brand/10 border border-brand/20 dark:border-brand/30 rounded-lg">
         <div className="flex gap-3">
           <div className="shrink-0 mt-0.5">
-            <div className="w-5 h-5 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center">
+            <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center">
               <Settings size={12} className="text-white" />
             </div>
           </div>
           <div>
-            <h5 className="text-xs font-semibold text-indigo-900 dark:text-indigo-200 mb-1">{t('flags.howTargetingWorks')}</h5>
-            <p className="text-xs text-indigo-700 dark:text-indigo-300">{t('flags.howTargetingWorksDesc')}</p>
+            <h5 className="text-xs font-semibold text-brand dark:text-brand-light mb-1">{t('flags.howTargetingWorks')}</h5>
+            <p className="text-xs text-brand/80 dark:text-brand-light/80">{t('flags.howTargetingWorksDesc')}</p>
           </div>
         </div>
       </div>

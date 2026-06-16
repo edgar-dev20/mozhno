@@ -7,7 +7,7 @@ export function useFlagArchive() {
   return useMutation({
     mutationFn: (flagId: number) => api.flags.archive(flagId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags'] });
+      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
     },
   });
 }
