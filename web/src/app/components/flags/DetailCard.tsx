@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Trash2 } from "@/shared/icons";
 import { MultiValueChips } from "@/app/components/flags/MultiValueChips";
-import { getOperatorsForType, getDefaultOperator, getOperatorShortCode, getInputPlaceholder, getInputPattern, getInputHint, getInputMode } from "@/app/components/operators";
+import { getOperatorsForType, getDefaultOperator, getOperatorShortCode, getInputPlaceholder, getInputPattern, getInputHint, getInputMode, getInlineValidationError } from "@/app/components/operators";
 import { OperatorSelector } from "@/app/components/OperatorSelector";
+import { DateTimePicker } from "@/shared/components/DateTimePicker";
 import { useT } from '@/i18n';
 import type { ConstraintGroup } from "@/app/components/flags/types";
 import type { ContextDefinition } from "@/api";
@@ -180,26 +181,29 @@ export function DetailCard({ group, contexts, initialGroup, onChange, onRemove, 
                     </div>
                   ) : (
                     <div className="space-y-1.5">
-                      <input
-                        ref={singleInputRef}
-                        type="text"
-                        inputMode={getInputMode(ctxDef?.type) as React.HTMLAttributes<HTMLInputElement>['inputMode']}
-                        pattern={getInputPattern(ctxDef?.type)}
-                        placeholder={getInputPlaceholder(ctxDef?.type) || t('flags.valuePlaceholder')}
-                        value={group.values[0] ?? ''}
-                        onChange={(e) => onChange({ ...group, values: [e.target.value] })}
-                        onInput={(e) => {
-                          const input = e.target as HTMLInputElement;
-                          const v = input.value.trim();
-                          if (!v) { input.setCustomValidity(''); return; }
-                          if (ctxDef?.type === 'number' && isNaN(Number(v))) input.setCustomValidity('invalid');
-                          else if (ctxDef?.type === 'time' && !/^\d{2}:\d{2}$/.test(v)) input.setCustomValidity('invalid');
-                          else if (ctxDef?.type === 'semver' && !/^\d+\.\d+\.\d+(-.*)?$/.test(v)) input.setCustomValidity('invalid');
-                          else input.setCustomValidity('');
-                        }}
-                        className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
-                      />
-                      {ctxDef?.type && ctxDef.type !== 'string' && (
+                      {ctxDef?.type === 'time' ? (
+                        <DateTimePicker
+                          value={group.values[0] ?? ''}
+                          onChange={(iso) => onChange({ ...group, values: iso ? [iso] : [] })}
+                          placeholder={t('flags.valuePlaceholder')}
+                        />
+                      ) : (
+                        <input
+                          ref={singleInputRef}
+                          type="text"
+                          inputMode={getInputMode(ctxDef?.type) as React.HTMLAttributes<HTMLInputElement>['inputMode']}
+                          pattern={getInputPattern(ctxDef?.type)}
+                          placeholder={getInputPlaceholder(ctxDef?.type) || t('flags.valuePlaceholder')}
+                          value={group.values[0] ?? ''}
+                          onChange={(e) => onChange({ ...group, values: [e.target.value] })}
+                          onInput={(e) => {
+                            const input = e.target as HTMLInputElement;
+                            input.setCustomValidity(getInlineValidationError(ctxDef?.type, input.value.trim()));
+                          }}
+                          className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
+                        />
+                      )}
+                      {ctxDef?.type && ctxDef.type !== 'string' && ctxDef.type !== 'time' && (
                         <p className="text-[11px] text-muted-foreground/60 ml-0.5">{getInputHint(ctxDef.type)}</p>
                       )}
                     </div>

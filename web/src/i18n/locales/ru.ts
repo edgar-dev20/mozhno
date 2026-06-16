@@ -36,6 +36,7 @@ const ru = {
     fileTooBig: 'Файл слишком большой. Максимальный размер: {{size}}MB',
     selectPeriod: 'Выберите период',
     selectDate: 'Выберите дату',
+    selectDateTime: 'Выберите дату и время',
     from: 'от',
     fromLower: 'из',
     to: 'По',
@@ -55,6 +56,7 @@ const ru = {
     sparkline: 'График оценок',
     statusIndicator: 'Индикатор статуса',
     colorBar: 'Цветовая полоса',
+    clearFilter: 'Очистить',
   },
   auth: {
     login: 'Войти',

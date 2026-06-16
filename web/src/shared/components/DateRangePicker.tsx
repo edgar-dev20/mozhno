@@ -119,7 +119,6 @@ export function DateRangePicker({
                 type="button"
                 onClick={() => {
                   onChange(undefined, undefined);
-                  setOpen(false);
                 }}
                 className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border border-transparent bg-accent text-muted-foreground hover:bg-accent/80"
               >

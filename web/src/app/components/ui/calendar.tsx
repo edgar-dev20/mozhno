@@ -33,21 +33,21 @@ function Calendar({
         weeks: "flex flex-col mt-2",
         week: "flex w-full",
         day: cn(
-          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20 size-8 group [&:has([aria-selected])]:bg-primary/10 dark:[&:has([aria-selected])]:bg-primary/20",
+          "relative p-0 text-center text-sm text-foreground/80 focus-within:relative focus-within:z-20 size-8 group [&:not(:has([aria-selected=true]))]:hover:bg-muted transition-colors",
           props.mode === "range"
             ? "[&:has(>.day-range-end)]:rounded-r-xl [&:has(>.day-range-start)]:rounded-l-xl first:[&:has([aria-selected])]:rounded-l-xl last:[&:has([aria-selected])]:rounded-r-xl"
             : "[&:has([aria-selected])]:rounded-xl",
         ),
         day_button:
-          "size-8 rounded-xl p-0 font-normal hover:bg-accent text-foreground/80 inline-flex items-center justify-center group-aria-[selected]:text-white",
+          "size-8 rounded-xl p-0 font-normal inline-flex items-center justify-center",
         selected:
-          "bg-primary text-white shadow-sm",
+          "bg-primary text-white shadow-sm [&.today]:ring-primary-foreground/40",
         range_start:
           "bg-primary text-white rounded-l-xl",
         range_end:
           "bg-primary text-white rounded-r-xl",
         range_middle:
-          "bg-primary/10 dark:bg-primary/20 text-foreground rounded-none",
+          "bg-primary/15 dark:bg-primary/20 text-foreground rounded-none",
         today:
           "ring-1 ring-primary/30 dark:ring-primary/40 font-semibold",
         outside:

@@ -139,12 +139,14 @@ public class DefaultMozhnoClient implements MozhnoClient {
 
         boolean needsAppName = context.getAppName() == null;
         boolean needsEnvironment = context.getEnvironment() == null;
-        if (!needsAppName && !needsEnvironment) return context;
+        boolean needsCurrentTime = context.getProperty("currentTime") == null;
+        if (!needsAppName && !needsEnvironment && !needsCurrentTime) return context;
 
         var builder = MozhnoContext.builder();
         context.getProperties().forEach(builder::addProperty);
         if (needsAppName) builder.appName(config.getAppName());
         if (config.getEnvironment() != null && needsEnvironment) builder.environment(config.getEnvironment());
+        if (needsCurrentTime) builder.addProperty("currentTime", java.time.Instant.now().toString());
         return builder.build();
     }
 

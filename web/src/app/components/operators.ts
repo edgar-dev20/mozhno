@@ -95,21 +95,20 @@ export function isValidOperator(type: string | undefined, operator: string): boo
 
 export function getInputMode(type: string | undefined): string {
   if (type === 'number') return 'decimal';
-  if (type === 'time' || type === 'semver') return 'numeric';
+  if (type === 'semver') return 'numeric';
   return 'text';
 }
 
 export function getInputPlaceholder(type: string | undefined): string {
   switch (type) {
     case 'number': return '42';
-    case 'time': return '12:00';
+    case 'time': return '2026-06-16T10:00:00';
     case 'semver': return '1.0.0';
     default: return '';
   }
 }
 
 export function getInputPattern(type: string | undefined): string | undefined {
-  if (type === 'time') return '^\\d{2}:\\d{2}$';
   if (type === 'semver') return '^\\d+\\.\\d+\\.\\d+(-.*)?$';
   return undefined;
 }
@@ -117,7 +116,7 @@ export function getInputPattern(type: string | undefined): string | undefined {
 export function getInputHint(type: string | undefined): string {
   switch (type) {
     case 'number': return '42, 3.14, -10';
-    case 'time': return '12:00, 23:59';
+    case 'time': return '2026-06-16T10:00:00Z, 2026-07-01T00:00:00Z';
     case 'semver': return '1.0.0, 2.1.0-beta';
     default: return '';
   }
@@ -128,7 +127,14 @@ export function isConstraintValueValid(type: string | undefined, value: string, 
   if (operator === 'in' || operator === 'not_in') return true;
   if (!value) return true;
   if (type === 'number') return !isNaN(Number(value));
-  if (type === 'time') return /^\d{2}:\d{2}$/.test(value);
+  if (type === 'time') return /(^\d{2}:\d{2}$)|(^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$)/.test(value);
   if (type === 'semver') return /^\d+\.\d+\.\d+(-.*)?$/.test(value);
   return true;
+}
+
+export function getInlineValidationError(type: string | undefined, value: string): string {
+  if (!value) return '';
+  if (type === 'number' && isNaN(Number(value))) return 'invalid';
+  if (type === 'semver' && !/^\d+\.\d+\.\d+(-.*)?$/.test(value)) return 'invalid';
+  return '';
 }

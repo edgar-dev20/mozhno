@@ -8,8 +8,9 @@ import { ConfirmDialog } from "@/app/components/ConfirmDialog";
 import { InlineDiffBar } from "@/app/components/InlineDiffBar";
 import { computeDiff, DiffChange } from "@/shared/diffUtils";
 import { SegmentIcon, SegmentIconPicker, SegmentColorPicker } from "@/app/components/SegmentIcon";
+import { DateTimePicker } from "@/shared/components/DateTimePicker";
 import { SegmentResponse } from "@/api";
-import { getDefaultOperator, isValidOperator, getInputPlaceholder, getInputPattern, getInputHint, getInputMode, isConstraintValueValid } from "@/app/components/operators";
+import { getDefaultOperator, isValidOperator, getInputPlaceholder, getInputPattern, getInputHint, getInputMode, isConstraintValueValid, getInlineValidationError } from "@/app/components/operators";
 import { OperatorBadge } from "@/app/components/OperatorBadge";
 import { ConstraintRow } from "@/app/components/ConstraintRow";
 import { SectionHeader, EmptyState, ColorBar, FormField, GradientButton, ErrorBox, Badge } from "@/shared";
@@ -417,36 +418,39 @@ export function Segments() {
                     <div className="space-y-3">
                       <div className="flex items-start gap-1.5">
                         <div className="flex-1 space-y-1.5">
-                          <input
-                            type="text"
-                            inputMode={getInputMode(contextType) as React.HTMLAttributes<HTMLInputElement>['inputMode']}
-                            pattern={getInputPattern(contextType)}
-                            placeholder={getInputPlaceholder(contextType) || t('segments.targetingRules.valuePlaceholder')}
-                            className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
-                            onInput={(e) => {
-                              const input = e.target as HTMLInputElement;
-                              const v = input.value.trim();
-                              if (!v) { input.setCustomValidity(''); return; }
-                              if (contextType === 'number' && isNaN(Number(v))) input.setCustomValidity('invalid');
-                              else if (contextType === 'time' && !/^\d{2}:\d{2}$/.test(v)) input.setCustomValidity('invalid');
-                              else if (contextType === 'semver' && !/^\d+\.\d+\.\d+(-.*)?$/.test(v)) input.setCustomValidity('invalid');
-                              else input.setCustomValidity('');
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ',') {
-                                e.preventDefault();
-                                const v = (e.target as HTMLInputElement).value.trim();
-                                if (!v) return;
-                                if (contextType === 'number' && isNaN(Number(v))) return;
-                                if (contextType === 'time' && !/^\d{2}:\d{2}$/.test(v)) return;
-                                if (contextType === 'semver' && !/^\d+\.\d+\.\d+(-.*)?$/.test(v)) return;
-                                addValue(c.id, v);
-                                (e.target as HTMLInputElement).value = '';
-                                (e.target as HTMLInputElement).setCustomValidity('');
-                              }
-                            }}
-                          />
-                          {contextType !== 'string' && (
+                          {contextType === 'time' ? (
+                            <DateTimePicker
+                              onChange={(iso) => {
+                                if (!iso) return;
+                                addValue(c.id, iso);
+                              }}
+                              placeholder={t('segments.targetingRules.valuePlaceholder')}
+                            />
+                          ) : (
+                            <input
+                              type="text"
+                              inputMode={getInputMode(contextType) as React.HTMLAttributes<HTMLInputElement>['inputMode']}
+                              pattern={getInputPattern(contextType)}
+                              placeholder={getInputPlaceholder(contextType) || t('segments.targetingRules.valuePlaceholder')}
+                              className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
+                              onInput={(e) => {
+                                const input = e.target as HTMLInputElement;
+                                input.setCustomValidity(getInlineValidationError(contextType, input.value.trim()));
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ',') {
+                                  e.preventDefault();
+                                  const v = (e.target as HTMLInputElement).value.trim();
+                                  if (!v) return;
+                                  if (getInlineValidationError(contextType, v)) return;
+                                  addValue(c.id, v);
+                                  (e.target as HTMLInputElement).value = '';
+                                  (e.target as HTMLInputElement).setCustomValidity('');
+                                }
+                              }}
+                            />
+                          )}
+                          {contextType !== 'string' && contextType !== 'time' && (
                             <p className="text-[11px] text-muted-foreground/60 ml-0.5">{getInputHint(contextType)}</p>
                           )}
                         </div>

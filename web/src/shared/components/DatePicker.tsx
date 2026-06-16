@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
-import { enUS, ru } from "date-fns/locale";
+import { enUS } from "date-fns/locale";
 import { Calendar, X } from "@/shared/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/app/components/ui/calendar";
 import { useLocale, useT } from "@/i18n";
+import { dateLocales } from "@/i18n/dateLocales";
 import type { Locale } from "date-fns/locale";
-
-const dateLocales: Record<string, Locale> = { en: enUS, ru };
 
 interface DatePickerProps {
   value?: Date | null;
@@ -102,7 +101,7 @@ export function DatePicker({
             {value && (
               <button
                 type="button"
-                onClick={() => handleSelect(undefined)}
+                onClick={() => onChange(undefined)}
                 className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
               >
                 {t("common.clearFilter")}

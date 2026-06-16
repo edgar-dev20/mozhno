@@ -3,6 +3,7 @@ import { Rocket, ShieldOff } from '@/shared/icons';
 import { SearchInput, adjustColor } from '@/shared';
 import type { Tag as TagType } from '@/api';
 import { useT } from '@/i18n';
+import { format, parseISO } from 'date-fns';
 
 const DateRangePicker = lazy(() => import('@/shared/components/DateRangePicker').then(m => ({ default: m.DateRangePicker })));
 
@@ -79,10 +80,10 @@ export function FlagFiltersBar({
         <span className="text-xs font-medium text-muted-foreground">{t('flags.created')}</span>
         <Suspense fallback={<div className="min-w-[260px] h-9 bg-muted rounded-lg animate-pulse" />}>
           <DateRangePicker
-            from={dateFrom ? new Date(dateFrom) : null}
-            to={dateTo ? new Date(dateTo) : null}
+            from={dateFrom ? parseISO(dateFrom) : null}
+            to={dateTo ? parseISO(dateTo) : null}
             onChange={(from, to) => {
-              onDateChange(from ? from.toISOString().slice(0, 10) : '', to ? to.toISOString().slice(0, 10) : '');
+              onDateChange(from ? format(from, 'yyyy-MM-dd') : '', to ? format(to, 'yyyy-MM-dd') : '');
             }}
             presets
             className="min-w-[260px]"

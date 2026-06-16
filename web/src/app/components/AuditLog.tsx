@@ -17,6 +17,7 @@ import {
   ChevronUp,
   Monitor,
 } from '@/shared/icons';
+import { format, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { api, AuditEvent } from '@/api';
 import { TipCard } from '@/app/components/TipCard';
@@ -110,7 +111,7 @@ export function AuditLog() {
 
   const toDateStr = (d: Date | undefined): string => {
     if (!d) return '';
-    return d.toISOString().slice(0, 10);
+    return format(d, 'yyyy-MM-dd');
   };
 
   const handleDateChange = (from: Date | undefined, to: Date | undefined) => {
@@ -325,8 +326,8 @@ export function AuditLog() {
           </span>
           <Suspense fallback={<div className="h-9 w-48 bg-muted rounded-lg animate-pulse" />}>
             <DateRangePicker
-              from={dateFrom ? new Date(dateFrom) : null}
-              to={dateTo ? new Date(dateTo) : null}
+              from={dateFrom ? parseISO(dateFrom) : null}
+              to={dateTo ? parseISO(dateTo) : null}
               onChange={handleDateChange}
               presets
             />

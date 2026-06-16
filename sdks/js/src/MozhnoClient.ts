@@ -33,6 +33,7 @@ export class MozhnoClient extends EventEmitter {
     this.context = {
       appName: this.config.appName,
       environment: this.config.environment || 'default',
+      currentTime: new Date().toISOString(),
       ...config.context,
     };
   }
@@ -67,6 +68,9 @@ export class MozhnoClient extends EventEmitter {
 
   isEnabled(flagKey: string, context?: MozhnoContext): boolean {
     const ctx = context || this.context;
+    if (!ctx.currentTime) {
+      ctx.currentTime = new Date().toISOString();
+    }
 
     if (this.config.mode === 'client') {
       return this.clientToggles.get(flagKey) || false;

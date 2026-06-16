@@ -38,6 +38,7 @@ const en = {
     fileTooBig: 'File too large. Maximum size: {{size}}MB',
     selectPeriod: 'Select period',
     selectDate: 'Select date',
+    selectDateTime: 'Select date & time',
     from: 'From',
     to: 'To',
     today: 'Today',
@@ -56,6 +57,8 @@ const en = {
     sparkline: 'Evaluation sparkline',
     statusIndicator: 'Status indicator',
     colorBar: 'Color bar',
+    clearFilter: 'Clear',
+    fromLower: 'from',
   },
   auth: {
     login: 'Log in',
