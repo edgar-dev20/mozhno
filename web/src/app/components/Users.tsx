@@ -13,6 +13,9 @@ import {
   User,
   Check,
   Loader2,
+  Crown,
+  Code2,
+  Eye,
 } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -36,7 +39,9 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar'
 export function Users() {
   const [users, setUsers] = useState<UserDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [filter, setFilter] = useState('');
+  const [debouncedFilter, setDebouncedFilter] = useState('');
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [roleFilter, setRoleFilter] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
@@ -58,6 +63,7 @@ export function Users() {
   const [deleting, setDeleting] = useState(false);
   const [resetPasswordConfirmId, setResetPasswordConfirmId] = useState<number | null>(null);
   const [resettingPassword, setResettingPassword] = useState(false);
+  const [diffOpen, setDiffOpen] = useState(false);
   const t = useT();
   const { locale } = useLocale();
 
@@ -65,7 +71,9 @@ export function Users() {
     try {
       const data = await api.users.list();
       setUsers(data);
+      setLoadError(false);
     } catch (e) {
+      setLoadError(true);
       if (import.meta.env.DEV) console.error(e);
     } finally {
       setLoading(false);
@@ -78,6 +86,10 @@ export function Users() {
   useEffect(() => {
     setDisplayLimit(10);
   }, [filter, roleFilter, statusFilter]);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedFilter(filter), 200);
+    return () => clearTimeout(timer);
+  }, [filter]);
 
   const toggleExpand = (id: number) => {
     setExpandedIds((prev) => {
@@ -156,6 +168,14 @@ export function Users() {
 
   const handleSave = async () => {
     setError('');
+    if (editingUser && initialFormData && (formData.status !== initialFormData.status || formData.role !== initialFormData.role)) {
+      setDiffOpen(true);
+      return;
+    }
+    await doSave();
+  };
+
+  const doSave = async () => {
     setSaving(true);
     try {
       if (editingUser) {
@@ -178,6 +198,7 @@ export function Users() {
         loadUsers();
       }
       setIsPanelOpen(false);
+      setDiffOpen(false);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : t('users.errors.save'));
     } finally {
@@ -185,12 +206,12 @@ export function Users() {
     }
   };
 
-  const roleVariantMap: Record<string, 'destructive' | 'info' | 'default'> = {
-    admin: 'destructive',
+  const roleVariantMap: Record<string, 'warning' | 'info' | 'default'> = {
+    admin: 'warning',
     developer: 'info',
   };
 
-  const getRoleVariant = (role: string): 'destructive' | 'info' | 'default' =>
+  const getRoleVariant = (role: string): 'warning' | 'info' | 'default' =>
     roleVariantMap[role] ?? 'default';
 
   const statusVariantMap: Record<string, 'success' | 'warning' | 'destructive' | 'default'> = {
@@ -217,6 +238,19 @@ export function Users() {
     }
   };
 
+  const getRoleIcon = (role: string, size: number = 12, className: string = '') => {
+    switch (role) {
+      case 'admin':
+        return <Crown size={size} className={className} />;
+      case 'developer':
+        return <Code2 size={size} className={className} />;
+      case 'viewer':
+        return <Eye size={size} className={className} />;
+      default:
+        return <Shield size={size} className={className} />;
+    }
+  };
+
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'active':
@@ -232,28 +266,26 @@ export function Users() {
 
   const renderRoleFilterBtn = (role: string, label: string) => {
     const active = roleFilter === role;
-    const icon = <Shield size={12} />;
+    const icon = getRoleIcon(role);
     const style =
       role === 'admin'
         ? {
-            on: 'bg-gradient-to-r from-destructive/10 to-destructive/10 text-destructive border-destructive/20',
+            on: 'bg-warning/10 text-warning border-warning/20',
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
-            icon: 'text-red-500',
           }
         : role === 'developer'
           ? {
-              on: 'bg-gradient-to-r from-gradient-start/10 to-gradient-end/10 text-info border-info/20',
+              on: 'bg-info/10 text-info border-info/20',
               off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
-              icon: 'text-blue-500',
             }
           : {
               on: 'bg-gradient-to-r from-neutral-500/10 to-neutral-500/10 text-foreground/80 border-neutral-500/20',
               off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
-              icon: 'text-muted-foreground',
             };
     return (
       <button
         onClick={() => setRoleFilter(active ? null : role)}
+        aria-pressed={active}
         className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
       >
         {icon}
@@ -271,14 +303,21 @@ export function Users() {
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
             dot: 'bg-success',
           }
-        : {
-            on: 'bg-destructive/10 text-destructive border-destructive/20',
-            off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
+        : status === 'invited'
+          ? {
+              on: 'bg-warning/10 text-warning border-warning/20',
+              off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
+              dot: 'bg-warning',
+            }
+          : {
+              on: 'bg-destructive/10 text-destructive border-destructive/20',
+              off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
             dot: 'bg-destructive',
           };
     return (
       <button
         onClick={() => setStatusFilter(active ? null : status)}
+        aria-pressed={active}
         className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
       >
         <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
@@ -323,8 +362,8 @@ export function Users() {
   let filtered = users;
   if (roleFilter) filtered = filtered.filter((u) => u.role === roleFilter);
   if (statusFilter) filtered = filtered.filter((u) => u.status === statusFilter);
-  if (filter.trim()) {
-    const q = filter.toLowerCase();
+  if (debouncedFilter.trim()) {
+    const q = debouncedFilter.toLowerCase();
     filtered = filtered.filter(
       (u) => u.email.toLowerCase().includes(q) || (u.name ?? '').toLowerCase().includes(q),
     );
@@ -355,6 +394,7 @@ export function Users() {
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setRoleFilter(null)}
+            aria-pressed={!roleFilter}
             className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
               !roleFilter
                 ? 'bg-brand/10 text-brand border-brand/20'
@@ -370,6 +410,7 @@ export function Users() {
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setStatusFilter(null)}
+            aria-pressed={!statusFilter}
             className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
               !statusFilter
                 ? 'bg-brand/10 text-brand border-brand/20'
@@ -379,12 +420,20 @@ export function Users() {
             {t('users.filterAllStatuses')}
           </button>
           {renderStatusFilterBtn('active', t('users.status.active'))}
+          {renderStatusFilterBtn('invited', t('users.status.invited'))}
           {renderStatusFilterBtn('suspended', t('users.status.suspended'))}
         </div>
       </div>
 
       <div className="space-y-3">
-        {loading ? (
+        {loadError ? (
+          <ErrorBox>
+            {t('users.errors.load')}{' '}
+            <button onClick={loadUsers} className="underline hover:no-underline font-semibold">
+              {t('common.retry')}
+            </button>
+          </ErrorBox>
+        ) : loading ? (
           <UserTableSkeleton count={4} />
         ) : filtered.length === 0 ? (
           <EmptyState
@@ -419,8 +468,17 @@ export function Users() {
                     id={`user-card-${user.id}`}
                   >
                     <div
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={expanded}
                       className="flex gap-4 px-4 py-3 cursor-pointer"
                       onClick={() => toggleExpand(user.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleExpand(user.id);
+                        }
+                      }}
                     >
                       <div className="flex-1 min-w-0 flex items-center gap-3">
                         <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -429,7 +487,7 @@ export function Users() {
                               src={hasAvatar ? avatarUrl : undefined}
                               alt={user.name ?? ''}
                             />
-                            <AvatarFallback className="bg-primary text-xs font-bold text-white">
+                            <AvatarFallback className="bg-brand text-xs font-bold text-white">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
@@ -494,7 +552,7 @@ export function Users() {
                                   {t('users.card.role')}
                                 </span>
                                 <span className="text-xs font-medium flex items-center gap-1.5">
-                                  <Shield size={11} className="text-muted-foreground shrink-0" />
+                                  {getRoleIcon(user.role, 11, 'text-muted-foreground shrink-0')}
                                   <Badge variant={getRoleVariant(user.role)} size="sm">{getRoleLabel(user.role)}</Badge>
                                 </span>
                               </div>
@@ -528,7 +586,7 @@ export function Users() {
                                   e.stopPropagation();
                                   handleOpenEdit(user);
                                 }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-rose-600 dark:hover:text-rose-400 hover:border-rose-200 dark:hover:border-rose-500/30 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-brand hover:border-brand/20 hover:bg-brand/5 transition-all"
                               >
                                 <Edit2 size={12} />
                                 {t('users.card.edit')}
@@ -577,47 +635,91 @@ export function Users() {
         description={
           editingUser ? t('users.panel.editDescription') : t('users.panel.createDescription')
         }
+        diffSlot={
+          diffOpen ? (
+            <div className="border-t border-border bg-secondary/30 dark:bg-secondary/10">
+              <div className="px-6 pt-4 pb-1">
+                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                  {t('common.reviewChanges')}
+                </span>
+              </div>
+              <div className="px-6 pb-4 space-y-2.5">
+                {initialFormData && formData.role !== initialFormData.role && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-muted-foreground w-12 shrink-0">{t('users.card.role')}</span>
+                    <Badge variant={getRoleVariant(initialFormData.role)} size="sm">
+                      {getRoleLabel(initialFormData.role)}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">→</span>
+                    <Badge variant={getRoleVariant(formData.role)} size="sm">
+                      {getRoleLabel(formData.role)}
+                    </Badge>
+                  </div>
+                )}
+                {initialFormData && formData.status !== initialFormData.status && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-muted-foreground w-12 shrink-0">{t('users.card.status')}</span>
+                    <Badge variant={getStatusVariant(initialFormData.status)} size="sm">
+                      {getStatusLabel(initialFormData.status)}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">→</span>
+                    <Badge variant={getStatusVariant(formData.status)} size="sm">
+                      {getStatusLabel(formData.status)}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : undefined
+        }
+        onDiffDismiss={diffOpen ? () => setDiffOpen(false) : undefined}
         footer={
-          <>
-            <button
-              onClick={() => setIsPanelOpen(false)}
-              className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
-            >
-              {t('common.cancel')}
-            </button>
-            <GradientButton
-              onClick={handleSave}
-              disabled={
-                saving ||
-                !formData.email ||
-                (!!editingUser && !isDirty)
-              }
-              loading={saving}
-            >
-              {editingUser ? t('common.saveChanges') : t('users.panel.invite')}
-            </GradientButton>
-          </>
+          diffOpen ? (
+            <>
+              <button
+                onClick={() => setDiffOpen(false)}
+                className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <GradientButton onClick={doSave} loading={saving}>
+                {t('common.applyChanges')}
+              </GradientButton>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setIsPanelOpen(false)}
+                className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <GradientButton
+                onClick={handleSave}
+                disabled={
+                  saving ||
+                  !formData.email ||
+                  (!!editingUser && !isDirty)
+                }
+                loading={saving}
+              >
+                {editingUser ? t('common.saveChanges') : t('users.panel.invite')}
+              </GradientButton>
+            </>
+          )
         }
       >
         <div className="space-y-5">
           {error && <ErrorBox>{error}</ErrorBox>}
 
-          {!editingUser && (
-            <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg">
-              <p className="text-xs text-indigo-700 dark:text-indigo-300">
-                {t('users.panel.createTip')}
-              </p>
-            </div>
-          )}
-
           {editingUser && (
-            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-gradient-subtle-start to-gradient-subtle-end dark:from-info/5 dark:to-brand/5 border border-info/20 dark:border-brand/20 rounded-xl">
+            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-gradient-subtle-start to-gradient-subtle-end dark:from-brand/5 dark:to-brand/5 border border-info/20 dark:border-brand/20 rounded-xl">
               <Avatar className="w-10 h-10 shadow-md shrink-0">
                 <AvatarImage
                   src={editingUser.avatar ? api.users.getAvatarUrl(editingUser.id) : undefined}
                   alt={editingUser.name ?? ''}
                 />
-                <AvatarFallback className="bg-primary text-sm font-bold text-white">
+                <AvatarFallback className="bg-brand text-sm font-bold text-white">
                   {(editingUser.name ?? editingUser.email).substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -679,11 +781,11 @@ export function Users() {
 
           <div className="pt-4 border-t border-border space-y-3">
             <div className="flex items-center gap-2">
-              <Shield size={16} className="text-indigo-600 dark:text-indigo-400" />
+              <Shield size={16} className="text-brand" />
               <label className="text-sm font-medium text-foreground/80">
                 {t('users.form.roleLabel')}
               </label>
-              <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 font-medium leading-none">
+              <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">
                 {t('users.form.roleSelect')}
               </span>
             </div>
@@ -693,16 +795,16 @@ export function Users() {
                 [
                   {
                     value: 'admin',
-                    color: 'from-red-600 to-red-500',
-                    borderColor: 'border-destructive',
-                    bgHover: 'group-hover:bg-destructive/10',
-                    bgSelected: 'bg-destructive/10',
-                    textSelected: 'text-destructive',
+                    color: 'from-warning to-warning/80',
+                    borderColor: 'border-warning',
+                    bgHover: 'group-hover:bg-warning/10',
+                    bgSelected: 'bg-warning/10',
+                    textSelected: 'text-warning',
                     description: t('users.roleDescriptions.admin'),
                   },
                   {
                     value: 'developer',
-                    color: 'from-blue-600 to-violet-500',
+                    color: 'from-info to-info/80',
                     borderColor: 'border-info',
                     bgHover: 'group-hover:bg-info/10',
                     bgSelected: 'bg-info/10',
@@ -735,7 +837,7 @@ export function Users() {
                     <div
                       className={`w-8 h-8 rounded-lg bg-gradient-to-r ${color} flex items-center justify-center text-white shadow-sm shrink-0`}
                     >
-                      <Shield size={16} />
+                      {getRoleIcon(value, 16)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div
@@ -761,7 +863,7 @@ export function Users() {
           {editingUser && (
             <div className="pt-4 border-t border-border space-y-3">
               <div className="flex items-center gap-2">
-                <Activity size={16} className="text-indigo-600 dark:text-indigo-400" />
+                <Activity size={16} className="text-brand" />
                 <label className="text-sm font-medium text-foreground/80">
                   {t('users.form.statusLabel')}
                 </label>
@@ -774,33 +876,22 @@ export function Users() {
                       value: 'active',
                       label: t('users.status.active'),
                       dotClass: 'bg-success',
+                      color: 'success',
                       description: t('users.statusDescriptions.active'),
                     },
                     {
                       value: 'suspended',
                       label: t('users.status.suspended'),
                       dotClass: 'bg-destructive',
+                      color: 'destructive',
                       description: t('users.statusDescriptions.suspended'),
                     },
                   ] as const
-                ).map(({ value, label, dotClass, description }) => {
+                ).map(({ value, label, dotClass, color, description }) => {
                   const selected = formData.status === value;
-                  const isActive = value === 'active';
-                  const borderColor = selected
-                    ? isActive
-                      ? 'border-success'
-                      : 'border-destructive'
-                    : 'border-border';
-                  const bgSelected = selected
-                    ? isActive
-                      ? 'bg-success/10'
-                      : 'bg-destructive/10'
-                    : '';
-                  const textSelected = selected
-                    ? isActive
-                      ? 'text-success'
-                      : 'text-destructive'
-                    : '';
+                  const borderColor = selected ? `border-${color}` : 'border-border';
+                  const bgSelected = selected ? `bg-${color}/10` : '';
+                  const textSelected = selected ? `text-${color}` : '';
                   return (
                     <button
                       key={value}
@@ -825,7 +916,7 @@ export function Users() {
                       </div>
                       {selected && (
                         <div
-                          className={`w-5 h-5 rounded-md ${isActive ? 'bg-success' : 'bg-destructive'} flex items-center justify-center shrink-0`}
+                          className={`w-5 h-5 rounded-md bg-${color} flex items-center justify-center shrink-0`}
                         >
                           <Check size={12} className="text-white" strokeWidth={3} />
                         </div>
@@ -860,18 +951,18 @@ export function Users() {
             </div>
           )}
 
-          <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg">
+          <div className="p-4 bg-brand/5 border border-brand/20 rounded-lg">
             <div className="flex gap-3">
               <div className="shrink-0 mt-0.5">
-                <div className="w-5 h-5 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center">
                   <Shield size={12} className="text-white" />
                 </div>
               </div>
               <div>
-                <h5 className="text-xs font-semibold text-indigo-900 dark:text-indigo-200 mb-1">
+                <h5 className="text-xs font-semibold text-brand mb-1">
                   {t('users.help.title')}
                 </h5>
-                <p className="text-xs text-indigo-700 dark:text-indigo-300">
+                <p className="text-xs text-foreground/70">
                   {t('users.help.admin')}
                   <br />
                   {t('users.help.developer')}
