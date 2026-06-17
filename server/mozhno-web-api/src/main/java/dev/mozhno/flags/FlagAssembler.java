@@ -5,7 +5,6 @@ import dev.mozhno.auth.UserRepository;
 import dev.mozhno.flags.strategy.FlagStrategy;
 import dev.mozhno.tags.Tag;
 import dev.mozhno.tags.TagRepository;
-import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -19,6 +18,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
 
 @Component
 public class FlagAssembler {
@@ -40,33 +41,9 @@ public class FlagAssembler {
     }
 
     public FlagResponse toResponse(Flag flag, FlagStrategy strategy) {
-        List<FlagTagValue> tagValues = flagTagValueRepository.findByFlagId(flag.getId());
-        List<Integer> tagIds = tagValues.stream().map(FlagTagValue::getTagId).distinct().toList();
-        Map<Integer, Tag> tagMap = tagIds.isEmpty()
-            ? Collections.emptyMap()
-            : tagRepository.findAllByIds(tagIds).stream()
-                .collect(Collectors.toMap(Tag::getId, Function.identity()));
-
-        List<FlagResponse.TagValueResponse> tags = tagValues.stream().map(ftv -> {
-            Tag tag = tagMap.get(ftv.getTagId());
-            return FlagResponse.TagValueResponse.builder()
-                .tagId(ftv.getTagId())
-                .tagName(tag != null ? tag.getName() : "")
-                .tagColor(tag != null ? tag.getColor() : "")
-                .value(ftv.getTagValue())
-                .build();
-        }).toList();
-
-        boolean enabled = strategy != null ? strategy.isEnabled() : flag.isEnabled();
-        Integer strategyId = strategy != null ? strategy.getId() : null;
-        Double percentage = strategy != null ? strategy.getPercentage() : null;
-        Integer contextDefinitionId = strategy != null ? strategy.getContextDefinitionId() : null;
-        String contextValuesJson = strategy != null ? strategy.getContextValuesJson() : null;
-        List<Integer> segmentIds = strategy != null ? strategy.getSegmentIds() : null;
-        Instant lastUsedAt = strategy != null ? strategy.getLastUsedAt() : null;
-
-        String createdBy = resolveUserNameCached(flag.getCreatorId());
-        String archivedBy = resolveUserNameCached(flag.getArchivedBy());
+        List<FlagResponse.TagValueResponse> tags = resolveTags(flagTagValueRepository.findByFlagId(flag.getId()));
+        String createdBy = resolveUserName(flag.getCreatorId());
+        String archivedBy = resolveUserName(flag.getArchivedBy());
 
         return FlagResponse.builder()
             .id(flag.getId())
@@ -77,16 +54,16 @@ public class FlagAssembler {
             .flagType(flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE")
             .createdAt(flag.getCreatedAt())
             .createdBy(createdBy)
-            .lastUsedAt(lastUsedAt)
+            .lastUsedAt(strategy != null ? strategy.getLastUsedAt() : null)
             .archivedBy(archivedBy)
             .archivedAt(flag.getArchivedAt())
             .tags(tags)
-            .enabled(enabled)
-            .strategyId(strategyId)
-            .percentage(percentage)
-            .contextDefinitionId(contextDefinitionId)
-            .contextValuesJson(contextValuesJson)
-            .segmentIds(segmentIds)
+            .enabled(strategy != null ? strategy.isEnabled() : flag.isEnabled())
+            .strategyId(strategy != null ? strategy.getId() : null)
+            .percentage(strategy != null ? strategy.getPercentage() : null)
+            .contextDefinitionId(strategy != null ? strategy.getContextDefinitionId() : null)
+            .contextValuesJson(strategy != null ? strategy.getContextValuesJson() : null)
+            .segmentIds(strategy != null ? strategy.getSegmentIds() : null)
             .archived(flag.isArchived())
             .build();
     }
@@ -108,31 +85,8 @@ public class FlagAssembler {
         return flagWithStrategies.stream().map(fws -> {
             Flag flag = fws.flag();
             FlagStrategy strategy = fws.strategy();
-
-            List<FlagTagValue> tagValues = tagValuesByFlag.getOrDefault(flag.getId(), List.of());
-            List<Integer> tagIds = tagValues.stream().map(FlagTagValue::getTagId).distinct().toList();
-            Map<Integer, Tag> tagMap = tagIds.isEmpty()
-                ? Collections.emptyMap()
-                : tagRepository.findAllByIds(tagIds).stream()
-                    .collect(Collectors.toMap(Tag::getId, Function.identity()));
-
-            List<FlagResponse.TagValueResponse> tags = tagValues.stream().map(ftv -> {
-                Tag tag = tagMap.get(ftv.getTagId());
-                return FlagResponse.TagValueResponse.builder()
-                    .tagId(ftv.getTagId())
-                    .tagName(tag != null ? tag.getName() : "")
-                    .tagColor(tag != null ? tag.getColor() : "")
-                    .value(ftv.getTagValue())
-                    .build();
-            }).toList();
-
-            boolean enabled = fws.isEnabled();
-            Integer strategyId = strategy != null ? strategy.getId() : null;
-            Double percentage = strategy != null ? strategy.getPercentage() : null;
-            Integer contextDefinitionId = strategy != null ? strategy.getContextDefinitionId() : null;
-            String contextValuesJson = strategy != null ? strategy.getContextValuesJson() : null;
-            List<Integer> segmentIds = strategy != null ? strategy.getSegmentIds() : null;
-            Instant lastUsedAt = strategy != null ? strategy.getLastUsedAt() : null;
+            List<FlagResponse.TagValueResponse> tags = resolveTags(
+                tagValuesByFlag.getOrDefault(flag.getId(), List.of()));
 
             return FlagResponse.builder()
                 .id(flag.getId())
@@ -143,38 +97,19 @@ public class FlagAssembler {
                 .flagType(flag.getFlagType() != null ? flag.getFlagType().name() : "RELEASE")
                 .createdAt(flag.getCreatedAt())
                 .createdBy(userNameMap.get(flag.getCreatorId()))
-                .lastUsedAt(lastUsedAt)
+                .lastUsedAt(strategy != null ? strategy.getLastUsedAt() : null)
                 .archivedBy(userNameMap.get(flag.getArchivedBy()))
                 .archivedAt(flag.getArchivedAt())
                 .tags(tags)
-                .enabled(enabled)
-                .strategyId(strategyId)
-                .percentage(percentage)
-                .contextDefinitionId(contextDefinitionId)
-                .contextValuesJson(contextValuesJson)
-                .segmentIds(segmentIds)
+                .enabled(fws.isEnabled())
+                .strategyId(strategy != null ? strategy.getId() : null)
+                .percentage(strategy != null ? strategy.getPercentage() : null)
+                .contextDefinitionId(strategy != null ? strategy.getContextDefinitionId() : null)
+                .contextValuesJson(strategy != null ? strategy.getContextValuesJson() : null)
+                .segmentIds(strategy != null ? strategy.getSegmentIds() : null)
                 .archived(flag.isArchived())
                 .build();
         }).toList();
-    }
-
-    private Map<Integer, String> resolveUserNames(Set<Integer> userIds) {
-        if (userIds.isEmpty()) return Collections.emptyMap();
-        List<User> users = userRepository.findAllByIds(new ArrayList<>(userIds));
-        Map<Integer, String> map = new LinkedHashMap<>();
-        for (User user : users) {
-            String name = user.getName() != null ? user.getName() : user.getEmail();
-            map.put(user.getId(), name + " (" + user.getEmail() + ")");
-        }
-        return map;
-    }
-
-    private String resolveUserNameCached(Integer userId) {
-        if (userId == null) return null;
-        User user = userRepository.findById(userId);
-        if (user == null) return null;
-        String name = user.getName() != null ? user.getName() : user.getEmail();
-        return name + " (" + user.getEmail() + ")";
     }
 
     public List<EnrichedFlagResponse> toEnrichedResponses(List<FlagWithStrategy> flagWithStrategies) {
@@ -199,22 +134,8 @@ public class FlagAssembler {
             String createdBy = userNameMap.get(first.getCreatorId());
             String archivedBy = userNameMap.get(first.getArchivedBy());
 
-            List<FlagTagValue> tagValues = tagValuesByFlag.getOrDefault(first.getId(), List.of());
-            List<Integer> tagIds = tagValues.stream().map(FlagTagValue::getTagId).distinct().toList();
-            Map<Integer, Tag> tagMap = tagIds.isEmpty()
-                ? Collections.emptyMap()
-                : tagRepository.findAllByIds(tagIds).stream()
-                    .collect(Collectors.toMap(Tag::getId, Function.identity()));
-
-            List<EnrichedFlagResponse.TagValueResponse> tags = tagValues.stream().map(ftv -> {
-                Tag tag = tagMap.get(ftv.getTagId());
-                return EnrichedFlagResponse.TagValueResponse.builder()
-                    .tagId(ftv.getTagId())
-                    .tagName(tag != null ? tag.getName() : "")
-                    .tagColor(tag != null ? tag.getColor() : "")
-                    .value(ftv.getTagValue())
-                    .build();
-            }).toList();
+            List<EnrichedFlagResponse.TagValueResponse> tags =
+                resolveEnrichedTags(tagValuesByFlag.getOrDefault(first.getId(), List.of()));
 
             List<EnrichedFlagResponse.EnvironmentState> environments = group.stream()
                 .filter(fws -> fws.strategy() != null)
@@ -255,5 +176,60 @@ public class FlagAssembler {
                 .archived(first.isArchived())
                 .build();
         }).toList();
+    }
+
+    private List<FlagResponse.TagValueResponse> resolveTags(List<FlagTagValue> tagValues) {
+        List<Integer> tagIds = tagValues.stream().map(FlagTagValue::getTagId).distinct().toList();
+        Map<Integer, Tag> tagMap = tagIds.isEmpty()
+            ? Collections.emptyMap()
+            : tagRepository.findAllByIds(tagIds).stream()
+                .collect(Collectors.toMap(Tag::getId, Function.identity()));
+
+        return tagValues.stream().map(ftv -> {
+            Tag tag = tagMap.get(ftv.getTagId());
+            return FlagResponse.TagValueResponse.builder()
+                .tagId(ftv.getTagId())
+                .tagName(tag != null ? tag.getName() : "")
+                .tagColor(tag != null ? tag.getColor() : "")
+                .value(ftv.getTagValue())
+                .build();
+        }).toList();
+    }
+
+    private List<EnrichedFlagResponse.TagValueResponse> resolveEnrichedTags(List<FlagTagValue> tagValues) {
+        List<Integer> tagIds = tagValues.stream().map(FlagTagValue::getTagId).distinct().toList();
+        Map<Integer, Tag> tagMap = tagIds.isEmpty()
+            ? Collections.emptyMap()
+            : tagRepository.findAllByIds(tagIds).stream()
+                .collect(Collectors.toMap(Tag::getId, Function.identity()));
+
+        return tagValues.stream().map(ftv -> {
+            Tag tag = tagMap.get(ftv.getTagId());
+            return EnrichedFlagResponse.TagValueResponse.builder()
+                .tagId(ftv.getTagId())
+                .tagName(tag != null ? tag.getName() : "")
+                .tagColor(tag != null ? tag.getColor() : "")
+                .value(ftv.getTagValue())
+                .build();
+        }).toList();
+    }
+
+    private Map<Integer, String> resolveUserNames(Set<Integer> userIds) {
+        if (userIds.isEmpty()) return Collections.emptyMap();
+        List<User> users = userRepository.findAllByIds(new ArrayList<>(userIds));
+        Map<Integer, String> map = new LinkedHashMap<>();
+        for (User user : users) {
+            String name = user.getName() != null ? user.getName() : user.getEmail();
+            map.put(user.getId(), name + " (" + user.getEmail() + ")");
+        }
+        return map;
+    }
+
+    private String resolveUserName(Integer userId) {
+        if (userId == null) return null;
+        User user = userRepository.findById(userId);
+        if (user == null) return null;
+        String name = user.getName() != null ? user.getName() : user.getEmail();
+        return name + " (" + user.getEmail() + ")";
     }
 }
