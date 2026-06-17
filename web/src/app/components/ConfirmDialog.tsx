@@ -9,9 +9,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/app/components/ui/alert-dialog';
-import { Info, Trash2 } from '@/shared/icons';
-import { GradientButton } from '@/shared';
-import { StatusIcon } from '@/shared/components/StatusIcon';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -20,7 +17,7 @@ interface ConfirmDialogProps {
   description?: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  variant?: 'destructive' | 'default';
+  variant?: 'destructive' | 'default' | 'warning';
   onConfirm: () => void;
   loading?: boolean;
   children?: React.ReactNode;
@@ -41,32 +38,25 @@ export function ConfirmDialog({
   wide = false,
 }: ConfirmDialogProps) {
   const t = useT();
-  const isDestructive = variant === 'destructive';
+  const variantButtonClasses: Record<string, string> = {
+    destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+    warning: 'bg-warning text-warning-foreground hover:bg-warning/90',
+    default: 'bg-brand text-brand-foreground hover:bg-brand/90',
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className={wide ? 'sm:max-w-3xl' : 'sm:max-w-md'}>
-        <div className="pt-0 pb-5">
-          <div className="flex gap-4">
-            <StatusIcon
-              variant={isDestructive ? 'destructive' : 'brand'}
-              icon={isDestructive ? <Trash2 /> : <Info />}
-            />
-
-            <div className="flex-1 min-w-0">
-              <AlertDialogHeader className="gap-1.5 p-0">
-                <AlertDialogTitle className="text-lg font-semibold text-foreground leading-tight">
-                  {title}
-                </AlertDialogTitle>
-                {description && (
-                  <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
-                    {description}
-                  </AlertDialogDescription>
-                )}
-              </AlertDialogHeader>
-            </div>
-          </div>
-        </div>
+        <AlertDialogHeader className="gap-1.5 p-0 pb-5">
+          <AlertDialogTitle className="text-lg font-semibold text-foreground leading-tight">
+            {title}
+          </AlertDialogTitle>
+          {description && (
+            <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
+              {description}
+            </AlertDialogDescription>
+          )}
+        </AlertDialogHeader>
 
         {children && <div className="pb-6 min-w-0 overflow-hidden">{children}</div>}
 
@@ -74,15 +64,20 @@ export function ConfirmDialog({
           <AlertDialogCancel className="px-4 py-2.5 text-sm font-medium text-foreground/80 bg-card border border-border rounded-lg hover:bg-accent transition-colors">
             {t(cancelLabel as MessageKey)}
           </AlertDialogCancel>
-          <GradientButton
-            variant={isDestructive ? 'danger' : 'primary'}
+          <button
             onClick={onConfirm}
             disabled={loading}
-            loading={loading}
-            size="md"
+            className={`inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-all px-4 py-2.5 disabled:opacity-50 disabled:pointer-events-none ${variantButtonClasses[variant]}`}
           >
-            {loading ? t('common.loading') : t(confirmLabel as MessageKey)}
-          </GradientButton>
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                {t('common.loading')}
+              </>
+            ) : (
+              t(confirmLabel as MessageKey)
+            )}
+          </button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -12,7 +12,6 @@ import {
   Activity,
   User,
   Check,
-  Loader2,
   Crown,
   Code2,
   Eye,
@@ -54,7 +53,9 @@ export function Users() {
   const [initialFormData, setInitialFormData] = useState<typeof formData | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [resetStep, setResetStep] = useState<'confirm' | 'sending' | 'sent' | null>(null);
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [resetPasswordOpen, setResetPasswordOpen] = useState(false);
+  const [diffOpen, setDiffOpen] = useState(false);
   const t = useT();
   const { locale } = useLocale();
 
@@ -135,13 +136,15 @@ export function Users() {
 
   const handleResetPassword = async () => {
     if (!editingUser) return;
-    setResetStep('sending');
+    setResettingPassword(true);
     try {
       await api.users.sendResetLink(editingUser.id);
-      setResetStep('sent');
+      toast.success(t('users.form.resetLinkSent'));
+      setResetPasswordOpen(false);
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : t('users.errors.save'));
-      setResetStep(null);
+    } finally {
+      setResettingPassword(false);
     }
   };
 
@@ -157,6 +160,14 @@ export function Users() {
 
   const handleSave = async () => {
     setError('');
+    if (editingUser && initialFormData && (formData.status !== initialFormData.status || formData.role !== initialFormData.role)) {
+      setDiffOpen(true);
+      return;
+    }
+    await doSave();
+  };
+
+  const doSave = async () => {
     setSaving(true);
     try {
       if (editingUser) {
@@ -179,6 +190,7 @@ export function Users() {
         loadUsers();
       }
       setIsPanelOpen(false);
+      setDiffOpen(false);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : t('users.errors.save'));
     } finally {
@@ -619,30 +631,81 @@ export function Users() {
       <SidePanel
         open={isPanelOpen}
         onOpenChange={setIsPanelOpen}
+        diffSlot={
+          diffOpen ? (
+            <div className="border-t border-border bg-secondary/30 dark:bg-secondary/10">
+              <div className="px-6 pt-4 pb-1">
+                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                  {t('common.reviewChanges')}
+                </span>
+              </div>
+              <div className="px-6 pb-4 space-y-2.5">
+                {initialFormData && formData.role !== initialFormData.role && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-muted-foreground w-12 shrink-0">{t('users.card.role')}</span>
+                    <Badge variant={getRoleVariant(initialFormData.role)} size="sm">
+                      {getRoleLabel(initialFormData.role)}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">→</span>
+                    <Badge variant={getRoleVariant(formData.role)} size="sm">
+                      {getRoleLabel(formData.role)}
+                    </Badge>
+                  </div>
+                )}
+                {initialFormData && formData.status !== initialFormData.status && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-medium text-muted-foreground w-12 shrink-0">{t('users.card.status')}</span>
+                    <Badge variant={getStatusVariant(initialFormData.status)} size="sm">
+                      {getStatusLabel(initialFormData.status)}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">→</span>
+                    <Badge variant={getStatusVariant(formData.status)} size="sm">
+                      {getStatusLabel(formData.status)}
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : undefined
+        }
+        onDiffDismiss={diffOpen ? () => setDiffOpen(false) : undefined}
         title={editingUser ? t('users.panel.editTitle') : t('users.panel.createTitle')}
         description={
           editingUser ? t('users.panel.editDescription') : t('users.panel.createDescription')
         }
         footer={
-          <>
-            <button
-              onClick={() => setIsPanelOpen(false)}
-              className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
-            >
-              {t('common.cancel')}
-            </button>
-            <GradientButton
-              onClick={handleSave}
-              disabled={saving || !formData.email || (!!editingUser && !isDirty)}
-              loading={saving}
-            >
-              {editingUser ? t('common.saveChanges') : t('users.panel.invite')}
-            </GradientButton>
-          </>
+          diffOpen ? (
+            <>
+              <button
+                onClick={() => setDiffOpen(false)}
+                className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <GradientButton onClick={doSave} loading={saving}>
+                {t('common.applyChanges')}
+              </GradientButton>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setIsPanelOpen(false)}
+                className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <GradientButton
+                onClick={handleSave}
+                disabled={saving || !formData.email || (!!editingUser && !isDirty)}
+                loading={saving}
+              >
+                {editingUser ? t('common.saveChanges') : t('users.panel.invite')}
+              </GradientButton>
+            </>
+          )
         }
       >
-        <div className="relative">
-          <div className="space-y-5">
+        <div className="space-y-5">
             {error && <ErrorBox>{error}</ErrorBox>}
 
             {editingUser && (
@@ -706,7 +769,7 @@ export function Users() {
               <div className="pt-4 border-t border-border">
                 <button
                   type="button"
-                  onClick={() => setResetStep('confirm')}
+                  onClick={() => setResetPasswordOpen(true)}
                   className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-foreground/80 bg-secondary border border-border rounded-lg hover:bg-accent hover:text-foreground transition-all"
                 >
                   <Mail size={14} />
@@ -922,73 +985,6 @@ export function Users() {
               </div>
             )}
           </div>
-
-          {resetStep && (
-            <div className="absolute inset-0 z-10 flex flex-col">
-              <div
-                className="absolute inset-0 bg-white/70 dark:bg-black/50 backdrop-blur-[2px]"
-                onClick={() => resetStep === 'confirm' && setResetStep(null)}
-              />
-              <div className="relative flex-1 flex items-center justify-center p-6">
-                <div className="bg-card border border-border rounded-2xl shadow-xl p-6 w-full max-w-sm z-20">
-                  {resetStep === 'confirm' && (
-                    <>
-                      <h3 className="text-lg font-semibold text-foreground mb-2">
-                        {t('users.resetConfirm.title')}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-5">
-                        {t('users.resetConfirm.description', {
-                          name: editingUser?.name ?? editingUser?.email ?? '',
-                        })}
-                      </p>
-                      <div className="flex justify-end gap-3">
-                        <button
-                          onClick={() => setResetStep(null)}
-                          className="px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
-                        >
-                          {t('common.cancel')}
-                        </button>
-                        <GradientButton onClick={handleResetPassword}>
-                          {t('users.resetConfirm.send')}
-                        </GradientButton>
-                      </div>
-                    </>
-                  )}
-                  {resetStep === 'sending' && (
-                    <div className="flex flex-col items-center gap-3 py-2">
-                      <Loader2 size={24} className="animate-spin text-brand" />
-                      <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
-                    </div>
-                  )}
-                  {resetStep === 'sent' && (
-                    <div className="flex flex-col items-center gap-3 py-2">
-                      <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
-                        <svg
-                          className="w-5 h-5 text-green-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={3}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                      <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                        {t('users.form.resetLinkSent')}
-                      </p>
-                      <button
-                        onClick={() => setResetStep(null)}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors mt-1"
-                      >
-                        {t('common.close')}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
       </SidePanel>
 
       <ConfirmDialog
@@ -1006,6 +1002,21 @@ export function Users() {
         confirmLabel={t('common.delete')}
         onConfirm={handleDelete}
         loading={deleting}
+      />
+
+      <ConfirmDialog
+        open={resetPasswordOpen}
+        onOpenChange={(open) => {
+          if (!open) setResetPasswordOpen(false);
+        }}
+        title={t('users.resetConfirm.title')}
+        description={t('users.resetConfirm.description', {
+          name: editingUser?.name ?? editingUser?.email ?? '',
+        })}
+        confirmLabel={t('users.resetConfirm.send')}
+        variant="default"
+        onConfirm={handleResetPassword}
+        loading={resettingPassword}
       />
     </div>
   );

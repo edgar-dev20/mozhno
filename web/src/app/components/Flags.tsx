@@ -770,6 +770,7 @@ export function Flags() {
         title={t('flags.archiveConfirm')}
         description={`${t('flags.namePlaceholder')} «${archiveTarget?.name ?? ''}» ${t('flags.archiveDescription')}`}
         confirmLabel={t('flags.archiveBtn')}
+        variant="default"
         onConfirm={doArchive}
         loading={archiving}
       />

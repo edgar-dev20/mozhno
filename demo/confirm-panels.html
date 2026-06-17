@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SidePanel Confirmation Mockups</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box }
+body { font-family:Inter,-apple-system,sans-serif; background:#0d0d12; color:#ccc; padding:0 0 80px }
+body > h1 { text-align:center; padding:24px 16px 0; font-size:28px; font-weight:800; letter-spacing:-0.03em; color:#e0e0e0 }
+body > p.sub { text-align:center; color:#666; font-size:14px; margin-bottom:40px; padding:0 16px }
+.wrap { display:flex; flex-direction:column; gap:56px; max-width:900px; margin:0 auto; padding:0 16px 60px }
+.label { display:flex; align-items:center; gap:10px; margin-bottom:14px }
+.label .dot { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#fff; flex-shrink:0 }
+.label h2 { font-size:18px; font-weight:700; color:#e0e0e0 }
+.label p { font-size:12px; color:#777 }
+.demo { overflow:hidden; box-shadow:0 0 0 1px rgba(255,255,255,.04),0 16px 48px rgba(0,0,0,.5) }
+
+/* Layout: page background > panel wrapper (right-aligned) */
+.layout {
+  background:#18181b; border-radius:20px;
+  display:flex; height:520px; position:relative; overflow:hidden
+}
+.layout-bg {
+  flex:1; display:flex; flex-direction:column; padding:24px; position:relative
+}
+
+/* SidePanel */
+.sidepanel {
+  width:420px; min-width:420px; border-left:1px solid rgba(255,255,255,.06);
+  background:#18181b;
+  display:flex; flex-direction:column;
+  position:relative; z-index:1
+}
+.sp-header {
+  padding:20px 24px 16px; border-bottom:1px solid rgba(255,255,255,.06);
+  display:flex; align-items:flex-start; justify-content:space-between
+}
+.sp-header h3 { font-size:18px; font-weight:700; color:#e0e0e0; letter-spacing:-0.02em }
+.sp-header p { font-size:12px; color:#666; margin-top:2px }
+.sp-close {
+  width:32px; height:32px; display:flex; align-items:center; justify-content:center;
+  border-radius:10px; color:#666; cursor:pointer; border:none; background:transparent; font-size:18px
+}
+.sp-close:hover { background:rgba(255,255,255,.06); color:#aaa }
+.sp-body {
+  flex:1; overflow-y:auto; padding:20px 24px; display:flex; flex-direction:column; gap:16px
+}
+
+/* Form elements */
+.field { display:flex; flex-direction:column; gap:4px }
+.field label { font-size:13px; font-weight:600; color:#aaa; display:flex; justify-content:space-between }
+.field label .cnt { font-size:11px; font-weight:400; color:#555 }
+.field input, .field select {
+  background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);
+  border-radius:10px; padding:10px 14px; font-size:13px; color:#ccc; outline:none; font-family:inherit
+}
+.field input:focus { border-color:rgba(147,112,219,.4); ring:2px rgba(147,112,219,.2) }
+.sp-footer {
+  padding:16px 24px; border-top:1px solid rgba(255,255,255,.06);
+  display:flex; justify-content:flex-end; gap:10px
+}
+
+/* Buttons */
+.btn {
+  display:inline-flex; align-items:center; gap:6px; padding:10px 18px;
+  border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; border:none;
+  font-family:inherit; transition:all .15s
+}
+.btn-ghost { background:transparent; color:#aaa }
+.btn-ghost:hover { background:rgba(255,255,255,.06); color:#ccc }
+.btn-primary {
+  background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff;
+  box-shadow:0 2px 12px rgba(124,58,237,.3)
+}
+.btn-primary:hover { box-shadow:0 4px 20px rgba(124,58,237,.5); transform:translateY(-1px) }
+.btn-danger { background:#ef4444; color:#fff }
+.btn-danger:hover { background:#dc2626 }
+
+/* Email field */
+.email-row {
+  display:flex; align-items:center; gap:10px; padding:12px 16px;
+  background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:10px
+}
+.email-icon { color:#666; flex-shrink:0 }
+.email-text { font-size:13px; font-weight:600; color:#ccc }
+
+/* User avatar row */
+.user-row {
+  display:flex; align-items:center; gap:12px; padding:14px 16px;
+  background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(168,85,247,.05));
+  border:1px solid rgba(124,58,237,.15); border-radius:14px
+}
+.avatar { width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,#7c3aed,#a855f7); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px; flex-shrink:0 }
+.user-meta { min-width:0 }
+.user-name { font-size:14px; font-weight:700; color:#e0e0e0; truncate:true }
+.user-email { font-size:11px; color:#666; display:flex; align-items:center; gap:4px }
+
+/* Role cards */
+.role-grid { display:flex; flex-direction:column; gap:8px }
+.role-card {
+  display:flex; align-items:center; gap:10px; padding:12px 14px;
+  border:2px solid rgba(255,255,255,.06); border-radius:12px;
+  cursor:pointer; transition:all .15s; text-align:left; background:transparent; font-family:inherit; width:100%
+}
+.role-card:hover { border-color:rgba(255,255,255,.1) }
+.role-card.selected-admin { border-color:#f59e0b; background:rgba(245,158,11,.08) }
+.role-card.selected-dev { border-color:#3b82f6; background:rgba(59,130,246,.08) }
+.role-card.selected-viewer { border-color:#6b7280; background:rgba(107,114,128,.06) }
+.role-icon { width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0 }
+.role-icon.admin { background:linear-gradient(135deg,#f59e0b,#d97706) }
+.role-icon.dev { background:linear-gradient(135deg,#3b82f6,#2563eb) }
+.role-icon.viewer { background:linear-gradient(135deg,#6b7280,#4b5563) }
+.role-label { font-size:13px; font-weight:700; color:#ccc }
+.role-desc { font-size:11px; color:#666; margin-top:1px }
+.check-badge {
+  width:20px; height:20px; border-radius:6px; margin-left:auto; display:flex; align-items:center; justify-content:center; flex-shrink:0
+}
+.check-badge.admin { background:linear-gradient(135deg,#f59e0b,#d97706) }
+.check-badge.dev { background:linear-gradient(135deg,#3b82f6,#2563eb) }
+.check-badge.viewer { background:linear-gradient(135deg,#6b7280,#4b5563) }
+
+/* ======= CONFIRMATION PANEL (slides up from bottom) ======= */
+.confirm-overlay {
+  position:absolute; inset:0; z-index:10; display:flex; flex-direction:column; pointer-events:none
+}
+.confirm-overlay.active { pointer-events:auto }
+.confirm-bg {
+  flex:1;
+  background:rgba(0,0,0,.3);
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+  transition:opacity .3s
+}
+.confirm-panel {
+  background:#1c1c21;
+  border-top:1px solid rgba(255,255,255,.08);
+  border-radius:16px 16px 0 0;
+  padding:20px 24px 24px;
+  box-shadow:0 -8px 32px rgba(0,0,0,.4);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+}
+.confirm-panel.hidden { transform:translateY(100%) }
+.confirm-panel.visible { transform:translateY(0) }
+
+.confirm-title { font-size:16px; font-weight:700; color:#e0e0e0; margin-bottom:6px }
+.confirm-desc { font-size:13px; color:#888; line-height:1.5; margin-bottom:18px }
+.confirm-actions { display:flex; justify-content:flex-end; gap:10px }
+
+/* Danger variant */
+.confirm-panel.danger { background:#1f1315; border-color:rgba(239,68,68,.15) }
+.confirm-panel.danger .confirm-title { color:#fca5a5 }
+.confirm-panel.danger .confirm-desc { color:#a88 }
+
+/* Success state */
+.confirm-result {
+  display:flex; flex-direction:column; align-items:center; gap:12px; padding:8px 0 4px; text-align:center
+}
+.confirm-result-icon {
+  width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center
+}
+.confirm-result-icon.success { background:rgba(34,197,94,.15) }
+.confirm-result-text { font-size:14px; font-weight:600 }
+
+/* Loading */
+.spinner { animation:spin .8s linear infinite }
+@keyframes spin { to { transform:rotate(360deg) } }
+
+/* Danger button in panel */
+.reset-btn {
+  display:inline-flex; align-items:center; gap:6px; padding:8px 14px;
+  border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:none;
+  background:transparent; color:#aaa; font-family:inherit
+}
+.reset-btn:hover { background:rgba(255,255,255,.06) }
+
+/* State: sending & sent overlays */
+.state-overlay-sending,
+.state-overlay-sent {
+  position:absolute; inset:0; z-index:20; display:flex;
+  flex-direction:column; align-items:center; justify-content:center;
+  background:rgba(24,24,27,.8);
+  backdrop-filter:blur(2px);
+}
+.state-overlay-sent .card {
+  background:#18181b; border:1px solid rgba(34,197,94,.2);
+  border-radius:16px; padding:28px 32px; text-align:center
+}
+
+/* Divider */
+.divider { border-top:1px solid rgba(255,255,255,.06); margin:12px 0 }
+</style>
+</head>
+<body>
+
+<h1>SidePanel — панель подтверждения</h1>
+<p class="sub">Панель выезжает снизу внутри SidePanel, не выходя за его границы</p>
+
+<div class="wrap">
+
+<!-- ====== 1. RESET PASSWORD ====== -->
+<div>
+  <div class="label">
+    <div class="dot" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">1</div>
+    <div>
+      <h2>Сброс пароля — подтверждение снизу</h2>
+      <p>Кликни «Отправить ссылку для сброса» → панель выезжает из нижней части SidePanel</p>
+    </div>
+  </div>
+
+  <div class="demo layout">
+    <div class="layout-bg">
+      <div style="color:#555;font-size:12px">Основной контент страницы</div>
+    </div>
+    <div class="sidepanel" id="demo1-panel">
+      <div class="sp-header">
+        <div>
+          <h3>Редактировать пользователя</h3>
+          <p>Измените роль, статус и параметры</p>
+        </div>
+        <button class="sp-close">✕</button>
+      </div>
+      <div class="sp-body" style="position:relative">
+        <div class="user-row">
+          <div class="avatar">ED</div>
+          <div class="user-meta">
+            <div class="user-name">Edgar</div>
+            <div class="user-email">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+              edgar@example.com
+            </div>
+          </div>
+        </div>
+        <div class="email-row">
+          <svg class="email-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span class="email-text">Edgar</span>
+        </div>
+        <div class="email-row">
+          <svg class="email-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+          <span class="email-text">edgar@example.com</span>
+        </div>
+        <div class="divider"></div>
+        <button class="reset-btn" onclick="toggleConfirm('demo1')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+          Отправить ссылку для сброса
+        </button>
+        <div class="divider"></div>
+        <div class="field"><label>Роль <span class="cnt">выбрать</span></label></div>
+        <div class="role-grid">
+          <div class="role-card selected-admin">
+            <div class="role-icon admin"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><div class="role-label">Администратор</div><div class="role-desc">Полный доступ ко всем разделам</div></div>
+            <div class="check-badge admin"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+          </div>
+        </div>
+
+        <!-- Confirm overlay -->
+        <div class="confirm-overlay active" id="demo1-confirm" style="display:none">
+          <div class="confirm-bg" onclick="toggleConfirm('demo1')"></div>
+          <div class="confirm-panel hidden" id="demo1-panel-confirm">
+            <div id="demo1-content">
+              <div class="confirm-title">Отправить ссылку для сброса?</div>
+              <div class="confirm-desc">Пользователь «Edgar» получит письмо со ссылкой для установки нового пароля.</div>
+              <div class="confirm-actions">
+                <button class="btn btn-ghost" onclick="toggleConfirm('demo1')">Отмена</button>
+                <button class="btn btn-primary" onclick="showSending('demo1')">Отправить</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sending state -->
+        <div class="state-overlay-sending" id="demo1-sending" style="display:none">
+          <svg class="spinner" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+          <div style="color:#888;font-size:13px;margin-top:12px">Отправка...</div>
+        </div>
+        <!-- Sent state -->
+        <div class="state-overlay-sent" id="demo1-sent" style="display:none">
+          <div class="card">
+            <div class="confirm-result-icon success"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+            <div class="confirm-result-text" style="color:#22c55e;margin-top:12px">Ссылка отправлена</div>
+            <button class="btn btn-ghost" style="margin-top:16px" onclick="resetDemo('demo1')">Закрыть</button>
+          </div>
+        </div>
+      </div>
+      <div class="sp-footer">
+        <button class="btn btn-ghost">Отмена</button>
+        <button class="btn btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 2. DELETE USER ====== -->
+<div>
+  <div class="label">
+    <div class="dot" style="background:linear-gradient(135deg,#ef4444,#dc2626)">2</div>
+    <div>
+      <h2>Удаление пользователя — опасное действие снизу</h2>
+      <p>Кнопка удаления в футере → панель подтверждения выезжает оттуда же, красный акцент</p>
+    </div>
+  </div>
+
+  <div class="demo layout">
+    <div class="layout-bg"></div>
+    <div class="sidepanel">
+      <div class="sp-header"><div><h3>Редактировать пользователя</h3></div><button class="sp-close">✕</button></div>
+      <div class="sp-body" style="position:relative">
+        <div class="user-row"><div class="avatar">ED</div><div class="user-meta"><div class="user-name">Edgar</div><div class="user-email">edgar@example.com</div></div></div>
+        <!-- (abbreviated form) -->
+        <div style="flex:1"></div>
+        <button class="reset-btn" style="color:#ef4444;width:100%;justify-content:center;padding:12px" onclick="toggleConfirm('demo2')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+          Удалить пользователя
+        </button>
+
+        <div class="confirm-overlay active" id="demo2-confirm" style="display:none">
+          <div class="confirm-bg" onclick="toggleConfirm('demo2')"></div>
+          <div class="confirm-panel danger hidden" id="demo2-panel-confirm">
+            <div class="confirm-title">Удалить пользователя?</div>
+            <div class="confirm-desc">Пользователь «Edgar» будет удалён без возможности восстановления.</div>
+            <div class="confirm-actions">
+              <button class="btn btn-ghost" onclick="toggleConfirm('demo2')">Отмена</button>
+              <button class="btn btn-danger" onclick="showSending('demo2')">Удалить</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-overlay-sending" id="demo2-sending" style="display:none">
+          <svg class="spinner" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+          <div style="color:#888;font-size:13px;margin-top:12px">Удаление...</div>
+        </div>
+        <div class="state-overlay-sent" id="demo2-sent" style="display:none">
+          <div class="card">
+            <div class="confirm-result-icon success"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+            <div class="confirm-result-text" style="color:#22c55e;margin-top:12px">Пользователь удалён</div>
+            <button class="btn btn-ghost" style="margin-top:16px" onclick="resetDemo('demo2')">Понятно</button>
+          </div>
+        </div>
+      </div>
+      <div class="sp-footer">
+        <button class="btn btn-ghost">Отмена</button>
+        <button class="btn btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 3. INVITE CONFIRMATION ====== -->
+<div>
+  <div class="label">
+    <div class="dot" style="background:linear-gradient(135deg,#8b5cf6,#6366f1)">3</div>
+    <div>
+      <h2>Приглашение — автоматический результат</h2>
+      <p>После создания приглашения — авто-переход к success внутри SidePanel (без подтверждения)</p>
+    </div>
+  </div>
+
+  <div class="demo layout">
+    <div class="layout-bg"></div>
+    <div class="sidepanel">
+      <div class="sp-header"><div><h3>Пригласить пользователя</h3></div><button class="sp-close">✕</button></div>
+      <div class="sp-body" style="position:relative">
+        <div class="field"><label>Имя</label><input placeholder="Имя Фамилия" value="Edgar"></div>
+        <div class="field"><label>Email</label><input placeholder="email@company.com" value="edgar@example.com"></div>
+        <div class="field"><label>Роль</label></div>
+        <div class="role-grid">
+          <div class="role-card selected-admin">
+            <div class="role-icon admin"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div><div class="role-label">Администратор</div><div class="role-desc">Полный доступ</div></div>
+            <div class="check-badge admin"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+          </div>
+        </div>
+
+        <!-- Auto-success after invite -->
+        <div class="state-overlay-sent" id="demo3-done">
+          <div class="card">
+            <div class="confirm-result-icon success"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></div>
+            <div class="confirm-result-text" style="color:#22c55e;margin-top:12px">Приглашение отправлено на edgar@example.com</div>
+            <button class="btn btn-ghost" style="margin-top:16px" onclick="document.getElementById('demo3-done').style.display='none'">Понятно</button>
+          </div>
+        </div>
+      </div>
+      <div class="sp-footer">
+        <button class="btn btn-ghost">Отмена</button>
+        <button class="btn btn-primary">Пригласить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 4. ARCHIVE FLAG ====== -->
+<div>
+  <div class="label">
+    <div class="dot" style="background:linear-gradient(135deg,#f59e0b,#d97706)">4</div>
+    <div>
+      <h2>Архивация флага — подтверждение снизу (warning)</h2>
+      <p>Из SidePanel флага → подтверждение архивации, оранжевый акцент</p>
+    </div>
+  </div>
+
+  <div class="demo layout">
+    <div class="layout-bg"></div>
+    <div class="sidepanel">
+      <div class="sp-header"><div><h3>Редактировать флаг</h3><p>dark-mode-switch</p></div><button class="sp-close">✕</button></div>
+      <div class="sp-body" style="position:relative">
+        <div class="field"><label>Название</label><input value="dark-mode-switch"></div>
+        <div class="field"><label>Ключ</label><input value="dark_mode_switch"></div>
+        <div class="field"><label>Описание</label><input placeholder="Описание флага" value="Переключатель тёмной темы"></div>
+        <div style="flex:1"></div>
+        <button class="reset-btn" style="color:#f59e0b;width:100%;justify-content:center;padding:12px" onclick="toggleConfirm('demo4')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Архивировать флаг
+        </button>
+
+        <div class="confirm-overlay active" id="demo4-confirm" style="display:none">
+          <div class="confirm-bg" onclick="toggleConfirm('demo4')"></div>
+          <div class="confirm-panel hidden" id="demo4-panel-confirm" style="background:#1a1812;border-color:rgba(245,158,11,.15)">
+            <div class="confirm-title" style="color:#fcd34d">Архивировать флаг?</div>
+            <div class="confirm-desc" style="color:#a89">Флаг «dark-mode-switch» будет перемещён в архив. Его можно будет восстановить позже.</div>
+            <div class="confirm-actions">
+              <button class="btn btn-ghost" onclick="toggleConfirm('demo4')">Отмена</button>
+              <button class="btn" style="background:#f59e0b;color:#fff" onclick="showSending('demo4')">Архивировать</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-overlay-sending" id="demo4-sending" style="display:none">
+          <svg class="spinner" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+          <div style="color:#888;font-size:13px;margin-top:12px">Архивация...</div>
+        </div>
+      </div>
+      <div class="sp-footer">
+        <button class="btn btn-ghost">Отмена</button>
+        <button class="btn btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 5. ENABLE FLAG ====== -->
+<div>
+  <div class="label">
+    <div class="dot" style="background:linear-gradient(135deg,#22c55e,#16a34a)">5</div>
+    <div>
+      <h2>Активация флага — подтверждение снизу (success)</h2>
+      <p>Включение флага в production → зелёный акцент, предупреждение о последствиях</p>
+    </div>
+  </div>
+
+  <div class="demo layout">
+    <div class="layout-bg"></div>
+    <div class="sidepanel">
+      <div class="sp-header"><div><h3>Production · dark-mode-switch</h3><p>Настройка стратегии</p></div><button class="sp-close">✕</button></div>
+      <div class="sp-body" style="position:relative">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,.03);border-radius:10px">
+          <span style="font-size:13px;font-weight:600;color:#ccc">Включить флаг</span>
+          <div style="width:44px;height:26px;border-radius:13px;background:#22c55e;position:relative;cursor:pointer" onclick="toggleConfirm('demo5')">
+            <div style="width:22px;height:22px;border-radius:50%;background:#fff;position:absolute;top:2px;right:2px"></div>
+          </div>
+        </div>
+
+        <div class="confirm-overlay active" id="demo5-confirm" style="display:none">
+          <div class="confirm-bg" onclick="toggleConfirm('demo5')"></div>
+          <div class="confirm-panel hidden" id="demo5-panel-confirm" style="background:#121a14;border-color:rgba(34,197,94,.15)">
+            <div class="confirm-title" style="color:#86efac">Включить флаг в Production?</div>
+            <div class="confirm-desc" style="color:#aab">Флаг «dark-mode-switch» будет активирован для 100% пользователей в окружении Production. Это изменение вступит в силу немедленно.</div>
+            <div class="confirm-actions">
+              <button class="btn btn-ghost" onclick="toggleConfirm('demo5')">Отмена</button>
+              <button class="btn" style="background:#22c55e;color:#fff" onclick="showSending('demo5')">Включить</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="state-overlay-sending" id="demo5-sending" style="display:none">
+          <svg class="spinner" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+          <div style="color:#888;font-size:13px;margin-top:12px">Применение...</div>
+        </div>
+      </div>
+      <div class="sp-footer">
+        <button class="btn btn-ghost">Отмена</button>
+        <button class="btn btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function toggleConfirm(id) {
+  const overlay = document.getElementById(id+'-confirm');
+  const panel = document.getElementById(id+'-panel-confirm');
+  const isShowing = overlay.style.display === 'flex';
+  if (isShowing) {
+    panel.classList.add('hidden');
+    panel.classList.remove('visible');
+    setTimeout(() => overlay.style.display = 'none', 300);
+  } else {
+    overlay.style.display = 'flex';
+    panel.classList.add('hidden');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        panel.classList.remove('hidden');
+        panel.classList.add('visible');
+      });
+    });
+  }
+}
+
+function showSending(id) {
+  const overlay = document.getElementById(id+'-confirm');
+  overlay.style.display = 'none';
+  const sending = document.getElementById(id+'-sending');
+  sending.style.display = 'flex';
+
+  setTimeout(() => {
+    sending.style.display = 'none';
+    const sent = document.getElementById(id+'-sent');
+    if (sent) sent.style.display = 'flex';
+  }, 1500);
+}
+
+function resetDemo(id) {
+  const sent = document.getElementById(id+'-sent');
+  if (sent) sent.style.display = 'none';
+  const overlay = document.getElementById(id+'-confirm');
+  if (overlay) overlay.style.display = 'none';
+  const panel = document.getElementById(id+'-panel-confirm');
+  if (panel) { panel.classList.add('hidden'); panel.classList.remove('visible'); }
+}
+</script>
+
+</body>
+</html>
