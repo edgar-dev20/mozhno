@@ -3,6 +3,7 @@ import { api, setToken, setRefreshToken } from '@/api';
 import { useT } from '@/i18n';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 
 interface UseCreateProjectReturn {
   projectName: string;
@@ -82,8 +83,8 @@ export function useCreateProject(): UseCreateProjectReturn {
         setToken(res.token);
         setRefreshToken(res.refreshToken);
         onProjectCreated();
-        queryClient.invalidateQueries({ queryKey: ['environments'] });
-        queryClient.invalidateQueries({ queryKey: ['contexts'] });
+        queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
+        queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
         onComplete();
       } catch (e) {
         setProjectError((e as Error).message || t('onboarding.projectCreateError'));

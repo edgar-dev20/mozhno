@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { api } from '@/api';
 import { useT } from '@/i18n';
 import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 
 interface UseCreateFlagReturn {
   flagName: string;
@@ -45,7 +46,7 @@ export function useCreateFlag(): UseCreateFlagReturn {
           percentage: 100,
         });
       }
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
       setFlagCreated(true);
     } catch (e) {
       setFlagError((e as Error).message || t('onboarding.flagCreateError'));

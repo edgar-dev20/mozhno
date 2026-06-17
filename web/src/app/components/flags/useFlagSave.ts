@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api, FlagRequest, FlagTagValue } from '@/api';
+import { queryKeys } from '@/api/queryKeys';
 import type { FlagView, EnvState } from '@/app/hooks/flagTypes';
 import type { ConstraintEntry } from '@/app/components/flags/types';
 import type { DiffChange } from '@/shared/diffUtils';
@@ -59,7 +60,7 @@ export function useFlagSave(deps: SaveDeps) {
   const queryClient = useQueryClient();
 
   const invalidateFlags = useCallback(
-    () => queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] }),
+    () => queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched }),
     [queryClient],
   );
 

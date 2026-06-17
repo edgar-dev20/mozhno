@@ -81,7 +81,7 @@ class IntegrationServiceTest extends BaseIntegrationTest {
         update.setEventSubscriptionsJson("[]");
         update.setName("Modified");
         update.setEnabled(true);
-        Integration updated = integrationService.update(created.getId(), update);
+        Integration updated = integrationService.update(created.getId(), update, null);
 
         assertThat(updated.getName()).isEqualTo("Modified");
         assertThat(updated.getConfigJson()).isEqualTo("{\"key\":\"old\"}");
@@ -115,7 +115,7 @@ class IntegrationServiceTest extends BaseIntegrationTest {
         req.setEventSubscriptionsJson("[]");
         Integration created = integrationService.create(req);
 
-        Integration found = integrationService.findById(created.getId());
+        Integration found = integrationService.findById(created.getId(), null);
         assertThat(found.getName()).isEqualTo("Test");
     }
 }

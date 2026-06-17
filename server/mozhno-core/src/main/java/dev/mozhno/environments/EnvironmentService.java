@@ -55,11 +55,6 @@ public class EnvironmentService {
         return env;
     }
 
-    @Transactional(readOnly = true)
-    public Environment findById(Integer id) {
-        return findById(id, null);
-    }
-
     /**
      * Updates an environment's name.
      *
@@ -82,10 +77,6 @@ public class EnvironmentService {
         events.publish(DomainEvent.of(saved.getProjectId(), "environment.updated", "environment",
             saved.getId(), saved.getName(), "Environment renamed to " + name));
         return saved;
-    }
-
-    public Environment update(Integer id, String name) {
-        return update(id, name, null);
     }
 
     /**
@@ -135,10 +126,5 @@ public class EnvironmentService {
         if (deleted == 0) throw new NotFoundException("Environment", id);
         events.publish(DomainEvent.of(projectId, "environment.deleted", "environment",
             id, null, "Environment deleted"));
-    }
-
-    @Transactional
-    public void delete(Integer id) {
-        delete(id, null);
     }
 }

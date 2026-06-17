@@ -44,39 +44,29 @@ class SegmentServiceTest {
         s.setProjectId(1);
         s.setName("Test Segment");
         when(segmentRepository.findByProjectId(1)).thenReturn(List.of(s));
-        when(segmentContextRepository.findContextsBySegmentIds(List.of(1))).thenReturn(List.of());
 
-        List<SegmentResponse> result = segmentService.findByProjectId(1);
+        List<Segment> result = segmentService.findByProjectId(1);
         assertEquals(1, result.size());
-        assertEquals("Test Segment", result.get(0).name());
+        assertEquals("Test Segment", result.get(0).getName());
     }
 
     @Test
-    void findById_shouldReturnSegmentWithContext() {
+    void findById_shouldReturnSegment() {
         Segment s = new Segment();
         s.setId(1);
         s.setProjectId(1);
         s.setName("Power Users");
         when(segmentRepository.findById(1)).thenReturn(s);
 
-        SegmentContext sc = new SegmentContext();
-        sc.setId(1);
-        sc.setSegmentId(1);
-        sc.setContextDefinitionId(2);
-        sc.setContextValues("[\"web\"]");
-        when(segmentContextRepository.findBySegmentId(1)).thenReturn(List.of(sc));
-
-        SegmentResponse result = segmentService.findById(1);
-        assertEquals("Power Users", result.name());
-        assertEquals(1, result.context().size());
-        assertEquals(2, result.context().get(0).contextDefinitionId());
+        Segment result = segmentService.findById(1, null);
+        assertEquals("Power Users", result.getName());
     }
 
     @Test
     void findById_shouldThrowExceptionWhenNotFound() {
         when(segmentRepository.findById(999)).thenReturn(null);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> segmentService.findById(999));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> segmentService.findById(999, null));
         assertTrue(ex.getMessage().contains("Segment not found"));
     }
 
@@ -89,12 +79,6 @@ class SegmentServiceTest {
         });
         when(segmentContextRepository.save(any(SegmentContext.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        SegmentContext savedCtx = new SegmentContext();
-        savedCtx.setSegmentId(1);
-        savedCtx.setContextDefinitionId(2);
-        savedCtx.setContextValues("[\"web\",\"mobile\"]");
-        when(segmentContextRepository.findBySegmentId(1)).thenReturn(List.of(savedCtx));
-
         SegmentRequest req = new SegmentRequest();
         req.setProjectId(1);
         req.setName("Power Users");
@@ -105,10 +89,9 @@ class SegmentServiceTest {
         entry.setContextValues("[\"web\",\"mobile\"]");
         req.setContext(List.of(entry));
 
-        SegmentResponse result = segmentService.create(req);
+        Segment result = segmentService.create(req);
         assertNotNull(result);
-        assertEquals("Power Users", result.name());
-        assertEquals(1, result.context().size());
+        assertEquals("Power Users", result.getName());
         verify(segmentContextRepository).save(any(SegmentContext.class));
     }
 
@@ -119,17 +102,15 @@ class SegmentServiceTest {
             s.setId(1);
             return s;
         });
-        when(segmentContextRepository.findBySegmentId(1)).thenReturn(List.of());
 
         SegmentRequest req = new SegmentRequest();
         req.setProjectId(1);
         req.setName("Empty Segment");
         req.setContext(null);
 
-        SegmentResponse result = segmentService.create(req);
+        Segment result = segmentService.create(req);
         assertNotNull(result);
-        assertEquals("Empty Segment", result.name());
-        assertTrue(result.context().isEmpty());
+        assertEquals("Empty Segment", result.getName());
     }
 
     @Test
@@ -141,15 +122,14 @@ class SegmentServiceTest {
         when(segmentRepository.findById(1)).thenReturn(existing);
         when(segmentRepository.save(any(Segment.class))).thenReturn(existing);
         doNothing().when(segmentContextRepository).deleteBySegmentId(1);
-        when(segmentContextRepository.findBySegmentId(1)).thenReturn(List.of());
 
         SegmentRequest req = new SegmentRequest();
         req.setName("New Name");
         req.setDescription("Updated");
         req.setContext(List.of());
 
-        SegmentResponse result = segmentService.update(1, req);
-        assertEquals("New Name", result.name());
+        Segment result = segmentService.update(1, req);
+        assertEquals("New Name", result.getName());
         verify(segmentContextRepository).deleteBySegmentId(1);
     }
 
@@ -167,7 +147,7 @@ class SegmentServiceTest {
     @Test
     void delete_shouldCallRepository() {
         when(segmentRepository.deleteById(anyInt(), any())).thenReturn(1);
-        segmentService.delete(1);
+        segmentService.delete(1, null);
         verify(segmentRepository).deleteById(eq(1), any());
     }
 }

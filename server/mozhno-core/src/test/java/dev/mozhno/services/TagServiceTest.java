@@ -50,7 +50,7 @@ class TagServiceTest {
         t.setName("beta");
         when(tagRepository.findById(1)).thenReturn(t);
 
-        Tag result = tagService.findById(1);
+        Tag result = tagService.findById(1, null);
         assertEquals("beta", result.getName());
     }
 
@@ -58,7 +58,7 @@ class TagServiceTest {
     void findById_shouldThrowExceptionWhenNotFound() {
         when(tagRepository.findById(999)).thenReturn(null);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> tagService.findById(999));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> tagService.findById(999, null));
         assertTrue(ex.getMessage().contains("Tag not found"));
     }
 
@@ -100,7 +100,7 @@ class TagServiceTest {
     @Test
     void delete_shouldCallRepository() {
         when(tagRepository.deleteById(anyInt(), any())).thenReturn(1);
-        tagService.delete(1);
+        tagService.delete(1, null);
         verify(tagRepository).deleteById(eq(1), any());
     }
 }

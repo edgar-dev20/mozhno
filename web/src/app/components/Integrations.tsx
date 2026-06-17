@@ -11,6 +11,7 @@ import { SectionHeader, EmptyState, GradientButton } from '@/shared';
 import { IntegrationCardSkeletonList } from '@/app/components/skeletons';
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 import { WebhookCard } from './integrations/WebhookCard';
 import { WebhookPanel } from './integrations/WebhookPanel';
 import { useWebhookForm } from './integrations/useWebhookForm';
@@ -24,7 +25,7 @@ export function Integrations() {
   const projectId = project?.id ?? null;
 
   const { data: items = [], isLoading: loading } = useQuery({
-    queryKey: ['integrations', projectId],
+    queryKey: queryKeys.integrations.byProject(projectId),
     queryFn: async () => {
       if (!projectId) return [];
       const all = await api.integrations.list();
@@ -35,7 +36,7 @@ export function Integrations() {
   });
 
   const { data: limitData } = useQuery({
-    queryKey: ['integrations', 'webhookLimit', projectId],
+    queryKey: queryKeys.integrations.webhookLimit(projectId),
     queryFn: () => api.integrations.webhookLimit(),
     enabled: !!projectId,
     staleTime: 5 * 60_000,
@@ -74,7 +75,7 @@ export function Integrations() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['integrations', projectId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.integrations.byProject(projectId) });
       setPanelOpen(false);
     },
     onError: (e: unknown) => {
@@ -86,7 +87,7 @@ export function Integrations() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.integrations.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['integrations', projectId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.integrations.byProject(projectId) });
       setDeleteId(null);
       setPanelOpen(false);
     },

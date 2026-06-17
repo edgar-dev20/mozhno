@@ -62,7 +62,7 @@ class ApiKeyServiceTest extends BaseIntegrationTest {
         ApiKey created = apiKeyService.create(projectId, new ApiKeyRequest("To Delete", null, null, null));
         apiKeyService.delete(created.getId(), projectId);
 
-        assertThatThrownBy(() -> apiKeyService.findById(created.getId()))
+        assertThatThrownBy(() -> apiKeyService.findById(created.getId(), null))
                 .hasMessageContaining("ApiKey not found");
     }
 }

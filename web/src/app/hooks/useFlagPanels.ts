@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useReducer, useCallback } from 'react';
 import { toast } from 'sonner';
 import type { FlagView } from '@/app/hooks/flagTypes';
 import type { ConstraintGroup } from '@/app/components/flags/types';
@@ -14,6 +14,213 @@ export interface PanelEditingState {
   flag: FlagView | null;
   mode: 'create' | 'general' | 'environment';
   envId: number | null;
+}
+
+interface PanelState {
+  panelOpen: boolean;
+  editing: PanelEditingState;
+  expandedKeys: Set<string>;
+  generalDirty: boolean;
+  activeGroupId: string | null;
+  envRulePercent: number;
+  envRuleSegments: number[];
+  envRuleConstraints: ConstraintGroup[];
+  envRuleEnabled: boolean;
+  initialEnvRulePercent: number;
+  initialEnvRuleSegments: number[];
+  initialEnvRuleConstraints: ConstraintGroup[];
+  initialEnvRuleEnabled: boolean;
+  archiveOpen: boolean;
+  deleteTarget: FlagView | null;
+  deleting: boolean;
+  archiveTarget: FlagView | null;
+  archiving: boolean;
+  metricsDialogOpen: boolean;
+  metricsTarget: { flagId: number; flagName: string; envId: number } | null;
+}
+
+type PanelAction =
+  | { type: 'OPEN_CREATE' }
+  | { type: 'OPEN_GENERAL'; flag: FlagView }
+  | { type: 'OPEN_ENVIRONMENT'; flag: FlagView; envId: number; contexts: ContextDefinition[] }
+  | { type: 'SET_PANEL_OPEN'; open: boolean }
+  | { type: 'SET_EXPANDED_KEYS'; keys: Set<string> }
+  | { type: 'TOGGLE_EXPANDED_KEY'; key: string }
+  | { type: 'SET_GENERAL_DIRTY'; dirty: boolean }
+  | { type: 'SET_ACTIVE_GROUP'; id: string | null }
+  | { type: 'SET_ENV_PERCENT'; value: number }
+  | { type: 'SET_ENV_SEGMENTS'; values: number[] }
+  | { type: 'SET_ENV_CONSTRAINTS'; values: ConstraintGroup[] }
+  | { type: 'SET_ENV_ENABLED'; value: boolean }
+  | { type: 'SET_INITIAL_ENV_PERCENT'; value: number }
+  | { type: 'SET_INITIAL_ENV_SEGMENTS'; values: number[] }
+  | { type: 'SET_INITIAL_ENV_CONSTRAINTS'; values: ConstraintGroup[] }
+  | { type: 'SET_INITIAL_ENV_ENABLED'; value: boolean }
+  | { type: 'SET_ARCHIVE_OPEN'; open: boolean }
+  | { type: 'SET_DELETE_TARGET'; target: FlagView | null }
+  | { type: 'SET_DELETING'; value: boolean }
+  | { type: 'SET_ARCHIVE_TARGET'; target: FlagView | null }
+  | { type: 'SET_ARCHIVING'; value: boolean }
+  | { type: 'SET_METRICS_OPEN'; open: boolean }
+  | { type: 'SET_METRICS_TARGET'; target: { flagId: number; flagName: string; envId: number } | null }
+  | { type: 'SET_EDITING'; editing: PanelEditingState }
+  | { type: 'CLOSE_PANEL' }
+  | { type: 'RESET_PANEL' };
+
+const initialState: PanelState = {
+  panelOpen: false,
+  editing: { flag: null, mode: 'create', envId: null },
+  expandedKeys: new Set<string>(),
+  generalDirty: false,
+  activeGroupId: null,
+  envRulePercent: 100,
+  envRuleSegments: [],
+  envRuleConstraints: [],
+  envRuleEnabled: false,
+  initialEnvRulePercent: 100,
+  initialEnvRuleSegments: [],
+  initialEnvRuleConstraints: [],
+  initialEnvRuleEnabled: false,
+  archiveOpen: false,
+  deleteTarget: null,
+  deleting: false,
+  archiveTarget: null,
+  archiving: false,
+  metricsDialogOpen: false,
+  metricsTarget: null,
+};
+
+function buildInitialEnvConstraints(
+  constraintGroups: ConstraintGroup[],
+): ConstraintGroup[] {
+  return constraintGroups.map((g) => ({ ...g, values: [...g.values] }));
+}
+
+function initEnvFromFlag(
+  flag: FlagView,
+  envId: number,
+  contexts: ContextDefinition[],
+): {
+  envRulePercent: number;
+  envRuleSegments: number[];
+  envRuleConstraints: ConstraintGroup[];
+  envRuleEnabled: boolean;
+  initialEnvRulePercent: number;
+  initialEnvRuleSegments: number[];
+  initialEnvRuleConstraints: ConstraintGroup[];
+  initialEnvRuleEnabled: boolean;
+} {
+  const es = flag.environments[envId] ?? {
+    enabled: false,
+    percentage: 100,
+    segmentIds: [],
+    strategyId: null,
+    contextDefinitionId: null,
+    contextValuesJson: null,
+  };
+  const constraints = parseConstraintEntries(
+    es.contextValuesJson,
+    es.contextDefinitionId,
+    contexts,
+  );
+  const groups = groupConstraintEntries(constraints);
+  return {
+    envRulePercent: es.percentage ?? 100,
+    envRuleSegments: es.segmentIds ?? [],
+    envRuleConstraints: groups,
+    envRuleEnabled: es.enabled ?? false,
+    initialEnvRulePercent: es.percentage ?? 100,
+    initialEnvRuleSegments: es.segmentIds ?? [],
+    initialEnvRuleConstraints: buildInitialEnvConstraints(groups),
+    initialEnvRuleEnabled: es.enabled ?? false,
+  };
+}
+
+function panelReducer(state: PanelState, action: PanelAction): PanelState {
+  switch (action.type) {
+    case 'OPEN_CREATE':
+      return {
+        ...state,
+        editing: { flag: null, mode: 'create', envId: null },
+        generalDirty: false,
+        panelOpen: true,
+      };
+    case 'OPEN_GENERAL':
+      return {
+        ...state,
+        editing: { flag: action.flag, mode: 'general', envId: null },
+        generalDirty: false,
+        panelOpen: true,
+      };
+    case 'OPEN_ENVIRONMENT': {
+      const envData = initEnvFromFlag(action.flag, action.envId, action.contexts);
+      return {
+        ...state,
+        editing: { flag: action.flag, mode: 'environment', envId: action.envId },
+        panelOpen: true,
+        activeGroupId: null,
+        ...envData,
+      };
+    }
+    case 'SET_PANEL_OPEN':
+      return { ...state, panelOpen: action.open };
+    case 'SET_EXPANDED_KEYS':
+      return { ...state, expandedKeys: action.keys };
+    case 'TOGGLE_EXPANDED_KEY': {
+      const next = new Set(state.expandedKeys);
+      if (next.has(action.key)) next.delete(action.key);
+      else next.add(action.key);
+      return { ...state, expandedKeys: next };
+    }
+    case 'SET_GENERAL_DIRTY':
+      return { ...state, generalDirty: action.dirty };
+    case 'SET_ACTIVE_GROUP':
+      return { ...state, activeGroupId: action.id };
+    case 'SET_ENV_PERCENT':
+      return { ...state, envRulePercent: action.value };
+    case 'SET_ENV_SEGMENTS':
+      return { ...state, envRuleSegments: action.values };
+    case 'SET_ENV_CONSTRAINTS':
+      return { ...state, envRuleConstraints: action.values };
+    case 'SET_ENV_ENABLED':
+      return { ...state, envRuleEnabled: action.value };
+    case 'SET_INITIAL_ENV_PERCENT':
+      return { ...state, initialEnvRulePercent: action.value };
+    case 'SET_INITIAL_ENV_SEGMENTS':
+      return { ...state, initialEnvRuleSegments: action.values };
+    case 'SET_INITIAL_ENV_CONSTRAINTS':
+      return { ...state, initialEnvRuleConstraints: action.values };
+    case 'SET_INITIAL_ENV_ENABLED':
+      return { ...state, initialEnvRuleEnabled: action.value };
+    case 'SET_ARCHIVE_OPEN':
+      return { ...state, archiveOpen: action.open };
+    case 'SET_DELETE_TARGET':
+      return { ...state, deleteTarget: action.target };
+    case 'SET_DELETING':
+      return { ...state, deleting: action.value };
+    case 'SET_ARCHIVE_TARGET':
+      return { ...state, archiveTarget: action.target };
+    case 'SET_ARCHIVING':
+      return { ...state, archiving: action.value };
+    case 'SET_METRICS_OPEN':
+      return { ...state, metricsDialogOpen: action.open };
+    case 'SET_METRICS_TARGET':
+      return { ...state, metricsTarget: action.target };
+    case 'SET_EDITING':
+      return { ...state, editing: action.editing };
+    case 'CLOSE_PANEL':
+      return { ...state, panelOpen: false, activeGroupId: null };
+    case 'RESET_PANEL':
+      return {
+        ...state,
+        panelOpen: false,
+        editing: { flag: null, mode: 'create', envId: null },
+        generalDirty: false,
+        activeGroupId: null,
+      };
+    default:
+      return state;
+  }
 }
 
 export function useFlagPanels(
@@ -34,113 +241,129 @@ export function useFlagPanels(
     }) => Promise<unknown>;
   },
 ) {
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [editing, setEditing] = useState<PanelEditingState>({
-    flag: null,
-    mode: 'create',
-    envId: null,
-  });
-  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
-
-  const [generalDirty, setGeneralDirty] = useState(false);
-  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
-  const [envRulePercent, setEnvRulePercent] = useState(100);
-  const [envRuleSegments, setEnvRuleSegments] = useState<number[]>([]);
-  const [envRuleConstraints, setEnvRuleConstraints] = useState<ConstraintGroup[]>([]);
-  const [envRuleEnabled, setEnvRuleEnabled] = useState(false);
-  const [initialEnvRulePercent, setInitialEnvRulePercent] = useState(100);
-  const [initialEnvRuleSegments, setInitialEnvRuleSegments] = useState<number[]>([]);
-  const [initialEnvRuleConstraints, setInitialEnvRuleConstraints] = useState<ConstraintGroup[]>([]);
-  const [initialEnvRuleEnabled, setInitialEnvRuleEnabled] = useState(false);
+  const [state, dispatch] = useReducer(panelReducer, initialState);
 
   const isEnvDirty =
-    envRulePercent !== initialEnvRulePercent ||
-    JSON.stringify(envRuleSegments) !== JSON.stringify(initialEnvRuleSegments) ||
-    JSON.stringify(envRuleConstraints) !== JSON.stringify(initialEnvRuleConstraints) ||
-    envRuleEnabled !== initialEnvRuleEnabled;
+    state.envRulePercent !== state.initialEnvRulePercent ||
+    JSON.stringify(state.envRuleSegments) !== JSON.stringify(state.initialEnvRuleSegments) ||
+    JSON.stringify(state.envRuleConstraints) !==
+      JSON.stringify(state.initialEnvRuleConstraints) ||
+    state.envRuleEnabled !== state.initialEnvRuleEnabled;
 
-  const [archiveOpen, setArchiveOpen] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<FlagView | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [archiveTarget, setArchiveTarget] = useState<FlagView | null>(null);
-  const [archiving, setArchiving] = useState(false);
-  const [metricsDialogOpen, setMetricsDialogOpen] = useState(false);
-  const [metricsTarget, setMetricsTarget] = useState<{
-    flagId: number;
-    flagName: string;
-    envId: number;
-  } | null>(null);
+  const openCreate = useCallback(() => dispatch({ type: 'OPEN_CREATE' }), []);
 
-  const openCreate = useCallback(() => {
-    setEditing({ flag: null, mode: 'create', envId: null });
-    setGeneralDirty(false);
-    setPanelOpen(true);
-  }, []);
-
-  const openGeneral = useCallback((flag: FlagView) => {
-    setEditing({ flag, mode: 'general', envId: null });
-    setGeneralDirty(false);
-    setPanelOpen(true);
-  }, []);
+  const openGeneral = useCallback(
+    (flag: FlagView) => dispatch({ type: 'OPEN_GENERAL', flag }),
+    [],
+  );
 
   const openEnvironment = useCallback(
-    (flag: FlagView, envId: number) => {
-      setEditing({ flag, mode: 'environment', envId });
-      setPanelOpen(true);
-      setActiveGroupId(null);
-      const es = flag.environments[envId] ?? {
-        enabled: false,
-        percentage: 100,
-        segmentIds: [],
-        strategyId: null,
-        contextDefinitionId: null,
-        contextValuesJson: null,
-      };
-      const constraints = parseConstraintEntries(
-        es.contextValuesJson,
-        es.contextDefinitionId,
-        contexts,
-      );
-      const groups = groupConstraintEntries(constraints);
-      setEnvRulePercent(es.percentage ?? 100);
-      setEnvRuleSegments(es.segmentIds ?? []);
-      setEnvRuleConstraints(groups);
-      setEnvRuleEnabled(es.enabled ?? false);
-      setInitialEnvRulePercent(es.percentage ?? 100);
-      setInitialEnvRuleSegments(es.segmentIds ?? []);
-      setInitialEnvRuleConstraints(groups.map((g) => ({ ...g, values: [...g.values] })));
-      setInitialEnvRuleEnabled(es.enabled ?? false);
-    },
+    (flag: FlagView, envId: number) =>
+      dispatch({ type: 'OPEN_ENVIRONMENT', flag, envId, contexts }),
     [contexts],
   );
 
+  const setPanelOpen = useCallback((open: boolean) => dispatch({ type: 'SET_PANEL_OPEN', open }), []);
+  const setExpandedKeys = useCallback(
+    (keys: Set<string>) => dispatch({ type: 'SET_EXPANDED_KEYS', keys }),
+    [],
+  );
+  const setGeneralDirty = useCallback(
+    (dirty: boolean) => dispatch({ type: 'SET_GENERAL_DIRTY', dirty }),
+    [],
+  );
+  const setActiveGroupId = useCallback(
+    (id: string | null) => dispatch({ type: 'SET_ACTIVE_GROUP', id }),
+    [],
+  );
+  const setEnvRulePercent = useCallback(
+    (value: number) => dispatch({ type: 'SET_ENV_PERCENT', value }),
+    [],
+  );
+  const setEnvRuleSegments = useCallback(
+    (values: number[]) => dispatch({ type: 'SET_ENV_SEGMENTS', values }),
+    [],
+  );
+  const setEnvRuleConstraints = useCallback(
+    (values: ConstraintGroup[]) => dispatch({ type: 'SET_ENV_CONSTRAINTS', values }),
+    [],
+  );
+  const setEnvRuleEnabled = useCallback(
+    (value: boolean) => dispatch({ type: 'SET_ENV_ENABLED', value }),
+    [],
+  );
+  const setInitialEnvRulePercent = useCallback(
+    (value: number) => dispatch({ type: 'SET_INITIAL_ENV_PERCENT', value }),
+    [],
+  );
+  const setInitialEnvRuleSegments = useCallback(
+    (values: number[]) => dispatch({ type: 'SET_INITIAL_ENV_SEGMENTS', values }),
+    [],
+  );
+  const setInitialEnvRuleConstraints = useCallback(
+    (values: ConstraintGroup[]) => dispatch({ type: 'SET_INITIAL_ENV_CONSTRAINTS', values }),
+    [],
+  );
+  const setInitialEnvRuleEnabled = useCallback(
+    (value: boolean) => dispatch({ type: 'SET_INITIAL_ENV_ENABLED', value }),
+    [],
+  );
+  const setArchiveOpen = useCallback(
+    (open: boolean) => dispatch({ type: 'SET_ARCHIVE_OPEN', open }),
+    [],
+  );
+  const setDeleteTarget = useCallback(
+    (target: FlagView | null) => dispatch({ type: 'SET_DELETE_TARGET', target }),
+    [],
+  );
+  const setArchiveTarget = useCallback(
+    (target: FlagView | null) => dispatch({ type: 'SET_ARCHIVE_TARGET', target }),
+    [],
+  );
+  const setMetricsDialogOpen = useCallback(
+    (open: boolean) => dispatch({ type: 'SET_METRICS_OPEN', open }),
+    [],
+  );
+  const setMetricsTarget = useCallback(
+    (target: { flagId: number; flagName: string; envId: number } | null) =>
+      dispatch({ type: 'SET_METRICS_TARGET', target }),
+    [],
+  );
+  const setEditing = useCallback(
+    (editing: PanelEditingState) => dispatch({ type: 'SET_EDITING', editing }),
+    [],
+  );
+
+  const closePanel = useCallback(() => dispatch({ type: 'CLOSE_PANEL' }), []);
+  const resetPanel = useCallback(() => dispatch({ type: 'RESET_PANEL' }), []);
+
   const doDelete = useCallback(async () => {
-    if (!projectId || !deleteTarget) return;
-    setDeleting(true);
+    if (!projectId || !state.deleteTarget) return;
+    dispatch({ type: 'SET_DELETING', value: true });
     try {
-      await deleteFlag.mutateAsync(deleteTarget.flagId);
-      setDeleteTarget(null);
-      setPanelOpen(false);
+      await deleteFlag.mutateAsync(state.deleteTarget.flagId);
+      dispatch({ type: 'SET_DELETE_TARGET', target: null });
+      dispatch({ type: 'CLOSE_PANEL' });
     } catch (e: unknown) {
       toast.error(getErrorMessage(e));
     } finally {
-      setDeleting(false);
+      dispatch({ type: 'SET_DELETING', value: false });
     }
-  }, [projectId, deleteTarget, deleteFlag]);
+  }, [projectId, state.deleteTarget, deleteFlag]);
 
   const doArchive = useCallback(async () => {
-    if (!projectId || !archiveTarget) return;
-    setArchiving(true);
+    if (!projectId || !state.archiveTarget) return;
+    dispatch({ type: 'SET_ARCHIVING', value: true });
     try {
-      await archiveFlag.mutateAsync(archiveTarget.flagId);
-      setArchiveTarget(null);
-      setPanelOpen(false);
+      await archiveFlag.mutateAsync(state.archiveTarget.flagId);
+      dispatch({ type: 'SET_ARCHIVE_TARGET', target: null });
+      dispatch({ type: 'CLOSE_PANEL' });
     } catch (e: unknown) {
       toast.error(getErrorMessage(e));
     } finally {
-      setArchiving(false);
+      dispatch({ type: 'SET_ARCHIVING', value: false });
     }
-  }, [projectId, archiveTarget, archiveFlag]);
+  }, [projectId, state.archiveTarget, archiveFlag]);
 
   const doUnarchive = useCallback(
     async (flag: FlagView) => {
@@ -172,61 +395,36 @@ export function useFlagPanels(
     [projectId, toggleFlagMutation],
   );
 
-  const resetPanel = useCallback(() => {
-    setPanelOpen(false);
-    setEditing({ flag: null, mode: 'create', envId: null });
-    setGeneralDirty(false);
-    setActiveGroupId(null);
-  }, []);
-
   return {
-    panelOpen,
+    ...state,
+    isEnvDirty,
+    openCreate,
+    openGeneral,
+    openEnvironment,
     setPanelOpen,
-    editing,
-    setEditing,
-    expandedKeys,
     setExpandedKeys,
-    generalDirty,
     setGeneralDirty,
-    activeGroupId,
     setActiveGroupId,
-    envRulePercent,
     setEnvRulePercent,
-    envRuleSegments,
     setEnvRuleSegments,
-    envRuleConstraints,
     setEnvRuleConstraints,
-    envRuleEnabled,
     setEnvRuleEnabled,
-    initialEnvRulePercent,
-    initialEnvRuleSegments,
-    initialEnvRuleConstraints,
-    initialEnvRuleEnabled,
     setInitialEnvRulePercent,
     setInitialEnvRuleSegments,
     setInitialEnvRuleConstraints,
     setInitialEnvRuleEnabled,
-    isEnvDirty,
-    archiveOpen,
     setArchiveOpen,
-    deleteTarget,
     setDeleteTarget,
-    deleting,
-    archiveTarget,
     setArchiveTarget,
-    archiving,
-    metricsDialogOpen,
     setMetricsDialogOpen,
-    metricsTarget,
     setMetricsTarget,
-    openCreate,
-    openGeneral,
-    openEnvironment,
+    setEditing,
+    closePanel,
+    resetPanel,
     doDelete,
     doArchive,
     doUnarchive,
     doToggleFlag,
-    resetPanel,
     flattenConstraintGroups,
   };
 }

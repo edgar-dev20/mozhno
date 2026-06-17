@@ -51,11 +51,6 @@ public class TagService {
         return tag;
     }
 
-    @Transactional(readOnly = true)
-    public Tag findById(Integer id) {
-        return findById(id, null);
-    }
-
     /**
      * Creates a new tag.
      *
@@ -111,10 +106,5 @@ public class TagService {
         if (deleted == 0) throw new NotFoundException("Tag", id);
         events.publish(DomainEvent.of(projectId, "tag.deleted", "tag",
             id, null, "Tag deleted"));
-    }
-
-    @Transactional
-    public void delete(Integer id) {
-        delete(id, null);
     }
 }

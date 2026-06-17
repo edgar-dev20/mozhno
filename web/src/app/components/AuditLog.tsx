@@ -29,6 +29,7 @@ const DateRangePicker = lazy(() =>
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 import { useT } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
 
@@ -58,7 +59,7 @@ export function AuditLog() {
   };
 
   const { isLoading: loading, refetch: refetchEvents } = useQuery({
-    queryKey: ['audit', projectId, dateFrom, dateTo],
+    queryKey: queryKeys.audit.filtered(projectId, dateFrom, dateTo),
     queryFn: async () => {
       if (!projectId) return [];
       const data = await api.audit.list(0, PAGE_SIZE, dateFrom || undefined, dateTo || undefined);

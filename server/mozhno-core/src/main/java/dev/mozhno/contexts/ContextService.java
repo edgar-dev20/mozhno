@@ -8,7 +8,6 @@ import dev.mozhno.segments.SegmentContextRepository;
 import dev.mozhno.spi.QuotaSpi;
 import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.NotFoundException;
-import dev.mozhno.exception.QuotaExceededException;
 
 import java.util.List;
 
@@ -65,22 +64,6 @@ public class ContextService {
         return def;
     }
 
-    @Transactional(readOnly = true)
-    public ContextDefinition findDefinitionById(Integer id) {
-        return findDefinitionById(id, null);
-    }
-
-    /**
-     * Creates a context definition with no explicit creator.
-     *
-     * @param request the context definition request
-     * @return the created context definition
-     */
-    @Transactional
-    public ContextDefinition createDefinition(ContextDefinitionRequest request) {
-        return createDefinition(request, null);
-    }
-
     /**
      * Creates a context definition.
      *
@@ -91,10 +74,7 @@ public class ContextService {
      */
     @Transactional
     public ContextDefinition createDefinition(ContextDefinitionRequest request, String createdBy) {
-        QuotaSpi.QuotaResult quota = quotaSpi.canCreateContext(request.getProjectId());
-        if (quota instanceof QuotaSpi.Blocked blocked) {
-            throw new QuotaExceededException(blocked.current(), blocked.limit(), blocked.planName());
-        }
+        dev.mozhno.util.QuotaValidator.check(quotaSpi.canCreateContext(request.getProjectId()));
 
         ContextDefinition definition = new ContextDefinition();
         definition.setProjectId(request.getProjectId());
@@ -153,11 +133,6 @@ public class ContextService {
             id, null, "Context definition deleted"));
     }
 
-    @Transactional
-    public void deleteDefinition(Integer id) {
-        deleteDefinition(id, null);
-    }
-
     /**
      * Returns all context values for a given context definition.
      *
@@ -166,23 +141,16 @@ public class ContextService {
      */
     @Transactional(readOnly = true)
     public List<ContextValue> findValuesByContextDefinitionId(Integer contextDefinitionId, Integer projectId) {
-        ContextDefinition def = contextDefinitionRepository.findByIdAndProjectId(contextDefinitionId, projectId);
+        ContextDefinition def;
+        if (projectId != null) {
+            def = contextDefinitionRepository.findByIdAndProjectId(contextDefinitionId, projectId);
+        } else {
+            def = contextDefinitionRepository.findById(contextDefinitionId);
+        }
         if (def == null) throw new NotFoundException("ContextDefinition", contextDefinitionId);
         return contextValueRepository.findByContextDefinitionId(contextDefinitionId);
     }
 
-    @Transactional(readOnly = true)
-    public List<ContextValue> findValuesByContextDefinitionId(Integer contextDefinitionId) {
-        return contextValueRepository.findByContextDefinitionId(contextDefinitionId);
-    }
-
-    /**
-     * Finds a context value by its ID.
-     *
-     * @param id the context value ID
-     * @return the context value
-     * @throws RuntimeException if not found
-     */
     @Transactional(readOnly = true)
     public ContextValue findValueById(Integer id, Integer projectId) {
         ContextValue value = contextValueRepository.findById(id);
@@ -194,19 +162,6 @@ public class ContextService {
         return value;
     }
 
-    @Transactional(readOnly = true)
-    public ContextValue findValueById(Integer id) {
-        return findValueById(id, null);
-    }
-
-    /**
-     * Updates a context value.
-     *
-     * @param id the context value ID
-     * @param request the context value update request
-     * @return the updated context value
-     * @throws RuntimeException if not found
-     */
     @Transactional
     public ContextValue updateValue(Integer id, ContextValueRequest request, Integer projectId) {
         ContextValue value = contextValueRepository.findById(id);
@@ -226,17 +181,6 @@ public class ContextService {
     }
 
     @Transactional
-    public ContextValue updateValue(Integer id, ContextValueRequest request) {
-        return updateValue(id, request, null);
-    }
-
-    /**
-     * Creates a new context value.
-     *
-     * @param request the context value creation request
-     * @return the created context value
-     */
-    @Transactional
     public ContextValue createValue(ContextValueRequest request, Integer projectId) {
         if (projectId != null) {
             ContextDefinition def = contextDefinitionRepository.findByIdAndProjectId(request.getContextDefinitionId(), projectId);
@@ -252,10 +196,6 @@ public class ContextService {
                 saved.getId(), eventDef.getName(), "Context value created"));
         }
         return saved;
-    }
-
-    public ContextValue createValue(ContextValueRequest request) {
-        return createValue(request, null);
     }
 
     /**
@@ -281,10 +221,5 @@ public class ContextService {
             }
         }
         contextValueRepository.deleteById(id);
-    }
-
-    @Transactional
-    public void deleteValue(Integer id) {
-        deleteValue(id, null);
     }
 }

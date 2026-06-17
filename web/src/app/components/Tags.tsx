@@ -18,6 +18,7 @@ import {
 } from '@/shared';
 import { useProjectQuery, useTagsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 import { useT, type MessageKey } from '@/i18n';
 
 const COLOR_PALETTES: [MessageKey, string[]][] = [
@@ -106,8 +107,8 @@ export function Tags() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.tags.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
       setDeleteId(null);
       setPanelOpen(false);
     },
@@ -131,8 +132,8 @@ export function Tags() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
-      queryClient.invalidateQueries({ queryKey: ['tags'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+      queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
       setPanelOpen(false);
     },
     onError: (e: unknown) => {

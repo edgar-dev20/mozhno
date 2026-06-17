@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api';
+import { queryKeys } from '@/api/queryKeys';
 
 export function useStrategyCreate(flagId: number) {
   const queryClient = useQueryClient();
@@ -12,7 +13,7 @@ export function useStrategyCreate(flagId: number) {
         percentage: input.percentage ?? 100,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
     },
   });
 }

@@ -15,6 +15,8 @@ import dev.mozhno.contexts.ContextService;
 import dev.mozhno.environments.EnvironmentAssembler;
 import dev.mozhno.environments.EnvironmentService;
 import dev.mozhno.segments.SegmentService;
+import dev.mozhno.segments.SegmentAssembler;
+import dev.mozhno.segments.Segment;
 import dev.mozhno.tags.TagAssembler;
 import dev.mozhno.tags.TagService;
 
@@ -28,6 +30,7 @@ public class FlagController {
     private final FlagService flagService;
     private final FlagAssembler flagAssembler;
     private final SegmentService segmentService;
+    private final SegmentAssembler segmentAssembler;
     private final TagService tagService;
     private final TagAssembler tagAssembler;
     private final ContextService contextService;
@@ -78,10 +81,12 @@ public class FlagController {
 
         Integer projectId = user.projectId();
         PageResponse<FlagWithStrategy> pageResult = flagService.findByProjectIdWithAllEnvironmentStrategiesPaginated(projectId, page, size);
+        List<Segment> segments = segmentService.findByProjectId(projectId);
+        List<Integer> segmentIds = segments.stream().map(Segment::getId).toList();
         return new PaginatedDashboardResponse(
             flagAssembler.toEnrichedResponses(pageResult.getItems()),
             pageResult.getPage(), pageResult.getSize(), pageResult.getTotalItems(), pageResult.getTotalPages(),
-            segmentService.findByProjectId(projectId),
+            segmentAssembler.toResponseList(segments, segmentService.getContextsForSegments(segmentIds)),
             tagAssembler.toResponseList(tagService.findByProjectId(projectId)),
             contextAssembler.toDefinitionResponseList(contextService.findDefinitionsByProjectId(projectId)),
             environmentAssembler.toResponseList(environmentService.findByProjectId(projectId))

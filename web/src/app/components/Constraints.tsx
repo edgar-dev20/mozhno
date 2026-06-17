@@ -13,6 +13,7 @@ import { SectionHeader, EmptyState, FormField, GradientButton, ErrorBox, Badge }
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useContextsQuery, useSegmentsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 import { useT } from '@/i18n';
 
 const TYPES = ['string', 'number', 'time', 'semver'] as const;
@@ -100,8 +101,8 @@ export function Constraints() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.contexts.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
-      queryClient.invalidateQueries({ queryKey: ['contexts'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
       setDeleteId(null);
       setPanelOpen(false);
     },
@@ -131,8 +132,8 @@ export function Constraints() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
-      queryClient.invalidateQueries({ queryKey: ['contexts'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
       setPanelOpen(false);
     },
     onError: (e: unknown) => {

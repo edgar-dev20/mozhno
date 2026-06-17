@@ -7,6 +7,7 @@ import { useT } from '@/i18n';
 import { useAuth } from '@/app/auth/useAuth';
 import { api } from '@/api';
 import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
 import { UserProfileMenu } from '@/app/components/UserProfileMenu';
 import { Flag, GitBranch, UserCog } from '@/shared/icons';
@@ -88,12 +89,12 @@ export function DashboardLayout() {
   const handleDismiss = useCallback(() => {
     setShowOnboarding(false);
     markOnboardingComplete();
-    queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
-    queryClient.invalidateQueries({ queryKey: ['environments'] });
-    queryClient.invalidateQueries({ queryKey: ['contexts'] });
-    queryClient.refetchQueries({ queryKey: ['flags', 'enriched'], type: 'active' });
-    queryClient.refetchQueries({ queryKey: ['environments'], type: 'active' });
-    queryClient.refetchQueries({ queryKey: ['contexts'], type: 'active' });
+    queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+    queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
+    queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
+    queryClient.refetchQueries({ queryKey: queryKeys.flags.enriched, type: 'active' });
+    queryClient.refetchQueries({ queryKey: queryKeys.environments.all, type: 'active' });
+    queryClient.refetchQueries({ queryKey: queryKeys.contexts.all, type: 'active' });
   }, [queryClient]);
 
   const handleProjectCreated = useCallback(() => {

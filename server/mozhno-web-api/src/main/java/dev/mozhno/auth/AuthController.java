@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import dev.mozhno.exception.InvalidCredentialsException;
 
 import java.util.Map;
 
@@ -86,8 +87,8 @@ public class AuthController {
         return userInviteService.acceptInvite(request.token(), request.name(), request.password());
     }
 
-    @ExceptionHandler(AuthService.InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidCredentials(AuthService.InvalidCredentialsException ex) {
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(Map.of("error", ex.getMessage()));
     }

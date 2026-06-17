@@ -24,6 +24,7 @@ import { PluginSlot } from '@/app/components/PluginSlot';
 import { SectionHeader, EmptyState, GradientButton, LoadingState } from '@/shared';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 import { useLocale, useT } from '@/i18n';
 import { resetOnboardingComplete } from '@/shared/onboardingUtils';
 import { toIntlLocale } from '@/i18n/locale';
@@ -52,14 +53,14 @@ export function Settings() {
   const { data: environments = [] } = useEnvironmentsQuery();
 
   const { data: _settings } = useQuery({
-    queryKey: ['settings', projectId],
+    queryKey: queryKeys.settings.byProject(projectId),
     queryFn: () => api.settings.get(),
     enabled: !!projectId,
     staleTime: 5 * 60_000,
   });
 
   const { data: envLimitData } = useQuery({
-    queryKey: ['environments', 'limit', projectId],
+    queryKey: queryKeys.environments.limit(projectId),
     queryFn: () => api.environments.getLimit(),
     enabled: !!projectId,
     staleTime: 5 * 60_000,
@@ -134,8 +135,8 @@ export function Settings() {
   const saveEditEnvMutation = useMutation({
     mutationFn: () => api.environments.update(editingEnvId!, editEnvName.trim()),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
-      queryClient.invalidateQueries({ queryKey: ['environments'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+      queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
       setEditingEnvId(null);
       setEditEnvName('');
       setInitialEditEnvName('');
@@ -167,8 +168,8 @@ export function Settings() {
       return api.projects.update(projectId, { name: projectName, description: projectDesc });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['environments'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
       initialProjectRef.current = { name: projectName, desc: projectDesc };
       window.dispatchEvent(new Event('project-updated'));
     },
@@ -202,8 +203,8 @@ export function Settings() {
   const addEnvMutation = useMutation({
     mutationFn: () => api.environments.create(newEnvName.trim()),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
-      queryClient.invalidateQueries({ queryKey: ['environments'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+      queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
       setNewEnvName('');
     },
     onError: (e: unknown) => {
@@ -225,8 +226,8 @@ export function Settings() {
   const removeEnvMutation = useMutation({
     mutationFn: () => api.environments.delete(deleteEnvId!),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
-      queryClient.invalidateQueries({ queryKey: ['environments'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+      queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
       setExpandedEnvIds((prev) => {
         const next = new Set(prev);
         next.delete(deleteEnvId!);

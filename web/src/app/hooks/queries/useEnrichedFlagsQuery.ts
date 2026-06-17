@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api';
+import { queryKeys } from '@/api/queryKeys';
 import type { FlagView } from '@/app/hooks/flagTypes';
 import type {
   SegmentResponse,
@@ -120,7 +121,7 @@ export function useEnrichedFlagsQuery(projectId: number | null) {
   const queryClient = useQueryClient();
 
   return useQuery({
-    queryKey: ['flags', 'enriched'],
+    queryKey: queryKeys.flags.enriched,
     queryFn: async (): Promise<EnrichedFlagsData> => {
       if (!projectId) {
         return { flags: [], segments: [], tags: [], contexts: [] };
@@ -129,10 +130,10 @@ export function useEnrichedFlagsQuery(projectId: number | null) {
       try {
         const data = await api.flags.listEnriched(0, 500);
 
-        queryClient.setQueryData(['segments', projectId], data.segments);
-        queryClient.setQueryData(['tags', projectId], data.tags);
-        queryClient.setQueryData(['contexts', projectId], data.contexts);
-        queryClient.setQueryData(['environments', projectId], data.environments);
+        queryClient.setQueryData(queryKeys.segments.byProject(projectId), data.segments);
+        queryClient.setQueryData(queryKeys.tags.all, data.tags);
+        queryClient.setQueryData(queryKeys.contexts.byProject(projectId), data.contexts);
+        queryClient.setQueryData(queryKeys.environments.all, data.environments);
 
         return {
           flags: transformEnrichedResponse(data.flags),

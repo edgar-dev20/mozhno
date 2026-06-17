@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 import { api, type StrategyRequest } from '@/api';
 
 interface ToggleFlagInput {
@@ -27,12 +28,12 @@ export function useFlagToggle() {
       return api.strategies.upsert(input.flagId, req);
     },
     onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey: ['flags', 'enriched'] });
+      await queryClient.cancelQueries({ queryKey: queryKeys.flags.enriched });
 
-      const prev = queryClient.getQueryData(['flags', 'enriched']);
+      const prev = queryClient.getQueryData(queryKeys.flags.enriched);
 
       queryClient.setQueryData(
-        ['flags', 'enriched'],
+        queryKeys.flags.enriched,
         (
           old:
             | { flags: { flagId: number; environments: Record<number, { enabled: boolean }> }[] }
@@ -63,11 +64,11 @@ export function useFlagToggle() {
     },
     onError: (_err, _input, context) => {
       if (context?.prev) {
-        queryClient.setQueryData(['flags', 'enriched'], context.prev);
+        queryClient.setQueryData(queryKeys.flags.enriched, context.prev);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
     },
   });
 }

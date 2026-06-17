@@ -38,6 +38,7 @@ import {
 import { NavLink } from 'react-router';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 
 export function ApiKeys() {
   const queryClient = useQueryClient();
@@ -48,14 +49,14 @@ export function ApiKeys() {
   const { data: environments = [] } = useEnvironmentsQuery();
 
   const { data: keys = [], isLoading: loading } = useQuery({
-    queryKey: ['apikeys', projectId],
+    queryKey: queryKeys.apiKeys.byProject(projectId),
     queryFn: () => api.apiKeys.list(),
     enabled: !!projectId,
     staleTime: 30_000,
   });
 
   const { data: instances = [] } = useQuery({
-    queryKey: ['clientInstances', projectId],
+    queryKey: queryKeys.clientInstances.byProject(projectId),
     queryFn: () => api.clientInstances.list(projectId ?? 0),
     enabled: !!projectId,
     staleTime: 30_000,
@@ -90,7 +91,7 @@ export function ApiKeys() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.apiKeys.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apikeys', projectId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys.byProject(projectId) });
       setExpandedIds((prev) => {
         const next = new Set(prev);
         next.delete(deleteId!);
@@ -112,7 +113,7 @@ export function ApiKeys() {
         keyType: formKeyType,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['apikeys', projectId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys.byProject(projectId) });
       setPanelOpen(false);
     },
     onError: (e: unknown) => {

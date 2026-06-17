@@ -7,7 +7,6 @@ import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.spi.QuotaSpi;
 
 import dev.mozhno.exception.NotFoundException;
-import dev.mozhno.exception.QuotaExceededException;
 
 import java.util.List;
 
@@ -56,11 +55,6 @@ public class ApiKeyService {
         return k;
     }
 
-    @Transactional(readOnly = true)
-    public ApiKey findById(Integer id) {
-        return findById(id, null);
-    }
-
     /**
      * Finds an API key by its token string.
      *
@@ -82,10 +76,7 @@ public class ApiKeyService {
      */
     @Transactional
     public ApiKey create(Integer projectId, ApiKeyRequest request) {
-        QuotaSpi.QuotaResult quota = quotaSpi.canCreateApiKey(projectId);
-        if (quota instanceof QuotaSpi.Blocked blocked) {
-            throw new QuotaExceededException(blocked.current(), blocked.limit(), blocked.planName());
-        }
+        dev.mozhno.util.QuotaValidator.check(quotaSpi.canCreateApiKey(projectId));
 
         ApiKey k = new ApiKey();
         k.setProjectId(projectId);
@@ -100,9 +91,6 @@ public class ApiKeyService {
         return saved;
     }
 
-    public ApiKey update(Integer id, ApiKeyRequest request) {
-        return update(id, request, null);
-    }
     @Transactional
     public ApiKey update(Integer id, ApiKeyRequest request, Integer projectId) {
         ApiKey k = apiKeyRepository.findByIdAndProjectId(id, projectId);
@@ -127,11 +115,6 @@ public class ApiKeyService {
         if (deleted == 0) throw new NotFoundException("ApiKey", id);
         events.publish(DomainEvent.of(projectId, "apikey.deleted", "apikey",
             id, null, "API key deleted"));
-    }
-
-    @Transactional
-    public void delete(Integer id) {
-        delete(id, null);
     }
 
     /**

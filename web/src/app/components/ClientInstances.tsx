@@ -20,6 +20,7 @@ import { SectionHeader, TruncatedCopyTooltip } from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/api/queryKeys';
 import { useT } from '@/i18n';
 
 function formatCount(n: number): string {
@@ -66,14 +67,14 @@ export function ClientInstances() {
   };
 
   const { data: instances = [], isLoading: loading } = useQuery({
-    queryKey: ['clientInstances', projectId, envFilter],
+    queryKey: queryKeys.clientInstances.filtered(projectId, envFilter),
     queryFn: () => api.clientInstances.list(projectId ?? 0, envFilter ?? undefined),
     enabled: !!projectId,
     staleTime: 15_000,
   });
 
   const { data: metricsByFlag = new Map() } = useQuery({
-    queryKey: ['metrics', 'project', projectId, envFilter],
+    queryKey: queryKeys.metrics.project(projectId, envFilter),
     queryFn: async () => {
       if (!projectId) return new Map<number, number>();
       const data = await api.metrics.listForProject(envFilter ?? undefined);

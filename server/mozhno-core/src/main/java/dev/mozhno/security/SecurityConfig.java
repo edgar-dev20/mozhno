@@ -31,19 +31,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Main Spring Security configuration for the application.
- *
- * <p>Sets up stateless session management, hierarchical roles
- * ({@code ADMIN > DEVELOPER > EDITOR > VIEWER}), and a pluggable
- * authentication chain via {@link dev.mozhno.spi.AuthenticationProviderSpi}
- * implementations. The legacy JWT and API key filters are replaced by
- * {@link dev.mozhno.spi.impl.DelegatingAuthenticationFilter} which aggregates
- * all registered providers.</p>
- *
- * <p>Also registers an SPA forward filter that serves {@code index.html}
- * for non-API, non-static requests to support client-side routing.</p>
- */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -139,10 +126,6 @@ public class SecurityConfig {
         ".woff", ".woff2", ".ttf", ".eot", ".map", ".json", ".xml", ".txt", ".webp"
     );
 
-    /**
-     * Filter that forwards non-API, non-static requests to {@code /index.html}
-     * to support SPA client-side routing.
-     */
     @Bean
     public OncePerRequestFilter spaForwardFilter() {
         return new OncePerRequestFilter() {

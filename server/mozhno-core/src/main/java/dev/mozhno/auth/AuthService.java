@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import dev.mozhno.spi.AuthenticationFlowSpi;
 
+import dev.mozhno.exception.InvalidCredentialsException;
 import dev.mozhno.exception.NotFoundException;
 import dev.mozhno.projects.ProjectRepository;
 
@@ -154,15 +155,5 @@ public class AuthService {
 
     private UserDto toDto(User user) {
         return new UserDto(user.getId(), user.getEmail(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(), user.getCreatedAt(), user.getLastActiveAt());
-    }
-
-    /**
-     * Thrown when authentication fails due to invalid credentials or when no provider
-     * is available to handle the request.
-     */
-    public static class InvalidCredentialsException extends RuntimeException {
-        public InvalidCredentialsException(String message) {
-            super(message);
-        }
     }
 }

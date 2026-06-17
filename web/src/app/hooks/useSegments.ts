@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, SegmentResponse } from '@/api';
+import { queryKeys } from '@/api/queryKeys';
 import { useProjectQuery } from '@/app/hooks/queries/useProjectQuery';
 
 export function useSegments() {
@@ -11,14 +12,14 @@ export function useSegments() {
   const projectId = project?.id ?? null;
 
   const { data: segments = [], isLoading: segmentsLoading } = useQuery({
-    queryKey: ['segments', projectId],
+    queryKey: queryKeys.segments.byProject(projectId),
     queryFn: () => api.segments.list(),
     enabled: !!projectId,
     staleTime: 30_000,
   });
 
   const { data: contexts = [], isLoading: contextsLoading } = useQuery({
-    queryKey: ['contexts', projectId],
+    queryKey: queryKeys.contexts.byProject(projectId),
     queryFn: () => api.contexts.list(),
     enabled: !!projectId,
     staleTime: 30_000,
@@ -29,8 +30,8 @@ export function useSegments() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.segments.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
-      queryClient.invalidateQueries({ queryKey: ['segments', projectId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+      queryClient.invalidateQueries({ queryKey: queryKeys.segments.byProject(projectId) });
     },
   });
 
@@ -64,8 +65,8 @@ export function useSegments() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['flags', 'enriched'] });
-      queryClient.invalidateQueries({ queryKey: ['segments', projectId] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+      queryClient.invalidateQueries({ queryKey: queryKeys.segments.byProject(projectId) });
     },
   });
 

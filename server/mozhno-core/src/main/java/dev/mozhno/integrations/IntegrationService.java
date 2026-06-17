@@ -35,11 +35,6 @@ public class IntegrationService {
         return integration;
     }
 
-    @Transactional(readOnly = true)
-    public Integration findById(Integer id) {
-        return findById(id, null);
-    }
-
     @Transactional
     public Integration create(IntegrationRequest request) {
         Integration integration = new Integration();
@@ -82,18 +77,9 @@ public class IntegrationService {
         return changed ? repository.save(integration) : integration;
     }
 
-    public Integration update(Integer id, IntegrationRequest request) {
-        return update(id, request, null);
-    }
-
     @Transactional
     public void delete(Integer id, Integer projectId) {
         int deleted = repository.delete(id, projectId);
         if (deleted == 0) throw new NotFoundException("Integration", id);
-    }
-
-    @Transactional
-    public void delete(Integer id) {
-        delete(id, null);
     }
 }
