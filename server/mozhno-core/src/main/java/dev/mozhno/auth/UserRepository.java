@@ -34,6 +34,7 @@ public class UserRepository {
         u.setRole(rs.getString("role"));
         u.setStatus(rs.getString("status"));
         u.setAvatar(rs.getString("avatar"));
+        u.setLocale(rs.getString("locale"));
         u.setCreatedAt(rs.getTimestamp("created_at").toInstant());
         Timestamp lastActive = rs.getTimestamp("last_active_at");
         u.setLastActiveAt(lastActive != null ? lastActive.toInstant() : null);
@@ -43,7 +44,7 @@ public class UserRepository {
     public User findByEmail(String email) {
         try {
             return jdbc.queryForObject(
-                "SELECT id, email, password_hash, name, role, status, avatar, created_at, last_active_at FROM users WHERE email = ?",
+                "SELECT id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at FROM users WHERE email = ?",
                 ROW_MAPPER, email);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -53,7 +54,7 @@ public class UserRepository {
     public User findById(Integer id) {
         try {
             return jdbc.queryForObject(
-                "SELECT id, email, password_hash, name, role, status, avatar, created_at, last_active_at FROM users WHERE id = ?",
+                "SELECT id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at FROM users WHERE id = ?",
                 ROW_MAPPER, id);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -62,7 +63,7 @@ public class UserRepository {
 
     public List<User> findAll() {
         return jdbc.query(
-            "SELECT id, email, password_hash, name, role, status, avatar, created_at, last_active_at FROM users ORDER BY created_at DESC",
+            "SELECT id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at FROM users ORDER BY created_at DESC",
             ROW_MAPPER);
     }
 
@@ -81,13 +82,13 @@ public class UserRepository {
     public User save(User user) {
         if (user.getId() == null) {
             jdbc.update(
-                "INSERT INTO users (email, password_hash, name, role, status, avatar) VALUES (?, ?, ?, ?, ?, ?)",
-                user.getEmail(), user.getPasswordHash(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar());
+                "INSERT INTO users (email, password_hash, name, role, status, avatar, locale) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                user.getEmail(), user.getPasswordHash(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale());
             return findByEmail(user.getEmail());
         } else {
             jdbc.update(
-                "UPDATE users SET email = ?, password_hash = ?, name = ?, role = ?, status = ?, avatar = ? WHERE id = ?",
-                user.getEmail(), user.getPasswordHash(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getId());
+                "UPDATE users SET email = ?, password_hash = ?, name = ?, role = ?, status = ?, avatar = ?, locale = ? WHERE id = ?",
+                user.getEmail(), user.getPasswordHash(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(), user.getId());
             return findById(user.getId());
         }
     }
@@ -112,7 +113,7 @@ public class UserRepository {
         if (ids == null || ids.isEmpty()) return Collections.emptyList();
         String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
         return jdbc.query(
-            "SELECT id, email, password_hash, name, role, status, avatar, created_at, last_active_at FROM users WHERE id IN (" + placeholders + ")",
+            "SELECT id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at FROM users WHERE id IN (" + placeholders + ")",
             ROW_MAPPER, ids.toArray());
     }
 

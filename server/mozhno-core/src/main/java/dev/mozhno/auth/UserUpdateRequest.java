@@ -22,5 +22,9 @@ public record UserUpdateRequest(
 
     @Pattern(regexp = "active|invited|suspended")
     @Schema(description = "Account status: active, invited, or suspended", nullable = true, example = "active")
-    String status
+    String status,
+
+    @Pattern(regexp = "ru|en")
+    @Schema(description = "Preferred locale: ru or en", nullable = true, example = "ru")
+    String locale
 ) {}

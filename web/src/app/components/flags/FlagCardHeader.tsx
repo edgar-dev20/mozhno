@@ -110,7 +110,7 @@ export function FlagCardHeader({
                     <Switch
                       checked={es.enabled}
                       onCheckedChange={() => onToggleFlag(flag, env.id)}
-                      className="data-[state=checked]:bg-primary scale-75 origin-right"
+                      className="data-[state=checked]:bg-brand scale-75 origin-right"
                     />
                   </span>
                 )}

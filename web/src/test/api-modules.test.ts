@@ -246,6 +246,15 @@ describe('usersApi', () => {
     await usersApi.create(d);
     expect(requestSpy).toHaveBeenCalledWith('/users', { method: 'POST', body: JSON.stringify(d) });
   });
+  it('invite', async () => {
+    const d = { email: 'invite@m.com', role: 'developer', locale: 'ru' };
+    await usersApi.invite(d);
+    expect(requestSpy).toHaveBeenCalledWith('/users/invite', { method: 'POST', body: JSON.stringify(d) });
+  });
+  it('sendResetLink', async () => {
+    await usersApi.sendResetLink(42);
+    expect(requestSpy).toHaveBeenCalledWith('/users/42/send-reset-link', { method: 'POST' });
+  });
   it('update', async () => {
     const d = { name: 'u' } as never;
     await usersApi.update(1, d);

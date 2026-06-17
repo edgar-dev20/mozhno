@@ -418,6 +418,7 @@ const ru = {
     },
     statusDescriptions: {
       active: 'Пользователь может входить в систему',
+      invited: 'Приглашение отправлено, ожидает активации',
       suspended: 'Доступ временно заблокирован',
     },
     time: {
@@ -443,7 +444,7 @@ const ru = {
       editTitle: 'Редактировать пользователя',
       createTitle: 'Пригласить пользователя',
       editDescription: 'Измените роль, статус и параметры',
-      createDescription: 'Новый пользователь получит доступ к проекту',
+      createDescription: 'Приглашение с ссылкой будет отправлено на указанный email',
       cancel: 'Отмена',
       save: 'Сохранить',
       invite: 'Пригласить',
@@ -457,7 +458,9 @@ const ru = {
       namePlaceholder: 'Имя Фамилия',
       emailLabel: 'Email',
       emailPlaceholder: 'hello@example.com',
-      passwordLabel: 'Пароль',
+      sendResetLink: 'Отправить ссылку для сброса',
+      resetLinkSent: 'Ссылка для сброса пароля отправлена пользователю',
+      inviteSent: 'Приглашение отправлено на {{email}}',
       roleLabel: 'Роль',
       roleSelect: 'выбрать',
       statusLabel: 'Статус',
@@ -473,9 +476,15 @@ const ru = {
       confirmTitle: 'Удалить пользователя?',
       confirmDescription: 'Пользователь «{{name}}» будет удалён без возможности восстановления.',
     },
+    resetConfirm: {
+      title: 'Отправить ссылку для сброса?',
+      description: 'Пользователь «{{name}}» получит письмо со ссылкой для установки нового пароля.',
+      send: 'Отправить',
+    },
     errors: {
       delete: 'Ошибка при удалении пользователя',
       save: 'Ошибка при сохранении пользователя',
+      load: 'Не удалось загрузить пользователей.',
     },
   },
   tags: {

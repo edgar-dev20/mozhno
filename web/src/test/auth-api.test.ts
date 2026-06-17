@@ -63,6 +63,14 @@ describe('authApi', () => {
     });
   });
 
+  it('forgotPassword with locale', async () => {
+    await authApi.forgotPassword('e@m.com', 'en');
+    expect(requestSpy).toHaveBeenCalledWith('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email: 'e@m.com', locale: 'en' }),
+    });
+  });
+
   it('resetPassword', async () => {
     await authApi.resetPassword('tok', 'newpass');
     expect(requestSpy).toHaveBeenCalledWith('/auth/reset-password', {

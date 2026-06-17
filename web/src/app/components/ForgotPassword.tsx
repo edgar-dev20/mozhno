@@ -5,10 +5,11 @@ import { GradientButton, ErrorBox } from '@/shared';
 import { Input } from '@/app/components/ui/input';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { api } from '@/api';
-import { useT } from '@/i18n';
+import { useT, useLocale } from '@/i18n';
 
 export function ForgotPassword() {
   const t = useT();
+  const { locale } = useLocale();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,7 +21,7 @@ export function ForgotPassword() {
     setSent(false);
     setLoading(true);
     try {
-      await api.auth.forgotPassword(email);
+      await api.auth.forgotPassword(email, locale);
       setSent(true);
     } catch (err) {
       setError((err as Error).message || t('auth.error.sendFailed'));

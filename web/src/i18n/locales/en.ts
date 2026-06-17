@@ -420,6 +420,7 @@ const en = {
     },
     statusDescriptions: {
       active: 'User can log in',
+      invited: 'Invitation sent, awaiting activation',
       suspended: 'Access temporarily blocked',
     },
     time: {
@@ -445,7 +446,7 @@ const en = {
       editTitle: 'Edit user',
       createTitle: 'Invite user',
       editDescription: 'Change role, status and settings',
-      createDescription: 'New user will get access to the project',
+      createDescription: 'An invite link will be sent to the provided email',
       cancel: 'Cancel',
       save: 'Save',
       invite: 'Invite',
@@ -459,7 +460,9 @@ const en = {
       namePlaceholder: 'First Last',
       emailLabel: 'Email',
       emailPlaceholder: 'hello@example.com',
-      passwordLabel: 'Password',
+      sendResetLink: 'Send reset link',
+      resetLinkSent: 'Password reset link sent to user',
+      inviteSent: 'Invitation sent to {{email}}',
       roleLabel: 'Role',
       roleSelect: 'select',
       statusLabel: 'Status',
@@ -475,9 +478,15 @@ const en = {
       confirmTitle: 'Delete user?',
       confirmDescription: 'User "{{name}}" will be permanently deleted.',
     },
+    resetConfirm: {
+      title: 'Send password reset link?',
+      description: 'User "{{name}}" will receive an email with a link to set a new password.',
+      send: 'Send',
+    },
     errors: {
       delete: 'Error deleting user',
       save: 'Error saving user',
+      load: 'Failed to load users.',
     },
   },
   tags: {

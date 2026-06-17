@@ -12,6 +12,7 @@ import {
   Activity,
   User,
   Check,
+  Loader2,
 } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -24,12 +25,11 @@ import {
   SectionHeader,
   GradientButton,
   EmptyState,
-  LoadingState,
   SearchInput,
   ErrorBox,
   Badge,
 } from '@/shared';
-import { useT } from '@/i18n';
+import { useT, useLocale } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
 
@@ -50,14 +50,16 @@ export function Users() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
     role: 'viewer',
-    status: 'active',
+    status: 'invited',
   });
   const [initialFormData, setInitialFormData] = useState<typeof formData | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [resetPasswordConfirmId, setResetPasswordConfirmId] = useState<number | null>(null);
+  const [resettingPassword, setResettingPassword] = useState(false);
   const t = useT();
+  const { locale } = useLocale();
 
   const loadUsers = async () => {
     try {
@@ -89,7 +91,7 @@ export function Users() {
   const handleOpenCreate = () => {
     setEditingUser(null);
     setError('');
-    setFormData({ name: '', email: '', password: '', role: 'viewer', status: 'active' });
+    setFormData({ name: '', email: '', role: 'viewer', status: 'invited' });
     setInitialFormData(null);
     setIsPanelOpen(true);
   };
@@ -100,7 +102,6 @@ export function Users() {
     const initial = {
       name: user.name ?? '',
       email: user.email,
-      password: '',
       role: user.role,
       status: user.status,
     };
@@ -129,14 +130,27 @@ export function Users() {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (!editingUser) return;
+    setResetPasswordConfirmId(null);
+    setResettingPassword(true);
+    try {
+      await api.users.sendResetLink(editingUser.id);
+      toast.success(t('users.form.resetLinkSent'));
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : t('users.errors.save'));
+    } finally {
+      setResettingPassword(false);
+    }
+  };
+
   const isDirty = useMemo(() => {
     if (!editingUser || !initialFormData) return false;
     return (
       formData.name !== initialFormData.name ||
       formData.email !== initialFormData.email ||
       formData.role !== initialFormData.role ||
-      (editingUser && formData.status !== initialFormData.status) ||
-      (formData.password && formData.password !== '')
+      (editingUser && formData.status !== initialFormData.status)
     );
   }, [formData, editingUser, initialFormData]);
 
@@ -151,17 +165,17 @@ export function Users() {
           role: formData.role,
           status: formData.status,
         };
-        if (formData.password) (payload as Record<string, string>).password = formData.password;
         const updated = await api.users.update(editingUser.id, payload);
         setUsers(users.map((u) => (u.id === updated.id ? updated : u)));
       } else {
-        const created = await api.users.create({
+        await api.users.invite({
           email: formData.email,
-          password: formData.password,
-          name: formData.name,
+          name: formData.name || undefined,
           role: formData.role,
+          locale,
         });
-        setUsers([created, ...users]);
+        toast.success(t('users.form.inviteSent', { email: formData.email }));
+        loadUsers();
       }
       setIsPanelOpen(false);
     } catch (e: unknown) {
@@ -576,8 +590,7 @@ export function Users() {
               disabled={
                 saving ||
                 !formData.email ||
-                (!editingUser && !formData.password) ||
-                (editingUser && !isDirty)
+                (!!editingUser && !isDirty)
               }
               loading={saving}
             >
@@ -650,20 +663,17 @@ export function Users() {
             />
           </div>
 
-          {!editingUser && (
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
-                <span>{t('users.form.passwordLabel')}</span>
-                <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{formData.password.length}/128</span>
-              </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                maxLength={128}
-                placeholder="••••••••"
-                className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
-              />
+          {editingUser && (
+            <div className="pt-4 border-t border-border">
+              <button
+                type="button"
+                onClick={() => { if (editingUser) setResetPasswordConfirmId(editingUser.id); }}
+                disabled={resettingPassword}
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-foreground/80 bg-secondary border border-border rounded-lg hover:bg-accent hover:text-foreground transition-all disabled:opacity-50"
+              >
+                {resettingPassword ? <Loader2 size={14} className="animate-spin" /> : <Mail size={14} />}
+                {resettingPassword ? t('common.loading') : t('users.form.sendResetLink')}
+              </button>
             </div>
           )}
 
@@ -888,6 +898,24 @@ export function Users() {
           )}
         </div>
       </SidePanel>
+
+      <ConfirmDialog
+        open={!!resetPasswordConfirmId}
+        onOpenChange={(open) => {
+          if (!open) setResetPasswordConfirmId(null);
+        }}
+        title={t('users.resetConfirm.title')}
+        description={t('users.resetConfirm.description', {
+          name:
+            users.find((u) => u.id === resetPasswordConfirmId)?.name ??
+            users.find((u) => u.id === resetPasswordConfirmId)?.email ??
+            '',
+        })}
+        confirmLabel={t('users.resetConfirm.send')}
+        variant="default"
+        onConfirm={handleResetPassword}
+        loading={resettingPassword}
+      />
 
       <ConfirmDialog
         open={!!deleteId}

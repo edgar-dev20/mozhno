@@ -22,10 +22,10 @@ export const authApi = {
       body: JSON.stringify({ refreshToken: rt }),
     });
   },
-  forgotPassword: (email: string) =>
+  forgotPassword: (email: string, locale?: string) =>
     request<{ message: string }>('/auth/forgot-password', {
       method: 'POST',
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, locale }),
     }),
   resetPassword: (token: string, password: string) =>
     request<{ message: string }>('/auth/reset-password', {

@@ -23,6 +23,7 @@ public class InviteTokenRepository {
         t.setRole(rs.getString("role"));
         t.setCreatedBy(rs.getObject("created_by", Integer.class));
         t.setTokenHash(rs.getString("token_hash"));
+        t.setLocale(rs.getString("locale"));
         t.setExpiresAt(rs.getTimestamp("expires_at").toInstant());
         Timestamp usedAt = rs.getTimestamp("used_at");
         t.setUsedAt(usedAt != null ? usedAt.toInstant() : null);
@@ -33,8 +34,8 @@ public class InviteTokenRepository {
     public InviteToken save(InviteToken token) {
         if (token.getId() == null) {
             jdbc.update(
-                "INSERT INTO invite_tokens (email, role, created_by, token_hash, expires_at) VALUES (?, ?, ?, ?, ?)",
-                token.getEmail(), token.getRole(), token.getCreatedBy(), token.getTokenHash(),
+                "INSERT INTO invite_tokens (email, role, created_by, token_hash, locale, expires_at) VALUES (?, ?, ?, ?, ?, ?)",
+                token.getEmail(), token.getRole(), token.getCreatedBy(), token.getTokenHash(), token.getLocale(),
                 Timestamp.from(token.getExpiresAt()));
             return findByHash(token.getTokenHash());
         } else {
@@ -48,7 +49,7 @@ public class InviteTokenRepository {
     public InviteToken findByHash(String tokenHash) {
         try {
             return jdbc.queryForObject(
-                "SELECT id, email, role, created_by, token_hash, expires_at, used_at, created_at FROM invite_tokens WHERE token_hash = ?",
+                "SELECT id, email, role, created_by, token_hash, locale, expires_at, used_at, created_at FROM invite_tokens WHERE token_hash = ?",
                 ROW_MAPPER, tokenHash);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -58,7 +59,7 @@ public class InviteTokenRepository {
     public InviteToken findByHashForUpdate(String tokenHash) {
         try {
             return jdbc.queryForObject(
-                "SELECT id, email, role, created_by, token_hash, expires_at, used_at, created_at FROM invite_tokens WHERE token_hash = ? FOR UPDATE",
+                "SELECT id, email, role, created_by, token_hash, locale, expires_at, used_at, created_at FROM invite_tokens WHERE token_hash = ? FOR UPDATE",
                 ROW_MAPPER, tokenHash);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -68,7 +69,7 @@ public class InviteTokenRepository {
     public InviteToken findById(Integer id) {
         try {
             return jdbc.queryForObject(
-                "SELECT id, email, role, created_by, token_hash, expires_at, used_at, created_at FROM invite_tokens WHERE id = ?",
+                "SELECT id, email, role, created_by, token_hash, locale, expires_at, used_at, created_at FROM invite_tokens WHERE id = ?",
                 ROW_MAPPER, id);
         } catch (EmptyResultDataAccessException e) {
             return null;

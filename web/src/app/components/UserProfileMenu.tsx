@@ -72,7 +72,7 @@ export function UserProfileMenu() {
           <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full" aria-label={t('common.openUserMenu')}>
           <Avatar className="w-8 h-8 ring-2 ring-white dark:ring-neutral-700 shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-primary text-xs font-bold text-white">
+            <AvatarFallback className="bg-brand text-xs font-bold text-white">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -85,7 +85,7 @@ export function UserProfileMenu() {
         <div className="flex items-center gap-3 px-2 py-2">
           <Avatar className="w-12 h-12 ring-2 ring-neutral-200 dark:ring-neutral-700 shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-primary text-sm font-bold text-white">
+            <AvatarFallback className="bg-brand text-sm font-bold text-white">
               {initials}
             </AvatarFallback>
           </Avatar>

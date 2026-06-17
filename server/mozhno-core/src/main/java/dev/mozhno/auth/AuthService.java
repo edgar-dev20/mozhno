@@ -153,7 +153,7 @@ public class AuthService {
     }
 
     private UserDto toDto(User user) {
-        return new UserDto(user.getId(), user.getEmail(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getCreatedAt(), user.getLastActiveAt());
+        return new UserDto(user.getId(), user.getEmail(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(), user.getCreatedAt(), user.getLastActiveAt());
     }
 
     /**

@@ -87,10 +87,11 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setName(request.name());
         user.setRole(request.role());
-        user.setStatus("invited");
+        user.setStatus("active");
+        user.setLocale(request.locale() != null ? request.locale() : "ru");
         User saved = userRepository.save(user);
         events.publish(DomainEvent.of(null, "user.created", "user",
-            saved.getId(), saved.getEmail(), "User invited with role: " + saved.getRole()));
+            saved.getId(), saved.getEmail(), "User created with role: " + saved.getRole()));
         return toDto(saved);
     }
 
@@ -115,6 +116,7 @@ public class UserService {
         if (request.name() != null) user.setName(request.name());
         if (request.role() != null) user.setRole(request.role());
         if (request.status() != null) user.setStatus(request.status());
+        if (request.locale() != null) user.setLocale(request.locale());
         User saved = userRepository.save(user);
         events.publish(DomainEvent.of(null, "user.updated", "user",
             saved.getId(), saved.getEmail(), "User updated: role=" + saved.getRole() + ", status=" + saved.getStatus()));
@@ -181,6 +183,6 @@ public class UserService {
     }
 
     private UserDto toDto(User user) {
-        return new UserDto(user.getId(), user.getEmail(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getCreatedAt(), user.getLastActiveAt());
+        return new UserDto(user.getId(), user.getEmail(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(), user.getCreatedAt(), user.getLastActiveAt());
     }
 }

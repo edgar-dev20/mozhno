@@ -57,6 +57,7 @@ export type {
   ContextValue,
   UserCreateRequest,
   UserUpdateRequest,
+  UserInviteRequest,
   ApiKey,
   ApiKeyRequest,
   AuditEvent,

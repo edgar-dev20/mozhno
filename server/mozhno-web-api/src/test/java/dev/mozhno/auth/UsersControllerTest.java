@@ -194,4 +194,46 @@ class UsersControllerTest extends BaseIntegrationTest {
                 .content("{\"email\":\"nomail@test.com\",\"role\":\"viewer\"}"))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    void sendResetLink_shouldReturn200() throws Exception {
+        ObjectMapper om = new ObjectMapper();
+        String createResp = mockMvc.perform(post("/api/v1/users")
+                .header("Authorization", auth())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"resetme@test.com\",\"password\":\"pass1234\",\"name\":\"Reset Me\",\"role\":\"viewer\"}"))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        int userId = om.readTree(createResp).get("id").asInt();
+
+        mockMvc.perform(post("/api/v1/users/{id}/send-reset-link", userId)
+                .header("Authorization", auth()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Password reset link sent"));
+    }
+
+    @Test
+    void sendResetLink_shouldReturn404ForUnknownUser() throws Exception {
+        mockMvc.perform(post("/api/v1/users/99999/send-reset-link")
+                .header("Authorization", auth()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void sendResetLink_shouldReturn403ForNonAdmin() throws Exception {
+        jdbcTemplate.update(
+            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
+            "viewer2@test.com", passwordEncoder.encode("viewpass"), "viewer", "active");
+
+        String viewerLoginResp = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"viewer2@test.com\",\"password\":\"viewpass\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String viewerToken = objectMapper.readTree(viewerLoginResp).get("token").asText();
+
+        mockMvc.perform(post("/api/v1/users/1/send-reset-link")
+                .header("Authorization", "Bearer " + viewerToken))
+                .andExpect(status().isForbidden());
+    }
 }

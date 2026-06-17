@@ -9,13 +9,13 @@ import { useLocale } from "@/i18n";
 import { cn } from "@/app/components/ui/utils";
 
 const MONTHS_RU = [
-  "Янв", "Фев", "Мар", "Апр", "Май", "Июн",
-  "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек",
+  "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+  "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
 ];
 
 const MONTHS_EN = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
 
 type CaptionView = "days" | "months" | "years";
@@ -62,7 +62,7 @@ function MonthYearCaption({
             <ChevronRight className="size-4" />
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-1 w-full">
+        <div className="grid grid-cols-2 gap-1 w-full">
           {months.map((name, i) => (
             <button
               key={i}
