@@ -1,5 +1,10 @@
-import { uploadRequest, request } from "@/api/modules/http";
-import { UserDto, UserCreateRequest, UserUpdateRequest, UserInviteRequest } from "@/api/modules/types";
+import { uploadRequest, request } from '@/api/modules/http';
+import {
+  UserDto,
+  UserCreateRequest,
+  UserUpdateRequest,
+  UserInviteRequest,
+} from '@/api/modules/types';
 
 export const usersApi = {
   list: () => request<UserDto[]>('/users'),

@@ -18,7 +18,7 @@ describe('MOTION', () => {
   it('spring is an array of 4 numbers', () => {
     expect(Array.isArray(MOTION.spring)).toBe(true);
     expect(MOTION.spring).toHaveLength(4);
-    MOTION.spring.forEach(n => expect(typeof n).toBe('number'));
+    MOTION.spring.forEach((n) => expect(typeof n).toBe('number'));
   });
 
   it('card has initial, animate, exit, stagger, transition', () => {

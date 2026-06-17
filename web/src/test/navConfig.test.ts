@@ -3,7 +3,7 @@ import { MANAGEMENT_ITEMS, ADMIN_ITEMS, type NavItem } from '@/app/components/na
 
 describe('MANAGEMENT_ITEMS', () => {
   it('has expected items', () => {
-    const paths = MANAGEMENT_ITEMS.map(i => i.path);
+    const paths = MANAGEMENT_ITEMS.map((i) => i.path);
     expect(paths).toContain('/flags');
     expect(paths).toContain('/segments');
     expect(paths).toContain('/contexts');
@@ -11,7 +11,7 @@ describe('MANAGEMENT_ITEMS', () => {
   });
 
   it('all items have path, labelKey, and icon', () => {
-    MANAGEMENT_ITEMS.forEach(item => {
+    MANAGEMENT_ITEMS.forEach((item) => {
       expect(item.path).toBeTruthy();
       expect(item.labelKey).toBeTruthy();
       expect(item.icon).toBeTruthy();
@@ -21,7 +21,7 @@ describe('MANAGEMENT_ITEMS', () => {
 
 describe('ADMIN_ITEMS', () => {
   it('has expected items', () => {
-    const paths = ADMIN_ITEMS.map(i => i.path);
+    const paths = ADMIN_ITEMS.map((i) => i.path);
     expect(paths).toContain('/users');
     expect(paths).toContain('/integrations');
     expect(paths).toContain('/settings');
@@ -31,7 +31,7 @@ describe('ADMIN_ITEMS', () => {
   });
 
   it('all items have path, labelKey, and icon', () => {
-    ADMIN_ITEMS.forEach(item => {
+    ADMIN_ITEMS.forEach((item) => {
       expect(item.path).toBeTruthy();
       expect(item.labelKey).toBeTruthy();
       expect(item.icon).toBeTruthy();
@@ -39,7 +39,7 @@ describe('ADMIN_ITEMS', () => {
   });
 
   it('all items have adminOnly: true', () => {
-    ADMIN_ITEMS.forEach(item => {
+    ADMIN_ITEMS.forEach((item) => {
       expect(item.adminOnly).toBe(true);
     });
   });

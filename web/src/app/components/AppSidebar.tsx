@@ -89,7 +89,7 @@ export function AppSidebarProvider({ children }: { children: React.ReactNode }) 
     (v: boolean) => {
       lockOverflow();
       setCollapsedState(v);
-      document.cookie = `${SIDEBAR_COOKIE}=${v}; path=/; max-age=${60 * 60 * 24 * 365}`;
+      document.cookie = `${SIDEBAR_COOKIE}=${v}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
       scheduleUnlock();
     },
     [lockOverflow, scheduleUnlock],
@@ -242,10 +242,11 @@ function SidebarContent({
           )}
         </div>
 
-        <div
-          className="flex-1 min-h-[0.5rem] cursor-pointer"
+        <button
+          className="flex-1 min-h-[0.5rem] cursor-pointer border-0 bg-transparent"
           onClick={() => setCollapsed(!collapsed)}
-          aria-hidden="true"
+          aria-label={t('common.collapse')}
+          type="button"
         />
       </div>
 

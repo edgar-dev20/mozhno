@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { authApi } = await import("@/api/modules/auth");
+const { authApi } = await import('@/api/modules/auth');
 
 beforeEach(async () => {
   vi.restoreAllMocks();
-  const mod = await import("@/api/modules/http");
+  const mod = await import('@/api/modules/http');
   vi.spyOn(mod, 'request').mockResolvedValue({});
   vi.spyOn(mod, 'getRefreshToken').mockReturnValue('rt123');
 });
@@ -13,7 +13,7 @@ describe('authApi', () => {
   let requestSpy: ReturnType<typeof vi.mocked>;
 
   beforeEach(async () => {
-    const mod = await import("@/api/modules/http");
+    const mod = await import('@/api/modules/http');
     requestSpy = vi.mocked(mod.request);
     requestSpy.mockClear();
   });

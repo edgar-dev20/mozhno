@@ -1,5 +1,5 @@
-import { request, getRefreshToken } from "@/api/modules/http";
-import { UserDto } from "@/api/modules/types";
+import { request, getRefreshToken } from '@/api/modules/http';
+import { UserDto } from '@/api/modules/types';
 
 export const authApi = {
   login: (email: string, password: string, rememberMe: boolean = false) =>

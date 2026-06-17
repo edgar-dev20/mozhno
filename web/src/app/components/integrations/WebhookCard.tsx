@@ -52,11 +52,19 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
 
         <div className="flex items-center gap-2 flex-wrap">
           {item.enabled ? (
-            <Badge variant="success" shape="pill" icon={<span className="w-1.5 h-1.5 rounded-full bg-success" />}>
+            <Badge
+              variant="success"
+              shape="pill"
+              icon={<span className="w-1.5 h-1.5 rounded-full bg-success" />}
+            >
               {t('integrations.status.connected')}
             </Badge>
           ) : (
-            <Badge variant="accent" shape="pill" icon={<span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />}>
+            <Badge
+              variant="accent"
+              shape="pill"
+              icon={<span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />}
+            >
               {t('integrations.status.disconnected')}
             </Badge>
           )}

@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { format } from "date-fns";
-import { enUS } from "date-fns/locale";
-import { Calendar, X } from "@/shared/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/app/components/ui/calendar";
-import { useLocale, useT } from "@/i18n";
-import { dateLocales } from "@/i18n/dateLocales";
-import type { Locale } from "date-fns/locale";
+import React, { useState } from 'react';
+import { format } from 'date-fns';
+import { enUS } from 'date-fns/locale';
+import { Calendar, X } from '@/shared/icons';
+import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/app/components/ui/calendar';
+import { useLocale, useT } from '@/i18n';
+import { dateLocales } from '@/i18n/dateLocales';
+import type { Locale } from 'date-fns/locale';
 
 interface DatePickerProps {
   value?: Date | null;
@@ -19,7 +19,7 @@ interface DatePickerProps {
 }
 
 function formatDisplay(date: Date, locale: Locale): string {
-  return format(date, "d MMM yyyy", { locale });
+  return format(date, 'd MMM yyyy', { locale });
 }
 
 export function DatePicker({
@@ -29,7 +29,7 @@ export function DatePicker({
   presets: showPresets = false,
   minDate,
   maxDate,
-  className = "",
+  className = '',
 }: DatePickerProps) {
   const { locale } = useLocale();
   const t = useT();
@@ -37,8 +37,15 @@ export function DatePicker({
   const dateLocale = dateLocales[locale] ?? enUS;
 
   const presets = [
-    { label: t("common.today"), getValue: () => new Date() },
-    { label: t("common.yesterday"), getValue: () => { const d = new Date(); d.setDate(d.getDate() - 1); return d; } },
+    { label: t('common.today'), getValue: () => new Date() },
+    {
+      label: t('common.yesterday'),
+      getValue: () => {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return d;
+      },
+    },
   ];
 
   const handleSelect = (date: Date | undefined) => {
@@ -59,12 +66,14 @@ export function DatePicker({
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={placeholder ?? t("common.selectDate")}
+          aria-label={placeholder ?? t('common.selectDate')}
           className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-lg px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
         >
           <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
-          <span className={displayDate ? "text-foreground/80" : "text-muted-foreground"}>
-            {displayDate ? formatDisplay(value!, dateLocale) : placeholder ?? t("common.selectDate")}
+          <span className={displayDate ? 'text-foreground/80' : 'text-muted-foreground'}>
+            {displayDate
+              ? formatDisplay(value!, dateLocale)
+              : (placeholder ?? t('common.selectDate'))}
           </span>
           {displayDate && (
             <span
@@ -104,7 +113,7 @@ export function DatePicker({
                 onClick={() => onChange(undefined)}
                 className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
               >
-                {t("common.clearFilter")}
+                {t('common.clearFilter')}
               </button>
             )}
           </div>

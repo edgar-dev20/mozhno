@@ -45,14 +45,22 @@ describe('Badge', () => {
   });
 
   it('applies solid style', () => {
-    render(<Badge variant="primary" style="solid">Solid</Badge>);
+    render(
+      <Badge variant="primary" style="solid">
+        Solid
+      </Badge>,
+    );
     const el = screen.getByText('Solid');
     expect(el.className).toContain('text-primary-foreground');
     expect(el.className).toContain('bg-primary');
   });
 
   it('applies outline style', () => {
-    render(<Badge variant="success" style="outline">Outline</Badge>);
+    render(
+      <Badge variant="success" style="outline">
+        Outline
+      </Badge>,
+    );
     const el = screen.getByText('Outline');
     expect(el.className).toContain('border-success/30');
   });
@@ -71,7 +79,11 @@ describe('Badge', () => {
   });
 
   it('passes HTML attributes', () => {
-    render(<Badge title="tooltip" data-testid="badge">Tooltip</Badge>);
+    render(
+      <Badge title="tooltip" data-testid="badge">
+        Tooltip
+      </Badge>,
+    );
     const el = screen.getByTestId('badge');
     expect(el.getAttribute('title')).toBe('tooltip');
   });

@@ -91,9 +91,7 @@ export function WebhookEventsPicker({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-foreground/80">
-          {t('integrations.events')}
-        </label>
+        <label className="text-sm font-medium text-foreground/80">{t('integrations.events')}</label>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">
             {t('integrations.eventsCount', {
@@ -118,10 +116,7 @@ export function WebhookEventsPicker({
           const allInCat = cat.events.every((e) => formEventSet.has(e.key));
           const expanded = expandedCats.has(cat.catKey);
           return (
-            <div
-              key={cat.catKey}
-              className="rounded-xl border border-border overflow-hidden"
-            >
+            <div key={cat.catKey} className="rounded-xl border border-border overflow-hidden">
               <button
                 type="button"
                 onClick={() => onToggleCatExpand(cat.catKey)}
@@ -132,12 +127,9 @@ export function WebhookEventsPicker({
                     size={14}
                     className={`text-muted-foreground transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
                   />
-                  <span className="text-sm font-medium text-foreground/80">
-                    {cat.label}
-                  </span>
+                  <span className="text-sm font-medium text-foreground/80">{cat.label}</span>
                   <span className="text-xs text-muted-foreground">
-                    {cat.events.filter((e) => formEventSet.has(e.key)).length}/
-                    {cat.events.length}
+                    {cat.events.filter((e) => formEventSet.has(e.key)).length}/{cat.events.length}
                   </span>
                 </div>
                 <button
@@ -148,9 +140,7 @@ export function WebhookEventsPicker({
                   }}
                   className="text-xs font-medium text-brand hover:text-brand transition-colors"
                 >
-                  {allInCat
-                    ? t('integrations.deselectCategory')
-                    : t('integrations.selectCategory')}
+                  {allInCat ? t('integrations.deselectCategory') : t('integrations.selectCategory')}
                 </button>
               </button>
               {expanded && (
@@ -169,9 +159,7 @@ export function WebhookEventsPicker({
                           }}
                         />
                         <div className="min-w-0">
-                          <div className="text-xs font-medium text-foreground/80">
-                            {evt.title}
-                          </div>
+                          <div className="text-xs font-medium text-foreground/80">{evt.title}</div>
                           <div className="text-xs text-muted-foreground leading-tight mt-0.5">
                             {evt.desc}
                           </div>

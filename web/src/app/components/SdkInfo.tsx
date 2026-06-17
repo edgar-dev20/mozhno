@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Copy, Check, ChevronDown, ChevronUp, Server, Globe } from "@/shared/icons";
-import { JavaIcon } from "@/app/components/LanguageIcons";
+import { Copy, Check, ChevronDown, ChevronUp, Server, Globe } from '@/shared/icons';
+import { JavaIcon } from '@/app/components/LanguageIcons';
 import { useT, type MessageKey } from '@/i18n';
 
 type SdkTab = 'java' | 'js-server' | 'js-client';
@@ -40,7 +40,13 @@ function CodeBlock({ code, lang }: CodeBlockProps) {
   );
 }
 
-const tabs: { id: SdkTab; label: string; icon: React.ReactNode; keyType: 'SERVER' | 'FRONTEND'; gradient: string }[] = [
+const tabs: {
+  id: SdkTab;
+  label: string;
+  icon: React.ReactNode;
+  keyType: 'SERVER' | 'FRONTEND';
+  gradient: string;
+}[] = [
   {
     id: 'java',
     label: 'Java SDK',
@@ -64,7 +70,12 @@ const tabs: { id: SdkTab; label: string; icon: React.ReactNode; keyType: 'SERVER
   },
 ];
 
-function buildContent(t: (key: MessageKey, params?: Record<string, string>) => string): Record<SdkTab, { desc: string; install: string; usage: string; installLang: string; usageLang: string }> {
+function buildContent(
+  t: (key: MessageKey, params?: Record<string, string>) => string,
+): Record<
+  SdkTab,
+  { desc: string; install: string; usage: string; installLang: string; usageLang: string }
+> {
   return {
     java: {
       desc: t('sdkInfo.javaDesc'),
@@ -72,21 +83,28 @@ function buildContent(t: (key: MessageKey, params?: Record<string, string>) => s
 dependencies {
     implementation 'dev.mozhno:mozhno-client-java:1.0-SNAPSHOT'
 }`,
-      usage: `// application.yml
+      usage:
+        `// application.yml
 mozhno:
   url: https://${window.location.hostname}
-  api-key: sk-...          // ` + t('sdkInfo.serverKey') + `
+  api-key: sk-...          // ` +
+        t('sdkInfo.serverKey') +
+        `
 
   app-name: my-app
   instance-id: instance-1
   environment: production
 
-// ` + t('sdkInfo.inCode') + `
+// ` +
+        t('sdkInfo.inCode') +
+        `
 @Autowired
 private MozhnoClient mozhno;
 
 if (mozhno.isEnabled("new-feature")) {
-    // ` + t('sdkInfo.newFeatureCode') + `
+    // ` +
+        t('sdkInfo.newFeatureCode') +
+        `
 }`,
       installLang: 'gradle',
       usageLang: 'java',
@@ -94,11 +112,14 @@ if (mozhno.isEnabled("new-feature")) {
     'js-server': {
       desc: t('sdkInfo.jsServerDesc'),
       install: `npm install @mozhno/client-js`,
-      usage: `import { MozhnoClient } from '@mozhno/client-js';
+      usage:
+        `import { MozhnoClient } from '@mozhno/client-js';
 
 const mozhno = new MozhnoClient({
   url: 'https://${window.location.hostname}',
-  apiKey: 'sk-...',           // ` + t('sdkInfo.serverKey') + `
+  apiKey: 'sk-...',           // ` +
+        t('sdkInfo.serverKey') +
+        `
   appName: 'my-api',
   mode: 'server',
 });
@@ -106,7 +127,9 @@ const mozhno = new MozhnoClient({
 await mozhno.start();
 
 if (mozhno.isEnabled('new-feature', { userId: '123' })) {
-  // ` + t('sdkInfo.newFeatureCode') + `
+  // ` +
+        t('sdkInfo.newFeatureCode') +
+        `
 }`,
       installLang: 'bash',
       usageLang: 'ts',
@@ -114,18 +137,23 @@ if (mozhno.isEnabled('new-feature', { userId: '123' })) {
     'js-client': {
       desc: t('sdkInfo.jsClientDesc'),
       install: `npm install @mozhno/client-js`,
-      usage: `import { MozhnoClient } from '@mozhno/client-js';
+      usage:
+        `import { MozhnoClient } from '@mozhno/client-js';
 
 const mozhno = new MozhnoClient({
   url: 'https://${window.location.hostname}',
-  clientKey: 'sk-...',        // ` + t('sdkInfo.frontendKey') + `
+  clientKey: 'sk-...',        // ` +
+        t('sdkInfo.frontendKey') +
+        `
   appName: 'my-webapp',
   mode: 'client',
 });
 
 mozhno.on('ready', () => {
   if (mozhno.isEnabled('new-dashboard')) {
-    // ` + t('sdkInfo.showNewDashboard') + `
+    // ` +
+        t('sdkInfo.showNewDashboard') +
+        `
   }
 });
 
@@ -169,7 +197,9 @@ export function SdkInfo() {
         </div>
         <div className="flex items-center gap-2">
           {!expanded && (
-            <span className="text-xs text-muted-foreground/70 hidden sm:inline">{active.label}</span>
+            <span className="text-xs text-muted-foreground/70 hidden sm:inline">
+              {active.label}
+            </span>
           )}
           {expanded ? (
             <ChevronUp size={18} className="text-muted-foreground" />
@@ -198,7 +228,13 @@ export function SdkInfo() {
                     : 'text-muted-foreground hover:text-foreground/70 dark:hover:text-neutral-300'
                 }`}
               >
-                <span className={activeTab === tab.id ? `bg-gradient-to-r ${tab.gradient} bg-clip-text text-transparent` : ''}>
+                <span
+                  className={
+                    activeTab === tab.id
+                      ? `bg-gradient-to-r ${tab.gradient} bg-clip-text text-transparent`
+                      : ''
+                  }
+                >
                   {tab.icon}
                 </span>
                 {tab.label}
@@ -219,7 +255,10 @@ export function SdkInfo() {
                 }`}
               >
                 {active.keyType === 'SERVER' ? (
-                  <Server size={12} className={active.keyType === 'SERVER' ? 'text-indigo-500' : 'text-success'} />
+                  <Server
+                    size={12}
+                    className={active.keyType === 'SERVER' ? 'text-indigo-500' : 'text-success'}
+                  />
                 ) : (
                   <Globe size={12} className="text-success" />
                 )}
@@ -232,7 +271,10 @@ export function SdkInfo() {
                 <p className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
                   {t('sdkInfo.install')}
                 </p>
-                <CodeBlock code={content[activeTab].install} lang={content[activeTab].installLang} />
+                <CodeBlock
+                  code={content[activeTab].install}
+                  lang={content[activeTab].installLang}
+                />
               </div>
               <div>
                 <p className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">

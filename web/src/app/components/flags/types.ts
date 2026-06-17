@@ -1,5 +1,5 @@
-import type { FlagTagValue, SegmentResponse, Tag as TagType, ContextDefinition } from "@/api";
-import type { FlagView } from "@/app/hooks/flagTypes";
+import type { FlagTagValue, SegmentResponse, Tag as TagType, ContextDefinition } from '@/api';
+import type { FlagView } from '@/app/hooks/flagTypes';
 
 export interface ConstraintEntry {
   contextDefId: number;

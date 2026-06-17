@@ -21,7 +21,7 @@ export function Wordmark({ text, size = 'lg', className = '' }: WordmarkProps) {
       <span className="bg-gradient-to-r from-gradient-start to-gradient-end bg-clip-text text-transparent">
         {text}
       </span>
-      <span className="font-mono bg-gradient-to-r from-gradient-start to-gradient-end bg-clip-text text-transparent text-[0.55em] -ml-[0.2em]">
+      <span className="font-mono bg-gradient-to-r from-gradient-start to-gradient-end bg-clip-text text-transparent text-[0.6em] -ml-[0.15em]">
         .
       </span>
     </div>

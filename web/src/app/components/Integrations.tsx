@@ -78,9 +78,7 @@ export function Integrations() {
       setPanelOpen(false);
     },
     onError: (e: unknown) => {
-      form.setError(
-        e instanceof Error ? e.message : t('integrations.errors.connect'),
-      );
+      form.setError(e instanceof Error ? e.message : t('integrations.errors.connect'));
     },
     onSettled: () => setSaving(false),
   });
@@ -93,9 +91,7 @@ export function Integrations() {
       setPanelOpen(false);
     },
     onError: (e: unknown) => {
-      toast.error(
-        e instanceof Error ? e.message : t('integrations.errors.disconnect'),
-      );
+      toast.error(e instanceof Error ? e.message : t('integrations.errors.disconnect'));
     },
     onSettled: () => setDeleting(false),
   });
@@ -125,10 +121,7 @@ export function Integrations() {
 
   const editingLastError = form.editing?.lastError ?? null;
 
-  const canSave =
-    form.isDirty &&
-    !form.urlError &&
-    !saving;
+  const canSave = form.isDirty && !form.urlError && !saving;
 
   return (
     <div className="space-y-6">
@@ -163,12 +156,7 @@ export function Integrations() {
         <AnimatePresence mode="popLayout">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {items.map((item, idx) => (
-              <WebhookCard
-                key={item.id}
-                item={item}
-                index={idx}
-                onEdit={openEditAndReset}
-              />
+              <WebhookCard key={item.id} item={item} index={idx} onEdit={openEditAndReset} />
             ))}
           </div>
         </AnimatePresence>
@@ -177,11 +165,7 @@ export function Integrations() {
       <SidePanel
         open={panelOpen}
         onOpenChange={setPanelOpen}
-        title={
-          form.editing
-            ? t('integrations.configure')
-            : t('integrations.connect')
-        }
+        title={form.editing ? t('integrations.configure') : t('integrations.connect')}
         description={
           form.editing
             ? t('integrations.panelEditDescription')
@@ -207,11 +191,7 @@ export function Integrations() {
             >
               {t('common.cancel')}
             </button>
-            <GradientButton
-              onClick={handleSave}
-              disabled={!canSave}
-              loading={saving}
-            >
+            <GradientButton onClick={handleSave} disabled={!canSave} loading={saving}>
               {t('common.saveChanges')}
             </GradientButton>
           </>

@@ -24,14 +24,7 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { UserTableSkeleton } from '@/app/components/skeletons';
 import { api, UserDto } from '@/api';
-import {
-  SectionHeader,
-  GradientButton,
-  EmptyState,
-  SearchInput,
-  ErrorBox,
-  Badge,
-} from '@/shared';
+import { SectionHeader, GradientButton, EmptyState, SearchInput, ErrorBox, Badge } from '@/shared';
 import { useT, useLocale } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
@@ -61,9 +54,7 @@ export function Users() {
   const [initialFormData, setInitialFormData] = useState<typeof formData | null>(null);
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [resetPasswordConfirmId, setResetPasswordConfirmId] = useState<number | null>(null);
-  const [resettingPassword, setResettingPassword] = useState(false);
-  const [diffOpen, setDiffOpen] = useState(false);
+  const [resetStep, setResetStep] = useState<'confirm' | 'sending' | 'sent' | null>(null);
   const t = useT();
   const { locale } = useLocale();
 
@@ -144,15 +135,13 @@ export function Users() {
 
   const handleResetPassword = async () => {
     if (!editingUser) return;
-    setResetPasswordConfirmId(null);
-    setResettingPassword(true);
+    setResetStep('sending');
     try {
       await api.users.sendResetLink(editingUser.id);
-      toast.success(t('users.form.resetLinkSent'));
+      setResetStep('sent');
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : t('users.errors.save'));
-    } finally {
-      setResettingPassword(false);
+      setResetStep(null);
     }
   };
 
@@ -168,14 +157,6 @@ export function Users() {
 
   const handleSave = async () => {
     setError('');
-    if (editingUser && initialFormData && (formData.status !== initialFormData.status || formData.role !== initialFormData.role)) {
-      setDiffOpen(true);
-      return;
-    }
-    await doSave();
-  };
-
-  const doSave = async () => {
     setSaving(true);
     try {
       if (editingUser) {
@@ -198,7 +179,6 @@ export function Users() {
         loadUsers();
       }
       setIsPanelOpen(false);
-      setDiffOpen(false);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : t('users.errors.save'));
     } finally {
@@ -312,8 +292,8 @@ export function Users() {
           : {
               on: 'bg-destructive/10 text-destructive border-destructive/20',
               off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
-            dot: 'bg-destructive',
-          };
+              dot: 'bg-destructive',
+            };
     return (
       <button
         onClick={() => setStatusFilter(active ? null : status)}
@@ -502,8 +482,12 @@ export function Users() {
                               </div>
                             )}
                           </div>
-                          <Badge variant={getRoleVariant(user.role)} size="sm">{getRoleLabel(user.role)}</Badge>
-                          <Badge variant={getStatusVariant(user.status)} size="sm">{getStatusLabel(user.status)}</Badge>
+                          <Badge variant={getRoleVariant(user.role)} size="sm">
+                            {getRoleLabel(user.role)}
+                          </Badge>
+                          <Badge variant={getStatusVariant(user.status)} size="sm">
+                            {getStatusLabel(user.status)}
+                          </Badge>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
@@ -553,14 +537,18 @@ export function Users() {
                                 </span>
                                 <span className="text-xs font-medium flex items-center gap-1.5">
                                   {getRoleIcon(user.role, 11, 'text-muted-foreground shrink-0')}
-                                  <Badge variant={getRoleVariant(user.role)} size="sm">{getRoleLabel(user.role)}</Badge>
+                                  <Badge variant={getRoleVariant(user.role)} size="sm">
+                                    {getRoleLabel(user.role)}
+                                  </Badge>
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
                                 <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('users.card.status')}
                                 </span>
-                                <Badge variant={getStatusVariant(user.status)} size="sm">{getStatusLabel(user.status)}</Badge>
+                                <Badge variant={getStatusVariant(user.status)} size="sm">
+                                  {getStatusLabel(user.status)}
+                                </Badge>
                               </div>
                               <div className="px-3 py-2.5">
                                 <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
@@ -635,268 +623,147 @@ export function Users() {
         description={
           editingUser ? t('users.panel.editDescription') : t('users.panel.createDescription')
         }
-        diffSlot={
-          diffOpen ? (
-            <div className="border-t border-border bg-secondary/30 dark:bg-secondary/10">
-              <div className="px-6 pt-4 pb-1">
-                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
-                  {t('common.reviewChanges')}
-                </span>
-              </div>
-              <div className="px-6 pb-4 space-y-2.5">
-                {initialFormData && formData.role !== initialFormData.role && (
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-medium text-muted-foreground w-12 shrink-0">{t('users.card.role')}</span>
-                    <Badge variant={getRoleVariant(initialFormData.role)} size="sm">
-                      {getRoleLabel(initialFormData.role)}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">→</span>
-                    <Badge variant={getRoleVariant(formData.role)} size="sm">
-                      {getRoleLabel(formData.role)}
-                    </Badge>
-                  </div>
-                )}
-                {initialFormData && formData.status !== initialFormData.status && (
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-medium text-muted-foreground w-12 shrink-0">{t('users.card.status')}</span>
-                    <Badge variant={getStatusVariant(initialFormData.status)} size="sm">
-                      {getStatusLabel(initialFormData.status)}
-                    </Badge>
-                    <span className="text-sm text-muted-foreground">→</span>
-                    <Badge variant={getStatusVariant(formData.status)} size="sm">
-                      {getStatusLabel(formData.status)}
-                    </Badge>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : undefined
-        }
-        onDiffDismiss={diffOpen ? () => setDiffOpen(false) : undefined}
         footer={
-          diffOpen ? (
-            <>
-              <button
-                onClick={() => setDiffOpen(false)}
-                className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <GradientButton onClick={doSave} loading={saving}>
-                {t('common.applyChanges')}
-              </GradientButton>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => setIsPanelOpen(false)}
-                className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <GradientButton
-                onClick={handleSave}
-                disabled={
-                  saving ||
-                  !formData.email ||
-                  (!!editingUser && !isDirty)
-                }
-                loading={saving}
-              >
-                {editingUser ? t('common.saveChanges') : t('users.panel.invite')}
-              </GradientButton>
-            </>
-          )
+          <>
+            <button
+              onClick={() => setIsPanelOpen(false)}
+              className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+            >
+              {t('common.cancel')}
+            </button>
+            <GradientButton
+              onClick={handleSave}
+              disabled={saving || !formData.email || (!!editingUser && !isDirty)}
+              loading={saving}
+            >
+              {editingUser ? t('common.saveChanges') : t('users.panel.invite')}
+            </GradientButton>
+          </>
         }
       >
-        <div className="space-y-5">
-          {error && <ErrorBox>{error}</ErrorBox>}
+        <div className="relative">
+          <div className="space-y-5">
+            {error && <ErrorBox>{error}</ErrorBox>}
 
-          {editingUser && (
-            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-gradient-subtle-start to-gradient-subtle-end dark:from-brand/5 dark:to-brand/5 border border-info/20 dark:border-brand/20 rounded-xl">
-              <Avatar className="w-10 h-10 shadow-md shrink-0">
-                <AvatarImage
-                  src={editingUser.avatar ? api.users.getAvatarUrl(editingUser.id) : undefined}
-                  alt={editingUser.name ?? ''}
-                />
-                <AvatarFallback className="bg-brand text-sm font-bold text-white">
-                  {(editingUser.name ?? editingUser.email).substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0">
-                <div className="text-sm font-semibold text-foreground truncate">
-                  {editingUser.name ?? editingUser.email}
-                </div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1 truncate">
-                  <Mail size={11} />
-                  {editingUser.email}
+            {editingUser && (
+              <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-gradient-subtle-start to-gradient-subtle-end dark:from-brand/5 dark:to-brand/5 border border-info/20 dark:border-brand/20 rounded-xl">
+                <Avatar className="w-10 h-10 shadow-md shrink-0">
+                  <AvatarImage
+                    src={editingUser.avatar ? api.users.getAvatarUrl(editingUser.id) : undefined}
+                    alt={editingUser.name ?? ''}
+                  />
+                  <AvatarFallback className="bg-brand text-sm font-bold text-white">
+                    {(editingUser.name ?? editingUser.email).substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-foreground truncate">
+                    {editingUser.name ?? editingUser.email}
+                  </div>
+                  <div className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+                    <Mail size={11} />
+                    {editingUser.email}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
-              <span>{t('users.form.nameLabel')}</span>
-              <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{formData.name.length}/120</span>
-            </label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              maxLength={120}
-              placeholder={t('users.form.namePlaceholder')}
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
-              <span>Email</span>
-              <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{formData.email.length}/254</span>
-            </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              maxLength={254}
-              placeholder="email@company.com"
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
-            />
-          </div>
-
-          {editingUser && (
-            <div className="pt-4 border-t border-border">
-              <button
-                type="button"
-                onClick={() => { if (editingUser) setResetPasswordConfirmId(editingUser.id); }}
-                disabled={resettingPassword}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-foreground/80 bg-secondary border border-border rounded-lg hover:bg-accent hover:text-foreground transition-all disabled:opacity-50"
-              >
-                {resettingPassword ? <Loader2 size={14} className="animate-spin" /> : <Mail size={14} />}
-                {resettingPassword ? t('common.loading') : t('users.form.sendResetLink')}
-              </button>
-            </div>
-          )}
-
-          <div className="pt-4 border-t border-border space-y-3">
-            <div className="flex items-center gap-2">
-              <Shield size={16} className="text-brand" />
-              <label className="text-sm font-medium text-foreground/80">
-                {t('users.form.roleLabel')}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+                <span>{t('users.form.nameLabel')}</span>
+                <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                  {formData.name.length}/120
+                </span>
               </label>
-              <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">
-                {t('users.form.roleSelect')}
-              </span>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                maxLength={120}
+                placeholder={t('users.form.namePlaceholder')}
+                className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+              />
             </div>
 
-            <div className="grid grid-cols-1 gap-2">
-              {(
-                [
-                  {
-                    value: 'admin',
-                    color: 'from-warning to-warning/80',
-                    borderColor: 'border-warning',
-                    bgHover: 'group-hover:bg-warning/10',
-                    bgSelected: 'bg-warning/10',
-                    textSelected: 'text-warning',
-                    description: t('users.roleDescriptions.admin'),
-                  },
-                  {
-                    value: 'developer',
-                    color: 'from-info to-info/80',
-                    borderColor: 'border-info',
-                    bgHover: 'group-hover:bg-info/10',
-                    bgSelected: 'bg-info/10',
-                    textSelected: 'text-info',
-                    description: t('users.roleDescriptions.developer'),
-                  },
-                  {
-                    value: 'viewer',
-                    color: 'from-neutral-600 to-neutral-500',
-                    borderColor: 'border-neutral-400',
-                    bgHover: 'group-hover:bg-secondary dark:group-hover:bg-neutral-500/10',
-                    bgSelected: 'bg-secondary dark:bg-neutral-500/10',
-                    textSelected: 'text-foreground/80',
-                    description: t('users.roleDescriptions.viewer'),
-                  },
-                ] as const
-              ).map(({ value, color, borderColor, bgSelected, textSelected, description }) => {
-                const selected = formData.role === value;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, role: value })}
-                    className={`group flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all text-left ${
-                      selected
-                        ? `${borderColor} ${bgSelected} ${textSelected} shadow-sm`
-                        : 'border-border text-muted-foreground hover:border-border'
-                    }`}
-                  >
-                    <div
-                      className={`w-8 h-8 rounded-lg bg-gradient-to-r ${color} flex items-center justify-center text-white shadow-sm shrink-0`}
-                    >
-                      {getRoleIcon(value, 16)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div
-                        className={`text-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}
-                      >
-                        {getRoleLabel(value)}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">{description}</div>
-                    </div>
-                    {selected && (
-                      <div
-                        className={`w-5 h-5 rounded-md bg-gradient-to-r ${color} flex items-center justify-center shrink-0`}
-                      >
-                        <Check size={12} className="text-white" strokeWidth={3} />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+                <span>Email</span>
+                <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                  {formData.email.length}/254
+                </span>
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                maxLength={254}
+                placeholder="email@company.com"
+                className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+              />
             </div>
-          </div>
 
-          {editingUser && (
+            {editingUser && (
+              <div className="pt-4 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setResetStep('confirm')}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-foreground/80 bg-secondary border border-border rounded-lg hover:bg-accent hover:text-foreground transition-all"
+                >
+                  <Mail size={14} />
+                  {t('users.form.sendResetLink')}
+                </button>
+              </div>
+            )}
+
             <div className="pt-4 border-t border-border space-y-3">
               <div className="flex items-center gap-2">
-                <Activity size={16} className="text-brand" />
+                <Shield size={16} className="text-brand" />
                 <label className="text-sm font-medium text-foreground/80">
-                  {t('users.form.statusLabel')}
+                  {t('users.form.roleLabel')}
                 </label>
+                <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">
+                  {t('users.form.roleSelect')}
+                </span>
               </div>
 
               <div className="grid grid-cols-1 gap-2">
                 {(
                   [
                     {
-                      value: 'active',
-                      label: t('users.status.active'),
-                      dotClass: 'bg-success',
-                      color: 'success',
-                      description: t('users.statusDescriptions.active'),
+                      value: 'admin',
+                      color: 'from-warning to-warning/80',
+                      borderColor: 'border-warning',
+                      bgHover: 'group-hover:bg-warning/10',
+                      bgSelected: 'bg-warning/10',
+                      textSelected: 'text-warning',
+                      description: t('users.roleDescriptions.admin'),
                     },
                     {
-                      value: 'suspended',
-                      label: t('users.status.suspended'),
-                      dotClass: 'bg-destructive',
-                      color: 'destructive',
-                      description: t('users.statusDescriptions.suspended'),
+                      value: 'developer',
+                      color: 'from-info to-info/80',
+                      borderColor: 'border-info',
+                      bgHover: 'group-hover:bg-info/10',
+                      bgSelected: 'bg-info/10',
+                      textSelected: 'text-info',
+                      description: t('users.roleDescriptions.developer'),
+                    },
+                    {
+                      value: 'viewer',
+                      color: 'from-neutral-600 to-neutral-500',
+                      borderColor: 'border-neutral-400',
+                      bgHover: 'group-hover:bg-secondary dark:group-hover:bg-neutral-500/10',
+                      bgSelected: 'bg-secondary dark:bg-neutral-500/10',
+                      textSelected: 'text-foreground/80',
+                      description: t('users.roleDescriptions.viewer'),
                     },
                   ] as const
-                ).map(({ value, label, dotClass, color, description }) => {
-                  const selected = formData.status === value;
-                  const borderColor = selected ? `border-${color}` : 'border-border';
-                  const bgSelected = selected ? `bg-${color}/10` : '';
-                  const textSelected = selected ? `text-${color}` : '';
+                ).map(({ value, color, borderColor, bgSelected, textSelected, description }) => {
+                  const selected = formData.role === value;
                   return (
                     <button
                       key={value}
                       type="button"
-                      onClick={() => setFormData({ ...formData, status: value })}
+                      onClick={() => setFormData({ ...formData, role: value })}
                       className={`group flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all text-left ${
                         selected
                           ? `${borderColor} ${bgSelected} ${textSelected} shadow-sm`
@@ -904,19 +771,21 @@ export function Users() {
                       }`}
                     >
                       <div
-                        className={`w-5 h-5 rounded-full ${dotClass} shrink-0 ring-4 ${selected ? 'ring-white/50 dark:ring-black/20' : 'ring-transparent'} transition-all`}
-                      />
+                        className={`w-8 h-8 rounded-lg bg-gradient-to-r ${color} flex items-center justify-center text-white shadow-sm shrink-0`}
+                      >
+                        {getRoleIcon(value, 16)}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div
                           className={`text-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}
                         >
-                          {label}
+                          {getRoleLabel(value)}
                         </div>
                         <div className="text-xs text-muted-foreground mt-0.5">{description}</div>
                       </div>
                       {selected && (
                         <div
-                          className={`w-5 h-5 rounded-md bg-${color} flex items-center justify-center shrink-0`}
+                          className={`w-5 h-5 rounded-md bg-gradient-to-r ${color} flex items-center justify-center shrink-0`}
                         >
                           <Check size={12} className="text-white" strokeWidth={3} />
                         </div>
@@ -926,87 +795,201 @@ export function Users() {
                 })}
               </div>
             </div>
-          )}
 
-          {editingUser && (
-            <div className="pt-4 border-t border-border space-y-2.5">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <User size={12} className="text-muted-foreground" />
-                <span>
-                  {t('users.panel.created')}{' '}
-                  <span className="font-medium text-foreground/80">
-                    {formatDate(editingUser.createdAt)}
-                  </span>
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock size={12} className="text-muted-foreground" />
-                <span>
-                  {t('users.panel.lastActive')}{' '}
-                  <span className="font-medium text-foreground/80">
-                    {formatDateTime(editingUser.lastActiveAt)}
-                  </span>
-                </span>
-              </div>
-            </div>
-          )}
+            {editingUser && (
+              <div className="pt-4 border-t border-border space-y-3">
+                <div className="flex items-center gap-2">
+                  <Activity size={16} className="text-brand" />
+                  <label className="text-sm font-medium text-foreground/80">
+                    {t('users.form.statusLabel')}
+                  </label>
+                </div>
 
-          <div className="p-4 bg-brand/5 border border-brand/20 rounded-lg">
-            <div className="flex gap-3">
-              <div className="shrink-0 mt-0.5">
-                <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center">
-                  <Shield size={12} className="text-white" />
+                <div className="grid grid-cols-1 gap-2">
+                  {(
+                    [
+                      {
+                        value: 'active',
+                        label: t('users.status.active'),
+                        dotClass: 'bg-success',
+                        color: 'success',
+                        description: t('users.statusDescriptions.active'),
+                      },
+                      {
+                        value: 'suspended',
+                        label: t('users.status.suspended'),
+                        dotClass: 'bg-destructive',
+                        color: 'destructive',
+                        description: t('users.statusDescriptions.suspended'),
+                      },
+                    ] as const
+                  ).map(({ value, label, dotClass, color, description }) => {
+                    const selected = formData.status === value;
+                    const borderColor = selected ? `border-${color}` : 'border-border';
+                    const bgSelected = selected ? `bg-${color}/10` : '';
+                    const textSelected = selected ? `text-${color}` : '';
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, status: value })}
+                        className={`group flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all text-left ${
+                          selected
+                            ? `${borderColor} ${bgSelected} ${textSelected} shadow-sm`
+                            : 'border-border text-muted-foreground hover:border-border'
+                        }`}
+                      >
+                        <div
+                          className={`w-5 h-5 rounded-full ${dotClass} shrink-0 ring-4 ${selected ? 'ring-white/50 dark:ring-black/20' : 'ring-transparent'} transition-all`}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div
+                            className={`text-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}
+                          >
+                            {label}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{description}</div>
+                        </div>
+                        {selected && (
+                          <div
+                            className={`w-5 h-5 rounded-md bg-${color} flex items-center justify-center shrink-0`}
+                          >
+                            <Check size={12} className="text-white" strokeWidth={3} />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
-              <div>
-                <h5 className="text-xs font-semibold text-brand mb-1">
-                  {t('users.help.title')}
-                </h5>
-                <p className="text-xs text-foreground/70">
-                  {t('users.help.admin')}
-                  <br />
-                  {t('users.help.developer')}
-                  <br />
-                  {t('users.help.viewer')}
-                </p>
+            )}
+
+            {editingUser && (
+              <div className="pt-4 border-t border-border space-y-2.5">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <User size={12} className="text-muted-foreground" />
+                  <span>
+                    {t('users.panel.created')}{' '}
+                    <span className="font-medium text-foreground/80">
+                      {formatDate(editingUser.createdAt)}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock size={12} className="text-muted-foreground" />
+                  <span>
+                    {t('users.panel.lastActive')}{' '}
+                    <span className="font-medium text-foreground/80">
+                      {formatDateTime(editingUser.lastActiveAt)}
+                    </span>
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="p-4 bg-brand/5 border border-brand/20 rounded-lg">
+              <div className="flex gap-3">
+                <div className="shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center">
+                    <Shield size={12} className="text-white" />
+                  </div>
+                </div>
+                <div>
+                  <h5 className="text-xs font-semibold text-brand mb-1">{t('users.help.title')}</h5>
+                  <p className="text-xs text-foreground/70">
+                    {t('users.help.admin')}
+                    <br />
+                    {t('users.help.developer')}
+                    <br />
+                    {t('users.help.viewer')}
+                  </p>
+                </div>
               </div>
             </div>
+
+            {editingUser && (
+              <div className="pt-6 border-t border-border space-y-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDeleteId(editingUser.id);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
+                >
+                  <Trash2 size={16} />
+                  {t('users.panel.deleteUser')}
+                </button>
+              </div>
+            )}
           </div>
 
-          {editingUser && (
-            <div className="pt-6 border-t border-border space-y-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setDeleteId(editingUser.id);
-                }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
-              >
-                <Trash2 size={16} />
-                {t('users.panel.deleteUser')}
-              </button>
+          {resetStep && (
+            <div className="absolute inset-0 z-10 flex flex-col">
+              <div
+                className="absolute inset-0 bg-white/70 dark:bg-black/50 backdrop-blur-[2px]"
+                onClick={() => resetStep === 'confirm' && setResetStep(null)}
+              />
+              <div className="relative flex-1 flex items-center justify-center p-6">
+                <div className="bg-card border border-border rounded-2xl shadow-xl p-6 w-full max-w-sm z-20">
+                  {resetStep === 'confirm' && (
+                    <>
+                      <h3 className="text-lg font-semibold text-foreground mb-2">
+                        {t('users.resetConfirm.title')}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-5">
+                        {t('users.resetConfirm.description', {
+                          name: editingUser?.name ?? editingUser?.email ?? '',
+                        })}
+                      </p>
+                      <div className="flex justify-end gap-3">
+                        <button
+                          onClick={() => setResetStep(null)}
+                          className="px-4 py-2 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+                        >
+                          {t('common.cancel')}
+                        </button>
+                        <GradientButton onClick={handleResetPassword}>
+                          {t('users.resetConfirm.send')}
+                        </GradientButton>
+                      </div>
+                    </>
+                  )}
+                  {resetStep === 'sending' && (
+                    <div className="flex flex-col items-center gap-3 py-2">
+                      <Loader2 size={24} className="animate-spin text-brand" />
+                      <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
+                    </div>
+                  )}
+                  {resetStep === 'sent' && (
+                    <div className="flex flex-col items-center gap-3 py-2">
+                      <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
+                        <svg
+                          className="w-5 h-5 text-green-600"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={3}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                      <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                        {t('users.form.resetLinkSent')}
+                      </p>
+                      <button
+                        onClick={() => setResetStep(null)}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors mt-1"
+                      >
+                        {t('common.close')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>
       </SidePanel>
-
-      <ConfirmDialog
-        open={!!resetPasswordConfirmId}
-        onOpenChange={(open) => {
-          if (!open) setResetPasswordConfirmId(null);
-        }}
-        title={t('users.resetConfirm.title')}
-        description={t('users.resetConfirm.description', {
-          name:
-            users.find((u) => u.id === resetPasswordConfirmId)?.name ??
-            users.find((u) => u.id === resetPasswordConfirmId)?.email ??
-            '',
-        })}
-        confirmLabel={t('users.resetConfirm.send')}
-        variant="default"
-        onConfirm={handleResetPassword}
-        loading={resettingPassword}
-      />
 
       <ConfirmDialog
         open={!!deleteId}

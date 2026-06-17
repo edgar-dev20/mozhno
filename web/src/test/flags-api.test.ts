@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { flagsApi, strategiesApi, metricsApi } = await import("@/api/modules/flags");
+const { flagsApi, strategiesApi, metricsApi } = await import('@/api/modules/flags');
 
 beforeEach(async () => {
   vi.restoreAllMocks();
-  const mod = await import("@/api/modules/http");
+  const mod = await import('@/api/modules/http');
   vi.spyOn(mod, 'request').mockResolvedValue({});
 });
 
@@ -12,7 +12,7 @@ describe('flagsApi', () => {
   let requestSpy: ReturnType<typeof vi.mocked>;
 
   beforeEach(async () => {
-    const mod = await import("@/api/modules/http");
+    const mod = await import('@/api/modules/http');
     requestSpy = vi.mocked(mod.request);
     requestSpy.mockClear();
   });
@@ -45,13 +45,19 @@ describe('flagsApi', () => {
   it('create', async () => {
     const data = { name: 'f', key: 'f', flagType: 'RELEASE' } as never;
     await flagsApi.create(data);
-    expect(requestSpy).toHaveBeenCalledWith('/flags', { method: 'POST', body: JSON.stringify(data) });
+    expect(requestSpy).toHaveBeenCalledWith('/flags', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   });
 
   it('update', async () => {
     const data = { name: 'f' } as never;
     await flagsApi.update(3, data);
-    expect(requestSpy).toHaveBeenCalledWith('/flags/3', { method: 'PUT', body: JSON.stringify(data) });
+    expect(requestSpy).toHaveBeenCalledWith('/flags/3', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   });
 
   it('delete', async () => {
@@ -82,13 +88,19 @@ describe('flagsApi', () => {
   it('create strategy', async () => {
     const data = { name: 's' } as never;
     await strategiesApi.create(1, data);
-    expect(requestSpy).toHaveBeenCalledWith('/flags/1/strategies', { method: 'POST', body: JSON.stringify(data) });
+    expect(requestSpy).toHaveBeenCalledWith('/flags/1/strategies', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   });
 
   it('update strategy', async () => {
     const data = { name: 's' } as never;
     await strategiesApi.update(1, 2, data);
-    expect(requestSpy).toHaveBeenCalledWith('/flags/1/strategies/2', { method: 'PUT', body: JSON.stringify(data) });
+    expect(requestSpy).toHaveBeenCalledWith('/flags/1/strategies/2', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   });
 
   it('delete strategy', async () => {
@@ -99,7 +111,10 @@ describe('flagsApi', () => {
   it('upsert strategy', async () => {
     const data = { name: 's' } as never;
     await strategiesApi.upsert(1, data);
-    expect(requestSpy).toHaveBeenCalledWith('/flags/1/strategies', { method: 'PUT', body: JSON.stringify(data) });
+    expect(requestSpy).toHaveBeenCalledWith('/flags/1/strategies', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
   });
 
   it('get metrics for flag', async () => {

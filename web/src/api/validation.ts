@@ -6,7 +6,7 @@ export class ValidationError extends Error {
   readonly issues: z.ZodIssue[];
 
   constructor(issues: z.ZodIssue[]) {
-    super(`API schema validation failed: ${issues.map(i => i.message).join(', ')}`);
+    super(`API schema validation failed: ${issues.map((i) => i.message).join(', ')}`);
     this.name = 'ValidationError';
     this.issues = issues;
   }

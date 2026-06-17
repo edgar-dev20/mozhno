@@ -50,21 +50,15 @@ export function WebhookHeadersEditor({
     [onUpdate],
   );
 
-  const handleKeyFocus = useCallback(
-    (id: number) => {
-      setFocusedRowId(id);
-      setFocusedField('key');
-    },
-    [],
-  );
+  const handleKeyFocus = useCallback((id: number) => {
+    setFocusedRowId(id);
+    setFocusedField('key');
+  }, []);
 
-  const handleValueFocus = useCallback(
-    (id: number) => {
-      setFocusedRowId(id);
-      setFocusedField('value');
-    },
-    [],
-  );
+  const handleValueFocus = useCallback((id: number) => {
+    setFocusedRowId(id);
+    setFocusedField('value');
+  }, []);
 
   const handleBlur = useCallback(() => {
     setTimeout(() => {
@@ -90,8 +84,7 @@ export function WebhookHeadersEditor({
       </div>
       <div className="space-y-2">
         {headers.map((h) => {
-          const showKeySuggestions =
-            focusedRowId === h.id && focusedField === 'key';
+          const showKeySuggestions = focusedRowId === h.id && focusedField === 'key';
           const filteredSuggestions = getSuggestedHeaders(h.key);
 
           return (
@@ -124,7 +117,9 @@ export function WebhookHeadersEditor({
                     </div>
                   )}
                 </div>
-                <div className="text-[10px] font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">{h.key.length}/500</div>
+                <div className="text-[10px] font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+                  {h.key.length}/500
+                </div>
               </div>
               <div className="flex-1 min-w-0">
                 <input
@@ -136,7 +131,9 @@ export function WebhookHeadersEditor({
                   placeholder={t('integrations.headerValuePlaceholder')}
                   className="w-full bg-input-background border border-border rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                 />
-                <div className="text-[10px] font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">{h.value.length}/500</div>
+                <div className="text-[10px] font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+                  {h.value.length}/500
+                </div>
               </div>
               <button
                 type="button"

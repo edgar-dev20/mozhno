@@ -1,7 +1,7 @@
 import { Component } from 'react';
-import { AlertTriangle } from "@/shared/icons";
-import { GradientButton } from "@/shared";
-import { t } from "@/i18n";
+import { AlertTriangle } from '@/shared/icons';
+import { GradientButton } from '@/shared';
+import { t } from '@/i18n';
 
 interface PageErrorBoundaryProps {
   children: React.ReactNode;
@@ -42,14 +42,12 @@ export class PageErrorBoundary extends Component<PageErrorBoundaryProps, PageErr
               <AlertTriangle size={22} className="text-red-500" />
             </div>
             <div>
-        <p className="text-sm font-semibold text-foreground">{t('errors.pageError')}</p>
-            <p className="text-xs text-muted-foreground mt-1 max-w-md">
-              {this.state.error?.message ?? t('errors.unknownError')}
-            </p>
-          </div>
-          <GradientButton onClick={this.handleRetry}>
-            {t('common.retry')}
-            </GradientButton>
+              <p className="text-sm font-semibold text-foreground">{t('errors.pageError')}</p>
+              <p className="text-xs text-muted-foreground mt-1 max-w-md">
+                {this.state.error?.message ?? t('errors.unknownError')}
+              </p>
+            </div>
+            <GradientButton onClick={this.handleRetry}>{t('common.retry')}</GradientButton>
           </div>
         </div>
       );

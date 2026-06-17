@@ -31,9 +31,7 @@ export function OnboardingSidebar({ step }: OnboardingSidebarProps) {
               {CurrentIcon ? <CurrentIcon size={28} className="text-white" /> : null}
             </div>
             {step === 0 && (
-              <div className="text-xs text-muted-foreground">
-                {t('onboarding.createProject')}
-              </div>
+              <div className="text-xs text-muted-foreground">{t('onboarding.createProject')}</div>
             )}
             {step === 1 && (
               <>

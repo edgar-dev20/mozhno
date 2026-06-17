@@ -54,16 +54,20 @@ export const OPERATOR_LABELS: Record<string, string> = {
 
 export const OPERATOR_COLORS: Record<string, string> = {
   in: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20',
-  not_in: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20',
+  not_in:
+    'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20',
   eq: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20',
   ne: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20',
   gt: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
   gte: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
   lt: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
   lte: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
-  contains: 'text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 border-cyan-200 dark:border-cyan-500/20',
-  after: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
-  before: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
+  contains:
+    'text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 border-cyan-200 dark:border-cyan-500/20',
+  after:
+    'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
+  before:
+    'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
 };
 
 export function getOperatorsForType(type: string | undefined): OperatorDef[] {
@@ -111,7 +115,7 @@ export function getOperatorShortCode(op: string, contextType?: string): string {
 
 export function isValidOperator(type: string | undefined, operator: string): boolean {
   const ops = getOperatorsForType(type);
-  return ops.some(o => o.value === operator);
+  return ops.some((o) => o.value === operator);
 }
 
 export function getInputMode(type: string | undefined): string {
@@ -122,10 +126,14 @@ export function getInputMode(type: string | undefined): string {
 
 export function getInputPlaceholder(type: string | undefined): string {
   switch (type) {
-    case 'number': return '42';
-    case 'time': return '2026-06-16T10:00:00';
-    case 'semver': return '1.0.0';
-    default: return '';
+    case 'number':
+      return '42';
+    case 'time':
+      return '2026-06-16T10:00:00';
+    case 'semver':
+      return '1.0.0';
+    default:
+      return '';
   }
 }
 
@@ -136,19 +144,30 @@ export function getInputPattern(type: string | undefined): string | undefined {
 
 export function getInputHint(type: string | undefined): string {
   switch (type) {
-    case 'number': return '42, 3.14, -10';
-    case 'time': return '2026-06-16T10:00:00Z, 2026-07-01T00:00:00Z';
-    case 'semver': return '1.0.0, 2.1.0-beta';
-    default: return '';
+    case 'number':
+      return '42, 3.14, -10';
+    case 'time':
+      return '2026-06-16T10:00:00Z, 2026-07-01T00:00:00Z';
+    case 'semver':
+      return '1.0.0, 2.1.0-beta';
+    default:
+      return '';
   }
 }
 
-export function isConstraintValueValid(type: string | undefined, value: string, operator: string): boolean {
+export function isConstraintValueValid(
+  type: string | undefined,
+  value: string,
+  operator: string,
+): boolean {
   if (type === 'string' || !type) return true;
   if (operator === 'in' || operator === 'not_in') return true;
   if (!value) return true;
   if (type === 'number') return !isNaN(Number(value));
-  if (type === 'time') return /(^\d{2}:\d{2}$)|(^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$)/.test(value);
+  if (type === 'time')
+    return /(^\d{2}:\d{2}$)|(^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$)/.test(
+      value,
+    );
   if (type === 'semver') return /^\d+\.\d+\.\d+(-.*)?$/.test(value);
   return true;
 }

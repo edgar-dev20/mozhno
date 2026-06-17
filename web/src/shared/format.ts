@@ -4,19 +4,35 @@ import { loadLocale, toIntlLocale } from '@/i18n/locale';
 export function formatDate(d: string | null): string | null {
   if (!d) return null;
   const date = new Date(d);
-  return date.toLocaleDateString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric' });
+  return date.toLocaleDateString(toIntlLocale(loadLocale()), {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 export function formatDateTime(d: string | null): string | null {
   if (!d) return null;
   const date = new Date(d);
-  return date.toLocaleDateString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleDateString(toIntlLocale(loadLocale()), {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export function formatTimeConstraintValue(iso: string): string {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return iso;
-  return d.toLocaleString(toIntlLocale(loadLocale()), { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleString(toIntlLocale(loadLocale()), {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 export function timeAgo(d: string | null): string {
@@ -35,9 +51,12 @@ export function timeAgo(d: string | null): string {
 
 export function getFlagTypeColor(t: string): string {
   switch (t) {
-    case 'RELEASE': return 'text-info bg-info/10 border-info/20';
-    case 'KILLSWITCH': return 'text-destructive bg-destructive/10 border-destructive/20';
-    default: return 'text-muted-foreground bg-muted border-border';
+    case 'RELEASE':
+      return 'text-info bg-info/10 border-info/20';
+    case 'KILLSWITCH':
+      return 'text-destructive bg-destructive/10 border-destructive/20';
+    default:
+      return 'text-muted-foreground bg-muted border-border';
   }
 }
 

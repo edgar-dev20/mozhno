@@ -1,9 +1,9 @@
-import { Settings, Clock, User } from "@/shared/icons";
-import { formatDate, adjustColor } from "@/shared";
-import { useT } from "@/i18n";
-import { FlagCardEnvironmentColumn } from "@/app/components/flags/FlagCardEnvironmentColumn";
-import type { FlagView } from "@/app/hooks/flagTypes";
-import type { SegmentResponse, Tag as TagType } from "@/api";
+import { Settings, Clock, User } from '@/shared/icons';
+import { formatDate, adjustColor } from '@/shared';
+import { useT } from '@/i18n';
+import { FlagCardEnvironmentColumn } from '@/app/components/flags/FlagCardEnvironmentColumn';
+import type { FlagView } from '@/app/hooks/flagTypes';
+import type { SegmentResponse, Tag as TagType } from '@/api';
 
 interface FlagCardDetailProps {
   flag: FlagView;
@@ -49,7 +49,9 @@ export function FlagCardDetail({
                   <span
                     key={i}
                     className="inline-flex items-center px-1.5 py-1 rounded text-xs font-medium text-white shadow-sm leading-none"
-                    style={{ backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})` }}
+                    style={{
+                      backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})`,
+                    }}
                   >
                     {tv.value}
                   </span>

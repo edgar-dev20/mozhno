@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { isOnboardingComplete, markOnboardingComplete, resetOnboardingComplete } from "@/shared/onboardingUtils";
+import {
+  isOnboardingComplete,
+  markOnboardingComplete,
+  resetOnboardingComplete,
+} from '@/shared/onboardingUtils';
 
 describe('onboardingUtils', () => {
   beforeEach(() => {
@@ -23,7 +27,9 @@ describe('onboardingUtils', () => {
 
     it('returns false on localStorage error', () => {
       const orig = localStorage.getItem;
-      localStorage.getItem = () => { throw new Error('blocked'); };
+      localStorage.getItem = () => {
+        throw new Error('blocked');
+      };
       expect(isOnboardingComplete()).toBe(false);
       localStorage.getItem = orig;
     });
@@ -37,7 +43,9 @@ describe('onboardingUtils', () => {
 
     it('handles errors gracefully', () => {
       const orig = localStorage.setItem;
-      localStorage.setItem = () => { throw new Error('blocked'); };
+      localStorage.setItem = () => {
+        throw new Error('blocked');
+      };
       expect(() => markOnboardingComplete()).not.toThrow();
       localStorage.setItem = orig;
     });
@@ -56,7 +64,9 @@ describe('onboardingUtils', () => {
 
     it('handles errors gracefully on localStorage error', () => {
       const orig = localStorage.removeItem;
-      localStorage.removeItem = () => { throw new Error('blocked'); };
+      localStorage.removeItem = () => {
+        throw new Error('blocked');
+      };
       expect(() => resetOnboardingComplete()).not.toThrow();
       localStorage.removeItem = orig;
     });

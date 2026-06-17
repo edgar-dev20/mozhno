@@ -1,6 +1,13 @@
 import React from 'react';
 
-type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'destructive' | 'info' | 'accent';
+type BadgeVariant =
+  | 'default'
+  | 'primary'
+  | 'success'
+  | 'warning'
+  | 'destructive'
+  | 'info'
+  | 'accent';
 type BadgeStyle = 'subtle' | 'outline' | 'solid';
 type BadgeShape = 'rounded' | 'pill';
 type BadgeSize = 'sm' | 'md';

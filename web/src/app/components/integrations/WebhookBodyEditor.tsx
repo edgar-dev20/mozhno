@@ -60,7 +60,9 @@ export function WebhookBodyEditor({
               </span>
             )}
           </span>
-          <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{body.length}/10000</span>
+          <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+            {body.length}/10000
+          </span>
         </label>
         <button
           type="button"
@@ -68,9 +70,7 @@ export function WebhookBodyEditor({
           className="text-xs text-brand hover:text-brand font-medium flex items-center gap-1 transition-colors"
         >
           {showTemplateHelp ? <Code2 size={12} /> : <Braces size={12} />}
-          {showTemplateHelp
-            ? t('integrations.hideVariables')
-            : t('integrations.showVariables')}
+          {showTemplateHelp ? t('integrations.hideVariables') : t('integrations.showVariables')}
         </button>
       </div>
       {showTemplateHelp && (
@@ -108,9 +108,7 @@ export function WebhookBodyEditor({
         placeholder={t('integrations.bodyPlaceholder')}
         rows={7}
         className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-y whitespace-pre overflow-x-auto ${
-          jsonContentType && jsonValid === false
-            ? 'border-warning/30'
-            : 'border-border'
+          jsonContentType && jsonValid === false ? 'border-warning/30' : 'border-border'
         }`}
       />
       <p className="text-xs text-muted-foreground/70">{t('integrations.bodyHint')}</p>

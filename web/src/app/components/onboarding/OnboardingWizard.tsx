@@ -36,18 +36,28 @@ export function OnboardingWizard({
   const t = useT();
   const [step, setStep] = useState(startStep);
   const {
-    projectName, setProjectName,
-    projectDesc, setProjectDesc,
-    creatingProject, projectError,
-    pendingLogoFile, pendingLogoPreviewUrl,
-    fileInputRef, handleLogoUpload,
-    handleCreateProject, resetProject,
+    projectName,
+    setProjectName,
+    projectDesc,
+    setProjectDesc,
+    creatingProject,
+    projectError,
+    pendingLogoFile,
+    pendingLogoPreviewUrl,
+    fileInputRef,
+    handleLogoUpload,
+    handleCreateProject,
+    resetProject,
   } = useCreateProject();
   const {
-    flagName, setFlagName,
-    flagKey, setFlagKey,
-    creatingFlag, flagError,
-    flagCreated, handleCreateFlag,
+    flagName,
+    setFlagName,
+    flagKey,
+    setFlagKey,
+    creatingFlag,
+    flagError,
+    flagCreated,
+    handleCreateFlag,
     resetFlag,
   } = useCreateFlag();
 

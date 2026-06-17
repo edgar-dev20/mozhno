@@ -42,7 +42,9 @@ export function CreateProjectStep({
           placeholder={t('onboarding.projectNamePlaceholder')}
           className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
         />
-        <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">{projectName.length}/120</div>
+        <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+          {projectName.length}/120
+        </div>
       </div>
       <div>
         <textarea
@@ -53,7 +55,9 @@ export function CreateProjectStep({
           placeholder={t('onboarding.projectDescPlaceholder')}
           className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
         />
-        <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">{projectDesc.length}/500</div>
+        <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+          {projectDesc.length}/500
+        </div>
       </div>
       <input
         ref={fileInputRef}
@@ -81,12 +85,7 @@ export function CreateProjectStep({
       </div>
       <p className="text-xs text-muted-foreground">{t('onboarding.logoHint')}</p>
       {error && <p className="text-xs text-destructive">{error}</p>}
-      <GradientButton
-        onClick={onCreate}
-        disabled={creating}
-        loading={creating}
-        className="w-full"
-      >
+      <GradientButton onClick={onCreate} disabled={creating} loading={creating} className="w-full">
         {t('onboarding.createProject')}
       </GradientButton>
     </div>

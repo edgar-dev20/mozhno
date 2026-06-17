@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { format } from "date-fns";
-import { enUS, ru } from "date-fns/locale";
-import { Calendar, X } from "@/shared/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/app/components/ui/calendar";
-import { useLocale, useT } from "@/i18n";
-import type { Locale } from "date-fns/locale";
+import React, { useState } from 'react';
+import { format } from 'date-fns';
+import { enUS, ru } from 'date-fns/locale';
+import { Calendar, X } from '@/shared/icons';
+import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/app/components/ui/calendar';
+import { useLocale, useT } from '@/i18n';
+import type { Locale } from 'date-fns/locale';
 
 const dateLocales: Record<string, Locale> = { en: enUS, ru };
 
@@ -21,7 +21,7 @@ interface DateRangePickerProps {
 }
 
 function formatDisplay(date: Date, locale: Locale): string {
-  return format(date, "d MMM yyyy", { locale });
+  return format(date, 'd MMM yyyy', { locale });
 }
 
 export function DateRangePicker({
@@ -32,7 +32,7 @@ export function DateRangePicker({
   presets: showPresets = false,
   minDate,
   maxDate,
-  className = "",
+  className = '',
 }: DateRangePickerProps) {
   const { locale } = useLocale();
   const t = useT();
@@ -40,9 +40,25 @@ export function DateRangePicker({
   const dateLocale = dateLocales[locale] ?? enUS;
 
   const presets = [
-    { label: t("common.today"), getValue: () => ({ from: new Date(), to: new Date() }) },
-    { label: t("common.last7days"), getValue: () => { const to = new Date(); const from = new Date(); from.setDate(from.getDate() - 6); return { from, to }; } },
-    { label: t("common.last30days"), getValue: () => { const to = new Date(); const from = new Date(); from.setDate(from.getDate() - 29); return { from, to }; } },
+    { label: t('common.today'), getValue: () => ({ from: new Date(), to: new Date() }) },
+    {
+      label: t('common.last7days'),
+      getValue: () => {
+        const to = new Date();
+        const from = new Date();
+        from.setDate(from.getDate() - 6);
+        return { from, to };
+      },
+    },
+    {
+      label: t('common.last30days'),
+      getValue: () => {
+        const to = new Date();
+        const from = new Date();
+        from.setDate(from.getDate() - 29);
+        return { from, to };
+      },
+    },
   ];
 
   const handleSelect = (range: { from?: Date; to?: Date } | undefined) => {
@@ -68,14 +84,14 @@ export function DateRangePicker({
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={placeholder ?? t("common.selectPeriod")}
+          aria-label={placeholder ?? t('common.selectPeriod')}
           className={`inline-flex items-center gap-2 bg-accent border-transparent rounded-lg px-3 py-2 text-sm hover:bg-accent/80 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
         >
           <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
-          <span className={hasValue ? "text-foreground/80" : "text-muted-foreground"}>
+          <span className={hasValue ? 'text-foreground/80' : 'text-muted-foreground'}>
             {hasValue
-              ? `${displayFrom ? formatDisplay(from!, dateLocale) : t("common.from")} - ${displayTo ? formatDisplay(to!, dateLocale) : t("common.to")}`
-              : placeholder ?? t("common.selectPeriod")}
+              ? `${displayFrom ? formatDisplay(from!, dateLocale) : t('common.from')} - ${displayTo ? formatDisplay(to!, dateLocale) : t('common.to')}`
+              : (placeholder ?? t('common.selectPeriod'))}
           </span>
           {hasValue && (
             <span
@@ -122,7 +138,7 @@ export function DateRangePicker({
                 }}
                 className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border border-transparent bg-accent text-muted-foreground hover:bg-accent/80"
               >
-                {t("common.clearFilter")}
+                {t('common.clearFilter')}
               </button>
             )}
           </div>

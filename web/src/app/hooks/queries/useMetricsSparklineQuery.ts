@@ -40,10 +40,7 @@ function buildSparklineMap(data: Awaited<ReturnType<typeof api.metrics.listForPr
 
 export type SparklineData = ReturnType<typeof buildSparklineMap>;
 
-export function useMetricsSparklineQuery(
-  environmentsLength: number,
-  flagsLength: number,
-) {
+export function useMetricsSparklineQuery(environmentsLength: number, flagsLength: number) {
   return useQuery({
     queryKey: ['metrics', 'sparkline'],
     queryFn: async () => {

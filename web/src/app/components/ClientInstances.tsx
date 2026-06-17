@@ -123,8 +123,7 @@ export function ClientInstances() {
         from: '#059669',
         to: '#10b981',
         bg: 'from-emerald-500/10 to-emerald-600/5',
-        bgFlat:
-          'bg-success/10 text-success border-success/20',
+        bgFlat: 'bg-success/10 text-success border-success/20',
         border: 'border-success/20',
         dot: 'bg-success',
         text: 'text-success',
@@ -134,8 +133,7 @@ export function ClientInstances() {
         from: '#d97706',
         to: '#f59e0b',
         bg: 'from-amber-500/10 to-amber-600/5',
-        bgFlat:
-          'bg-warning/10 text-warning border-warning/20',
+        bgFlat: 'bg-warning/10 text-warning border-warning/20',
         border: 'border-warning/20',
         dot: 'bg-warning',
         text: 'text-warning',
@@ -145,8 +143,7 @@ export function ClientInstances() {
         from: '#7c3aed',
         to: '#8b5cf6',
         bg: 'from-violet-500/10 to-violet-600/5',
-        bgFlat:
-          'bg-brand/10 text-brand border-brand/20',
+        bgFlat: 'bg-brand/10 text-brand border-brand/20',
         border: 'border-brand/20',
         dot: 'bg-brand',
         text: 'text-brand',
@@ -164,12 +161,9 @@ export function ClientInstances() {
 
   const envCardStyle = (envId: number | null) => {
     const name = envName(envId);
-    if (name === 'Production')
-      return 'bg-success/10 border border-success/20';
-    if (name === 'Development')
-      return 'bg-warning/10 border border-warning/20';
-    if (name === 'Staging')
-      return 'bg-brand/10 border border-brand/20';
+    if (name === 'Production') return 'bg-success/10 border border-success/20';
+    if (name === 'Development') return 'bg-warning/10 border border-warning/20';
+    if (name === 'Staging') return 'bg-brand/10 border border-brand/20';
     return 'bg-info/10 border border-info/20';
   };
 

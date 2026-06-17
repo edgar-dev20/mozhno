@@ -33,11 +33,15 @@ export function useFlagToggle() {
 
       queryClient.setQueryData(
         ['flags', 'enriched'],
-        (old: { flags: { flagId: number; environments: Record<number, { enabled: boolean }> }[] } | undefined) => {
+        (
+          old:
+            | { flags: { flagId: number; environments: Record<number, { enabled: boolean }> }[] }
+            | undefined,
+        ) => {
           if (!old) return old;
           return {
             ...old,
-            flags: old.flags.map(f =>
+            flags: old.flags.map((f) =>
               f.flagId === input.flagId
                 ? {
                     ...f,

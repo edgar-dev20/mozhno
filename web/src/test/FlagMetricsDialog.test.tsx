@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { FlagMetricsDialog } from "@/app/components/FlagMetricsDialog";
-import { api } from "@/api";
+import { FlagMetricsDialog } from '@/app/components/FlagMetricsDialog';
+import { api } from '@/api';
 
 vi.mock('../api', () => ({
   api: {
@@ -34,7 +34,7 @@ describe('FlagMetricsDialog', () => {
         flagName="Test Flag"
         environments={mockEnvironments}
         defaultEnvId={1}
-      />
+      />,
     );
     await waitFor(() => {
       expect(screen.getByText('Test Flag')).toBeTruthy();
@@ -49,14 +49,23 @@ describe('FlagMetricsDialog', () => {
         flagId={1}
         flagName="Test Flag"
         environments={mockEnvironments}
-      />
+      />,
     );
     expect(container.querySelector('[role="dialog"]')).toBeNull();
   });
 
   it('loads metrics for default env on open', async () => {
     const mockMetrics = [
-      { id: 1, projectId: 1, flagId: 1, environmentId: 1, evaluationTrueCount: 50, evaluationFalseCount: 10, timeBucket: '2026-06-06T10:00:00Z', createdAt: '' },
+      {
+        id: 1,
+        projectId: 1,
+        flagId: 1,
+        environmentId: 1,
+        evaluationTrueCount: 50,
+        evaluationFalseCount: 10,
+        timeBucket: '2026-06-06T10:00:00Z',
+        createdAt: '',
+      },
     ];
     vi.mocked(api.metrics.get).mockResolvedValue(mockMetrics);
 
@@ -68,7 +77,7 @@ describe('FlagMetricsDialog', () => {
         flagName="Test Flag"
         environments={mockEnvironments}
         defaultEnvId={1}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -85,7 +94,7 @@ describe('FlagMetricsDialog', () => {
         flagName="My Flag"
         environments={mockEnvironments}
         defaultEnvId={2}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -102,7 +111,7 @@ describe('FlagMetricsDialog', () => {
         flagName="My Flag"
         environments={mockEnvironments}
         defaultEnvId={2}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -119,7 +128,7 @@ describe('FlagMetricsDialog', () => {
         flagId={1}
         flagName="My Flag"
         environments={mockEnvironments}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -138,7 +147,7 @@ describe('FlagMetricsDialog', () => {
         flagName="Empty Flag"
         environments={mockEnvironments}
         defaultEnvId={1}
-      />
+      />,
     );
 
     await waitFor(() => {
@@ -148,8 +157,26 @@ describe('FlagMetricsDialog', () => {
 
   it('displays true/false totals from loaded metrics', async () => {
     const mockMetrics = [
-      { id: 1, projectId: 1, flagId: 1, environmentId: 1, evaluationTrueCount: 70, evaluationFalseCount: 30, timeBucket: '2026-06-06T10:00:00Z', createdAt: '' },
-      { id: 2, projectId: 1, flagId: 1, environmentId: 1, evaluationTrueCount: 50, evaluationFalseCount: 20, timeBucket: '2026-06-06T11:00:00Z', createdAt: '' },
+      {
+        id: 1,
+        projectId: 1,
+        flagId: 1,
+        environmentId: 1,
+        evaluationTrueCount: 70,
+        evaluationFalseCount: 30,
+        timeBucket: '2026-06-06T10:00:00Z',
+        createdAt: '',
+      },
+      {
+        id: 2,
+        projectId: 1,
+        flagId: 1,
+        environmentId: 1,
+        evaluationTrueCount: 50,
+        evaluationFalseCount: 20,
+        timeBucket: '2026-06-06T11:00:00Z',
+        createdAt: '',
+      },
     ];
     vi.mocked(api.metrics.get).mockResolvedValue(mockMetrics);
 
@@ -161,7 +188,7 @@ describe('FlagMetricsDialog', () => {
         flagName="Total Flag"
         environments={mockEnvironments}
         defaultEnvId={1}
-      />
+      />,
     );
 
     await waitFor(() => {

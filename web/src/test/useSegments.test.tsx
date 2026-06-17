@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useSegments } from "@/app/hooks/useSegments";
+import { useSegments } from '@/app/hooks/useSegments';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-vi.mock("@/api", () => ({
+vi.mock('@/api', () => ({
   api: {
     segments: {
       list: vi.fn().mockResolvedValue([{ id: 1, name: 'Seg1' }]),

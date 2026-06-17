@@ -23,7 +23,9 @@ import { api, AuditEvent } from '@/api';
 import { TipCard } from '@/app/components/TipCard';
 import { SectionHeader, EmptyState, SearchInput } from '@/shared';
 
-const DateRangePicker = lazy(() => import('@/shared/components/DateRangePicker').then(m => ({ default: m.DateRangePicker })));
+const DateRangePicker = lazy(() =>
+  import('@/shared/components/DateRangePicker').then((m) => ({ default: m.DateRangePicker })),
+);
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';

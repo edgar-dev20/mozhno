@@ -1,8 +1,8 @@
 import React from 'react';
-import { GradientButton } from "@/shared/components/GradientButton";
-import { Plus } from "@/shared/icons";
+import { GradientButton } from '@/shared/components/GradientButton';
+import { Plus } from '@/shared/icons';
 import { motion } from 'motion/react';
-import { Card } from "@/shared/components/Card";
+import { Card } from '@/shared/components/Card';
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
@@ -13,12 +13,16 @@ interface EmptyStateProps {
   onAction?: () => void;
 }
 
-export function EmptyState({ icon, illustration, title, description, buttonLabel, onAction }: EmptyStateProps) {
+export function EmptyState({
+  icon,
+  illustration,
+  title,
+  description,
+  buttonLabel,
+  onAction,
+}: EmptyStateProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <Card padded className="px-6 py-20 text-center">
         <div className="flex flex-col items-center gap-5 max-w-xs mx-auto">
           {illustration ? (
@@ -35,7 +39,9 @@ export function EmptyState({ icon, illustration, title, description, buttonLabel
             <p className="text-body-sm text-muted-foreground mt-1.5 leading-body">{description}</p>
           </div>
           {buttonLabel && onAction && (
-            <GradientButton onClick={onAction} icon={<Plus size={14} />}>{buttonLabel}</GradientButton>
+            <GradientButton onClick={onAction} icon={<Plus size={14} />}>
+              {buttonLabel}
+            </GradientButton>
           )}
         </div>
       </Card>

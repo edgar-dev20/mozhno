@@ -265,9 +265,18 @@ describe('useFlagPanels', () => {
 
     act(() => {
       result.current.openGeneral({
-        key: 'test', name: 'Test', description: '', flagType: 'RELEASE', tags: [],
-        flagId: 1, environments: {}, archived: false,
-        createdAt: null, createdBy: null, archivedBy: null, archivedAt: null,
+        key: 'test',
+        name: 'Test',
+        description: '',
+        flagType: 'RELEASE',
+        tags: [],
+        flagId: 1,
+        environments: {},
+        archived: false,
+        createdAt: null,
+        createdBy: null,
+        archivedBy: null,
+        archivedAt: null,
       });
     });
     expect(result.current.generalDirty).toBe(false);

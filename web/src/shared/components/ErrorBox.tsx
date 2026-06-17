@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { AlertCircle } from "@/shared/icons";
+import { AlertCircle } from '@/shared/icons';
 
 interface ErrorBoxProps {
   children: React.ReactNode;

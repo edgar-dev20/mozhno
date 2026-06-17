@@ -1,11 +1,21 @@
 import { describe, it, expect } from 'vitest';
-import { aggregateMetricsByFlag } from "@/shared/sparklineUtils";
+import { aggregateMetricsByFlag } from '@/shared/sparklineUtils';
 
 describe('aggregateMetricsByFlag', () => {
   it('aggregates totals from metrics', () => {
     const result = aggregateMetricsByFlag([
-      { flagId: 1, evaluationTrueCount: 5, evaluationFalseCount: 3, timeBucket: '2024-01-01T00:00:00Z' },
-      { flagId: 1, evaluationTrueCount: 2, evaluationFalseCount: 1, timeBucket: '2024-01-01T01:00:00Z' },
+      {
+        flagId: 1,
+        evaluationTrueCount: 5,
+        evaluationFalseCount: 3,
+        timeBucket: '2024-01-01T00:00:00Z',
+      },
+      {
+        flagId: 1,
+        evaluationTrueCount: 2,
+        evaluationFalseCount: 1,
+        timeBucket: '2024-01-01T01:00:00Z',
+      },
     ]);
     expect(result.totalTrue).toBe(7);
     expect(result.totalFalse).toBe(4);

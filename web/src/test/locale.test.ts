@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { detectLocale, storeLocale, loadLocale, toIntlLocale, DEFAULT_LOCALE } from "@/i18n/locale";
+import { detectLocale, storeLocale, loadLocale, toIntlLocale, DEFAULT_LOCALE } from '@/i18n/locale';
 
 describe('detectLocale', () => {
   beforeEach(() => {
@@ -28,7 +28,9 @@ describe('detectLocale', () => {
 
   it('handles localStorage exceptions gracefully', () => {
     const orig = localStorage.getItem;
-    localStorage.getItem = () => { throw new Error('blocked'); };
+    localStorage.getItem = () => {
+      throw new Error('blocked');
+    };
     expect(detectLocale()).toBeDefined();
     localStorage.getItem = orig;
   });
@@ -45,7 +47,9 @@ describe('storeLocale', () => {
 
   it('handles localStorage exceptions gracefully', () => {
     const orig = localStorage.setItem;
-    localStorage.setItem = () => { throw new Error('blocked'); };
+    localStorage.setItem = () => {
+      throw new Error('blocked');
+    };
     expect(() => storeLocale('en')).not.toThrow();
     localStorage.setItem = orig;
   });

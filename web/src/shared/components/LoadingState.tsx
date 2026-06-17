@@ -1,5 +1,5 @@
 import { useT } from '@/i18n';
-import { Card } from "@/shared/components/Card";
+import { Card } from '@/shared/components/Card';
 
 interface LoadingStateProps {
   text?: string;

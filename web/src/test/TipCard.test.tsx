@@ -14,7 +14,9 @@ vi.mock('@/i18n', () => ({
 vi.mock('motion/react', () => ({
   motion: {
     div: ({ children, className, ...props }: Record<string, unknown>) => (
-      <div className={className as string} {...props}>{children as React.ReactNode}</div>
+      <div className={className as string} {...props}>
+        {children as React.ReactNode}
+      </div>
     ),
   },
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,

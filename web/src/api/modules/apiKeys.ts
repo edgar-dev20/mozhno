@@ -1,5 +1,5 @@
-import { request } from "@/api/modules/http";
-import { ApiKey, ApiKeyRequest } from "@/api/modules/types";
+import { request } from '@/api/modules/http';
+import { ApiKey, ApiKeyRequest } from '@/api/modules/types';
 
 export const apiKeysApi = {
   list: () => request<ApiKey[]>('/api-keys'),
@@ -13,6 +13,5 @@ export const apiKeysApi = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
-  delete: (id: number) =>
-    request<void>(`/api-keys/${id}`, { method: 'DELETE' }),
+  delete: (id: number) => request<void>(`/api-keys/${id}`, { method: 'DELETE' }),
 };

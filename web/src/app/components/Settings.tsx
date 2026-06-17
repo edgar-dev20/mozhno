@@ -325,7 +325,9 @@ export function Settings() {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
                   <span>{t('settings.projectName')}</span>
-                  <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{projectName.length}/120</span>
+                  <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                    {projectName.length}/120
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -340,7 +342,9 @@ export function Settings() {
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
                   <span>{t('settings.descriptionField')}</span>
-                  <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{projectDesc.length}/160</span>
+                  <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                    {projectDesc.length}/160
+                  </span>
                 </label>
                 <textarea
                   value={projectDesc}
@@ -447,28 +451,30 @@ export function Settings() {
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
                     <span>{t('settings.addEnvPlaceholder')}</span>
-                    <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{newEnvName.length}/120</span>
+                    <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                      {newEnvName.length}/120
+                    </span>
                   </label>
                   <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={newEnvName}
-                    onChange={(e) => setNewEnvName(e.target.value)}
-                    maxLength={120}
-                    onKeyDown={(e) => e.key === 'Enter' && addEnv()}
-                    placeholder={t('settings.addEnvPlaceholder')}
-                    className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
-                  />
-                  <GradientButton
-                    onClick={addEnv}
-                    disabled={savingEnv || !newEnvName.trim()}
-                    loading={savingEnv}
-                    icon={<Plus size={16} strokeWidth={2.5} />}
-                    className="shrink-0"
-                  >
-                    {t('common.add')}
-                  </GradientButton>
-                </div>
+                    <input
+                      type="text"
+                      value={newEnvName}
+                      onChange={(e) => setNewEnvName(e.target.value)}
+                      maxLength={120}
+                      onKeyDown={(e) => e.key === 'Enter' && addEnv()}
+                      placeholder={t('settings.addEnvPlaceholder')}
+                      className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                    />
+                    <GradientButton
+                      onClick={addEnv}
+                      disabled={savingEnv || !newEnvName.trim()}
+                      loading={savingEnv}
+                      icon={<Plus size={16} strokeWidth={2.5} />}
+                      className="shrink-0"
+                    >
+                      {t('common.add')}
+                    </GradientButton>
+                  </div>
                 </div>
               )}
 
@@ -565,40 +571,42 @@ export function Settings() {
                                     <div className="space-y-1.5">
                                       <label className="text-xs font-medium text-muted-foreground flex items-center justify-between">
                                         <span>{t('settings.editEnvName')}</span>
-                                        <span className="text-[10px] font-normal text-muted-foreground/50 tabular-nums">{editEnvName.length}/120</span>
+                                        <span className="text-[10px] font-normal text-muted-foreground/50 tabular-nums">
+                                          {editEnvName.length}/120
+                                        </span>
                                       </label>
                                       <div className="flex items-center gap-2">
-                                      <input
-                                        type="text"
-                                        value={editEnvName}
-                                        onChange={(e) => setEditEnvName(e.target.value)}
-                                        maxLength={120}
-                                        onKeyDown={(e) => {
-                                          if (e.key === 'Enter') saveEditEnv();
-                                          if (e.key === 'Escape') cancelEditEnv();
-                                        }}
-                                        autoFocus
-                                        className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
-                                      />
-                                      <GradientButton
-                                        onClick={saveEditEnv}
-                                        disabled={
-                                          savingEnvEdit ||
-                                          !editEnvName.trim() ||
-                                          editEnvName.trim() === initialEditEnvName
-                                        }
-                                        loading={savingEnvEdit}
-                                        size="sm"
-                                      >
-                                        {t('common.saveChanges')}
-                                      </GradientButton>
-                                      <button
-                                        onClick={cancelEditEnv}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:bg-accent transition-colors"
-                                      >
-                                        {t('common.cancel')}
-                                      </button>
-                                    </div>
+                                        <input
+                                          type="text"
+                                          value={editEnvName}
+                                          onChange={(e) => setEditEnvName(e.target.value)}
+                                          maxLength={120}
+                                          onKeyDown={(e) => {
+                                            if (e.key === 'Enter') saveEditEnv();
+                                            if (e.key === 'Escape') cancelEditEnv();
+                                          }}
+                                          autoFocus
+                                          className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
+                                        />
+                                        <GradientButton
+                                          onClick={saveEditEnv}
+                                          disabled={
+                                            savingEnvEdit ||
+                                            !editEnvName.trim() ||
+                                            editEnvName.trim() === initialEditEnvName
+                                          }
+                                          loading={savingEnvEdit}
+                                          size="sm"
+                                        >
+                                          {t('common.saveChanges')}
+                                        </GradientButton>
+                                        <button
+                                          onClick={cancelEditEnv}
+                                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:bg-accent transition-colors"
+                                        >
+                                          {t('common.cancel')}
+                                        </button>
+                                      </div>
                                     </div>
                                   ) : (
                                     <div className="flex items-center gap-2 border-t border-border pt-3">

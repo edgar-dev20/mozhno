@@ -1,4 +1,4 @@
-import { AppError, createAppError } from "@/shared/errors";
+import { AppError, createAppError } from '@/shared/errors';
 
 const BASE_URL = '/api/v1';
 
@@ -132,7 +132,11 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
               clearAuth();
             }
             const body = await retryRes.json().catch(() => ({}));
-            throw createAppError(body.error || body.message || `HTTP ${retryRes.status}`, retryRes.status, body);
+            throw createAppError(
+              body.error || body.message || `HTTP ${retryRes.status}`,
+              retryRes.status,
+              body,
+            );
           }
           if (retryRes.status === 204) return undefined as T;
           return retryRes.json();
@@ -160,7 +164,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
 export async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${getToken()}` },
+    headers: { Authorization: `Bearer ${getToken()}` },
     body: formData,
   });
   if (!res.ok) {

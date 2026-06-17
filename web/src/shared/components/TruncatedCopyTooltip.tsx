@@ -20,9 +20,7 @@ export function TruncatedCopyTooltip({ value, className }: TruncatedCopyTooltipP
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <code className={`truncate ${className ?? ''}`}>
-          {value}
-        </code>
+        <code className={`truncate ${className ?? ''}`}>{value}</code>
       </TooltipTrigger>
       <TooltipContent side="top" className="font-mono text-caption flex items-center gap-2">
         <span className="select-all">{value}</span>

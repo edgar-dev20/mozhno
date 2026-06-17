@@ -4,8 +4,7 @@ function hexToLinearSrgb(hex: string): [number, number, number] {
   const g = ((num >> 8) & 0xff) / 255;
   const b = (num & 0xff) / 255;
 
-  const toLinear = (c: number) =>
-    c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  const toLinear = (c: number) => (c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
 
   return [toLinear(r), toLinear(g), toLinear(b)];
 }
@@ -27,11 +26,7 @@ function linearSrgbToHex(lr: number, lg: number, lb: number): string {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
-function linearSrgbToOklch(
-  lr: number,
-  lg: number,
-  lb: number,
-): [number, number, number] {
+function linearSrgbToOklch(lr: number, lg: number, lb: number): [number, number, number] {
   const lmsL = 0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb;
   const lmsM = 0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb;
   const lmsS = 0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb;
@@ -40,12 +35,9 @@ function linearSrgbToOklch(
   const mCbrt = Math.cbrt(lmsM);
   const sCbrt = Math.cbrt(lmsS);
 
-  const L =
-    0.2104542553 * lCbrt + 0.793617785 * mCbrt - 0.0040720468 * sCbrt;
-  const a =
-    1.9779984951 * lCbrt - 2.428592205 * mCbrt + 0.4505937099 * sCbrt;
-  const bVal =
-    0.0259040371 * lCbrt + 0.7827717662 * mCbrt - 0.808675766 * sCbrt;
+  const L = 0.2104542553 * lCbrt + 0.793617785 * mCbrt - 0.0040720468 * sCbrt;
+  const a = 1.9779984951 * lCbrt - 2.428592205 * mCbrt + 0.4505937099 * sCbrt;
+  const bVal = 0.0259040371 * lCbrt + 0.7827717662 * mCbrt - 0.808675766 * sCbrt;
 
   const C = Math.sqrt(a * a + bVal * bVal);
   const H = Math.atan2(bVal, a);
@@ -53,11 +45,7 @@ function linearSrgbToOklch(
   return [L, C, H];
 }
 
-function oklchToLinearSrgb(
-  L: number,
-  C: number,
-  H: number,
-): [number, number, number] {
+function oklchToLinearSrgb(L: number, C: number, H: number): [number, number, number] {
   const a = C * Math.cos(H);
   const bVal = C * Math.sin(H);
 
@@ -69,12 +57,9 @@ function oklchToLinearSrgb(
   const lmsM = mCbrt * mCbrt * mCbrt;
   const lmsS = sCbrt * sCbrt * sCbrt;
 
-  const lr =
-    4.0767416621 * lmsL - 3.3077115913 * lmsM + 0.2309699292 * lmsS;
-  const lg =
-    -1.2684380046 * lmsL + 2.6097574011 * lmsM - 0.3413193965 * lmsS;
-  const lb =
-    -0.0041960863 * lmsL - 0.7034186147 * lmsM + 1.707614701 * lmsS;
+  const lr = 4.0767416621 * lmsL - 3.3077115913 * lmsM + 0.2309699292 * lmsS;
+  const lg = -1.2684380046 * lmsL + 2.6097574011 * lmsM - 0.3413193965 * lmsS;
+  const lb = -0.0041960863 * lmsL - 0.7034186147 * lmsM + 1.707614701 * lmsS;
 
   return [lr, lg, lb];
 }

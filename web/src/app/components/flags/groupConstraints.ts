@@ -1,12 +1,10 @@
-import type { ConstraintEntry, ConstraintGroup } from "@/app/components/flags/types";
+import type { ConstraintEntry, ConstraintGroup } from '@/app/components/flags/types';
 
 function nextId(): string {
   return `cg_${Math.random().toString(36).slice(2, 7)}_${Math.random().toString(36).slice(2, 5)}`;
 }
 
-export function groupConstraintEntries(
-  entries: ConstraintEntry[],
-): ConstraintGroup[] {
+export function groupConstraintEntries(entries: ConstraintEntry[]): ConstraintGroup[] {
   const map = new Map<string, string[]>();
   const order: { key: string; contextDefId: number; operator: string }[] = [];
 
@@ -30,9 +28,7 @@ export function groupConstraintEntries(
   }));
 }
 
-export function flattenConstraintGroups(
-  groups: ConstraintGroup[],
-): ConstraintEntry[] {
+export function flattenConstraintGroups(groups: ConstraintGroup[]): ConstraintEntry[] {
   const result: ConstraintEntry[] = [];
   for (const g of groups) {
     for (const val of g.values) {

@@ -177,18 +177,12 @@ export function isValidJson(str: string): boolean {
 }
 
 export function isJsonContentType(headers: HeaderRow[]): boolean {
-  const ct = headers.find(
-    (h) => h.key.trim().toLowerCase() === 'content-type',
-  );
+  const ct = headers.find((h) => h.key.trim().toLowerCase() === 'content-type');
   if (!ct) return true;
   return ct.value.toLowerCase().includes('application/json');
 }
 
-export function buildCurlCommand(
-  url: string,
-  headers: HeaderRow[],
-  body: string,
-): string {
+export function buildCurlCommand(url: string, headers: HeaderRow[], body: string): string {
   const hdrLines = headers
     .filter((h) => h.key.trim())
     .map((h) => `-H '${h.key.trim()}: ${h.value}'`)

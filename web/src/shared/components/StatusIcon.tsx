@@ -16,19 +16,19 @@ const variantStyles: Record<StatusIconVariant, { outer: string; inner: string }>
   },
   destructive: {
     outer: 'bg-destructive/10',
-    inner: 'bg-gradient-to-br from-red-500 to-red-600',
+    inner: 'bg-gradient-to-br from-destructive to-destructive/80',
   },
   success: {
     outer: 'bg-success/10',
-    inner: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
+    inner: 'bg-gradient-to-br from-success to-success/80',
   },
   warning: {
     outer: 'bg-warning/10',
-    inner: 'bg-gradient-to-br from-amber-500 to-orange-500',
+    inner: 'bg-gradient-to-br from-warning to-warning/80',
   },
   info: {
     outer: 'bg-info/10',
-    inner: 'bg-gradient-to-br from-blue-500 to-blue-600',
+    inner: 'bg-gradient-to-br from-info to-info/80',
   },
 };
 

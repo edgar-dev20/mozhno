@@ -203,7 +203,7 @@ export function DashboardLayout() {
 
             <main
               id="main-content"
-              className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-br from-background to-secondary p-8 transition-colors min-w-0"
+              className="flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-br from-background to-secondary p-4 sm:p-6 lg:p-8 transition-colors min-w-0"
             >
               <div className="max-w-[90rem] mx-auto">
                 <PageErrorBoundary>

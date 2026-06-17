@@ -23,7 +23,11 @@ function rowClasses(hasRemoved: boolean, hasAdded: boolean, compact: boolean) {
   return `border-l-2 border-l-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/10 ${py}`;
 }
 
-function renderValue(value: DiffChange['before'] | DiffChange['after'], isOld: boolean, compact: boolean) {
+function renderValue(
+  value: DiffChange['before'] | DiffChange['after'],
+  isOld: boolean,
+  compact: boolean,
+) {
   if (value === null || value === undefined || value === '') {
     return <span className="text-muted-foreground/50 italic">—</span>;
   }
@@ -32,19 +36,39 @@ function renderValue(value: DiffChange['before'] | DiffChange['after'], isOld: b
   }
   if (isOld) {
     return (
-      <span className={compact ? 'text-xs text-muted-foreground/60 line-through' : 'text-xs text-muted-foreground/60 line-through'}>
+      <span
+        className={
+          compact
+            ? 'text-xs text-muted-foreground/60 line-through'
+            : 'text-xs text-muted-foreground/60 line-through'
+        }
+      >
         {String(value)}
       </span>
     );
   }
   return (
-    <span className={compact ? 'text-xs font-medium text-foreground/90' : 'text-xs font-medium text-foreground/90'}>
+    <span
+      className={
+        compact
+          ? 'text-xs font-medium text-foreground/90'
+          : 'text-xs font-medium text-foreground/90'
+      }
+    >
       {String(value)}
     </span>
   );
 }
 
-function DiffRow({ change, index, compact }: { change: DiffChange; index: number; compact: boolean }) {
+function DiffRow({
+  change,
+  index,
+  compact,
+}: {
+  change: DiffChange;
+  index: number;
+  compact: boolean;
+}) {
   const hasRemoved = change.before !== null && change.before !== undefined && change.before !== '';
   const hasAdded = change.after !== null && change.after !== undefined && change.after !== '';
 
@@ -55,7 +79,13 @@ function DiffRow({ change, index, compact }: { change: DiffChange; index: number
       transition={{ duration: 0.15, delay: Math.min(index, 5) * 0.04 }}
       className={`pl-3 pr-3 ${rowClasses(hasRemoved, hasAdded, compact)}`}
     >
-      <div className={compact ? 'text-xs font-medium text-muted-foreground/70 mb-0.5' : 'text-xs font-medium text-muted-foreground/70 mb-0.5'}>
+      <div
+        className={
+          compact
+            ? 'text-xs font-medium text-muted-foreground/70 mb-0.5'
+            : 'text-xs font-medium text-muted-foreground/70 mb-0.5'
+        }
+      >
         {change.label}
       </div>
       <div className="flex items-start gap-2 min-w-0">
@@ -81,9 +111,7 @@ export function DiffView({ changes }: DiffViewProps) {
   const t = useT();
   if (changes.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground text-center py-4">
-        {t('common.noChanges')}
-      </p>
+      <p className="text-sm text-muted-foreground text-center py-4">{t('common.noChanges')}</p>
     );
   }
 

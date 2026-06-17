@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Drawer } from 'vaul';
-import { X } from "@/shared/icons";
+import { X } from '@/shared/icons';
 
 interface SidePanelProps {
   open: boolean;
@@ -45,7 +45,9 @@ function PanelContent({
           <Dialog.Title className="text-h2 font-heading text-foreground tracking-tight">
             {title}
           </Dialog.Title>
-          <Dialog.Description className={description ? "text-body-sm text-muted-foreground mt-1" : "sr-only"}>
+          <Dialog.Description
+            className={description ? 'text-body-sm text-muted-foreground mt-1' : 'sr-only'}
+          >
             {description || title}
           </Dialog.Description>
         </div>
@@ -58,9 +60,7 @@ function PanelContent({
 
       {hasDiff ? (
         <div className="flex-1 relative overflow-hidden">
-          <div className="absolute inset-0 overflow-y-auto p-6">
-            {children}
-          </div>
+          <div className="absolute inset-0 overflow-y-auto p-6">{children}</div>
           <div
             onClick={onDiffDismiss}
             className="absolute inset-0 bg-white/60 dark:bg-black/40 backdrop-blur-[2px] cursor-pointer z-10 flex items-start justify-center pt-8"
@@ -68,9 +68,7 @@ function PanelContent({
           />
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto p-6">
-          {children}
-        </div>
+        <div className="flex-1 overflow-y-auto p-6">{children}</div>
       )}
 
       {diffSlot}
@@ -84,7 +82,16 @@ function PanelContent({
   );
 }
 
-export function SidePanel({ open, onOpenChange, title, description, children, footer, diffSlot, onDiffDismiss }: SidePanelProps) {
+export function SidePanel({
+  open,
+  onOpenChange,
+  title,
+  description,
+  children,
+  footer,
+  diffSlot,
+  onDiffDismiss,
+}: SidePanelProps) {
   const isMobile = useIsMobile();
 
   if (isMobile) {

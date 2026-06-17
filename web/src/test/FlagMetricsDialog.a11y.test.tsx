@@ -15,9 +15,7 @@ vi.mock('@/api', () => ({
   },
 }));
 
-const mockEnvironments = [
-  { id: 1, projectId: 1, name: 'production', createdAt: '' },
-];
+const mockEnvironments = [{ id: 1, projectId: 1, name: 'production', createdAt: '' }];
 
 describe('FlagMetricsDialog a11y', () => {
   beforeEach(() => {
@@ -34,7 +32,7 @@ describe('FlagMetricsDialog a11y', () => {
         flagName="Test Flag"
         environments={mockEnvironments}
         defaultEnvId={1}
-      />
+      />,
     );
     await waitFor(() => {
       expect(document.querySelector('[role="dialog"]')).toBeTruthy();

@@ -3,10 +3,10 @@ import { ThemeProvider } from 'next-themes';
 import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { MotionConfig } from 'motion/react';
-import { Toaster } from "@/app/components/ui/sonner";
-import { ErrorBoundary } from "@/app/components/ErrorBoundary";
-import { LocaleProvider } from "@/i18n";
-import { router } from "@/app/routes";
+import { Toaster } from '@/app/components/ui/sonner';
+import { ErrorBoundary } from '@/app/components/ErrorBoundary';
+import { LocaleProvider } from '@/i18n';
+import { router } from '@/app/routes';
 import { getErrorMessage, isAppError } from '@/shared/errorHandler';
 
 const queryClient = new QueryClient({

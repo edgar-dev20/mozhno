@@ -1,5 +1,5 @@
 import { useT } from '@/i18n';
-import { Search } from "@/shared/icons";
+import { Search } from '@/shared/icons';
 
 interface SearchInputProps {
   value: string;
@@ -11,8 +11,11 @@ interface SearchInputProps {
 export function SearchInput({ value, onChange, placeholder, className = '' }: SearchInputProps) {
   const t = useT();
   return (
-    <div className={`relative flex-1 max-w-sm ${className}`}>
-      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70" />
+    <div className={`relative flex-1 max-w-md ${className}`}>
+      <Search
+        size={14}
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70"
+      />
       <input
         type="text"
         placeholder={placeholder ?? t('common.search')}

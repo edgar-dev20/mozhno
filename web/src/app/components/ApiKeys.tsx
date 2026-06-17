@@ -27,14 +27,7 @@ import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SidePanel } from '@/app/components/SidePanel';
 import { SdkInfo } from '@/app/components/SdkInfo';
 import { ApiKeyTableSkeleton } from '@/app/components/skeletons';
-import {
-  SectionHeader,
-  GradientButton,
-  EmptyState,
-  SearchInput,
-  ErrorBox,
-  Badge,
-} from '@/shared';
+import { SectionHeader, GradientButton, EmptyState, SearchInput, ErrorBox, Badge } from '@/shared';
 import {
   Select,
   SelectContent,
@@ -180,10 +173,8 @@ export function ApiKeys() {
   };
   const envFilterActive = (id: number | null) => {
     const name = envName(id);
-    if (name === 'Production')
-      return 'bg-success/10 text-success border-success/20';
-    if (name === 'Development')
-      return 'bg-warning/10 text-warning border-warning/20';
+    if (name === 'Production') return 'bg-success/10 text-success border-success/20';
+    if (name === 'Development') return 'bg-warning/10 text-warning border-warning/20';
     return 'bg-info/10 text-info border-info/20';
   };
   const getKeyTypeColor = (t: string) =>
@@ -366,7 +357,15 @@ export function ApiKeys() {
                           <span className="font-semibold text-sm text-foreground truncate transition-all">
                             {k.name}
                           </span>
-                          <Badge variant={getEnvVariant(k.environmentId)} size="sm" icon={<span className={`w-1.5 h-1.5 rounded-full ${envColor(k.environmentId)}`} />}>
+                          <Badge
+                            variant={getEnvVariant(k.environmentId)}
+                            size="sm"
+                            icon={
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${envColor(k.environmentId)}`}
+                              />
+                            }
+                          >
                             {envName(k.environmentId)}
                           </Badge>
                         </div>
@@ -470,9 +469,7 @@ export function ApiKeys() {
                                   <TypeIcon
                                     size={11}
                                     className={
-                                      k.keyType === 'FRONTEND'
-                                        ? 'text-success'
-                                        : 'text-indigo-500'
+                                      k.keyType === 'FRONTEND' ? 'text-success' : 'text-indigo-500'
                                     }
                                   />
                                   {getKeyTypeLabel(k.keyType)}
@@ -608,15 +605,15 @@ export function ApiKeys() {
           {error && <ErrorBox>{error}</ErrorBox>}
 
           <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
-            <p className="text-xs text-warning">
-              {t('apiKeys.panelWarning')}
-            </p>
+            <p className="text-xs text-warning">{t('apiKeys.panelWarning')}</p>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
               <span>{t('common.name')}</span>
-              <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">{formName.length}/120</span>
+              <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                {formName.length}/120
+              </span>
             </label>
             <input
               type="text"

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { DiffView } from "@/app/components/DiffView";
-import type { DiffChange } from "@/shared/diffUtils";
+import { DiffView } from '@/app/components/DiffView';
+import type { DiffChange } from '@/shared/diffUtils';
 
 describe('DiffView', () => {
   it('shows empty state when no changes', () => {
@@ -10,9 +10,7 @@ describe('DiffView', () => {
   });
 
   it('renders changes with labels', () => {
-    const changes: DiffChange[] = [
-      { field: 'name', label: 'Name', before: 'Old', after: 'New' },
-    ];
+    const changes: DiffChange[] = [{ field: 'name', label: 'Name', before: 'Old', after: 'New' }];
     render(<DiffView changes={changes} />);
     expect(screen.getByText('Name')).toBeInTheDocument();
     expect(screen.getByText('Old')).toBeInTheDocument();
@@ -38,17 +36,13 @@ describe('DiffView', () => {
   });
 
   it('renders removed-only change', () => {
-    const changes: DiffChange[] = [
-      { field: 'a', label: 'A', before: 'old', after: '' },
-    ];
+    const changes: DiffChange[] = [{ field: 'a', label: 'A', before: 'old', after: '' }];
     render(<DiffView changes={changes} />);
     expect(screen.getByText('old')).toBeInTheDocument();
   });
 
   it('renders added-only change', () => {
-    const changes: DiffChange[] = [
-      { field: 'a', label: 'A', before: '', after: 'new' },
-    ];
+    const changes: DiffChange[] = [{ field: 'a', label: 'A', before: '', after: 'new' }];
     render(<DiffView changes={changes} />);
     expect(screen.getByText('new')).toBeInTheDocument();
   });

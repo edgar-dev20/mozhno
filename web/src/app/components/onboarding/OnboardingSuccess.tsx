@@ -8,12 +8,8 @@ export function OnboardingSuccess() {
       <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
         <Check size={24} className="text-green-600 dark:text-green-400" />
       </div>
-      <p className="text-sm font-medium text-foreground">
-        {t('onboarding.flagCreated')}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {t('onboarding.flagCreatedDescription')}
-      </p>
+      <p className="text-sm font-medium text-foreground">{t('onboarding.flagCreated')}</p>
+      <p className="text-xs text-muted-foreground">{t('onboarding.flagCreatedDescription')}</p>
     </div>
   );
 }

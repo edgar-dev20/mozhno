@@ -13,16 +13,31 @@ interface CardProps {
 }
 
 export const Card = React.forwardRef<HTMLDivElement | HTMLButtonElement, CardProps>(
-  ({ variant = 'default', selected, dimmed, padded, className = '', children, onClick, as, ariaLabel }, ref) => {
+  (
+    {
+      variant = 'default',
+      selected,
+      dimmed,
+      padded,
+      className = '',
+      children,
+      onClick,
+      as,
+      ariaLabel,
+    },
+    ref,
+  ) => {
     const tag = as ?? (onClick ? 'button' : 'div');
 
     let classes = '';
 
     if (variant === 'selectable') {
       if (selected) {
-        classes = 'rounded-2xl transition-all overflow-hidden bg-gradient-to-br from-sparkline-true/[0.04] to-transparent ring-1 ring-sparkline-true/25 shadow-md';
+        classes =
+          'rounded-2xl transition-all overflow-hidden bg-gradient-to-br from-sparkline-true/[0.04] to-transparent ring-1 ring-sparkline-true/25 shadow-md';
       } else {
-        classes = 'rounded-2xl transition-all overflow-hidden bg-card shadow-sm hover:shadow-md border border-border';
+        classes =
+          'rounded-2xl transition-all overflow-hidden bg-card shadow-sm hover:shadow-md border border-border';
       }
     } else {
       const variantBase: Record<string, string> = {
@@ -56,7 +71,7 @@ export const Card = React.forwardRef<HTMLDivElement | HTMLButtonElement, CardPro
         {children}
       </div>
     );
-  }
+  },
 );
 
 Card.displayName = 'Card';

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GradientButton } from "@/shared/components/GradientButton";
+import { GradientButton } from '@/shared/components/GradientButton';
 
 describe('GradientButton', () => {
   it('renders children', () => {
@@ -16,7 +16,15 @@ describe('GradientButton', () => {
 
   it('handles click', async () => {
     let clicked = false;
-    render(<GradientButton onClick={() => { clicked = true; }}>Click</GradientButton>);
+    render(
+      <GradientButton
+        onClick={() => {
+          clicked = true;
+        }}
+      >
+        Click
+      </GradientButton>,
+    );
     await userEvent.click(screen.getByText('Click'));
     expect(clicked).toBe(true);
   });

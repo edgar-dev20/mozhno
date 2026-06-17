@@ -1,5 +1,5 @@
-import { request, uploadRequest } from "@/api/modules/http";
-import { Project } from "@/api/modules/types";
+import { request, uploadRequest } from '@/api/modules/http';
+import { Project } from '@/api/modules/types';
 
 export const projectsApi = {
   list: () => request<Project[]>('/projects'),

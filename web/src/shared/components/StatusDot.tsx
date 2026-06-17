@@ -1,6 +1,7 @@
 interface StatusDotProps {
   state: 'active' | 'recent' | 'stale' | 'neutral';
   size?: 'sm' | 'md';
+  label?: string;
 }
 
 const stateClasses: Record<string, string> = {
@@ -15,8 +16,14 @@ const sizeClasses: Record<string, string> = {
   md: 'w-2 h-2',
 };
 
-export function StatusDot({ state, size = 'md' }: StatusDotProps) {
+export function StatusDot({ state, size = 'md', label }: StatusDotProps) {
   return (
-    <div className={`rounded-full shrink-0 ${sizeClasses[size]} ${stateClasses[state]}`} aria-hidden="true" />
+    <>
+      <div
+        className={`rounded-full shrink-0 ${sizeClasses[size]} ${stateClasses[state]}`}
+        aria-hidden="true"
+      />
+      {label && <span className="sr-only">{label}</span>}
+    </>
   );
 }

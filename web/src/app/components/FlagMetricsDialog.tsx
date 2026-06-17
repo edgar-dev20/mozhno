@@ -547,9 +547,12 @@ export function FlagMetricsDialog({
                                     return `bg-[${env.color}]`;
                                   }
                                   const n = envName.toLowerCase();
-                                  if (n.includes('prod') || n.includes('production')) return 'bg-success';
-                                  if (n.includes('dev') || n.includes('development')) return 'bg-warning';
-                                  if (n.includes('stag') || n.includes('staging')) return 'bg-brand';
+                                  if (n.includes('prod') || n.includes('production'))
+                                    return 'bg-success';
+                                  if (n.includes('dev') || n.includes('development'))
+                                    return 'bg-warning';
+                                  if (n.includes('stag') || n.includes('staging'))
+                                    return 'bg-brand';
                                   return 'bg-info';
                                 })();
 

@@ -293,9 +293,7 @@ describe('extractDominantColor', () => {
     const newCanvas = document.createElement('canvas');
     const ctx = createMockContext(imageData);
     vi.spyOn(newCanvas, 'getContext').mockReturnValue(ctx);
-    const createElementSpy = vi
-      .spyOn(document, 'createElement')
-      .mockReturnValue(newCanvas);
+    const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(newCanvas);
 
     extractDominantColor(img);
 
@@ -344,11 +342,7 @@ describe('extractDominantColor', () => {
 
     const result = extractDominantColor(img, canvas);
 
-    expect(ctx.drawImage).toHaveBeenCalledWith(
-      img,
-      0, 0, 16, 16,
-      0, 0, 32, 32,
-    );
+    expect(ctx.drawImage).toHaveBeenCalledWith(img, 0, 0, 16, 16, 0, 0, 32, 32);
     expect(result).toBe('#ff00ff');
   });
 
@@ -370,11 +364,7 @@ describe('extractDominantColor', () => {
 
     const sx = (96 - 32) / 2;
     const sy = (96 - 32) / 2;
-    expect(ctx.drawImage).toHaveBeenCalledWith(
-      img,
-      sx, sy, 32, 32,
-      0, 0, 32, 32,
-    );
+    expect(ctx.drawImage).toHaveBeenCalledWith(img, sx, sy, 32, 32, 0, 0, 32, 32);
   });
 
   it('returns a valid 7-character hex color for successful extractions', () => {

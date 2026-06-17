@@ -52,44 +52,47 @@ export function useCreateProject(): UseCreateProjectReturn {
     if (fileInputRef.current) fileInputRef.current.value = '';
   }, []);
 
-  const handleCreateProject = useCallback(async (onProjectCreated: () => void, onComplete: () => void) => {
-    if (!projectName.trim()) {
-      setProjectError(t('onboarding.projectValidationError'));
-      return;
-    }
-    setCreatingProject(true);
-    setProjectError('');
-    try {
-      const project = await api.projects.create({
-        name: projectName.trim(),
-        description: projectDesc.trim() || undefined,
-      });
-      if (pendingLogoFile) {
-        try {
-          await api.projects.uploadLogo(project.id, pendingLogoFile);
-        } catch {
-          toast.warning(t('onboarding.projectCreateError'));
+  const handleCreateProject = useCallback(
+    async (onProjectCreated: () => void, onComplete: () => void) => {
+      if (!projectName.trim()) {
+        setProjectError(t('onboarding.projectValidationError'));
+        return;
+      }
+      setCreatingProject(true);
+      setProjectError('');
+      try {
+        const project = await api.projects.create({
+          name: projectName.trim(),
+          description: projectDesc.trim() || undefined,
+        });
+        if (pendingLogoFile) {
+          try {
+            await api.projects.uploadLogo(project.id, pendingLogoFile);
+          } catch {
+            toast.warning(t('onboarding.projectCreateError'));
+          }
         }
+        if (logoPreviewUrlRef.current) {
+          URL.revokeObjectURL(logoPreviewUrlRef.current);
+          logoPreviewUrlRef.current = null;
+        }
+        setPendingLogoFile(null);
+        setPendingLogoPreviewUrl(null);
+        const res = await api.auth.selectProject(project.id);
+        setToken(res.token);
+        setRefreshToken(res.refreshToken);
+        onProjectCreated();
+        queryClient.invalidateQueries({ queryKey: ['environments'] });
+        queryClient.invalidateQueries({ queryKey: ['contexts'] });
+        onComplete();
+      } catch (e) {
+        setProjectError((e as Error).message || t('onboarding.projectCreateError'));
+      } finally {
+        setCreatingProject(false);
       }
-      if (logoPreviewUrlRef.current) {
-        URL.revokeObjectURL(logoPreviewUrlRef.current);
-        logoPreviewUrlRef.current = null;
-      }
-      setPendingLogoFile(null);
-      setPendingLogoPreviewUrl(null);
-      const res = await api.auth.selectProject(project.id);
-      setToken(res.token);
-      setRefreshToken(res.refreshToken);
-      onProjectCreated();
-      queryClient.invalidateQueries({ queryKey: ['environments'] });
-      queryClient.invalidateQueries({ queryKey: ['contexts'] });
-      onComplete();
-    } catch (e) {
-      setProjectError((e as Error).message || t('onboarding.projectCreateError'));
-    } finally {
-      setCreatingProject(false);
-    }
-  }, [projectName, projectDesc, pendingLogoFile, t, queryClient]);
+    },
+    [projectName, projectDesc, pendingLogoFile, t, queryClient],
+  );
 
   const resetProject = useCallback(() => {
     if (logoPreviewUrlRef.current) {

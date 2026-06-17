@@ -20,14 +20,14 @@ describe('operators constants', () => {
 
   it('OPERATOR_LABELS has all expected keys', () => {
     const keys = Object.keys(OPERATOR_LABELS);
-    ['eq', 'ne', 'in', 'not_in', 'gt', 'gte', 'lt', 'lte', 'contains'].forEach(k => {
+    ['eq', 'ne', 'in', 'not_in', 'gt', 'gte', 'lt', 'lte', 'contains'].forEach((k) => {
       expect(keys).toContain(k);
     });
   });
 
   it('OPERATOR_COLORS has all expected keys', () => {
     const keys = Object.keys(OPERATOR_COLORS);
-    ['eq', 'ne', 'in', 'not_in', 'gt', 'gte', 'lt', 'lte', 'contains'].forEach(k => {
+    ['eq', 'ne', 'in', 'not_in', 'gt', 'gte', 'lt', 'lte', 'contains'].forEach((k) => {
       expect(keys).toContain(k);
     });
   });
@@ -36,7 +36,7 @@ describe('operators constants', () => {
 describe('getOperatorsForType', () => {
   it("returns STRING_OPERATORS for 'string'", () => {
     const ops = getOperatorsForType('string');
-    const values = ops.map(o => o.value);
+    const values = ops.map((o) => o.value);
     expect(values).toContain('in');
     expect(values).toContain('contains');
     expect(values).toContain('eq');
@@ -46,7 +46,7 @@ describe('getOperatorsForType', () => {
 
   it("returns COMPARABLE_OPERATORS for 'number'", () => {
     const ops = getOperatorsForType('number');
-    const values = ops.map(o => o.value);
+    const values = ops.map((o) => o.value);
     expect(values).toContain('gt');
     expect(values).toContain('lt');
     expect(values).toContain('eq');
@@ -55,7 +55,7 @@ describe('getOperatorsForType', () => {
 
   it('defaults to string operators with undefined type', () => {
     const ops = getOperatorsForType(undefined);
-    const values = ops.map(o => o.value);
+    const values = ops.map((o) => o.value);
     expect(values).toContain('in');
     expect(values).toContain('contains');
   });
@@ -84,7 +84,7 @@ describe('isValidOperator', () => {
     expect(isValidOperator('number', 'contains')).toBe(false);
   });
 
-  it("returns false for completely bogus operator", () => {
+  it('returns false for completely bogus operator', () => {
     expect(isValidOperator('number', 'bogus')).toBe(false);
   });
 });

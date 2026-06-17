@@ -1,27 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { apiKeysApi } = await import("@/api/modules/apiKeys");
-const { auditApi } = await import("@/api/modules/audit");
-const { clientInstancesApi } = await import("@/api/modules/clientInstances");
-const { contextsApi } = await import("@/api/modules/contexts");
-const { environmentsApi } = await import("@/api/modules/environments");
-const { integrationsApi } = await import("@/api/modules/integrations");
-const { projectsApi } = await import("@/api/modules/projects");
-const { segmentsApi } = await import("@/api/modules/segments");
-const { settingsApi } = await import("@/api/modules/settings");
-const { tagsApi } = await import("@/api/modules/tags");
-const { usersApi } = await import("@/api/modules/users");
+const { apiKeysApi } = await import('@/api/modules/apiKeys');
+const { auditApi } = await import('@/api/modules/audit');
+const { clientInstancesApi } = await import('@/api/modules/clientInstances');
+const { contextsApi } = await import('@/api/modules/contexts');
+const { environmentsApi } = await import('@/api/modules/environments');
+const { integrationsApi } = await import('@/api/modules/integrations');
+const { projectsApi } = await import('@/api/modules/projects');
+const { segmentsApi } = await import('@/api/modules/segments');
+const { settingsApi } = await import('@/api/modules/settings');
+const { tagsApi } = await import('@/api/modules/tags');
+const { usersApi } = await import('@/api/modules/users');
 
 beforeEach(async () => {
   vi.restoreAllMocks();
-  const mod = await import("@/api/modules/http");
+  const mod = await import('@/api/modules/http');
   vi.spyOn(mod, 'request').mockResolvedValue({});
   vi.spyOn(mod, 'uploadRequest').mockResolvedValue({});
 });
 
 let requestSpy: ReturnType<typeof vi.mocked>;
 beforeEach(async () => {
-  const mod = await import("@/api/modules/http");
+  const mod = await import('@/api/modules/http');
   requestSpy = vi.mocked(mod.request);
   requestSpy.mockClear();
 });
@@ -34,12 +34,18 @@ describe('apiKeysApi', () => {
   it('create', async () => {
     const d = { name: 'k' } as never;
     await apiKeysApi.create(d);
-    expect(requestSpy).toHaveBeenCalledWith('/api-keys', { method: 'POST', body: JSON.stringify(d) });
+    expect(requestSpy).toHaveBeenCalledWith('/api-keys', {
+      method: 'POST',
+      body: JSON.stringify(d),
+    });
   });
   it('update', async () => {
     const d = { name: 'k' } as never;
     await apiKeysApi.update(1, d);
-    expect(requestSpy).toHaveBeenCalledWith('/api-keys/1', { method: 'PUT', body: JSON.stringify(d) });
+    expect(requestSpy).toHaveBeenCalledWith('/api-keys/1', {
+      method: 'PUT',
+      body: JSON.stringify(d),
+    });
   });
   it('delete', async () => {
     await apiKeysApi.delete(1);
@@ -54,7 +60,9 @@ describe('auditApi', () => {
   });
   it('list with params', async () => {
     await auditApi.list(0, 50, '2024-01-01', '2024-12-31');
-    expect(requestSpy).toHaveBeenCalledWith('/audit?page=0&size=50&dateFrom=2024-01-01&dateTo=2024-12-31');
+    expect(requestSpy).toHaveBeenCalledWith(
+      '/audit?page=0&size=50&dateFrom=2024-01-01&dateTo=2024-12-31',
+    );
   });
 });
 
@@ -76,11 +84,17 @@ describe('contextsApi', () => {
   });
   it('create', async () => {
     await contextsApi.create({ name: 'c', key: 'c' });
-    expect(requestSpy).toHaveBeenCalledWith('/contexts', { method: 'POST', body: JSON.stringify({ name: 'c', key: 'c' }) });
+    expect(requestSpy).toHaveBeenCalledWith('/contexts', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'c', key: 'c' }),
+    });
   });
   it('update', async () => {
     await contextsApi.update(1, { name: 'c', key: 'c' });
-    expect(requestSpy).toHaveBeenCalledWith('/contexts/1', { method: 'PUT', body: JSON.stringify({ name: 'c', key: 'c' }) });
+    expect(requestSpy).toHaveBeenCalledWith('/contexts/1', {
+      method: 'PUT',
+      body: JSON.stringify({ name: 'c', key: 'c' }),
+    });
   });
   it('delete', async () => {
     await contextsApi.delete(1);
@@ -92,7 +106,10 @@ describe('contextsApi', () => {
   });
   it('values create', async () => {
     await contextsApi.values.create(1, 'a,b');
-    expect(requestSpy).toHaveBeenCalledWith('/contexts/1/values', { method: 'POST', body: JSON.stringify({ contextDefinitionId: 1, values: 'a,b' }) });
+    expect(requestSpy).toHaveBeenCalledWith('/contexts/1/values', {
+      method: 'POST',
+      body: JSON.stringify({ contextDefinitionId: 1, values: 'a,b' }),
+    });
   });
 });
 
@@ -103,11 +120,17 @@ describe('environmentsApi', () => {
   });
   it('create', async () => {
     await environmentsApi.create('prod');
-    expect(requestSpy).toHaveBeenCalledWith('/environments', { method: 'POST', body: JSON.stringify({ name: 'prod' }) });
+    expect(requestSpy).toHaveBeenCalledWith('/environments', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'prod' }),
+    });
   });
   it('update', async () => {
     await environmentsApi.update(1, 'staging');
-    expect(requestSpy).toHaveBeenCalledWith('/environments/1', { method: 'PUT', body: JSON.stringify({ name: 'staging' }) });
+    expect(requestSpy).toHaveBeenCalledWith('/environments/1', {
+      method: 'PUT',
+      body: JSON.stringify({ name: 'staging' }),
+    });
   });
   it('getLimit', async () => {
     await environmentsApi.getLimit();
@@ -127,12 +150,18 @@ describe('integrationsApi', () => {
   it('create', async () => {
     const d = { name: 'i' } as never;
     await integrationsApi.create(d);
-    expect(requestSpy).toHaveBeenCalledWith('/integrations', { method: 'POST', body: JSON.stringify(d) });
+    expect(requestSpy).toHaveBeenCalledWith('/integrations', {
+      method: 'POST',
+      body: JSON.stringify(d),
+    });
   });
   it('update', async () => {
     const d = { name: 'i' } as never;
     await integrationsApi.update(1, d);
-    expect(requestSpy).toHaveBeenCalledWith('/integrations/1', { method: 'PUT', body: JSON.stringify(d) });
+    expect(requestSpy).toHaveBeenCalledWith('/integrations/1', {
+      method: 'PUT',
+      body: JSON.stringify(d),
+    });
   });
   it('delete', async () => {
     await integrationsApi.delete(1);
@@ -155,11 +184,17 @@ describe('projectsApi', () => {
   });
   it('create', async () => {
     await projectsApi.create({ name: 'p' });
-    expect(requestSpy).toHaveBeenCalledWith('/projects', { method: 'POST', body: JSON.stringify({ name: 'p' }) });
+    expect(requestSpy).toHaveBeenCalledWith('/projects', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'p' }),
+    });
   });
   it('update', async () => {
     await projectsApi.update(1, { name: 'p2' });
-    expect(requestSpy).toHaveBeenCalledWith('/projects/1', { method: 'PUT', body: JSON.stringify({ name: 'p2' }) });
+    expect(requestSpy).toHaveBeenCalledWith('/projects/1', {
+      method: 'PUT',
+      body: JSON.stringify({ name: 'p2' }),
+    });
   });
   it('delete', async () => {
     await projectsApi.delete(1);
@@ -182,12 +217,18 @@ describe('segmentsApi', () => {
   it('create', async () => {
     const d = { name: 's' } as never;
     await segmentsApi.create(d);
-    expect(requestSpy).toHaveBeenCalledWith('/segments', { method: 'POST', body: JSON.stringify(d) });
+    expect(requestSpy).toHaveBeenCalledWith('/segments', {
+      method: 'POST',
+      body: JSON.stringify(d),
+    });
   });
   it('update', async () => {
     const d = { name: 's' } as never;
     await segmentsApi.update(1, d);
-    expect(requestSpy).toHaveBeenCalledWith('/segments/1', { method: 'PUT', body: JSON.stringify(d) });
+    expect(requestSpy).toHaveBeenCalledWith('/segments/1', {
+      method: 'PUT',
+      body: JSON.stringify(d),
+    });
   });
   it('delete', async () => {
     await segmentsApi.delete(1);
@@ -203,7 +244,10 @@ describe('settingsApi', () => {
   it('update', async () => {
     const d = { name: 's' } as never;
     await settingsApi.update(d);
-    expect(requestSpy).toHaveBeenCalledWith('/settings', { method: 'PUT', body: JSON.stringify(d) });
+    expect(requestSpy).toHaveBeenCalledWith('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(d),
+    });
   });
 });
 
@@ -249,7 +293,10 @@ describe('usersApi', () => {
   it('invite', async () => {
     const d = { email: 'invite@m.com', role: 'developer', locale: 'ru' };
     await usersApi.invite(d);
-    expect(requestSpy).toHaveBeenCalledWith('/users/invite', { method: 'POST', body: JSON.stringify(d) });
+    expect(requestSpy).toHaveBeenCalledWith('/users/invite', {
+      method: 'POST',
+      body: JSON.stringify(d),
+    });
   });
   it('sendResetLink', async () => {
     await usersApi.sendResetLink(42);

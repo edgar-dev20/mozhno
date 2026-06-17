@@ -1,20 +1,34 @@
 import React from 'react';
 
 interface GradientButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'default' | 'danger' | 'amber' | 'secondary' | 'muted' | 'outline' | 'ghost' | 'link';
+  variant?:
+    | 'primary'
+    | 'default'
+    | 'danger'
+    | 'amber'
+    | 'secondary'
+    | 'muted'
+    | 'outline'
+    | 'ghost'
+    | 'link';
   size?: 'sm' | 'md' | 'lg' | 'icon';
   icon?: React.ReactNode;
   loading?: boolean;
 }
 
 const variantClasses: Record<string, string> = {
-  primary: 'bg-gradient-to-r from-gradient-start to-gradient-end hover:from-gradient-start-hover hover:to-gradient-end-hover text-white',
+  primary:
+    'bg-gradient-to-r from-gradient-start to-gradient-end hover:from-gradient-start-hover hover:to-gradient-end-hover text-white',
   default: 'bg-primary text-primary-foreground hover:bg-primary/90',
-  danger: 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white',
-  amber: 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white',
-  secondary: 'bg-card border border-border text-foreground/80 hover:bg-accent hover:text-foreground',
+  danger:
+    'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white',
+  amber:
+    'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white',
+  secondary:
+    'bg-card border border-border text-foreground/80 hover:bg-accent hover:text-foreground',
   muted: 'bg-brand/10 text-brand border border-brand/20 hover:bg-brand/20',
-  outline: 'border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground',
+  outline:
+    'border border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground',
   ghost: 'text-muted-foreground hover:bg-accent hover:text-foreground',
   link: 'text-primary underline-offset-4 hover:underline',
 };
@@ -31,7 +45,13 @@ function needsFocusRing(variant: string): boolean {
 }
 
 function needsShadow(variant: string): boolean {
-  return variant !== 'secondary' && variant !== 'muted' && variant !== 'outline' && variant !== 'ghost' && variant !== 'link';
+  return (
+    variant !== 'secondary' &&
+    variant !== 'muted' &&
+    variant !== 'outline' &&
+    variant !== 'ghost' &&
+    variant !== 'link'
+  );
 }
 
 export function GradientButton({

@@ -1,6 +1,15 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { getToken, setToken, getRefreshToken, setRefreshToken, clearAuth, setOnAuthExpired, api, UserDto } from "@/api";
+import {
+  getToken,
+  setToken,
+  getRefreshToken,
+  setRefreshToken,
+  clearAuth,
+  setOnAuthExpired,
+  api,
+  UserDto,
+} from '@/api';
 import { resetOnboardingComplete } from '@/shared/onboardingUtils';
 
 interface AuthState {
@@ -36,8 +45,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const t = getToken();
     if (t) {
-      api.auth.me()
-        .then(u => setUser(u))
+      api.auth
+        .me()
+        .then((u) => setUser(u))
         .catch(async () => {
           const rt = getRefreshToken();
           if (rt) {

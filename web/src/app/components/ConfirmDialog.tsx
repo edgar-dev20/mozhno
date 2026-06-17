@@ -8,10 +8,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/app/components/ui/alert-dialog";
-import { Info, Trash2 } from "@/shared/icons";
-import { GradientButton } from "@/shared";
-import { StatusIcon } from "@/shared/components/StatusIcon";
+} from '@/app/components/ui/alert-dialog';
+import { Info, Trash2 } from '@/shared/icons';
+import { GradientButton } from '@/shared';
+import { StatusIcon } from '@/shared/components/StatusIcon';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -68,11 +68,7 @@ export function ConfirmDialog({
           </div>
         </div>
 
-        {children && (
-          <div className="pb-6 min-w-0 overflow-hidden">
-            {children}
-          </div>
-        )}
+        {children && <div className="pb-6 min-w-0 overflow-hidden">{children}</div>}
 
         <AlertDialogFooter className="py-4 border-t border-border bg-secondary/50 gap-3 flex-row justify-end">
           <AlertDialogCancel className="px-4 py-2.5 text-sm font-medium text-foreground/80 bg-card border border-border rounded-lg hover:bg-accent transition-colors">

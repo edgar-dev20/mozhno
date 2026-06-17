@@ -77,7 +77,8 @@ const en = {
     checkEmail: 'Check your email',
     checkEmailDescription: 'We sent a password reset link to your email.',
     invitationTitle: 'Project invitation',
-    invitationDescription: 'You have been invited to the "{{name}}" project. Set a password to log in.',
+    invitationDescription:
+      'You have been invited to the "{{name}}" project. Set a password to log in.',
     name: 'Name',
     namePlaceholder: 'First Last',
     setPassword: 'Set password',
@@ -87,7 +88,8 @@ const en = {
     rememberMe: 'Remember me',
     activationSuccess: 'Account activated. You can now log in.',
     passwordChanged: 'Password successfully changed.',
-    forgotPasswordSent: 'If an account with this email exists, a password reset link has been sent.',
+    forgotPasswordSent:
+      'If an account with this email exists, a password reset link has been sent.',
     error: {
       loginFailed: 'Login failed',
       nameRequired: 'Name is required',
@@ -114,7 +116,8 @@ const en = {
     deleteConfirm: 'Delete flag from all environments?',
     deleteDescription: 'will be permanently deleted. This affects all environments.',
     archiveConfirm: 'Archive flag?',
-    archiveDescription: 'will be archived. It will no longer appear in the default list and will be hidden from SDK responses. It can be unarchived later.',
+    archiveDescription:
+      'will be archived. It will no longer appear in the default list and will be hidden from SDK responses. It can be unarchived later.',
     loadingFlags: 'Loading flags...',
     noFlags: 'No flags',
     noFlagsDescription: 'Create your first flag to manage features',
@@ -127,7 +130,8 @@ const en = {
     release: 'Release',
     sortByName: 'By name',
     sortByDate: 'By date',
-    hygieneTip: 'Keep the number of active flags under control — remove those that have been in production for more than two sprints. Old flags slow down CI and clutter team context.',
+    hygieneTip:
+      'Keep the number of active flags under control — remove those that have been in production for more than two sprints. Old flags slow down CI and clutter team context.',
     hygieneLabel: 'Code hygiene',
     namePlaceholder: 'Flag',
     searchPlaceholder: 'Search by name, key or author...',
@@ -189,7 +193,8 @@ const en = {
     summaryStatsConditions: 'Conditions',
     summaryStatsLogic: 'Logic',
     howTargetingWorks: 'How does targeting work?',
-    howTargetingWorksDesc: 'The rollout percentage applies within selected segments and conditions. For example, 50% for the "Premium" segment will show the flag to half of premium users.',
+    howTargetingWorksDesc:
+      'The rollout percentage applies within selected segments and conditions. For example, 50% for the "Premium" segment will show the flag to half of premium users.',
     unknownField: 'Field #{{id}}',
     noContext: 'Select context',
     customSource: 'custom',
@@ -248,7 +253,8 @@ const en = {
     emptyTitle: 'No segments',
     emptyDescription: 'Create segments for audience targeting',
     emptyButton: 'Create segment',
-    tipText: 'Warm up segments from internal testers to external beta and only then to 100%. Each step is a new rollback point without downtime.',
+    tipText:
+      'Warm up segments from internal testers to external beta and only then to 100%. Each step is a new rollback point without downtime.',
     tipLabel: 'Strategy',
     contextCount: '{{count}} context',
     rules: 'Rules',
@@ -286,7 +292,8 @@ const en = {
     },
     infoBox: {
       title: 'How do segments work?',
-      description: 'Segments allow targeting features to specific user groups. Select a context field and specify values — only users matching these conditions will be included in the segment.',
+      description:
+        'Segments allow targeting features to specific user groups. Select a context field and specify values — only users matching these conditions will be included in the segment.',
     },
     deleteButton: 'Delete segment',
     deleteConfirm: {
@@ -346,7 +353,8 @@ const en = {
   settings: {
     title: 'Settings',
     description: 'Manage project, environments and security',
-    tipText: 'Run the security checklist quarterly: MFA, IP whitelist, audit log retention ≥ 90 days. One checkbox today saves an incident tomorrow.',
+    tipText:
+      'Run the security checklist quarterly: MFA, IP whitelist, audit log retention ≥ 90 days. One checkbox today saves an incident tomorrow.',
     tipLabel: 'Checklist',
     project: 'Project',
     projectDescription: 'Project info and logo',
@@ -364,7 +372,8 @@ const en = {
     logoHint: 'PNG, JPEG, GIF, WebP or SVG. Max 2 MB.',
     environments: 'Environments',
     environmentsDescription: 'Runtime environments for flags (dev, staging, production)',
-    envLimitReached: 'Limit reached: {{count}} / {{max}} environments. Remove one to add a new one.',
+    envLimitReached:
+      'Limit reached: {{count}} / {{max}} environments. Remove one to add a new one.',
     addEnvPlaceholder: 'Add environment...',
     envCount: '{{count}} / {{max}} environments',
     envHint: 'Used in feature flags to separate configs by environment',
@@ -375,11 +384,13 @@ const en = {
     dangerZone: 'Danger zone',
     dangerZoneDescription: 'Irreversible project actions',
     deleteProject: 'Delete project',
-    deleteProjectWarning: 'This action is irreversible. All flags, environments, segments, API keys and settings will be permanently deleted.',
+    deleteProjectWarning:
+      'This action is irreversible. All flags, environments, segments, API keys and settings will be permanently deleted.',
     deleteEnvConfirm: 'Delete environment?',
     deleteEnvDescription: 'Environment "{{name}}" will be permanently deleted.',
     deleteProjectConfirm: 'Delete project?',
-    deleteProjectDescription: 'Project "{{name}}" and all related data will be permanently deleted. This cannot be undone.',
+    deleteProjectDescription:
+      'Project "{{name}}" and all related data will be permanently deleted. This cannot be undone.',
     deleteProjectBtn: 'Delete project',
     errorSaveEnv: 'Error saving environment',
     errorSaveProject: 'Error saving project',
@@ -393,7 +404,8 @@ const en = {
     title: 'Users',
     description: 'Manage user access and roles',
     createInvite: 'Invite user',
-    tipText: 'Least privilege is the golden rule. Assign "Developer" by default, and "Admin" only after a security chat review.',
+    tipText:
+      'Least privilege is the golden rule. Assign "Developer" by default, and "Admin" only after a security chat review.',
     filterAllRoles: 'All roles',
     filterAllStatuses: 'All statuses',
     loading: 'Loading users...',
@@ -493,7 +505,8 @@ const en = {
     title: 'Tags',
     description: 'Group and filter flags by team, release or feature type',
     create: 'Create tag',
-    tipText: 'Agree on tag semantics within your team: "team/" for owners, "epic/" for release trains, "risk/high" for flags under special control.',
+    tipText:
+      'Agree on tag semantics within your team: "team/" for owners, "epic/" for release trains, "risk/high" for flags under special control.',
     tipLabel: 'Convention',
     emptyTitle: 'No tags',
     emptyDescription: 'Create tags to group flags by teams, modules or development stages',
@@ -503,15 +516,25 @@ const en = {
     panel: {
       createTitle: 'New tag',
       editTitle: 'Edit tag',
-      editDescription: 'Change the name, description or color of the tag. All linked flags will automatically reflect the changes.',
-      createDescription: 'Create a label to group flags. The name should be short and clear, and the color should help visually distinguish tags.',
+      editDescription:
+        'Change the name, description or color of the tag. All linked flags will automatically reflect the changes.',
+      createDescription:
+        'Create a label to group flags. The name should be short and clear, and the color should help visually distinguish tags.',
       cancel: 'Cancel',
       saveEdit: 'Save changes',
       saveCreate: 'Create tag',
     },
     form: {
-      name: { label: 'Name', hint: 'Short name for display on flags and filters', placeholder: 'e.g. Backend team' },
-      description: { label: 'Description', hint: 'A detailed description helps the team understand the purpose', placeholder: 'Describe what this tag is for...' },
+      name: {
+        label: 'Name',
+        hint: 'Short name for display on flags and filters',
+        placeholder: 'e.g. Backend team',
+      },
+      description: {
+        label: 'Description',
+        hint: 'A detailed description helps the team understand the purpose',
+        placeholder: 'Describe what this tag is for...',
+      },
       color: {
         label: 'Color',
         preview: 'Preview',
@@ -545,7 +568,8 @@ const en = {
     title: 'Contexts',
     description: 'Context fields for flag targeting and segment rules',
     create: 'Create context',
-    tipText: 'Context fields define audience parameters. The key is used in flag targeting rules and segment conditions.',
+    tipText:
+      'Context fields define audience parameters. The key is used in flag targeting rules and segment conditions.',
     tipLabel: 'DSL',
     loading: 'Loading...',
     emptyTitle: 'No contexts',
@@ -560,7 +584,8 @@ const en = {
     typeHelpText: 'Value format for targeting. SDK validates the passed value against the type.',
     relatedSegmentsLabel: 'Related segments',
     badgeInUse: 'In use',
-    cannotDeleteHelp: 'This context is used in segments and cannot be deleted. Remove segment associations first.',
+    cannotDeleteHelp:
+      'This context is used in segments and cannot be deleted. Remove segment associations first.',
     deleteButton: 'Delete context',
     confirmDeleteTitle: 'Delete context?',
     confirmDeleteDescription: 'Context "{{name}}" will be permanently deleted.',
@@ -588,7 +613,8 @@ const en = {
       disconnect: 'Error disconnecting integration',
       connect: 'Error connecting integration',
     },
-    tipText: 'For webhooks, configure the endpoint in your service, and only specify the URL and event list here — Mozhno will send a POST request when events occur.',
+    tipText:
+      'For webhooks, configure the endpoint in your service, and only specify the URL and event list here — Mozhno will send a POST request when events occur.',
     tipLabel: 'How webhooks work',
     enable: 'Enable webhook',
     enableHint: 'Send events when they occur',
@@ -708,7 +734,8 @@ const en = {
       delete: 'Error deleting key',
       create: 'Error creating key',
     },
-    tipText: 'Rotate keys every 90 days and never commit them. For CI/CD use a separate key ring — compromise of one won\'t affect the others.',
+    tipText:
+      "Rotate keys every 90 days and never commit them. For CI/CD use a separate key ring — compromise of one won't affect the others.",
     tipLabel: 'Best Practice',
     searchPlaceholder: 'Search by name...',
     filterAllTypes: 'All types',
@@ -718,14 +745,16 @@ const en = {
     hide: 'Hide',
     show: 'Show',
     securityTitle: 'Key Security',
-    securityDesc: 'Client SDK keys are safe for use on the frontend (browser, mobile apps). Server SDK keys have full data access and must never be exposed on the client side.',
+    securityDesc:
+      'Client SDK keys are safe for use on the frontend (browser, mobile apps). Server SDK keys have full data access and must never be exposed on the client side.',
     instancesOne: 'application connected',
     instancesFew: 'applications connected',
     instancesMany: 'applications connected',
     andMoreInstances: ' and {{count}} more',
     allConnections: 'All connections',
     panelDescription: 'New key for SDK project access',
-    panelWarning: 'After creation the key will be shown only once. Copy it immediately — the key cannot be recovered.',
+    panelWarning:
+      'After creation the key will be shown only once. Copy it immediately — the key cannot be recovered.',
     formNamePlaceholder: 'Production Server Key',
     formEnvLabel: 'Environment',
     formEnvPlaceholder: 'Select environment',
@@ -744,7 +773,8 @@ const en = {
     filterUser: 'All users',
     filterType: 'Type',
     period: 'Period',
-    tipText: 'Audit log lets you track changes — who toggled a flag, who changed a role. Use type and date filters for quick lookup.',
+    tipText:
+      'Audit log lets you track changes — who toggled a flag, who changed a role. Use type and date filters for quick lookup.',
     tipLabel: 'Tip',
     searchPlaceholder: 'Search by name, resource, action...',
     resource: {
@@ -787,7 +817,8 @@ const en = {
     enabled: 'Enabled',
     disabled: 'Disabled',
     description: 'Feature flag rollout strategies',
-    hygieneTip: 'Gradual rollout is the safest way to deploy. Start with 5% internal users and increase while metrics are stable.',
+    hygieneTip:
+      'Gradual rollout is the safest way to deploy. Start with 5% internal users and increase while metrics are stable.',
     hygieneLabel: 'Best practice',
     gradualName: 'Gradual rollout',
     gradualDesc: 'Gradually increase the percentage of your audience',
@@ -811,7 +842,8 @@ const en = {
     logoHint: 'PNG, JPG or SVG. Recommended 256×256.',
     step1: {
       title: 'Create your first flag',
-      description: 'Flags control feature availability. Start with a simple killswitch or release flag.',
+      description:
+        'Flags control feature availability. Start with a simple killswitch or release flag.',
     },
     step2: {
       title: 'Configure environments',
@@ -894,4 +926,3 @@ const en = {
 } satisfies MessagesShape;
 
 export { en };
-

@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
-import { useAuth } from "@/app/auth/useAuth";
-import { useT } from "@/i18n";
+import { useAuth } from '@/app/auth/useAuth';
+import { useT } from '@/i18n';
 
 const adminRoutes = ['/users', '/integrations', '/settings', '/audit', '/apikeys'];
 
@@ -24,7 +24,7 @@ export function ProtectedRoute() {
     return <Navigate to="/login" replace />;
   }
 
-  if (user.role !== 'admin' && adminRoutes.some(r => location.pathname.startsWith(r))) {
+  if (user.role !== 'admin' && adminRoutes.some((r) => location.pathname.startsWith(r))) {
     return <Navigate to="/flags" replace />;
   }
 

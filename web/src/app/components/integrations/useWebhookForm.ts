@@ -86,7 +86,7 @@ export function useWebhookForm() {
 
   const urlError = useMemo(() => {
     const result = validateUrl(formUrl);
-    return result.valid ? null : result.error ?? null;
+    return result.valid ? null : (result.error ?? null);
   }, [formUrl]);
 
   const currentHeaders = useMemo(() => buildHeadersMap(formHeaders), [formHeaders]);
@@ -125,9 +125,7 @@ export function useWebhookForm() {
     setEditing(null);
     setFormName('');
     setFormUrl('');
-    setFormHeaders([
-      { id: ++headerIdRef.current, key: 'Content-Type', value: 'application/json' },
-    ]);
+    setFormHeaders([{ id: ++headerIdRef.current, key: 'Content-Type', value: 'application/json' }]);
     setFormBody(defaultBody);
     setFormEnabled(false);
     setFormEvents([]);
@@ -184,9 +182,7 @@ export function useWebhookForm() {
   }, []);
 
   const updateHeader = useCallback((id: number, field: 'key' | 'value', val: string) => {
-    setFormHeaders((prev) =>
-      prev.map((h) => (h.id === id ? { ...h, [field]: val } : h)),
-    );
+    setFormHeaders((prev) => prev.map((h) => (h.id === id ? { ...h, [field]: val } : h)));
   }, []);
 
   const buildCurlCmd = useCallback((): string => {
@@ -214,21 +210,18 @@ export function useWebhookForm() {
     });
   }, []);
 
-  const toggleCatAll = useCallback(
-    (catKey: EventCategoryKey) => {
-      const keys = CATEGORY_EVENT_MAP[catKey];
-      setFormEvents((prev) => {
-        const formEventSet = new Set(prev);
-        const allInCat = keys.every((key) => formEventSet.has(key));
-        if (allInCat) {
-          return prev.filter((k) => !keys.includes(k));
-        } else {
-          return [...new Set([...prev, ...keys])];
-        }
-      });
-    },
-    [],
-  );
+  const toggleCatAll = useCallback((catKey: EventCategoryKey) => {
+    const keys = CATEGORY_EVENT_MAP[catKey];
+    setFormEvents((prev) => {
+      const formEventSet = new Set(prev);
+      const allInCat = keys.every((key) => formEventSet.has(key));
+      if (allInCat) {
+        return prev.filter((k) => !keys.includes(k));
+      } else {
+        return [...new Set([...prev, ...keys])];
+      }
+    });
+  }, []);
 
   const toggleAllEvents = useCallback(() => {
     setFormEvents((prev) => {

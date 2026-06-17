@@ -35,10 +35,7 @@ function buildRule(
   const pctClass = muted ? 'opacity-40' : '';
 
   parts.push(
-    <span
-      key="pct"
-      className={`font-bold text-xs text-brand ${pctClass}`}
-    >
+    <span key="pct" className={`font-bold text-xs text-brand ${pctClass}`}>
       {isFull ? '100%' : `${pct}%`}
     </span>,
   );
@@ -173,7 +170,7 @@ export function FlagCardEnvironmentColumn({
                 >
                   <FlagSparkline data={sparkBuckets} height={56} />
                 </button>
-                </>
+              </>
             ) : (
               <SparklinePlaceholder height={56} />
             )}

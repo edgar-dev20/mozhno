@@ -22,11 +22,16 @@ class PluginRegistry {
   register(
     slotId: PluginSlotId,
     Component: React.ComponentType<Record<string, unknown>>,
-    options?: { requiredPlan?: string; priority?: number; onInit?: () => void | Promise<void>; onDestroy?: () => void },
+    options?: {
+      requiredPlan?: string;
+      priority?: number;
+      onInit?: () => void | Promise<void>;
+      onDestroy?: () => void;
+    },
   ): () => void {
     const existing = this.plugins.get(slotId) || [];
 
-    if (existing.some(p => p.Component === Component)) {
+    if (existing.some((p) => p.Component === Component)) {
       return () => this.unregister(slotId, Component);
     }
 
@@ -68,7 +73,7 @@ class PluginRegistry {
 
   unregister(slotId: PluginSlotId, Component: React.ComponentType<Record<string, unknown>>) {
     const existing = this.plugins.get(slotId) || [];
-    const plugin = existing.find(p => p.Component === Component);
+    const plugin = existing.find((p) => p.Component === Component);
 
     if (plugin) {
       if (plugin.onDestroy) {
@@ -83,7 +88,10 @@ class PluginRegistry {
       this.initialized.delete(plugin.id);
     }
 
-    this.plugins.set(slotId, existing.filter(p => p.Component !== Component));
+    this.plugins.set(
+      slotId,
+      existing.filter((p) => p.Component !== Component),
+    );
   }
 
   getForSlot(slotId: PluginSlotId): PremiumPlugin[] {

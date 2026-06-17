@@ -1,5 +1,5 @@
-import { AppError, isAppError } from "@/shared/errors";
-import { t, type MessageKey } from "@/i18n";
+import { AppError, isAppError } from '@/shared/errors';
+import { t, type MessageKey } from '@/i18n';
 
 const ERROR_CODE_TO_KEY: Record<string, string> = {
   NETWORK: 'errors.network',
@@ -48,4 +48,4 @@ export function shouldRedirect(error: unknown): boolean {
 }
 
 export { isAppError, AppError };
-export type { ErrorCode } from "@/shared/errors";
+export type { ErrorCode } from '@/shared/errors';

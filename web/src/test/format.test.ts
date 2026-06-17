@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { formatDate, formatDateTime, timeAgo, getFlagTypeColor, getFlagTypeLabel } from "@/shared/format";
+import {
+  formatDate,
+  formatDateTime,
+  timeAgo,
+  getFlagTypeColor,
+  getFlagTypeLabel,
+} from '@/shared/format';
 
 describe('formatDate', () => {
   it('returns null for null input', () => {

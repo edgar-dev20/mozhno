@@ -1,11 +1,11 @@
-import React, { useState, useMemo, useCallback } from "react";
-import { format, setHours, setMinutes } from "date-fns";
-import { enUS } from "date-fns/locale";
-import { Calendar, Clock, X, Check } from "@/shared/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/app/components/ui/calendar";
-import { useLocale, useT } from "@/i18n";
-import { dateLocales } from "@/i18n/dateLocales";
+import React, { useState, useMemo, useCallback } from 'react';
+import { format, setHours, setMinutes } from 'date-fns';
+import { enUS } from 'date-fns/locale';
+import { Calendar, Clock, X, Check } from '@/shared/icons';
+import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/app/components/ui/calendar';
+import { useLocale, useT } from '@/i18n';
+import { dateLocales } from '@/i18n/dateLocales';
 
 interface DateTimePickerProps {
   value?: string;
@@ -15,22 +15,22 @@ interface DateTimePickerProps {
 }
 
 function parseISO(value?: string): { date: Date | null; hours: string; minutes: string } {
-  if (!value) return { date: null, hours: "", minutes: "" };
+  if (!value) return { date: null, hours: '', minutes: '' };
   try {
     let d: Date;
     if (/^\d{2}:\d{2}$/.test(value)) {
-      d = new Date("1970-01-01T" + value + ":00");
+      d = new Date('1970-01-01T' + value + ':00');
     } else {
       d = new Date(value);
     }
-    if (isNaN(d.getTime())) return { date: null, hours: "", minutes: "" };
+    if (isNaN(d.getTime())) return { date: null, hours: '', minutes: '' };
     return {
       date: d,
-      hours: String(d.getHours()).padStart(2, "0"),
-      minutes: String(d.getMinutes()).padStart(2, "0"),
+      hours: String(d.getHours()).padStart(2, '0'),
+      minutes: String(d.getMinutes()).padStart(2, '0'),
     };
   } catch {
-    return { date: null, hours: "", minutes: "" };
+    return { date: null, hours: '', minutes: '' };
   }
 }
 
@@ -38,7 +38,7 @@ export function DateTimePicker({
   value,
   onChange,
   placeholder,
-  className = "",
+  className = '',
 }: DateTimePickerProps) {
   const { locale } = useLocale();
   const t = useT();
@@ -73,13 +73,13 @@ export function DateTimePicker({
   }, [date, hours, minutes, onChange]);
 
   const displayText = useMemo(() => {
-    if (!value) return placeholder ?? t("common.selectDateTime");
+    if (!value) return placeholder ?? t('common.selectDateTime');
     try {
       const d = new Date(value);
-      if (isNaN(d.getTime())) return placeholder ?? t("common.selectDateTime");
-      return format(d, "d MMM yyyy, HH:mm", { locale: dateLocale });
+      if (isNaN(d.getTime())) return placeholder ?? t('common.selectDateTime');
+      return format(d, 'd MMM yyyy, HH:mm', { locale: dateLocale });
     } catch {
-      return placeholder ?? t("common.selectDateTime");
+      return placeholder ?? t('common.selectDateTime');
     }
   }, [value, placeholder, dateLocale, t]);
 
@@ -88,7 +88,7 @@ export function DateTimePicker({
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    onChange("");
+    onChange('');
   };
 
   return (
@@ -96,11 +96,11 @@ export function DateTimePicker({
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={placeholder ?? t("common.selectDateTime")}
+          aria-label={placeholder ?? t('common.selectDateTime')}
           className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-lg px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
         >
           <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
-          <span className={hasValue ? "text-foreground/80" : "text-muted-foreground"}>
+          <span className={hasValue ? 'text-foreground/80' : 'text-muted-foreground'}>
             {displayText}
           </span>
           {hasValue && (
@@ -148,11 +148,12 @@ export function DateTimePicker({
             disabled={!date}
             className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              backgroundImage: "linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end))",
+              backgroundImage:
+                'linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end))',
             }}
           >
             <Check size={14} />
-            {t("common.add")}
+            {t('common.add')}
           </button>
         </div>
       </PopoverContent>

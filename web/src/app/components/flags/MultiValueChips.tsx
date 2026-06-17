@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, type KeyboardEvent } from 'react';
-import { X } from "@/shared/icons";
+import { X } from '@/shared/icons';
 import { useT } from '@/i18n';
 
 interface MultiValueChipsProps {
@@ -20,42 +20,49 @@ export function MultiValueChips({ values, onChange, autoFocus }: MultiValueChips
     }
   }, [autoFocus]);
 
-  const addValue = useCallback((raw: string) => {
-    const v = raw.trim();
-    if (!v) return;
-    if (values.length >= 100) return;
-    if (values.includes(v)) {
-      const idx = values.indexOf(v);
-      setShakeId(idx);
-      setTimeout(() => setShakeId(null), 500);
-      return;
-    }
-    onChange([...values, v]);
-    setInput('');
-  }, [values, onChange]);
+  const addValue = useCallback(
+    (raw: string) => {
+      const v = raw.trim();
+      if (!v) return;
+      if (values.length >= 100) return;
+      if (values.includes(v)) {
+        const idx = values.indexOf(v);
+        setShakeId(idx);
+        setTimeout(() => setShakeId(null), 500);
+        return;
+      }
+      onChange([...values, v]);
+      setInput('');
+    },
+    [values, onChange],
+  );
 
-  const removeValue = useCallback((idx: number) => {
-    const next = values.filter((_, i) => i !== idx);
-    onChange(next);
-    if (next.length === 0) {
-      setTimeout(() => inputRef.current?.focus(), 0);
-    }
-  }, [values, onChange]);
+  const removeValue = useCallback(
+    (idx: number) => {
+      const next = values.filter((_, i) => i !== idx);
+      onChange(next);
+      if (next.length === 0) {
+        setTimeout(() => inputRef.current?.focus(), 0);
+      }
+    },
+    [values, onChange],
+  );
 
-  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      addValue(input);
-    } else if (e.key === 'Backspace' && input === '' && values.length > 0) {
-      removeValue(values.length - 1);
-    }
-  }, [input, values, addValue, removeValue]);
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        addValue(input);
+      } else if (e.key === 'Backspace' && input === '' && values.length > 0) {
+        removeValue(values.length - 1);
+      }
+    },
+    [input, values, addValue, removeValue],
+  );
 
   return (
     <div className="space-y-2">
-      <div
-        className="flex flex-wrap gap-1.5"
-      >
+      <div className="flex flex-wrap gap-1.5">
         {values.map((v, i) => (
           <span
             key={i}
@@ -79,7 +86,9 @@ export function MultiValueChips({ values, onChange, autoFocus }: MultiValueChips
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={values.length === 0 ? t('flags.chipEmptyPlaceholder') : t('flags.chipPlaceholder')}
+          placeholder={
+            values.length === 0 ? t('flags.chipEmptyPlaceholder') : t('flags.chipPlaceholder')
+          }
           className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-xs placeholder:text-muted-foreground/60 py-1"
         />
       </div>

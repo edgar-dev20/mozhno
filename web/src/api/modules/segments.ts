@@ -1,5 +1,5 @@
-import { request } from "@/api/modules/http";
-import { SegmentResponse, SegmentRequest } from "@/api/modules/types";
+import { request } from '@/api/modules/http';
+import { SegmentResponse, SegmentRequest } from '@/api/modules/types';
 
 export const segmentsApi = {
   list: () => request<SegmentResponse[]>('/segments'),
@@ -14,6 +14,5 @@ export const segmentsApi = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
-  delete: (id: number) =>
-    request<void>(`/segments/${id}`, { method: 'DELETE' }),
+  delete: (id: number) => request<void>(`/segments/${id}`, { method: 'DELETE' }),
 };

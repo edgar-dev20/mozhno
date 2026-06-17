@@ -1,11 +1,26 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api';
 import type { FlagView } from '@/app/hooks/flagTypes';
-import type { SegmentResponse, Tag as TagType, ContextDefinition, EnrichedFlagResponse } from '@/api';
+import type {
+  SegmentResponse,
+  Tag as TagType,
+  ContextDefinition,
+  EnrichedFlagResponse,
+} from '@/api';
 
-function createFlagView(
-  f: { key: string; name: string; description: string; flagType: string; id: number; tags: { tagId: number; tagName: string; tagColor: string; value: string }[]; archived: boolean; createdAt: string | null; createdBy: string | null; archivedBy: string | null; archivedAt: string | null },
-): FlagView {
+function createFlagView(f: {
+  key: string;
+  name: string;
+  description: string;
+  flagType: string;
+  id: number;
+  tags: { tagId: number; tagName: string; tagColor: string; value: string }[];
+  archived: boolean;
+  createdAt: string | null;
+  createdBy: string | null;
+  archivedBy: string | null;
+  archivedAt: string | null;
+}): FlagView {
   return {
     key: f.key,
     name: f.name,
@@ -23,7 +38,7 @@ function createFlagView(
 }
 
 function transformEnrichedResponse(enriched: EnrichedFlagResponse[]): FlagView[] {
-  return enriched.map(e => {
+  return enriched.map((e) => {
     const fv = createFlagView(e);
     for (const envState of e.environments) {
       fv.environments[envState.environmentId] = {
@@ -40,7 +55,12 @@ function transformEnrichedResponse(enriched: EnrichedFlagResponse[]): FlagView[]
   });
 }
 
-async function legacyEnrichment(): Promise<{ flags: FlagView[]; segments: SegmentResponse[]; tags: TagType[]; contexts: ContextDefinition[] }> {
+async function legacyEnrichment(): Promise<{
+  flags: FlagView[];
+  segments: SegmentResponse[];
+  tags: TagType[];
+  contexts: ContextDefinition[];
+}> {
   const [base, segs, tg, ctx, envs] = await Promise.all([
     api.flags.list(undefined, true),
     api.segments.list(),
@@ -61,9 +81,7 @@ async function legacyEnrichment(): Promise<{ flags: FlagView[]; segments: Segmen
   }
 
   const envResults = await Promise.all(
-    envs.map(env =>
-      api.flags.list(env.id).then(flags => ({ envId: env.id, flags })),
-    ),
+    envs.map((env) => api.flags.list(env.id).then((flags) => ({ envId: env.id, flags }))),
   );
 
   for (const { envId, flags: envFlags } of envResults) {

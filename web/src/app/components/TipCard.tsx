@@ -64,7 +64,9 @@ export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProp
             )}
             <div className="flex-1 min-w-0 pt-0.5">
               <div className="mb-1.5">
-                <Badge variant="primary" uppercase>{displayLabel}</Badge>
+                <Badge variant="primary" uppercase>
+                  {displayLabel}
+                </Badge>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
             </div>

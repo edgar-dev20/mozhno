@@ -93,7 +93,10 @@ function stripField<T extends Record<string, unknown>>(obj: T, field: keyof T): 
   return rest;
 }
 
-function withWrongType<T extends Record<string, unknown>>(obj: T, field: keyof T): T & Record<string, unknown> {
+function withWrongType<T extends Record<string, unknown>>(
+  obj: T,
+  field: keyof T,
+): T & Record<string, unknown> {
   return { ...obj, [field]: 'not-the-right-type' };
 }
 
@@ -187,10 +190,14 @@ describe('contextDefinitionSchema', () => {
   });
 
   it('throws on missing required field', () => {
-    expect(() => contextDefinitionSchema.parse(stripField(validContextDefinition, 'name'))).toThrow();
+    expect(() =>
+      contextDefinitionSchema.parse(stripField(validContextDefinition, 'name')),
+    ).toThrow();
   });
 
   it('rejects wrong type (coercion does not happen)', () => {
-    expect(() => contextDefinitionSchema.parse(withWrongType(validContextDefinition, 'id'))).toThrow();
+    expect(() =>
+      contextDefinitionSchema.parse(withWrongType(validContextDefinition, 'id')),
+    ).toThrow();
   });
 });

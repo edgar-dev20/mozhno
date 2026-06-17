@@ -1,5 +1,5 @@
-import { request } from "@/api/modules/http";
-import { ProjectSettings, SettingsUpdateRequest } from "@/api/modules/types";
+import { request } from '@/api/modules/http';
+import { ProjectSettings, SettingsUpdateRequest } from '@/api/modules/types';
 
 export const settingsApi = {
   get: () => request<ProjectSettings>('/settings'),

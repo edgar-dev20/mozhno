@@ -6,9 +6,7 @@ import type { Locale } from '@/i18n/locale';
 import { DEFAULT_LOCALE, detectLocale, storeLocale, loadLocale } from '@/i18n/locale';
 
 type NestedKeyOf<T> = {
-  [K in keyof T & string]: T[K] extends Record<string, unknown>
-    ? `${K}.${NestedKeyOf<T[K]>}`
-    : K;
+  [K in keyof T & string]: T[K] extends Record<string, unknown> ? `${K}.${NestedKeyOf<T[K]>}` : K;
 }[keyof T & string];
 
 export type MessageKey = NestedKeyOf<RuMessages>;
@@ -41,16 +39,13 @@ const LocaleContext = createContext<LocaleContextValue>({
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(() => detectLocale());
 
-  const setLocale = useCallback(
-    (newLocale: Locale) => {
-      setLocaleState(newLocale);
-      storeLocale(newLocale);
-      if (typeof document !== 'undefined') {
-        document.documentElement.lang = newLocale;
-      }
-    },
-    [],
-  );
+  const setLocale = useCallback((newLocale: Locale) => {
+    setLocaleState(newLocale);
+    storeLocale(newLocale);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = newLocale;
+    }
+  }, []);
 
   const value = useMemo(() => ({ locale, setLocale }), [locale, setLocale]);
 

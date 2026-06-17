@@ -18,7 +18,7 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(entries => {
+    const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         setWidth(entry.contentRect.width);
       }
@@ -29,13 +29,16 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
 
   if (data.length === 0) {
     return (
-      <div className="flex items-center justify-center text-xs text-muted-foreground/40" style={{ height }}>
+      <div
+        className="flex items-center justify-center text-xs text-muted-foreground/40"
+        style={{ height }}
+      >
         —
       </div>
     );
   }
 
-  const maxVal = Math.max(1, ...data.map(d => d.trueCount + d.falseCount));
+  const maxVal = Math.max(1, ...data.map((d) => d.trueCount + d.falseCount));
   const paddingX = 2;
   const effectiveWidth = width - paddingX * 2;
   const barWidth = Math.max(1, (effectiveWidth - (data.length - 1) * 1) / data.length);
@@ -49,7 +52,13 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
         animate={{ clipPath: 'inset(0 0 0 0%)' }}
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
       >
-        <svg width={width} height={height} className="block" role="img" aria-label="Sparkline chart">
+        <svg
+          width={width}
+          height={height}
+          className="block"
+          role="img"
+          aria-label="Sparkline chart"
+        >
           {data.map((d, i) => {
             const x = paddingX + i * (barWidth + gap);
             const totalH = ((d.trueCount + d.falseCount) / maxVal) * (height - 2);
@@ -110,7 +119,7 @@ export function SparklinePlaceholder({ height = 56 }: { height?: number }) {
   const colCount = 24;
   const heights = Array.from({ length: colCount }, (_, i) => {
     const t = i / (colCount - 1);
-    return 0.18 + 0.40 * Math.sin(t * Math.PI);
+    return 0.18 + 0.4 * Math.sin(t * Math.PI);
   });
 
   return (

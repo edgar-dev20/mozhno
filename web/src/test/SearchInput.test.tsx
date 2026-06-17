@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SearchInput } from "@/shared/components/SearchInput";
+import { SearchInput } from '@/shared/components/SearchInput';
 
 describe('SearchInput', () => {
   it('renders with value', () => {
@@ -11,7 +11,14 @@ describe('SearchInput', () => {
 
   it('calls onChange on input', async () => {
     let val = '';
-    render(<SearchInput value="" onChange={(v) => { val = v; }} />);
+    render(
+      <SearchInput
+        value=""
+        onChange={(v) => {
+          val = v;
+        }}
+      />,
+    );
     await userEvent.type(screen.getByRole('textbox'), 'h');
     expect(val).toBe('h');
   });
