@@ -23,6 +23,8 @@ public class AuditEventRepository {
         this.jdbc = jdbc;
     }
 
+    private static final String COLUMNS = "id, project_id, user_id, user_name, user_email, action, resource_type, resource_id, resource_name, details, ip_address, created_at";
+
     private static final RowMapper<AuditEvent> ROW_MAPPER = (rs, _) -> {
         AuditEvent e = new AuditEvent();
         e.setId(rs.getInt("id"));
@@ -48,7 +50,7 @@ public class AuditEventRepository {
      */
     public List<AuditEvent> findByProjectId(Integer projectId) {
         return jdbc.query(
-            "SELECT * FROM audit_log WHERE project_id = ? ORDER BY created_at DESC LIMIT 500",
+            "SELECT " + COLUMNS + " FROM audit_log WHERE project_id = ? ORDER BY created_at DESC LIMIT 500",
             ROW_MAPPER, projectId);
     }
 
@@ -63,7 +65,7 @@ public class AuditEventRepository {
      * @return list of audit events
      */
     public List<AuditEvent> findByProjectId(Integer projectId, int limit, int offset, String dateFrom, String dateTo) {
-        StringBuilder sql = new StringBuilder("SELECT * FROM audit_log WHERE project_id = ?");
+        StringBuilder sql = new StringBuilder("SELECT " + COLUMNS + " FROM audit_log WHERE project_id = ?");
         List<Object> params = new ArrayList<>();
         params.add(projectId);
 
@@ -91,7 +93,7 @@ public class AuditEventRepository {
      */
     public int deleteOlderThan(int days) {
         return jdbc.update(
-            "DELETE FROM audit_log WHERE created_at < CURRENT_TIMESTAMP - INTERVAL '" + days + " days'");
+            "DELETE FROM audit_log WHERE created_at < CURRENT_TIMESTAMP - (? || ' days')::INTERVAL", days);
     }
 
     /**

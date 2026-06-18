@@ -137,7 +137,7 @@ public class ProjectService {
         }
         try {
             byte[] bytes = file.getBytes();
-            String ext = getExtension(file.getOriginalFilename());
+            String ext = dev.mozhno.util.FileUtils.getExtension(file.getOriginalFilename());
             projectRepository.updateLogo(id, "blob" + ext, bytes);
         } catch (IOException e) {
             throw new BadRequestException("Failed to read logo file: " + e.getMessage());
@@ -161,11 +161,5 @@ public class ProjectService {
             return null;
         }
         return projectRepository.getLogoData(id);
-    }
-
-    private static String getExtension(String filename) {
-        if (filename == null) return "";
-        int dot = filename.lastIndexOf('.');
-        return dot >= 0 ? filename.substring(dot) : "";
     }
 }

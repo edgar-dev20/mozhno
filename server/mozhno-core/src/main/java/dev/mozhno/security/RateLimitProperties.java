@@ -11,6 +11,7 @@ public class RateLimitProperties {
     private final Bucket passwordReset = new Bucket(3, 3, 60);
     private final Bucket refresh = new Bucket(10, 10, 1);
     private final Bucket client = new Bucket(1000, 1000, 1);
+    private final Bucket apiWrite = new Bucket(100, 100, 1);
 
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
@@ -19,6 +20,7 @@ public class RateLimitProperties {
     public Bucket getPasswordReset() { return passwordReset; }
     public Bucket getRefresh() { return refresh; }
     public Bucket getClient() { return client; }
+    public Bucket getApiWrite() { return apiWrite; }
 
     public static class Bucket {
         private int capacity;

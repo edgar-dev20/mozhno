@@ -21,7 +21,7 @@ class ClientInstanceServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ClientInstanceService(repository);
+        service = new ClientInstanceService(repository, 30);
     }
 
     @Test

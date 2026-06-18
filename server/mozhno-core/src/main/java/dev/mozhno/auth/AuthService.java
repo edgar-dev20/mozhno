@@ -1,11 +1,14 @@
 package dev.mozhno.auth;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import dev.mozhno.spi.AuthenticationFlowSpi;
 
 import dev.mozhno.exception.InvalidCredentialsException;
 import dev.mozhno.exception.NotFoundException;
+import dev.mozhno.projects.Project;
 import dev.mozhno.projects.ProjectRepository;
 
 import java.util.Collections;
@@ -22,6 +25,8 @@ import java.util.List;
  */
 @Service
 public class AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     private final List<AuthenticationFlowSpi> authFlows;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
@@ -81,6 +86,7 @@ public class AuthService {
         }
 
         if (result == null || !result.success()) {
+            log.warn("Login failed for email={} provider={}", email, provider);
             throw new InvalidCredentialsException(
                 result != null ? result.errorMessage() : "No authentication provider available");
         }
@@ -103,7 +109,10 @@ public class AuthService {
     private Integer resolveProjectId() {
         int count = projectRepository.count();
         if (count == 1) {
-            return projectRepository.findAll().get(0).getId();
+            List<Project> projects = projectRepository.findAll();
+            if (!projects.isEmpty()) {
+                return projects.getFirst().getId();
+            }
         }
         return null;
     }

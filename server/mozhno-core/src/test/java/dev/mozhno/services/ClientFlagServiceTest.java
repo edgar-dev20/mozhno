@@ -384,7 +384,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         flag.setEnabled(true);
         flagRepository.save(flag);
 
-        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of(), null);
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of(), null, null);
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getName()).isEqualTo("Simple Flag");
@@ -401,7 +401,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         flag.setEnabled(false);
         flagRepository.save(flag);
 
-        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of(), null);
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of(), null, null);
 
         assertThat(results).isEmpty();
     }
@@ -430,7 +430,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         s.setContextValuesJson("[{\"cd\":" + cdId + ",\"op\":\"in\",\"val\":\"premium\"}]");
         flagStrategyRepository.save(s);
 
-        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of("plan", "premium"), null);
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of("plan", "premium"), null, null);
         assertThat(results).hasSize(1);
         assertThat(results.get(0).getName()).isEqualTo("Premium Flag");
     }
@@ -459,13 +459,13 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         s.setContextValuesJson("[{\"cd\":" + cdId + ",\"op\":\"in\",\"val\":\"premium\"}]");
         flagStrategyRepository.save(s);
 
-        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of("plan", "free"), null);
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of("plan", "free"), null, null);
         assertThat(results).isEmpty();
     }
 
     @Test
     void evaluate_emptyProject_shouldReturnEmpty() {
-        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of(), null);
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of(), null, null);
         assertThat(results).isEmpty();
     }
 

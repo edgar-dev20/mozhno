@@ -22,6 +22,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     private final Cache<String, Bucket> buckets = Caffeine.newBuilder()
         .expireAfterAccess(30, TimeUnit.MINUTES)
+        .maximumSize(10_000)
         .build();
 
     private final boolean enabled;
@@ -35,7 +36,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        if (!enabled) {
+        if (!enabled || !request.getRequestURI().startsWith("/api/")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -43,58 +44,65 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        if (!"POST".equalsIgnoreCase(method)) {
+        RateLimitConfig config = resolveConfig(path, method);
+        if (config == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        Bandwidth limit = null;
-        String keySuffix;
-        long retryAfterSeconds;
+        String identity = path.startsWith("/api/client/")
+            ? resolveApiKeyIdentity()
+            : resolveClientIp(request);
 
-        if (path.endsWith("/auth/login")) {
-            limit = toBandwidth(properties.getLogin());
-            keySuffix = ":login";
-            retryAfterSeconds = properties.getLogin().getRefillMinutes() * 60L;
-        } else if (path.endsWith("/auth/forgot-password")) {
-            limit = toBandwidth(properties.getPasswordReset());
-            keySuffix = ":forgot";
-            retryAfterSeconds = properties.getPasswordReset().getRefillMinutes() * 60L;
-        } else if (path.endsWith("/auth/reset-password")) {
-            limit = toBandwidth(properties.getPasswordReset());
-            keySuffix = ":reset";
-            retryAfterSeconds = properties.getPasswordReset().getRefillMinutes() * 60L;
-        } else if (path.endsWith("/auth/refresh")) {
-            limit = toBandwidth(properties.getRefresh());
-            keySuffix = ":refresh";
-            retryAfterSeconds = properties.getRefresh().getRefillMinutes() * 60L;
-        } else if (path.startsWith("/api/client/")) {
-            limit = toBandwidth(properties.getClient());
-            keySuffix = ":client";
-            retryAfterSeconds = properties.getClient().getRefillMinutes() * 60L;
-        } else {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String identity;
-        if (path.startsWith("/api/client/")) {
-            identity = resolveApiKeyIdentity();
-        } else {
-            identity = resolveClientIp(request);
-        }
-        String bucketKey = identity + keySuffix;
-        Bandwidth effectiveLimit = limit;
-        Bucket bucket = buckets.get(bucketKey, k -> Bucket.builder().addLimit(effectiveLimit).build());
+        Bucket bucket = buckets.get(identity + config.keySuffix,
+            k -> Bucket.builder().addLimit(config.limit).build());
 
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
         } else {
             response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            response.setHeader("Retry-After", String.valueOf(retryAfterSeconds));
+            response.setHeader("Retry-After", String.valueOf(config.retryAfterSeconds));
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\":\"Too many requests. Please try again later.\",\"code\":\"RATE_LIMIT_EXCEEDED\"}");
+            response.getWriter().write(
+                "{\"error\":\"Too many requests. Please try again later.\",\"code\":\"RATE_LIMIT_EXCEEDED\"}");
         }
+    }
+
+    private RateLimitConfig resolveConfig(String path, String method) {
+        if (path.endsWith("/auth/login") && "POST".equalsIgnoreCase(method)) {
+            return new RateLimitConfig(toBandwidth(properties.getLogin()), ":login",
+                properties.getLogin().getRefillMinutes() * 60L);
+        }
+        if (path.endsWith("/auth/forgot-password") && "POST".equalsIgnoreCase(method)) {
+            return new RateLimitConfig(toBandwidth(properties.getPasswordReset()), ":forgot",
+                properties.getPasswordReset().getRefillMinutes() * 60L);
+        }
+        if (path.endsWith("/auth/reset-password") && "POST".equalsIgnoreCase(method)) {
+            return new RateLimitConfig(toBandwidth(properties.getPasswordReset()), ":reset",
+                properties.getPasswordReset().getRefillMinutes() * 60L);
+        }
+        if (path.endsWith("/auth/refresh") && "POST".equalsIgnoreCase(method)) {
+            return new RateLimitConfig(toBandwidth(properties.getRefresh()), ":refresh",
+                properties.getRefresh().getRefillMinutes() * 60L);
+        }
+        if (path.endsWith("/auth/accept-invite") && "POST".equalsIgnoreCase(method)) {
+            return new RateLimitConfig(toBandwidth(properties.getPasswordReset()), ":invite",
+                properties.getPasswordReset().getRefillMinutes() * 60L);
+        }
+        if (path.startsWith("/api/client/")) {
+            return new RateLimitConfig(toBandwidth(properties.getClient()), ":client",
+                properties.getClient().getRefillMinutes() * 60L);
+        }
+        if (path.startsWith("/api/v1/") && isWriteMethod(method)) {
+            return new RateLimitConfig(toBandwidth(properties.getApiWrite()), ":api-write",
+                properties.getApiWrite().getRefillMinutes() * 60L);
+        }
+        return null;
+    }
+
+    private boolean isWriteMethod(String method) {
+        return "POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
+            || "DELETE".equalsIgnoreCase(method) || "PATCH".equalsIgnoreCase(method);
     }
 
     private static Bandwidth toBandwidth(RateLimitProperties.Bucket props) {
@@ -115,10 +123,8 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     private String resolveClientIp(HttpServletRequest request) {
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-        if (forwardedFor != null && !forwardedFor.isBlank()) {
-            return forwardedFor.split(",")[0].trim();
-        }
-        return request.getRemoteAddr();
+        return dev.mozhno.util.HttpUtils.getClientIp(request);
     }
+
+    private record RateLimitConfig(Bandwidth limit, String keySuffix, long retryAfterSeconds) {}
 }

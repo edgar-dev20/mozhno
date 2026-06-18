@@ -5,10 +5,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.micrometer.core.annotation.Timed;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +42,7 @@ public class ClientFlagController {
     public List<ClientFlagResponse> getFeatures(HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(auth instanceof ApiKeyAuthentication apiKeyAuth)) {
-            throw new RuntimeException("Unauthorized");
+            throw new AccessDeniedException("Invalid API key authentication");
         }
         recordInstance(apiKeyAuth, request);
         return clientFlagService.getFlagsForProject(apiKeyAuth.getProjectId(), apiKeyAuth.getEnvironmentId());
@@ -49,23 +51,17 @@ public class ClientFlagController {
     @PostMapping("/evaluate")
     @Operation(summary = "Evaluate flags against context (client-side SDK)", security = @SecurityRequirement(name = "ApiKeyAuth"))
     @Timed(value = "client.flags.evaluate", description = "Time taken to evaluate flags with context")
-    public ResponseEntity<ClientEvaluateResponse> evaluate(@RequestBody ClientEvaluateRequest req, HttpServletRequest request) {
+    public ResponseEntity<ClientEvaluateResponse> evaluate(@Valid @RequestBody ClientEvaluateRequest req, HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(auth instanceof ApiKeyAuthentication apiKeyAuth)) {
-            throw new RuntimeException("Unauthorized");
+            throw new AccessDeniedException("Invalid API key authentication");
         }
         Long instanceId = recordInstance(apiKeyAuth, request);
         Map<String, String> context = req.getContext() != null ? req.getContext() : Collections.emptyMap();
         List<String> requestedToggles = req.getToggles();
 
         List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
-            apiKeyAuth.getProjectId(), apiKeyAuth.getEnvironmentId(), context, instanceId);
-
-        if (requestedToggles != null && !requestedToggles.isEmpty()) {
-            results = results.stream()
-                .filter(t -> requestedToggles.contains(t.getName()))
-                .toList();
-        }
+            apiKeyAuth.getProjectId(), apiKeyAuth.getEnvironmentId(), context, instanceId, requestedToggles);
 
         return ResponseEntity.ok(new ClientEvaluateResponse(results));
     }
@@ -73,14 +69,14 @@ public class ClientFlagController {
     @PostMapping("/metrics")
     @Operation(summary = "Submit SDK usage metrics", security = @SecurityRequirement(name = "ApiKeyAuth"))
     @Timed(value = "client.metrics.submit", description = "Time taken to record SDK metrics")
-    public ResponseEntity<Void> submitMetrics(@RequestBody ClientMetricsRequest req, HttpServletRequest request) {
+    public ResponseEntity<Void> submitMetrics(@Valid @RequestBody ClientMetricsRequest req, HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(auth instanceof ApiKeyAuthentication apiKeyAuth)) {
-            throw new RuntimeException("Unauthorized");
+            throw new AccessDeniedException("Invalid API key authentication");
         }
         Long instanceId = recordInstance(apiKeyAuth, request);
         clientFlagService.recordMetrics(apiKeyAuth.getProjectId(), apiKeyAuth.getEnvironmentId(), req, instanceId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.accepted().build();
     }
 
     private Long recordInstance(ApiKeyAuthentication auth, HttpServletRequest request) {
@@ -89,7 +85,7 @@ public class ClientFlagController {
         if (appName != null && instanceId != null) {
             String sdkType = request.getHeader("X-Mozhno-Sdk-Type");
             String sdkVersion = request.getHeader("X-Mozhno-Sdk-Version");
-            log.info("Recording instance: app={}, instance={}, sdkType={}, sdkVersion={}",
+            log.debug("Recording instance: app={}, instance={}, sdkType={}, sdkVersion={}",
                 appName, instanceId, sdkType, sdkVersion);
             return clientInstanceService.record(auth.getProjectId(), auth.getEnvironmentId(),
                 null, appName, instanceId, sdkType != null ? sdkType : "unknown",

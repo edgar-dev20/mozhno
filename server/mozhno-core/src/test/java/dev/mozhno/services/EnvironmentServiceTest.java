@@ -68,7 +68,6 @@ class EnvironmentServiceTest {
     @Test
     void create_shouldCreateAndReturn() {
         when(limitProvider.getMaxEnvironments()).thenReturn(10);
-        when(environmentRepository.countByProjectId(1)).thenReturn(0);
         when(environmentRepository.saveWithLimitCheck(eq(1), eq("production"), eq(10))).thenAnswer(inv -> {
             Environment e = new Environment();
             e.setId(1);

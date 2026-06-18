@@ -6,6 +6,7 @@ import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.spi.QuotaSpi;
 import dev.mozhno.exception.NotFoundException;
+import dev.mozhno.util.QuotaValidator;
 
 import java.util.List;
 
@@ -53,7 +54,7 @@ public class SegmentService {
 
     @Transactional
     public Segment create(SegmentRequest request) {
-        dev.mozhno.util.QuotaValidator.check(quotaSpi.canCreateSegment(request.getProjectId()));
+        QuotaValidator.check(quotaSpi.canCreateSegment(request.getProjectId()));
 
         Segment segment = new Segment();
         segment.setProjectId(request.getProjectId());
@@ -63,15 +64,8 @@ public class SegmentService {
         if (request.getColor() != null) segment.setColor(request.getColor());
         Segment saved = segmentRepository.save(segment);
 
-        if (request.getContext() != null) {
-            for (SegmentRequest.ContextEntry entry : request.getContext()) {
-                SegmentContext ctx = new SegmentContext();
-                ctx.setSegmentId(saved.getId());
-                ctx.setContextDefinitionId(entry.getContextDefinitionId());
-                ctx.setOperator(entry.getOperator() != null ? entry.getOperator() : "in");
-                ctx.setContextValues(entry.getContextValues());
-                segmentContextRepository.save(ctx);
-            }
+        if (request.getContext() != null && !request.getContext().isEmpty()) {
+            segmentContextRepository.saveBatch(saved.getId(), request.getContext());
         }
 
         events.publish(DomainEvent.of(saved.getProjectId(), "segment.created", "segment",
@@ -95,15 +89,8 @@ public class SegmentService {
         Segment saved = segmentRepository.save(segment);
 
         segmentContextRepository.deleteBySegmentId(id);
-        if (request.getContext() != null) {
-            for (SegmentRequest.ContextEntry entry : request.getContext()) {
-                SegmentContext ctx = new SegmentContext();
-                ctx.setSegmentId(id);
-                ctx.setContextDefinitionId(entry.getContextDefinitionId());
-                ctx.setOperator(entry.getOperator() != null ? entry.getOperator() : "in");
-                ctx.setContextValues(entry.getContextValues());
-                segmentContextRepository.save(ctx);
-            }
+        if (request.getContext() != null && !request.getContext().isEmpty()) {
+            segmentContextRepository.saveBatch(id, request.getContext());
         }
 
         events.publish(DomainEvent.of(saved.getProjectId(), "segment.updated", "segment",

@@ -36,4 +36,34 @@ public record PaginatedDashboardResponse(
 
     @Schema(description = "All environments in the project")
     List<EnvironmentResponse> environments
-) {}
+) {
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        private List<EnrichedFlagResponse> flags;
+        private int page;
+        private int size;
+        private long totalItems;
+        private int totalPages;
+        private List<SegmentResponse> segments;
+        private List<TagResponse> tags;
+        private List<ContextDefinitionResponse> contexts;
+        private List<EnvironmentResponse> environments;
+
+        public Builder flags(List<EnrichedFlagResponse> flags) { this.flags = flags; return this; }
+        public Builder page(int page) { this.page = page; return this; }
+        public Builder size(int size) { this.size = size; return this; }
+        public Builder totalItems(long totalItems) { this.totalItems = totalItems; return this; }
+        public Builder totalPages(int totalPages) { this.totalPages = totalPages; return this; }
+        public Builder segments(List<SegmentResponse> segments) { this.segments = segments; return this; }
+        public Builder tags(List<TagResponse> tags) { this.tags = tags; return this; }
+        public Builder contexts(List<ContextDefinitionResponse> contexts) { this.contexts = contexts; return this; }
+        public Builder environments(List<EnvironmentResponse> environments) { this.environments = environments; return this; }
+
+        public PaginatedDashboardResponse build() {
+            return new PaginatedDashboardResponse(flags, page, size, totalItems, totalPages, segments, tags, contexts, environments);
+        }
+    }
+}

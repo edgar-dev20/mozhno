@@ -98,11 +98,13 @@ public class EnvironmentService {
      */
     @Transactional
     public Environment create(Integer projectId, String name) {
-        int limit = limitProvider.getMaxEnvironments();
-        int count = environmentRepository.countByProjectId(projectId);
-        if (count >= limit) {
-            throw new BadRequestException("Maximum number of environments (" + limit + ") reached for this project");
+        if (name == null || name.isBlank()) {
+            throw new BadRequestException("Environment name is required");
         }
+        if (name.length() > 255) {
+            throw new BadRequestException("Environment name must not exceed 255 characters");
+        }
+        int limit = limitProvider.getMaxEnvironments();
         Environment env = new Environment();
         env.setProjectId(projectId);
         env.setName(name);

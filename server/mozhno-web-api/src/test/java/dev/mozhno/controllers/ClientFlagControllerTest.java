@@ -274,20 +274,20 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
     }
 
     @Test
-    void submitMetrics_shouldReturnOk() throws Exception {
+    void submitMetrics_shouldReturnAccepted() throws Exception {
         mockMvc.perform(post("/api/client/metrics")
                         .header("Authorization", "client-test-token-abcdefghijklmnop1234567890")
                         .contentType("application/json")
                         .content("{\"evaluations\":{\"test-feature\":{\"t\":3,\"f\":2}}}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isAccepted());
     }
 
     @Test
-    void submitMetrics_empty_shouldReturnOk() throws Exception {
+    void submitMetrics_empty_shouldReturnAccepted() throws Exception {
         mockMvc.perform(post("/api/client/metrics")
                         .header("Authorization", "client-test-token-abcdefghijklmnop1234567890")
                         .contentType("application/json")
                         .content("{}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isAccepted());
     }
 }

@@ -59,7 +59,7 @@ public class ApiKeyController {
     public ApiKeyResponse create(@Valid @RequestBody ApiKeyRequest request,
                                  @AuthenticationPrincipal UserPrincipal user) {
         ApiKey key = apiKeyService.create(user.projectId(), request);
-        return apiKeyAssembler.toResponse(key);
+        return apiKeyAssembler.toResponse(key, true);
     }
 
     @PutMapping("/{id}")

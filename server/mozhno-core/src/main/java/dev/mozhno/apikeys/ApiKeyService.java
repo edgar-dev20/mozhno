@@ -5,7 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.spi.QuotaSpi;
+import dev.mozhno.environments.EnvironmentRepository;
 
+import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.NotFoundException;
 
 import java.util.List;
@@ -21,12 +23,15 @@ public class ApiKeyService {
     private final ApiKeyRepository apiKeyRepository;
     private final DomainEventPublisher events;
     private final QuotaSpi quotaSpi;
+    private final EnvironmentRepository environmentRepository;
 
     public ApiKeyService(ApiKeyRepository apiKeyRepository,
-                         DomainEventPublisher events, QuotaSpi quotaSpi) {
+                         DomainEventPublisher events, QuotaSpi quotaSpi,
+                         EnvironmentRepository environmentRepository) {
         this.apiKeyRepository = apiKeyRepository;
         this.events = events;
         this.quotaSpi = quotaSpi;
+        this.environmentRepository = environmentRepository;
     }
 
     /**
@@ -77,6 +82,13 @@ public class ApiKeyService {
     @Transactional
     public ApiKey create(Integer projectId, ApiKeyRequest request) {
         dev.mozhno.util.QuotaValidator.check(quotaSpi.canCreateApiKey(projectId));
+
+        if (request.getEnvironmentId() != null) {
+            var env = environmentRepository.findByIdAndProjectId(request.getEnvironmentId(), projectId);
+            if (env == null) {
+                throw new BadRequestException("Environment does not belong to project");
+            }
+        }
 
         ApiKey k = new ApiKey();
         k.setProjectId(projectId);

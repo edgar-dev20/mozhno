@@ -12,6 +12,7 @@ import dev.mozhno.integrations.CustomWebhookService;
 import dev.mozhno.integrations.Integration;
 import dev.mozhno.integrations.IntegrationRepository;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -72,7 +73,7 @@ public class IntegrationEventListener {
         }
         try {
             return objectMapper.readValue(json, new TypeReference<List<String>>() {});
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.warn("Failed to parse integration subscriptions: {}", json, e);
             return null;
         }

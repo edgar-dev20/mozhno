@@ -1,20 +1,16 @@
 package dev.mozhno.contexts;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * Request body for creating or updating a context value.
- */
+@Data
+@NoArgsConstructor
 public class ContextValueRequest {
-    /** The context definition ID. */
+    @NotNull
     private Integer contextDefinitionId;
-    /** Comma-separated list of allowed values. */
-    @Size(max = 10000) private String values;
 
-    public ContextValueRequest() {}
-
-    public Integer getContextDefinitionId() { return contextDefinitionId; }
-    public void setContextDefinitionId(Integer contextDefinitionId) { this.contextDefinitionId = contextDefinitionId; }
-    public String getValues() { return values; }
-    public void setValues(String values) { this.values = values; }
+    @Size(max = 10000)
+    private String values;
 }

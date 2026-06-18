@@ -27,6 +27,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @io.swagger.v3.oas.annotations.tags.Tag(name = "Flags", description = "Feature flag management")
 public class FlagController {
+
+    private static final int DEFAULT_PAGE_SIZE = 50;
+    private static final int MAX_PAGE_SIZE = 200;
+    private static final int ENRICHED_MAX_PAGE_SIZE = 500;
+
     private final FlagService flagService;
     private final FlagAssembler flagAssembler;
     private final SegmentService segmentService;
@@ -39,27 +44,31 @@ public class FlagController {
     private final EnvironmentAssembler environmentAssembler;
 
     @GetMapping
-    @Operation(summary = "Get all flags for a project")
+    @Operation(summary = "Get all flags for a project (paginated)")
     @Timed(value = "flags.list", description = "Time to list flags")
-    public Object getAll(@RequestParam(required = false) Integer environmentId,
-                         @RequestParam(required = false, defaultValue = "false") boolean includeArchived,
-                         @RequestParam(required = false, defaultValue = "0") int page,
-                         @RequestParam(required = false, defaultValue = "50") int size,
-                         @AuthenticationPrincipal UserPrincipal user) {
-        if (page < 0) page = 0;
-        if (size < 1) size = 50;
-        if (size > 200) size = 200;
+    public PageResponse<FlagResponse> getAll(
+            @RequestParam(required = false, defaultValue = "false") boolean includeArchived,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "50") int size,
+            @AuthenticationPrincipal UserPrincipal user) {
+        page = Math.max(page, 0);
+        size = clamp(size, 1, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
 
-        Integer projectId = user.projectId();
-        if (environmentId != null) {
-            List<FlagWithStrategy> flags = flagService.findByProjectIdWithStrategyForEnvironment(projectId, environmentId);
-            return flagAssembler.toResponses(flags);
-        }
-        PageResponse<Flag> pageResult = flagService.findByProjectIdPaginated(projectId, includeArchived, page, size);
+        PageResponse<Flag> pageResult = flagService.findByProjectIdPaginated(user.projectId(), includeArchived, page, size);
         List<FlagResponse> items = pageResult.getItems().stream()
             .map(flagAssembler::toResponse)
             .toList();
         return new PageResponse<>(items, pageResult.getPage(), pageResult.getSize(), pageResult.getTotalItems());
+    }
+
+    @GetMapping("/by-environment")
+    @Operation(summary = "Get all flags for a project, filtered by environment")
+    @Timed(value = "flags.list.byEnv", description = "Time to list flags by environment")
+    public List<FlagResponse> getByEnvironment(
+            @RequestParam Integer environmentId,
+            @AuthenticationPrincipal UserPrincipal user) {
+        List<FlagWithStrategy> flags = flagService.findByProjectIdWithStrategyForEnvironment(user.projectId(), environmentId);
+        return flagAssembler.toResponses(flags);
     }
 
     @GetMapping("/{id}")
@@ -72,25 +81,28 @@ public class FlagController {
 
     @GetMapping("/enriched")
     @Operation(summary = "Get all flags with environments, segments, tags, contexts in a single request")
-    public Object getAllEnriched(@RequestParam(required = false, defaultValue = "0") int page,
-                                  @RequestParam(required = false, defaultValue = "200") int size,
-                                  @AuthenticationPrincipal UserPrincipal user) {
-        if (page < 0) page = 0;
-        if (size < 1) size = 200;
-        if (size > 500) size = 500;
+    public PaginatedDashboardResponse getAllEnriched(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "200") int size,
+            @AuthenticationPrincipal UserPrincipal user) {
+        page = Math.max(page, 0);
+        size = clamp(size, 1, DEFAULT_PAGE_SIZE, ENRICHED_MAX_PAGE_SIZE);
 
         Integer projectId = user.projectId();
         PageResponse<FlagWithStrategy> pageResult = flagService.findByProjectIdWithAllEnvironmentStrategiesPaginated(projectId, page, size);
         List<Segment> segments = segmentService.findByProjectId(projectId);
         List<Integer> segmentIds = segments.stream().map(Segment::getId).toList();
-        return new PaginatedDashboardResponse(
-            flagAssembler.toEnrichedResponses(pageResult.getItems()),
-            pageResult.getPage(), pageResult.getSize(), pageResult.getTotalItems(), pageResult.getTotalPages(),
-            segmentAssembler.toResponseList(segments, segmentService.getContextsForSegments(segmentIds)),
-            tagAssembler.toResponseList(tagService.findByProjectId(projectId)),
-            contextAssembler.toDefinitionResponseList(contextService.findDefinitionsByProjectId(projectId)),
-            environmentAssembler.toResponseList(environmentService.findByProjectId(projectId))
-        );
+        return PaginatedDashboardResponse.builder()
+            .flags(flagAssembler.toEnrichedResponses(pageResult.getItems()))
+            .page(pageResult.getPage())
+            .size(pageResult.getSize())
+            .totalItems(pageResult.getTotalItems())
+            .totalPages(pageResult.getTotalPages())
+            .segments(segmentAssembler.toResponseList(segments, segmentService.getContextsForSegments(segmentIds)))
+            .tags(tagAssembler.toResponseList(tagService.findByProjectId(projectId)))
+            .contexts(contextAssembler.toDefinitionResponseList(contextService.findDefinitionsByProjectId(projectId)))
+            .environments(environmentAssembler.toResponseList(environmentService.findByProjectId(projectId)))
+            .build();
     }
 
     @PostMapping
@@ -142,5 +154,11 @@ public class FlagController {
                                   @AuthenticationPrincipal UserPrincipal user) {
         Flag flag = flagService.unarchive(id, user.projectId());
         return flagAssembler.toResponse(flag);
+    }
+
+    private static int clamp(int value, int min, int defaultValue, int max) {
+        if (value < min) return defaultValue;
+        if (value > max) return max;
+        return value;
     }
 }

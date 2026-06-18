@@ -8,6 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import dev.mozhno.auth.UserPrincipal;
+import dev.mozhno.exception.BadRequestException;
 
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,8 @@ public class EnvironmentController {
     @PreAuthorize("hasRole('ADMIN')")
     public EnvironmentResponse create(@RequestBody Map<String, String> body,
                                       @AuthenticationPrincipal UserPrincipal user) {
-        Environment env = environmentService.create(user.projectId(), body.get("name"));
+        String name = requireName(body);
+        Environment env = environmentService.create(user.projectId(), name);
         return environmentAssembler.toResponse(env);
     }
 
@@ -66,7 +68,16 @@ public class EnvironmentController {
     public EnvironmentResponse update(@PathVariable Integer id,
                                       @RequestBody Map<String, String> body,
                                       @AuthenticationPrincipal UserPrincipal user) {
-        Environment env = environmentService.update(id, body.get("name"), user.projectId());
+        String name = requireName(body);
+        Environment env = environmentService.update(id, name, user.projectId());
         return environmentAssembler.toResponse(env);
+    }
+
+    private static String requireName(Map<String, String> body) {
+        String name = body.get("name");
+        if (name == null || name.isBlank()) {
+            throw new BadRequestException("Environment name is required");
+        }
+        return name;
     }
 }

@@ -12,7 +12,6 @@ import java.util.List;
  * Includes a scheduled job to purge events older than the configured retention period.
  */
 @Service
-@Transactional
 public class AuditService {
     private final AuditEventRepository repository;
     private final AuditProperties auditProperties;
@@ -30,6 +29,7 @@ public class AuditService {
      * @param projectId the project ID
      * @return list of audit events
      */
+    @Transactional(readOnly = true)
     public List<AuditEvent> findByProjectId(Integer projectId) {
         return repository.findByProjectId(projectId);
     }
@@ -44,8 +44,9 @@ public class AuditService {
      * @param dateTo    optional end date (ISO: yyyy-MM-dd)
      * @return list of audit events for the requested page
      */
+    @Transactional(readOnly = true)
     public List<AuditEvent> findByProjectId(Integer projectId, int page, int size, String dateFrom, String dateTo) {
-        int offset = page * size;
+        int offset = Math.multiplyExact(page, size);
         return repository.findByProjectId(projectId, size, offset, dateFrom, dateTo);
     }
 
@@ -64,6 +65,7 @@ public class AuditService {
      * @param ipAddress the IP address of the user, may be null
      * @return the recorded audit event
      */
+    @Transactional
     public AuditEvent log(Integer projectId, Integer userId, String userName, String userEmail,
                           String action, String resourceType, Integer resourceId,
                           String resourceName, String details, String ipAddress) {
@@ -86,6 +88,7 @@ public class AuditService {
      * Runs daily at 3:00 AM.
      */
     @Scheduled(cron = "0 0 3 * * ?")
+    @Transactional
     public void purgeOldEvents() {
         int retentionDays = quotaSpi.getAuditRetentionDays(null);
         int deleted = repository.deleteOlderThan(retentionDays);

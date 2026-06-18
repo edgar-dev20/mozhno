@@ -9,9 +9,11 @@ import {
 } from '@/api/modules/types';
 
 export const flagsApi = {
-  list: (envId?: number, includeArchived?: boolean) =>
+  list: (includeArchived?: boolean) =>
+    request<FlagResponse[]>(`/flags${includeArchived ? '?includeArchived=true' : ''}`),
+  listByEnvironment: (envId: number, includeArchived?: boolean) =>
     request<FlagResponse[]>(
-      `/flags${envId ? `?environmentId=${envId}` : includeArchived ? '?includeArchived=true' : ''}${envId && includeArchived ? '&includeArchived=true' : ''}`,
+      `/flags/by-environment?environmentId=${envId}${includeArchived ? '&includeArchived=true' : ''}`,
     ),
   get: (id: number) => request<FlagResponse>(`/flags/${id}`),
   create: (data: FlagRequest) =>

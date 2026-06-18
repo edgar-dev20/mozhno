@@ -9,6 +9,9 @@ public final class QuotaValidator {
     }
 
     public static void check(QuotaSpi.QuotaResult result) {
+        if (result == null) {
+            throw new QuotaExceededException(0, 0, "unknown");
+        }
         if (result instanceof QuotaSpi.Blocked blocked) {
             throw new QuotaExceededException(blocked.current(), blocked.limit(), blocked.planName());
         }
