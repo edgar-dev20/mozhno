@@ -41,9 +41,14 @@ public class FlagAssembler {
     }
 
     public FlagResponse toResponse(Flag flag, FlagStrategy strategy) {
+        Set<Integer> userIds = new HashSet<>();
+        if (flag.getCreatorId() != null) userIds.add(flag.getCreatorId());
+        if (flag.getArchivedBy() != null) userIds.add(flag.getArchivedBy());
+        Map<Integer, String> userNames = resolveUserNames(userIds);
+
         List<FlagResponse.TagValueResponse> tags = resolveTags(flagTagValueRepository.findByFlagId(flag.getId()));
-        String createdBy = resolveUserName(flag.getCreatorId());
-        String archivedBy = resolveUserName(flag.getArchivedBy());
+        String createdBy = userNames.get(flag.getCreatorId());
+        String archivedBy = userNames.get(flag.getArchivedBy());
 
         return FlagResponse.builder()
             .id(flag.getId())
@@ -180,10 +185,7 @@ public class FlagAssembler {
 
     private List<FlagResponse.TagValueResponse> resolveTags(List<FlagTagValue> tagValues) {
         List<Integer> tagIds = tagValues.stream().map(FlagTagValue::getTagId).distinct().toList();
-        Map<Integer, Tag> tagMap = tagIds.isEmpty()
-            ? Collections.emptyMap()
-            : tagRepository.findAllByIds(tagIds).stream()
-                .collect(Collectors.toMap(Tag::getId, Function.identity()));
+        Map<Integer, Tag> tagMap = loadTagMap(tagIds);
 
         return tagValues.stream().map(ftv -> {
             Tag tag = tagMap.get(ftv.getTagId());
@@ -198,10 +200,7 @@ public class FlagAssembler {
 
     private List<EnrichedFlagResponse.TagValueResponse> resolveEnrichedTags(List<FlagTagValue> tagValues) {
         List<Integer> tagIds = tagValues.stream().map(FlagTagValue::getTagId).distinct().toList();
-        Map<Integer, Tag> tagMap = tagIds.isEmpty()
-            ? Collections.emptyMap()
-            : tagRepository.findAllByIds(tagIds).stream()
-                .collect(Collectors.toMap(Tag::getId, Function.identity()));
+        Map<Integer, Tag> tagMap = loadTagMap(tagIds);
 
         return tagValues.stream().map(ftv -> {
             Tag tag = tagMap.get(ftv.getTagId());
@@ -212,6 +211,12 @@ public class FlagAssembler {
                 .value(ftv.getTagValue())
                 .build();
         }).toList();
+    }
+
+    private Map<Integer, Tag> loadTagMap(List<Integer> tagIds) {
+        if (tagIds.isEmpty()) return Collections.emptyMap();
+        return tagRepository.findAllByIds(tagIds).stream()
+            .collect(Collectors.toMap(Tag::getId, Function.identity()));
     }
 
     private Map<Integer, String> resolveUserNames(Set<Integer> userIds) {
@@ -227,9 +232,6 @@ public class FlagAssembler {
 
     private String resolveUserName(Integer userId) {
         if (userId == null) return null;
-        User user = userRepository.findById(userId);
-        if (user == null) return null;
-        String name = user.getName() != null ? user.getName() : user.getEmail();
-        return name + " (" + user.getEmail() + ")";
+        return resolveUserNames(Set.of(userId)).get(userId);
     }
 }

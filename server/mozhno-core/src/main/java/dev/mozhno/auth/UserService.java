@@ -22,8 +22,10 @@ import java.util.List;
  * are published on create, update, and delete for audit and integration purposes.</p>
  */
 @Service
-@Transactional
 public class UserService {
+
+    private static final String DEFAULT_STATUS = "active";
+    private static final String DEFAULT_LOCALE = "ru";
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final DomainEventPublisher events;
@@ -42,6 +44,7 @@ public class UserService {
      *
      * @return list of user DTOs
      */
+    @Transactional(readOnly = true)
     public List<UserDto> findAll() {
         return userRepository.findAll().stream()
             .map(this::toDto)
@@ -55,6 +58,7 @@ public class UserService {
      * @return user DTO
      * @throws RuntimeException if not found
      */
+    @Transactional(readOnly = true)
     public UserDto findById(Integer id) {
         User user = userRepository.findById(id);
         if (user == null) {
@@ -70,6 +74,7 @@ public class UserService {
      * @return created user DTO
      * @throws RuntimeException if email exists or quota is exceeded
      */
+    @Transactional
     public UserDto create(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new ConflictException("User with email " + request.email() + " already exists");
@@ -87,8 +92,8 @@ public class UserService {
         user.setPasswordHash(passwordEncoder.encode(request.password()));
         user.setName(request.name());
         user.setRole(request.role());
-        user.setStatus("active");
-        user.setLocale(request.locale() != null ? request.locale() : "ru");
+        user.setStatus(DEFAULT_STATUS);
+        user.setLocale(request.locale() != null ? request.locale() : DEFAULT_LOCALE);
         User saved = userRepository.save(user);
         events.publish(DomainEvent.of(null, "user.created", "user",
             saved.getId(), saved.getEmail(), "User created with role: " + saved.getRole()));
@@ -103,6 +108,7 @@ public class UserService {
      * @return updated user DTO
      * @throws RuntimeException if user not found or new email conflicts
      */
+    @Transactional
     public UserDto update(Integer id, UserUpdateRequest request) {
         User user = userRepository.findById(id);
         if (user == null) {
@@ -112,7 +118,10 @@ public class UserService {
             throw new ConflictException("User with email " + request.email() + " already exists");
         }
         if (request.email() != null) user.setEmail(request.email());
-        if (request.password() != null) user.setPasswordHash(passwordEncoder.encode(request.password()));
+        if (request.password() != null) {
+            PasswordValidator.validate(request.password(), user.getEmail());
+            user.setPasswordHash(passwordEncoder.encode(request.password()));
+        }
         if (request.name() != null) user.setName(request.name());
         if (request.role() != null) user.setRole(request.role());
         if (request.status() != null) user.setStatus(request.status());
@@ -128,6 +137,7 @@ public class UserService {
      *
      * @param id user id
      */
+    @Transactional
     public void delete(Integer id) {
         User user = userRepository.findById(id);
         String email = user != null ? user.getEmail() : String.valueOf(id);
@@ -143,6 +153,7 @@ public class UserService {
      * @param file the uploaded image file
      * @return the updated user DTO
      */
+    @Transactional
     public UserDto uploadAvatar(Integer id, MultipartFile file) {
         User user = userRepository.findById(id);
         if (user == null) {
@@ -152,9 +163,9 @@ public class UserService {
             byte[] bytes = file.getBytes();
             userRepository.updateAvatarData(id, bytes);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to read avatar file", e);
+            throw new dev.mozhno.exception.BadRequestException("Failed to read avatar file: " + e.getMessage());
         }
-        String ext = getExtension(file.getOriginalFilename());
+        String ext = dev.mozhno.util.FileUtils.getExtension(file.getOriginalFilename());
         user.setAvatar("blob" + ext);
         User saved = userRepository.save(user);
         events.publish(DomainEvent.of(null, "user.avatar_updated", "user",
@@ -168,18 +179,13 @@ public class UserService {
      * @param id the user ID
      * @return avatar bytes, or null if no avatar is set
      */
+    @Transactional(readOnly = true)
     public byte[] getAvatarData(Integer id) {
         User user = userRepository.findById(id);
         if (user == null || user.getAvatar() == null || user.getAvatar().isEmpty()) {
             return null;
         }
         return userRepository.getAvatarData(id);
-    }
-
-    private static String getExtension(String filename) {
-        if (filename == null) return "";
-        int dot = filename.lastIndexOf('.');
-        return dot >= 0 ? filename.substring(dot) : "";
     }
 
     private UserDto toDto(User user) {

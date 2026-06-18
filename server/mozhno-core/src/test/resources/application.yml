@@ -33,5 +33,6 @@ jwt:
   access-token-ttl-minutes: 15
 
 app:
+  base-url: "http://localhost:8080"
   rate-limit:
     enabled: false

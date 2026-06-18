@@ -1,10 +1,13 @@
 package dev.mozhno.segments;
 
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collections;
@@ -150,6 +153,28 @@ public class SegmentContextRepository {
         }
         ctx.setOperator(operator);
         return ctx;
+    }
+
+    public void saveBatch(Integer segmentId, List<SegmentRequest.ContextEntry> entries) {
+        String sql = "INSERT INTO segment_contexts (segment_id, context_definition_id, operator, context_values, created_at) " +
+                     "VALUES (?, ?, ?, ?, ?) " +
+                     "ON CONFLICT (segment_id, context_definition_id, operator) DO UPDATE SET context_values = EXCLUDED.context_values";
+        jdbc.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                SegmentRequest.ContextEntry entry = entries.get(i);
+                ps.setInt(1, segmentId);
+                ps.setInt(2, entry.getContextDefinitionId());
+                ps.setString(3, entry.getOperator() != null ? entry.getOperator() : "in");
+                ps.setString(4, entry.getContextValues());
+                ps.setTimestamp(5, Timestamp.from(Instant.now()));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return entries.size();
+            }
+        });
     }
 
 

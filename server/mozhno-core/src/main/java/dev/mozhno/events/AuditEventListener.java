@@ -1,11 +1,8 @@
 package dev.mozhno.events;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import dev.mozhno.spi.AuditSpi;
 
 @Component
@@ -31,18 +28,6 @@ public class AuditEventListener {
     }
 
     private String resolveIp() {
-        try {
-            var attrs = RequestContextHolder.getRequestAttributes();
-            if (attrs instanceof ServletRequestAttributes servletAttrs) {
-                HttpServletRequest request = servletAttrs.getRequest();
-                String forwardedFor = request.getHeader("X-Forwarded-For");
-                if (forwardedFor != null && !forwardedFor.isBlank()) {
-                    return forwardedFor.split(",")[0].trim();
-                }
-                return request.getRemoteAddr();
-            }
-        } catch (IllegalStateException ignored) {
-        }
-        return null;
+        return dev.mozhno.util.HttpUtils.getClientIpFromCurrentRequest();
     }
 }

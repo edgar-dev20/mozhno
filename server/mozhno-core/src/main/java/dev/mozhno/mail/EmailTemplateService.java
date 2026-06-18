@@ -59,7 +59,7 @@ public class EmailTemplateService {
         try {
             return new ClassPathResource(path).getContentAsString(StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load email template: " + path, e);
+            throw new dev.mozhno.exception.BadRequestException("Failed to load email template: " + path);
         }
     }
 }

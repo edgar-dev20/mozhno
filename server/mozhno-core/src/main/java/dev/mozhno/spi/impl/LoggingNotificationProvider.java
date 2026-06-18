@@ -30,6 +30,10 @@ public class LoggingNotificationProvider implements NotificationSpi {
      */
     @Override
     public void send(NotificationEvent event) {
-        log.info("Notification [{}] to {}: {} — {}", event.type(), event.recipient(), event.subject(), event.body());
+        String maskedBody = event.body() != null && event.body().length() > 200
+            ? event.body().substring(0, 200) + "..."
+            : event.body();
+        log.info("Notification [{}] to {}: {}", event.type(), event.recipient(), event.subject());
+        log.debug("Notification body: {}", maskedBody);
     }
 }

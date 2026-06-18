@@ -7,6 +7,7 @@ import dev.mozhno.segments.SegmentContextRepository.SegmentContextWithName;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -17,6 +18,17 @@ import static dev.mozhno.client.HashUtils.compareSemver;
 import static dev.mozhno.client.HashUtils.murmurHash32;
 
 public class FeatureFlagEvaluator {
+
+    public static final String OP_IN = "in";
+    public static final String OP_NOT_IN = "not_in";
+    public static final String OP_EQ = "eq";
+    public static final String OP_NE = "ne";
+    public static final String OP_GT = "gt";
+    public static final String OP_GTE = "gte";
+    public static final String OP_LT = "lt";
+    public static final String OP_LTE = "lte";
+    public static final String OP_CONTAINS = "contains";
+    public static final String DEFAULT_OP = OP_IN;
 
     public boolean evaluateFlag(Flag flag, FlagStrategy s, Map<String, String> context,
                                  Map<Integer, List<SegmentContextWithName>> segmentContextsMap,
@@ -31,7 +43,7 @@ public class FeatureFlagEvaluator {
                 for (Integer segId : s.getSegmentIds()) {
                     List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(segId, Collections.emptyList());
                     for (SegmentContextWithName sc : segContexts) {
-                        String op = sc.getOperator() != null ? sc.getOperator() : "in";
+                        String op = sc.getOperator() != null ? sc.getOperator() : DEFAULT_OP;
                         String ctxType = sc.getContextType() != null ? sc.getContextType() : "string";
                         String key = sc.getContextDefinitionName() + "|" + op;
                         evalConstraints.computeIfAbsent(key, k -> new ConstraintEval(sc.getContextDefinitionName(), op, ctxType))
@@ -47,7 +59,7 @@ public class FeatureFlagEvaluator {
                     ContextDefinition cd = contextDefMap.getOrDefault(sc.cd(), null);
                     String fieldName = cd != null ? cd.getContextKey() : String.valueOf(sc.cd());
                     String ctxType = cd != null && cd.getContextType() != null ? cd.getContextType() : "string";
-                    String op = sc.op() != null ? sc.op() : "in";
+                    String op = sc.op() != null ? sc.op() : DEFAULT_OP;
                     String key = fieldName + "|" + op;
                     evalConstraints.computeIfAbsent(key, k -> new ConstraintEval(fieldName, op, ctxType))
                             .values.add(sc.val());
@@ -59,9 +71,9 @@ public class FeatureFlagEvaluator {
             String contextValue = context.get(ce.fieldName);
             if (contextValue == null) return false;
 
-            if ("in".equals(ce.operator)) {
+            if (OP_IN.equals(ce.operator)) {
                 if (!ce.values.contains(contextValue)) return false;
-            } else if ("not_in".equals(ce.operator)) {
+            } else if (OP_NOT_IN.equals(ce.operator)) {
                 if (ce.values.contains(contextValue)) return false;
             } else {
                 boolean anyMatch = false;
@@ -101,33 +113,33 @@ public class FeatureFlagEvaluator {
 
     static boolean evaluateConstraintOp(String operator, String contextType, String contextValue, String checkValue) {
         switch (operator) {
-            case "in":
+            case OP_IN:
                 return checkValue.equals(contextValue);
-            case "not_in":
+            case OP_NOT_IN:
                 return !checkValue.equals(contextValue);
-            case "eq":
+            case OP_EQ:
                 if ("number".equals(contextType)) {
                     try {
                         return Double.parseDouble(contextValue) == Double.parseDouble(checkValue);
                     } catch (NumberFormatException e) { return false; }
                 }
                 return contextValue.equals(checkValue);
-            case "ne":
+            case OP_NE:
                 if ("number".equals(contextType)) {
                     try {
                         return Double.parseDouble(contextValue) != Double.parseDouble(checkValue);
                     } catch (NumberFormatException e) { return false; }
                 }
                 return !contextValue.equals(checkValue);
-            case "gt":
+            case OP_GT:
                 return compareValues(contextType, contextValue, checkValue) > 0;
-            case "gte":
+            case OP_GTE:
                 return compareValues(contextType, contextValue, checkValue) >= 0;
-            case "lt":
+            case OP_LT:
                 return compareValues(contextType, contextValue, checkValue) < 0;
-            case "lte":
+            case OP_LTE:
                 return compareValues(contextType, contextValue, checkValue) <= 0;
-            case "contains":
+            case OP_CONTAINS:
                 return contextValue.contains(checkValue);
             default:
                 return false;
@@ -147,7 +159,7 @@ public class FeatureFlagEvaluator {
                 long ta = Instant.parse(a).toEpochMilli();
                 long tb = Instant.parse(b).toEpochMilli();
                 return Long.compare(ta, tb);
-            } catch (Exception e) { return a.compareTo(b); }
+            } catch (DateTimeParseException e) { return 0; }
         }
         if ("semver".equals(contextType)) {
             return compareSemver(a, b);

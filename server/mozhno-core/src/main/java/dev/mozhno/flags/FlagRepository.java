@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * JDBC-based repository for {@link Flag} entities.
@@ -135,7 +137,7 @@ public class FlagRepository {
                    s.id as strategy_id, s.environment_id as strategy_env_id, s.enabled as strategy_enabled, s.percentage,
                    s.context_definition_id, s.context_values_json as context_values, s.last_used_at as strategy_last_used_at,
                    cd.name as context_name, e.name as environment_name
-            FROM (SELECT * FROM flags WHERE project_id = ? ORDER BY id LIMIT ? OFFSET ?) f
+             FROM (SELECT id, project_id, name, flag_key, description, flag_type, created_at, creator_id, archived_by, archived_at, enabled, archived FROM flags WHERE project_id = ? ORDER BY id LIMIT ? OFFSET ?) f
             LEFT JOIN flag_strategies s ON f.id = s.flag_id
             LEFT JOIN context_definitions cd ON cd.id = s.context_definition_id
             LEFT JOIN environments e ON e.id = s.environment_id
@@ -263,6 +265,18 @@ public class FlagRepository {
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }
+    }
+
+    public List<Flag> findByProjectIdAndKeys(Integer projectId, Set<String> keys) {
+        if (keys == null || keys.isEmpty()) return List.of();
+        String placeholders = keys.stream().map(k -> "?").collect(java.util.stream.Collectors.joining(","));
+        Object[] params = new Object[keys.size() + 1];
+        params[0] = projectId;
+        int i = 1;
+        for (String key : keys) params[i++] = key;
+        return jdbc.query(
+            "SELECT id, project_id, name, flag_key, description, flag_type, created_at, creator_id, archived_by, archived_at, enabled, archived FROM flags WHERE project_id = ? AND flag_key IN (" + placeholders + ")",
+            ROW_MAPPER, params);
     }
 
     /**

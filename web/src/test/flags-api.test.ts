@@ -23,18 +23,18 @@ describe('flagsApi', () => {
   });
 
   it('list with envId', async () => {
-    await flagsApi.list(1);
-    expect(requestSpy).toHaveBeenCalledWith('/flags?environmentId=1');
+    await flagsApi.listByEnvironment(1);
+    expect(requestSpy).toHaveBeenCalledWith('/flags/by-environment?environmentId=1');
   });
 
   it('list with includeArchived', async () => {
-    await flagsApi.list(undefined, true);
+    await flagsApi.list(true);
     expect(requestSpy).toHaveBeenCalledWith('/flags?includeArchived=true');
   });
 
   it('list with both envId and includeArchived', async () => {
-    await flagsApi.list(1, true);
-    expect(requestSpy).toHaveBeenCalledWith('/flags?environmentId=1&includeArchived=true');
+    await flagsApi.listByEnvironment(1, true);
+    expect(requestSpy).toHaveBeenCalledWith('/flags/by-environment?environmentId=1&includeArchived=true');
   });
 
   it('get by id', async () => {

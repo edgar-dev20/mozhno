@@ -2,6 +2,7 @@ package dev.mozhno.integrations;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,7 +43,7 @@ public class IntegrationController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create an integration (admin only)")
     @PreAuthorize("hasRole('ADMIN')")
-    public IntegrationResponse create(@RequestBody IntegrationRequest request,
+    public IntegrationResponse create(@Valid @RequestBody IntegrationRequest request,
                                       @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(user.projectId());
         Integration integration = integrationService.create(request);
@@ -53,8 +54,9 @@ public class IntegrationController {
     @Operation(summary = "Update an integration (admin only)")
     @PreAuthorize("hasRole('ADMIN')")
     public IntegrationResponse update(@PathVariable Integer id,
-                                      @RequestBody IntegrationRequest request,
+                                      @Valid @RequestBody IntegrationRequest request,
                                       @AuthenticationPrincipal UserPrincipal user) {
+        request.setProjectId(user.projectId());
         Integration integration = integrationService.update(id, request, user.projectId());
         return integrationAssembler.toResponse(integration);
     }

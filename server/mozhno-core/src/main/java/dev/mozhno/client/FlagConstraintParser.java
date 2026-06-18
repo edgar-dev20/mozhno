@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.io.IOException;
 
 public final class FlagConstraintParser {
 
@@ -40,8 +41,11 @@ public final class FlagConstraintParser {
                 result.add(new StrategyConstraint(cd, op, val));
             }
             return result;
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.warn("Failed to parse strategy constraints JSON: {}", json, e);
+            return Collections.emptyList();
+        } catch (RuntimeException e) {
+            log.error("Unexpected error parsing strategy constraints JSON: {}", json, e);
             return Collections.emptyList();
         }
     }

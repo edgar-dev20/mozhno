@@ -2,6 +2,7 @@ package dev.mozhno.settings;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,7 +27,7 @@ public class SettingsController {
     @PutMapping
     @Operation(summary = "Update project settings (admin only)")
     @PreAuthorize("hasRole('ADMIN')")
-    public ProjectSettingsResponse update(@RequestBody ProjectSettingsUpdateRequest request,
+    public ProjectSettingsResponse update(@Valid @RequestBody ProjectSettingsUpdateRequest request,
                                           @AuthenticationPrincipal UserPrincipal user) {
         ProjectSettings settings = settingsService.update(user.projectId(), request);
         return settingsAssembler.toResponse(settings);

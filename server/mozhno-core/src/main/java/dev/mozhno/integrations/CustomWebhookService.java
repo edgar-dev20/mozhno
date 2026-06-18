@@ -98,7 +98,7 @@ public class CustomWebhookService {
             Thread.currentThread().interrupt();
             log.error("Webhook {} dispatch interrupted", integration.getId());
             updateStatus(integration, "Interrupted");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("Unexpected error dispatching webhook {}: {}", integration.getId(), e.getMessage(), e);
             updateStatus(integration, e.getClass().getSimpleName() + ": " + truncate(e.getMessage()));
         }
@@ -153,7 +153,7 @@ public class CustomWebhookService {
         }
         try {
             return objectMapper.readValue(configJson, new TypeReference<Map<String, Object>>() {});
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.warn("Failed to parse integration config JSON: {}", configJson, e);
             return Map.of();
         }

@@ -77,7 +77,7 @@ class SegmentServiceTest {
             s.setId(1);
             return s;
         });
-        when(segmentContextRepository.save(any(SegmentContext.class))).thenAnswer(inv -> inv.getArgument(0));
+        doNothing().when(segmentContextRepository).saveBatch(anyInt(), anyList());
 
         SegmentRequest req = new SegmentRequest();
         req.setProjectId(1);
@@ -92,7 +92,7 @@ class SegmentServiceTest {
         Segment result = segmentService.create(req);
         assertNotNull(result);
         assertEquals("Power Users", result.getName());
-        verify(segmentContextRepository).save(any(SegmentContext.class));
+        verify(segmentContextRepository).saveBatch(eq(1), anyList());
     }
 
     @Test

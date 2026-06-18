@@ -92,10 +92,16 @@ public class SecurityConfig {
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((request, response, authException) ->
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication required"))
-                .accessDeniedHandler((request, response, accessDeniedException) ->
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied"))
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Authentication required\",\"code\":\"UNAUTHORIZED\"}");
+                })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Access denied\",\"code\":\"FORBIDDEN\"}");
+                })
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.GET, "/api/client/features").hasRole("SERVER")

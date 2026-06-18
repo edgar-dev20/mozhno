@@ -1,14 +1,17 @@
 package dev.mozhno.auth;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
-import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.mail.EmailTemplateService;
 import dev.mozhno.spi.NotificationSpi;
+import dev.mozhno.exception.NotFoundException;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -24,21 +27,22 @@ public class PasswordResetService {
     private static final Map<String, String> RU_RESET_SUBJECT = Map.of("ru", "Сброс пароля Mozhno", "en", "Mozhno password reset");
     private static final Map<String, String> RU_ADMIN_RESET_SUBJECT = Map.of("ru", "Сброс пароля Mozhno", "en", "Mozhno password reset");
 
-    private final Map<String, Instant> lastResetSent = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Cache<String, Instant> lastResetSent = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofMinutes(RESET_COOLDOWN_MINUTES + 1))
+        .maximumSize(10_000)
+        .build();
 
-    private boolean isInCooldown(String email) {
-        Instant lastSent = lastResetSent.get(email);
-        if (lastSent == null) return false;
-        if (lastSent.plus(RESET_COOLDOWN_MINUTES, ChronoUnit.MINUTES).isAfter(Instant.now())) {
+    private boolean tryAcquireCooldown(String email) {
+        Instant now = Instant.now();
+        Instant previous = lastResetSent.asMap().putIfAbsent(email, now);
+        if (previous == null) {
             return true;
         }
-        lastResetSent.remove(email);
-        return false;
-    }
-
-    private void cleanupCooldowns() {
-        Instant cutoff = Instant.now().minus(RESET_COOLDOWN_MINUTES + 1, ChronoUnit.MINUTES);
-        lastResetSent.entrySet().removeIf(e -> e.getValue().isBefore(cutoff));
+        if (previous.plus(RESET_COOLDOWN_MINUTES, ChronoUnit.MINUTES).isAfter(now)) {
+            return false;
+        }
+        lastResetSent.put(email, now);
+        return true;
     }
 
     private final EmailTemplateService emailTemplateService;
@@ -68,6 +72,7 @@ public class PasswordResetService {
         this.baseUrl = baseUrl;
     }
 
+    @Transactional
     public boolean sendResetEmail(String email, String locale) {
         String effectiveLocale = locale != null ? locale : "ru";
 
@@ -76,11 +81,9 @@ public class PasswordResetService {
             return false;
         }
 
-        if (isInCooldown(email)) {
+        if (!tryAcquireCooldown(email)) {
             return false;
         }
-        cleanupCooldowns();
-        lastResetSent.put(email, Instant.now());
 
         tokenRepository.markAllUsedForUser(user.getId());
 
@@ -105,10 +108,11 @@ public class PasswordResetService {
         return true;
     }
 
+    @Transactional
     public void sendAdminResetEmail(Integer userId) {
         User user = userRepository.findById(userId);
         if (user == null || "suspended".equals(user.getStatus())) {
-            throw new dev.mozhno.exception.NotFoundException("User", userId);
+            throw new NotFoundException("User", userId);
         }
 
         String locale = user.getLocale() != null ? user.getLocale() : "ru";
@@ -132,7 +136,7 @@ public class PasswordResetService {
             "EMAIL", user.getEmail(), subject, html, null));
 
         events.publish(DomainEvent.of(null, "password_reset.admin_requested", "user",
-            userId, user.getEmail(), "Admin requested password reset"));
+            userId, user.getEmail(), "Admin password reset email sent"));
     }
 
     @Transactional
@@ -144,10 +148,10 @@ public class PasswordResetService {
             throw new InvalidTokenException("Invalid or expired reset token");
         }
         if (token.getUsedAt() != null) {
-            throw new InvalidTokenException("This reset link has already been used");
+            throw new InvalidTokenException("Token has already been used");
         }
-        if (token.getExpiresAt().isBefore(Instant.now())) {
-            throw new InvalidTokenException("Reset link has expired");
+        if (token.getExpiresAt() != null && token.getExpiresAt().isBefore(Instant.now())) {
+            throw new InvalidTokenException("Reset token has expired");
         }
 
         PasswordValidator.validate(newPassword, null);
@@ -156,7 +160,6 @@ public class PasswordResetService {
         if (user == null) {
             throw new InvalidTokenException("User not found");
         }
-
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setStatus("active");
         userRepository.save(user);

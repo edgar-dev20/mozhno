@@ -19,6 +19,8 @@ public class IntegrationRepository {
         this.jdbc = jdbc;
     }
 
+    private static final String COLUMNS = "id, project_id, type, name, enabled, config_json, event_subscriptions_json, last_error, created_at, updated_at";
+
     private static final RowMapper<Integration> ROW_MAPPER = (rs, _) -> {
         Integration i = new Integration();
         i.setId(rs.getInt("id"));
@@ -41,7 +43,7 @@ public class IntegrationRepository {
      * @return list of integrations
      */
     public List<Integration> findByProjectId(Integer projectId) {
-        return jdbc.query("SELECT * FROM integrations WHERE project_id = ? ORDER BY created_at DESC",
+        return jdbc.query("SELECT " + COLUMNS + " FROM integrations WHERE project_id = ? ORDER BY created_at DESC",
             ROW_MAPPER, projectId);
     }
 
@@ -53,7 +55,7 @@ public class IntegrationRepository {
      */
     public Integration findById(Integer id) {
         try {
-            return jdbc.queryForObject("SELECT * FROM integrations WHERE id = ?", ROW_MAPPER, id);
+            return jdbc.queryForObject("SELECT " + COLUMNS + " FROM integrations WHERE id = ?", ROW_MAPPER, id);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }
@@ -61,7 +63,7 @@ public class IntegrationRepository {
 
     public Integration findByIdAndProjectId(Integer id, Integer projectId) {
         try {
-            return jdbc.queryForObject("SELECT * FROM integrations WHERE id = ? AND project_id = ?", ROW_MAPPER, id, projectId);
+            return jdbc.queryForObject("SELECT " + COLUMNS + " FROM integrations WHERE id = ? AND project_id = ?", ROW_MAPPER, id, projectId);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }

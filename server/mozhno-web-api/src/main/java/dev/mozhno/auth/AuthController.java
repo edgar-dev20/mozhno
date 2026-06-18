@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import dev.mozhno.exception.InvalidCredentialsException;
+import org.slf4j.MDC;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -38,13 +40,13 @@ public class AuthController {
     }
 
     @PostMapping("/select-project")
-    public LoginResponse selectProject(@RequestBody SelectProjectRequest request,
+    public LoginResponse selectProject(@Valid @RequestBody SelectProjectRequest request,
                                         @AuthenticationPrincipal UserPrincipal user) {
         return authService.selectProject(user.email(), request.projectId());
     }
 
     @PostMapping("/refresh")
-    public LoginResponse refresh(HttpServletRequest servletRequest, @RequestBody RefreshTokenRequest request) {
+    public LoginResponse refresh(HttpServletRequest servletRequest, @Valid @RequestBody RefreshTokenRequest request) {
         Integer projectId = extractProjectIdFromBearer(servletRequest);
         return authService.refresh(request.refreshToken(), projectId);
     }
@@ -70,10 +72,18 @@ public class AuthController {
         return authService.getCurrentUser(user.email());
     }
 
+    private static final Map<String, String> FORGOT_PASSWORD_MESSAGES = Map.of(
+        "ru", "Если email существует, ссылка для сброса отправлена",
+        "en", "If the email exists, a reset link has been sent"
+    );
+
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         passwordResetService.sendResetEmail(request.email(), request.locale());
-        return ResponseEntity.ok(Map.of("message", "If the email exists, a reset link has been sent"));
+        String msg = FORGOT_PASSWORD_MESSAGES.getOrDefault(
+            request.locale() != null ? request.locale() : "ru",
+            FORGOT_PASSWORD_MESSAGES.get("en"));
+        return ResponseEntity.ok(Map.of("message", msg));
     }
 
     @PostMapping("/reset-password")
@@ -88,26 +98,33 @@ public class AuthController {
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidCredentials(InvalidCredentialsException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return buildError(HttpStatus.UNAUTHORIZED, ex.getMessage(), "INVALID_CREDENTIALS");
     }
 
     @ExceptionHandler(RefreshTokenService.TokenReuseException.class)
-    public ResponseEntity<Map<String, String>> handleTokenReuse(RefreshTokenService.TokenReuseException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-            .body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, Object>> handleTokenReuse(RefreshTokenService.TokenReuseException ex) {
+        return buildError(HttpStatus.UNAUTHORIZED, ex.getMessage(), "TOKEN_REUSE");
     }
 
     @ExceptionHandler(PasswordResetService.InvalidTokenException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidResetToken(PasswordResetService.InvalidTokenException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, Object>> handleInvalidResetToken(PasswordResetService.InvalidTokenException ex) {
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), "INVALID_RESET_TOKEN");
     }
 
     @ExceptionHandler(UserInviteService.InvalidInviteTokenException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidInviteToken(UserInviteService.InvalidInviteTokenException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(Map.of("error", ex.getMessage()));
+    public ResponseEntity<Map<String, Object>> handleInvalidInviteToken(UserInviteService.InvalidInviteTokenException ex) {
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage(), "INVALID_INVITE_TOKEN");
+    }
+
+    private ResponseEntity<Map<String, Object>> buildError(HttpStatus status, String message, String code) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("error", message);
+        body.put("code", code);
+        String traceId = MDC.get("traceId");
+        if (traceId != null) {
+            body.put("traceId", traceId);
+        }
+        return ResponseEntity.status(status).body(body);
     }
 }

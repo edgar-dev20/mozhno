@@ -2,6 +2,7 @@ package dev.mozhno.client;
 
 import dev.mozhno.contexts.ContextDefinition;
 import dev.mozhno.contexts.ContextDefinitionRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import dev.mozhno.flags.Flag;
 import dev.mozhno.flags.FlagRepository;
@@ -14,6 +15,7 @@ import dev.mozhno.segments.SegmentContextRepository.SegmentContextWithName;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,6 +27,9 @@ import static dev.mozhno.client.FlagConstraintParser.parseStrategyConstraints;
 
 @Service
 public class ClientFlagService {
+
+    private static final FeatureFlagEvaluator evaluator = new FeatureFlagEvaluator();
+
     private final FlagRepository flagRepository;
     private final FlagStrategyRepository flagStrategyRepository;
     private final SegmentContextRepository segmentContextRepository;
@@ -42,6 +47,7 @@ public class ClientFlagService {
         this.flagMetricRepository = flagMetricRepository;
     }
 
+    @Cacheable(value = "clientFlags", key = "#projectId + ':' + #environmentId")
     public List<ClientFlagResponse> getFlagsForProject(Integer projectId, Integer environmentId) {
         List<FlagWithStrategy> flags = flagRepository.findByProjectIdWithStrategyForEnvironment(projectId, environmentId);
 
@@ -124,8 +130,12 @@ public class ClientFlagService {
         }).toList();
     }
 
-    public List<ClientEvaluateResponse.ToggleResult> evaluate(Integer projectId, Integer environmentId, Map<String, String> context, Long clientInstanceId) {
+    public List<ClientEvaluateResponse.ToggleResult> evaluate(Integer projectId, Integer environmentId,
+            Map<String, String> context, Long clientInstanceId, List<String> requestedToggles) {
         List<FlagWithStrategy> flags = flagRepository.findByProjectIdWithStrategyForEnvironment(projectId, environmentId);
+
+        Set<String> requestedSet = requestedToggles != null && !requestedToggles.isEmpty()
+            ? new HashSet<>(requestedToggles) : null;
 
         List<Integer> strategyIds = new ArrayList<>();
         List<Integer> segmentIds = new ArrayList<>();
@@ -161,10 +171,11 @@ public class ClientFlagService {
 
         Map<Integer, ContextDefinition> contextDefMap = contextDefinitionRepository.findByIds(contextDefIds);
 
-        FeatureFlagEvaluator evaluator = new FeatureFlagEvaluator();
-
         List<ClientEvaluateResponse.ToggleResult> results = new ArrayList<>();
         for (FlagWithStrategy fws : flags) {
+            if (requestedSet != null && !requestedSet.contains(fws.flag().getName())) {
+                continue;
+            }
             boolean enabled = evaluator.evaluateFlag(fws.flag(), fws.strategy(), context, segmentContextsMap, contextDefMap);
             flagMetricRepository.recordEvaluation(projectId, fws.flag().getId(), environmentId, enabled, clientInstanceId);
 
@@ -181,8 +192,14 @@ public class ClientFlagService {
 
     public void recordMetrics(Integer projectId, Integer environmentId, ClientMetricsRequest request, Long clientInstanceId) {
         if (request.getEvaluations() == null) return;
+        Set<String> keys = request.getEvaluations().keySet();
+        List<Flag> foundFlags = flagRepository.findByProjectIdAndKeys(projectId, keys);
+        Map<String, Flag> flagByKey = new LinkedHashMap<>();
+        for (Flag flag : foundFlags) {
+            flagByKey.put(flag.getKey(), flag);
+        }
         for (Map.Entry<String, ClientMetricsRequest.EvalCount> entry : request.getEvaluations().entrySet()) {
-            Flag flag = flagRepository.findByProjectIdAndKey(projectId, entry.getKey());
+            Flag flag = flagByKey.get(entry.getKey());
             if (flag != null) {
                 ClientMetricsRequest.EvalCount ec = entry.getValue();
                 int t = (int) Math.min(ec.getTrueCount(), Integer.MAX_VALUE);

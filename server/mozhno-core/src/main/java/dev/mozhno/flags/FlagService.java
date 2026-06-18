@@ -10,8 +10,12 @@ import dev.mozhno.common.PageResponse;
 import dev.mozhno.spi.QuotaSpi;
 import dev.mozhno.tags.Tag;
 import dev.mozhno.tags.TagRepository;
+import dev.mozhno.util.QuotaValidator;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Service for managing feature flags within a project.
@@ -19,6 +23,8 @@ import java.util.List;
  */
 @Service
 public class FlagService {
+
+    private static final int MAX_TAGS_PER_FLAG = 10;
     private final FlagRepository flagRepository;
     private final TagRepository tagRepository;
     private final FlagTagValueRepository flagTagValueRepository;
@@ -116,7 +122,7 @@ public class FlagService {
     @Transactional(readOnly = true)
     public PageResponse<FlagWithStrategy> findByProjectIdWithAllEnvironmentStrategiesPaginated(Integer projectId, int page, int size) {
         long total = flagRepository.countByProjectId(projectId, true);
-        int offset = page * size;
+        int offset = Math.multiplyExact(page, size);
         List<FlagWithStrategy> items = flagRepository.findByProjectIdWithAllEnvironmentStrategiesPaginated(projectId, offset, size);
         return new PageResponse<>(items, page, size, total);
     }
@@ -124,7 +130,7 @@ public class FlagService {
     @Transactional(readOnly = true)
     public PageResponse<Flag> findByProjectIdPaginated(Integer projectId, boolean includeArchived, int page, int size) {
         long total = flagRepository.countByProjectId(projectId, includeArchived);
-        int offset = page * size;
+        int offset = Math.multiplyExact(page, size);
         List<Flag> items = flagRepository.findByProjectIdPaginated(projectId, includeArchived, offset, size);
         return new PageResponse<>(items, page, size, total);
     }
@@ -139,7 +145,7 @@ public class FlagService {
      */
     @Transactional
     public Flag create(FlagRequest request, Integer creatorId) {
-        dev.mozhno.util.QuotaValidator.check(quotaSpi.canCreateFlag(request.getProjectId()));
+        QuotaValidator.check(quotaSpi.canCreateFlag(request.getProjectId()));
 
         Flag flag = new Flag();
         flag.setProjectId(request.getProjectId());
@@ -152,14 +158,15 @@ public class FlagService {
             try {
                 flag.setFlagType(FlagType.valueOf(request.getFlagType().toUpperCase()));
             } catch (IllegalArgumentException e) {
-                throw new BadRequestException("Invalid flag type: " + request.getFlagType() + ". Must be RELEASE or KILLSWITCH");
+                throw new BadRequestException("Invalid flag type: " + request.getFlagType()
+                    + ". Must be one of: " + Arrays.toString(FlagType.values()));
             }
         }
         flag = flagRepository.save(flag);
 
         if (request.getTags() != null && !request.getTags().isEmpty()) {
-            if (request.getTags().size() > 10) {
-                throw new BadRequestException("At most 10 tags per flag");
+            if (request.getTags().size() > MAX_TAGS_PER_FLAG) {
+                throw new BadRequestException("At most " + MAX_TAGS_PER_FLAG + " tags per flag");
             }
             validateTagIds(request.getTags());
             flagTagValueRepository.saveBatch(flag.getId(), request.getTags());
@@ -192,7 +199,8 @@ public class FlagService {
             try {
                 flag.setFlagType(FlagType.valueOf(request.getFlagType().toUpperCase()));
             } catch (IllegalArgumentException e) {
-                throw new BadRequestException("Invalid flag type: " + request.getFlagType() + ". Must be RELEASE or KILLSWITCH");
+                throw new BadRequestException("Invalid flag type: " + request.getFlagType()
+                    + ". Must be one of: " + Arrays.toString(FlagType.values()));
             }
         }
         flag = flagRepository.save(flag);
@@ -200,8 +208,8 @@ public class FlagService {
         flagTagValueRepository.deleteByFlagId(id);
 
         if (request.getTags() != null && !request.getTags().isEmpty()) {
-            if (request.getTags().size() > 10) {
-                throw new BadRequestException("At most 10 tags per flag");
+            if (request.getTags().size() > MAX_TAGS_PER_FLAG) {
+                throw new BadRequestException("At most " + MAX_TAGS_PER_FLAG + " tags per flag");
             }
             validateTagIds(request.getTags());
             flagTagValueRepository.saveBatch(id, request.getTags());
@@ -250,7 +258,7 @@ public class FlagService {
         List<Integer> tagIds = tags.stream().map(FlagRequest.TagValue::getTagId).distinct().toList();
         List<Tag> found = tagRepository.findAllByIds(tagIds);
         if (found.size() != tagIds.size()) {
-            java.util.Set<Integer> foundIds = found.stream().map(Tag::getId).collect(java.util.stream.Collectors.toSet());
+            Set<Integer> foundIds = found.stream().map(Tag::getId).collect(Collectors.toSet());
             for (Integer tagId : tagIds) {
                 if (!foundIds.contains(tagId)) {
                     throw new NotFoundException("Tag", tagId);

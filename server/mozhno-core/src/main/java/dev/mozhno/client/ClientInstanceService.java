@@ -2,6 +2,7 @@ package dev.mozhno.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -10,10 +11,15 @@ import java.util.List;
 @Service
 public class ClientInstanceService {
     private static final Logger log = LoggerFactory.getLogger(ClientInstanceService.class);
-    private final ClientInstanceRepository repository;
+    private static final int DEFAULT_RETENTION_DAYS = 30;
 
-    public ClientInstanceService(ClientInstanceRepository repository) {
+    private final ClientInstanceRepository repository;
+    private final int retentionDays;
+
+    public ClientInstanceService(ClientInstanceRepository repository,
+                                 @Value("${app.client-instance.retention-days:30}") int retentionDays) {
         this.repository = repository;
+        this.retentionDays = retentionDays > 0 ? retentionDays : DEFAULT_RETENTION_DAYS;
     }
 
     public Long record(Integer projectId, Integer environmentId, Integer apiKeyId,
@@ -36,9 +42,9 @@ public class ClientInstanceService {
 
     @Scheduled(cron = "0 30 3 * * ?")
     public void purgeOldInstances() {
-        int deleted = repository.deleteOlderThan(30);
+        int deleted = repository.deleteOlderThan(retentionDays);
         if (deleted > 0) {
-            log.info("Purged {} client instances older than 30 days", deleted);
+            log.info("Purged {} client instances older than {} days", deleted, retentionDays);
         }
     }
 }
