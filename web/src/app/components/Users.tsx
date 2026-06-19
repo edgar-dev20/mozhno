@@ -23,7 +23,7 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { UserTableSkeleton } from '@/app/components/skeletons';
 import { api, UserDto } from '@/api';
-import { SectionHeader, GradientButton, EmptyState, SearchInput, ErrorBox, Badge, getErrorMessage } from '@/shared';
+import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage } from '@/shared';
 import { useT, useLocale } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
@@ -794,7 +794,7 @@ export function Users() {
                   [
                     {
                       value: 'admin',
-                      color: 'from-warning to-warning/80',
+                      colorHex: '#d97706',
                       borderColor: 'border-warning',
                       bgHover: 'group-hover:bg-warning/10',
                       bgSelected: 'bg-warning/10',
@@ -803,7 +803,7 @@ export function Users() {
                     },
                     {
                       value: 'developer',
-                      color: 'from-info to-info/80',
+                      colorHex: '#2563eb',
                       borderColor: 'border-info',
                       bgHover: 'group-hover:bg-info/10',
                       bgSelected: 'bg-info/10',
@@ -812,7 +812,7 @@ export function Users() {
                     },
                     {
                       value: 'viewer',
-                      color: 'from-neutral-600 to-neutral-500',
+                      colorHex: '#525252',
                       borderColor: 'border-neutral-400',
                       bgHover: 'group-hover:bg-secondary dark:group-hover:bg-neutral-500/10',
                       bgSelected: 'bg-secondary dark:bg-neutral-500/10',
@@ -820,7 +820,7 @@ export function Users() {
                       description: t('users.roleDescriptions.viewer'),
                     },
                   ] as const
-                ).map(({ value, color, borderColor, bgSelected, textSelected, description }) => {
+                ).map(({ value, colorHex, borderColor, bgSelected, textSelected, description }) => {
                   const selected = formData.role === value;
                   return (
                     <button
@@ -833,11 +833,13 @@ export function Users() {
                           : 'border-border text-muted-foreground hover:border-border'
                       }`}
                     >
-                      <div
-                        className={`w-8 h-8 rounded-lg bg-gradient-to-r ${color} flex items-center justify-center text-white shadow-sm shrink-0`}
-                      >
-                        {getRoleIcon(value, 16)}
-                      </div>
+                      <ColorIcon
+                        variant="gradient"
+                        size="md"
+                        color={colorHex}
+                        icon={getRoleIcon(value, 16)}
+                        shadow
+                      />
                       <div className="flex-1 min-w-0">
                         <div
                           className={`text-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}
@@ -847,11 +849,12 @@ export function Users() {
                         <div className="text-xs text-muted-foreground mt-0.5">{description}</div>
                       </div>
                       {selected && (
-                        <div
-                          className={`w-5 h-5 rounded-md bg-gradient-to-r ${color} flex items-center justify-center shrink-0`}
-                        >
-                          <Check size={12} className="text-white" strokeWidth={3} />
-                        </div>
+                        <ColorIcon
+                          variant="gradient"
+                          size="sm"
+                          color={colorHex}
+                          icon={<Check size={12} className="text-white" strokeWidth={3} />}
+                        />
                       )}
                     </button>
                   );

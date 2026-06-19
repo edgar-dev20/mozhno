@@ -5,6 +5,7 @@ import type { FlagView } from '@/app/hooks/flagTypes';
 import type { ReactNode } from 'react';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
+import { ColorIcon } from '@/shared';
 import { ContextType } from '@/app/components/contextTypes';
 import { formatTimeConstraintValue } from '@/shared/format';
 
@@ -40,12 +41,12 @@ export function makeSegmentNode(
   const segIcon = seg?.icon ?? 'Users';
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span
-        className="inline-flex items-center justify-center w-4 h-4 rounded text-white shrink-0"
-        style={{ backgroundColor: segColor }}
-      >
-        <SegmentIcon name={segIcon} size={9} />
-      </span>
+      <ColorIcon
+        size="xs"
+        color={segColor}
+        icon={<SegmentIcon name={segIcon} size={9} />}
+        darkDim={false}
+      />
       <span style={{ color: segColor }} className="font-medium">
         {segName}
       </span>

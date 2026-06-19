@@ -39,6 +39,7 @@ import {
   SectionHeader,
   EmptyState,
   ColorBar,
+  ColorIcon,
   FormField,
   GradientButton,
   ErrorBox,
@@ -415,13 +416,14 @@ export function Segments() {
                 <ColorBar color={s.color || '#7c3aed'} />
                 <div className="p-5">
                   <div className="flex justify-between items-start mb-4">
-                    <div
-                      className="p-2.5 rounded-xl text-white cursor-pointer transition-transform hover:scale-110"
-                      style={{ backgroundColor: s.color || '#7c3aed' }}
+                    <ColorIcon
+                      size="lg"
+                      color={s.color || '#7c3aed'}
+                      icon={<SegmentIcon name={s.icon || 'Users'} size={24} />}
+                      shadow
+                      className="cursor-pointer transition-transform hover:scale-110"
                       onClick={() => openEdit(s)}
-                    >
-                      <SegmentIcon name={s.icon || 'Users'} size={24} />
-                    </div>
+                    />
                   </div>
                   <h3
                     className="text-lg font-semibold text-foreground mb-1.5 cursor-pointer hover:text-foreground/60 dark:hover:text-muted-foreground/60 transition-colors"
@@ -575,12 +577,12 @@ export function Segments() {
               className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-secondary transition-colors group"
             >
               <div className="flex items-center gap-3">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white shadow-sm"
-                  style={{ backgroundColor: formColor }}
-                >
-                  <SegmentIcon name={formIcon} size={15} />
-                </div>
+                <ColorIcon
+                  size="md"
+                  color={formColor}
+                  icon={<SegmentIcon name={formIcon} size={15} />}
+                  shadow
+                />
                 <div className="text-left">
                   <div className="text-sm font-medium text-foreground/80">
                     {t('segments.customize.title')}

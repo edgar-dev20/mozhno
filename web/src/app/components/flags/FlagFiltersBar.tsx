@@ -146,7 +146,7 @@ export function FlagFiltersBar({
                     onTagTypeFilterChange(active ? null : tg.id);
                     onTagValueFilterChange(null);
                   }}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? 'text-white' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? 'text-white dark:brightness-[.85] dark:saturate-[.7]' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
                   style={
                     active
                       ? { backgroundColor: tg.color, borderColor: adjustColor(tg.color, 20) }
@@ -176,7 +176,7 @@ export function FlagFiltersBar({
                   <button
                     key={v}
                     onClick={() => onTagValueFilterChange(active ? null : v)}
-                    className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? 'text-white' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+                    className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? 'text-white dark:brightness-[.85] dark:saturate-[.7]' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
                     style={
                       active
                         ? {
