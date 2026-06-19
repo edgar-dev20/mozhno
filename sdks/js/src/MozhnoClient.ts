@@ -4,6 +4,23 @@ import { HttpFetcher } from './transport/fetcher';
 import { isFlagEnabled } from './evaluation/evaluator';
 import { createDefaultStorage } from './repository/storage';
 
+const STORAGE_KEY = 'mozhno_anon_id';
+
+function getOrCreateAnonId(): string {
+  try {
+    let id = localStorage.getItem(STORAGE_KEY);
+    if (!id) {
+      id = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      try { localStorage.setItem(STORAGE_KEY, id); } catch { /* quota exceeded */ }
+    }
+    return id;
+  } catch {
+    return crypto?.randomUUID?.() ?? Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+  }
+}
+
 export class MozhnoClient extends EventEmitter {
   private config: MozhnoConfig;
   private fetcher: HttpFetcher;
@@ -16,6 +33,9 @@ export class MozhnoClient extends EventEmitter {
   private fetchTimer: ReturnType<typeof setInterval> | null = null;
   private metricsTimer: ReturnType<typeof setInterval> | null = null;
   private readyNotified = false;
+  private warnedNoId = false;
+  private anonId: string;
+  private useAnonId: boolean;
 
   constructor(config: MozhnoConfig) {
     super();
@@ -30,6 +50,8 @@ export class MozhnoClient extends EventEmitter {
     };
     this.fetcher = new HttpFetcher(this.config);
     this.storage = config.storageProvider || createDefaultStorage();
+    this.useAnonId = config.stickyAnonId !== false;
+    this.anonId = this.useAnonId ? getOrCreateAnonId() : '';
     this.context = {
       appName: this.config.appName,
       environment: this.config.environment || 'default',
@@ -68,6 +90,7 @@ export class MozhnoClient extends EventEmitter {
 
   isEnabled(flagKey: string, context?: MozhnoContext): boolean {
     const ctx = this.enrichContext(context);
+    const targetingKey = this.getTargetingKey(ctx);
 
     if (this.config.mode === 'client') {
       return this.clientToggles.get(flagKey) || false;
@@ -77,7 +100,19 @@ export class MozhnoClient extends EventEmitter {
     if (!flag) return false;
 
     this.recordMetric(flagKey);
-    return isFlagEnabled(flag, ctx);
+    return isFlagEnabled(flag, ctx, targetingKey);
+  }
+
+  private getTargetingKey(context: MozhnoContext): string {
+    const key = context.userId || context.sessionId || (this.useAnonId ? this.anonId : '');
+    if (!key && !this.warnedNoId) {
+      this.warnedNoId = true;
+      console.warn(
+        'Mozhno: no userId or sessionId in context — rollout will bucket all anonymous traffic into the same group. ' +
+        'Set stickyAnonId=true (default) or pass a userId/sessionId to fix.',
+      );
+    }
+    return key;
   }
 
   private enrichContext(context?: MozhnoContext): MozhnoContext {

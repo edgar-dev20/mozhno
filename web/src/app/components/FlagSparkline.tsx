@@ -64,8 +64,8 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
             const totalH = ((d.trueCount + d.falseCount) / maxVal) * (height - 2);
             const trueH = totalH > 0 ? (d.trueCount / (d.trueCount + d.falseCount)) * totalH : 0;
             const falseH = totalH - trueH;
-            const yFalse = baselineY - totalH;
-            const yTrue = yFalse + falseH;
+            const yTrue = baselineY - totalH;
+            const yFalse = yTrue + trueH;
 
             return (
               <g key={i}>

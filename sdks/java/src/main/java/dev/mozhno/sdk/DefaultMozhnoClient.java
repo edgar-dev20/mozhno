@@ -27,6 +27,7 @@ public class DefaultMozhnoClient implements MozhnoClient {
     private final Map<String, long[]> metricsBuffer;
     private final ScheduledExecutorService scheduler;
     private final AtomicBoolean running;
+    private final AtomicBoolean warnedNoId = new AtomicBoolean(false);
 
     private ScheduledFuture<?> fetchFuture;
     private ScheduledFuture<?> metricsFuture;
@@ -116,6 +117,13 @@ public class DefaultMozhnoClient implements MozhnoClient {
         }
 
         MozhnoContext enriched = enrichContext(context);
+
+        if (enriched.getProperty("userId") == null && enriched.getProperty("sessionId") == null) {
+            if (warnedNoId.compareAndSet(false, true)) {
+                log.warn("No userId or sessionId in context — rollout will bucket all anonymous traffic into the same group");
+            }
+        }
+
         boolean enabled = evaluator.isEnabled(flag, enriched);
         recordMetric(flagKey, enabled);
         return enabled;

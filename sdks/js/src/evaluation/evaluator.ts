@@ -150,7 +150,7 @@ function evaluateSegments(segments: Segment[] | undefined, context: MozhnoContex
   return false;
 }
 
-export function isFlagEnabled(flag: FeatureFlag, context: MozhnoContext): boolean {
+export function isFlagEnabled(flag: FeatureFlag, context: MozhnoContext, targetingKey?: string): boolean {
   if (!flag.enabled) return false;
 
   const activation = flag.activation;
@@ -174,7 +174,8 @@ export function isFlagEnabled(flag: FeatureFlag, context: MozhnoContext): boolea
   if (rollOut != null) {
     if (rollOut >= 100) return true;
     if (rollOut <= 0) return false;
-    const seed = flag.key + (context.userId || context.sessionId || '');
+    const key = targetingKey || context.userId || context.sessionId || '';
+    const seed = flag.key + key;
     const hash = murmurHash32(seed);
     const bucket = Math.abs(hash) % 100;
     return bucket < rollOut;
