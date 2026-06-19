@@ -118,3 +118,20 @@ export function adjustColor(hex: string, amount: number): string {
   const [nlr, nlg, nlb] = oklchToLinearSrgb(fl, fc, fh);
   return linearSrgbToHex(nlr, nlg, nlb);
 }
+
+export function dimColor(hex: string): string {
+  const [lr, lg, lb] = hexToLinearSrgb(hex);
+  const [L, C, H] = linearSrgbToOklch(lr, lg, lb);
+
+  const newL = L * 0.85;
+  const newC = C * 0.72;
+
+  const [fl, fc, fh] = gamutMap(newL, newC, H);
+
+  if (fc < 1e-8) {
+    return linearSrgbToHex(fl, fl, fl);
+  }
+
+  const [nlr, nlg, nlb] = oklchToLinearSrgb(fl, fc, fh);
+  return linearSrgbToHex(nlr, nlg, nlb);
+}

@@ -421,13 +421,20 @@ export function Segments() {
                       color={s.color || '#7c3aed'}
                       icon={<SegmentIcon name={s.icon || 'Users'} size={24} />}
                       shadow
-                      className="cursor-pointer transition-transform hover:scale-110"
                       onClick={() => openEdit(s)}
                     />
                   </div>
                   <h3
-                    className="text-lg font-semibold text-foreground mb-1.5 cursor-pointer hover:text-foreground/60 dark:hover:text-muted-foreground/60 transition-colors"
+                    className="text-lg font-semibold text-foreground mb-1.5 cursor-pointer hover:text-foreground/60 dark:hover:text-muted-foreground/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background rounded"
                     onClick={() => openEdit(s)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        openEdit(s);
+                      }
+                    }}
                   >
                     {s.name}
                   </h3>
