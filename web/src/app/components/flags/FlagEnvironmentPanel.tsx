@@ -110,7 +110,7 @@ export function FlagEnvironmentPanel({
     lines.push({
       field,
       operator: g.operator,
-      values: [...g.values],
+      values: g.values.filter((v) => v.trim() !== ''),
       source: 'custom',
       contextType: ctxDef?.type,
     });
@@ -119,10 +119,11 @@ export function FlagEnvironmentPanel({
   const hasSummary = true;
 
   const formatValues = (values: string[]): string => {
-    if (values.length === 0) return '∅';
-    if (values.length === 1) return values[0];
-    const display = values.slice(0, 3).join(', ');
-    return values.length > 3 ? `[${display}, +${values.length - 3}]` : `[${display}]`;
+    const filtered = values.filter((v) => v.trim() !== '');
+    if (filtered.length === 0) return '∅';
+    if (filtered.length === 1) return filtered[0];
+    const display = filtered.slice(0, 3).join(', ');
+    return filtered.length > 3 ? `[${display}, +${filtered.length - 3}]` : `[${display}]`;
   };
 
   const sourceGroups = new Map<string, SummaryLine[]>();
@@ -257,7 +258,7 @@ export function FlagEnvironmentPanel({
                             {Array.from(groupByKey.entries()).map(([_key, keyLines], fi) => {
                               const line = keyLines[0];
                               const isTimeType = line.contextType === ContextType.TIME;
-                              const allValues = keyLines.flatMap((l) => l.values);
+                              const allValues = keyLines.flatMap((l) => l.values).filter((v) => v.trim() !== '');
                               const displayValues = isTimeType
                                 ? allValues.map((v) => formatTimeConstraintValue(v))
                                 : allValues;
