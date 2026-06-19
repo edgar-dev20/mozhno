@@ -1,4 +1,6 @@
 import { getOperatorShortCode, OPERATOR_COLORS } from '@/app/components/operators';
+import { ContextType } from '@/app/components/contextTypes';
+import { Operator } from '@/app/components/operatorsMeta';
 
 interface OperatorBadgeProps {
   operator: string;
@@ -9,8 +11,8 @@ interface OperatorBadgeProps {
 export function OperatorBadge({ operator, className = '', contextType }: OperatorBadgeProps) {
   const code = getOperatorShortCode(operator, contextType);
   const colorKey =
-    contextType === 'time' && (operator === 'gt' || operator === 'lt')
-      ? operator === 'gt'
+    contextType === ContextType.TIME && (operator === Operator.GT || operator === Operator.LT)
+      ? operator === Operator.GT
         ? 'after'
         : 'before'
       : operator;

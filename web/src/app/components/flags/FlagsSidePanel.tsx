@@ -10,6 +10,7 @@ import { FlagCreatePanel } from '@/app/components/flags/FlagCreatePanel';
 import { FlagEditPanel } from '@/app/components/flags/FlagEditPanel';
 import { FlagEnvironmentPanel } from '@/app/components/flags/FlagEnvironmentPanel';
 import { createFormId, editFormId } from '@/app/components/flags/formIds';
+import { isMultiOperator } from '@/app/components/operatorsMeta';
 import { isConstraintValueValid } from '@/app/components/operators';
 import { useT } from '@/i18n';
 import type { CreateFlagFormValues, EditFlagFormValues } from '@/app/components/flags/schemas';
@@ -107,7 +108,11 @@ export function FlagsSidePanel({
   const saveLabel = t('common.saveChanges');
   const hasInvalidConstraints = envRuleConstraints.some((g) => {
     if (g.contextDefId === 0) return false;
+    if (!g.operator || g.operator.trim() === '') return true;
+    if (g.values.length === 0 || g.values.every((v) => v.trim() === '')) return true;
     const ctx = Array.isArray(contexts) ? contexts.find((c) => c.id === g.contextDefId) : undefined;
+    const isMulti = isMultiOperator(g.operator);
+    if (!isMulti && g.values.length > 1) return true;
     return !isConstraintValueValid(ctx?.type, g.values[0] ?? '', g.operator);
   });
 

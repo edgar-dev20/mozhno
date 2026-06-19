@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { adjustColor } from '@/shared/color';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
+import { ContextType } from '@/app/components/contextTypes';
 import { formatTimeConstraintValue } from '@/shared/format';
 
 export interface DiffContext {
@@ -61,7 +62,7 @@ export function renderConstraintGroupNode(
   const attr = ctx?.name ?? `#${g.contextDefId}`;
   const vals =
     g.values.length > 0
-      ? (ctx?.type === 'time' ? g.values.map(formatTimeConstraintValue) : g.values).join(', ')
+      ? (ctx?.type === ContextType.TIME ? g.values.map(formatTimeConstraintValue) : g.values).join(', ')
       : '\u2205';
   return (
     <span className="inline-flex items-center gap-1.5 text-xs flex-wrap">

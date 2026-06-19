@@ -8,6 +8,7 @@ import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { InlineDiffBar } from '@/app/components/InlineDiffBar';
 import type { DiffChange } from '@/shared/diffUtils';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
+import { ContextType, CONTEXT_TYPES } from '@/app/components/contextTypes';
 import { api, ContextDefinition, SegmentResponse } from '@/api';
 import { SectionHeader, EmptyState, FormField, GradientButton, ErrorBox, Badge, getErrorMessage } from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
@@ -17,18 +18,17 @@ import { queryKeys } from '@/api/queryKeys';
 import { useT } from '@/i18n';
 import { Switch } from '@/app/components/ui/switch';
 
-const TYPES = ['string', 'number', 'time', 'semver'] as const;
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  string: <Type size={13} />,
-  number: <span className="text-sm font-semibold">123</span>,
-  time: <Clock size={13} />,
-  semver: <Settings2 size={13} />,
+  [ContextType.STRING]: <Type size={13} />,
+  [ContextType.NUMBER]: <span className="text-sm font-semibold">123</span>,
+  [ContextType.TIME]: <Clock size={13} />,
+  [ContextType.SEMVER]: <Settings2 size={13} />,
 };
 const TYPE_COLORS: Record<string, string> = {
-  string: '#3b82f6',
-  number: '#f97316',
-  time: '#06b6d4',
-  semver: '#8b5cf6',
+  [ContextType.STRING]: '#3b82f6',
+  [ContextType.NUMBER]: '#f97316',
+  [ContextType.TIME]: '#06b6d4',
+  [ContextType.SEMVER]: '#8b5cf6',
 };
 const TYPE_COLORS_BAR: Record<string, string> = {
   '#3b82f6': 'linear-gradient(to right, #3b82f6, #93bbfd)',
@@ -64,7 +64,7 @@ export function Constraints() {
   const [saving, setSaving] = useState(false);
   const [formName, setFormName] = useState('');
   const [formKey, setFormKey] = useState('');
-  const [formType, setFormType] = useState('string');
+  const [formType, setFormType] = useState(ContextType.STRING);
   const [formDesc, setFormDesc] = useState('');
   const [formIsStrict, setFormIsStrict] = useState(false);
   const [formValidValues, setFormValidValues] = useState<string[]>([]);
@@ -76,10 +76,10 @@ export function Constraints() {
   const [diffChanges, setDiffChanges] = useState<DiffChange[]>([]);
 
   const typeLabels: Record<string, string> = {
-    string: t('constraints.typeLabel.string'),
-    number: t('constraints.typeLabel.number'),
-    time: t('constraints.typeLabel.time'),
-    semver: t('constraints.typeLabel.semver'),
+    [ContextType.STRING]: t('constraints.typeLabel.string'),
+    [ContextType.NUMBER]: t('constraints.typeLabel.number'),
+    [ContextType.TIME]: t('constraints.typeLabel.time'),
+    [ContextType.SEMVER]: t('constraints.typeLabel.semver'),
   };
 
   const segmentUsage = useMemo(() => {
@@ -98,7 +98,7 @@ export function Constraints() {
   const isDirty = editing
     ? formName !== editing.name ||
       formKey !== editing.key ||
-      formType !== (editing.type ?? 'string') ||
+      formType !== (editing.type ?? ContextType.STRING) ||
       formDesc !== (editing.description ?? '') ||
       formIsStrict !== (editing.isStrict ?? false) ||
       JSON.stringify(formValidValues) !== JSON.stringify(editing.validValues ?? [])
@@ -158,7 +158,7 @@ export function Constraints() {
     setEditing(null);
     setFormName('');
     setFormKey('');
-    setFormType('string');
+    setFormType(ContextType.STRING);
     setFormDesc('');
     setFormIsStrict(false);
     setFormValidValues([]);
@@ -171,7 +171,7 @@ export function Constraints() {
     setEditing(c);
     setFormName(c.name);
     setFormKey(c.key);
-    setFormType(c.type ?? 'string');
+    setFormType(c.type ?? ContextType.STRING);
     setFormDesc(c.description ?? '');
     setFormIsStrict(c.isStrict ?? false);
     setFormValidValues(c.validValues ?? []);
@@ -217,11 +217,11 @@ export function Constraints() {
           group: t('constraints.diffGroupSettings'),
         });
       }
-      if ((editing.type ?? 'string') !== formType) {
+      if ((editing.type ?? ContextType.STRING) !== formType) {
         changes.push({
           field: 'type',
           label: t('common.type'),
-          before: typeLabels[editing.type ?? 'string'],
+          before: typeLabels[editing.type ?? ContextType.STRING],
           after: typeLabels[formType],
           group: t('constraints.diffGroupSettings'),
         });
@@ -317,8 +317,8 @@ export function Constraints() {
                     className="h-1.5"
                     style={{
                       background:
-                        TYPE_COLORS_BAR[TYPE_COLORS[c.type ?? 'string']] ??
-                        `linear-gradient(to right, ${TYPE_COLORS[c.type ?? 'string']}, ${TYPE_COLORS[c.type ?? 'string']}88)`,
+                        TYPE_COLORS_BAR[TYPE_COLORS[c.type ?? ContextType.STRING]] ??
+                        `linear-gradient(to right, ${TYPE_COLORS[c.type ?? ContextType.STRING]}, ${TYPE_COLORS[c.type ?? ContextType.STRING]}88)`,
                     }}
                   />
                   <div className="p-5">
@@ -326,10 +326,10 @@ export function Constraints() {
                       <div className="shrink-0 pt-0.5">
                         <div
                           className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: TYPE_COLORS[c.type ?? 'string'] + '18' }}
+                          style={{ backgroundColor: TYPE_COLORS[c.type ?? ContextType.STRING] + '18' }}
                         >
-                          <span style={{ color: TYPE_COLORS[c.type ?? 'string'] }}>
-                            {TYPE_ICONS[c.type ?? 'string']}
+                          <span style={{ color: TYPE_COLORS[c.type ?? ContextType.STRING] }}>
+                            {TYPE_ICONS[c.type ?? ContextType.STRING]}
                           </span>
                         </div>
                       </div>
@@ -472,7 +472,7 @@ export function Constraints() {
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground/80">{t('common.type')}</label>
             <div className="grid grid-cols-4 gap-1.5">
-              {TYPES.map((tp) => (
+              {CONTEXT_TYPES.map((tp) => (
                 <button
                   key={tp}
                   onClick={() => {

@@ -245,6 +245,8 @@ const ru = {
     },
     whitelistAllSelected: 'Все допустимые значения выбраны',
     whitelistSuggestions: 'Подсказки из белого списка:',
+    coveredBySegment: 'Уже покрыто сегментом «{{segment}}»',
+    segmentsCoveredValuesNote: 'Серые значения уже включены через выбранные сегменты.',
   },
   segments: {
     title: 'Сегменты',

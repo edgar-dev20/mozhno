@@ -23,5 +23,14 @@ export default defineConfig({
         entryFileNames: 'assets/[name]-[hash].js'
       }
     }
+  },
+  server: {
+    warmup: {
+      clientFiles: [
+        './src/main.tsx',
+        './src/app/routes.tsx',
+        './src/app/components/operators.ts',
+      ]
+    }
   }
 })

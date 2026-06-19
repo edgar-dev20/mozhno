@@ -5,10 +5,13 @@ import org.springframework.transaction.annotation.Transactional;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.spi.QuotaSpi;
+import dev.mozhno.Operator;
+import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.NotFoundException;
 import dev.mozhno.contexts.ContextService;
 import dev.mozhno.util.QuotaValidator;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +130,31 @@ public class SegmentService {
 
     private void validateContextValues(SegmentRequest request) {
         if (request.getContext() == null || request.getContext().isEmpty()) return;
+
+        List<SegmentRequest.ContextEntry> entries = request.getContext();
+        for (int i = 0; i < entries.size(); i++) {
+            SegmentRequest.ContextEntry entry = entries.get(i);
+            String label = "Constraint #" + (i + 1);
+            String operator = entry.getOperator();
+            if (operator == null || operator.isBlank()) {
+                throw new BadRequestException(label + ": operator is required");
+            }
+            String values = entry.getContextValues();
+            if (values == null || values.isBlank()) {
+                throw new BadRequestException(label + ": values are required");
+            }
+            if (Operator.isMulti(operator)) continue;
+            long nonEmptyCount = Arrays.stream(values.split(","))
+                .map(String::trim)
+                .filter(v -> !v.isEmpty())
+                .count();
+            if (nonEmptyCount > 1) {
+                throw new BadRequestException(
+                    label + ": single-value operator '" + operator +
+                    "' cannot have multiple values (got " + nonEmptyCount + ")");
+            }
+        }
+
         Map<Integer, String> valuesByDefId = new HashMap<>();
         for (SegmentRequest.ContextEntry entry : request.getContext()) {
             if (entry.getContextValues() != null && !entry.getContextValues().isBlank()) {

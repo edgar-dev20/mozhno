@@ -1,5 +1,6 @@
 package dev.mozhno.segments;
 
+import dev.mozhno.Operator;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -129,7 +130,7 @@ public class SegmentContextRepository {
      * @return the saved segment context
      */
     public SegmentContext save(SegmentContext ctx) {
-        String operator = ctx.getOperator() != null ? ctx.getOperator() : "in";
+        String operator = ctx.getOperator() != null ? ctx.getOperator() : Operator.IN.getValue();
         if (ctx.getId() == null) {
             Instant createTime = Instant.now();
             String sql = "INSERT INTO segment_contexts (segment_id, context_definition_id, operator, context_values, created_at) " +
@@ -165,7 +166,7 @@ public class SegmentContextRepository {
                 SegmentRequest.ContextEntry entry = entries.get(i);
                 ps.setInt(1, segmentId);
                 ps.setInt(2, entry.getContextDefinitionId());
-                ps.setString(3, entry.getOperator() != null ? entry.getOperator() : "in");
+                ps.setString(3, entry.getOperator() != null ? entry.getOperator() : Operator.IN.getValue());
                 ps.setString(4, entry.getContextValues());
                 ps.setTimestamp(5, Timestamp.from(Instant.now()));
             }

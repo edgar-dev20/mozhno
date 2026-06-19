@@ -6,9 +6,10 @@ interface MultiValueChipsProps {
   values: string[];
   onChange: (values: string[]) => void;
   autoFocus?: boolean;
+  validValues?: string[];
 }
 
-export function MultiValueChips({ values, onChange, autoFocus }: MultiValueChipsProps) {
+export function MultiValueChips({ values, onChange, autoFocus, validValues }: MultiValueChipsProps) {
   const t = useT();
   const [input, setInput] = useState('');
   const [shakeId, setShakeId] = useState<number | null>(null);
@@ -63,23 +64,39 @@ export function MultiValueChips({ values, onChange, autoFocus }: MultiValueChips
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-1.5">
-        {values.map((v, i) => (
+        {values.map((v, i) => {
+          const hasWhitelist = validValues && validValues.length > 0;
+          const inWhitelist = hasWhitelist ? validValues!.includes(v) : true;
+          return (
           <span
             key={i}
             data-shake={shakeId === i ? '' : undefined}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-primary/10 text-primary border border-primary/20 animate-in fade-in zoom-in-95 duration-150 data-[shake]:animate-[shake_400ms_ease-in-out]"
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border animate-in fade-in zoom-in-95 duration-150 data-[shake]:animate-[shake_400ms_ease-in-out] ${
+              hasWhitelist
+                ? inWhitelist
+                  ? 'bg-success/10 text-success border-success/20'
+                  : 'bg-warning/10 text-warning border-warning/30'
+                : 'bg-primary/10 text-primary border-primary/20'
+            }`}
           >
             <span className="max-w-[160px] truncate">{v}</span>
             <button
               type="button"
               onClick={() => removeValue(i)}
-              className="shrink-0 p-0.5 rounded-sm hover:bg-primary/20 transition-colors -mr-0.5"
+              className={`shrink-0 p-0.5 rounded-sm transition-colors -mr-0.5 hover:text-red-500 ${
+                hasWhitelist
+                  ? inWhitelist
+                    ? 'text-emerald-500'
+                    : 'text-amber-500'
+                  : ''
+              }`}
               tabIndex={-1}
             >
               <X size={12} />
             </button>
           </span>
-        ))}
+        );
+        })}
         <input
           ref={inputRef}
           type="text"

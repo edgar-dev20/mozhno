@@ -1,6 +1,9 @@
 package dev.mozhno.segments;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import dev.mozhno.Operator;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -31,6 +34,7 @@ public class SegmentRequest {
     @Schema(description = "Color hex code", example = "#3b82f1")
     private String color;
 
+    @Valid
     @Schema(description = "List of context targeting rules", nullable = true)
     private java.util.List<ContextEntry> context;
 
@@ -42,10 +46,18 @@ public class SegmentRequest {
         @Schema(description = "Context definition ID")
         private Integer contextDefinitionId;
 
-        @Schema(description = "Operator (e.g. in, not_in)", example = "in")
+        @NotBlank
+        @Schema(description = "Operator", example = "in")
         private String operator;
 
+        @NotBlank
         @Schema(description = "Comma-separated context values", example = "US,CA,UK")
         private String contextValues;
+
+        @AssertTrue(message = "Single-value operators cannot have multiple values")
+        public boolean hasConsistentOperatorValues() {
+            if (operator == null || contextValues == null || contextValues.isBlank()) return true;
+            return Operator.isMulti(operator) || contextValues.split(",").length <= 1;
+        }
     }
 }
