@@ -3,6 +3,8 @@ import { ChevronRight, Trash2 } from '@/shared/icons';
 import { getOperatorsForType } from '@/app/components/operators';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
 import { OperatorSelector } from '@/app/components/OperatorSelector';
+import { ContextType } from '@/app/components/contextTypes';
+import { isMultiOperator } from '@/app/components/operatorsMeta';
 import { useT } from '@/i18n';
 import { formatTimeConstraintValue } from '@/shared/format';
 import type { ContextDefinition } from '@/api';
@@ -39,9 +41,9 @@ export function ConstraintRow({
   const ctxDef = hasContext ? (Array.isArray(contexts) ? contexts.find((c) => c.id === contextDefId) : undefined) : undefined;
   const contextType = ctxDef?.type;
   const availableOps = getOperatorsForType(contextType);
-  const isMulti = operator === 'in' || operator === 'not_in';
+  const isMulti = isMultiOperator(operator);
   const displayValues =
-    contextType === 'time' && valuesPreview !== '∅'
+    contextType === ContextType.TIME && valuesPreview !== '∅'
       ? valuesPreview
           .split(', ')
           .map((v) => formatTimeConstraintValue(v))
@@ -126,7 +128,7 @@ export function ConstraintRow({
               <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
                 {isMulti ? t('flags.detailCard.values') : t('flags.detailCard.value')}
               </label>
-              {children(ctxDef?.type ?? 'string')}
+              {children(ctxDef?.type ?? ContextType.STRING)}
             </div>
           )}
 

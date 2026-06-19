@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
+import dev.mozhno.Operator;
+import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.NotFoundException;
 import dev.mozhno.flags.Flag;
 import dev.mozhno.flags.FlagRepository;
@@ -197,7 +199,27 @@ public class StrategyService {
         List<FlagConstraintParser.StrategyConstraint> constraints =
             FlagConstraintParser.parseStrategyConstraints(contextValuesJson);
         Map<Integer, String> valuesByDefId = new HashMap<>();
-        for (FlagConstraintParser.StrategyConstraint c : constraints) {
+        for (int i = 0; i < constraints.size(); i++) {
+            FlagConstraintParser.StrategyConstraint c = constraints.get(i);
+            String label = "Constraint #" + (i + 1);
+            if (c.op() == null || c.op().isBlank()) {
+                throw new BadRequestException(label + ": operator is required");
+            }
+            if (c.val() == null || c.val().isBlank()) {
+                throw new BadRequestException(label + ": values are required");
+            }
+            if (!Operator.isMulti(c.op())) {
+                String[] parts = c.val().split(",");
+                long nonEmpty = java.util.Arrays.stream(parts)
+                    .map(String::trim)
+                    .filter(v -> !v.isEmpty())
+                    .count();
+                if (nonEmpty > 1) {
+                    throw new BadRequestException(
+                        label + ": single-value operator '" + c.op() +
+                        "' cannot have multiple values (got " + nonEmpty + ")");
+                }
+            }
             if (c.cd() > 0 && !c.val().isBlank()) {
                 valuesByDefId.merge(c.cd(), c.val(), (a, b) -> a + ", " + b);
             }

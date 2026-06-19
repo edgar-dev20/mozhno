@@ -12,9 +12,22 @@ const ERROR_CODE_TO_KEY: Record<string, string> = {
   UNKNOWN: 'errors.unexpected',
 };
 
+function extractValidationDetails(error: AppError): string {
+  const body = error.details as Record<string, unknown> | undefined;
+  if (!body) return error.message;
+  const details = body['details'] as { field: string; message: string }[] | undefined;
+  if (!details || details.length === 0) return error.message;
+  if (details.length === 1) {
+    return details[0].message;
+  }
+  return details.map((d) => d.message).join('\n');
+}
+
 export function getErrorMessage(error: unknown): string {
   if (isAppError(error)) {
     if (error.code === 'VALIDATION') {
+      const detailsText = extractValidationDetails(error);
+      if (detailsText !== error.message) return detailsText;
       const key = ERROR_CODE_TO_KEY[error.code];
       return key ? t(key as MessageKey) : error.message;
     }

@@ -79,8 +79,13 @@ public class GlobalExceptionHandler {
             .map(e -> Map.of("field", e.getField(), "message", e.getDefaultMessage() != null ? e.getDefaultMessage() : "invalid"))
             .toList();
 
+        String detail = fieldErrors.stream()
+            .map(f -> f.get("message") + " (" + f.get("field") + ")")
+            .reduce((a, b) -> a + "; " + b)
+            .orElse("");
+
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("error", "Validation failed");
+        body.put("error", "Validation failed: " + detail);
         body.put("code", "VALIDATION_ERROR");
         body.put("details", fieldErrors);
         putTraceId(body);

@@ -3,7 +3,9 @@ import { Fragment } from 'react';
 import { Switch } from '@/app/components/ui/switch';
 import { Plus, Percent, Users, Settings, Filter, X } from '@/shared/icons';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
+import { isMultiOperator } from '@/app/components/operatorsMeta';
 import { MultiValueChips } from '@/app/components/flags/MultiValueChips';
+import { ContextType } from '@/app/components/contextTypes';
 import {
   getDefaultOperator,
   getInputPlaceholder,
@@ -14,6 +16,7 @@ import {
 } from '@/app/components/operators';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
 import { ConstraintRow } from '@/app/components/ConstraintRow';
+import { Operator } from '@/app/components/operatorsMeta';
 import { DateTimePicker } from '@/shared/components/DateTimePicker';
 import { formatTimeConstraintValue } from '@/shared/format';
 import { useT } from '@/i18n';
@@ -63,7 +66,7 @@ export function FlagEnvironmentPanel({
       {
         id: newGroupId(),
         contextDefId: 0,
-        operator: 'in',
+        operator: Operator.IN,
         values: [],
       },
     ]);
@@ -93,7 +96,7 @@ export function FlagEnvironmentPanel({
         .filter(Boolean);
       lines.push({
         field,
-        operator: c.operator ?? 'in',
+        operator: c.operator ?? Operator.IN,
         values: vals,
         source: seg.name,
         contextType: ctxDef?.type,
@@ -253,7 +256,7 @@ export function FlagEnvironmentPanel({
                           <div className="px-3 py-2 space-y-1.5">
                             {Array.from(groupByKey.entries()).map(([_key, keyLines], fi) => {
                               const line = keyLines[0];
-                              const isTimeType = line.contextType === 'time';
+                              const isTimeType = line.contextType === ContextType.TIME;
                               const allValues = keyLines.flatMap((l) => l.values);
                               const displayValues = isTimeType
                                 ? allValues.map((v) => formatTimeConstraintValue(v))
@@ -434,7 +437,7 @@ export function FlagEnvironmentPanel({
                         const ctxDef = Array.isArray(contexts) ? contexts.find((cd) => cd.id === c.contextDefinitionId) : undefined;
                         const sCtxType = ctxDef?.type;
                         const sDisplayValues =
-                          sCtxType === 'time'
+                          sCtxType === ContextType.TIME
                             ? (c.contextValues ?? '')
                                 .split(',')
                                 .map((v) => formatTimeConstraintValue(v.trim()))
@@ -453,7 +456,7 @@ export function FlagEnvironmentPanel({
                               {ctxDef?.name ?? `#${c.contextDefinitionId}`}
                             </span>
                             <OperatorBadge
-                              operator={c.operator ?? 'in'}
+                              operator={c.operator ?? Operator.IN}
                               contextType={sCtxType}
                               className="opacity-60"
                             />
@@ -501,7 +504,7 @@ export function FlagEnvironmentPanel({
           <div className="space-y-1.5">
             {envRuleConstraintGroups.map((g) => {
               const isActive = activeGroupId === g.id;
-              const isMulti = g.operator === 'in' || g.operator === 'not_in';
+              const isMulti = isMultiOperator(g.operator);
 
               const updateGroup = (upd: Partial<ConstraintGroup>) => {
                 onEnvRuleConstraintGroupsChange(
@@ -524,7 +527,7 @@ export function FlagEnvironmentPanel({
               };
 
               const handleOperatorChange = (op: string) => {
-                const newIsMulti = op === 'in' || op === 'not_in';
+                const newIsMulti = isMultiOperator(op);
                 const values = !newIsMulti && g.values.length > 1 ? [g.values[0]] : g.values;
                 updateGroup({ operator: op, values });
               };
@@ -548,6 +551,41 @@ export function FlagEnvironmentPanel({
                     const validVals = ctx?.validValues ?? [];
                     const strict = ctx?.isStrict ?? false;
                     const hasWhitelist = validVals.length > 0;
+
+                    const segmentsCoveredValues = new Map<string, string>();
+                    for (const seg of selectedSegs) {
+                      for (const c of seg.context ?? []) {
+                        if (c.contextDefinitionId === g.contextDefId) {
+                          const vals = (c.contextValues ?? '').split(',').map((v) => v.trim()).filter(Boolean);
+                          for (const v of vals) {
+                            if (!segmentsCoveredValues.has(v)) {
+                              segmentsCoveredValues.set(v, seg.name);
+                            }
+                          }
+                        }
+                      }
+                    }
+                    const hasSegmentsCovered = segmentsCoveredValues.size > 0;
+
+                    const segmentsCoveredNote = hasSegmentsCovered ? (
+                      <p className="text-[11px] text-muted-foreground/60 italic">
+                        {t('flags.segmentsCoveredValuesNote')}
+                      </p>
+                    ) : null;
+
+                    const renderCoveredChip = (v: string, spanCls: string) => {
+                      const coveredBy = segmentsCoveredValues.get(v);
+                      if (!coveredBy) return null;
+                      return (
+                        <span
+                          key={v}
+                          className={spanCls}
+                          title={`${t('flags.coveredBySegment', { segment: coveredBy })}`}
+                        >
+                          {v}
+                        </span>
+                      );
+                    };
 
                     if (isMulti) {
                       if (strict && hasWhitelist) {
@@ -583,19 +621,24 @@ export function FlagEnvironmentPanel({
                             <div className="flex flex-wrap gap-1.5">
                               {validVals
                                 .filter((v) => !g.values.includes(v))
-                                .map((v) => (
-                                  <button
-                                    key={v}
-                                    onClick={() =>
-                                      updateGroup({ values: [...g.values, v] })
-                                    }
-                                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border border-border transition-all"
-                                  >
-                                    + {v}
-                                  </button>
-                                ))}
+                                .map((v) => {
+                                  const covered = renderCoveredChip(v, 'px-3 py-1.5 rounded-lg text-xs font-medium bg-muted/30 text-muted-foreground/50 border border-border/40 cursor-not-allowed');
+                                  if (covered) return covered;
+                                  return (
+                                    <button
+                                      key={v}
+                                      onClick={() =>
+                                        updateGroup({ values: [...g.values, v] })
+                                      }
+                                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border border-border transition-all"
+                                    >
+                                      + {v}
+                                    </button>
+                                  );
+                                })}
                             </div>
-                            {validVals.every((v) => g.values.includes(v)) && (
+                            {segmentsCoveredNote}
+                            {validVals.every((v) => g.values.includes(v) || segmentsCoveredValues.has(v)) && (
                               <p className="text-[11px] text-muted-foreground">
                                 {t('flags.whitelistAllSelected')}
                               </p>
@@ -610,8 +653,9 @@ export function FlagEnvironmentPanel({
                               values={g.values}
                               onChange={(vals) => updateGroup({ values: vals })}
                               autoFocus
+                              validValues={validVals}
                             />
-                            {validVals.some((v) => !g.values.includes(v)) && (
+                            {validVals.some((v) => !g.values.includes(v) && !segmentsCoveredValues.has(v)) && (
                               <div className="mt-2">
                                 <p className="text-[11px] text-muted-foreground mb-1">
                                   {t('flags.whitelistSuggestions')}
@@ -619,21 +663,28 @@ export function FlagEnvironmentPanel({
                                 <div className="flex flex-wrap gap-1">
                                   {validVals
                                     .filter((v) => !g.values.includes(v))
-                                    .map((v) => (
-                                      <button
-                                        key={v}
-                                        onClick={() =>
-                                          updateGroup({
-                                            values: [...g.values, v],
-                                          })
-                                        }
-                                        className="px-2 py-0.5 text-xs border border-brand/20 rounded-md text-brand hover:bg-brand/10 transition-colors"
-                                      >
-                                        + {v}
-                                      </button>
-                                    ))}
+                                    .map((v) => {
+                                      const covered = renderCoveredChip(v, 'px-2 py-0.5 text-xs border border-muted rounded-md text-muted-foreground/50 cursor-not-allowed');
+                                      if (covered) return covered;
+                                      return (
+                                        <button
+                                          key={v}
+                                          onClick={() =>
+                                            updateGroup({
+                                              values: [...g.values, v],
+                                            })
+                                          }
+                                          className="px-2 py-0.5 text-xs border border-brand/20 rounded-md text-brand hover:bg-brand/10 transition-colors"
+                                        >
+                                          + {v}
+                                        </button>
+                                      );
+                                    })}
                                 </div>
                               </div>
+                            )}
+                            {segmentsCoveredNote && (
+                              <div className="mt-1.5">{segmentsCoveredNote}</div>
                             )}
                           </div>
                         );
@@ -649,7 +700,7 @@ export function FlagEnvironmentPanel({
                       );
                     }
 
-                    if (contextType === 'time') {
+                    if (contextType === ContextType.TIME) {
                       return (
                         <div className="space-y-1.5">
                           <DateTimePicker
@@ -667,6 +718,8 @@ export function FlagEnvironmentPanel({
                           <div className="flex flex-wrap gap-1.5">
                             {validVals.map((v) => {
                               const isSelected = g.values.includes(v);
+                              const covered = !isSelected ? renderCoveredChip(v, 'px-3 py-1.5 rounded-lg text-xs font-medium bg-muted/30 text-muted-foreground/50 border border-border/40 cursor-not-allowed') : null;
+                              if (covered) return covered;
                               return (
                                 <button
                                   key={v}
@@ -688,6 +741,7 @@ export function FlagEnvironmentPanel({
                               );
                             })}
                           </div>
+                          {segmentsCoveredNote}
                           {g.values.length > 0 && (
                             <p className="text-[11px] text-muted-foreground">
                               {t('flags.detailCard.value')}:{' '}
@@ -733,7 +787,7 @@ export function FlagEnvironmentPanel({
                             ))}
                           </datalist>
                         )}
-                        {contextType !== 'string' && contextType !== 'time' && (
+                        {contextType !== ContextType.STRING && contextType !== ContextType.TIME && (
                           <p className="text-[11px] text-muted-foreground/60 ml-0.5">
                             {getInputHint(contextType)}
                           </p>

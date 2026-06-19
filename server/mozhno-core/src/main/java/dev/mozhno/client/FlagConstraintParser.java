@@ -3,6 +3,8 @@ package dev.mozhno.client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import dev.mozhno.Operator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +23,7 @@ public final class FlagConstraintParser {
 
     public record StrategyConstraint(int cd, String op, String val) {
         public StrategyConstraint {
-            op = op != null ? op : "in";
+            op = op != null ? op : Operator.IN.getValue();
             val = val != null ? val : "";
         }
     }

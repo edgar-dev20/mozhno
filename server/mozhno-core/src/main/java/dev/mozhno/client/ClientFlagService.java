@@ -1,5 +1,6 @@
 package dev.mozhno.client;
 
+import dev.mozhno.ContextType;
 import dev.mozhno.contexts.ContextDefinition;
 import dev.mozhno.contexts.ContextDefinitionRepository;
 import org.springframework.cache.annotation.Cacheable;
@@ -96,7 +97,7 @@ public class ClientFlagService {
                         List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(segId, Collections.emptyList());
                         for (SegmentContextWithName sc : segContexts) {
                             String key = sc.getContextDefinitionName() + "|" + sc.getOperator();
-                            String ctxType = sc.getContextType() != null ? sc.getContextType() : "string";
+                            String ctxType = ContextType.fromValue(sc.getContextType()).getValue();
                             merged.computeIfAbsent(key, k -> new ConstraintMerge(sc.getContextDefinitionName(), sc.getOperator(), ctxType))
                                     .values.addAll(FeatureFlagEvaluator.splitValues(sc.getContextValues()));
                         }
@@ -108,7 +109,7 @@ public class ClientFlagService {
                     for (FlagConstraintParser.StrategyConstraint sc : parsed) {
                         ContextDefinition cd = contextDefMap.getOrDefault(sc.cd(), null);
                         String fieldName = cd != null ? cd.getContextKey() : String.valueOf(sc.cd());
-                        String ctxType = cd != null && cd.getContextType() != null ? cd.getContextType() : "string";
+                        String ctxType = ContextType.fromValue(cd != null ? cd.getContextType() : null).getValue();
                         String key = fieldName + "|" + sc.op();
                         merged.computeIfAbsent(key, k -> new ConstraintMerge(fieldName, sc.op(), ctxType))
                                 .values.add(sc.val());

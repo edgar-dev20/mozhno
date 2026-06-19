@@ -1,5 +1,6 @@
 package dev.mozhno.contexts;
 
+import dev.mozhno.ContextType;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -114,7 +115,7 @@ public class ContextDefinitionRepository {
             }
             String type = ctx.getContextType();
             if (type == null || type.isBlank()) {
-                type = "string";
+                type = ContextType.STRING.getValue();
                 ctx.setContextType(type);
             }
             final String finalKey = key;

@@ -2,6 +2,7 @@ package dev.mozhno.contexts;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import dev.mozhno.ContextType;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.segments.SegmentContextRepository;
@@ -86,7 +87,7 @@ public class ContextService {
         definition.setProjectId(request.getProjectId());
         definition.setName(request.getName());
         definition.setContextKey(request.getKey());
-        definition.setContextType(request.getType() != null ? request.getType() : "string");
+        definition.setContextType(ContextType.fromValue(request.getType()).getValue());
         definition.setCreatedBy(createdBy);
         definition.setDescription(request.getDescription());
         if (request.getIsStrict() != null) definition.setStrict(request.getIsStrict());
@@ -115,7 +116,7 @@ public class ContextService {
         if (definition == null) throw new NotFoundException("ContextDefinition", id);
         definition.setName(request.getName());
         definition.setContextKey(request.getKey());
-        definition.setContextType(request.getType() != null ? request.getType() : "string");
+        definition.setContextType(ContextType.fromValue(request.getType()).getValue());
         definition.setDescription(request.getDescription());
         if (request.getIsStrict() != null) definition.setStrict(request.getIsStrict());
         ContextDefinition saved = contextDefinitionRepository.save(definition);

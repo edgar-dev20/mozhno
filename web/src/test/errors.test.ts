@@ -98,6 +98,32 @@ describe('getErrorMessage', () => {
     expect(msg).toBe('Данные заполнены некорректно. Проверьте поля формы.');
   });
 
+  it('returns details message for VALIDATION with single field error', () => {
+    const err = new AppError('Validation failed: email is required (email)', 'VALIDATION', 400, {
+      error: 'Validation failed: email is required (email)',
+      code: 'VALIDATION_ERROR',
+      details: [{ field: 'email', message: 'email is required' }],
+    });
+    const msg = getErrorMessage(err);
+    expect(msg).toBe('email is required');
+  });
+
+  it('returns joined details for VALIDATION with multiple field errors', () => {
+    const err = new AppError(
+      'Validation failed: must not be blank (context[0].operator); must not be blank (context[0].contextValues)',
+      'VALIDATION', 400, {
+      error: 'Validation failed',
+      code: 'VALIDATION_ERROR',
+      details: [
+        { field: 'context[0].operator', message: 'must not be blank' },
+        { field: 'context[0].contextValues', message: 'must not be blank' },
+      ],
+    });
+    const msg = getErrorMessage(err);
+    expect(msg).toContain('must not be blank');
+    expect(msg).toContain('\n');
+  });
+
   it('returns raw message for HTTP-prefixed errors', () => {
     const msg = getErrorMessage(new AppError('HTTP 500 Internal Error', 'SERVER'));
     expect(msg).toBe('HTTP 500 Internal Error');

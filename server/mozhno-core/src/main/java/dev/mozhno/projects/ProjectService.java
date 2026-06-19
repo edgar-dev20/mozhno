@@ -3,6 +3,7 @@ package dev.mozhno.projects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import dev.mozhno.ContextType;
 import dev.mozhno.contexts.ContextDefinitionRequest;
 import dev.mozhno.contexts.ContextService;
 import dev.mozhno.environments.EnvironmentService;
@@ -78,7 +79,7 @@ public class ProjectService {
         ctxRequest.setProjectId(saved.getId());
         ctxRequest.setName("userId");
         ctxRequest.setKey("user_id");
-        ctxRequest.setType("string");
+        ctxRequest.setType(ContextType.STRING.getValue());
         ctxRequest.setDescription("User identifier");
         contextService.createDefinition(ctxRequest, null);
         events.publish(DomainEvent.of(saved.getId(), "project.created", "project",

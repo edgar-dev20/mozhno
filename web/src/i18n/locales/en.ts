@@ -246,6 +246,8 @@ const en = {
     },
     whitelistAllSelected: 'All allowed values selected',
     whitelistSuggestions: 'Suggestions from whitelist:',
+    coveredBySegment: 'Already covered by segment «{{segment}}»',
+    segmentsCoveredValuesNote: 'Grayed values are already included via selected segments.',
   },
   segments: {
     title: 'Segments',

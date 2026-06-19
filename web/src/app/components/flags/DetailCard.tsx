@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Trash2 } from '@/shared/icons';
 import { MultiValueChips } from '@/app/components/flags/MultiValueChips';
+import { ContextType } from '@/app/components/contextTypes';
+import { isMultiOperator } from '@/app/components/operatorsMeta';
 import {
   getOperatorsForType,
   getInputPlaceholder,
@@ -45,13 +47,13 @@ export function DetailCard({
   const [focusedKey, setFocusedKey] = useState(0);
 
   const hasContext = group !== null && group.contextDefId !== 0;
-  const isMulti = group?.operator === 'in' || group?.operator === 'not_in';
+  const isMulti = isMultiOperator(group?.operator ?? '');
   const ctxDef = hasContext ? (Array.isArray(contexts) ? contexts.find((c) => c.id === group?.contextDefId) : undefined) : undefined;
   const contextType = ctxDef?.type;
 
   const previewValues = group?.values.length
     ? group.values.length === 1
-      ? contextType === 'time'
+      ? contextType === ContextType.TIME
         ? formatTimeConstraintValue(group.values[0])
         : group.values[0]
       : group.values.length <= 3
@@ -139,7 +141,7 @@ export function DetailCard({
                   </div>
                 ) : (
                   <div className="space-y-1.5">
-                    {ctxDef?.type === 'time' ? (
+                    {ctxDef?.type === ContextType.TIME ? (
                       <DateTimePicker
                         value={group.values[0] ?? ''}
                         onChange={(iso) => onChange({ ...group, values: iso ? [iso] : [] })}
@@ -169,7 +171,7 @@ export function DetailCard({
                         className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
                       />
                     )}
-                    {ctxDef?.type && ctxDef.type !== 'string' && ctxDef.type !== 'time' && (
+                    {ctxDef?.type && ctxDef.type !== ContextType.STRING && ctxDef.type !== ContextType.TIME && (
                       <p className="text-[11px] text-muted-foreground/60 ml-0.5">
                         {getInputHint(ctxDef.type)}
                       </p>
@@ -189,7 +191,7 @@ export function DetailCard({
                     <span className="font-semibold text-foreground/80">{ctxDef?.name ?? '?'}</span>
                     <OperatorBadge operator={group.operator} contextType={contextType} />
                     <code
-                      className={`break-all min-w-0 ${contextType === 'time' ? 'text-foreground/80' : 'font-mono text-foreground/80'}`}
+                      className={`break-all min-w-0 ${contextType === ContextType.TIME ? 'text-foreground/80' : 'font-mono text-foreground/80'}`}
                     >
                       {previewValues}
                     </code>

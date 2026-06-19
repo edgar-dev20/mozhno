@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.segments.*;
 import dev.mozhno.spi.QuotaSpi;
@@ -90,7 +91,8 @@ class SegmentServiceTest {
 
         SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
         entry.setContextDefinitionId(2);
-        entry.setContextValues("[\"web\",\"mobile\"]");
+        entry.setOperator("in");
+        entry.setContextValues("web,mobile");
         req.setContext(List.of(entry));
 
         Segment result = segmentService.create(req);
@@ -153,5 +155,74 @@ class SegmentServiceTest {
         when(segmentRepository.deleteById(anyInt(), any())).thenReturn(1);
         segmentService.delete(1, null);
         verify(segmentRepository).deleteById(eq(1), any());
+    }
+
+    @Test
+    void create_shouldRejectEmptyOperator() {
+        SegmentRequest req = new SegmentRequest();
+        req.setProjectId(1);
+        req.setName("Test");
+        SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
+        entry.setContextDefinitionId(2);
+        entry.setContextValues("web,mobile");
+        req.setContext(List.of(entry));
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> segmentService.create(req));
+        assertTrue(ex.getMessage().contains("Constraint #1"));
+        assertTrue(ex.getMessage().contains("operator is required"));
+    }
+
+    @Test
+    void create_shouldRejectEmptyValues() {
+        SegmentRequest req = new SegmentRequest();
+        req.setProjectId(1);
+        req.setName("Test");
+        SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
+        entry.setContextDefinitionId(2);
+        entry.setOperator("eq");
+        req.setContext(List.of(entry));
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> segmentService.create(req));
+        assertTrue(ex.getMessage().contains("Constraint #1"));
+        assertTrue(ex.getMessage().contains("values are required"));
+    }
+
+    @Test
+    void create_shouldRejectMultiValueSingleOperator() {
+        SegmentRequest req = new SegmentRequest();
+        req.setProjectId(1);
+        req.setName("Test");
+        SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
+        entry.setContextDefinitionId(2);
+        entry.setOperator("eq");
+        entry.setContextValues("web,mobile,desktop");
+        req.setContext(List.of(entry));
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> segmentService.create(req));
+        assertTrue(ex.getMessage().contains("single-value operator"));
+        assertTrue(ex.getMessage().contains("got 3"));
+    }
+
+    @Test
+    void create_shouldAcceptValidMultiValueOperator() {
+        when(segmentRepository.save(any(Segment.class))).thenAnswer(inv -> {
+            Segment s = inv.getArgument(0);
+            s.setId(1);
+            return s;
+        });
+        doNothing().when(segmentContextRepository).saveBatch(anyInt(), anyList());
+
+        SegmentRequest req = new SegmentRequest();
+        req.setProjectId(1);
+        req.setName("Test");
+        SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
+        entry.setContextDefinitionId(2);
+        entry.setOperator("in");
+        entry.setContextValues("web,mobile,desktop");
+        req.setContext(List.of(entry));
+
+        Segment result = segmentService.create(req);
+        assertNotNull(result);
+        assertEquals("Test", result.getName());
     }
 }

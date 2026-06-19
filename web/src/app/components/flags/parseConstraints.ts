@@ -1,6 +1,7 @@
 import type { ConstraintEntry } from '@/app/components/flags/types';
 import type { ContextDefinition } from '@/api';
 import { isValidOperator, getDefaultOperator } from '@/app/components/operators';
+import { Operator } from '@/app/components/operatorsMeta';
 
 export {
   groupConstraintEntries,
@@ -28,11 +29,11 @@ export function parseConstraintEntries(
       let val: string;
       if (typeof item === 'object' && item !== null && 'op' in item) {
         cdId = item.cd ?? item.contextDefId ?? contextDefinitionId ?? 0;
-        op = item.op ?? 'eq';
+        op = item.op ?? Operator.EQ;
         val = item.val ?? String(item.value ?? '');
       } else {
         cdId = contextDefinitionId ?? 0;
-        op = 'in';
+        op = Operator.IN;
         val = String(item);
       }
       const ctx = Array.isArray(contexts) ? contexts.find((x) => x.id === cdId) : undefined;

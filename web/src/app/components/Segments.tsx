@@ -19,6 +19,8 @@ import { InlineDiffBar } from '@/app/components/InlineDiffBar';
 import { computeDiff, DiffChange } from '@/shared/diffUtils';
 import { SegmentIcon, SegmentIconPicker, SegmentColorPicker } from '@/app/components/SegmentIcon';
 import { DateTimePicker } from '@/shared/components/DateTimePicker';
+import { ContextType } from '@/app/components/contextTypes';
+import { Operator, isMultiOperator } from '@/app/components/operatorsMeta';
 import { SegmentResponse } from '@/api';
 import {
   getDefaultOperator,
@@ -101,7 +103,7 @@ export function Segments() {
     setFormColor(s.color ?? '#7c3aed');
     const initContexts = (s.context ?? []).map((c, i) => {
       const ctx = contexts.find((cd) => cd.id === c.contextDefinitionId);
-      const op = c.operator ?? 'in';
+      const op = c.operator ?? Operator.IN;
       return {
         id: `sc-${Date.now()}-${i}`,
         contextDefinitionId: c.contextDefinitionId,
@@ -126,7 +128,7 @@ export function Segments() {
   const addContext = () => {
     setFormContexts((prev) => [
       ...prev,
-      { id: `sc-${Date.now()}`, contextDefinitionId: 0, operator: 'in', contextValues: '' },
+      { id: `sc-${Date.now()}`, contextDefinitionId: 0, operator: Operator.IN, contextValues: '' },
     ]);
   };
 
@@ -152,7 +154,7 @@ export function Segments() {
     setFormContexts((prev) =>
       prev.map((c) => {
         if (c.id !== id) return c;
-        const isMulti = c.operator === 'in' || c.operator === 'not_in';
+        const isMulti = isMultiOperator(c.operator);
         if (isMulti) {
           const existing = c.contextValues
             ? c.contextValues
@@ -227,16 +229,21 @@ export function Segments() {
   const hasInvalidConstraints = useMemo(() => {
     return formContexts.some((c) => {
       if (c.contextDefinitionId === 0) return false;
+      const operator = c.operator;
+      if (!operator || operator.trim() === '') return true;
+      const values = c.contextValues;
+      if (!values || values.trim() === '') return true;
       const ctx = contexts.find((cd) => cd.id === c.contextDefinitionId);
-      const type = ctx?.type ?? 'string';
-      const isMulti = c.operator === 'in' || c.operator === 'not_in';
-      if (isMulti || type === 'string') return false;
-      const vals = (c.contextValues ?? '')
+      const type = ctx?.type ?? ContextType.STRING;
+      const isMulti = isMultiOperator(operator);
+      const vals = values
         .split(',')
         .map((v) => v.trim())
         .filter(Boolean);
+      if (!isMulti && vals.length > 1) return true;
       if (vals.length === 0) return false;
-      return vals.some((v) => !isConstraintValueValid(type, v, c.operator));
+      if (isMulti || type === ContextType.STRING) return false;
+      return vals.some((v) => !isConstraintValueValid(type, v, operator));
     });
   }, [formContexts, contexts]);
 
@@ -255,7 +262,7 @@ export function Segments() {
                 const ctx = contexts.find((cd) => cd.id === r.contextDefinitionId);
                 const sCtxType = ctx?.type;
                 const sDisplayValues =
-                  sCtxType === 'time'
+                  sCtxType === ContextType.TIME
                     ? (r.contextValues || '')
                         .split(',')
                         .map((v) => formatTimeConstraintValue(v.trim()))
@@ -267,7 +274,7 @@ export function Segments() {
                       {ctx?.name ??
                         t('segments.unknownField', { id: String(r.contextDefinitionId) })}
                     </span>
-                    <OperatorBadge operator={r.operator ?? 'in'} contextType={sCtxType} />
+                    <OperatorBadge operator={r.operator ?? Operator.IN} contextType={sCtxType} />
                     <code className="font-mono text-success break-all">{sDisplayValues}</code>
                   </div>
                 );
@@ -443,7 +450,7 @@ export function Segments() {
                             const ctxDef = contexts.find((cd) => cd.id === c.contextDefinitionId);
                             const sCtxType = ctxDef?.type;
                             const sDisplayValues =
-                              sCtxType === 'time'
+                              sCtxType === ContextType.TIME
                                 ? (c.contextValues || '')
                                     .split(',')
                                     .map((v) => formatTimeConstraintValue(v.trim()))
@@ -458,7 +465,7 @@ export function Segments() {
                                     })}
                                 </span>
                                 <OperatorBadge
-                                  operator={c.operator ?? 'in'}
+                                  operator={c.operator ?? Operator.IN}
                                   contextType={sCtxType}
                                 />
                                 <span className="text-foreground/80 break-all line-clamp-1">
@@ -638,7 +645,7 @@ export function Segments() {
                 const formatRowValues = (vals: string[]): string => {
                   if (vals.length === 0) return '∅';
                   const displayed =
-                    sCtxType === 'time' ? vals.map(formatTimeConstraintValue) : vals;
+                    sCtxType === ContextType.TIME ? vals.map(formatTimeConstraintValue) : vals;
                   if (displayed.length === 1) return displayed[0];
                   const display = displayed.slice(0, 3).join(', ');
                   return displayed.length > 3 ? `[${display}, ...]` : `[${display}]`;
@@ -666,6 +673,18 @@ export function Segments() {
                 };
 
                 const handleOperatorChange = (op: string) => {
+                  const isCurrentlyMulti = isMultiOperator(c.operator);
+                  const newIsMulti = isMultiOperator(op);
+                  if (isCurrentlyMulti && !newIsMulti) {
+                    const vals = (c.contextValues ?? '')
+                      .split(',')
+                      .map((v) => v.trim())
+                      .filter(Boolean);
+                    if (vals.length > 1) {
+                      updateEntry({ operator: op, contextValues: vals[0] });
+                      return;
+                    }
+                  }
                   updateEntry({ operator: op });
                 };
 
@@ -693,7 +712,7 @@ export function Segments() {
                       <div className="space-y-3">
                         <div className="flex items-start gap-1.5">
                           <div className="flex-1 space-y-1.5">
-                            {contextType === 'time' ? (
+                            {contextType === ContextType.TIME ? (
                               <DateTimePicker
                                 onChange={(iso) => {
                                   if (!iso) return;
@@ -704,7 +723,7 @@ export function Segments() {
                             ) : strict && hasWhitelist ? (
                               <div className="flex flex-wrap gap-1.5">
                                 {validVals.map((v) => {
-                                  const isMultiOp = c.operator === 'in' || c.operator === 'not_in';
+                                  const isMultiOp = isMultiOperator(c.operator);
                                   const isSelected = parsedValues.includes(v);
                                   if (isMultiOp && isSelected) return null;
                                   return (
@@ -791,7 +810,7 @@ export function Segments() {
                                 </div>
                               </div>
                             )}
-                            {contextType !== 'string' && contextType !== 'time' && (
+                            {contextType !== ContextType.STRING && contextType !== ContextType.TIME && (
                               <p className="text-[11px] text-muted-foreground/60 ml-0.5">
                                 {getInputHint(contextType)}
                               </p>
