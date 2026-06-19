@@ -33,6 +33,12 @@ export interface FeatureFlag {
 export interface Activation {
   rollOut?: number;
   constraints?: Constraint[];
+  segments?: Segment[];
+}
+
+export interface Segment {
+  name?: string;
+  constraints?: Constraint[];
 }
 
 export interface Constraint {

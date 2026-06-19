@@ -20,12 +20,12 @@ public class ClientFlagResponse {
     private boolean enabled;
     private Activation activation;
 
-    public ClientFlagResponse(Flag flag, FlagStrategy strategy, List<Constraint> constraints) {
+    public ClientFlagResponse(Flag flag, FlagStrategy strategy, List<Constraint> constraints, List<Segment> segments) {
         this.name = flag.getName();
         this.key = flag.getKey();
         this.enabled = strategy != null ? strategy.isEnabled() : flag.isEnabled();
         if (strategy != null) {
-            this.activation = new Activation(strategy.getPercentage(), constraints);
+            this.activation = new Activation(strategy.getPercentage(), constraints, segments);
         }
     }
 
@@ -35,11 +35,21 @@ public class ClientFlagResponse {
     public static class Activation {
         private Double rollOut;
         private List<Constraint> constraints;
+        private List<Segment> segments;
 
-        public Activation(Double rollOut, List<Constraint> constraints) {
+        public Activation(Double rollOut, List<Constraint> constraints, List<Segment> segments) {
             this.rollOut = rollOut;
             this.constraints = constraints;
+            this.segments = segments;
         }
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class Segment {
+        private String name;
+        private List<Constraint> constraints;
     }
 
     @Getter

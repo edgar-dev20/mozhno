@@ -64,7 +64,7 @@ class ClientFlagResponseTest {
 
     @Test
     void activationWithConstructor_shouldWork() {
-        var a = new ClientFlagResponse.Activation(30.0, null);
+        var a = new ClientFlagResponse.Activation(30.0, null, null);
         assertThat(a.getRollOut()).isEqualTo(30.0);
         assertThat(a.getConstraints()).isNull();
     }

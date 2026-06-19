@@ -15,7 +15,13 @@ public class ConstraintEvaluator {
         FeatureFlag.Activation activation = flag.getActivation();
         if (activation == null) return true;
 
-        if (!evaluateConstraints(activation.getConstraints(), context)) return false;
+        List<FeatureFlag.Constraint> constraints = activation.getConstraints();
+        List<FeatureFlag.Segment> segments = activation.getSegments();
+
+        boolean constraintsOk = evaluateConstraints(constraints, context);
+        boolean segmentsOk = evaluateSegments(segments, context);
+
+        if (!constraintsOk || !segmentsOk) return false;
 
         if (activation.getRollOut() != null) {
             if (activation.getRollOut() >= 100) return true;
@@ -31,6 +37,16 @@ public class ConstraintEvaluator {
         }
 
         return true;
+    }
+
+    private boolean evaluateSegments(List<FeatureFlag.Segment> segments, MozhnoContext context) {
+        if (segments == null || segments.isEmpty()) return true;
+        for (FeatureFlag.Segment segment : segments) {
+            if (evaluateConstraints(segment.getConstraints(), context)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean evaluateConstraints(List<FeatureFlag.Constraint> constraints, MozhnoContext context) {

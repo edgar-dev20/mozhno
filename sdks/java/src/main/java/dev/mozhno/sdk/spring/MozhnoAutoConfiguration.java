@@ -1,5 +1,6 @@
 package dev.mozhno.sdk.spring;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -21,7 +22,7 @@ public class MozhnoAutoConfiguration {
     private final MozhnoContextProvider contextProvider;
 
     public MozhnoAutoConfiguration(MozhnoProperties properties,
-                                    @org.springframework.beans.factory.annotation.Autowired(required = false) MozhnoContextProvider contextProvider) {
+                                    @Autowired(required = false) MozhnoContextProvider contextProvider) {
         this.properties = properties;
         this.contextProvider = contextProvider;
     }

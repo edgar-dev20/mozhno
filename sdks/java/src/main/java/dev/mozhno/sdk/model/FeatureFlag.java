@@ -22,11 +22,26 @@ public class FeatureFlag {
     public static class Activation {
         private Double rollOut;
         private List<Constraint> constraints;
+        private java.util.List<Segment> segments;
 
         public Activation() {}
 
         public Double getRollOut() { return rollOut; }
         public void setRollOut(Double rollOut) { this.rollOut = rollOut; }
+        public List<Constraint> getConstraints() { return constraints; }
+        public void setConstraints(List<Constraint> constraints) { this.constraints = constraints; }
+        public java.util.List<Segment> getSegments() { return segments; }
+        public void setSegments(java.util.List<Segment> segments) { this.segments = segments; }
+    }
+
+    public static class Segment {
+        private String name;
+        private List<Constraint> constraints;
+
+        public Segment() {}
+
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
         public List<Constraint> getConstraints() { return constraints; }
         public void setConstraints(List<Constraint> constraints) { this.constraints = constraints; }
     }
