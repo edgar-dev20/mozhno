@@ -23,7 +23,7 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { UserTableSkeleton } from '@/app/components/skeletons';
 import { api, UserDto } from '@/api';
-import { SectionHeader, GradientButton, EmptyState, SearchInput, ErrorBox, Badge } from '@/shared';
+import { SectionHeader, GradientButton, EmptyState, SearchInput, ErrorBox, Badge, getErrorMessage } from '@/shared';
 import { useT, useLocale } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
@@ -128,7 +128,7 @@ export function Users() {
       setDeleteId(null);
       setIsPanelOpen(false);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : t('users.errors.delete'));
+      toast.error(getErrorMessage(e));
     } finally {
       setDeleting(false);
     }
@@ -142,7 +142,7 @@ export function Users() {
       toast.success(t('users.form.resetLinkSent'));
       setResetPasswordOpen(false);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : t('users.errors.save'));
+      toast.error(getErrorMessage(e));
     } finally {
       setResettingPassword(false);
     }
@@ -192,7 +192,7 @@ export function Users() {
       setIsPanelOpen(false);
       setDiffOpen(false);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : t('users.errors.save'));
+      setError(getErrorMessage(e));
     } finally {
       setSaving(false);
     }

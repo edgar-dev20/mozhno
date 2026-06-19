@@ -21,7 +21,7 @@ import { api, Environment } from '@/api';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { PluginSlot } from '@/app/components/PluginSlot';
-import { SectionHeader, EmptyState, GradientButton, LoadingState } from '@/shared';
+import { SectionHeader, EmptyState, GradientButton, LoadingState, getErrorMessage } from '@/shared';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
@@ -142,7 +142,7 @@ export function Settings() {
       setInitialEditEnvName('');
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : t('settings.errorSaveEnv'));
+      toast.error(getErrorMessage(e));
     },
     onSettled: () => setSavingEnvEdit(false),
   });
@@ -174,7 +174,7 @@ export function Settings() {
       window.dispatchEvent(new Event('project-updated'));
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : t('settings.errorSaveProject'));
+      toast.error(getErrorMessage(e));
     },
     onSettled: () => setSavingProject(false),
   });
@@ -208,7 +208,7 @@ export function Settings() {
       setNewEnvName('');
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : t('settings.errorAddEnv'));
+      toast.error(getErrorMessage(e));
     },
     onSettled: () => setSavingEnv(false),
   });
@@ -240,7 +240,7 @@ export function Settings() {
       setDeleteEnvId(null);
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : t('settings.errorDeleteEnv'));
+      toast.error(getErrorMessage(e));
     },
     onSettled: () => setDeletingEnv(false),
   });
@@ -257,7 +257,7 @@ export function Settings() {
     try {
       await api.projects.delete(projectId);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : t('settings.errorDeleteProject'));
+      toast.error(getErrorMessage(e));
       setDeletingProject(false);
       return;
     }

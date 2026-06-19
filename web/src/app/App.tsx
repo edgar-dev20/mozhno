@@ -1,6 +1,6 @@
 import { RouterProvider } from 'react-router';
 import { ThemeProvider } from 'next-themes';
-import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, QueryCache } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { MotionConfig } from 'motion/react';
 import { Toaster } from '@/app/components/ui/sonner';
@@ -13,12 +13,6 @@ const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
       if (query.state.data !== undefined) return;
-      if (isAppError(error) && error.code === 'UNAUTHORIZED') return;
-      toast.error(getErrorMessage(error));
-    },
-  }),
-  mutationCache: new MutationCache({
-    onError: (error) => {
       if (isAppError(error) && error.code === 'UNAUTHORIZED') return;
       toast.error(getErrorMessage(error));
     },

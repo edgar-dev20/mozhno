@@ -19,9 +19,10 @@ import {
 } from '@/shared/icons';
 import { format, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
+import { toast } from 'sonner';
 import { api, AuditEvent } from '@/api';
 import { TipCard } from '@/app/components/TipCard';
-import { SectionHeader, EmptyState, SearchInput } from '@/shared';
+import { SectionHeader, EmptyState, SearchInput, getErrorMessage } from '@/shared';
 
 const DateRangePicker = lazy(() =>
   import('@/shared/components/DateRangePicker').then((m) => ({ default: m.DateRangePicker })),
@@ -99,7 +100,7 @@ export function AuditLog() {
         }
         setHasMore(data.length === PAGE_SIZE);
       } catch (e) {
-        if (import.meta.env.DEV) console.error(e);
+        toast.error(getErrorMessage(e));
       } finally {
         setLoadingMore(false);
       }

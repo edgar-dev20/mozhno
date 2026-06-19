@@ -9,7 +9,7 @@ import { InlineDiffBar } from '@/app/components/InlineDiffBar';
 import type { DiffChange } from '@/shared/diffUtils';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
 import { api, ContextDefinition, SegmentResponse } from '@/api';
-import { SectionHeader, EmptyState, FormField, GradientButton, ErrorBox, Badge } from '@/shared';
+import { SectionHeader, EmptyState, FormField, GradientButton, ErrorBox, Badge, getErrorMessage } from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useContextsQuery, useSegmentsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -113,7 +113,7 @@ export function Constraints() {
       setPanelOpen(false);
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : t('constraints.errors.delete'));
+      toast.error(getErrorMessage(e));
     },
     onSettled: () => setDeleting(false),
   });
@@ -149,7 +149,7 @@ export function Constraints() {
       setPanelOpen(false);
     },
     onError: (e: unknown) => {
-      setError(e instanceof Error ? e.message : t('constraints.errors.save'));
+      setError(getErrorMessage(e));
     },
     onSettled: () => setSaving(false),
   });

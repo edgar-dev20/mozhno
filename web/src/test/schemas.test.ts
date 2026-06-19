@@ -85,6 +85,8 @@ const validContextDefinition = {
   type: 'string',
   createdBy: null,
   description: 'Country of the user',
+  isStrict: false,
+  validValues: ['US', 'GB', 'DE'],
   createdAt: '2025-01-01T00:00:00Z',
 };
 

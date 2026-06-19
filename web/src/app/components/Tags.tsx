@@ -15,6 +15,7 @@ import {
   FormField,
   GradientButton,
   ErrorBox,
+  getErrorMessage,
 } from '@/shared';
 import { useProjectQuery, useTagsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -113,7 +114,7 @@ export function Tags() {
       setPanelOpen(false);
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : t('tags.errors.delete'));
+      toast.error(getErrorMessage(e));
     },
     onSettled: () => setDeleting(false),
   });

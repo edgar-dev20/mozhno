@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { api, setToken, setRefreshToken } from '@/api';
 import { useT } from '@/i18n';
+import { getErrorMessage } from '@/shared/errorHandler';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
@@ -87,7 +88,7 @@ export function useCreateProject(): UseCreateProjectReturn {
         queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
         onComplete();
       } catch (e) {
-        setProjectError((e as Error).message || t('onboarding.projectCreateError'));
+        setProjectError(getErrorMessage(e));
       } finally {
         setCreatingProject(false);
       }

@@ -10,9 +10,10 @@ import {
   SelectValue,
 } from '@/app/components/ui/select';
 import { api, Environment, FlagMetric, ClientInstance } from '@/api';
-import { timeAgo, Card, CardHeader, Hairline, StatusDot, TruncatedCopyTooltip } from '@/shared';
+import { timeAgo, Card, CardHeader, Hairline, StatusDot, TruncatedCopyTooltip, getErrorMessage } from '@/shared';
 import { motion, AnimatePresence } from 'motion/react';
 import { useT } from '@/i18n';
+import { toast } from 'sonner';
 
 const ACTIVE_MS = 5 * 60 * 1000;
 const RECENT_MS = 60 * 60 * 1000;
@@ -118,7 +119,8 @@ export function FlagMetricsDialog({
           hasEverLoaded.current = true;
           setChartReady(true);
         })
-        .catch(() => {
+        .catch((err) => {
+          toast.error(getErrorMessage(err));
           setMetrics([]);
           setChartReady(true);
         })
@@ -139,7 +141,8 @@ export function FlagMetricsDialog({
           data.filter((i) => Date.now() - new Date(i.lastSeenAt).getTime() < 24 * 60 * 60 * 1000),
         );
       })
-      .catch(() => {
+      .catch((err) => {
+        toast.error(getErrorMessage(err));
         setInstances([]);
       })
       .finally(() => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
 import { Mail, ArrowLeft } from '@/shared/icons';
-import { GradientButton, ErrorBox } from '@/shared';
+import { GradientButton, ErrorBox, getErrorMessage } from '@/shared';
 import { Input } from '@/app/components/ui/input';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { api } from '@/api';
@@ -24,7 +24,7 @@ export function ForgotPassword() {
       await api.auth.forgotPassword(email, locale);
       setSent(true);
     } catch (err) {
-      setError((err as Error).message || t('auth.error.sendFailed'));
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

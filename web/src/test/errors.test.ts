@@ -93,6 +93,16 @@ describe('getErrorMessage', () => {
     expect(msg).toBe('plain error');
   });
 
+  it('returns localized message for VALIDATION error', () => {
+    const msg = getErrorMessage(new AppError('Bad data', 'VALIDATION'));
+    expect(msg).toBe('Данные заполнены некорректно. Проверьте поля формы.');
+  });
+
+  it('returns raw message for HTTP-prefixed errors', () => {
+    const msg = getErrorMessage(new AppError('HTTP 500 Internal Error', 'SERVER'));
+    expect(msg).toBe('HTTP 500 Internal Error');
+  });
+
   it('returns String for non-error values', () => {
     expect(getErrorMessage('str')).toBe('str');
     expect(getErrorMessage(42)).toBe('42');
