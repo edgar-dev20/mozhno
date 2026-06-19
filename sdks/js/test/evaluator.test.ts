@@ -224,7 +224,7 @@ describe('Evaluator', () => {
     expect(isFlagEnabled(flag, { country: 'US' })).toBe(false);
   });
 
-  it('segments AND constraints both required', () => {
+  it('segments AND constraints OR either passes', () => {
     const flag: FeatureFlag = {
       name: 'test',
       key: 'test',
@@ -237,8 +237,9 @@ describe('Evaluator', () => {
       },
     };
     expect(isFlagEnabled(flag, { plan: 'premium', country: 'RU' })).toBe(true);
-    expect(isFlagEnabled(flag, { plan: 'premium', country: 'US' })).toBe(false);
-    expect(isFlagEnabled(flag, { plan: 'basic', country: 'RU' })).toBe(false);
+    expect(isFlagEnabled(flag, { plan: 'premium', country: 'US' })).toBe(true);
+    expect(isFlagEnabled(flag, { plan: 'basic', country: 'RU' })).toBe(true);
+    expect(isFlagEnabled(flag, { plan: 'basic', country: 'US' })).toBe(false);
   });
 
   it('empty segments pass', () => {

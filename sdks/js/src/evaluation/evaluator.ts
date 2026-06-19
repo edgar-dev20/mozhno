@@ -159,7 +159,16 @@ export function isFlagEnabled(flag: FeatureFlag, context: MozhnoContext): boolea
   const constraintsOk = evaluateConstraints(activation.constraints || [], context);
   const segmentsOk = evaluateSegments(activation.segments, context);
 
-  if (!constraintsOk || !segmentsOk) return false;
+  const hasConstraints = (activation.constraints?.length ?? 0) > 0;
+  const hasSegments = (activation.segments?.length ?? 0) > 0;
+
+  if (hasConstraints && hasSegments) {
+    if (!constraintsOk && !segmentsOk) return false;
+  } else if (hasConstraints) {
+    if (!constraintsOk) return false;
+  } else if (hasSegments) {
+    if (!segmentsOk) return false;
+  }
 
   const rollOut = activation.rollOut;
   if (rollOut != null) {

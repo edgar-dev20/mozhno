@@ -30,7 +30,11 @@ public class FeatureFlagEvaluator {
         if (!enabled) return false;
 
         if (s != null) {
+            boolean hasDirect = false;
+            boolean directOk = true;
+
             if (s.getContextValuesJson() != null) {
+                hasDirect = true;
                 List<FlagConstraintParser.StrategyConstraint> parsed =
                     FlagConstraintParser.parseStrategyConstraints(s.getContextValuesJson());
                 Map<String, ConstraintEval> directConstraints = new LinkedHashMap<>();
@@ -45,25 +49,34 @@ public class FeatureFlagEvaluator {
                 }
                 for (ConstraintEval ce : directConstraints.values()) {
                     String contextValue = context.get(ce.fieldName);
-                    if (contextValue == null) return false;
-                    if (!checkMultiValue(ce.operator, ce.contextType, contextValue, ce.values)) return false;
+                    if (contextValue == null) {
+                        directOk = false;
+                    } else if (!checkMultiValue(ce.operator, ce.contextType, contextValue, ce.values)) {
+                        directOk = false;
+                    }
                 }
             }
 
+            boolean hasSegments = false;
+            boolean segmentsOk = false;
+
             if (s.getSegmentIds() != null && !s.getSegmentIds().isEmpty()) {
-                boolean anySegmentMatched = false;
+                hasSegments = true;
                 for (Integer segId : s.getSegmentIds()) {
                     List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(segId, Collections.emptyList());
-                    if (segContexts.isEmpty()) {
-                        anySegmentMatched = true;
-                        break;
-                    }
-                    if (evaluateSegment(segContexts, context)) {
-                        anySegmentMatched = true;
+                    if (segContexts.isEmpty() || evaluateSegment(segContexts, context)) {
+                        segmentsOk = true;
                         break;
                     }
                 }
-                if (!anySegmentMatched) return false;
+            }
+
+            if (hasDirect && hasSegments) {
+                if (!directOk && !segmentsOk) return false;
+            } else if (hasDirect) {
+                if (!directOk) return false;
+            } else if (hasSegments) {
+                if (!segmentsOk) return false;
             }
         }
 

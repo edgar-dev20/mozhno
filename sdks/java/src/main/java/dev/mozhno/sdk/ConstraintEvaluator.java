@@ -21,7 +21,16 @@ public class ConstraintEvaluator {
         boolean constraintsOk = evaluateConstraints(constraints, context);
         boolean segmentsOk = evaluateSegments(segments, context);
 
-        if (!constraintsOk || !segmentsOk) return false;
+        boolean hasConstraints = constraints != null && !constraints.isEmpty();
+        boolean hasSegments = segments != null && !segments.isEmpty();
+
+        if (hasConstraints && hasSegments) {
+            if (!constraintsOk && !segmentsOk) return false;
+        } else if (hasConstraints) {
+            if (!constraintsOk) return false;
+        } else if (hasSegments) {
+            if (!segmentsOk) return false;
+        }
 
         if (activation.getRollOut() != null) {
             if (activation.getRollOut() >= 100) return true;
