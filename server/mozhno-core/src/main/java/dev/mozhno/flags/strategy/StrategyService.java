@@ -3,8 +3,10 @@ package dev.mozhno.flags.strategy;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
+import dev.mozhno.CacheNames;
 import dev.mozhno.Operator;
 import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.NotFoundException;
@@ -94,6 +96,7 @@ public class StrategyService {
      * @param id the strategy ID
      */
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public void delete(Integer id, Integer flagId) {
         FlagStrategy existing;
         if (flagId != null) {
@@ -119,6 +122,7 @@ public class StrategyService {
      * @throws RuntimeException if the strategy is not found
      */
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public FlagStrategy update(Integer id, StrategyRequest request, Integer flagId) {
         FlagStrategy existing;
         if (flagId != null) {
@@ -161,6 +165,7 @@ public class StrategyService {
      * @throws RuntimeException if the flag is not found
      */
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public FlagStrategy upsert(StrategyRequest request, Integer projectId) {
         Flag flag;
         if (projectId != null) {

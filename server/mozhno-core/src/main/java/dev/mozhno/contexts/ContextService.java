@@ -2,6 +2,8 @@ package dev.mozhno.contexts;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import dev.mozhno.CacheNames;
 import dev.mozhno.ContextType;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
@@ -9,10 +11,8 @@ import dev.mozhno.segments.SegmentContextRepository;
 import dev.mozhno.spi.QuotaSpi;
 import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.NotFoundException;
+import dev.mozhno.util.QuotaValidator;
 
-import java.util.stream.Collectors;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +80,7 @@ public class ContextService {
      * @throws RuntimeException if the context quota is exceeded
      */
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public ContextDefinition createDefinition(ContextDefinitionRequest request, String createdBy) {
         dev.mozhno.util.QuotaValidator.check(quotaSpi.canCreateContext(request.getProjectId()));
 
@@ -106,6 +107,7 @@ public class ContextService {
      * @throws RuntimeException if not found
      */
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public ContextDefinition updateDefinition(Integer id, ContextDefinitionRequest request) {
         ContextDefinition definition;
         if (request.getProjectId() != null) {
@@ -132,6 +134,7 @@ public class ContextService {
      * @throws RuntimeException if not found or still used by segments
      */
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public void deleteDefinition(Integer id, Integer projectId) {
         if (segmentContextRepository.existsByContextDefinitionId(id)) {
             throw new BadRequestException("Cannot delete context: it is used by segments");
@@ -177,6 +180,7 @@ public class ContextService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public ContextValue updateValue(Integer id, ContextValueRequest request, Integer projectId) {
         ContextValue value = contextValueRepository.findById(id);
         if (value == null) throw new NotFoundException("ContextValue", id);
@@ -195,6 +199,7 @@ public class ContextService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public ContextValue createValue(ContextValueRequest request, Integer projectId) {
         if (projectId != null) {
             ContextDefinition def = contextDefinitionRepository.findByIdAndProjectId(request.getContextDefinitionId(), projectId);
@@ -234,6 +239,7 @@ public class ContextService {
      * @throws NotFoundException if the value does not exist
      */
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public void deleteValue(Integer id, Integer projectId) {
         ContextValue value = contextValueRepository.findById(id);
         if (value == null) throw new NotFoundException("ContextValue", id);

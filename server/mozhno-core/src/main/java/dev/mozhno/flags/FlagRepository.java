@@ -4,6 +4,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import dev.mozhno.CacheNames;
 import dev.mozhno.flags.strategy.FlagStrategy;
 
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -312,7 +313,7 @@ public class FlagRepository {
      * @param flag the flag to save
      * @return the saved flag with its ID populated
      */
-    @CacheEvict(value = "flags", allEntries = true)
+    @CacheEvict(value = CacheNames.FLAGS, allEntries = true)
     public Flag save(Flag flag) {
         if (flag.getId() == null) {
             Instant createTime = Instant.now();
@@ -348,7 +349,7 @@ public class FlagRepository {
      * @param projectId the project ID
      * @return number of deleted rows
      */
-    @CacheEvict(value = "flags", allEntries = true)
+    @CacheEvict(value = CacheNames.FLAGS, allEntries = true)
     public int deleteById(Integer id, Integer projectId) {
         return jdbc.update("DELETE FROM flags WHERE id = ? AND project_id = ?", id, projectId);
     }
@@ -361,7 +362,7 @@ public class FlagRepository {
      * @param archivedBy the ID of the user performing the action
      * @param projectId the project ID
      */
-    @CacheEvict(value = "flags", allEntries = true)
+    @CacheEvict(value = CacheNames.FLAGS, allEntries = true)
     public int setArchived(Integer id, boolean archived, Integer archivedBy, Integer projectId) {
         return jdbc.update("UPDATE flags SET archived = ?, archived_by = ?, archived_at = ? WHERE id = ? AND project_id = ?",
             archived, archivedBy, archived ? new Timestamp(System.currentTimeMillis()) : null, id, projectId);
@@ -373,7 +374,7 @@ public class FlagRepository {
      * @param id the flag ID
      * @param projectId the project ID
      */
-    @CacheEvict(value = "flags", allEntries = true)
+    @CacheEvict(value = CacheNames.FLAGS, allEntries = true)
     public int clearArchived(Integer id, Integer projectId) {
         return jdbc.update("UPDATE flags SET archived = FALSE, archived_by = NULL, archived_at = NULL WHERE id = ? AND project_id = ?", id, projectId);
     }

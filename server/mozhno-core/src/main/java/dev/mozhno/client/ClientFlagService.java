@@ -1,5 +1,6 @@
 package dev.mozhno.client;
 
+import dev.mozhno.CacheNames;
 import dev.mozhno.ContextType;
 import dev.mozhno.Operator;
 import dev.mozhno.contexts.ContextDefinition;
@@ -49,7 +50,7 @@ public class ClientFlagService {
         this.flagMetricRepository = flagMetricRepository;
     }
 
-    @Cacheable(value = "clientFlags", key = "#projectId + ':' + #environmentId")
+    @Cacheable(value = CacheNames.CLIENT_FLAGS, key = "#projectId + ':' + #environmentId")
     public List<ClientFlagResponse> getFlagsForProject(Integer projectId, Integer environmentId) {
         List<FlagWithStrategy> flags = flagRepository.findByProjectIdWithStrategyForEnvironment(projectId, environmentId);
 
