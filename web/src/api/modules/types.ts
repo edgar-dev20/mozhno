@@ -1,3 +1,139 @@
+export type Project = {
+  id: number;
+  name: string;
+  description: string;
+  logo: string | null;
+  createdAt: string;
+};
+
+export type Environment = {
+  id: number;
+  projectId: number;
+  name: string;
+  createdAt: string;
+};
+
+export type ContextDefinition = {
+  id: number;
+  projectId: number;
+  name: string;
+  key: string;
+  type: string;
+  createdBy: string | null;
+  description: string;
+  isStrict: boolean;
+  validValues: string[];
+  createdAt: string;
+};
+
+export type ContextValue = {
+  id: number;
+  contextDefinitionId: number;
+  values: string;
+  createdAt: string;
+};
+
+export type FlagResponse = {
+  id: number;
+  projectId: number;
+  name: string;
+  key: string;
+  description: string;
+  flagType: string;
+  createdAt: string;
+  createdBy: string | null;
+  lastUsedAt: string | null;
+  archivedBy: string | null;
+  archivedAt: string | null;
+  tags: FlagTagValue[];
+  enabled: boolean;
+  strategyId: number;
+  percentage: number;
+  contextDefinitionId: number;
+  contextValuesJson: string;
+  segmentIds: number[];
+  archived: boolean;
+};
+
+export type FlagRequest = {
+  projectId?: number;
+  name: string;
+  key: string;
+  description?: string;
+  flagType?: string;
+};
+
+export type FlagTagValue = {
+  tagId: number;
+  tagName: string;
+  tagColor: string;
+  value: string;
+};
+
+export type FlagStrategy = {
+  id: number;
+  flagId: number;
+  environmentId: number;
+  enabled: boolean;
+  percentage: number | null;
+  contextDefinitionId: number | null;
+  contextValuesJson: string | null;
+  segmentIds: number[];
+  createdAt: string;
+  lastUsedAt: string | null;
+};
+
+export type StrategyRequest = {
+  flagId: number;
+  environmentId: number;
+  enabled?: boolean;
+  percentage?: number | null;
+  contextDefinitionId?: number | null;
+  contextValuesJson?: string | null;
+  segmentIds?: number[];
+};
+
+export type SegmentResponse = {
+  id: number;
+  projectId: number;
+  name: string;
+  description: string;
+  icon: string;
+  color: string;
+  context: SegmentContextEntry[];
+  createdAt: string;
+};
+
+export type SegmentContextEntry = {
+  contextDefinitionId: number;
+  operator: string;
+  contextValues: string;
+};
+
+export type SegmentRequest = {
+  projectId?: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  context?: SegmentContextEntry[];
+};
+
+export type Tag = {
+  id: number;
+  projectId: number;
+  name: string;
+  description: string;
+  color: string;
+  createdAt: string;
+};
+
+export type TagRequest = {
+  name: string;
+  description?: string;
+  color?: string;
+};
+
 export type UserDto = {
   id: number;
   email: string;

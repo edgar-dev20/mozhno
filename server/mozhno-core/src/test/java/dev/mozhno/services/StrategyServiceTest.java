@@ -9,6 +9,7 @@ import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.flags.Flag;
 import dev.mozhno.flags.FlagRepository;
 import dev.mozhno.flags.strategy.*;
+import dev.mozhno.contexts.ContextService;
 
 import java.util.List;
 
@@ -27,11 +28,14 @@ class StrategyServiceTest {
     @Mock
     private DomainEventPublisher events;
 
+    @Mock
+    private ContextService contextService;
+
     private StrategyService strategyService;
 
     @BeforeEach
     void setUp() {
-        strategyService = new StrategyService(strategyRepository, flagRepository, events);
+        strategyService = new StrategyService(strategyRepository, flagRepository, events, contextService);
     }
 
     @Test

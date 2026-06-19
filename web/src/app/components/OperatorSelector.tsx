@@ -30,10 +30,10 @@ export function OperatorSelector({
             e.stopPropagation();
             onSelect(op.value);
           }}
-          className={`px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-all flex flex-col items-center gap-1.5 ${
+          className={`px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-all flex flex-col items-center gap-1.5 border ${
             currentOperator === op.value
-              ? 'bg-primary/10 text-primary border border-primary/30'
-              : 'bg-secondary/60 text-foreground/70 hover:bg-secondary hover:text-foreground border border-border'
+              ? 'bg-brand/10 text-brand border-brand/20'
+              : 'bg-secondary/60 text-foreground/70 hover:bg-secondary hover:text-foreground border-border'
           }`}
         >
           <span className="leading-none">
@@ -42,7 +42,7 @@ export function OperatorSelector({
           <span
             className={`inline-flex items-center font-mono text-[10px] font-bold px-1.5 py-0.5 rounded leading-none uppercase border ${
               currentOperator === op.value
-                ? 'bg-primary text-primary-foreground border-primary'
+                ? 'bg-brand text-white border-brand'
                 : (OPERATOR_COLORS[op.value] ?? 'bg-muted text-muted-foreground border-border')
             }`}
           >

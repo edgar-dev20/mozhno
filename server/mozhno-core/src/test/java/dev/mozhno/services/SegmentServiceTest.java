@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.segments.*;
 import dev.mozhno.spi.QuotaSpi;
+import dev.mozhno.contexts.ContextService;
 
 import java.util.List;
 
@@ -29,11 +30,14 @@ class SegmentServiceTest {
     @Mock
     private QuotaSpi quotaSpi;
 
+    @Mock
+    private ContextService contextService;
+
     private SegmentService segmentService;
 
     @BeforeEach
     void setUp() {
-        segmentService = new SegmentService(segmentRepository, segmentContextRepository, events, quotaSpi);
+        segmentService = new SegmentService(segmentRepository, segmentContextRepository, events, quotaSpi, contextService);
         lenient().when(quotaSpi.canCreateSegment(any())).thenReturn(new QuotaSpi.Allowed());
     }
 

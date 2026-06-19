@@ -493,4 +493,254 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         ClientMetricsRequest req = new ClientMetricsRequest();
         clientFlagService.recordMetrics(projectId, envId, req, null);
     }
+
+    @Test
+    void evaluate_twoSegmentsDifferentContexts_userMatchesOne_shouldReturnFlag() {
+        ContextDefinition userIdCd = new ContextDefinition();
+        userIdCd.setName("User ID");
+        userIdCd.setContextKey("userId");
+        userIdCd.setProjectId(projectId);
+        Integer userIdCdId = contextDefinitionRepository.save(userIdCd).getId();
+
+        ContextDefinition planCd = new ContextDefinition();
+        planCd.setName("Plan");
+        planCd.setContextKey("plan");
+        planCd.setProjectId(projectId);
+        Integer planCdId = contextDefinitionRepository.save(planCd).getId();
+
+        Segment segA = new Segment();
+        segA.setProjectId(projectId);
+        segA.setName("VIP Users");
+        Integer segAId = segmentRepository.save(segA).getId();
+        SegmentContext scA = new SegmentContext();
+        scA.setSegmentId(segAId);
+        scA.setContextDefinitionId(userIdCdId);
+        scA.setContextValues("user-100,user-200");
+        segmentContextRepository.save(scA);
+
+        Segment segB = new Segment();
+        segB.setProjectId(projectId);
+        segB.setName("Premium Plan");
+        Integer segBId = segmentRepository.save(segB).getId();
+        SegmentContext scB = new SegmentContext();
+        scB.setSegmentId(segBId);
+        scB.setContextDefinitionId(planCdId);
+        scB.setContextValues("premium,enterprise");
+        segmentContextRepository.save(scB);
+
+        Flag flag = new Flag();
+        flag.setProjectId(projectId);
+        flag.setName("OR Segments Flag");
+        flag.setKey("or-segments-flag");
+        flag.setFlagType(FlagType.RELEASE);
+        flag.setEnabled(true);
+        Flag saved = flagRepository.save(flag);
+
+        FlagStrategy s = new FlagStrategy();
+        s.setFlagId(saved.getId());
+        s.setEnvironmentId(envId);
+        s.setEnabled(true);
+        s.setSegmentIds(List.of(segAId, segBId));
+        flagStrategyRepository.save(s);
+
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
+            projectId, envId, Map.of("userId", "user-100"), null, null);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getName()).isEqualTo("OR Segments Flag");
+    }
+
+    @Test
+    void evaluate_twoSegmentsDifferentContexts_userMatchesNone_shouldNotReturn() {
+        ContextDefinition userIdCd = new ContextDefinition();
+        userIdCd.setName("User ID");
+        userIdCd.setContextKey("userId");
+        userIdCd.setProjectId(projectId);
+        Integer userIdCdId = contextDefinitionRepository.save(userIdCd).getId();
+
+        ContextDefinition planCd = new ContextDefinition();
+        planCd.setName("Plan");
+        planCd.setContextKey("plan");
+        planCd.setProjectId(projectId);
+        Integer planCdId = contextDefinitionRepository.save(planCd).getId();
+
+        Segment segA = new Segment();
+        segA.setProjectId(projectId);
+        segA.setName("VIP Users");
+        Integer segAId = segmentRepository.save(segA).getId();
+        SegmentContext scA = new SegmentContext();
+        scA.setSegmentId(segAId);
+        scA.setContextDefinitionId(userIdCdId);
+        scA.setContextValues("user-100");
+        segmentContextRepository.save(scA);
+
+        Segment segB = new Segment();
+        segB.setProjectId(projectId);
+        segB.setName("Premium Plan");
+        Integer segBId = segmentRepository.save(segB).getId();
+        SegmentContext scB = new SegmentContext();
+        scB.setSegmentId(segBId);
+        scB.setContextDefinitionId(planCdId);
+        scB.setContextValues("premium");
+        segmentContextRepository.save(scB);
+
+        Flag flag = new Flag();
+        flag.setProjectId(projectId);
+        flag.setName("No Match");
+        flag.setKey("no-match");
+        flag.setFlagType(FlagType.RELEASE);
+        flag.setEnabled(true);
+        Flag saved = flagRepository.save(flag);
+
+        FlagStrategy s = new FlagStrategy();
+        s.setFlagId(saved.getId());
+        s.setEnvironmentId(envId);
+        s.setEnabled(true);
+        s.setSegmentIds(List.of(segAId, segBId));
+        flagStrategyRepository.save(s);
+
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
+            projectId, envId, Map.of("userId", "not-in-list"), null, null);
+        assertThat(results).isEmpty();
+    }
+
+    @Test
+    void evaluate_twoSegmentsSameContext_userMatchesValueInEither_shouldReturnFlag() {
+        ContextDefinition cd = new ContextDefinition();
+        cd.setName("User ID");
+        cd.setContextKey("userId");
+        cd.setProjectId(projectId);
+        Integer cdId = contextDefinitionRepository.save(cd).getId();
+
+        Segment segA = new Segment();
+        segA.setProjectId(projectId);
+        segA.setName("VIP Users");
+        Integer segAId = segmentRepository.save(segA).getId();
+        SegmentContext scA = new SegmentContext();
+        scA.setSegmentId(segAId);
+        scA.setContextDefinitionId(cdId);
+        scA.setContextValues("user-100,user-200");
+        segmentContextRepository.save(scA);
+
+        Segment segB = new Segment();
+        segB.setProjectId(projectId);
+        segB.setName("Beta Users");
+        Integer segBId = segmentRepository.save(segB).getId();
+        SegmentContext scB = new SegmentContext();
+        scB.setSegmentId(segBId);
+        scB.setContextDefinitionId(cdId);
+        scB.setContextValues("user-300,user-400");
+        segmentContextRepository.save(scB);
+
+        Flag flag = new Flag();
+        flag.setProjectId(projectId);
+        flag.setName("Same Context");
+        flag.setKey("same-context");
+        flag.setFlagType(FlagType.RELEASE);
+        flag.setEnabled(true);
+        Flag saved = flagRepository.save(flag);
+
+        FlagStrategy s = new FlagStrategy();
+        s.setFlagId(saved.getId());
+        s.setEnvironmentId(envId);
+        s.setEnabled(true);
+        s.setSegmentIds(List.of(segAId, segBId));
+        flagStrategyRepository.save(s);
+
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
+            projectId, envId, Map.of("userId", "user-300"), null, null);
+        assertThat(results).hasSize(1);
+    }
+
+    @Test
+    void evaluate_directConstraintAndSegment_userMatchesSegmentButNotDirect_shouldNotReturn() {
+        ContextDefinition userIdCd = new ContextDefinition();
+        userIdCd.setName("User ID");
+        userIdCd.setContextKey("userId");
+        userIdCd.setProjectId(projectId);
+        Integer userIdCdId = contextDefinitionRepository.save(userIdCd).getId();
+
+        ContextDefinition planCd = new ContextDefinition();
+        planCd.setName("Plan");
+        planCd.setContextKey("plan");
+        planCd.setProjectId(projectId);
+        Integer planCdId = contextDefinitionRepository.save(planCd).getId();
+
+        Segment seg = new Segment();
+        seg.setProjectId(projectId);
+        seg.setName("VIP");
+        Integer segId = segmentRepository.save(seg).getId();
+        SegmentContext sc = new SegmentContext();
+        sc.setSegmentId(segId);
+        sc.setContextDefinitionId(userIdCdId);
+        sc.setContextValues("user-100");
+        segmentContextRepository.save(sc);
+
+        Flag flag = new Flag();
+        flag.setProjectId(projectId);
+        flag.setName("Direct + Segment");
+        flag.setKey("direct-segment");
+        flag.setFlagType(FlagType.RELEASE);
+        flag.setEnabled(true);
+        Flag saved = flagRepository.save(flag);
+
+        FlagStrategy s = new FlagStrategy();
+        s.setFlagId(saved.getId());
+        s.setEnvironmentId(envId);
+        s.setEnabled(true);
+        s.setSegmentIds(List.of(segId));
+        s.setContextDefinitionId(planCdId);
+        s.setContextValuesJson("[{\"cd\":" + planCdId + ",\"op\":\"in\",\"val\":\"premium\"}]");
+        flagStrategyRepository.save(s);
+
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
+            projectId, envId, Map.of("userId", "user-100"), null, null);
+        assertThat(results).isEmpty();
+    }
+
+    @Test
+    void evaluate_directConstraintAndSegment_bothMatch_shouldReturnFlag() {
+        ContextDefinition userIdCd = new ContextDefinition();
+        userIdCd.setName("User ID");
+        userIdCd.setContextKey("userId");
+        userIdCd.setProjectId(projectId);
+        Integer userIdCdId = contextDefinitionRepository.save(userIdCd).getId();
+
+        ContextDefinition planCd = new ContextDefinition();
+        planCd.setName("Plan");
+        planCd.setContextKey("plan");
+        planCd.setProjectId(projectId);
+        Integer planCdId = contextDefinitionRepository.save(planCd).getId();
+
+        Segment seg = new Segment();
+        seg.setProjectId(projectId);
+        seg.setName("VIP");
+        Integer segId = segmentRepository.save(seg).getId();
+        SegmentContext sc = new SegmentContext();
+        sc.setSegmentId(segId);
+        sc.setContextDefinitionId(userIdCdId);
+        sc.setContextValues("user-100");
+        segmentContextRepository.save(sc);
+
+        Flag flag = new Flag();
+        flag.setProjectId(projectId);
+        flag.setName("Both Match");
+        flag.setKey("both-match");
+        flag.setFlagType(FlagType.RELEASE);
+        flag.setEnabled(true);
+        Flag saved = flagRepository.save(flag);
+
+        FlagStrategy s = new FlagStrategy();
+        s.setFlagId(saved.getId());
+        s.setEnvironmentId(envId);
+        s.setEnabled(true);
+        s.setSegmentIds(List.of(segId));
+        s.setContextDefinitionId(planCdId);
+        s.setContextValuesJson("[{\"cd\":" + planCdId + ",\"op\":\"in\",\"val\":\"premium\"}]");
+        flagStrategyRepository.save(s);
+
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
+            projectId, envId, Map.of("userId", "user-100", "plan", "premium"), null, null);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getName()).isEqualTo("Both Match");
+    }
 }

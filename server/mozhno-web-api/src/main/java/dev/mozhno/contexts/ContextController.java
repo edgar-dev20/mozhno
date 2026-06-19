@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import dev.mozhno.auth.UserPrincipal;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/contexts")
@@ -24,7 +27,9 @@ public class ContextController {
     @Operation(summary = "Get all context definitions for a project")
     public List<ContextDefinitionResponse> getDefinitions(@AuthenticationPrincipal UserPrincipal user) {
         List<ContextDefinition> defs = contextService.findDefinitionsByProjectId(user.projectId());
-        return contextAssembler.toDefinitionResponseList(defs);
+        Set<Integer> defIds = defs.stream().map(ContextDefinition::getId).collect(Collectors.toSet());
+        Map<Integer, List<String>> valuesByDef = contextService.findValuesByDefinitionIds(defIds);
+        return contextAssembler.toDefinitionResponseList(defs, valuesByDef);
     }
 
     @PostMapping
@@ -35,7 +40,8 @@ public class ContextController {
                                                       @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(user.projectId());
         ContextDefinition def = contextService.createDefinition(request, user.email());
-        return contextAssembler.toDefinitionResponse(def);
+        Map<Integer, List<String>> valuesByDef = contextService.findValuesByDefinitionIds(Set.of(def.getId()));
+        return contextAssembler.toDefinitionResponse(def, valuesByDef.getOrDefault(def.getId(), List.of()));
     }
 
     @GetMapping("/{definitionId}")
@@ -43,7 +49,8 @@ public class ContextController {
     public ContextDefinitionResponse getDefinitionById(@PathVariable Integer definitionId,
                                                        @AuthenticationPrincipal UserPrincipal user) {
         ContextDefinition def = contextService.findDefinitionById(definitionId, user.projectId());
-        return contextAssembler.toDefinitionResponse(def);
+        Map<Integer, List<String>> valuesByDef = contextService.findValuesByDefinitionIds(Set.of(definitionId));
+        return contextAssembler.toDefinitionResponse(def, valuesByDef.getOrDefault(definitionId, List.of()));
     }
 
     @PutMapping("/{definitionId}")
@@ -54,7 +61,8 @@ public class ContextController {
                                                       @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(user.projectId());
         ContextDefinition def = contextService.updateDefinition(definitionId, request);
-        return contextAssembler.toDefinitionResponse(def);
+        Map<Integer, List<String>> valuesByDef = contextService.findValuesByDefinitionIds(Set.of(def.getId()));
+        return contextAssembler.toDefinitionResponse(def, valuesByDef.getOrDefault(def.getId(), List.of()));
     }
 
     @DeleteMapping("/{definitionId}")
@@ -84,6 +92,16 @@ public class ContextController {
         request.setContextDefinitionId(definitionId);
         ContextValue value = contextService.createValue(request, user.projectId());
         return contextAssembler.toValueResponse(value);
+    }
+
+    @PutMapping("/{definitionId}/values")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Replace all values for a context definition")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    public void upsertValues(@PathVariable Integer definitionId,
+                             @Valid @RequestBody ContextValueRequest request,
+                             @AuthenticationPrincipal UserPrincipal user) {
+        contextService.upsertValues(definitionId, request.getValues(), user.projectId());
     }
 
     @GetMapping("/values/{valueId}")

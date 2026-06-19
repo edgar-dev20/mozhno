@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import java.time.Instant;
+import java.util.List;
 
 @Schema(description = "Context definition describing a targeting attribute")
 @Builder
@@ -22,6 +23,10 @@ public record ContextDefinitionResponse(
     String createdBy,
     @Schema(description = "Optional description", nullable = true)
     String description,
+    @Schema(description = "Whether the whitelist is strictly enforced", defaultValue = "false")
+    Boolean isStrict,
+    @Schema(description = "Whitelist of allowed values for this context", nullable = true)
+    List<String> validValues,
     @Schema(description = "Project ID")
     Integer projectId,
     @Schema(description = "When the context definition was created")

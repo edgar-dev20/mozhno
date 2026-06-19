@@ -7,13 +7,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.contexts.*;
+import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.segments.SegmentContextRepository;
 import dev.mozhno.spi.QuotaSpi;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class ContextServiceTest {
@@ -216,5 +221,115 @@ class ContextServiceTest {
         doNothing().when(contextValueRepository).deleteById(1);
         contextService.deleteValue(1, null);
         verify(contextValueRepository).deleteById(1);
+    }
+
+    @Test
+    void validateStrictValues_nonStrictContext_shouldPass() {
+        ContextDefinition def = new ContextDefinition();
+        def.setId(1);
+        def.setStrict(false);
+        when(contextDefinitionRepository.findById(1)).thenReturn(def);
+
+        assertDoesNotThrow(() -> contextService.validateStrictValues(1, "some-value"));
+    }
+
+    @Test
+    void validateStrictValues_defNotFound_shouldPass() {
+        when(contextDefinitionRepository.findById(999)).thenReturn(null);
+
+        assertDoesNotThrow(() -> contextService.validateStrictValues(999, "value"));
+    }
+
+    @Test
+    void validateStrictValues_strictWithEmptyWhitelist_shouldPass() {
+        ContextDefinition def = new ContextDefinition();
+        def.setId(1);
+        def.setStrict(true);
+        when(contextDefinitionRepository.findById(1)).thenReturn(def);
+        when(contextValueRepository.findByContextDefinitionId(1)).thenReturn(List.of());
+
+        assertDoesNotThrow(() -> contextService.validateStrictValues(1, "anything"));
+    }
+
+    @Test
+    void validateStrictValues_valueInWhitelist_shouldPass() {
+        ContextDefinition def = new ContextDefinition();
+        def.setId(1);
+        def.setName("country");
+        def.setStrict(true);
+        when(contextDefinitionRepository.findById(1)).thenReturn(def);
+        ContextValue cv = new ContextValue();
+        cv.setValues("US, CA, UK");
+        when(contextValueRepository.findByContextDefinitionId(1)).thenReturn(List.of(cv));
+
+        assertDoesNotThrow(() -> contextService.validateStrictValues(1, "US"));
+    }
+
+    @Test
+    void validateStrictValues_valueNotInWhitelist_shouldThrow() {
+        ContextDefinition def = new ContextDefinition();
+        def.setId(1);
+        def.setName("country");
+        def.setStrict(true);
+        when(contextDefinitionRepository.findById(1)).thenReturn(def);
+        ContextValue cv = new ContextValue();
+        cv.setValues("US, CA");
+        when(contextValueRepository.findByContextDefinitionId(1)).thenReturn(List.of(cv));
+
+        BadRequestException ex = assertThrows(BadRequestException.class,
+            () -> contextService.validateStrictValues(1, "XX"));
+        assertTrue(ex.getMessage().contains("XX"));
+        assertTrue(ex.getMessage().contains("country"));
+    }
+
+    @Test
+    void validateStrictValues_nullOrBlankValues_shouldPass() {
+        ContextDefinition def = new ContextDefinition();
+        def.setId(1);
+        def.setStrict(true);
+        when(contextDefinitionRepository.findById(1)).thenReturn(def);
+        ContextValue cv = new ContextValue();
+        cv.setValues("US");
+        when(contextValueRepository.findByContextDefinitionId(1)).thenReturn(List.of(cv));
+
+        assertDoesNotThrow(() -> contextService.validateStrictValues(1, null));
+        assertDoesNotThrow(() -> contextService.validateStrictValues(1, ""));
+        assertDoesNotThrow(() -> contextService.validateStrictValues(1, "  "));
+    }
+
+    @Test
+    void upsertValues_shouldReplaceExisting() {
+        when(contextDefinitionRepository.findByIdAndProjectId(1, 10)).thenReturn(new ContextDefinition());
+        doNothing().when(contextValueRepository).deleteByDefinitionId(1);
+        when(contextValueRepository.save(any(ContextValue.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        contextService.upsertValues(1, "a, b, c", 10);
+
+        verify(contextValueRepository).deleteByDefinitionId(1);
+        verify(contextValueRepository).save(any(ContextValue.class));
+    }
+
+    @Test
+    void upsertValues_blankValues_shouldDeleteOnly() {
+        when(contextDefinitionRepository.findByIdAndProjectId(1, 10)).thenReturn(new ContextDefinition());
+        doNothing().when(contextValueRepository).deleteByDefinitionId(1);
+
+        contextService.upsertValues(1, "   ", 10);
+
+        verify(contextValueRepository).deleteByDefinitionId(1);
+        verify(contextValueRepository, never()).save(any());
+    }
+
+    @Test
+    void findValuesByDefinitionIds_shouldReturnBatchResults() {
+        ContextValue cv1 = new ContextValue();
+        cv1.setContextDefinitionId(1);
+        cv1.setValues("a, b, c");
+        when(contextValueRepository.findValuesByDefinitionIds(Set.of(1, 2)))
+            .thenReturn(Map.of(1, List.of("a", "b", "c")));
+
+        Map<Integer, List<String>> result = contextService.findValuesByDefinitionIds(Set.of(1, 2));
+        assertThat(result).containsKey(1);
+        assertThat(result.get(1)).containsExactly("a", "b", "c");
     }
 }

@@ -8,7 +8,12 @@ import org.springframework.stereotype.Repository;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * JDBC-based repository for {@link ContextValue} entities.
@@ -89,6 +94,41 @@ public class ContextValueRepository {
      */
     public void deleteById(Integer id) {
         jdbc.update("DELETE FROM context_values WHERE id = ?", id);
+    }
+
+    /**
+     * Deletes all context values for a given definition.
+     *
+     * @param definitionId the context definition ID
+     */
+    public void deleteByDefinitionId(Integer definitionId) {
+        jdbc.update("DELETE FROM context_values WHERE context_definition_id = ?", definitionId);
+    }
+
+    /**
+     * Returns all context values for the given definition IDs, grouped by definition ID.
+     *
+     * @param definitionIds set of context definition IDs
+     * @return map of definition ID -> list of comma-separated value strings
+     */
+    public Map<Integer, List<String>> findValuesByDefinitionIds(Set<Integer> definitionIds) {
+        if (definitionIds == null || definitionIds.isEmpty()) return Collections.emptyMap();
+        String placeholders = String.join(",", Collections.nCopies(definitionIds.size(), "?"));
+        List<ContextValue> rows = jdbc.query(
+            "SELECT id, context_definition_id, context_values, created_at FROM context_values WHERE context_definition_id IN (" + placeholders + ") ORDER BY context_definition_id, id",
+            ROW_MAPPER, definitionIds.toArray());
+        Map<Integer, List<String>> result = new LinkedHashMap<>();
+        for (ContextValue cv : rows) {
+            if (cv.getValues() == null || cv.getValues().isBlank()) continue;
+            String[] parts = cv.getValues().split("\\s*,\\s*");
+            for (String part : parts) {
+                String trimmed = part.trim();
+                if (!trimmed.isEmpty()) {
+                    result.computeIfAbsent(cv.getContextDefinitionId(), k -> new ArrayList<>()).add(trimmed);
+                }
+            }
+        }
+        return result;
     }
 
 

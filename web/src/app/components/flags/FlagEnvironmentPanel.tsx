@@ -1,6 +1,7 @@
 import * as Slider from '@radix-ui/react-slider';
+import { Fragment } from 'react';
 import { Switch } from '@/app/components/ui/switch';
-import { Plus, Percent, Users, Settings, Filter } from '@/shared/icons';
+import { Plus, Percent, Users, Settings, Filter, X } from '@/shared/icons';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
 import { MultiValueChips } from '@/app/components/flags/MultiValueChips';
 import {
@@ -71,7 +72,7 @@ export function FlagEnvironmentPanel({
   const hasSegments = envRuleSegments.length > 0;
   const hasConstraints = envRuleConstraintGroups.length > 0;
   const selectedSegs = envRuleSegments
-    .map((sid) => segments.find((s) => s.id === sid))
+    .map((sid) => Array.isArray(segments) ? segments.find((s) => s.id === sid) : undefined)
     .filter((s): s is SegmentResponse => !!s);
 
   interface SummaryLine {
@@ -84,47 +85,32 @@ export function FlagEnvironmentPanel({
   const lines: SummaryLine[] = [];
   for (const seg of selectedSegs) {
     for (const c of seg.context ?? []) {
-      const ctxDef = contexts.find((cd) => cd.id === c.contextDefinitionId);
+      const ctxDef = Array.isArray(contexts) ? contexts.find((cd) => cd.id === c.contextDefinitionId) : undefined;
       const field = ctxDef?.name ?? t('flags.unknownField', { id: String(c.contextDefinitionId) });
       const vals = (c.contextValues ?? '')
         .split(',')
         .map((v) => v.trim())
         .filter(Boolean);
-      const existing = lines.find((l) => l.field === field && l.operator === (c.operator ?? 'in'));
-      if (existing) {
-        for (const v of vals) {
-          if (!existing.values.includes(v)) existing.values.push(v);
-        }
-      } else {
-        lines.push({
-          field,
-          operator: c.operator ?? 'in',
-          values: vals,
-          source: seg.name,
-          contextType: ctxDef?.type,
-        });
-      }
+      lines.push({
+        field,
+        operator: c.operator ?? 'in',
+        values: vals,
+        source: seg.name,
+        contextType: ctxDef?.type,
+      });
     }
   }
   for (const g of envRuleConstraintGroups) {
     if (g.contextDefId === 0) continue;
     const ctxDef = contexts.find((cd) => cd.id === g.contextDefId);
     const field = ctxDef?.name ?? t('flags.unknownField', { id: String(g.contextDefId) });
-    const existing = lines.find((l) => l.field === field && l.operator === g.operator);
-    if (existing) {
-      for (const v of g.values) {
-        if (!existing.values.includes(v)) existing.values.push(v);
-      }
-      if (existing.source !== 'custom') existing.source = existing.source + ' + custom';
-    } else {
-      lines.push({
-        field,
-        operator: g.operator,
-        values: [...g.values],
-        source: 'custom',
-        contextType: ctxDef?.type,
-      });
-    }
+    lines.push({
+      field,
+      operator: g.operator,
+      values: [...g.values],
+      source: 'custom',
+      contextType: ctxDef?.type,
+    });
   }
 
   const hasSummary = true;
@@ -133,8 +119,22 @@ export function FlagEnvironmentPanel({
     if (values.length === 0) return '∅';
     if (values.length === 1) return values[0];
     const display = values.slice(0, 3).join(', ');
-    return values.length > 3 ? `[${display}, ...]` : `[${display}]`;
+    return values.length > 3 ? `[${display}, +${values.length - 3}]` : `[${display}]`;
   };
+
+  const sourceGroups = new Map<string, SummaryLine[]>();
+  for (const line of lines) {
+    if (!sourceGroups.has(line.source)) sourceGroups.set(line.source, []);
+    sourceGroups.get(line.source)!.push(line);
+  }
+
+  const sourceOrder = new Map<string, number>();
+  sourceOrder.set('custom', 0);
+  selectedSegs.forEach((s, i) => sourceOrder.set(s.name, i + 1));
+
+  const sortedSources = Array.from(sourceGroups.keys()).sort(
+    (a, b) => (sourceOrder.get(a) ?? 99) - (sourceOrder.get(b) ?? 99),
+  );
 
   return (
     <div className="space-y-5">
@@ -208,41 +208,84 @@ export function FlagEnvironmentPanel({
               </div>
             </div>
 
-            {lines.length > 0 && (
-              <div className="space-y-2">
+            {sourceGroups.size > 0 && (
+              <div className="space-y-3">
                 <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
                   <Filter size={10} />
                   {t('flags.summaryUnderConditions')}
                 </div>
-                <div className="space-y-1.5">
-                  {lines.map((line, li) => {
-                    const isTimeType = line.contextType === 'time';
-                    const displayValues = isTimeType
-                      ? line.values.map((v) => formatTimeConstraintValue(v))
-                      : line.values;
+                <div className="space-y-2">
+                  {sortedSources.map((source, si) => {
+                    const sourceLines = sourceGroups.get(source)!;
+                    const isSegment = source !== 'custom';
+                    const seg = isSegment ? selectedSegs.find((s) => s.name === source) : null;
+                    const groupByKey = new Map<string, SummaryLine[]>();
+                    for (const line of sourceLines) {
+                      const key = line.field + '|' + line.operator;
+                      if (!groupByKey.has(key)) groupByKey.set(key, []);
+                      groupByKey.get(key)!.push(line);
+                    }
                     return (
-                      <div
-                        key={li}
-                        className="flex items-center gap-1.5 text-[11px] bg-input-background/70 rounded-lg p-2.5 border border-brand/10"
-                      >
-                        <span className="font-semibold text-foreground/80 shrink-0">
-                          {line.field}
-                        </span>
-                        <OperatorBadge operator={line.operator} contextType={line.contextType} />
-                        <span className="break-all min-w-0 text-foreground/80">
-                          {displayValues.length === 1
-                            ? displayValues[0]
-                            : displayValues.length <= 3
-                              ? `[${displayValues.join(', ')}]`
-                              : `[${displayValues.slice(0, 3).join(', ')}, +${displayValues.length - 3}]`}
-                        </span>
-                        <span
-                          className="text-[11px] text-muted-foreground shrink-0 ml-auto"
-                          title={line.source}
-                        >
-                          ← {line.source === 'custom' ? t('flags.customSource') : line.source}
-                        </span>
-                      </div>
+                      <Fragment key={si}>
+                        {si > 0 && (
+                          <div className="flex items-center gap-2 py-0.5">
+                            <div className="flex-1 h-px bg-amber-500/20" />
+                            <span className="text-[10px] font-bold text-amber-500/60 uppercase tracking-wider px-1">
+                              OR
+                            </span>
+                            <div className="flex-1 h-px bg-amber-500/20" />
+                          </div>
+                        )}
+                        <div className="bg-input-background/70 rounded-lg border border-brand/10 overflow-hidden">
+                          <div className="px-3 py-2 bg-brand/5 border-b border-brand/10 flex items-center gap-2">
+                            {seg && (
+                              <span
+                                className="w-4 h-4 rounded flex items-center justify-center"
+                                style={{ backgroundColor: seg.color ?? '#6b7280' }}
+                              >
+                                <SegmentIcon name={seg.icon ?? 'Users'} size={9} />
+                              </span>
+                            )}
+                            <span className="text-xs font-semibold text-brand">
+                              {source === 'custom' ? t('flags.customSource') : source}
+                            </span>
+                          </div>
+                          <div className="px-3 py-2 space-y-1.5">
+                            {Array.from(groupByKey.entries()).map(([_key, keyLines], fi) => {
+                              const line = keyLines[0];
+                              const isTimeType = line.contextType === 'time';
+                              const allValues = keyLines.flatMap((l) => l.values);
+                              const displayValues = isTimeType
+                                ? allValues.map((v) => formatTimeConstraintValue(v))
+                                : allValues;
+                              return (
+                                <div key={fi} className="space-y-1.5">
+                                  {fi > 0 && (
+                                    <div className="flex items-center gap-2">
+                                      <div className="flex-1 h-px bg-brand/15" />
+                                      <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider px-1">
+                                        AND
+                                      </span>
+                                      <div className="flex-1 h-px bg-brand/15" />
+                                    </div>
+                                  )}
+                                  <div className="flex items-center gap-1.5 text-[11px]">
+                                    <span className="font-semibold text-foreground/80">{line.field}</span>
+                                    <OperatorBadge operator={line.operator} contextType={line.contextType} />
+                                    <span className="break-all min-w-0 text-foreground/80">
+                                      {displayValues.length === 1
+                                        ? displayValues[0]
+                                        : displayValues.length <= 3
+                                          ? `[${displayValues.join(', ')}]`
+                                          : `[${displayValues.slice(0, 3).join(', ')}, +${displayValues.length - 3}]`}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </Fragment>
                     );
                   })}
                 </div>
@@ -257,17 +300,21 @@ export function FlagEnvironmentPanel({
             )}
 
             <div className="flex items-center gap-4 text-[11px] text-muted-foreground pt-2 border-t border-brand/10">
-              <span>
-                {t('flags.summaryStatsSegments')}:{' '}
-                <strong className="text-foreground/80">
-                  {hasSegments ? selectedSegs.length : 0}
-                </strong>
-              </span>
-              <span>
-                {t('flags.summaryStatsConditions')}:{' '}
-                <strong className="text-foreground/80">{lines.length}</strong>
-              </span>
-              <span>{selectedSegs.length > 1 ? t('flags.summaryLogicOrSegments') : 'AND'}</span>
+              {selectedSegs.length > 0 && (
+                <span>
+                  {t('flags.summaryStatsSegments')}:{' '}
+                  <strong className="text-foreground/80">{selectedSegs.length}</strong>
+                  {selectedSegs.length > 1 && (
+                    <span className="text-brand/70 font-medium"> {t('flags.summaryLogicOrSegments')}</span>
+                  )}
+                </span>
+              )}
+              {sourceGroups.size > 0 && (
+                <span>
+                  {t('flags.summaryStatsConditions')}:{' '}
+                  <strong className="text-foreground/80">{sourceGroups.size}</strong>
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -384,7 +431,7 @@ export function FlagEnvironmentPanel({
                   {checked && hasContext && (
                     <div className="mt-2.5 space-y-1">
                       {seg.context!.map((c, ci) => {
-                        const ctxDef = contexts.find((cd) => cd.id === c.contextDefinitionId);
+                        const ctxDef = Array.isArray(contexts) ? contexts.find((cd) => cd.id === c.contextDefinitionId) : undefined;
                         const sCtxType = ctxDef?.type;
                         const sDisplayValues =
                           sCtxType === 'time'
@@ -472,7 +519,7 @@ export function FlagEnvironmentPanel({
               };
 
               const handleContextChange = (ctxId: number) => {
-                const ctx = contexts.find((c) => c.id === ctxId);
+                const ctx = Array.isArray(contexts) ? contexts.find((c) => c.id === ctxId) : undefined;
                 updateGroup({ contextDefId: ctxId, operator: getDefaultOperator(ctx?.type) });
               };
 
@@ -496,46 +543,195 @@ export function FlagEnvironmentPanel({
                   onOperatorChange={handleOperatorChange}
                   onRemove={handleRemove}
                 >
-                  {(contextType) =>
-                    isMulti ? (
-                      <div className="p-3 bg-secondary/50 rounded-xl border border-border">
-                        <MultiValueChips
-                          values={g.values}
-                          onChange={(vals) => updateGroup({ values: vals })}
-                          autoFocus
-                        />
-                      </div>
-                    ) : (
-                      <div className="space-y-1.5">
-                        {contextType === 'time' ? (
+                  {(contextType) => {
+                    const ctx = Array.isArray(contexts) ? contexts.find((c) => c.id === g.contextDefId) : undefined;
+                    const validVals = ctx?.validValues ?? [];
+                    const strict = ctx?.isStrict ?? false;
+                    const hasWhitelist = validVals.length > 0;
+
+                    if (isMulti) {
+                      if (strict && hasWhitelist) {
+                        return (
+                          <div className="p-3 bg-secondary/50 rounded-xl border border-border space-y-2">
+                            <div className="flex flex-wrap gap-1.5">
+                              {g.values.map((v, i) => {
+                                const inWhitelist = !hasWhitelist || validVals.includes(v);
+                                return (
+                                <span
+                                  key={i}
+                                  className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md border ${
+                                    inWhitelist
+                                      ? 'bg-success/10 text-success border-success/20'
+                                      : 'bg-warning/10 text-warning border-warning/30'
+                                  }`}
+                                >
+                                  {v}
+                                  <button
+                                    onClick={() =>
+                                      updateGroup({
+                                        values: g.values.filter((_, j) => j !== i),
+                                      })
+                                    }
+                                    className={`${inWhitelist ? 'text-emerald-500' : 'text-amber-500'} hover:text-red-500 transition-colors`}
+                                  >
+                                    <X size={11} />
+                                  </button>
+                                </span>
+                                );
+                              })}
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {validVals
+                                .filter((v) => !g.values.includes(v))
+                                .map((v) => (
+                                  <button
+                                    key={v}
+                                    onClick={() =>
+                                      updateGroup({ values: [...g.values, v] })
+                                    }
+                                    className="px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border border-border transition-all"
+                                  >
+                                    + {v}
+                                  </button>
+                                ))}
+                            </div>
+                            {validVals.every((v) => g.values.includes(v)) && (
+                              <p className="text-[11px] text-muted-foreground">
+                                {t('flags.whitelistAllSelected')}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      }
+                      if (hasWhitelist) {
+                        return (
+                          <div className="p-3 bg-secondary/50 rounded-xl border border-border">
+                            <MultiValueChips
+                              values={g.values}
+                              onChange={(vals) => updateGroup({ values: vals })}
+                              autoFocus
+                            />
+                            {validVals.some((v) => !g.values.includes(v)) && (
+                              <div className="mt-2">
+                                <p className="text-[11px] text-muted-foreground mb-1">
+                                  {t('flags.whitelistSuggestions')}
+                                </p>
+                                <div className="flex flex-wrap gap-1">
+                                  {validVals
+                                    .filter((v) => !g.values.includes(v))
+                                    .map((v) => (
+                                      <button
+                                        key={v}
+                                        onClick={() =>
+                                          updateGroup({
+                                            values: [...g.values, v],
+                                          })
+                                        }
+                                        className="px-2 py-0.5 text-xs border border-brand/20 rounded-md text-brand hover:bg-brand/10 transition-colors"
+                                      >
+                                        + {v}
+                                      </button>
+                                    ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                      return (
+                        <div className="p-3 bg-secondary/50 rounded-xl border border-border">
+                          <MultiValueChips
+                            values={g.values}
+                            onChange={(vals) => updateGroup({ values: vals })}
+                            autoFocus
+                          />
+                        </div>
+                      );
+                    }
+
+                    if (contextType === 'time') {
+                      return (
+                        <div className="space-y-1.5">
                           <DateTimePicker
                             value={g.values[0] ?? ''}
                             onChange={(iso) => updateGroup({ values: iso ? [iso] : [] })}
                             placeholder={t('flags.valuePlaceholder')}
                           />
-                        ) : (
-                          <input
-                            type="text"
-                            inputMode={
-                              getInputMode(
-                                contextType,
-                              ) as React.HTMLAttributes<HTMLInputElement>['inputMode']
-                            }
-                            pattern={getInputPattern(contextType)}
-                            placeholder={
-                              getInputPlaceholder(contextType) || t('flags.valuePlaceholder')
-                            }
-                            value={g.values[0] ?? ''}
-                            onChange={(e) => updateGroup({ values: [e.target.value] })}
-                            onInput={(e) => {
-                              const input = e.target as HTMLInputElement;
-                              input.setCustomValidity(
-                                getInlineValidationError(contextType, input.value.trim()),
+                        </div>
+                      );
+                    }
+
+                    if (strict && hasWhitelist) {
+                      return (
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap gap-1.5">
+                            {validVals.map((v) => {
+                              const isSelected = g.values.includes(v);
+                              return (
+                                <button
+                                  key={v}
+                                  onClick={() => {
+                                    if (isSelected) {
+                                      updateGroup({ values: g.values.filter((x) => x !== v) });
+                                    } else {
+                                      updateGroup({ values: [v] });
+                                    }
+                                  }}
+                                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                                    isSelected
+                                      ? 'bg-brand/10 text-brand border-brand/20'
+                                      : 'bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border-border'
+                                  }`}
+                                >
+                                  {v}
+                                </button>
                               );
-                            }}
-                            className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
-                            autoFocus
-                          />
+                            })}
+                          </div>
+                          {g.values.length > 0 && (
+                            <p className="text-[11px] text-muted-foreground">
+                              {t('flags.detailCard.value')}:{' '}
+                              <span className={`font-semibold ${validVals.includes(g.values[0]) ? 'text-foreground/80' : 'text-warning'}`}>
+                                {g.values[0]}
+                                {!validVals.includes(g.values[0]) && ' (not in whitelist)'}
+                              </span>
+                            </p>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="space-y-1.5">
+                        <input
+                          type="text"
+                          inputMode={
+                            getInputMode(
+                              contextType,
+                            ) as React.HTMLAttributes<HTMLInputElement>['inputMode']
+                          }
+                          pattern={getInputPattern(contextType)}
+                          placeholder={
+                            getInputPlaceholder(contextType) || t('flags.valuePlaceholder')
+                          }
+                          value={g.values[0] ?? ''}
+                          onChange={(e) => updateGroup({ values: [e.target.value] })}
+                          onInput={(e) => {
+                            const input = e.target as HTMLInputElement;
+                            input.setCustomValidity(
+                              getInlineValidationError(contextType, input.value.trim()),
+                            );
+                          }}
+                          list={hasWhitelist ? `wl-${g.id}` : undefined}
+                          className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
+                          autoFocus
+                        />
+                        {hasWhitelist && (
+                          <datalist id={`wl-${g.id}`}>
+                            {validVals.map((v) => (
+                              <option key={v} value={v} />
+                            ))}
+                          </datalist>
                         )}
                         {contextType !== 'string' && contextType !== 'time' && (
                           <p className="text-[11px] text-muted-foreground/60 ml-0.5">
@@ -543,8 +739,8 @@ export function FlagEnvironmentPanel({
                           </p>
                         )}
                       </div>
-                    )
-                  }
+                    );
+                  }}
                 </ConstraintRow>
               );
             })}

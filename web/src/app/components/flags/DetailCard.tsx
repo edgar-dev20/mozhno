@@ -46,7 +46,7 @@ export function DetailCard({
 
   const hasContext = group !== null && group.contextDefId !== 0;
   const isMulti = group?.operator === 'in' || group?.operator === 'not_in';
-  const ctxDef = hasContext ? contexts.find((c) => c.id === group?.contextDefId) : undefined;
+  const ctxDef = hasContext ? (Array.isArray(contexts) ? contexts.find((c) => c.id === group?.contextDefId) : undefined) : undefined;
   const contextType = ctxDef?.type;
 
   const previewValues = group?.values.length

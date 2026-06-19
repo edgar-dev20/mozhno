@@ -107,7 +107,7 @@ export function FlagsSidePanel({
   const saveLabel = t('common.saveChanges');
   const hasInvalidConstraints = envRuleConstraints.some((g) => {
     if (g.contextDefId === 0) return false;
-    const ctx = contexts.find((c) => c.id === g.contextDefId);
+    const ctx = Array.isArray(contexts) ? contexts.find((c) => c.id === g.contextDefId) : undefined;
     return !isConstraintValueValid(ctx?.type, g.values[0] ?? '', g.operator);
   });
 

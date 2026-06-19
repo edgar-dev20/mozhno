@@ -28,7 +28,7 @@ function buildRule(
 
   const pct = es.percentage ?? 100;
   const activeSegs = (es.segmentIds ?? [])
-    .map((sid) => segments.find((s) => s.id === sid))
+    .map((sid) => Array.isArray(segments) ? segments.find((s) => s.id === sid) : undefined)
     .filter(Boolean) as SegmentResponse[];
   const parts: React.ReactNode[] = [];
   const isFull = pct === 100 && activeSegs.length === 0 && !es.contextValuesJson;

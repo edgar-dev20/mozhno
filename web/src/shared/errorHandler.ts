@@ -14,6 +14,9 @@ const ERROR_CODE_TO_KEY: Record<string, string> = {
 
 export function getErrorMessage(error: unknown): string {
   if (isAppError(error)) {
+    if (error.code === 'VALIDATION' || error.message.startsWith('HTTP ')) {
+      return error.message;
+    }
     const key = ERROR_CODE_TO_KEY[error.code];
     if (key) return t(key as MessageKey);
     return error.message;

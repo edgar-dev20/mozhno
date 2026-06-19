@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Box, Braces, Clock, User, Type, Settings2 } from '@/shared/icons';
+import { Plus, Trash2, Box, Braces, Clock, User, Type, Settings2, X, Upload } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { SidePanel } from '@/app/components/SidePanel';
@@ -15,6 +15,7 @@ import { useProjectQuery, useContextsQuery, useSegmentsQuery } from '@/app/hooks
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
 import { useT } from '@/i18n';
+import { Switch } from '@/app/components/ui/switch';
 
 const TYPES = ['string', 'number', 'time', 'semver'] as const;
 const TYPE_ICONS: Record<string, React.ReactNode> = {
@@ -65,6 +66,9 @@ export function Constraints() {
   const [formKey, setFormKey] = useState('');
   const [formType, setFormType] = useState('string');
   const [formDesc, setFormDesc] = useState('');
+  const [formIsStrict, setFormIsStrict] = useState(false);
+  const [formValidValues, setFormValidValues] = useState<string[]>([]);
+  const [valueInput, setValueInput] = useState('');
   const [error, setError] = useState('');
   const [keyError, setKeyError] = useState('');
   const [deleteId, setDeleteId] = useState<number | null>(null);
@@ -95,7 +99,9 @@ export function Constraints() {
     ? formName !== editing.name ||
       formKey !== editing.key ||
       formType !== (editing.type ?? 'string') ||
-      formDesc !== (editing.description ?? '')
+      formDesc !== (editing.description ?? '') ||
+      formIsStrict !== (editing.isStrict ?? false) ||
+      JSON.stringify(formValidValues) !== JSON.stringify(editing.validValues ?? [])
     : true;
 
   const deleteMutation = useMutation({
@@ -115,21 +121,27 @@ export function Constraints() {
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!projectId) throw new Error('No project');
+      let saved: ContextDefinition;
+      const valuesStr = formValidValues.join(', ');
       if (editing) {
-        return api.contexts.update(editing.id, {
+        saved = await api.contexts.update(editing.id, {
           name: formName,
           key: formKey,
           type: formType,
           description: formDesc,
+          isStrict: formIsStrict,
         });
       } else {
-        return api.contexts.create({
+        saved = await api.contexts.create({
           name: formName,
           key: formKey,
           type: formType,
           description: formDesc,
+          isStrict: formIsStrict,
         });
       }
+      await api.contexts.values.upsert(saved.id, valuesStr);
+      return saved;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
@@ -148,6 +160,9 @@ export function Constraints() {
     setFormKey('');
     setFormType('string');
     setFormDesc('');
+    setFormIsStrict(false);
+    setFormValidValues([]);
+    setValueInput('');
     setError('');
     setKeyError('');
     setPanelOpen(true);
@@ -158,6 +173,9 @@ export function Constraints() {
     setFormKey(c.key);
     setFormType(c.type ?? 'string');
     setFormDesc(c.description ?? '');
+    setFormIsStrict(c.isStrict ?? false);
+    setFormValidValues(c.validValues ?? []);
+    setValueInput('');
     setError('');
     setKeyError('');
     setPanelOpen(true);
@@ -214,6 +232,26 @@ export function Constraints() {
           label: t('common.description'),
           before: editing.description ?? '',
           after: formDesc,
+          group: t('constraints.diffGroupSettings'),
+        });
+      }
+      if ((editing.isStrict ?? false) !== formIsStrict) {
+        changes.push({
+          field: 'isStrict',
+          label: t('constraints.strictModeLabel'),
+          before: editing.isStrict ? 'Yes' : 'No',
+          after: formIsStrict ? 'Yes' : 'No',
+          group: t('constraints.diffGroupSettings'),
+        });
+      }
+      const beforeVals = (editing.validValues ?? []).join(', ');
+      const afterVals = formValidValues.join(', ');
+      if (beforeVals !== afterVals) {
+        changes.push({
+          field: 'validValues',
+          label: t('constraints.validValuesLabel'),
+          before: beforeVals || t('constraints.none'),
+          after: afterVals || t('constraints.none'),
           group: t('constraints.diffGroupSettings'),
         });
       }
@@ -480,6 +518,126 @@ export function Constraints() {
               className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden leading-relaxed"
             />
           </FormField>
+
+          <div className="pt-5 border-t border-border space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-sm font-medium text-foreground/80">
+                  {t('constraints.strictModeLabel')}
+                </label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {t('constraints.strictModeHint')}
+                </p>
+              </div>
+              <Switch
+                checked={formIsStrict}
+                onCheckedChange={setFormIsStrict}
+                className="!bg-switch-background data-[state=checked]:!bg-brand dark:data-[state=checked]:!bg-brand"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground/80">
+                {t('constraints.validValuesLabel')}
+              </label>
+              <p className="text-xs text-muted-foreground mb-2">
+                {t('constraints.validValuesHint')}
+              </p>
+              <div className="flex items-start gap-1.5 mb-3">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={valueInput}
+                    onChange={(e) => setValueInput(e.target.value)}
+                    placeholder={t('constraints.valuePlaceholder')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ',') {
+                        e.preventDefault();
+                        const v = valueInput.trim();
+                        if (!v) return;
+                        if (!formValidValues.includes(v)) {
+                          setFormValidValues((prev) => [...prev, v]);
+                        }
+                        setValueInput('');
+                      }
+                    }}
+                    className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    const v = valueInput.trim();
+                    if (!v) return;
+                    if (!formValidValues.includes(v)) {
+                      setFormValidValues((prev) => [...prev, v]);
+                    }
+                    setValueInput('');
+                  }}
+                  className="shrink-0 px-3 py-2 text-xs font-medium text-brand hover:bg-brand/10 rounded-md border border-brand/20 transition-all"
+                >
+                  <Plus size={14} />
+                </button>
+                <label
+                  className="cursor-pointer text-indigo-500 hover:text-indigo-400 transition-colors shrink-0 px-1 py-2"
+                  title={t('constraints.uploadTooltip')}
+                >
+                  <Upload size={14} />
+                  <input
+                    type="file"
+                    accept=".txt,.csv"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (!f) return;
+                      const MAX_SIZE = 1_048_576;
+                      if (f.size > MAX_SIZE) {
+                        toast.error(t('constraints.errors.fileTooBig', { size: '1' }));
+                        e.target.value = '';
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onload = (ev) => {
+                        const text = (ev.target?.result as string) || '';
+                        const newValues = text
+                          .split(/[\n\r,]+/)
+                          .map((v) => v.trim())
+                          .filter(Boolean);
+                        setFormValidValues((prev) => {
+                          const merged = [...new Set([...prev, ...newValues])];
+                          return merged;
+                        });
+                      };
+                      reader.readAsText(f);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+              </div>
+              {formValidValues.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-3 pb-2">
+                  {formValidValues.map((v, vi) => (
+                    <span
+                      key={vi}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs font-mono bg-success/10 text-success border border-success/20 rounded-md break-all leading-none"
+                    >
+                      {v}
+                      <button
+                        onClick={() =>
+                          setFormValidValues((prev) => prev.filter((_, i) => i !== vi))
+                        }
+                        className="text-emerald-500 hover:text-red-500 transition-colors"
+                      >
+                        <X size={11} />
+                      </button>
+                    </span>
+                  ))}
+                  <span className="text-xs text-muted-foreground self-center ml-1">
+                    {formValidValues.length} value{formValidValues.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {editingUsage && editingUsage.length > 0 && (

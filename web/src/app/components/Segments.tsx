@@ -151,14 +151,18 @@ export function Segments() {
     setFormContexts((prev) =>
       prev.map((c) => {
         if (c.id !== id) return c;
-        const existing = c.contextValues
-          ? c.contextValues
-              .split(',')
-              .map((v) => v.trim())
-              .filter(Boolean)
-          : [];
-        if (existing.includes(trimmed)) return c;
-        return { ...c, contextValues: existing.concat(trimmed).join(', ') };
+        const isMulti = c.operator === 'in' || c.operator === 'not_in';
+        if (isMulti) {
+          const existing = c.contextValues
+            ? c.contextValues
+                .split(',')
+                .map((v) => v.trim())
+                .filter(Boolean)
+            : [];
+          if (existing.includes(trimmed)) return c;
+          return { ...c, contextValues: existing.concat(trimmed).join(', ') };
+        }
+        return { ...c, contextValues: trimmed };
       }),
     );
   };
@@ -678,7 +682,13 @@ export function Segments() {
                     onOperatorChange={handleOperatorChange}
                     onRemove={handleRemove}
                   >
-                    {(contextType) => (
+                    {(contextType) => {
+                      const ctxDef = Array.isArray(contexts) ? contexts.find((cd) => cd.id === c.contextDefinitionId) : undefined;
+                      const validVals = ctxDef?.validValues ?? [];
+                      const strict = ctxDef?.isStrict ?? false;
+                      const hasWhitelist = validVals.length > 0;
+
+                      return (
                       <div className="space-y-3">
                         <div className="flex items-start gap-1.5">
                           <div className="flex-1 space-y-1.5">
@@ -690,6 +700,35 @@ export function Segments() {
                                 }}
                                 placeholder={t('segments.targetingRules.valuePlaceholder')}
                               />
+                            ) : strict && hasWhitelist ? (
+                              <div className="flex flex-wrap gap-1.5">
+                                {validVals.map((v) => {
+                                  const isMultiOp = c.operator === 'in' || c.operator === 'not_in';
+                                  const isSelected = parsedValues.includes(v);
+                                  if (isMultiOp && isSelected) return null;
+                                  return (
+                                    <button
+                                      key={v}
+                                      onClick={() => {
+                                        if (getInlineValidationError(contextType, v)) return;
+                                        addValue(c.id, v);
+                                      }}
+                                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                                        !isMultiOp && isSelected
+                                          ? 'bg-brand/10 text-brand border-brand/20'
+                                          : 'bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border-border'
+                                      }`}
+                                    >
+                                      {!isMultiOp && isSelected ? v : `+ ${v}`}
+                                    </button>
+                                  );
+                                })}
+                                {validVals.length === 0 && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {t('segments.targetingRules.valuePlaceholder')}
+                                  </p>
+                                )}
+                              </div>
                             ) : (
                               <input
                                 type="text"
@@ -703,6 +742,7 @@ export function Segments() {
                                   getInputPlaceholder(contextType) ||
                                   t('segments.targetingRules.valuePlaceholder')
                                 }
+                                list={hasWhitelist ? `seg-wl-${c.id}` : undefined}
                                 className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
                                 onInput={(e) => {
                                   const input = e.target as HTMLInputElement;
@@ -723,12 +763,40 @@ export function Segments() {
                                 }}
                               />
                             )}
+                            {hasWhitelist && !strict && (
+                              <datalist id={`seg-wl-${c.id}`}>
+                                {validVals.map((v) => (
+                                  <option key={v} value={v} />
+                                ))}
+                              </datalist>
+                            )}
+                            {hasWhitelist && !strict && validVals.some((v) => !parsedValues.includes(v)) && (
+                              <div className="pt-1">
+                                <p className="text-[11px] text-muted-foreground mb-1">
+                                  {t('segments.targetingRules.availableValues')}
+                                </p>
+                                <div className="flex flex-wrap gap-1">
+                                  {validVals
+                                    .filter((v) => !parsedValues.includes(v))
+                                    .map((v) => (
+                                      <button
+                                        key={v}
+                                        onClick={() => addValue(c.id, v)}
+                                        className="px-2 py-0.5 text-xs border border-brand/20 rounded-md text-brand hover:bg-brand/10 transition-colors"
+                                      >
+                                        + {v}
+                                      </button>
+                                    ))}
+                                </div>
+                              </div>
+                            )}
                             {contextType !== 'string' && contextType !== 'time' && (
                               <p className="text-[11px] text-muted-foreground/60 ml-0.5">
                                 {getInputHint(contextType)}
                               </p>
                             )}
                           </div>
+                          {!strict && (
                           <label
                             className="cursor-pointer text-indigo-500 hover:text-indigo-400 transition-colors shrink-0"
                             title={t('segments.targetingRules.uploadTooltip')}
@@ -745,13 +813,20 @@ export function Segments() {
                               }}
                             />
                           </label>
+                          )}
                         </div>
                         {parsedValues.length > 0 && (
                           <div className="flex flex-wrap gap-1.5">
-                            {parsedValues.map((v, vi) => (
+                            {parsedValues.map((v, vi) => {
+                              const inWhitelist = !strict || !hasWhitelist || validVals.includes(v);
+                              return (
                               <span
                                 key={vi}
-                                className="inline-flex items-center gap-1 px-2 py-1 text-xs font-mono bg-success/10 text-success border border-success/20 rounded-md break-all leading-none"
+                                className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md border break-all leading-none ${
+                                  inWhitelist
+                                    ? 'bg-success/10 text-success border-success/20'
+                                    : 'bg-warning/10 text-warning border-warning/30'
+                                }`}
                               >
                                 {v}
                                 <button
@@ -759,12 +834,13 @@ export function Segments() {
                                     e.stopPropagation();
                                     removeValue(c.id, vi);
                                   }}
-                                  className="text-emerald-500 hover:text-red-500 transition-colors"
+                                  className={`${inWhitelist ? 'text-emerald-500' : 'text-amber-500'} hover:text-red-500 transition-colors`}
                                 >
                                   <X size={11} />
                                 </button>
                               </span>
-                            ))}
+                              );
+                            })}
                             <span className="text-xs text-muted-foreground self-center ml-1">
                               {t('segments.targetingRules.valueCount', {
                                 count: String(parsedValues.length),
@@ -773,7 +849,8 @@ export function Segments() {
                           </div>
                         )}
                       </div>
-                    )}
+                      );
+                    }}
                   </ConstraintRow>
                 );
               })}

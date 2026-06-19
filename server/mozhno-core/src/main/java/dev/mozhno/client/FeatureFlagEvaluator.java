@@ -36,54 +36,41 @@ public class FeatureFlagEvaluator {
         boolean enabled = s != null ? s.isEnabled() : flag.isEnabled();
         if (!enabled) return false;
 
-        Map<String, ConstraintEval> evalConstraints = new LinkedHashMap<>();
-
         if (s != null) {
-            if (s.getSegmentIds() != null) {
-                for (Integer segId : s.getSegmentIds()) {
-                    List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(segId, Collections.emptyList());
-                    for (SegmentContextWithName sc : segContexts) {
-                        String op = sc.getOperator() != null ? sc.getOperator() : DEFAULT_OP;
-                        String ctxType = sc.getContextType() != null ? sc.getContextType() : "string";
-                        String key = sc.getContextDefinitionName() + "|" + op;
-                        evalConstraints.computeIfAbsent(key, k -> new ConstraintEval(sc.getContextDefinitionName(), op, ctxType))
-                                .values.addAll(splitValues(sc.getContextValues()));
-                    }
-                }
-            }
-
             if (s.getContextValuesJson() != null) {
                 List<FlagConstraintParser.StrategyConstraint> parsed =
                     FlagConstraintParser.parseStrategyConstraints(s.getContextValuesJson());
+                Map<String, ConstraintEval> directConstraints = new LinkedHashMap<>();
                 for (FlagConstraintParser.StrategyConstraint sc : parsed) {
                     ContextDefinition cd = contextDefMap.getOrDefault(sc.cd(), null);
                     String fieldName = cd != null ? cd.getContextKey() : String.valueOf(sc.cd());
                     String ctxType = cd != null && cd.getContextType() != null ? cd.getContextType() : "string";
                     String op = sc.op() != null ? sc.op() : DEFAULT_OP;
                     String key = fieldName + "|" + op;
-                    evalConstraints.computeIfAbsent(key, k -> new ConstraintEval(fieldName, op, ctxType))
+                    directConstraints.computeIfAbsent(key, k -> new ConstraintEval(fieldName, op, ctxType))
                             .values.add(sc.val());
                 }
+                for (ConstraintEval ce : directConstraints.values()) {
+                    String contextValue = context.get(ce.fieldName);
+                    if (contextValue == null) return false;
+                    if (!checkMultiValue(ce.operator, ce.contextType, contextValue, ce.values)) return false;
+                }
             }
-        }
 
-        for (ConstraintEval ce : evalConstraints.values()) {
-            String contextValue = context.get(ce.fieldName);
-            if (contextValue == null) return false;
-
-            if (OP_IN.equals(ce.operator)) {
-                if (!ce.values.contains(contextValue)) return false;
-            } else if (OP_NOT_IN.equals(ce.operator)) {
-                if (ce.values.contains(contextValue)) return false;
-            } else {
-                boolean anyMatch = false;
-                for (String checkValue : ce.values) {
-                    if (evaluateConstraintOp(ce.operator, ce.contextType, contextValue, checkValue)) {
-                        anyMatch = true;
+            if (s.getSegmentIds() != null && !s.getSegmentIds().isEmpty()) {
+                boolean anySegmentMatched = false;
+                for (Integer segId : s.getSegmentIds()) {
+                    List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(segId, Collections.emptyList());
+                    if (segContexts.isEmpty()) {
+                        anySegmentMatched = true;
+                        break;
+                    }
+                    if (evaluateSegment(segContexts, context)) {
+                        anySegmentMatched = true;
                         break;
                     }
                 }
-                if (!anyMatch) return false;
+                if (!anySegmentMatched) return false;
             }
         }
 
@@ -97,6 +84,32 @@ public class FeatureFlagEvaluator {
         }
 
         return true;
+    }
+
+    private boolean evaluateSegment(List<SegmentContextWithName> segContexts, Map<String, String> context) {
+        for (SegmentContextWithName sc : segContexts) {
+            String fieldName = sc.getContextDefinitionName();
+            String contextValue = context.get(fieldName);
+            if (contextValue == null) return false;
+            String op = sc.getOperator() != null ? sc.getOperator() : DEFAULT_OP;
+            String ctxType = sc.getContextType() != null ? sc.getContextType() : "string";
+            List<String> values = splitValues(sc.getContextValues());
+            if (!checkMultiValue(op, ctxType, contextValue, values)) return false;
+        }
+        return true;
+    }
+
+    private boolean checkMultiValue(String operator, String contextType, String contextValue, List<String> values) {
+        if (OP_IN.equals(operator)) {
+            return values.contains(contextValue);
+        } else if (OP_NOT_IN.equals(operator)) {
+            return !values.contains(contextValue);
+        } else {
+            for (String checkValue : values) {
+                if (evaluateConstraintOp(operator, contextType, contextValue, checkValue)) return true;
+            }
+            return false;
+        }
     }
 
     static class ConstraintEval {
