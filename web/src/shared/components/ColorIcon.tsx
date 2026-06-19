@@ -1,5 +1,5 @@
 import React from 'react';
-import { adjustColor, dimColor } from '@/shared/color';
+import { adjustColor } from '@/shared/color';
 
 type ColorIconVariant = 'solid' | 'gradient' | 'ghost';
 type ColorIconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -47,47 +47,37 @@ export function ColorIcon({
 }: ColorIconProps) {
   const s = sizeMap[size];
 
-  const varStyle: Record<string, string> = {};
-  const inlineStyle: React.CSSProperties = {};
-
-  const dark = darkDim ? dimColor(color) : color;
+  const bgStyle: React.CSSProperties = {};
 
   if (variant === 'solid') {
-    varStyle['--ci-bg'] = color;
-    varStyle['--ci-bg-dark'] = dark;
+    bgStyle.backgroundColor = color;
   } else if (variant === 'gradient') {
-    varStyle['--ci-grad'] = `linear-gradient(135deg, ${color}, ${adjustColor(color, 25)})`;
-    varStyle['--ci-grad-dark'] = `linear-gradient(135deg, ${dark}, ${adjustColor(dark, 25)})`;
+    bgStyle.backgroundImage = `linear-gradient(135deg, ${color}, ${adjustColor(color, 25)})`;
   } else if (variant === 'ghost') {
-    inlineStyle.backgroundColor = color + '20';
+    bgStyle.backgroundColor = color + '20';
   }
 
   if (shadow) {
-    const lightShadow = coloredShadow(color, size);
-    if (lightShadow) {
-      varStyle['--ci-shadow'] = lightShadow;
-      varStyle['--ci-shadow-dark'] = coloredShadow(dark, size) ?? lightShadow;
+    const cs = coloredShadow(color, size);
+    if (cs) {
+      bgStyle.boxShadow = cs;
     }
   }
 
   const isInteractive = typeof onClick === 'function';
 
-  const variantClass =
-    variant === 'solid'
-      ? 'bg-[var(--ci-bg)] dark:bg-[var(--ci-bg-dark)]'
-      : variant === 'gradient'
-        ? '[background-image:var(--ci-grad)] dark:[background-image:var(--ci-grad-dark)]'
-        : '';
-
-  const shadowClass =
-    shadow && coloredShadow(color, size)
-      ? '[box-shadow:var(--ci-shadow)] dark:[box-shadow:var(--ci-shadow-dark)]'
-      : '';
-
   return (
     <div
-      className={`inline-flex items-center justify-center shrink-0 ${variant !== 'ghost' ? 'text-white' : ''} ${s.container} ${shadow && s.tailwindShadow ? s.tailwindShadow : ''} ${variantClass} ${shadowClass} ${isInteractive ? `cursor-pointer transition-transform hover:scale-110 ${focusRing}` : ''} ${className}`}
-      style={{ ...inlineStyle, ...(varStyle as React.CSSProperties) }}
+      className={
+        `inline-flex items-center justify-center shrink-0` +
+        ` ${variant !== 'ghost' ? 'text-white' : ''}` +
+        ` ${s.container}` +
+        ` ${shadow && s.tailwindShadow ? s.tailwindShadow : ''}` +
+        ` ${darkDim ? 'dark:brightness-[.85] dark:saturate-[.7]' : ''}` +
+        ` ${isInteractive ? `cursor-pointer transition-transform hover:scale-110 ${focusRing}` : ''}` +
+        ` ${className}`
+      }
+      style={bgStyle}
       onClick={onClick}
       role={isInteractive ? 'button' : undefined}
       tabIndex={isInteractive ? 0 : undefined}

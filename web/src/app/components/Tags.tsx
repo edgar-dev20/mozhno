@@ -250,6 +250,7 @@ export function Tags() {
                         color={tag.color}
                         icon={<TagIcon size={18} className="text-white" />}
                         shadow
+                        className="group-hover:scale-110 transition-transform"
                       />
                       <div className="min-w-0">
                         <h3 className="font-semibold text-foreground truncate">{tag.name}</h3>
