@@ -90,9 +90,10 @@ export function ClientInstances() {
   });
 
   const loadFlags = async (envId: number) => {
-    if (flagCache[envId] || !projectId) return;
+    const cached = flagCache[envId];
+    if ((cached !== undefined && Array.isArray(cached)) || !projectId) return;
     try {
-      const flags = await api.flags.list(envId);
+      const flags = await api.flags.listByEnvironment(envId);
       setFlagCache((prev) => ({ ...prev, [envId]: flags }));
     } catch {
       /* silently ignore flag loading errors */
