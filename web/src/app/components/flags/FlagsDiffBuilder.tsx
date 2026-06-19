@@ -18,7 +18,7 @@ export function makeTagNode(tv: FlagTagValue): ReactNode {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white shadow-sm leading-none"
+        className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
         style={{
           background: tv.tagColor,
         }}

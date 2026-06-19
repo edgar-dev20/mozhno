@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Rocket, ShieldOff, X } from '@/shared/icons';
-import { FormField, adjustColor, GradientButton } from '@/shared';
+import { FormField, GradientButton } from '@/shared';
 import { useT } from '@/i18n';
 import { createFlagSchema, CreateFlagFormValues } from '@/app/components/flags/schemas';
 import type { FlagTagValue, Tag as TagType } from '@/api';
@@ -148,9 +148,9 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
               return (
                 <div
                   key={i}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium text-white shadow-sm"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium text-white shadow-sm dark:brightness-[.85] dark:saturate-[.7]"
                   style={{
-                    backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})`,
+                    background: tg.color,
                   }}
                 >
                   <span>{tv.value}</span>
@@ -193,9 +193,9 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
                     style={newTagId === tg.id ? { borderColor: tg.color, borderWidth: '2px' } : {}}
                   >
                     <div
-                      className="w-2.5 h-2.5 rounded-full"
+                      className="w-2.5 h-2.5 rounded-full dark:brightness-[.85] dark:saturate-[.7]"
                       style={{
-                        backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})`,
+                        background: tg.color,
                       }}
                     />
                     <span className="text-foreground/80">{tg.name}</span>

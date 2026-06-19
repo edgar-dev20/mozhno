@@ -550,7 +550,7 @@ export function ClientInstances() {
                                                       {flag.tags.slice(0, 2).map((tv, i) => (
                                                         <span
                                                           key={i}
-                                                          className="inline-flex items-center px-1 py-0 rounded text-xs font-medium text-white truncate max-w-[64px]"
+                                                          className="inline-flex items-center px-1 py-0 rounded text-xs font-medium text-white truncate max-w-[64px] dark:brightness-[.85] dark:saturate-[.7]"
                                                           style={{ background: tv.tagColor }}
                                                         >
                                                           {tv.value}

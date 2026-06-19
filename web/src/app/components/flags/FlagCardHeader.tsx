@@ -82,7 +82,7 @@ export function FlagCardHeader({
               return tg ? (
                 <span
                   key={i}
-                  className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white leading-none"
+                  className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white leading-none dark:brightness-[.85] dark:saturate-[.7]"
                   style={{ background: tg.color }}
                 >
                   {tv.value}
