@@ -83,7 +83,7 @@ public class ProjectService {
         ctxRequest.setDescription("User identifier");
         contextService.createDefinition(ctxRequest, null);
         events.publish(DomainEvent.of(saved.getId(), "project.created", "project",
-            saved.getId(), saved.getName(), null));
+            saved.getId(), saved.getName(), "Project created"));
         return saved;
     }
 
@@ -105,7 +105,7 @@ public class ProjectService {
         p.setDescription(request.getDescription());
         Project saved = projectRepository.save(p);
         events.publish(DomainEvent.of(saved.getId(), "project.updated", "project",
-            saved.getId(), saved.getName(), null));
+            saved.getId(), saved.getName(), "Project updated"));
         return saved;
     }
 
@@ -145,7 +145,7 @@ public class ProjectService {
         }
         Project saved = projectRepository.findById(id);
         events.publish(DomainEvent.of(saved.getId(), "project.logo_updated", "project",
-            saved.getId(), saved.getName(), null));
+            saved.getId(), saved.getName(), "Logo updated"));
         return saved;
     }
 

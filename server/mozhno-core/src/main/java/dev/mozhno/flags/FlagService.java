@@ -176,7 +176,7 @@ public class FlagService {
         }
 
         events.publish(DomainEvent.of(flag.getProjectId(), "flag.created", "flag",
-            flag.getId(), flag.getName(), "Flag created: " + flag.getKey()));
+            flag.getId(), flag.getName(), "Key: " + flag.getKey()));
         return flag;
     }
 
@@ -220,7 +220,7 @@ public class FlagService {
         }
 
         events.publish(DomainEvent.of(flag.getProjectId(), "flag.updated", "flag",
-            flag.getId(), flag.getName(), "Flag updated: " + flag.getKey()));
+            flag.getId(), flag.getName(), "Key: " + flag.getKey()));
         return flag;
     }
 
@@ -232,11 +232,13 @@ public class FlagService {
     @Transactional
     @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public void delete(Integer id, Integer projectId) {
+        Flag flag = flagRepository.findByIdAndProjectId(id, projectId);
+        if (flag == null) throw new NotFoundException("Flag", id);
         flagTagValueRepository.deleteByFlagId(id);
         int deleted = flagRepository.deleteById(id, projectId);
         if (deleted == 0) throw new NotFoundException("Flag", id);
         events.publish(DomainEvent.of(projectId, "flag.deleted", "flag",
-            id, null, "Flag deleted"));
+            id, flag.getName(), "Flag deleted"));
     }
 
     @Transactional
@@ -246,7 +248,7 @@ public class FlagService {
         if (affected == 0) throw new NotFoundException("Flag", id);
         Flag flag = flagRepository.findByIdAndProjectId(id, projectId);
         events.publish(DomainEvent.of(projectId, "flag.archived", "flag",
-            id, null, "Flag archived"));
+            id, flag.getName(), "Flag archived"));
         return flag;
     }
 
@@ -257,7 +259,7 @@ public class FlagService {
         if (affected == 0) throw new NotFoundException("Flag", id);
         Flag flag = flagRepository.findByIdAndProjectId(id, projectId);
         events.publish(DomainEvent.of(projectId, "flag.unarchived", "flag",
-            id, null, "Flag unarchived"));
+            id, flag.getName(), "Flag unarchived"));
         return flag;
     }
 

@@ -118,11 +118,13 @@ public class SegmentService {
     @Transactional
     @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public void delete(Integer id, Integer projectId) {
+        Segment segment = segmentRepository.findByIdAndProjectId(id, projectId);
+        if (segment == null) throw new NotFoundException("Segment", id);
         segmentContextRepository.deleteBySegmentId(id);
         int deleted = segmentRepository.deleteById(id, projectId);
         if (deleted == 0) throw new NotFoundException("Segment", id);
         events.publish(DomainEvent.of(projectId, "segment.deleted", "segment",
-            id, null, "Segment deleted"));
+            id, segment.getName(), "Segment deleted"));
     }
 
     public List<SegmentContext> getContexts(Integer segmentId) {
