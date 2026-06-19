@@ -10,6 +10,8 @@ import dev.mozhno.flags.Flag;
 import dev.mozhno.flags.FlagRepository;
 import dev.mozhno.flags.strategy.*;
 import dev.mozhno.contexts.ContextService;
+import dev.mozhno.environments.Environment;
+import dev.mozhno.environments.EnvironmentRepository;
 
 import java.util.List;
 
@@ -31,11 +33,14 @@ class StrategyServiceTest {
     @Mock
     private ContextService contextService;
 
+    @Mock
+    private EnvironmentRepository environmentRepository;
+
     private StrategyService strategyService;
 
     @BeforeEach
     void setUp() {
-        strategyService = new StrategyService(strategyRepository, flagRepository, events, contextService);
+        strategyService = new StrategyService(strategyRepository, flagRepository, events, contextService, environmentRepository);
     }
 
     @Test
@@ -67,6 +72,12 @@ class StrategyServiceTest {
         flag.setName("test-flag");
         when(flagRepository.findById(1)).thenReturn(flag);
 
+        Environment env = new Environment();
+        env.setId(2);
+        env.setName("Production");
+        when(environmentRepository.findById(2)).thenReturn(env);
+        when(strategyRepository.findByFlagIdAndEnvironmentId(1, 2)).thenReturn(null);
+
         FlagStrategy mockSaved = new FlagStrategy();
         mockSaved.setId(10);
         mockSaved.setFlagId(1);
@@ -97,6 +108,12 @@ class StrategyServiceTest {
         flag.setProjectId(100);
         flag.setName("test-flag");
         when(flagRepository.findById(1)).thenReturn(flag);
+
+        Environment env = new Environment();
+        env.setId(2);
+        env.setName("Development");
+        when(environmentRepository.findById(2)).thenReturn(env);
+        when(strategyRepository.findByFlagIdAndEnvironmentId(1, 2)).thenReturn(null);
 
         FlagStrategy mockSaved = new FlagStrategy();
         mockSaved.setId(10);
@@ -225,6 +242,12 @@ class StrategyServiceTest {
         flag.setName("test-flag");
         when(flagRepository.findById(1)).thenReturn(flag);
 
+        Environment env = new Environment();
+        env.setId(2);
+        env.setName("Production");
+        when(environmentRepository.findById(2)).thenReturn(env);
+        when(strategyRepository.findByFlagIdAndEnvironmentId(1, 2)).thenReturn(null);
+
         FlagStrategy mockSaved = new FlagStrategy();
         mockSaved.setId(10);
         mockSaved.setFlagId(1);
@@ -249,6 +272,12 @@ class StrategyServiceTest {
         flag.setProjectId(100);
         flag.setName("test-flag");
         when(flagRepository.findById(1)).thenReturn(flag);
+
+        Environment env = new Environment();
+        env.setId(2);
+        env.setName("Production");
+        when(environmentRepository.findById(2)).thenReturn(env);
+        when(strategyRepository.findByFlagIdAndEnvironmentId(1, 2)).thenReturn(new FlagStrategy());
 
         FlagStrategy updated = new FlagStrategy();
         updated.setId(5);

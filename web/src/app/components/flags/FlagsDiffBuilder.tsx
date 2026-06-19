@@ -3,7 +3,6 @@ import type { FlagTagValue, SegmentResponse, ContextDefinition } from '@/api';
 import type { ConstraintGroup } from '@/app/components/flags/types';
 import type { FlagView } from '@/app/hooks/flagTypes';
 import type { ReactNode } from 'react';
-import { adjustColor } from '@/shared/color';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
 import { ContextType } from '@/app/components/contextTypes';
@@ -19,9 +18,9 @@ export function makeTagNode(tv: FlagTagValue): ReactNode {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white shadow-sm leading-none"
+        className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-white shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
         style={{
-          backgroundImage: `linear-gradient(to right, ${tv.tagColor}, ${adjustColor(tv.tagColor, 20)})`,
+          background: tv.tagColor,
         }}
       >
         {tv.tagName}

@@ -14,6 +14,7 @@ import dev.mozhno.flags.Flag;
 import dev.mozhno.flags.FlagRepository;
 import dev.mozhno.client.FlagConstraintParser;
 import dev.mozhno.contexts.ContextService;
+import dev.mozhno.environments.EnvironmentRepository;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,13 +30,16 @@ public class StrategyService {
     private final FlagRepository flagRepository;
     private final DomainEventPublisher events;
     private final ContextService contextService;
+    private final EnvironmentRepository environmentRepository;
 
     public StrategyService(FlagStrategyRepository strategyRepository, FlagRepository flagRepository,
-                           DomainEventPublisher events, ContextService contextService) {
+                           DomainEventPublisher events, ContextService contextService,
+                           EnvironmentRepository environmentRepository) {
         this.strategyRepository = strategyRepository;
         this.flagRepository = flagRepository;
         this.events = events;
         this.contextService = contextService;
+        this.environmentRepository = environmentRepository;
     }
 
     /**
@@ -146,8 +150,10 @@ public class StrategyService {
 
         var flag = flagRepository.findById(existing.getFlagId());
         if (flag != null) {
+            var env = environmentRepository.findById(existing.getEnvironmentId());
+            String envName = env != null ? env.getName() : String.valueOf(existing.getEnvironmentId());
             events.publish(DomainEvent.of(flag.getProjectId(), "strategy.updated", "strategy",
-                saved.getId(), flag.getName(), "Strategy updated for env " + existing.getEnvironmentId()));
+                saved.getId(), flag.getName(), "Environment: " + envName));
         }
         return saved;
     }
@@ -179,6 +185,9 @@ public class StrategyService {
 
         validateConstraintValues(request.getContextValuesJson());
 
+        boolean exists = strategyRepository.findByFlagIdAndEnvironmentId(
+            request.getFlagId(), request.getEnvironmentId()) != null;
+
         FlagStrategy saved = strategyRepository.upsert(
             request.getFlagId(),
             request.getEnvironmentId(),
@@ -189,8 +198,11 @@ public class StrategyService {
             request.getSegmentIds()
         );
 
-        events.publish(DomainEvent.of(flag.getProjectId(), "strategy.created", "strategy",
-            saved.getId(), flag.getName(), "Strategy upserted for env " + request.getEnvironmentId()));
+        var env = environmentRepository.findById(request.getEnvironmentId());
+        String envName = env != null ? env.getName() : String.valueOf(request.getEnvironmentId());
+        String action = exists ? "strategy.updated" : "strategy.created";
+        events.publish(DomainEvent.of(flag.getProjectId(), action, "strategy",
+            saved.getId(), flag.getName(), "Environment: " + envName));
         return saved;
     }
 

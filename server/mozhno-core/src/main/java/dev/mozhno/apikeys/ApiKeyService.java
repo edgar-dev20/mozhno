@@ -99,7 +99,7 @@ public class ApiKeyService {
         k.setKeyType(request.getKeyType() != null ? request.getKeyType() : "SERVER");
         ApiKey saved = apiKeyRepository.save(k);
         events.publish(DomainEvent.of(saved.getProjectId(), "apikey.created", "apikey",
-            saved.getId(), saved.getName(), "API key created"));
+            saved.getId(), saved.getName(), "Type: " + saved.getKeyType()));
         return saved;
     }
 
@@ -112,7 +112,7 @@ public class ApiKeyService {
         k.setDescription(request.getDescription());
         ApiKey saved = apiKeyRepository.save(k);
         events.publish(DomainEvent.of(saved.getProjectId(), "apikey.updated", "apikey",
-            saved.getId(), saved.getName(), "API key updated"));
+            saved.getId(), saved.getName(), "Type: " + saved.getKeyType()));
         return saved;
     }
 
@@ -123,10 +123,12 @@ public class ApiKeyService {
      */
     @Transactional
     public void delete(Integer id, Integer projectId) {
+        ApiKey key = apiKeyRepository.findByIdAndProjectId(id, projectId);
+        if (key == null) throw new NotFoundException("ApiKey", id);
         int deleted = apiKeyRepository.deleteById(id, projectId);
         if (deleted == 0) throw new NotFoundException("ApiKey", id);
         events.publish(DomainEvent.of(projectId, "apikey.deleted", "apikey",
-            id, null, "API key deleted"));
+            id, key.getName(), "API key deleted"));
     }
 
     /**

@@ -4,13 +4,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import dev.mozhno.spi.AuditSpi;
+import dev.mozhno.spi.AuditEventEnricher;
 
 @Component
 public class AuditEventListener {
     private final AuditSpi auditSpi;
+    private final AuditEventEnricher enricher;
 
-    public AuditEventListener(AuditSpi auditSpi) {
+    public AuditEventListener(AuditSpi auditSpi, AuditEventEnricher enricher) {
         this.auditSpi = auditSpi;
+        this.enricher = enricher;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -21,10 +24,20 @@ public class AuditEventListener {
 
         String ip = resolveIp();
 
-        auditSpi.log(new AuditSpi.AuditRecord(
+        AuditSpi.AuditRecord record = new AuditSpi.AuditRecord(
             event.projectId(), userId, userName, userEmail, event.action(),
             event.resourceType(), event.resourceId(), event.resourceName(),
-            event.details(), ip));
+            event.details(), ip);
+
+        String enrichedDetails = enricher.enrich(record);
+        if (enrichedDetails != null && !enrichedDetails.equals(record.details())) {
+            record = new AuditSpi.AuditRecord(
+                record.projectId(), record.userId(), record.userName(), record.userEmail(),
+                record.action(), record.resourceType(), record.resourceId(), record.resourceName(),
+                enrichedDetails, record.ipAddress());
+        }
+
+        auditSpi.log(record);
     }
 
     private String resolveIp() {

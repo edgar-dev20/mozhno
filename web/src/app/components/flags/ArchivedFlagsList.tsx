@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Archive, ArchiveRestore, User, Clock } from '@/shared/icons';
-import { formatDate, getFlagTypeColor, getFlagTypeLabel, adjustColor } from '@/shared';
+import { formatDate, getFlagTypeColor, getFlagTypeLabel } from '@/shared';
 import { useT } from '@/i18n';
 import type { FlagView } from '@/app/hooks/flagTypes';
 import type { Tag as TagType } from '@/api';
@@ -101,9 +101,9 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
                       return tg ? (
                         <span
                           key={i}
-                          className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white shadow-sm leading-none"
+                          className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-white shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
                           style={{
-                            backgroundImage: `linear-gradient(to right, ${tg.color}, ${adjustColor(tg.color, 20)})`,
+                            background: tg.color,
                           }}
                         >
                           {tv.value}

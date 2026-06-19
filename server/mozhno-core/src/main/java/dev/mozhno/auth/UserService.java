@@ -96,7 +96,7 @@ public class UserService {
         user.setLocale(request.locale() != null ? request.locale() : DEFAULT_LOCALE);
         User saved = userRepository.save(user);
         events.publish(DomainEvent.of(null, "user.created", "user",
-            saved.getId(), saved.getEmail(), "User created with role: " + saved.getRole()));
+            saved.getId(), saved.getEmail(), "Role: " + saved.getRole()));
         return toDto(saved);
     }
 
@@ -128,7 +128,7 @@ public class UserService {
         if (request.locale() != null) user.setLocale(request.locale());
         User saved = userRepository.save(user);
         events.publish(DomainEvent.of(null, "user.updated", "user",
-            saved.getId(), saved.getEmail(), "User updated: role=" + saved.getRole() + ", status=" + saved.getStatus()));
+            saved.getId(), saved.getEmail(), "Role: " + saved.getRole() + ", Status: " + saved.getStatus()));
         return toDto(saved);
     }
 
@@ -169,7 +169,7 @@ public class UserService {
         user.setAvatar("blob" + ext);
         User saved = userRepository.save(user);
         events.publish(DomainEvent.of(null, "user.avatar_updated", "user",
-            saved.getId(), saved.getEmail(), null));
+            saved.getId(), saved.getEmail(), "Avatar updated"));
         return toDto(saved);
     }
 

@@ -239,7 +239,7 @@ export function Tags() {
                       <div
                         className="w-11 h-11 rounded-xl flex items-center justify-center shadow-sm shrink-0"
                         style={{
-                          backgroundImage: `linear-gradient(135deg, ${tag.color}, ${adjustColor(tag.color, 25)})`,
+                          background: tag.color,
                           boxShadow: `0 4px 12px ${tag.color}33`,
                         }}
                       >
@@ -356,10 +356,10 @@ export function Tags() {
               <div className="flex items-center gap-3">
                 <div
                   className="w-14 h-14 rounded-2xl shadow-lg shrink-0 flex items-center justify-center transition-all"
-                  style={{
-                    backgroundImage: `linear-gradient(135deg, ${formColor}, ${adjustColor(formColor, 25)})`,
-                    boxShadow: `0 8px 24px ${formColor}40`,
-                  }}
+                    style={{
+                      background: formColor,
+                      boxShadow: `0 8px 24px ${formColor}40`,
+                    }}
                 >
                   <TagIcon size={20} className="text-white" />
                 </div>

@@ -392,6 +392,11 @@ export function AuditLog() {
                           {getResourceIcon(event.resourceType, 10)}
                           {getResourceLabel(event.resourceType)}
                         </span>
+                        {event.details && (
+                          <span className="text-xs text-muted-foreground/70 truncate max-w-[200px]">
+                            — {event.details}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         {!expanded && (
