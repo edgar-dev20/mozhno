@@ -2,9 +2,11 @@ package dev.mozhno.segments;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.spi.QuotaSpi;
+import dev.mozhno.CacheNames;
 import dev.mozhno.Operator;
 import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.NotFoundException;
@@ -61,6 +63,7 @@ public class SegmentService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public Segment create(SegmentRequest request) {
         QuotaValidator.check(quotaSpi.canCreateSegment(request.getProjectId()));
 
@@ -84,6 +87,7 @@ public class SegmentService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public Segment update(Integer id, SegmentRequest request) {
         Segment segment;
         if (request.getProjectId() != null) {
@@ -112,6 +116,7 @@ public class SegmentService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public void delete(Integer id, Integer projectId) {
         segmentContextRepository.deleteBySegmentId(id);
         int deleted = segmentRepository.deleteById(id, projectId);

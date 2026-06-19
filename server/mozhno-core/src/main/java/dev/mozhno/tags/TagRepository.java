@@ -1,5 +1,6 @@
 package dev.mozhno.tags;
 
+import dev.mozhno.CacheNames;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,7 +40,7 @@ public class TagRepository {
      * @param projectId the project ID
      * @return list of tags
      */
-    @Cacheable("tags")
+    @Cacheable(CacheNames.TAGS)
     public List<Tag> findByProjectId(Integer projectId) {
         return jdbc.query("SELECT id, name, description, color, project_id, created_at FROM tags WHERE project_id = ? ORDER BY id", ROW_MAPPER, projectId);
     }
@@ -72,7 +73,7 @@ public class TagRepository {
      * @param tag the tag to save
      * @return the saved tag
      */
-    @CacheEvict(value = "tags", allEntries = true)
+    @CacheEvict(value = CacheNames.TAGS, allEntries = true)
     public Tag save(Tag tag) {
         if (tag.getId() == null) {
             Instant createTime = Instant.now();
@@ -104,7 +105,7 @@ public class TagRepository {
      * @param projectId the project ID
      * @return number of deleted rows
      */
-    @CacheEvict(value = "tags", allEntries = true)
+    @CacheEvict(value = CacheNames.TAGS, allEntries = true)
     public int deleteById(Integer id, Integer projectId) {
         return jdbc.update("DELETE FROM tags WHERE id = ? AND project_id = ?", id, projectId);
     }
@@ -115,7 +116,7 @@ public class TagRepository {
      * @param ids list of tag IDs
      * @return list of tags, empty if no IDs provided
      */
-    @Cacheable("tags")
+    @Cacheable(CacheNames.TAGS)
     public List<Tag> findAllByIds(List<Integer> ids) {
         if (ids == null || ids.isEmpty()) return List.of();
         String placeholders = String.join(",", ids.stream().map(id -> "?").toList());

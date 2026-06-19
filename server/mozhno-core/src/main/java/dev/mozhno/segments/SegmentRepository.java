@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import dev.mozhno.CacheNames;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
@@ -84,7 +85,7 @@ public class SegmentRepository {
      * @param segment the segment to save
      * @return the saved segment
      */
-    @CacheEvict(value = "segments", allEntries = true)
+    @CacheEvict(value = CacheNames.SEGMENTS, allEntries = true)
     public Segment save(Segment segment) {
         if (segment.getId() == null) {
             Instant createTime = Instant.now();
@@ -120,7 +121,7 @@ public class SegmentRepository {
      * @param projectId the project ID
      * @return number of deleted rows
      */
-    @CacheEvict(value = "segments", allEntries = true)
+    @CacheEvict(value = CacheNames.SEGMENTS, allEntries = true)
     public int deleteById(Integer id, Integer projectId) {
         return jdbc.update("DELETE FROM segments WHERE id = ? AND project_id = ?", id, projectId);
     }

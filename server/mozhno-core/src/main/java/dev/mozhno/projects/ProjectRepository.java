@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.cache.annotation.Cacheable;
+import dev.mozhno.CacheNames;
 import org.springframework.cache.annotation.CacheEvict;
 
 /**
@@ -48,7 +49,7 @@ public class ProjectRepository {
      * @param id the project ID
      * @return the project, or null if not found
      */
-    @Cacheable("projects")
+    @Cacheable(CacheNames.PROJECTS)
     public Project findById(Integer id) {
         try {
             return jdbc.queryForObject("SELECT id, name, description, logo, created_at FROM projects WHERE id = ?", ROW_MAPPER, id);
@@ -63,7 +64,7 @@ public class ProjectRepository {
      * @param project the project to save
      * @return the saved project
      */
-    @CacheEvict(value = "projects", key = "#project.id")
+    @CacheEvict(value = CacheNames.PROJECTS, key = "#project.id")
     public Project save(Project project) {
         if (project.getId() == null) {
             Instant createTime = Instant.now();
@@ -92,7 +93,7 @@ public class ProjectRepository {
      *
      * @param id the project ID
      */
-    @CacheEvict(value = "projects", key = "#id")
+    @CacheEvict(value = CacheNames.PROJECTS, key = "#id")
     public void deleteById(Integer id) {
         jdbc.update("DELETE FROM projects WHERE id = ?", id);
     }
@@ -137,7 +138,7 @@ public class ProjectRepository {
      * @param logo the logo filename
      * @param data the logo bytes
      */
-    @CacheEvict(value = "projects", key = "#id")
+    @CacheEvict(value = CacheNames.PROJECTS, key = "#id")
     public void updateLogo(Integer id, String logo, byte[] data) {
         jdbc.update("UPDATE projects SET logo = ?, logo_data = ? WHERE id = ?", logo, data, id);
     }

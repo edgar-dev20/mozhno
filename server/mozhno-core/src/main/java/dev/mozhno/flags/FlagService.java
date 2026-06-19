@@ -2,6 +2,8 @@ package dev.mozhno.flags;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import dev.mozhno.CacheNames;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.exception.BadRequestException;
@@ -144,6 +146,7 @@ public class FlagService {
      * @throws RuntimeException if the project is not found, quota is exceeded, or flag type is invalid
      */
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public Flag create(FlagRequest request, Integer creatorId) {
         QuotaValidator.check(quotaSpi.canCreateFlag(request.getProjectId()));
 
@@ -186,6 +189,7 @@ public class FlagService {
      * @throws RuntimeException if the flag or a tag is not found, or flag type is invalid
      */
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public Flag update(Integer id, FlagRequest request) {
         Flag flag = flagRepository.findByIdAndProjectId(id, request.getProjectId());
         if (flag == null) throw new NotFoundException("Flag", id);
@@ -226,6 +230,7 @@ public class FlagService {
      * @param id the flag ID
      */
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public void delete(Integer id, Integer projectId) {
         flagTagValueRepository.deleteByFlagId(id);
         int deleted = flagRepository.deleteById(id, projectId);
@@ -235,6 +240,7 @@ public class FlagService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public Flag archive(Integer id, Integer archivedBy, Integer projectId) {
         int affected = flagRepository.setArchived(id, true, archivedBy, projectId);
         if (affected == 0) throw new NotFoundException("Flag", id);
@@ -245,6 +251,7 @@ public class FlagService {
     }
 
     @Transactional
+    @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public Flag unarchive(Integer id, Integer projectId) {
         int affected = flagRepository.clearArchived(id, projectId);
         if (affected == 0) throw new NotFoundException("Flag", id);

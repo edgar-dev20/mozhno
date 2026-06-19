@@ -1,5 +1,6 @@
 package dev.mozhno.contexts;
 
+import dev.mozhno.CacheNames;
 import dev.mozhno.ContextType;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -49,7 +50,7 @@ public class ContextDefinitionRepository {
      * @param projectId the project ID
      * @return list of context definitions
      */
-    @Cacheable("contextDefinitions")
+    @Cacheable(CacheNames.CONTEXT_DEFINITIONS)
     public List<ContextDefinition> findByProjectId(Integer projectId) {
         return jdbc.query("SELECT id, name, context_key, context_type, description, created_by, is_strict, project_id, created_at FROM context_definitions WHERE project_id = ? ORDER BY id", ROW_MAPPER, projectId);
     }
@@ -103,7 +104,7 @@ public class ContextDefinitionRepository {
      * @param ctx the context definition to save
      * @return the saved context definition
      */
-    @CacheEvict(value = "contextDefinitions", allEntries = true)
+    @CacheEvict(value = CacheNames.CONTEXT_DEFINITIONS, allEntries = true)
     public ContextDefinition save(ContextDefinition ctx) {
         if (ctx.getId() == null) {
             String key = ctx.getContextKey();
@@ -152,7 +153,7 @@ public class ContextDefinitionRepository {
      * @param projectId the project ID
      * @return number of deleted rows
      */
-    @CacheEvict(value = "contextDefinitions", allEntries = true)
+    @CacheEvict(value = CacheNames.CONTEXT_DEFINITIONS, allEntries = true)
     public int deleteById(Integer id, Integer projectId) {
         return jdbc.update("DELETE FROM context_definitions WHERE id = ? AND project_id = ?", id, projectId);
     }
