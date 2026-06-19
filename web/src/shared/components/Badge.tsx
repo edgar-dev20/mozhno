@@ -1,90 +1,87 @@
 import React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-type BadgeVariant =
-  | 'default'
-  | 'primary'
-  | 'success'
-  | 'warning'
-  | 'destructive'
-  | 'info'
-  | 'accent';
-type BadgeStyle = 'subtle' | 'outline' | 'solid';
-type BadgeShape = 'rounded' | 'pill';
-type BadgeSize = 'sm' | 'md';
+const badgeVariants = cva(
+  'inline-flex items-center gap-1 font-semibold leading-none shrink-0',
+  {
+    variants: {
+      variant: {
+        default: '',
+        primary: '',
+        success: '',
+        warning: '',
+        destructive: '',
+        info: '',
+        accent: '',
+      },
+      style: {
+        subtle: '',
+        outline: '',
+        solid: '',
+      },
+      shape: {
+        rounded: 'rounded',
+        pill: 'rounded-full',
+      },
+      size: {
+        sm: 'px-1.5 py-0.5 text-xs',
+        md: 'px-2 py-0.5 text-xs',
+      },
+    },
+    compoundVariants: [
+      { variant: 'default', style: 'subtle', className: 'text-muted-foreground bg-muted border border-border' },
+      { variant: 'default', style: 'outline', className: 'text-muted-foreground border border-border' },
+      { variant: 'default', style: 'solid', className: 'text-foreground bg-accent border border-accent' },
+      { variant: 'primary', style: 'subtle', className: 'text-primary bg-primary/10 border border-primary/10' },
+      { variant: 'primary', style: 'outline', className: 'text-primary border border-primary/30' },
+      { variant: 'primary', style: 'solid', className: 'text-primary-foreground bg-primary border border-primary' },
+      { variant: 'success', style: 'subtle', className: 'text-success bg-success/10 border border-success/20' },
+      { variant: 'success', style: 'outline', className: 'text-success border border-success/30' },
+      { variant: 'success', style: 'solid', className: 'text-success-foreground bg-success border border-success' },
+      { variant: 'warning', style: 'subtle', className: 'text-warning bg-warning/10 border border-warning/20' },
+      { variant: 'warning', style: 'outline', className: 'text-warning border border-warning/30' },
+      { variant: 'warning', style: 'solid', className: 'text-warning-foreground bg-warning border border-warning' },
+      { variant: 'destructive', style: 'subtle', className: 'text-destructive bg-destructive/10 border border-destructive/20' },
+      { variant: 'destructive', style: 'outline', className: 'text-destructive border border-destructive/30' },
+      { variant: 'destructive', style: 'solid', className: 'text-destructive-foreground bg-destructive border border-destructive' },
+      { variant: 'info', style: 'subtle', className: 'text-info bg-info/10 border border-info/20' },
+      { variant: 'info', style: 'outline', className: 'text-info border border-info/30' },
+      { variant: 'info', style: 'solid', className: 'text-info-foreground bg-info border border-info' },
+      { variant: 'accent', style: 'subtle', className: 'text-muted-foreground bg-accent border border-border' },
+      { variant: 'accent', style: 'outline', className: 'text-muted-foreground border border-accent' },
+      { variant: 'accent', style: 'solid', className: 'text-foreground bg-accent border border-accent' },
+    ],
+    defaultVariants: {
+      variant: 'default',
+      style: 'subtle',
+      shape: 'rounded',
+      size: 'md',
+    },
+  },
+);
 
-interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: BadgeVariant;
-  style?: BadgeStyle;
-  shape?: BadgeShape;
-  size?: BadgeSize;
+interface BadgeProps
+  extends React.HTMLAttributes<HTMLSpanElement>,
+    VariantProps<typeof badgeVariants> {
   uppercase?: boolean;
   icon?: React.ReactNode;
-  className?: string;
-  children: React.ReactNode;
 }
 
-const variantStyleClasses: Record<BadgeVariant, Record<BadgeStyle, string>> = {
-  default: {
-    subtle: 'text-muted-foreground bg-muted border border-border',
-    outline: 'text-muted-foreground border border-border',
-    solid: 'text-foreground bg-accent border border-accent',
-  },
-  primary: {
-    subtle: 'text-primary bg-primary/10 border border-primary/10',
-    outline: 'text-primary border border-primary/30',
-    solid: 'text-primary-foreground bg-primary border border-primary',
-  },
-  success: {
-    subtle: 'text-success bg-success/10 border border-success/20',
-    outline: 'text-success border border-success/30',
-    solid: 'text-success-foreground bg-success border border-success',
-  },
-  warning: {
-    subtle: 'text-warning bg-warning/10 border border-warning/20',
-    outline: 'text-warning border border-warning/30',
-    solid: 'text-warning-foreground bg-warning border border-warning',
-  },
-  destructive: {
-    subtle: 'text-destructive bg-destructive/10 border border-destructive/20',
-    outline: 'text-destructive border border-destructive/30',
-    solid: 'text-destructive-foreground bg-destructive border border-destructive',
-  },
-  info: {
-    subtle: 'text-info bg-info/10 border border-info/20',
-    outline: 'text-info border border-info/30',
-    solid: 'text-info-foreground bg-info border border-info',
-  },
-  accent: {
-    subtle: 'text-muted-foreground bg-accent border border-border',
-    outline: 'text-muted-foreground border border-accent',
-    solid: 'text-foreground bg-accent border border-accent',
-  },
-};
-
-const shapeClasses: Record<BadgeShape, string> = {
-  rounded: 'rounded',
-  pill: 'rounded-full',
-};
-
-const sizeClasses: Record<BadgeSize, string> = {
-  sm: 'px-1.5 py-0.5 text-xs',
-  md: 'px-2 py-0.5 text-xs',
-};
-
 export function Badge({
-  variant = 'default',
-  style = 'subtle',
-  shape = 'rounded',
-  size = 'md',
+  variant,
+  style,
+  shape,
+  size,
   uppercase = false,
   icon,
-  className = '',
+  className,
   children,
   ...rest
 }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1 font-semibold leading-none shrink-0 ${shapeClasses[shape]} ${sizeClasses[size]} ${variantStyleClasses[variant][style]} ${uppercase ? 'uppercase tracking-[0.2em]' : ''} ${className}`}
+      className={badgeVariants({ variant, style, shape, size, className }) +
+        (uppercase ? ' uppercase tracking-[0.2em]' : '')}
       {...rest}
     >
       {icon}

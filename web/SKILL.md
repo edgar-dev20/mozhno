@@ -55,18 +55,470 @@ Remember: Claude is capable of extraordinary creative work. Don't hold back, sho
 
 ---
 
-## Mozhno PluginRegistry API
+# Mozhno Project Reference
+
+## Project Overview
+
+Mozhno is an **open-core feature flag management platform**. Monorepo:
+- `/server` — Spring Boot 3.x + PostgreSQL (Java)
+- `/web` — React 19 SPA, published as `@mozhno/core-ui` npm package
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | React 19 |
+| Routing | react-router 7 |
+| Data fetching | TanStack Query 5 |
+| Styling | Tailwind CSS v4 (`@theme inline` pattern) |
+| UI primitives | Radix UI (Dialog, Select, DropdownMenu, Switch, Popover, Checkbox, Tooltip, etc.) |
+| Component variants | `class-variance-authority` (CVA) |
+| Animation | `motion` (framer-motion) |
+| Icons | `lucide-react` — curated re-export via `@/shared/icons` |
+| Forms | `react-hook-form` + `zod` + `@hookform/resolvers` |
+| Theme | `next-themes` (dark mode via `.dark` class) |
+| Toasts | `sonner` |
+| Class merging | `clsx` + `tailwind-merge` → `cn()` in `@/app/components/ui/utils` |
+| Testing | vitest + @testing-library/react + jsdom |
+| Charts | recharts |
+| Date handling | date-fns + react-day-picker |
+
+## Directory Map
+
+```
+web/src/
+  main.tsx                 — entry point
+  app/
+    App.tsx                — providers: ThemeProvider, LocaleProvider, QueryClient, MotionConfig, Router
+    routes.tsx             — 16 routes (see Routes below)
+    auth/                  — AuthContext, useAuth
+    components/
+      ui/                  — shadcn/ui: dialog, select, sheet, dropdown-menu, switch, checkbox, toggle, ...
+      flags/               — feature flag pages (FlagsList, FlagCard, FlagCreatePanel, FlagEditPanel, ...)
+      integrations/        — webhook config pages
+      onboarding/          — onboarding wizard (OnboardingWizard, CreateProjectStep, CreateFlagStep)
+      skeletons/           — loading skeletons (FlagCardSkeleton, TableRowSkeleton, ...)
+      PluginSlot.tsx       — plugin system renderer
+      SidePanel.tsx, TipCard.tsx, ConfirmDialog.tsx, DiffView.tsx, InlineDiffBar.tsx, ...
+    hooks/                 — queries.ts, mutations.ts, useFlagFilters.ts, useFlagPanels.ts, ...
+  shared/
+    index.ts               — barrel export: all shared components + utilities
+    components/
+      Badge.tsx            — CVA: 7 variants × 3 styles × 2 shapes × 2 sizes
+      GradientButton.tsx   — CVA: 9 variants × 4 sizes
+      Card.tsx             — CVA: 4 variants (default/elevated/panel/selectable)
+      StatusDot.tsx        — CVA: 4 states × 2 sizes
+      EmptyState.tsx       — icon/illustration + title + action button
+      SectionHeader.tsx    — gradient heading + dot + description
+      FormField.tsx        — label + hint/error wrapper for inputs
+      SearchInput.tsx      — search icon + clear button
+      LoadingState.tsx     — pulsing card placeholder
+      PageLoader.tsx       — full-page spinner
+      LazyPage.tsx         — Suspense wrapper for lazy routes
+      ErrorBox.tsx         — alert message
+      Hairline.tsx         — thin border divider
+      TruncatedCopyTooltip.tsx — truncate + copy tooltip
+      CardHeader.tsx       — card title bar with actions slot
+      ColorBar.tsx         — horizontal color bar
+      ColorIcon.tsx        — small color swatch
+      Wordmark.tsx         — brand wordmark (sm/md/lg/xl)
+      DatePicker.tsx, DateRangePicker.tsx, DateTimePicker.tsx — date inputs
+      StatusIcon.tsx       — icon in a colored container
+      SkipLink.tsx         — accessibility skip-to-content
+      EmptyFlags.tsx, EmptyKeys.tsx, EmptySegments.tsx — empty state illustrations
+    icons.ts               — 116 lucide-react icons, 10 semantic groups, ICON_SIZE export
+    motion.ts              — animation presets (spring, card, accordion, fadeUp, ...)
+    color.ts               — oklch ↔ hex conversion utilities (hexToOklch, oklchToHex, adjustColor, dimColor)
+    format.ts              — formatDate, formatDateTime, timeAgo, getFlagTypeColor, getFlagTypeLabel
+    errors.ts              — AppError class, isAppError, createAppError
+    errorHandler.ts        — getErrorMessage, getErrorCode, shouldRetry, shouldRedirect
+    sparklineUtils.ts      — sparkline data processing
+    diffUtils.ts           — diff comparison utilities
+    onboardingUtils.ts     — onboarding state management
+    extractLogoColor.ts    — dominant color extraction from images
+  api/
+    index.ts               — main API client (api.modules.flags, api.modules.environments, ...)
+    queryKeys.ts           — TanStack query key factory
+    schemas.ts             — shared Zod schemas
+    validation.ts          — validation helpers
+  i18n/
+    index.tsx              — LocaleProvider, useT() hook
+    messages.ts            — translation messages
+    dateLocales.ts         — date-fns locale imports
+  styles/
+    theme.css              — ALL design tokens (732 lines, single source of truth)
+    design-tokens.json     — canonical token specification (light + dark, all scales)
+    tailwind.css           — Tailwind v4 imports + tw-animate-css
+    index.css              — entry point (imports tailwind.css + theme.css)
+  stories/                  — Storybook stories: Badge, Card, GradientButton, EmptyState, StatusDot, ...
+  test/                     — vitest tests + setup.ts
+```
+
+## Routes
+
+| Path | Component | Lazy | Protected |
+|------|-----------|------|-----------|
+| `/login` | Auth | — | No |
+| `/forgot-password` | ForgotPassword | — | No |
+| `/reset-password` | ResetPassword | — | No |
+| `/accept-invite` | AcceptInvite | — | No |
+| `/` | DashboardLayout → redirect /flags | — | Yes |
+| `/flags` | Flags | Yes | Yes |
+| `/segments` | Segments | Yes | Yes |
+| `/contexts` | Constraints | Yes | Yes |
+| `/strategies` | Strategies | Yes | Yes |
+| `/tags` | Tags | Yes | Yes |
+| `/users` | Users | Yes | Yes |
+| `/audit` | AuditLog | Yes | Yes |
+| `/integrations` | Integrations | Yes | Yes |
+| `/apikeys` | ApiKeys | Yes | Yes |
+| `/applications` | ClientInstances | Yes | Yes |
+| `/settings` | Settings | Yes | Yes |
+
+DashboardLayout wraps all protected routes with sidebar, header (logo + stats), and user menu. All page components inside DashboardLayout use lazy loading with `<LazyPage Component={...} />`.
+
+---
+
+# Design Token System
+
+## Token Hierarchy (3 Layers)
+
+All tokens defined in `src/styles/theme.css`. Canonical source: `src/styles/design-tokens.json`.
+
+**Layer 1 — Primitives** (raw palette, theme-dependent):
+- `--palette-{color}-{50..950}` for gray, brand, primary, success, warning, danger, info
+- Example: `--palette-gray-50`, `--palette-success-500`, `--palette-danger-700`
+- Each has light + dark variants
+
+**Layer 2 — Semantic** (purpose, theme-dependent):
+- Surfaces: `--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--popover-foreground`
+- Interactive: `--primary`, `--primary-foreground`, `--secondary`, `--secondary-foreground`, `--muted`, `--muted-foreground`, `--accent`, `--accent-foreground`
+- Feedback: `--destructive`, `--destructive-foreground`, `--success`, `--success-foreground`, `--warning`, `--warning-foreground`, `--info`, `--info-foreground`
+- Structure: `--border`, `--input-border`, `--input-background`, `--switch-background`, `--overlay-bg`
+- Brand: `--brand`, `--brand-foreground`
+- Focus: `--ring`, `--ring-success`, `--ring-destructive`, `--ring-warning`, `--ring-brand`
+
+**Layer 3 — Component-specific**:
+- Gradients: `--gradient-start`, `--gradient-end`, `--gradient-start-hover`, `--gradient-end-hover`
+- Gradient variants: `--gradient-danger-start`, `--gradient-warning-start`, etc.
+- Subtle gradients: `--gradient-subtle-start`, `--gradient-subtle-end`
+- Sparklines: `--sparkline-true`, `--sparkline-false`
+- Sidebar: `--sidebar`, `--sidebar-primary`, `--sidebar-accent`, etc.
+- Charts: `--chart-1` through `--chart-5`
+- Disabled: `--disabled-bg`, `--disabled-fg`, `--disabled-border`
+
+## Typography Tokens
+
+**Font families** (in `:root`, theme-independent):
+- `--font-sans`: Inter, system-ui fallbacks
+- `--font-mono`: JetBrains Mono, Fira Code, Consolas
+
+**Size scale** → Tailwind utilities:
+| Token | Tailwind Class | Value |
+|-------|---------------|-------|
+| `--text-display` | `text-display` | clamp(2rem, 5vw, 2.75rem) |
+| `--text-h1` | `text-h1` | clamp(1.5rem, 3.5vw, 2rem) |
+| `--text-h2` | `text-h2` | clamp(1.125rem, 2.5vw, 1.25rem) |
+| `--text-h3` | `text-h3` | clamp(0.9375rem, 2vw, 1rem) |
+| `--text-body` | `text-body` | 0.875rem |
+| `--text-body-sm` | `text-body-sm` | 0.8125rem |
+| `--text-caption` | `text-caption` | 0.75rem |
+| `--text-overline` | `text-overline` | 0.75rem |
+
+**Weights** → Tailwind utilities:
+- `font-display` (750), `font-heading` (700), `font-medium` (500), `font-normal` (400)
+
+**Line heights** → Tailwind utilities:
+- `leading-display` (1.15), `leading-heading` (1.25), `leading-body` (1.5), `leading-ui` (1.45), `leading-caption` (1.4)
+
+**Headings** use: `<h1>` = `text-h1 font-heading leading-heading`, `<h2>` = `text-h2 font-heading leading-heading`, etc.
+
+## Radius Tokens
+
+| Token | Tailwind Utility | Value |
+|-------|-----------------|-------|
+| `--radius-sm` | `rounded-[--radius-sm]` | 0.375rem (6px) |
+| `--radius-md` | `rounded-[--radius-md]` | 0.5rem (8px) |
+| `--radius-lg` | `rounded-[--radius-lg]` | 0.625rem (10px) |
+| `--radius-xl` | `rounded-[--radius-xl]` | 0.875rem (14px) |
+
+## Shadow Tokens
+
+`shadow-xs` → `shadow-sm` → `shadow-md` → `shadow-lg` → `shadow-xl` → `shadow-2xl`
+
+Defined in both `:root` (light, lower opacity) and `.dark` (higher opacity). Use directly — theme switching is automatic.
+
+## Spacing & Z-Index
+
+- **Spacing**: Use Tailwind's built-in scale (4px base via `p-4`, `gap-2`, etc.)
+- **Z-index tokens**: `--z-base` (0) → `--z-docked` (10) → `--z-dropdown` (20) → `--z-sticky` (30) → `--z-overlay` (40) → `--z-drawer` (50) → `--z-modal` (60) → `--z-popover` (70) → `--z-tooltip` (80) → `--z-toast` (90)
+
+## Motion Tokens
+
+**Durations**:
+| Token | Value | Use Case |
+|-------|-------|----------|
+| `--duration-instant` | 0ms | No animation |
+| `--duration-fast` | 150ms | Hover, micro-interactions |
+| `--duration-normal` | 200ms | Default transitions |
+| `--duration-slow` | 300ms | Entrance animations |
+| `--duration-deliberate` | 500ms | Page transitions |
+
+**Easings**:
+- `--ease-default`: cubic-bezier(0.4, 0, 0.2, 1) — standard
+- `--ease-in`: cubic-bezier(0.4, 0, 1, 1) — deceleration
+- `--ease-out`: cubic-bezier(0, 0, 0.2, 1) — acceleration
+- `--ease-in-out`: cubic-bezier(0.4, 0, 0.2, 1) — symmetric
+- `--ease-spring`: cubic-bezier(0.22, 0.45, 0, 0.95) — bouncy
+
+**Usage in CSS**: `transition-[...] duration-[--duration-fast] ease-[--ease-out]`
+
+## Dark Mode
+
+- Managed by `next-themes` → adds `.dark` class to `<html>`
+- All color tokens have dark equivalents in `.dark {}` block in theme.css
+- **No manual `dark:` prefix needed** for color tokens — just use the semantic token
+- Shadow tokens automatically intensify in dark mode
+- Overlay token (`--overlay-bg`) switches from `oklch(0 0 0 / 0.4)` to `oklch(0 0 0 / 0.6)`
+- Icon, spacing, radius, duration tokens are theme-independent
+
+---
+
+# Styling Rules
+
+## CRITICAL: NO Raw Color Values
+
+**NEVER** use:
+- `bg-red-600`, `bg-blue-500`, `text-green-400`, `from-amber-500 to-orange-500`
+- `bg-black/50`, `bg-white/20`
+- Tailwind's built-in color palette (`red-*`, `blue-*`, etc.)
+
+**ALWAYS** use semantic tokens:
+- `bg-primary`, `text-muted-foreground`, `border-border`
+- `bg-overlay` (for modals/sheets/alert backdrops)
+- `bg-input-background`, `bg-switch-background`
+- `text-foreground` (main text), `text-muted-foreground` (secondary)
+
+**Opacity variants** use Tailwind's opacity modifier on semantic tokens:
+- `bg-primary/10`, `bg-success/20`, `text-muted-foreground/50`, `border-primary/30`
+
+**Palette access** (when you need a specific shade):
+- `bg-palette-brand-500`, `text-palette-danger-700`
+- Tailwind: `bg-palette-success-100`, `border-palette-gray-200`
+
+## Component Variants
+
+Use **`class-variance-authority`** (CVA) for components with variants:
+```typescript
+import { cva, type VariantProps } from 'class-variance-authority';
+
+const myVariants = cva('base-classes', {
+  variants: {
+    variant: { ... },
+    size: { ... },
+  },
+  compoundVariants: [ ... ],
+  defaultVariants: { ... },
+});
+```
+
+Reference implementations: `Badge.tsx`, `GradientButton.tsx`, `Card.tsx`, `StatusDot.tsx`, `toggleVariants.ts`.
+
+## Class Merging
+
+```typescript
+import { cn } from '@/app/components/ui/utils';
+// cn() combines clsx + tailwind-merge
+```
+
+## Focus Rings
+
+Standard pattern across all interactive elements:
+```
+focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]
+```
+
+## Disabled State
+
+```
+disabled:pointer-events-none disabled:bg-disabled-bg disabled:text-disabled-fg disabled:border-disabled-border
+```
+
+---
+
+# Icons
+
+Import from `@/shared/icons`:
+```typescript
+import { Plus, Trash2, Settings, Flag, Search } from '@/shared/icons';
+```
+
+**ICON_SIZE** constant (CSS token references):
+```typescript
+import { ICON_SIZE } from '@/shared/icons';
+// ICON_SIZE.sm = 'var(--icon-sm)' // 0.75rem (12px)
+// ICON_SIZE.md = 'var(--icon-md)' // 1rem (16px)
+// ICON_SIZE.lg = 'var(--icon-lg)' // 1.25rem (20px)
+```
+
+Usage: `<Plus className="size-[--icon-md]" />`
+
+**NOTE**: Most Lucide icons use `size-4` (16px) by default via `[&_svg:not([class*='size-'])]:size-4` in UI components. No need to specify size on every icon.
+
+---
+
+# Motion & Animation
+
+**Import**: `import { MOTION, fadeUp, scaleIn } from '@/shared/motion';`
+
+**Available presets**:
+- `MOTION.spring` — spring physics `[300, 30, 0, 1]`
+- `MOTION.card` — staggered card list entrance
+- `MOTION.accordion` — height expand/collapse
+- `MOTION.hover` — scale(1.02) on hover
+- `MOTION.fade` / `MOTION.fadeUp` / `MOTION.slideUp` / `MOTION.scaleIn` — entrance presets
+- `MOTION.dialog` — overlay + content entrance
+- `MOTION.sparkline` — SVG path draw
+
+**Motion tokens are read from CSS at runtime** — if you change `--duration-normal` in theme.css, `MOTION.card` and `MOTION.accordion` update automatically.
+
+**CSS keyframes** (in `theme.css`): `fadeIn`, `shake`
+**tw-animate-css** classes: `animate-in`, `fade-in-0`, `zoom-in-95`, `slide-in-from-top-2`, etc.
+
+---
+
+# Shared Components Quick Reference
+
+All exported from `@/shared`:
+
+| Component | Key Props |
+|-----------|----------|
+| **Badge** | `variant` (7), `style` (subtle/outline/solid), `shape` (rounded/pill), `size` (sm/md), `uppercase`, `icon` |
+| **GradientButton** | `variant` (9), `size` (sm/md/lg/icon), `icon`, `loading`, `disabled` |
+| **Card** | `variant` (default/elevated/panel/selectable), `padded`, `dimmed`, `selected`, `onClick`, `as` |
+| **StatusDot** | `state` (active/recent/stale/neutral), `size` (sm/md), `label` |
+| **SectionHeader** | `title` (string), `description` (ReactNode), `gradientClass` |
+| **EmptyState** | `illustration`/`icon`, `title`, `description`, `buttonLabel`, `onAction` |
+| **FormField** | `label`, `hint`, `error`, `maxLength`, `value`, `children` (input) |
+| **SearchInput** | Standard input props + search icon |
+| **LoadingState** | No props — renders pulsing card |
+| **PageLoader** | No props — full page spinner |
+| **LazyPage** | `Component` — suspense wrapper |
+| **ErrorBox** | `message` |
+| **Hairline** | `className` |
+| **TruncatedCopyTooltip** | `text` |
+| **CardHeader** | `title`, children (actions slot) |
+| **DatePicker** / **DateRangePicker** / **DateTimePicker** | Date selection with calendar popover |
+
+---
+
+# Shadcn/UI Components
+
+Located in `@/app/components/ui/`. All wrap Radix primitives:
+
+| Component | Import | Key Notes |
+|-----------|--------|-----------|
+| AlertDialog | `alert-dialog.tsx` | Overlay uses `bg-overlay`, content `rounded-[--radius-xl]` |
+| Avatar | `avatar.tsx` | Radix Avatar |
+| Checkbox | `checkbox.tsx` | `rounded-[--radius-sm]`, `duration-[--duration-fast]` |
+| Dialog | `dialog.tsx` | Overlay `bg-overlay backdrop-blur-sm`, content `rounded-[--radius-xl]` |
+| DropdownMenu | `dropdown-menu.tsx` | `min-w-[--panel-min-width]`, `rounded-[--radius-xl]` |
+| Input | `input.tsx` | `bg-input-background`, `border-input`, `rounded-lg` |
+| Label | `label.tsx` | `text-body-sm` |
+| Popover | `popover.tsx` | `min-w-[--panel-min-width]`, `rounded-[--radius-xl]` |
+| RadioGroup | `radio-group.tsx` | `duration-[--duration-fast]`, `size-[--icon-sm]` |
+| Select | `select.tsx` | Scroll buttons, `bg-input-background` |
+| Separator | `separator.tsx` | Horizontal/vertical, `bg-border` |
+| Sheet | `sheet.tsx` | Overlay `bg-overlay backdrop-blur-sm`, side-based positioning |
+| Skeleton | `skeleton.tsx` | `bg-accent animate-pulse` |
+| Switch | `switch.tsx` | `bg-primary` when checked, `bg-switch-background` unchecked |
+| Textarea | `textarea.tsx` | `rounded-[--radius-md]`, `text-body` |
+| Toggle | `toggle.tsx` | CVA via `toggleVariants` (default/outline × default/sm/lg) |
+| Tooltip | `tooltip.tsx` | `rounded-[--radius-lg]`, arrow `rounded-[--radius-sm]` |
+
+---
+
+# Forms
+
+- Library: `react-hook-form` + `zod` validation
+- Resolver: `@hookform/resolvers/zod`
+- **ALWAYS wrap form fields in `<FormField>`** from `@/shared`:
+  ```tsx
+  <FormField label="Name" hint="Optional hint" error={errors.name?.message}>
+    <Input {...register('name')} />
+  </FormField>
+  ```
+- FormField auto-generates accessible `id`/`aria-describedby` connections
+- Reference patterns: `FlagCreatePanel.tsx`, `FlagEditPanel.tsx`, `Settings.tsx`, `CreateFlagStep.tsx`
+
+---
+
+# API & Data
+
+```typescript
+import { api } from '@/api';
+import { useProjectQuery, useEnrichedFlagsQuery } from '@/app/hooks/queries';
+import { useFlagDelete, useFlagToggle } from '@/app/hooks/mutations';
+import { queryKeys } from '@/api/queryKeys';
+```
+
+- API client: modular (`api.projects.getLogoUrl()`, `api.flags.create()`, etc.)
+- TanStack Query hooks prefixed with `use...Query` / `use...Mutation`
+- QueryCache error handling in `App.tsx` — auto-toasts on query errors
+- Query config: staleTime 60s, gcTime 10min, retry 1, no refetchOnWindowFocus
+
+---
+
+# i18n
+
+```typescript
+import { useT } from '@/i18n';
+const t = useT();
+// t('navigation.flags'), t('flags.create.title'), etc.
+```
+
+---
+
+# Testing
+
+- **Framework**: vitest + @testing-library/react + jsdom
+- **Setup**: `src/test/setup.ts`
+- **Tests location**: `src/test/*.test.tsx` (unit/component tests)
+- **Run**: `npm run test`
+- **Coverage**: `npm run test:coverage` (thresholds: lines 22%, functions 18%, branches 15%, statements 20%)
+
+---
+
+# Build Commands
+
+| Command | What |
+|---------|------|
+| `npm run dev` | Vite dev server (port 5173) |
+| `npm run build` | Production build → `dist/` |
+| `npm run build:lib` | Library build (`@mozhno/core-ui`) |
+| `npm run build:static` | Build to `../server/mozhno-app/src/main/resources/static` |
+| `npm run storybook` | Storybook dev server (port 6006) |
+| `npm run build-storybook` | Static Storybook build |
+| `npm run test` | vitest run |
+| `npm run test:watch` | vitest in watch mode |
+| `npm run test:coverage` | vitest with coverage |
+| `npm run lint` | eslint |
+| `npm run format` | prettier |
+
+---
+
+# Mozhno PluginRegistry API
 
 The `pluginRegistry` is a singleton for registering premium feature plugins in Mozhno's open-core architecture. Plugins rendered via `<PluginSlot slotId="..." />`.
 
-### Available slots
+## Available slots
 
 | Slot ID | Location | Description |
 |---------|----------|-------------|
 | `sidebar.admin` | DashboardLayout sidebar | Injected in the admin section, between "Контексты" and "Пользователи" |
 | `settings.premium` | Settings page | Appears at the bottom of the Settings page, after the "Опасная зона" section |
 
-### Usage
+## Usage
 
 ```typescript
 import { pluginRegistry, type PremiumPlugin } from '@mozhno/core-ui/plugin';
@@ -86,7 +538,7 @@ pluginRegistry.unregister('sidebar.admin', MyAdminPlugin);
 const plugins = pluginRegistry.getForSlot('sidebar.admin');
 ```
 
-### Plugin component contract
+## Plugin component contract
 
 ```tsx
 import React from 'react';
@@ -100,7 +552,7 @@ function MyAdminPlugin() {
 export default MyAdminPlugin;
 ```
 
-### Rendering plugins
+## Rendering plugins
 
 ```tsx
 import { PluginSlot } from '@mozhno/core-ui/plugin';
@@ -110,7 +562,7 @@ import { PluginSlot } from '@mozhno/core-ui/plugin';
 // Renders all registered plugins for this slot, sorted by priority.
 ```
 
-### Priority ordering
+## Priority ordering
 - Plugins are sorted by `priority` ascending (lower = first).
 - Default priority is `50`.
 - Multiple plugins in the same slot render in priority order.

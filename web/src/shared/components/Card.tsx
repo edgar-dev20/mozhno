@@ -1,7 +1,21 @@
 import React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
 
-interface CardProps {
-  variant?: 'default' | 'elevated' | 'panel' | 'selectable';
+const cardVariants = cva('', {
+  variants: {
+    variant: {
+      default: 'bg-card rounded-2xl shadow-sm border border-border',
+      elevated: 'bg-card rounded-2xl shadow-md border border-border',
+      panel: 'bg-card rounded-2xl shadow-lg border border-border',
+      selectable: 'rounded-2xl transition-all overflow-hidden',
+    },
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+});
+
+interface CardProps extends VariantProps<typeof cardVariants> {
   selected?: boolean;
   dimmed?: boolean;
   padded?: boolean;
@@ -15,7 +29,7 @@ interface CardProps {
 export const Card = React.forwardRef<HTMLDivElement | HTMLButtonElement, CardProps>(
   (
     {
-      variant = 'default',
+      variant,
       selected,
       dimmed,
       padded,
@@ -29,23 +43,14 @@ export const Card = React.forwardRef<HTMLDivElement | HTMLButtonElement, CardPro
   ) => {
     const tag = as ?? (onClick ? 'button' : 'div');
 
-    let classes = '';
+    let classes: string;
 
     if (variant === 'selectable') {
-      if (selected) {
-        classes =
-          'rounded-2xl transition-all overflow-hidden bg-gradient-to-br from-sparkline-true/[0.04] to-transparent ring-1 ring-sparkline-true/25 shadow-md';
-      } else {
-        classes =
-          'rounded-2xl transition-all overflow-hidden bg-card shadow-sm hover:shadow-md border border-border';
-      }
+      classes = selected
+        ? 'rounded-2xl transition-all overflow-hidden bg-gradient-to-br from-sparkline-true/[0.04] to-transparent ring-1 ring-sparkline-true/25 shadow-md'
+        : 'rounded-2xl transition-all overflow-hidden bg-card shadow-sm hover:shadow-md border border-border';
     } else {
-      const variantBase: Record<string, string> = {
-        default: 'bg-card rounded-2xl shadow-sm border border-border',
-        elevated: 'bg-card rounded-2xl shadow-md border border-border',
-        panel: 'bg-card rounded-2xl shadow-lg border border-border',
-      };
-      classes = variantBase[variant];
+      classes = cardVariants({ variant });
     }
 
     if (dimmed) classes += ' scale-[0.98] grayscale opacity-60';
