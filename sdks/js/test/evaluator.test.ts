@@ -189,4 +189,77 @@ describe('Evaluator', () => {
     const second = isFlagEnabled(flag, { userId: 'test-user' });
     expect(first).toBe(second);
   });
+
+  it('segments OR any match', () => {
+    const flag: FeatureFlag = {
+      name: 'test',
+      key: 'test',
+      enabled: true,
+      activation: {
+        segments: [
+          { constraints: [{ field: 'country', operator: 'in', values: ['RU', 'KZ'] }] },
+          { constraints: [{ field: 'country', operator: 'in', values: ['US'] }] },
+        ],
+      },
+    };
+    expect(isFlagEnabled(flag, { country: 'RU' })).toBe(true);
+    expect(isFlagEnabled(flag, { country: 'US' })).toBe(true);
+    expect(isFlagEnabled(flag, { country: 'CN' })).toBe(false);
+  });
+
+  it('segments OR different fields', () => {
+    const flag: FeatureFlag = {
+      name: 'test',
+      key: 'test',
+      enabled: true,
+      activation: {
+        segments: [
+          { constraints: [{ field: 'country', operator: 'eq', values: ['RU'] }] },
+          { constraints: [{ field: 'plan', operator: 'eq', values: ['premium'] }] },
+        ],
+      },
+    };
+    expect(isFlagEnabled(flag, { country: 'RU' })).toBe(true);
+    expect(isFlagEnabled(flag, { plan: 'premium' })).toBe(true);
+    expect(isFlagEnabled(flag, { country: 'US' })).toBe(false);
+  });
+
+  it('segments AND constraints both required', () => {
+    const flag: FeatureFlag = {
+      name: 'test',
+      key: 'test',
+      enabled: true,
+      activation: {
+        constraints: [{ field: 'plan', operator: 'eq', values: ['premium'] }],
+        segments: [
+          { constraints: [{ field: 'country', operator: 'eq', values: ['RU'] }] },
+        ],
+      },
+    };
+    expect(isFlagEnabled(flag, { plan: 'premium', country: 'RU' })).toBe(true);
+    expect(isFlagEnabled(flag, { plan: 'premium', country: 'US' })).toBe(false);
+    expect(isFlagEnabled(flag, { plan: 'basic', country: 'RU' })).toBe(false);
+  });
+
+  it('empty segments pass', () => {
+    const flag: FeatureFlag = {
+      name: 'test',
+      key: 'test',
+      enabled: true,
+      activation: { segments: [] },
+    };
+    expect(isFlagEnabled(flag, {})).toBe(true);
+  });
+
+  it('segment with empty constraints passes', () => {
+    const flag: FeatureFlag = {
+      name: 'test',
+      key: 'test',
+      enabled: true,
+      activation: {
+        segments: [{ constraints: [] }],
+      },
+    };
+    expect(isFlagEnabled(flag, {})).toBe(true);
+  });
 });

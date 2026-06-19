@@ -1,6 +1,7 @@
 package dev.mozhno.client;
 
 import dev.mozhno.ContextType;
+import dev.mozhno.Operator;
 import dev.mozhno.contexts.ContextDefinition;
 import dev.mozhno.contexts.ContextDefinitionRepository;
 import org.springframework.cache.annotation.Cacheable;
@@ -89,18 +90,27 @@ public class ClientFlagService {
         return flags.stream().map(fws -> {
             Flag flag = fws.flag();
             FlagStrategy s = fws.strategy();
-            Map<String, ConstraintMerge> merged = new LinkedHashMap<>();
+
+            List<ClientFlagResponse.Segment> segmentList = null;
+            Map<String, ConstraintMerge> constraintsMerged = new LinkedHashMap<>();
 
             if (s != null) {
                 if (s.getSegmentIds() != null) {
+                    segmentList = new ArrayList<>();
                     for (Integer segId : s.getSegmentIds()) {
                         List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(segId, Collections.emptyList());
+                        List<ClientFlagResponse.Constraint> segConstraints = new ArrayList<>();
                         for (SegmentContextWithName sc : segContexts) {
-                            String key = sc.getContextDefinitionName() + "|" + sc.getOperator();
-                            String ctxType = ContextType.fromValue(sc.getContextType()).getValue();
-                            merged.computeIfAbsent(key, k -> new ConstraintMerge(sc.getContextDefinitionName(), sc.getOperator(), ctxType))
-                                    .values.addAll(FeatureFlagEvaluator.splitValues(sc.getContextValues()));
+                            segConstraints.add(new ClientFlagResponse.Constraint(
+                                sc.getContextDefinitionName(),
+                                sc.getOperator() != null ? sc.getOperator() : Operator.IN.getValue(),
+                                FeatureFlagEvaluator.splitValues(sc.getContextValues()),
+                                ContextType.fromValue(sc.getContextType()).getValue()));
                         }
+                        ClientFlagResponse.Segment seg = new ClientFlagResponse.Segment();
+                        seg.setName(null);
+                        seg.setConstraints(segConstraints.isEmpty() ? null : segConstraints);
+                        segmentList.add(seg);
                     }
                 }
 
@@ -111,23 +121,23 @@ public class ClientFlagService {
                         String fieldName = cd != null ? cd.getContextKey() : String.valueOf(sc.cd());
                         String ctxType = ContextType.fromValue(cd != null ? cd.getContextType() : null).getValue();
                         String key = fieldName + "|" + sc.op();
-                        merged.computeIfAbsent(key, k -> new ConstraintMerge(fieldName, sc.op(), ctxType))
+                        constraintsMerged.computeIfAbsent(key, k -> new ConstraintMerge(fieldName, sc.op(), ctxType))
                                 .values.add(sc.val());
                     }
                 }
             }
 
             List<ClientFlagResponse.Constraint> constraints;
-            if (merged.isEmpty()) {
+            if (constraintsMerged.isEmpty()) {
                 constraints = null;
             } else {
-                constraints = new ArrayList<>(merged.size());
-                for (ConstraintMerge m : merged.values()) {
+                constraints = new ArrayList<>(constraintsMerged.size());
+                for (ConstraintMerge m : constraintsMerged.values()) {
                     constraints.add(new ClientFlagResponse.Constraint(m.fieldName, m.operator, new ArrayList<>(m.values), m.contextType));
                 }
             }
 
-            return new ClientFlagResponse(flag, s, constraints);
+            return new ClientFlagResponse(flag, s, constraints, segmentList);
         }).toList();
     }
 

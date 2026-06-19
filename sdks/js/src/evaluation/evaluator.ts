@@ -1,4 +1,4 @@
-import type { FeatureFlag, Constraint, MozhnoContext } from '../types';
+import type { FeatureFlag, Constraint, Segment, MozhnoContext } from '../types';
 
 function murmurHash32(data: string): number {
   const bytes = new TextEncoder().encode(data);
@@ -140,13 +140,26 @@ function evaluateConstraints(constraints: Constraint[], context: MozhnoContext):
   return true;
 }
 
+function evaluateSegments(segments: Segment[] | undefined, context: MozhnoContext): boolean {
+  if (!segments || segments.length === 0) return true;
+  for (const seg of segments) {
+    if (evaluateConstraints(seg.constraints || [], context)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function isFlagEnabled(flag: FeatureFlag, context: MozhnoContext): boolean {
   if (!flag.enabled) return false;
 
   const activation = flag.activation;
   if (!activation) return true;
 
-  if (!evaluateConstraints(activation.constraints || [], context)) return false;
+  const constraintsOk = evaluateConstraints(activation.constraints || [], context);
+  const segmentsOk = evaluateSegments(activation.segments, context);
+
+  if (!constraintsOk || !segmentsOk) return false;
 
   const rollOut = activation.rollOut;
   if (rollOut != null) {

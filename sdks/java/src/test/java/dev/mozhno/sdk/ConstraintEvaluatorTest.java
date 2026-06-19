@@ -270,6 +270,133 @@ class ConstraintEvaluatorTest {
         assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder().build()));
     }
 
+    @Test
+    void segmentsOrAnyMatch() {
+        FeatureFlag flag = new FeatureFlag();
+        flag.setKey("test");
+        flag.setName("test");
+        flag.setEnabled(true);
+
+        FeatureFlag.Activation activation = new FeatureFlag.Activation();
+
+        FeatureFlag.Segment seg1 = new FeatureFlag.Segment();
+        FeatureFlag.Constraint c1 = new FeatureFlag.Constraint();
+        c1.setField("country");
+        c1.setOperator("in");
+        c1.setValues(List.of("RU", "KZ"));
+        seg1.setConstraints(List.of(c1));
+
+        FeatureFlag.Segment seg2 = new FeatureFlag.Segment();
+        FeatureFlag.Constraint c2 = new FeatureFlag.Constraint();
+        c2.setField("country");
+        c2.setOperator("in");
+        c2.setValues(List.of("US"));
+        seg2.setConstraints(List.of(c2));
+
+        activation.setSegments(List.of(seg1, seg2));
+        flag.setActivation(activation);
+
+        assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder().addProperty("country", "RU").build()));
+        assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder().addProperty("country", "US").build()));
+        assertFalse(evaluator.isEnabled(flag, MozhnoContext.builder().addProperty("country", "CN").build()));
+    }
+
+    @Test
+    void segmentsOrDifferentFields() {
+        FeatureFlag flag = new FeatureFlag();
+        flag.setKey("test");
+        flag.setName("test");
+        flag.setEnabled(true);
+
+        FeatureFlag.Activation activation = new FeatureFlag.Activation();
+
+        FeatureFlag.Segment seg1 = new FeatureFlag.Segment();
+        FeatureFlag.Constraint c1 = new FeatureFlag.Constraint();
+        c1.setField("country");
+        c1.setOperator("eq");
+        c1.setValues(List.of("RU"));
+        seg1.setConstraints(List.of(c1));
+
+        FeatureFlag.Segment seg2 = new FeatureFlag.Segment();
+        FeatureFlag.Constraint c2 = new FeatureFlag.Constraint();
+        c2.setField("plan");
+        c2.setOperator("eq");
+        c2.setValues(List.of("premium"));
+        seg2.setConstraints(List.of(c2));
+
+        activation.setSegments(List.of(seg1, seg2));
+        flag.setActivation(activation);
+
+        assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder().addProperty("country", "RU").build()));
+        assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder().addProperty("plan", "premium").build()));
+        assertFalse(evaluator.isEnabled(flag, MozhnoContext.builder().addProperty("country", "US").build()));
+    }
+
+    @Test
+    void segmentsAndConstraintsBothRequired() {
+        FeatureFlag flag = new FeatureFlag();
+        flag.setKey("test");
+        flag.setName("test");
+        flag.setEnabled(true);
+
+        FeatureFlag.Activation activation = new FeatureFlag.Activation();
+
+        FeatureFlag.Constraint customConstraint = new FeatureFlag.Constraint();
+        customConstraint.setField("plan");
+        customConstraint.setOperator("eq");
+        customConstraint.setValues(List.of("premium"));
+        activation.setConstraints(List.of(customConstraint));
+
+        FeatureFlag.Segment seg = new FeatureFlag.Segment();
+        FeatureFlag.Constraint segConstraint = new FeatureFlag.Constraint();
+        segConstraint.setField("country");
+        segConstraint.setOperator("eq");
+        segConstraint.setValues(List.of("RU"));
+        seg.setConstraints(List.of(segConstraint));
+        activation.setSegments(List.of(seg));
+
+        flag.setActivation(activation);
+
+        assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder()
+            .addProperty("plan", "premium").addProperty("country", "RU").build()));
+        assertFalse(evaluator.isEnabled(flag, MozhnoContext.builder()
+            .addProperty("plan", "premium").addProperty("country", "US").build()));
+        assertFalse(evaluator.isEnabled(flag, MozhnoContext.builder()
+            .addProperty("plan", "basic").addProperty("country", "RU").build()));
+    }
+
+    @Test
+    void emptySegmentsPass() {
+        FeatureFlag flag = new FeatureFlag();
+        flag.setKey("test");
+        flag.setName("test");
+        flag.setEnabled(true);
+
+        FeatureFlag.Activation activation = new FeatureFlag.Activation();
+        activation.setSegments(List.of());
+        flag.setActivation(activation);
+
+        assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder().build()));
+    }
+
+    @Test
+    void segmentWithEmptyConstraintsPass() {
+        FeatureFlag flag = new FeatureFlag();
+        flag.setKey("test");
+        flag.setName("test");
+        flag.setEnabled(true);
+
+        FeatureFlag.Activation activation = new FeatureFlag.Activation();
+
+        FeatureFlag.Segment seg = new FeatureFlag.Segment();
+        seg.setConstraints(List.of());
+        activation.setSegments(List.of(seg));
+
+        flag.setActivation(activation);
+
+        assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder().build()));
+    }
+
     private static class ConstraintData {
         final String field;
         final String operator;
