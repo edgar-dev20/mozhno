@@ -181,9 +181,19 @@ public class FlagMetricRepository {
      */
     public List<FlagMetric> findByProjectIdAndEnvironmentId(Integer projectId, Integer environmentId, Instant since) {
         String sql = """
-            SELECT id, project_id, flag_id, environment_id, evaluation_true_count, evaluation_false_count, client_instance_id, time_bucket, created_at
+            SELECT
+              MAX(id) AS id,
+              MAX(project_id) AS project_id,
+              flag_id,
+              environment_id,
+              SUM(evaluation_true_count) AS evaluation_true_count,
+              SUM(evaluation_false_count) AS evaluation_false_count,
+              NULL AS client_instance_id,
+              time_bucket,
+              MAX(created_at) AS created_at
             FROM flag_metrics
             WHERE project_id = ? AND environment_id = ? AND time_bucket >= ?
+            GROUP BY flag_id, environment_id, time_bucket
             ORDER BY time_bucket ASC
             """;
         return jdbc.query(sql, rowMapper(), projectId, environmentId, Timestamp.from(since));
@@ -198,9 +208,19 @@ public class FlagMetricRepository {
      */
     public List<FlagMetric> findByProjectId(Integer projectId, Instant since) {
         String sql = """
-            SELECT id, project_id, flag_id, environment_id, evaluation_true_count, evaluation_false_count, client_instance_id, time_bucket, created_at
+            SELECT
+              MAX(id) AS id,
+              MAX(project_id) AS project_id,
+              flag_id,
+              environment_id,
+              SUM(evaluation_true_count) AS evaluation_true_count,
+              SUM(evaluation_false_count) AS evaluation_false_count,
+              NULL AS client_instance_id,
+              time_bucket,
+              MAX(created_at) AS created_at
             FROM flag_metrics
             WHERE project_id = ? AND time_bucket >= ?
+            GROUP BY flag_id, environment_id, time_bucket
             ORDER BY time_bucket ASC
             """;
         return jdbc.query(sql, rowMapper(), projectId, Timestamp.from(since));

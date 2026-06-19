@@ -8,6 +8,9 @@ export interface MozhnoConfig {
   refreshInterval?: number;
   metricsInterval?: number;
   disableMetrics?: boolean;
+  /** Auto-generate a persistent anonymous ID for sticky bucketing
+   *  when userId/sessionId are missing. Default: true. */
+  stickyAnonId?: boolean;
   bootstrap?: FeatureFlag[];
   storageProvider?: StorageProvider;
   fetch?: typeof globalThis.fetch;

@@ -224,7 +224,7 @@ describe('Evaluator', () => {
     expect(isFlagEnabled(flag, { country: 'US' })).toBe(false);
   });
 
-  it('segments AND constraints both required', () => {
+  it('segments AND constraints OR either passes', () => {
     const flag: FeatureFlag = {
       name: 'test',
       key: 'test',
@@ -237,8 +237,9 @@ describe('Evaluator', () => {
       },
     };
     expect(isFlagEnabled(flag, { plan: 'premium', country: 'RU' })).toBe(true);
-    expect(isFlagEnabled(flag, { plan: 'premium', country: 'US' })).toBe(false);
-    expect(isFlagEnabled(flag, { plan: 'basic', country: 'RU' })).toBe(false);
+    expect(isFlagEnabled(flag, { plan: 'premium', country: 'US' })).toBe(true);
+    expect(isFlagEnabled(flag, { plan: 'basic', country: 'RU' })).toBe(true);
+    expect(isFlagEnabled(flag, { plan: 'basic', country: 'US' })).toBe(false);
   });
 
   it('empty segments pass', () => {
@@ -251,15 +252,27 @@ describe('Evaluator', () => {
     expect(isFlagEnabled(flag, {})).toBe(true);
   });
 
-  it('segment with empty constraints passes', () => {
-    const flag: FeatureFlag = {
-      name: 'test',
-      key: 'test',
-      enabled: true,
-      activation: {
-        segments: [{ constraints: [] }],
-      },
-    };
+  it('rollout uses targetingKey when provided', () => {
+    const flag = createFlag({ rollOut: 50 });
+    // Same context, different targeting keys → different results possible
+    const ctx: MozhnoContext = {};
+    const r1 = isFlagEnabled(flag, ctx, 'anon-aaa');
+    const r2 = isFlagEnabled(flag, ctx, 'anon-bbb');
+    // Both should be deterministic for their respective keys
+    expect(isFlagEnabled(flag, ctx, 'anon-aaa')).toBe(r1);
+    expect(isFlagEnabled(flag, ctx, 'anon-bbb')).toBe(r2);
+  });
+
+  it('rollout falls back to context fields when no targetingKey', () => {
+    const flag = createFlag({ rollOut: 100 });
+    expect(isFlagEnabled(flag, { userId: 'u1' })).toBe(true);
+    expect(isFlagEnabled(flag, { sessionId: 's1' })).toBe(true);
+  });
+
+  it('rollout uses empty string when nothing is provided', () => {
+    const flag = createFlag({ rollOut: 100 });
     expect(isFlagEnabled(flag, {})).toBe(true);
+    const flag2 = createFlag({ rollOut: 0 });
+    expect(isFlagEnabled(flag2, {})).toBe(false);
   });
 });

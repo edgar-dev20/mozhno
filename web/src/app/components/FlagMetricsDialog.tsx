@@ -334,7 +334,7 @@ export function FlagMetricsDialog({
                     </span>
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-sparkline-false/45" />
+                    <span className="w-2.5 h-2.5 rounded-sm bg-sparkline-false" />
                     <span className="text-muted-foreground/60">
                       false {totalFalse > 0 ? formatNumber(totalFalse) : '—'}
                     </span>
@@ -405,7 +405,6 @@ export function FlagMetricsDialog({
                           dataKey="falseCount"
                           stackId="a"
                           fill="var(--sparkline-false)"
-                          fillOpacity={0.45}
                           name="false"
                           radius={[3, 3, 0, 0]}
                         />

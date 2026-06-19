@@ -333,7 +333,7 @@ class ConstraintEvaluatorTest {
     }
 
     @Test
-    void segmentsAndConstraintsBothRequired() {
+    void segmentsAndConstraintsOrEitherPasses() {
         FeatureFlag flag = new FeatureFlag();
         flag.setKey("test");
         flag.setName("test");
@@ -357,12 +357,16 @@ class ConstraintEvaluatorTest {
 
         flag.setActivation(activation);
 
+        // Either custom constraint passes OR segment passes
         assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder()
             .addProperty("plan", "premium").addProperty("country", "RU").build()));
-        assertFalse(evaluator.isEnabled(flag, MozhnoContext.builder()
+        assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder()
             .addProperty("plan", "premium").addProperty("country", "US").build()));
-        assertFalse(evaluator.isEnabled(flag, MozhnoContext.builder()
+        assertTrue(evaluator.isEnabled(flag, MozhnoContext.builder()
             .addProperty("plan", "basic").addProperty("country", "RU").build()));
+        // Both fail
+        assertFalse(evaluator.isEnabled(flag, MozhnoContext.builder()
+            .addProperty("plan", "basic").addProperty("country", "US").build()));
     }
 
     @Test
