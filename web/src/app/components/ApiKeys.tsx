@@ -27,7 +27,7 @@ import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SidePanel } from '@/app/components/SidePanel';
 import { SdkInfo } from '@/app/components/SdkInfo';
 import { ApiKeyTableSkeleton } from '@/app/components/skeletons';
-import { SectionHeader, GradientButton, EmptyState, SearchInput, ErrorBox, Badge } from '@/shared';
+import { SectionHeader, GradientButton, EmptyState, SearchInput, ErrorBox, Badge, getErrorMessage } from '@/shared';
 import {
   Select,
   SelectContent,
@@ -100,7 +100,7 @@ export function ApiKeys() {
       setDeleteId(null);
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : t('apiKeys.errors.delete'));
+      toast.error(getErrorMessage(e));
     },
     onSettled: () => setDeleting(false),
   });

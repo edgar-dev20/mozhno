@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Mail, Lock } from '@/shared/icons';
-import { GradientButton, ErrorBox } from '@/shared';
+import { GradientButton, ErrorBox, getErrorMessage } from '@/shared';
 import { Input } from '@/app/components/ui/input';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { useAuth } from '@/app/auth/useAuth';
@@ -25,7 +25,7 @@ export function Auth() {
       await login(email, password, rememberMe);
       navigate('/flags');
     } catch (err) {
-      setError((err as Error).message || t('auth.error.loginFailed'));
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

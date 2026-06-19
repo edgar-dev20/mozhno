@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { Lock, UserRound } from '@/shared/icons';
-import { GradientButton, ErrorBox } from '@/shared';
+import { GradientButton, ErrorBox, getErrorMessage } from '@/shared';
 import { Input } from '@/app/components/ui/input';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { api } from '@/api';
@@ -44,7 +44,7 @@ export function AcceptInvite() {
       await api.auth.acceptInvite(token, name.trim(), password);
       setDone(true);
     } catch (err) {
-      setError((err as Error).message || t('auth.error.activationFailed'));
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

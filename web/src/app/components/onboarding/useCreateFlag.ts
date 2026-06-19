@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { api } from '@/api';
 import { useT } from '@/i18n';
+import { getErrorMessage } from '@/shared/errorHandler';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
 
@@ -49,7 +50,7 @@ export function useCreateFlag(): UseCreateFlagReturn {
       queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
       setFlagCreated(true);
     } catch (e) {
-      setFlagError((e as Error).message || t('onboarding.flagCreateError'));
+      setFlagError(getErrorMessage(e));
     } finally {
       setCreatingFlag(false);
     }

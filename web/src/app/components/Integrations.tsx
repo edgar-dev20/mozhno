@@ -7,7 +7,7 @@ import { api, type Integration } from '@/api';
 import { SidePanel } from '@/app/components/SidePanel';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
-import { SectionHeader, EmptyState, GradientButton } from '@/shared';
+import { SectionHeader, EmptyState, GradientButton, getErrorMessage } from '@/shared';
 import { IntegrationCardSkeletonList } from '@/app/components/skeletons';
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -79,7 +79,7 @@ export function Integrations() {
       setPanelOpen(false);
     },
     onError: (e: unknown) => {
-      form.setError(e instanceof Error ? e.message : t('integrations.errors.connect'));
+      form.setError(getErrorMessage(e));
     },
     onSettled: () => setSaving(false),
   });
@@ -92,7 +92,7 @@ export function Integrations() {
       setPanelOpen(false);
     },
     onError: (e: unknown) => {
-      toast.error(e instanceof Error ? e.message : t('integrations.errors.disconnect'));
+      toast.error(getErrorMessage(e));
     },
     onSettled: () => setDeleting(false),
   });

@@ -41,6 +41,7 @@ import {
   GradientButton,
   ErrorBox,
   Badge,
+  getErrorMessage,
 } from '@/shared';
 import { SegmentCardSkeletonList } from '@/app/components/skeletons';
 import { useT } from '@/i18n';
@@ -137,7 +138,7 @@ export function Segments() {
       setDeleteId(null);
       setPanelOpen(false);
     } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : t('segments.errors.delete'));
+      toast.error(getErrorMessage(e));
     } finally {
       setDeleting(false);
     }
@@ -335,7 +336,7 @@ export function Segments() {
       });
       setPanelOpen(false);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : t('segments.errors.save'));
+      setError(getErrorMessage(e));
     } finally {
       setSaving(false);
     }
@@ -359,7 +360,7 @@ export function Segments() {
       });
       setPanelOpen(false);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : t('segments.errors.save'));
+      setError(getErrorMessage(e));
     } finally {
       setSaving(false);
     }

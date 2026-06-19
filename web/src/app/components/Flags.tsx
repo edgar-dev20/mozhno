@@ -1,12 +1,13 @@
 import { useEffect, useCallback, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router';
+import { toast } from 'sonner';
 import { Plus, Zap, Archive } from '@/shared/icons';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 const FlagMetricsDialog = lazy(() =>
   import('@/app/components/FlagMetricsDialog').then((m) => ({ default: m.FlagMetricsDialog })),
 );
-import { SectionHeader, GradientButton } from '@/shared';
+import { SectionHeader, GradientButton, getErrorMessage } from '@/shared';
 import type { FlagTagValue } from '@/api';
 import { useT } from '@/i18n';
 
@@ -239,7 +240,7 @@ export function Flags() {
       save(config);
     }
     } catch (e) {
-      console.error('handleEnvironmentSave error', e);
+      toast.error(getErrorMessage(e));
     }
   }, [
     projectId, editing.flag, editing.envId,

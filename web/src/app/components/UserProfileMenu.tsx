@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { Camera, Sun, Moon, LogOut, ChevronDown, Loader2, Globe } from '@/shared/icons';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/app/auth/useAuth';
 import { api } from '@/api';
 import { useLocale, useT } from '@/i18n';
+import { getErrorMessage } from '@/shared';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,7 +49,7 @@ export function UserProfileMenu() {
         setAvatarVersion((v) => v + 1);
       })
       .catch((err) => {
-        if (import.meta.env.DEV) console.error('Avatar upload failed:', err);
+        toast.error(getErrorMessage(err));
       })
       .finally(() => setUploading(false));
     e.target.value = '';

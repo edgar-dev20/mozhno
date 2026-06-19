@@ -395,6 +395,7 @@ const en = {
     deleteProjectDescription:
       'Project "{{name}}" and all related data will be permanently deleted. This cannot be undone.',
     deleteProjectBtn: 'Delete project',
+    editEnvName: 'Environment name',
     errorSaveEnv: 'Error saving environment',
     errorSaveProject: 'Error saving project',
     errorAddEnv: 'Error adding environment',

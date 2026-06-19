@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { Lock } from '@/shared/icons';
-import { GradientButton, ErrorBox } from '@/shared';
+import { GradientButton, ErrorBox, getErrorMessage } from '@/shared';
 import { Input } from '@/app/components/ui/input';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { api } from '@/api';
@@ -39,7 +39,7 @@ export function ResetPassword() {
       await api.auth.resetPassword(token, password);
       setDone(true);
     } catch (err) {
-      setError((err as Error).message || t('auth.error.resetFailed'));
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
