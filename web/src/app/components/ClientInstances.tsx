@@ -475,7 +475,8 @@ export function ClientInstances() {
 
                           {environmentIds.map((envId) => {
                             const eg = envGradient(envId);
-                            const flags = flagCache[envId];
+                            const rawFlags = flagCache[envId];
+                            const flags = Array.isArray(rawFlags) ? rawFlags : undefined;
                             return (
                               <div key={envId} className="border-t border-border pt-2.5 mt-1">
                                 <div className="flex items-center gap-2 mb-1.5">
