@@ -25,7 +25,6 @@ import { api, Environment } from '@/api';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SidePanel } from '@/app/components/SidePanel';
-import { SdkInfo } from '@/app/components/SdkInfo';
 import { ApiKeyTableSkeleton } from '@/app/components/skeletons';
 import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage } from '@/shared';
 import {
@@ -545,8 +544,6 @@ export function ApiKeys() {
           </p>
         </div>
       </div>
-
-      <SdkInfo />
 
       {instances.length > 0 && (
         <div className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-500/5 dark:to-blue-500/5 border border-cyan-100 dark:border-cyan-500/15 rounded-xl p-4 flex items-center justify-between">

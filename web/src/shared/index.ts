@@ -20,6 +20,11 @@ export { ErrorBox } from '@/shared/components/ErrorBox';
 export { Badge } from '@/shared/components/Badge';
 export { ColorIcon } from '@/shared/components/ColorIcon';
 export { Wordmark } from '@/shared/components/Wordmark';
+export { StatusIcon } from '@/shared/components/StatusIcon';
+export { SkipLink } from '@/shared/components/SkipLink';
+export { LazyPage } from '@/shared/components/LazyPage';
+export { PageLoader } from '@/shared/components/PageLoader';
+export { DateTimePicker } from '@/shared/components/DateTimePicker';
 export {
   formatDate,
   formatDateTime,

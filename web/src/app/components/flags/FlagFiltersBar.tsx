@@ -47,13 +47,13 @@ export function FlagFiltersBar({
   const t = useT();
   return (
     <>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <SearchInput
           value={searchQuery}
           onChange={onSearchChange}
           placeholder={t('flags.searchPlaceholder')}
         />
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => onFlagTypeFilterChange(null)}
             className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${

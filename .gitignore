@@ -48,6 +48,9 @@ out/
 ### VS Code ###
 .vscode/
 
+### Temp ###
+*tmp*
+
 ### macOS ###
 .DS_Store
 .AppleDouble

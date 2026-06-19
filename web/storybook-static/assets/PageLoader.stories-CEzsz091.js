@@ -1,0 +1,1 @@
+import{P as a}from"./PageLoader-BAu-Rpx6.js";import"./jsx-runtime-D_zvdyIk.js";const t={title:"Shared/PageLoader",component:a,tags:["autodocs"],parameters:{layout:"fullscreen"}},e={};e.parameters={...e.parameters,docs:{...e.parameters?.docs,source:{originalSource:"{}",...e.parameters?.docs?.source}}};const s=["Default"];export{e as Default,s as __namedExportsOrder,t as default};

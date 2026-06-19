@@ -11,6 +11,7 @@ import { queryKeys } from '@/api/queryKeys';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
 import { UserProfileMenu } from '@/app/components/UserProfileMenu';
 import { Flag, GitBranch, UserCog } from '@/shared/icons';
+import { Menu } from 'lucide-react';
 import { PageErrorBoundary } from '@/app/components/PageErrorBoundary';
 import { OnboardingWizard } from '@/app/components/onboarding';
 import {
@@ -20,7 +21,7 @@ import {
 } from '@/shared/onboardingUtils';
 import { extractDominantColor, lightenForDarkMode } from '@/shared/extractLogoColor';
 import { SkipLink } from '@/shared/components/SkipLink';
-import { AppSidebar, AppSidebarProvider } from '@/app/components/AppSidebar';
+import { AppSidebar, AppSidebarProvider, useAppSidebar } from '@/app/components/AppSidebar';
 
 import {
   useProjectQuery,
@@ -34,6 +35,7 @@ export function DashboardLayout() {
   const { user } = useAuth();
   const location = useLocation();
   const t = useT();
+  const { toggleMobile } = useAppSidebar();
   const [accentColor, setAccentColor] = useState('#7c3aed');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [logoVersion, setLogoVersion] = useState(0);
@@ -110,7 +112,7 @@ export function DashboardLayout() {
     }
     if (isOnboardingComplete()) return;
     if (flags != null && flags.length === 0) {
-      setShowOnboarding(true);
+      setShowOnboarding(false);
     }
   }, [user, projectLoading, projectId, flags]);
 
@@ -134,8 +136,15 @@ export function DashboardLayout() {
           <AppSidebar />
 
           <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-            <header className="h-14 border-b border-border bg-card flex items-center justify-between px-6 shrink-0 shadow-sm transition-colors min-w-0">
+            <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm transition-colors min-w-0">
               <div className="flex items-center gap-3 min-w-0">
+                <button
+                  className="md:hidden p-2 -ml-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                  onClick={toggleMobile}
+                  aria-label={t('navigation.menu')}
+                >
+                  <Menu size={20} />
+                </button>
                 {projectLogo && projectId ? (
                   <img
                     key={logoVersion}
@@ -159,7 +168,7 @@ export function DashboardLayout() {
                 </span>
                 <canvas ref={canvasRef} className="hidden" />
                 <div className="h-5 w-px bg-border mx-1" />
-                <div className="flex items-center gap-0.5">
+                <div className="hidden sm:flex items-center gap-0.5">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent">

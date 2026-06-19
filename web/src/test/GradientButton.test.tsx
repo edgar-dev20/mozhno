@@ -44,7 +44,7 @@ describe('GradientButton', () => {
   it('applies variant classes', () => {
     render(<GradientButton variant="danger">Delete</GradientButton>);
     const btn = screen.getByText('Delete');
-    expect(btn.className).toContain('from-red-600');
+    expect(btn.className).toContain('gradient-btn-danger');
   });
 
   it('applies size classes', () => {
