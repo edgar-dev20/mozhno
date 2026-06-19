@@ -12,6 +12,7 @@ import {
   SectionHeader,
   EmptyState,
   ColorBar,
+  ColorIcon,
   FormField,
   GradientButton,
   ErrorBox,
@@ -236,15 +237,12 @@ export function Tags() {
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className="w-11 h-11 rounded-xl flex items-center justify-center shadow-sm shrink-0"
-                        style={{
-                          background: tag.color,
-                          boxShadow: `0 4px 12px ${tag.color}33`,
-                        }}
-                      >
-                        <TagIcon size={18} className="text-white" />
-                      </div>
+                      <ColorIcon
+                        size="lg"
+                        color={tag.color}
+                        icon={<TagIcon size={18} className="text-white" />}
+                        shadow
+                      />
                       <div className="min-w-0">
                         <h3 className="font-semibold text-foreground truncate">{tag.name}</h3>
                         <p className="text-xs text-muted-foreground/70 font-mono mt-0.5">
@@ -354,15 +352,15 @@ export function Tags() {
 
             <div className="p-4 bg-secondary rounded-2xl border border-border space-y-4">
               <div className="flex items-center gap-3">
-                <div
-                  className="w-14 h-14 rounded-2xl shadow-lg shrink-0 flex items-center justify-center transition-all"
-                    style={{
-                      background: formColor,
-                      boxShadow: `0 8px 24px ${formColor}40`,
-                    }}
-                >
-                  <TagIcon size={20} className="text-white" />
-                </div>
+                <ColorIcon
+                  variant="gradient"
+                  size="xl"
+                  color={formColor}
+                  icon={<TagIcon size={20} className="text-white" />}
+                  shadow
+                  darkDim={false}
+                  className="transition-all"
+                />
                 <div className="space-y-1 min-w-0">
                   <div className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
                     {t('tags.form.color.preview')}

@@ -18,6 +18,7 @@ export { StatusDot } from '@/shared/components/StatusDot';
 export { TruncatedCopyTooltip } from '@/shared/components/TruncatedCopyTooltip';
 export { ErrorBox } from '@/shared/components/ErrorBox';
 export { Badge } from '@/shared/components/Badge';
+export { ColorIcon } from '@/shared/components/ColorIcon';
 export { Wordmark } from '@/shared/components/Wordmark';
 export {
   formatDate,

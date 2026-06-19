@@ -27,7 +27,7 @@ import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SidePanel } from '@/app/components/SidePanel';
 import { SdkInfo } from '@/app/components/SdkInfo';
 import { ApiKeyTableSkeleton } from '@/app/components/skeletons';
-import { SectionHeader, GradientButton, EmptyState, SearchInput, ErrorBox, Badge, getErrorMessage } from '@/shared';
+import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage } from '@/shared';
 import {
   Select,
   SelectContent,
@@ -660,7 +660,7 @@ export function ApiKeys() {
                   {
                     value: 'SERVER',
                     icon: Server,
-                    color: 'from-gradient-start to-gradient-end',
+                    colorHex: '#6366f1',
                     borderColor: 'border-indigo-500',
                     bgSelected: 'bg-indigo-50 dark:bg-indigo-500/10',
                     textSelected: 'text-indigo-700 dark:text-indigo-300',
@@ -670,7 +670,7 @@ export function ApiKeys() {
                   {
                     value: 'FRONTEND',
                     icon: Globe,
-                    color: 'from-emerald-600 to-emerald-500',
+                    colorHex: '#059669',
                     borderColor: 'border-success',
                     bgSelected: 'bg-success/10',
                     textSelected: 'text-success',
@@ -682,7 +682,7 @@ export function ApiKeys() {
                 ({
                   value,
                   icon: Icon,
-                  color,
+                  colorHex,
                   borderColor,
                   bgSelected,
                   textSelected,
@@ -701,11 +701,13 @@ export function ApiKeys() {
                           : 'border-border text-muted-foreground hover:border-border'
                       }`}
                     >
-                      <div
-                        className={`w-8 h-8 rounded-lg bg-gradient-to-r ${color} flex items-center justify-center text-white shadow-sm shrink-0`}
-                      >
-                        <Icon size={16} />
-                      </div>
+                      <ColorIcon
+                        variant="gradient"
+                        size="md"
+                        color={colorHex}
+                        icon={<Icon size={16} />}
+                        shadow
+                      />
                       <div className="flex-1 min-w-0">
                         <div
                           className={`text-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}

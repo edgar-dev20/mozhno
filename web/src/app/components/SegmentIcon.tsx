@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import * as LucideIcons from 'lucide-react';
-import { adjustColor } from '@/shared/color';
-import { GradientButton } from '@/shared';
+import { GradientButton, ColorIcon } from '@/shared';
 import { useT, type MessageKey } from '@/i18n';
 
 export const SEGMENT_ICONS = [
@@ -197,15 +196,15 @@ export function SegmentColorPicker({
     <div className="space-y-4">
       <div className="p-4 bg-secondary rounded-2xl border border-border space-y-4">
         <div className="flex items-center gap-3">
-          <div
-            className="w-14 h-14 rounded-2xl shadow-lg shrink-0 flex items-center justify-center transition-all"
-            style={{
-              backgroundImage: `linear-gradient(135deg, ${value}, ${adjustColor(value, 25)})`,
-              boxShadow: `0 8px 24px ${value}40`,
-            }}
-          >
-            <SegmentIcon name={icon} size={20} className="text-white" />
-          </div>
+          <ColorIcon
+            variant="gradient"
+            size="xl"
+            color={value}
+            icon={<SegmentIcon name={icon} size={20} className="text-white" />}
+            shadow
+            darkDim={false}
+            className="transition-all"
+          />
           <div className="space-y-1 min-w-0">
             <div className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
               {t('tags.form.color.preview')}

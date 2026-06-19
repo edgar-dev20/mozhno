@@ -3,6 +3,7 @@ import { Fragment } from 'react';
 import { Switch } from '@/app/components/ui/switch';
 import { Plus, Percent, Users, Settings, Filter, X } from '@/shared/icons';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
+import { ColorIcon } from '@/shared';
 import { isMultiOperator } from '@/app/components/operatorsMeta';
 import { MultiValueChips } from '@/app/components/flags/MultiValueChips';
 import { ContextType } from '@/app/components/contextTypes';
@@ -243,12 +244,12 @@ export function FlagEnvironmentPanel({
                         <div className="bg-input-background/70 rounded-lg border border-brand/10 overflow-hidden">
                           <div className="px-3 py-2 bg-brand/5 border-b border-brand/10 flex items-center gap-2">
                             {seg && (
-                              <span
-                                className="w-4 h-4 rounded flex items-center justify-center"
-                                style={{ backgroundColor: seg.color ?? '#6b7280' }}
-                              >
-                                <SegmentIcon name={seg.icon ?? 'Users'} size={9} />
-                              </span>
+                              <ColorIcon
+                                size="xs"
+                                color={seg.color ?? '#6b7280'}
+                                icon={<SegmentIcon name={seg.icon ?? 'Users'} size={9} />}
+                                darkDim={false}
+                              />
                             )}
                             <span className="text-xs font-semibold text-brand">
                               {source === 'custom' ? t('flags.customSource') : source}
@@ -384,12 +385,13 @@ export function FlagEnvironmentPanel({
                   }
                 >
                   <div className="flex gap-3">
-                    <div
-                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 mt-0.5"
-                      style={{ backgroundColor: segColor }}
-                    >
-                      <SegmentIcon name={seg.icon || 'Users'} size={16} />
-                    </div>
+                    <ColorIcon
+                      variant="gradient"
+                      size="md"
+                      color={segColor}
+                      icon={<SegmentIcon name={seg.icon || 'Users'} size={16} />}
+                      className="mt-0.5"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-semibold text-foreground/90">{seg.name}</div>
                       {seg.description && (

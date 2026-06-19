@@ -10,7 +10,7 @@ import type { DiffChange } from '@/shared/diffUtils';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
 import { ContextType, CONTEXT_TYPES } from '@/app/components/contextTypes';
 import { api, ContextDefinition, SegmentResponse } from '@/api';
-import { SectionHeader, EmptyState, FormField, GradientButton, ErrorBox, Badge, getErrorMessage } from '@/shared';
+import { SectionHeader, EmptyState, ColorIcon, FormField, GradientButton, ErrorBox, Badge, getErrorMessage } from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useContextsQuery, useSegmentsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -652,12 +652,13 @@ export function Constraints() {
                   className="flex items-center gap-3 p-3 rounded-xl border"
                   style={{ borderColor: s.color + '40', backgroundColor: s.color + '0A' }}
                 >
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ backgroundColor: s.color + '20' }}
-                  >
-                    <SegmentIcon name={s.icon} size={16} />
-                  </div>
+                  <ColorIcon
+                    variant="ghost"
+                    size="md"
+                    color={s.color}
+                    icon={<SegmentIcon name={s.icon} size={16} />}
+                    darkDim={false}
+                  />
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold" style={{ color: s.color }}>
                       {s.name}
