@@ -2,12 +2,18 @@ package dev.mozhno.contexts;
 
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class ContextAssembler {
 
     public ContextDefinitionResponse toDefinitionResponse(ContextDefinition def) {
+        return toDefinitionResponse(def, Collections.emptyList());
+    }
+
+    public ContextDefinitionResponse toDefinitionResponse(ContextDefinition def, List<String> validValues) {
         return ContextDefinitionResponse.builder()
             .id(def.getId())
             .name(def.getName())
@@ -15,6 +21,8 @@ public class ContextAssembler {
             .contextType(def.getContextType())
             .createdBy(def.getCreatedBy())
             .description(def.getDescription())
+            .isStrict(def.isStrict())
+            .validValues(validValues)
             .projectId(def.getProjectId())
             .createdAt(def.getCreatedAt())
             .build();
@@ -22,6 +30,12 @@ public class ContextAssembler {
 
     public List<ContextDefinitionResponse> toDefinitionResponseList(List<ContextDefinition> defs) {
         return defs.stream().map(this::toDefinitionResponse).toList();
+    }
+
+    public List<ContextDefinitionResponse> toDefinitionResponseList(List<ContextDefinition> defs, Map<Integer, List<String>> valuesByDef) {
+        return defs.stream()
+            .map(d -> toDefinitionResponse(d, valuesByDef.getOrDefault(d.getId(), Collections.emptyList())))
+            .toList();
     }
 
     public ContextValueResponse toValueResponse(ContextValue value) {

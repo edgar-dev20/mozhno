@@ -8,8 +8,12 @@ import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.exception.NotFoundException;
 import dev.mozhno.flags.Flag;
 import dev.mozhno.flags.FlagRepository;
+import dev.mozhno.client.FlagConstraintParser;
+import dev.mozhno.contexts.ContextService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service for managing flag strategies, which control how a flag is evaluated per environment.
@@ -20,12 +24,14 @@ public class StrategyService {
     private final FlagStrategyRepository strategyRepository;
     private final FlagRepository flagRepository;
     private final DomainEventPublisher events;
+    private final ContextService contextService;
 
     public StrategyService(FlagStrategyRepository strategyRepository, FlagRepository flagRepository,
-                           DomainEventPublisher events) {
+                           DomainEventPublisher events, ContextService contextService) {
         this.strategyRepository = strategyRepository;
         this.flagRepository = flagRepository;
         this.events = events;
+        this.contextService = contextService;
     }
 
     /**
@@ -120,6 +126,8 @@ public class StrategyService {
         }
         if (existing == null) throw new NotFoundException("Strategy", id);
 
+        validateConstraintValues(request.getContextValuesJson());
+
         FlagStrategy saved = strategyRepository.updateById(
             id,
             request.getEnabled() != null ? request.getEnabled() : existing.isEnabled(),
@@ -162,6 +170,8 @@ public class StrategyService {
             throw new NotFoundException("Flag", request.getFlagId());
         }
 
+        validateConstraintValues(request.getContextValuesJson());
+
         FlagStrategy saved = strategyRepository.upsert(
             request.getFlagId(),
             request.getEnvironmentId(),
@@ -180,5 +190,18 @@ public class StrategyService {
     @Transactional
     public FlagStrategy upsert(StrategyRequest request) {
         return upsert(request, null);
+    }
+
+    private void validateConstraintValues(String contextValuesJson) {
+        if (contextValuesJson == null || contextValuesJson.isBlank()) return;
+        List<FlagConstraintParser.StrategyConstraint> constraints =
+            FlagConstraintParser.parseStrategyConstraints(contextValuesJson);
+        Map<Integer, String> valuesByDefId = new HashMap<>();
+        for (FlagConstraintParser.StrategyConstraint c : constraints) {
+            if (c.cd() > 0 && !c.val().isBlank()) {
+                valuesByDefId.merge(c.cd(), c.val(), (a, b) -> a + ", " + b);
+            }
+        }
+        contextService.validateStrictValues(valuesByDefId);
     }
 }

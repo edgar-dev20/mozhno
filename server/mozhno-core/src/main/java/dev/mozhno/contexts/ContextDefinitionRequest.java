@@ -30,4 +30,7 @@ public class ContextDefinitionRequest {
     @Size(max = 1000)
     @Schema(description = "Optional description", nullable = true)
     private String description;
+
+    @Schema(description = "Whether the whitelist is strictly enforced", defaultValue = "false")
+    private Boolean isStrict;
 }

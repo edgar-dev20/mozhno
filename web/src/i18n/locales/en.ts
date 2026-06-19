@@ -244,6 +244,8 @@ const en = {
       peak: 'Peak',
       avgPerHour: 'Avg/hr',
     },
+    whitelistAllSelected: 'All allowed values selected',
+    whitelistSuggestions: 'Suggestions from whitelist:',
   },
   segments: {
     title: 'Segments',
@@ -289,6 +291,7 @@ const en = {
       valueCount: '{{count}} values',
       noValues: 'No values. Enter a value and press Enter, or upload a file.',
       emptyRules: 'No targeting rules. Click "Add" to configure a context.',
+      availableValues: 'Available from whitelist:',
     },
     infoBox: {
       title: 'How do segments work?',
@@ -592,7 +595,15 @@ const en = {
     errors: {
       delete: 'Error deleting context',
       save: 'Error saving context',
+      fileTooBig: 'File is too large. Maximum size is {{size}} MB.',
     },
+    strictModeLabel: 'Strict mode',
+    strictModeHint: 'Only allow values from the whitelist when used in strategies and segments',
+    validValuesLabel: 'Valid values',
+    validValuesHint: 'Add allowed values for this context field',
+    valuePlaceholder: 'Enter value and press Enter',
+    uploadTooltip: 'Import from file',
+    none: '—',
   },
   integrations: {
     title: 'Integrations',

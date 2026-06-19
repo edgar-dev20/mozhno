@@ -27,7 +27,7 @@ export function parseConstraintEntries(
       let op: string;
       let val: string;
       if (typeof item === 'object' && item !== null && 'op' in item) {
-        cdId = item.contextDefId ?? contextDefinitionId ?? 0;
+        cdId = item.cd ?? item.contextDefId ?? contextDefinitionId ?? 0;
         op = item.op ?? 'eq';
         val = item.val ?? String(item.value ?? '');
       } else {
@@ -35,7 +35,7 @@ export function parseConstraintEntries(
         op = 'in';
         val = String(item);
       }
-      const ctx = contexts.find((x) => x.id === cdId);
+      const ctx = Array.isArray(contexts) ? contexts.find((x) => x.id === cdId) : undefined;
       return {
         contextDefId: cdId,
         operator: isValidOperator(ctx?.type, op) ? op : getDefaultOperator(ctx?.type),

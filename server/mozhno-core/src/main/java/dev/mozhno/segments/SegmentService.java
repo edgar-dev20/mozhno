@@ -6,9 +6,12 @@ import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.spi.QuotaSpi;
 import dev.mozhno.exception.NotFoundException;
+import dev.mozhno.contexts.ContextService;
 import dev.mozhno.util.QuotaValidator;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Service for managing user segments, including their context-based targeting rules.
@@ -20,13 +23,15 @@ public class SegmentService {
     private final SegmentContextRepository segmentContextRepository;
     private final DomainEventPublisher events;
     private final QuotaSpi quotaSpi;
+    private final ContextService contextService;
 
     public SegmentService(SegmentRepository segmentRepository, SegmentContextRepository segmentContextRepository,
-                          DomainEventPublisher events, QuotaSpi quotaSpi) {
+                          DomainEventPublisher events, QuotaSpi quotaSpi, ContextService contextService) {
         this.segmentRepository = segmentRepository;
         this.segmentContextRepository = segmentContextRepository;
         this.events = events;
         this.quotaSpi = quotaSpi;
+        this.contextService = contextService;
     }
 
     /**
@@ -55,6 +60,8 @@ public class SegmentService {
     @Transactional
     public Segment create(SegmentRequest request) {
         QuotaValidator.check(quotaSpi.canCreateSegment(request.getProjectId()));
+
+        validateContextValues(request);
 
         Segment segment = new Segment();
         segment.setProjectId(request.getProjectId());
@@ -86,6 +93,9 @@ public class SegmentService {
         segment.setDescription(request.getDescription());
         if (request.getIcon() != null) segment.setIcon(request.getIcon());
         if (request.getColor() != null) segment.setColor(request.getColor());
+
+        validateContextValues(request);
+
         Segment saved = segmentRepository.save(segment);
 
         segmentContextRepository.deleteBySegmentId(id);
@@ -113,5 +123,17 @@ public class SegmentService {
 
     public List<SegmentContextRepository.SegmentContextWithName> getContextsForSegments(List<Integer> segmentIds) {
         return segmentContextRepository.findContextsBySegmentIds(segmentIds);
+    }
+
+    private void validateContextValues(SegmentRequest request) {
+        if (request.getContext() == null || request.getContext().isEmpty()) return;
+        Map<Integer, String> valuesByDefId = new HashMap<>();
+        for (SegmentRequest.ContextEntry entry : request.getContext()) {
+            if (entry.getContextValues() != null && !entry.getContextValues().isBlank()) {
+                valuesByDefId.merge(entry.getContextDefinitionId(), entry.getContextValues(),
+                    (a, b) -> a + ", " + b);
+            }
+        }
+        contextService.validateStrictValues(valuesByDefId);
     }
 }

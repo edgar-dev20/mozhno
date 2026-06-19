@@ -27,6 +27,8 @@ public class ContextDefinition {
     private String createdBy;
     /** Optional description. */
     private String description;
+    /** Whether the context enforces a whitelist of allowed values. */
+    private boolean isStrict;
     /** Project this context belongs to. */
     private Integer projectId;
     /** When the context definition was created. */

@@ -33,7 +33,7 @@ export function createAppError(message: string, statusCode: number, details?: un
         ? 'FORBIDDEN'
         : statusCode === 404
           ? 'NOT_FOUND'
-          : statusCode === 422
+          : statusCode === 400 || statusCode === 422
             ? 'VALIDATION'
             : statusCode >= 500
               ? 'SERVER'

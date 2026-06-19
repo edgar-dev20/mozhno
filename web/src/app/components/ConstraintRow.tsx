@@ -36,7 +36,7 @@ export function ConstraintRow({
 }: ConstraintRowProps) {
   const t = useT();
   const hasContext = contextDefId !== 0;
-  const ctxDef = hasContext ? contexts.find((c) => c.id === contextDefId) : undefined;
+  const ctxDef = hasContext ? (Array.isArray(contexts) ? contexts.find((c) => c.id === contextDefId) : undefined) : undefined;
   const contextType = ctxDef?.type;
   const availableOps = getOperatorsForType(contextType);
   const isMulti = operator === 'in' || operator === 'not_in';
@@ -95,10 +95,10 @@ export function ConstraintRow({
                     e.stopPropagation();
                     handleContextChange(ctx.id);
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
                     hasContext && contextDefId === ctx.id
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border border-border'
+                      ? 'bg-brand/10 text-brand border-brand/20'
+                      : 'bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border-border'
                   }`}
                 >
                   {ctx.name}

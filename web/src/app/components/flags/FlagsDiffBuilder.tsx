@@ -34,7 +34,7 @@ export function makeSegmentNode(
   segId: number,
   segments: SegmentResponse[],
 ): ReactNode {
-  const seg = segments.find((s) => s.id === segId);
+  const seg = Array.isArray(segments) ? segments.find((s) => s.id === segId) : undefined;
   const segName = seg?.name ?? `Segment #${segId}`;
   const segColor = seg?.color ?? '#6b7280';
   const segIcon = seg?.icon ?? 'Users';
@@ -57,7 +57,7 @@ export function renderConstraintGroupNode(
   g: ConstraintGroup,
   contexts: ContextDefinition[],
 ): ReactNode {
-  const ctx = contexts.find((cd) => cd.id === g.contextDefId);
+  const ctx = Array.isArray(contexts) ? contexts.find((cd) => cd.id === g.contextDefId) : undefined;
   const attr = ctx?.name ?? `#${g.contextDefId}`;
   const vals =
     g.values.length > 0

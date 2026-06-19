@@ -30,11 +30,14 @@ import { FlagsList } from '@/app/components/flags/FlagsList';
 import { FlagsSidePanel } from '@/app/components/flags/FlagsSidePanel';
 import { useFlagDiff } from '@/app/components/flags/useFlagDiff';
 import { useFlagSave } from '@/app/components/flags/useFlagSave';
+import type { EnrichedFlagsData } from '@/app/hooks/queries/useEnrichedFlagsQuery';
+import { useQueryClient } from '@tanstack/react-query';
 import type { CreateFlagFormValues, EditFlagFormValues } from '@/app/components/flags/schemas';
 
 export function Flags() {
   const { data: project, isLoading: projectLoading } = useProjectQuery();
   const t = useT();
+  const queryClient = useQueryClient();
   const projectId = project?.id ?? null;
 
   const { data: environments = [] } = useEnvironmentsQuery();
@@ -149,6 +152,13 @@ export function Flags() {
         setInitialEnvRuleSegments([...envRuleSegments]);
         setInitialEnvRuleConstraints(envRuleConstraints.map((g) => ({ ...g, values: [...g.values] })));
         setInitialEnvRuleEnabled(envRuleEnabled);
+        if (editing.flag && editing.envId != null) {
+          const queryData = queryClient.getQueryData<EnrichedFlagsData>(['flags', 'enriched']);
+          const freshFlag = queryData?.flags?.find((f) => f.key === editing.flag!.key);
+          if (freshFlag) {
+            setEditing({ flag: freshFlag, mode: 'environment', envId: editing.envId });
+          }
+        }
       } else if (editing.mode === 'general' && editing.flag && saved) {
         setEditing({
           flag: { ...editing.flag, name: saved.name, key: saved.key, description: saved.description, flagType: saved.flagType, tags: saved.tags },
@@ -192,6 +202,7 @@ export function Flags() {
   );
 
   const handleEnvironmentSave = useCallback(() => {
+    try {
     if (!projectId || !editing.flag || !editing.envId) return;
     const changes = computeEnvironmentDiff({
       current: {
@@ -226,6 +237,9 @@ export function Flags() {
       showDiff(changes, config);
     } else {
       save(config);
+    }
+    } catch (e) {
+      console.error('handleEnvironmentSave error', e);
     }
   }, [
     projectId, editing.flag, editing.envId,

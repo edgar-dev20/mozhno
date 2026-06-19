@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { api, FlagRequest, FlagTagValue } from '@/api';
+import { api, FlagRequest, FlagTagValue, FlagResponse } from '@/api';
 import { queryKeys } from '@/api/queryKeys';
 import type { FlagView, EnvState } from '@/app/hooks/flagTypes';
 import type { ConstraintEntry } from '@/app/components/flags/types';
@@ -61,6 +61,11 @@ export function useFlagSave(deps: SaveDeps) {
 
   const invalidateFlags = useCallback(
     () => queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched }),
+    [queryClient],
+  );
+
+  const refetchFlags = useCallback(
+    () => queryClient.refetchQueries({ queryKey: queryKeys.flags.enriched }),
     [queryClient],
   );
 
@@ -145,7 +150,8 @@ export function useFlagSave(deps: SaveDeps) {
             tags: tagsPayload.length > 0 ? tagsPayload : undefined,
           } as FlagRequest;
           const envFlags = await api.flags.list(Object.keys(flag.environments).map(Number)[0]);
-          const match = envFlags.find((f) => f.key === flag.key);
+          const envFlagsArr = Array.isArray(envFlags) ? envFlags : ((envFlags as Record<string, unknown>)?.items as FlagResponse[] | undefined) ?? [];
+          const match = envFlagsArr.find((f) => f.key === flag.key);
           if (match) await api.flags.update(match.id, req);
           queryClient.setQueryData<EnrichedFlagsData>(['flags', 'enriched'], (old) => {
             if (!old) return old;
@@ -171,7 +177,8 @@ export function useFlagSave(deps: SaveDeps) {
         } else if (config.mode === 'environment') {
           const { flag, envId, enabled, percentage, segmentIds, constraints } = config.data;
           const envFlags = await api.flags.list(envId);
-          const envFlag = envFlags.find((f) => f.key === flag.key);
+          const envFlagsArr = Array.isArray(envFlags) ? envFlags : ((envFlags as Record<string, unknown>)?.items as FlagResponse[] | undefined) ?? [];
+          const envFlag = envFlagsArr.find((f) => f.key === flag.key);
           if (!envFlag) {
             setError('Flag not found in environment. Please refresh the page.');
             setSaving(false);
@@ -193,33 +200,7 @@ export function useFlagSave(deps: SaveDeps) {
             contextDefinitionId: contextDefId,
             contextValuesJson,
           });
-          queryClient.setQueryData<EnrichedFlagsData>(['flags', 'enriched'], (old) => {
-            if (!old) return old;
-            return {
-              ...old,
-              flags: old.flags.map((f) =>
-                f.key === flag.key
-                  ? {
-                      ...f,
-                      environments: {
-                        ...f.environments,
-                        [envId]: {
-                          enabled,
-                          percentage,
-                          segmentIds,
-                          strategyId: f.environments[envId]?.strategyId ?? null,
-                          contextDefinitionId: contextDefId ?? null,
-                          contextValuesJson: contextValuesJson ?? null,
-                          lastUsedAt: f.environments[envId]?.lastUsedAt ?? null,
-                        },
-                      },
-                    }
-                  : f,
-              ),
-            };
-          });
-
-          invalidateFlags();
+          await refetchFlags();
           onSaveSuccessRef.current?.();
         }
       } catch (e: unknown) {
@@ -228,7 +209,7 @@ export function useFlagSave(deps: SaveDeps) {
         setSaving(false);
       }
     },
-    [projectId, environments, invalidateFlags, queryClient],
+    [projectId, environments, invalidateFlags, refetchFlags, queryClient],
   );
 
   const save = useCallback(

@@ -9,7 +9,13 @@ import dev.mozhno.spi.QuotaSpi;
 import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.NotFoundException;
 
+import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Service for managing context definitions and their values.
@@ -83,6 +89,7 @@ public class ContextService {
         definition.setContextType(request.getType() != null ? request.getType() : "string");
         definition.setCreatedBy(createdBy);
         definition.setDescription(request.getDescription());
+        if (request.getIsStrict() != null) definition.setStrict(request.getIsStrict());
         ContextDefinition saved = contextDefinitionRepository.save(definition);
         events.publish(DomainEvent.of(saved.getProjectId(), "context_definition.created", "context",
             saved.getId(), saved.getName(), "Context definition created"));
@@ -110,6 +117,7 @@ public class ContextService {
         definition.setContextKey(request.getKey());
         definition.setContextType(request.getType() != null ? request.getType() : "string");
         definition.setDescription(request.getDescription());
+        if (request.getIsStrict() != null) definition.setStrict(request.getIsStrict());
         ContextDefinition saved = contextDefinitionRepository.save(definition);
         events.publish(DomainEvent.of(saved.getProjectId(), "context_definition.updated", "context",
             saved.getId(), saved.getName(), "Context definition updated"));
@@ -162,6 +170,11 @@ public class ContextService {
         return value;
     }
 
+    @Transactional(readOnly = true)
+    public Map<Integer, List<String>> findValuesByDefinitionIds(Set<Integer> definitionIds) {
+        return contextValueRepository.findValuesByDefinitionIds(definitionIds);
+    }
+
     @Transactional
     public ContextValue updateValue(Integer id, ContextValueRequest request, Integer projectId) {
         ContextValue value = contextValueRepository.findById(id);
@@ -198,6 +211,21 @@ public class ContextService {
         return saved;
     }
 
+    @Transactional
+    public void upsertValues(Integer contextDefinitionId, String values, Integer projectId) {
+        if (projectId != null) {
+            ContextDefinition def = contextDefinitionRepository.findByIdAndProjectId(contextDefinitionId, projectId);
+            if (def == null) throw new NotFoundException("ContextDefinition", contextDefinitionId);
+        }
+        contextValueRepository.deleteByDefinitionId(contextDefinitionId);
+        if (values != null && !values.isBlank()) {
+            ContextValue cv = new ContextValue();
+            cv.setContextDefinitionId(contextDefinitionId);
+            cv.setValues(values);
+            contextValueRepository.save(cv);
+        }
+    }
+
     /**
      * Deletes a context value by its ID.
      *
@@ -221,5 +249,69 @@ public class ContextService {
             }
         }
         contextValueRepository.deleteById(id);
+    }
+
+    /**
+     * Validates that the given value(s) are in the whitelist for a strict context definition.
+     *
+     * @param contextDefinitionId the context definition ID
+     * @param values comma-separated or single values to validate
+     * @throws BadRequestException if the context is strict and a value is not in the whitelist
+     */
+    @Transactional(readOnly = true)
+    public void validateStrictValues(Integer contextDefinitionId, String values) {
+        ContextDefinition def = contextDefinitionRepository.findById(contextDefinitionId);
+        if (def == null || !def.isStrict()) return;
+        List<String> allowed = contextValueRepository.findByContextDefinitionId(contextDefinitionId)
+            .stream()
+            .flatMap(cv -> {
+                String v = cv.getValues();
+                if (v == null || v.isBlank()) return java.util.stream.Stream.empty();
+                return java.util.stream.Stream.of(v.split("\\s*,\\s*"));
+            })
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .toList();
+        if (allowed.isEmpty()) return;
+        if (values == null || values.isBlank()) return;
+        String[] parts = values.split("\\s*,\\s*");
+        for (String part : parts) {
+            String trimmed = part.trim();
+            if (trimmed.isEmpty()) continue;
+            if (!allowed.contains(trimmed)) {
+                throw new BadRequestException("Value '" + trimmed + "' is not in the whitelist for context '" + def.getName() + "'");
+            }
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public void validateStrictValues(Map<Integer, String> valuesByDefId) {
+        if (valuesByDefId == null || valuesByDefId.isEmpty()) return;
+        Set<Integer> defIds = valuesByDefId.keySet();
+        Map<Integer, ContextDefinition> defs = contextDefinitionRepository.findByIds(defIds);
+        List<Integer> strictIds = defs.values().stream()
+            .filter(ContextDefinition::isStrict)
+            .map(ContextDefinition::getId)
+            .toList();
+        if (strictIds.isEmpty()) return;
+        Map<Integer, List<String>> allowedByDef = contextValueRepository.findValuesByDefinitionIds(new HashSet<>(strictIds));
+        for (Map.Entry<Integer, String> entry : valuesByDefId.entrySet()) {
+            Integer defId = entry.getKey();
+            if (!strictIds.contains(defId)) continue;
+            String values = entry.getValue();
+            if (values == null || values.isBlank()) continue;
+            List<String> allowed = allowedByDef.getOrDefault(defId, List.of());
+            if (allowed.isEmpty()) continue;
+            String[] parts = values.split("\\s*,\\s*");
+            for (String part : parts) {
+                String trimmed = part.trim();
+                if (trimmed.isEmpty()) continue;
+                if (!allowed.contains(trimmed)) {
+                    ContextDefinition def = defs.get(defId);
+                    String name = def != null ? def.getName() : String.valueOf(defId);
+                    throw new BadRequestException("Value '" + trimmed + "' is not in the whitelist for context '" + name + "'");
+                }
+            }
+        }
     }
 }

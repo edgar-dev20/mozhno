@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import dev.mozhno.common.PageResponse;
 import dev.mozhno.auth.UserPrincipal;
 import dev.mozhno.contexts.ContextAssembler;
+import dev.mozhno.contexts.ContextDefinition;
 import dev.mozhno.contexts.ContextService;
 import dev.mozhno.environments.EnvironmentAssembler;
 import dev.mozhno.environments.EnvironmentService;
@@ -21,6 +22,9 @@ import dev.mozhno.tags.TagAssembler;
 import dev.mozhno.tags.TagService;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/flags")
@@ -92,6 +96,9 @@ public class FlagController {
         PageResponse<FlagWithStrategy> pageResult = flagService.findByProjectIdWithAllEnvironmentStrategiesPaginated(projectId, page, size);
         List<Segment> segments = segmentService.findByProjectId(projectId);
         List<Integer> segmentIds = segments.stream().map(Segment::getId).toList();
+        List<ContextDefinition> defs = contextService.findDefinitionsByProjectId(projectId);
+        Set<Integer> defIds = defs.stream().map(ContextDefinition::getId).collect(Collectors.toSet());
+        Map<Integer, List<String>> valuesByDef = contextService.findValuesByDefinitionIds(defIds);
         return PaginatedDashboardResponse.builder()
             .flags(flagAssembler.toEnrichedResponses(pageResult.getItems()))
             .page(pageResult.getPage())
@@ -100,7 +107,7 @@ public class FlagController {
             .totalPages(pageResult.getTotalPages())
             .segments(segmentAssembler.toResponseList(segments, segmentService.getContextsForSegments(segmentIds)))
             .tags(tagAssembler.toResponseList(tagService.findByProjectId(projectId)))
-            .contexts(contextAssembler.toDefinitionResponseList(contextService.findDefinitionsByProjectId(projectId)))
+            .contexts(contextAssembler.toDefinitionResponseList(defs, valuesByDef))
             .environments(environmentAssembler.toResponseList(environmentService.findByProjectId(projectId)))
             .build();
     }

@@ -89,5 +89,7 @@ export const contextDefinitionSchema = z.object({
   type: z.string(),
   createdBy: z.string().nullable(),
   description: z.string(),
+  isStrict: z.boolean(),
+  validValues: z.array(z.string()),
   createdAt: z.string(),
 });

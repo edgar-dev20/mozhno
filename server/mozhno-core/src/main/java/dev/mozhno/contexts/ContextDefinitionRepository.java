@@ -36,6 +36,7 @@ public class ContextDefinitionRepository {
         c.setContextType(rs.getString("context_type"));
         c.setCreatedBy(rs.getString("created_by"));
         c.setDescription(rs.getString("description"));
+        c.setStrict(rs.getBoolean("is_strict"));
         c.setProjectId(rs.getInt("project_id"));
         c.setCreatedAt(rs.getTimestamp("created_at").toInstant());
         return c;
@@ -49,7 +50,7 @@ public class ContextDefinitionRepository {
      */
     @Cacheable("contextDefinitions")
     public List<ContextDefinition> findByProjectId(Integer projectId) {
-        return jdbc.query("SELECT id, name, context_key, context_type, description, created_by, project_id, created_at FROM context_definitions WHERE project_id = ? ORDER BY id", ROW_MAPPER, projectId);
+        return jdbc.query("SELECT id, name, context_key, context_type, description, created_by, is_strict, project_id, created_at FROM context_definitions WHERE project_id = ? ORDER BY id", ROW_MAPPER, projectId);
     }
 
     /**
@@ -72,7 +73,7 @@ public class ContextDefinitionRepository {
      */
     public ContextDefinition findById(Integer id) {
         try {
-            return jdbc.queryForObject("SELECT id, name, context_key, context_type, description, created_by, project_id, created_at FROM context_definitions WHERE id = ?", ROW_MAPPER, id);
+            return jdbc.queryForObject("SELECT id, name, context_key, context_type, description, created_by, is_strict, project_id, created_at FROM context_definitions WHERE id = ?", ROW_MAPPER, id);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -80,7 +81,7 @@ public class ContextDefinitionRepository {
 
     public ContextDefinition findByIdAndProjectId(Integer id, Integer projectId) {
         try {
-            return jdbc.queryForObject("SELECT id, name, context_key, context_type, description, created_by, project_id, created_at FROM context_definitions WHERE id = ? AND project_id = ?", ROW_MAPPER, id, projectId);
+            return jdbc.queryForObject("SELECT id, name, context_key, context_type, description, created_by, is_strict, project_id, created_at FROM context_definitions WHERE id = ? AND project_id = ?", ROW_MAPPER, id, projectId);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -90,7 +91,7 @@ public class ContextDefinitionRepository {
         if (ids == null || ids.isEmpty()) return Collections.emptyMap();
         String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
         return jdbc.query(
-            "SELECT id, name, context_key, context_type, description, created_by, project_id, created_at FROM context_definitions WHERE id IN (" + placeholders + ")",
+            "SELECT id, name, context_key, context_type, description, created_by, is_strict, project_id, created_at FROM context_definitions WHERE id IN (" + placeholders + ")",
             ROW_MAPPER, ids.toArray())
             .stream().collect(Collectors.toMap(ContextDefinition::getId, Function.identity()));
     }
@@ -122,22 +123,23 @@ public class ContextDefinitionRepository {
             GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(con -> {
                 PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO context_definitions (name, context_key, context_type, created_by, description, project_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO context_definitions (name, context_key, context_type, created_by, description, is_strict, project_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     new String[]{"id"});
                 ps.setString(1, ctx.getName());
                 ps.setString(2, finalKey);
                 ps.setString(3, finalType);
                 ps.setString(4, ctx.getCreatedBy());
                 ps.setString(5, ctx.getDescription());
-                ps.setInt(6, ctx.getProjectId());
-                ps.setTimestamp(7, Timestamp.from(createTime));
+                ps.setBoolean(6, ctx.isStrict());
+                ps.setInt(7, ctx.getProjectId());
+                ps.setTimestamp(8, Timestamp.from(createTime));
                 return ps;
             }, keyHolder);
             ctx.setId(keyHolder.getKey().intValue());
             ctx.setCreatedAt(createTime);
         } else {
-            jdbc.update("UPDATE context_definitions SET name = ?, context_key = ?, context_type = ?, description = ? WHERE id = ? AND project_id = ?",
-                ctx.getName(), ctx.getContextKey(), ctx.getContextType(), ctx.getDescription(), ctx.getId(), ctx.getProjectId());
+            jdbc.update("UPDATE context_definitions SET name = ?, context_key = ?, context_type = ?, description = ?, is_strict = ? WHERE id = ? AND project_id = ?",
+                ctx.getName(), ctx.getContextKey(), ctx.getContextType(), ctx.getDescription(), ctx.isStrict(), ctx.getId(), ctx.getProjectId());
         }
         return ctx;
     }
