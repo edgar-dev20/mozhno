@@ -119,7 +119,6 @@ export function DateTimePicker({
           selected={date}
           onSelect={(d) => setDate(d)}
           locale={dateLocale}
-          initialFocus
         />
         <div className="flex items-center gap-2 px-4 pb-3 border-t border-border pt-3">
           <Clock size={14} className="text-muted-foreground shrink-0" />

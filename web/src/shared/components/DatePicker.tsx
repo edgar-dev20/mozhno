@@ -90,10 +90,9 @@ export function DatePicker({
           mode="single"
           selected={value ?? undefined}
           onSelect={handleSelect}
-          fromDate={minDate}
-          toDate={maxDate}
+          startMonth={minDate}
+          endMonth={maxDate}
           locale={dateLocale}
-          initialFocus
         />
         {showPresets && (
           <div className="flex items-center justify-center gap-1.5 px-4 py-3 flex-wrap border-t border-border">

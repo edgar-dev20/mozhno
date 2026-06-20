@@ -130,7 +130,7 @@ interface SegmentIconProps {
 
 export function SegmentIcon({ name, className = '', size = 20 }: SegmentIconProps) {
   const IconComponent = (
-    LucideIcons as Record<string, React.ComponentType<{ size?: number; className?: string }>>
+    LucideIcons as unknown as Record<string, React.ComponentType<{ size?: number; className?: string }>>
   )[name];
   if (!IconComponent) {
     const Fallback = LucideIcons.Users;
