@@ -4,8 +4,14 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { visualizer } from 'rollup-plugin-visualizer'
 
+const plugins = [react(), tailwindcss()]
+
+if (process.env.ANALYZE) {
+  plugins.push(visualizer({ open: false, gzipSize: true, brotliSize: true }))
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss(), visualizer({ open: false, gzipSize: true, brotliSize: true })],
+  plugins,
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -16,6 +22,7 @@ export default defineConfig({
     target: 'esnext',
     outDir: 'dist',
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
         assetFileNames: 'assets/[name]-[hash][extname]',

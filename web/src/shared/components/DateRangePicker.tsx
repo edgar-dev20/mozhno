@@ -108,10 +108,9 @@ export function DateRangePicker({
           mode="range"
           selected={hasValue ? { from: from ?? undefined, to: to ?? undefined } : undefined}
           onSelect={handleSelect}
-          fromDate={minDate}
-          toDate={maxDate}
+          startMonth={minDate}
+          endMonth={maxDate}
           locale={dateLocale}
-          initialFocus
           numberOfMonths={1}
         />
         {showPresets && (
