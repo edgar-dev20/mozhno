@@ -9,6 +9,7 @@ const preview: Preview = {
         color: /(background|color)$/i,
         date: /Date$/i,
       },
+      sort: "requiredFirst",
     },
     backgrounds: {
       default: "light",
@@ -17,7 +18,45 @@ const preview: Preview = {
         { name: "dark", value: "#1a1a2e" },
       ],
     },
+    viewport: {
+      defaultViewport: "responsive",
+      viewports: {
+        mobile: {
+          name: "Mobile",
+          styles: { width: "390px", height: "844px" },
+        },
+        tablet: {
+          name: "Tablet",
+          styles: { width: "768px", height: "1024px" },
+        },
+        desktop: {
+          name: "Desktop",
+          styles: { width: "1280px", height: "800px" },
+        },
+        wide: {
+          name: "Wide",
+          styles: { width: "1920px", height: "1080px" },
+        },
+      },
+    },
+    a11y: {
+      config: {
+        rules: [
+          {
+            id: "color-contrast",
+            enabled: true,
+          },
+        ],
+      },
+    },
+    options: {
+      storySort: {
+        method: "alphabetical",
+        order: ["Design System", "UI", "Shared", "Charts", "Components", "App"],
+      },
+    },
   },
+  tags: ["autodocs"],
   decorators: [
     withThemeByClassName({
       themes: {

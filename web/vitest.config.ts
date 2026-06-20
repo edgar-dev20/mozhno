@@ -14,7 +14,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
       include: ['src/**/*.{ts,tsx}'],
-      exclude: ['src/test/**', 'src/main.tsx', 'src/**/*.d.ts'],
+      exclude: ['src/test/**', 'src/main.tsx', 'src/**/*.d.ts', 'src/stories/**', 'src/**/*.stories.*'],
       thresholds: {
         lines: 22,
         functions: 18,

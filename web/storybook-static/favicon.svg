@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="м.">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+  </defs>
+  <text x="32" y="52" text-anchor="middle"
+        font-family="'Inter',-apple-system,'Helvetica Neue',Arial,sans-serif"
+        font-weight="700" font-size="56" fill="url(#g)">
+    <tspan letter-spacing="0.02em">м</tspan><tspan font-family="'JetBrains Mono','Fira Code','Consolas',monospace" font-weight="600" font-size="30">.</tspan>
+  </text>
+</svg>

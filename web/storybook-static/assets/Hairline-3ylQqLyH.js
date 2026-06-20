@@ -1,0 +1,1 @@
+import{j as r}from"./jsx-runtime-D_zvdyIk.js";function s({className:e}){return r.jsx("div",{className:`border-t border-border/20 ${e??""}`})}s.__docgenInfo={description:"",methods:[],displayName:"Hairline",props:{className:{required:!1,tsType:{name:"string"},description:""}}};export{s as H};
