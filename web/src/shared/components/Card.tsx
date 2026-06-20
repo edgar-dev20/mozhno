@@ -4,10 +4,10 @@ import { cva, type VariantProps } from 'class-variance-authority';
 const cardVariants = cva('', {
   variants: {
     variant: {
-      default: 'bg-card rounded-2xl shadow-sm border border-border',
-      elevated: 'bg-card rounded-2xl shadow-md border border-border',
-      panel: 'bg-card rounded-2xl shadow-lg border border-border',
-      selectable: 'rounded-2xl transition-all overflow-hidden',
+      default: 'bg-card rounded-xl shadow-sm border border-border',
+      elevated: 'bg-card rounded-xl shadow-md border border-border',
+      panel: 'bg-card rounded-xl shadow-lg border border-border',
+      selectable: 'rounded-xl transition-all overflow-hidden',
     },
   },
   defaultVariants: {
@@ -47,8 +47,8 @@ export const Card = React.forwardRef<HTMLDivElement | HTMLButtonElement, CardPro
 
     if (variant === 'selectable') {
       classes = selected
-        ? 'rounded-2xl transition-all overflow-hidden bg-gradient-to-br from-sparkline-true/[0.04] to-transparent ring-1 ring-sparkline-true/25 shadow-md'
-        : 'rounded-2xl transition-all overflow-hidden bg-card shadow-sm hover:shadow-md border border-border';
+        ? 'rounded-xl transition-all overflow-hidden bg-gradient-to-br from-sparkline-true/[0.04] to-transparent ring-1 ring-sparkline-true/25 shadow-md'
+        : 'rounded-xl transition-all overflow-hidden bg-card shadow-sm hover:shadow-md border border-border';
     } else {
       classes = cardVariants({ variant });
     }

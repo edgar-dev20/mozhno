@@ -231,20 +231,14 @@
   --info: oklch(0.55 0.18 250);
   --info-foreground: oklch(1 0 0);
 
-  --gradient-start: oklch(0.5 0.21 268);
-  --gradient-end: oklch(0.46 0.18 276);
-  --gradient-start-hover: oklch(0.42 0.21 268);
-  --gradient-end-hover: oklch(0.39 0.18 276);
+  --gradient-start: oklch(0.5 0.21 275);
+  --gradient-end: oklch(0.46 0.18 275);
   --gradient-subtle-start: oklch(0.96 0.01 264);
-  --gradient-subtle-end: oklch(0.96 0.01 290);
+  --gradient-subtle-end: oklch(0.96 0.01 275);
   --gradient-danger-start: oklch(0.56 0.21 17.4);
   --gradient-danger-end: oklch(0.52 0.19 12);
-  --gradient-danger-start-hover: oklch(0.48 0.19 17.4);
-  --gradient-danger-end-hover: oklch(0.44 0.17 12);
   --gradient-warning-start: oklch(0.7 0.18 82);
   --gradient-warning-end: oklch(0.65 0.18 72);
-  --gradient-warning-start-hover: oklch(0.62 0.16 82);
-  --gradient-warning-end-hover: oklch(0.57 0.16 72);
 
   --sparkline-true: oklch(0.52 0.15 266);
   --sparkline-false: oklch(0.76 0.012 264);
@@ -399,20 +393,14 @@
   --info: oklch(0.62 0.14 250);
   --info-foreground: oklch(1 0 0);
 
-  --gradient-start: oklch(0.56 0.17 268);
-  --gradient-end: oklch(0.52 0.14 276);
-  --gradient-start-hover: oklch(0.49 0.17 268);
-  --gradient-end-hover: oklch(0.46 0.14 276);
+  --gradient-start: oklch(0.56 0.17 275);
+  --gradient-end: oklch(0.52 0.14 275);
   --gradient-subtle-start: oklch(0.19 0.008 264);
-  --gradient-subtle-end: oklch(0.2 0.006 290);
+  --gradient-subtle-end: oklch(0.2 0.006 275);
   --gradient-danger-start: oklch(0.55 0.16 20);
   --gradient-danger-end: oklch(0.5 0.14 16);
-  --gradient-danger-start-hover: oklch(0.48 0.14 20);
-  --gradient-danger-end-hover: oklch(0.43 0.12 16);
   --gradient-warning-start: oklch(0.62 0.14 80);
   --gradient-warning-end: oklch(0.57 0.14 70);
-  --gradient-warning-start-hover: oklch(0.55 0.12 80);
-  --gradient-warning-end-hover: oklch(0.5 0.12 70);
 
   --sparkline-true: oklch(0.65 0.08 268);
   --sparkline-false: oklch(0.36 0.008 264);
@@ -483,18 +471,12 @@
   --color-brand-foreground: var(--brand-foreground);
   --color-gradient-start: var(--gradient-start);
   --color-gradient-end: var(--gradient-end);
-  --color-gradient-start-hover: var(--gradient-start-hover);
-  --color-gradient-end-hover: var(--gradient-end-hover);
   --color-gradient-subtle-start: var(--gradient-subtle-start);
   --color-gradient-subtle-end: var(--gradient-subtle-end);
   --color-gradient-danger-start: var(--gradient-danger-start);
   --color-gradient-danger-end: var(--gradient-danger-end);
-  --color-gradient-danger-start-hover: var(--gradient-danger-start-hover);
-  --color-gradient-danger-end-hover: var(--gradient-danger-end-hover);
   --color-gradient-warning-start: var(--gradient-warning-start);
   --color-gradient-warning-end: var(--gradient-warning-end);
-  --color-gradient-warning-start-hover: var(--gradient-warning-start-hover);
-  --color-gradient-warning-end-hover: var(--gradient-warning-end-hover);
   --color-sparkline-true: var(--sparkline-true);
   --color-sparkline-false: var(--sparkline-false);
   --color-disabled-bg: var(--disabled-bg);
@@ -729,4 +711,25 @@
 
 @utility tracking-overline {
   letter-spacing: var(--tracking-overline);
+}
+
+.gradient-btn-primary {
+  background-image: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+}
+.gradient-btn-primary:not(:disabled):hover {
+  background-image: linear-gradient(to right, color-mix(in oklch, var(--gradient-start), black 10%), color-mix(in oklch, var(--gradient-end), black 10%));
+}
+
+.gradient-btn-danger {
+  background-image: linear-gradient(to right, var(--gradient-danger-start), var(--gradient-danger-end));
+}
+.gradient-btn-danger:not(:disabled):hover {
+  background-image: linear-gradient(to right, color-mix(in oklch, var(--gradient-danger-start), black 10%), color-mix(in oklch, var(--gradient-danger-end), black 10%));
+}
+
+.gradient-btn-warning {
+  background-image: linear-gradient(to right, var(--gradient-warning-start), var(--gradient-warning-end));
+}
+.gradient-btn-warning:not(:disabled):hover {
+  background-image: linear-gradient(to right, color-mix(in oklch, var(--gradient-warning-start), black 10%), color-mix(in oklch, var(--gradient-warning-end), black 10%));
 }

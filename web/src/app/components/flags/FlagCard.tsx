@@ -32,7 +32,7 @@ export function FlagCard(props: FlagCardProps) {
       className={`group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden ${flag.archived ? 'opacity-50 grayscale-[0.3]' : ''}`}
       id={`flag-card-${flag.key}`}
     >
-      <div className="flex gap-4 px-4 py-3 cursor-pointer" onClick={onToggleExpand}>
+      <div className="flex gap-2 sm:gap-4 px-3 sm:px-4 py-2 sm:py-3 cursor-pointer" onClick={onToggleExpand}>
         <FlagCardHeader
           flag={flag}
           expanded={expanded}

@@ -7,13 +7,13 @@ const gradientButtonVariants = cva(
     variants: {
       variant: {
         primary:
-          'bg-gradient-to-r from-gradient-start to-gradient-end hover:from-gradient-start-hover hover:to-gradient-end-hover text-white shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'gradient-btn-primary text-white shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
         default:
           'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
         danger:
-          'bg-gradient-to-r from-gradient-danger-start to-gradient-danger-end hover:from-gradient-danger-start-hover hover:to-gradient-danger-end-hover text-white shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'gradient-btn-danger text-white shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
         warning:
-          'bg-gradient-to-r from-gradient-warning-start to-gradient-warning-end hover:from-gradient-warning-start-hover hover:to-gradient-warning-end-hover text-warning-foreground shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'gradient-btn-warning text-warning-foreground shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
         secondary:
           'bg-card border border-border text-foreground/80 hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
         muted:

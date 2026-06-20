@@ -150,7 +150,7 @@ web/src/
     design-tokens.json     — canonical token specification (light + dark, all scales)
     tailwind.css           — Tailwind v4 imports + tw-animate-css
     index.css              — entry point (imports tailwind.css + theme.css)
-  stories/                  — Storybook stories: Badge, Card, GradientButton, EmptyState, StatusDot, ...
+  stories/                  — Storybook stories: Badge, Card, GradientButton, EmptyState, StatusDot, Tokens (palettes/swatches/typography showcase), ...
   test/                     — vitest tests + setup.ts
 ```
 
@@ -199,9 +199,13 @@ All tokens defined in `src/styles/theme.css`. Canonical source: `src/styles/desi
 - Focus: `--ring`, `--ring-success`, `--ring-destructive`, `--ring-warning`, `--ring-brand`
 
 **Layer 3 — Component-specific**:
-- Gradients: `--gradient-start`, `--gradient-end`, `--gradient-start-hover`, `--gradient-end-hover`
-- Gradient variants: `--gradient-danger-start`, `--gradient-warning-start`, etc.
+- Gradients: `--gradient-start`, `--gradient-end` (hover via `.gradient-btn-primary` CSS class using `color-mix()`)
+- Gradient variants: `--gradient-danger-start`, `--gradient-danger-end` (hover via `.gradient-btn-danger`), `--gradient-warning-start`, `--gradient-warning-end` (hover via `.gradient-btn-warning`)
+- Button gradient classes: `.gradient-btn-primary`, `.gradient-btn-danger`, `.gradient-btn-warning` — handle background + hover in CSS via `color-mix(in oklch, ..., black 10%)`
 - Subtle gradients: `--gradient-subtle-start`, `--gradient-subtle-end`
+- Overlay: `--overlay-bg` (modal/sheet/alert backdrops, light: 40% black, dark: 60%)
+- Panel sizing: `--panel-min-width` (8rem), `--panel-max-width` (32rem)
+- Icon sizing: `--icon-sm` (0.75rem), `--icon-md` (1rem), `--icon-lg` (1.25rem)
 - Sparklines: `--sparkline-true`, `--sparkline-false`
 - Sidebar: `--sidebar`, `--sidebar-primary`, `--sidebar-accent`, etc.
 - Charts: `--chart-1` through `--chart-5`
@@ -394,7 +398,7 @@ All exported from `@/shared`:
 | Component | Key Props |
 |-----------|----------|
 | **Badge** | `variant` (7), `style` (subtle/outline/solid), `shape` (rounded/pill), `size` (sm/md), `uppercase`, `icon` |
-| **GradientButton** | `variant` (9), `size` (sm/md/lg/icon), `icon`, `loading`, `disabled` |
+| **GradientButton** | `variant` (primary/default/danger/warning/secondary/muted/outline/ghost/link), `size` (sm/md/lg/icon), `icon`, `loading`, `disabled` | Gradient variants use `.gradient-btn-*` CSS classes from theme.css |
 | **Card** | `variant` (default/elevated/panel/selectable), `padded`, `dimmed`, `selected`, `onClick`, `as` |
 | **StatusDot** | `state` (active/recent/stale/neutral), `size` (sm/md), `label` |
 | **SectionHeader** | `title` (string), `description` (ReactNode), `gradientClass` |
