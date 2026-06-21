@@ -99,7 +99,7 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
                       transition={{ delay: i * 0.02 + 0.08, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                       style={{ originY: 1 }}
                       d={d}
-                      fill={i % 3 === 0 ? "var(--chart-4)" : "var(--sparkline-true)"}
+                      fill="var(--sparkline-true)"
                     />
                   );
                 })()}
