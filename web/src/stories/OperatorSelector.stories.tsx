@@ -30,10 +30,15 @@ const meta: Meta<typeof OperatorSelector> = {
 export default meta;
 type Story = StoryObj<typeof OperatorSelector>;
 
-export const StringOps: Story = {
-  render: () => { const [op, setOp] = useState("eq"); return <OperatorSelector availableOps={STRING_OPS} currentOperator={op} onSelect={setOp} />; },
-};
+function StringOpsRender() {
+  const [op, setOp] = useState("eq");
+  return <OperatorSelector availableOps={STRING_OPS} currentOperator={op} onSelect={setOp} />;
+}
 
-export const ComparableOps: Story = {
-  render: () => { const [op, setOp] = useState("gt"); return <OperatorSelector availableOps={COMPARABLE_OPS} currentOperator={op} onSelect={setOp} />; },
-};
+function ComparableOpsRender() {
+  const [op, setOp] = useState("gt");
+  return <OperatorSelector availableOps={COMPARABLE_OPS} currentOperator={op} onSelect={setOp} />;
+}
+
+export const StringOps: Story = { render: StringOpsRender };
+export const ComparableOps: Story = { render: ComparableOpsRender };

@@ -28,6 +28,9 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
     return () => ro.disconnect();
   }, []);
 
+  const displayData = useMemo(() => aggregateHourPairs(data), [data]);
+  const maxVal = Math.max(1, ...displayData.map((d) => d.trueCount + d.falseCount));
+
   if (data.length === 0) {
     return (
       <div
@@ -39,8 +42,6 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
     );
   }
 
-  const displayData = useMemo(() => aggregateHourPairs(data), [data]);
-  const maxVal = Math.max(1, ...displayData.map((d) => d.trueCount + d.falseCount));
   const paddingX = 3;
   const effectiveWidth = width - paddingX * 2;
   const barWidth = Math.max(1, (effectiveWidth - (displayData.length - 1) * 1) / displayData.length);

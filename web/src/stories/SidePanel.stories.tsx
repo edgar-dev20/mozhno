@@ -13,7 +13,7 @@ export default meta;
 type Story = StoryObj<typeof SidePanel>;
 
 export const Default: Story = {
-  render: () => {
+  render: function SidePanelRender() {
     const [open, setOpen] = useState(true);
     return (
       <SidePanel open={open} onOpenChange={setOpen} title="Settings" description="Configure your flag settings">
