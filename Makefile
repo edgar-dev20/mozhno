@@ -49,6 +49,15 @@ docker-down: ## Stop full stack
 
 lint: web-lint ## Run all linters
 
+docs-dev: ## Start docs dev server
+	cd site && npm run dev
+
+docs-build: ## Build docs site
+	cd site && npm run build
+
+docs-preview: ## Preview built docs site
+	cd site && npm run preview
+
 clean: ## Clean build artifacts
 	cd server && ./gradlew clean
-	rm -rf web/dist sdks/js/dist
+	rm -rf web/dist sdks/js/dist site/.vitepress/dist
