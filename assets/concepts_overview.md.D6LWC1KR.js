@@ -1,0 +1,55 @@
+import{_ as a,o as i,c as n,a2 as t}from"./chunks/framework.DnrXFDHb.js";const g=JSON.parse('{"title":"Обзор концептов","description":"","frontmatter":{},"headers":[],"relativePath":"concepts/overview.md","filePath":"concepts/overview.md"}'),e={name:"concepts/overview.md"};function l(r,s,h,p,o,d){return i(),n("div",null,[...s[0]||(s[0]=[t(`<h1 id="обзор-концептов" tabindex="-1">Обзор концептов <a class="header-anchor" href="#обзор-концептов" aria-label="Permalink to &quot;Обзор концептов&quot;">​</a></h1><p><strong>можно.</strong> построен вокруг нескольких ключевых понятий. Понимание их взаимодействия поможет эффективно управлять фичами.</p><h2 id="карта-концептов" tabindex="-1">Карта концептов <a class="header-anchor" href="#карта-концептов" aria-label="Permalink to &quot;Карта концептов&quot;">​</a></h2><pre class="mermaid">graph TB
+    subgraph &quot;Окружения&quot;
+        DEV[dev]
+        STG[staging]
+        PROD[production]
+    end
+
+    subgraph &quot;Флаги&quot;
+        BF[Булевы флаги]
+        MF[Мультивариативные флаги]
+    end
+
+    subgraph &quot;Стратегии&quot;
+        DS[Default]
+        GS[Gradual]
+        SS[Scheduled]
+        CS[Custom]
+    end
+
+    subgraph &quot;Таргетинг&quot;
+        SG[Сегменты]
+        AT[Правила на атрибутах]
+        PR[Процентный роллаут]
+    end
+
+    SDK[SDK] --&gt;|загружает правила| API
+    API --&gt;|оценивает| FL[Флаги]
+    FL --&gt;|используют| STR[Стратегии]
+    STR --&gt;|ссылаются на| SG
+    FL --&gt;|привязаны к| ENV[Окружение]
+    ENV --&gt;|авторизуется через| KEY[API-ключ]
+    CTX[Контекст] --&gt;|атрибуты пользователя| STR
+    AUDIT[Аудит] --&gt;|логирует все изменения| FL
+</pre><h2 id="ключевые-понятия" tabindex="-1">Ключевые понятия <a class="header-anchor" href="#ключевые-понятия" aria-label="Permalink to &quot;Ключевые понятия&quot;">​</a></h2><h3 id="флаг" tabindex="-1">Флаг <a class="header-anchor" href="#флаг" aria-label="Permalink to &quot;Флаг&quot;">​</a></h3><p>Именованная точка переключения в вашем коде. <strong>можно.</strong> поддерживает два типа флагов:</p><ul><li><strong>Булев флаг</strong> — вкл/выкл (<code>true</code>/<code>false</code>). Базовый и самый частый сценарий.</li><li><strong>Мультивариативный флаг</strong> — возвращает одно из нескольких значений (<code>&quot;A&quot;</code>, <code>&quot;B&quot;</code>, <code>&quot;C&quot;</code>). Для A/B-тестов и канареечных деплоев.</li></ul><p>Подробнее: <a href="/concepts/flags.html">Флаги</a></p><h3 id="стратегия" tabindex="-1">Стратегия <a class="header-anchor" href="#стратегия" aria-label="Permalink to &quot;Стратегия&quot;">​</a></h3><p>Определяет, <strong>как</strong> флаг применяется к пользователям. Стратегии — это подключаемая логика роллаута:</p><ul><li><strong>Default</strong> — мгновенное включение или выключение для всех</li><li><strong>Gradual</strong> — постепенная раскатка: сначала 1%, потом 10%, затем 100%</li><li><strong>Scheduled</strong> — включение по расписанию, в заданные дату и время</li><li><strong>Custom</strong> — собственная логика через SPI</li></ul><p>Каждый флаг проходит цепочку стратегий до первого совпадения.</p><p>Подробнее: <a href="/concepts/strategies.html">Стратегии</a></p><h3 id="сегмент" tabindex="-1">Сегмент <a class="header-anchor" href="#сегмент" aria-label="Permalink to &quot;Сегмент&quot;">​</a></h3><p>Переиспользуемая <strong>группа пользователей</strong>, объединённая общими признаками. Вместо того чтобы дублировать правила таргетинга на каждом флаге, вы создаёте сегмент один раз и ссылаетесь на него.</p><p>Примеры сегментов:</p><ul><li>Пользователи из России</li><li>Premium-подписчики</li><li>Мобильные устройства на iOS</li><li>Бета-тестеры</li></ul><p>Подробнее: <a href="/concepts/segments.html">Сегменты</a></p><h3 id="контекст" tabindex="-1">Контекст <a class="header-anchor" href="#контекст" aria-label="Permalink to &quot;Контекст&quot;">​</a></h3><p>Произвольный набор атрибутов, которые ваше приложение передаёт в SDK при оценке флага. Атрибуты могут быть любыми: <code>userId</code>, <code>country</code>, <code>plan</code>, <code>device</code>, <code>email</code> и т.д.</p><div class="language-java vp-adaptive-theme line-numbers-mode"><button title="Copy Code" class="copy"></button><span class="lang">java</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583;">var</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> ctx </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583;">=</span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583;"> new</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;"> EvaluationContext</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">()</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">    .</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">set</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;userId&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">, </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;user-123&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">)</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">    .</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">set</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;country&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">, </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;RU&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">)</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">    .</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">set</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;plan&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">, </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;premium&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">)</span></span>
+<span class="line"><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">    .</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">set</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;device&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">, </span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;ios&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">);</span></span>
+<span class="line"></span>
+<span class="line"><span style="--shiki-light:#D73A49;--shiki-dark:#F97583;">boolean</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> enabled </span><span style="--shiki-light:#D73A49;--shiki-dark:#F97583;">=</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;"> client.</span><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">isFlagEnabled</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">(</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;">&quot;new-checkout&quot;</span><span style="--shiki-light:#24292E;--shiki-dark:#E1E4E8;">, ctx);</span></span></code></pre><div class="line-numbers-wrapper" aria-hidden="true"><span class="line-number">1</span><br><span class="line-number">2</span><br><span class="line-number">3</span><br><span class="line-number">4</span><br><span class="line-number">5</span><br><span class="line-number">6</span><br><span class="line-number">7</span><br></div></div><p>Стратегии и правила сегментов опираются на контекст для принятия решения.</p><h3 id="окружение" tabindex="-1">Окружение <a class="header-anchor" href="#окружение" aria-label="Permalink to &quot;Окружение&quot;">​</a></h3><p>Логически изолированный контекст для флагов:</p><ul><li><strong>dev</strong> — локальная разработка, эксперименты</li><li><strong>staging</strong> — предпродакшен, интеграционное тестирование</li><li><strong>production</strong> — боевое окружение</li></ul><p>Каждое окружение имеет <strong>собственные настройки флагов</strong> и <strong>собственные API-ключи</strong>. Флаг, включённый в dev, может быть выключен в production.</p><p>Подробнее: <a href="/concepts/environments.html">Окружения</a></p><h3 id="api-ключ" tabindex="-1">API-ключ <a class="header-anchor" href="#api-ключ" aria-label="Permalink to &quot;API-ключ&quot;">​</a></h3><p>Ключ доступа SDK к серверу <strong>можно.</strong>. Каждый API-ключ:</p><ul><li>Привязан к конкретному окружению</li><li>Имеет гранулярные права (чтение флагов, управление, администрирование)</li><li>Может быть отозван в любой момент</li></ul><h3 id="аудит" tabindex="-1">Аудит <a class="header-anchor" href="#аудит" aria-label="Permalink to &quot;Аудит&quot;">​</a></h3><p>Все изменения конфигурации флагов записываются в аудит-лог:</p><ul><li>Кто изменил (администратор или API-клиент)</li><li>Что изменилось (старое и новое значение)</li><li>Когда произошло изменение</li><li>В каком окружении</li></ul><p>Аудит-лог доступен через веб-панель и REST API.</p><h2 id="поток-принятия-решения" tabindex="-1">Поток принятия решения <a class="header-anchor" href="#поток-принятия-решения" aria-label="Permalink to &quot;Поток принятия решения&quot;">​</a></h2><pre class="mermaid">sequenceDiagram
+    participant App as Ваше приложение
+    participant SDK as SDK (локально)
+    participant Server as Сервер можно.
+
+    App-&gt;&gt;SDK: isEnabled(&quot;new-checkout&quot;, context)
+    SDK-&gt;&gt;SDK: Поиск флага в кеше
+    SDK-&gt;&gt;SDK: Поиск окружения
+    SDK-&gt;&gt;SDK: Проверка стратегий по порядку
+    SDK-&gt;&gt;SDK: Оценка правил сегментов (если есть)
+    SDK-&gt;&gt;SDK: Вычисление процента роллаута
+    SDK--&gt;&gt;App: true / false
+    Note over SDK,Server: Фоновое обновление правил
+    SDK-&gt;&gt;Server: GET /api/flags/evaluation-data
+    Server--&gt;&gt;SDK: Обновлённые правила
+</pre><p>Решение принимается <strong>локально</strong> в SDK — без сетевого вызова к серверу. Это устраняет задержки и делает оценку флагов мгновенной.</p><h2 id="что-дальше" tabindex="-1">Что дальше? <a class="header-anchor" href="#что-дальше" aria-label="Permalink to &quot;Что дальше?&quot;">​</a></h2><ul><li><a href="/concepts/flags.html">Флаги</a> — типы флагов и жизненный цикл</li><li><a href="/concepts/segments.html">Сегменты</a> — создание переиспользуемых групп</li><li><a href="/concepts/strategies.html">Стратегии</a> — механика роллаута</li><li><a href="/concepts/environments.html">Окружения</a> — изоляция dev / staging / production</li></ul>`,40)])])}const c=a(e,[["render",l]]);export{g as __pageData,c as default};
