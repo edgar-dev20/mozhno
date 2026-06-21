@@ -516,7 +516,7 @@ export function ClientInstances() {
                                               flag.flagType === 'KILLSWITCH' ? ShieldOff : Rocket;
                                             const typeColor =
                                               flag.flagType === 'KILLSWITCH'
-                                                ? 'text-destructive'
+                                                ? 'text-chart-4'
                                                 : 'text-info';
                                             return (
                                               <NavLink

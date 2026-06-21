@@ -153,11 +153,11 @@ export function FlagEditPanel({
           <button
             type="button"
             onClick={() => setValue('flagType', 'KILLSWITCH')}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-sm font-semibold transition-all ${flagType === 'KILLSWITCH' ? 'border-destructive bg-destructive/10 text-destructive shadow-sm' : 'border-border text-muted-foreground hover:border-destructive/20'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-sm font-semibold transition-all ${flagType === 'KILLSWITCH' ? 'border-chart-4 bg-chart-4/10 text-chart-4 shadow-sm' : 'border-border text-muted-foreground hover:border-chart-4/20'}`}
           >
             <ShieldOff
               size={18}
-              className={flagType === 'KILLSWITCH' ? 'text-red-500' : 'text-muted-foreground'}
+              className={flagType === 'KILLSWITCH' ? 'text-chart-4' : 'text-muted-foreground'}
             />
             {t('flags.killswitch')}
           </button>
