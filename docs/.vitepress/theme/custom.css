@@ -67,7 +67,7 @@ html { scroll-behavior: smooth; }
   --vp-shadow-1: 0 1px 2px 0 oklch(0 0 0 / 0.22); --vp-shadow-2: 0 4px 6px -1px oklch(0 0 0 / 0.32), 0 2px 4px -2px oklch(0 0 0 / 0.22); --vp-shadow-3: 0 10px 15px -3px oklch(0 0 0 / 0.38), 0 4px 6px -4px oklch(0 0 0 / 0.26);
 }
 
-.VPHomeHero .name { font-weight:750; background:linear-gradient(135deg,oklch(0.48 0.17 175),oklch(0.44 0.15 170),oklch(0.36 0.13 170)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.VPHomeHero .name { font-weight:750; font-size:clamp(3rem,14vw,7rem); background:linear-gradient(135deg,oklch(0.48 0.17 175),oklch(0.44 0.15 170),oklch(0.36 0.13 170)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
 :root.dark .VPHomeHero .name { background:linear-gradient(135deg,oklch(0.58 0.18 175),oklch(0.56 0.15 170),oklch(0.62 0.16 170)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
 .VPHomeHero .name::after { content:'.'; font-family:'JetBrains Mono','Fira Code','Consolas',monospace; font-weight:600; font-size:0.5em; color:var(--vp-c-copper-1); margin-left:-0.1em; background:none; -webkit-text-fill-color:var(--vp-c-copper-1); }
 .VPHomeHero .text { font-size:clamp(1.5rem,3.5vw,2rem); line-height:1.25; }
