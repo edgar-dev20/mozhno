@@ -99,12 +99,13 @@ const enAdvancedSidebar = [
 export default defineConfig({
   title: 'можно.',
   description: 'Documentation for можно. — open-core feature flag management platform',
+  base: '/mozhno/',
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/mozhno/logo.svg' }],
     ['meta', { name: 'theme-color', content: '#3d4f7a' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:image', content: '/og-image.png' }],
+    ['meta', { property: 'og:image', content: '/mozhno/og-image.png' }],
   ],
 
   locales: {
