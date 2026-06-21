@@ -102,7 +102,7 @@ export default defineConfig({
   base: '/mozhno/',
 
   head: [
-
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/mozhno/favicon.svg' }],
     ['meta', { name: 'theme-color', content: '#3d4f7a' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:image', content: '/mozhno/og-image.png' }],
