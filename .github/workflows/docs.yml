@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'site/**'
+      - 'docs/**'
       - '.github/workflows/docs.yml'
   workflow_dispatch:
 
@@ -25,21 +25,21 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 26
           cache: npm
-          cache-dependency-path: site/package-lock.json
+          cache-dependency-path: docs/package-lock.json
 
       - name: Install dependencies
-        working-directory: site
+        working-directory: docs
         run: npm ci
 
       - name: Build
-        working-directory: site
+        working-directory: docs
         run: npm run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: site/.vitepress/dist
+          publish_dir: docs/.vitepress/dist
           cname: docs.mozhno.dev
