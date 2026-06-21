@@ -76,10 +76,10 @@ export function FlagMetricsDialog({
   const [chartReady, setChartReady] = useState(false);
   const [instances, setInstances] = useState<ClientInstance[]>([]);
   const [instancesLoading, setInstancesLoading] = useState(false);
+  const [hasEverLoaded, setHasEverLoaded] = useState(false);
   const [filterAppName, setFilterAppName] = useState<string | null>(null);
   const [filterInstanceId, setFilterInstanceId] = useState<number | null>(null);
   const loadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasEverLoaded = useRef(false);
 
   const projectId = environments[0]?.projectId ?? 0;
 
@@ -89,10 +89,14 @@ export function FlagMetricsDialog({
     };
   }, []);
 
+  // Reset filters when dialog opens
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedEnvId(defaultEnvId ?? environments[0]?.id ?? null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilterAppName(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilterInstanceId(null);
     }
   }, [open, defaultEnvId, environments]);
@@ -100,6 +104,7 @@ export function FlagMetricsDialog({
   useEffect(() => {
     if (!open || !flagId || !selectedEnvId) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     if (loadTimerRef.current) clearTimeout(loadTimerRef.current);
     loadTimerRef.current = setTimeout(() => {
@@ -116,7 +121,7 @@ export function FlagMetricsDialog({
         .then((metricsData) => {
           setMetrics(metricsData);
           setStaleMetrics(metricsData);
-          hasEverLoaded.current = true;
+          setHasEverLoaded(true);
           setChartReady(true);
         })
         .catch((err) => {
@@ -133,6 +138,7 @@ export function FlagMetricsDialog({
   useEffect(() => {
     if (!open || !projectId || !selectedEnvId) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setInstancesLoading(true);
     api.clientInstances
       .list(projectId, selectedEnvId)
@@ -345,7 +351,7 @@ export function FlagMetricsDialog({
               </div>
 
               <div className="flex-1 min-h-0 relative">
-                {!chartReady && !hasEverLoaded.current ? (
+                {!chartReady && !hasEverLoaded ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
                     <div className="animate-spin rounded-full h-8 w-8 border-[3px] border-sparkline-true/30 border-t-sparkline-true" />
                     <span className="text-xs text-muted-foreground/40">{t('common.loading')}</span>

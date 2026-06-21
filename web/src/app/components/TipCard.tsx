@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
 import { Badge } from '@/shared/components/Badge';
@@ -13,15 +13,14 @@ interface TipCardProps {
 }
 
 export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProps) {
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    if (storageKey) {
+      return localStorage.getItem(`tip-${storageKey}`) === 'dismissed';
+    }
+    return false;
+  });
   const t = useT();
   const displayLabel = label ?? t('common.tip');
-
-  useEffect(() => {
-    if (storageKey) {
-      setDismissed(localStorage.getItem(`tip-${storageKey}`) === 'dismissed');
-    }
-  }, [storageKey]);
 
   const handleDismiss = () => {
     setDismissed(true);

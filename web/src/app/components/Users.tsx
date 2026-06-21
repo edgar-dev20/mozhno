@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Plus,
   Mail,
@@ -24,9 +24,42 @@ import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { UserTableSkeleton } from '@/app/components/skeletons';
 import { api, UserDto } from '@/api';
 import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage } from '@/shared';
-import { useT, useLocale } from '@/i18n';
+import { useT, useLocale, t } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
+
+function formatDate(d: string) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString(toIntlLocale(loadLocale()), {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function formatDateTime(d: string) {
+  if (!d) return t('users.time.never');
+  return new Date(d).toLocaleString(toIntlLocale(loadLocale()), {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function timeAgo(d: string) {
+  if (!d) return t('users.time.never');
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return t('users.time.justNow');
+  if (mins < 60) return t('users.time.minutesAgo', { n: String(mins) });
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return t('users.time.hoursAgo', { n: String(hours) });
+  const days = Math.floor(hours / 24);
+  if (days < 30) return t('users.time.daysAgo', { n: String(days) });
+  return formatDate(d);
+}
 
 export function Users() {
   const [users, setUsers] = useState<UserDto[]>([]);
@@ -72,12 +105,13 @@ export function Users() {
     }
   };
 
+  const didLoadUsers = useRef(false);
   useEffect(() => {
-    loadUsers();
+    if (!didLoadUsers.current) {
+      didLoadUsers.current = true;
+      loadUsers();
+    }
   }, []);
-  useEffect(() => {
-    setDisplayLimit(10);
-  }, [filter, roleFilter, statusFilter]);
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedFilter(filter), 200);
     return () => clearTimeout(timer);
@@ -316,39 +350,6 @@ export function Users() {
         {label}
       </button>
     );
-  };
-
-  const formatDate = (d: string) => {
-    if (!d) return '—';
-    return new Date(d).toLocaleDateString(toIntlLocale(loadLocale()), {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
-  const formatDateTime = (d: string) => {
-    if (!d) return t('users.time.never');
-    return new Date(d).toLocaleString(toIntlLocale(loadLocale()), {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const timeAgo = (d: string) => {
-    if (!d) return t('users.time.never');
-    const diff = Date.now() - new Date(d).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return t('users.time.justNow');
-    if (mins < 60) return t('users.time.minutesAgo', { n: String(mins) });
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return t('users.time.hoursAgo', { n: String(hours) });
-    const days = Math.floor(hours / 24);
-    if (days < 30) return t('users.time.daysAgo', { n: String(days) });
-    return formatDate(d);
   };
 
   let filtered = users;

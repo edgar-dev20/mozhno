@@ -71,7 +71,7 @@ export function Settings() {
 
   const [projectName, setProjectName] = useState('');
   const [projectDesc, setProjectDesc] = useState('');
-  const initialProjectRef = useRef<{ name: string; desc: string } | null>(null);
+  const [initialProject, setInitialProject] = useState<{ name: string; desc: string } | null>(null);
   const [savingProject, setSavingProject] = useState(false);
 
   const [expandedEnvIds, setExpandedEnvIds] = useState<Set<number>>(new Set());
@@ -97,11 +97,11 @@ export function Settings() {
 
   useEffect(() => {
     if (project) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProjectName(project.name);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProjectDesc(project.description ?? '');
-      if (!initialProjectRef.current) {
-        initialProjectRef.current = { name: project.name, desc: project.description ?? '' };
-      }
+      setInitialProject((prev) => prev ?? { name: project.name, desc: project.description ?? '' });
     }
   }, [project]);
 
@@ -170,7 +170,7 @@ export function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
-      initialProjectRef.current = { name: projectName, desc: projectDesc };
+      setInitialProject({ name: projectName, desc: projectDesc });
       window.dispatchEvent(new Event('project-updated'));
     },
     onError: (e: unknown) => {
@@ -180,10 +180,9 @@ export function Settings() {
   });
 
   const isProjectDirty = useMemo(() => {
-    const orig = initialProjectRef.current;
-    if (!orig || !project) return false;
-    return projectName !== orig.name || projectDesc !== orig.desc || !!pendingLogoFile;
-  }, [projectName, projectDesc, pendingLogoFile, project]);
+    if (!initialProject || !project) return false;
+    return projectName !== initialProject.name || projectDesc !== initialProject.desc || !!pendingLogoFile;
+  }, [projectName, projectDesc, pendingLogoFile, project, initialProject]);
 
   const saveProject = () => {
     if (!projectId) return;

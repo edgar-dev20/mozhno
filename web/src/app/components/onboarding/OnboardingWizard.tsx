@@ -63,11 +63,10 @@ export function OnboardingWizard({
 
   useEffect(() => {
     if (open) {
-      setStep(startStep);
       resetProject();
       resetFlag();
     }
-  }, [open, startStep]);
+  }, [open, resetProject, resetFlag]);
 
   const onCreateProject = useCallback(async () => {
     await handleCreateProject(onProjectCreated, () => setStep(1));

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api, FlagRequest, FlagTagValue, FlagResponse } from '@/api';
 import { queryKeys } from '@/api/queryKeys';
@@ -56,7 +56,7 @@ type SaveConfig =
   | { mode: 'environment'; data: EnvironmentSaveData };
 
 export function useFlagSave(deps: SaveDeps) {
-  const { projectId, environments, onSaveSuccess } = deps;
+  const { environments, onSaveSuccess } = deps;
   const queryClient = useQueryClient();
 
   const invalidateFlags = useCallback(
@@ -75,7 +75,9 @@ export function useFlagSave(deps: SaveDeps) {
   const [diffChanges, setDiffChanges] = useState<DiffChange[]>([]);
   const pendingConfig = useRef<SaveConfig | null>(null);
   const onSaveSuccessRef = useRef(onSaveSuccess);
-  onSaveSuccessRef.current = onSaveSuccess;
+  useEffect(() => {
+    onSaveSuccessRef.current = onSaveSuccess;
+  });
 
   const executeSaveImpl = useCallback(
     async (config: SaveConfig) => {
@@ -209,7 +211,7 @@ export function useFlagSave(deps: SaveDeps) {
         setSaving(false);
       }
     },
-    [projectId, environments, invalidateFlags, refetchFlags, queryClient],
+    [environments, invalidateFlags, refetchFlags, queryClient],
   );
 
   const save = useCallback(

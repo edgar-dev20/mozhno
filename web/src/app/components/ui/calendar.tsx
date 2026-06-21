@@ -205,9 +205,7 @@ function Calendar({
   const { locale } = useLocale();
   const months = locale === 'ru' ? MONTHS_RU : MONTHS_EN;
 
-  React.useEffect(() => {
-    if (monthProp) setInternalMonth(monthProp);
-  }, [monthProp]);
+  const effectiveMonth = monthProp ?? internalMonth;
 
   const handleMonthChange = React.useCallback(
     (d: Date) => {
@@ -222,7 +220,7 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      month={internalMonth}
+      month={effectiveMonth}
       onMonthChange={handleMonthChange}
       className={cn('p-4', className)}
       classNames={{
@@ -263,7 +261,7 @@ function Calendar({
       components={{
         MonthCaption: () => (
           <MonthYearCaption
-            month={internalMonth}
+            month={effectiveMonth}
             view={captionView}
             onViewChange={setCaptionView}
             onMonthChange={handleMonthChange}

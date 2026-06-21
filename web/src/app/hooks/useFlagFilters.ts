@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { FlagView } from '@/app/hooks/flagTypes';
 
 interface FilterCriteria {
@@ -75,18 +75,6 @@ export function useFlagFilters(flags: FlagView[], totalItems?: number) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [displayLimit, setDisplayLimit] = useState(10);
-
-  useEffect(() => {
-    setDisplayLimit(10);
-  }, [
-    searchQuery,
-    selectedTagTypeFilter,
-    selectedTagValueFilter,
-    dateFrom,
-    dateTo,
-    sortBy,
-    flagTypeFilter,
-  ]);
 
   const criteria: FilterCriteria = useMemo(
     () => ({

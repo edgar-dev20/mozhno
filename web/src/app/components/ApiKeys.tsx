@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useT } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import {
@@ -65,16 +65,8 @@ export function ApiKeys() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [formName, setFormName] = useState('');
-  const [formEnvId, setFormEnvId] = useState<number | null>(null);
+  const [formEnvId, setFormEnvId] = useState<number | null>(environments[0]?.id ?? null);
   const [formKeyType, setFormKeyType] = useState('SERVER');
-
-  useEffect(() => {
-    if (environments.length > 0 && !formEnvId) setFormEnvId(environments[0].id);
-  }, [environments, formEnvId]);
-
-  useEffect(() => {
-    setDisplayLimit(10);
-  }, [searchQuery, typeFilter, envFilter]);
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.apiKeys.delete(id),
@@ -173,9 +165,9 @@ export function ApiKeys() {
   const getKeyTypeLabel = (t: string) => (t === 'FRONTEND' ? 'Frontend' : 'Server');
   const getKeyTypeIcon = (t: string) => (t === 'FRONTEND' ? Globe : Server);
 
-  const formatDate = (d: string) =>
-    d ? new Date(d).toLocaleDateString(toIntlLocale(loadLocale())) : t('apiKeys.never');
-  const formatDateTime = (d: string) => {
+  const formatDate = useCallback((d: string) =>
+    d ? new Date(d).toLocaleDateString(toIntlLocale(loadLocale())) : t('apiKeys.never'), [t]);
+  const formatDateTime = useCallback((d: string) => {
     if (!d) return t('apiKeys.never');
     return new Date(d).toLocaleString(toIntlLocale(loadLocale()), {
       day: 'numeric',
@@ -184,9 +176,10 @@ export function ApiKeys() {
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
-  const timeAgo = (d: string) => {
+  }, [t]);
+  const timeAgo = useCallback((d: string) => {
     if (!d) return t('apiKeys.neverUsed');
+    // eslint-disable-next-line react-hooks/purity
     const diff = Date.now() - new Date(d).getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return t('users.time.justNow');
@@ -196,7 +189,7 @@ export function ApiKeys() {
     const days = Math.floor(hours / 24);
     if (days < 30) return t('users.time.daysAgo', { n: String(days) });
     return formatDate(d);
-  };
+  }, [t, formatDate]);
 
   let filtered = keys;
   if (typeFilter) filtered = filtered.filter((k) => k.keyType === typeFilter);
