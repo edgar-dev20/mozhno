@@ -103,6 +103,8 @@ class EnvironmentServiceTest {
 
     @Test
     void delete_shouldCallRepository() {
+        Environment env = new Environment();
+        when(environmentRepository.findById(1)).thenReturn(env);
         when(environmentRepository.deleteById(anyInt(), any())).thenReturn(1);
         environmentService.delete(1, null);
         verify(environmentRepository).deleteById(eq(1), any());

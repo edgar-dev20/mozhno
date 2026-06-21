@@ -37,16 +37,8 @@ class UserAuthenticationTest {
     }
 
     @Test
-    void shouldHandleEditorRole() {
-        UserAuthentication auth = new UserAuthentication(3, "editor@example.com", "Editor", "editor", "active", null);
-
-        assertEquals("editor", auth.getRole());
-        assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_EDITOR")));
-    }
-
-    @Test
     void shouldHandleDeveloperRole() {
-        UserAuthentication auth = new UserAuthentication(4, "dev@example.com", "Developer", "developer", "active", null);
+        UserAuthentication auth = new UserAuthentication(3, "dev@example.com", "Developer", "developer", "active", null);
 
         assertEquals("developer", auth.getRole());
         assertTrue(auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_DEVELOPER")));
@@ -54,7 +46,7 @@ class UserAuthenticationTest {
 
     @Test
     void shouldHandleSuspendedUser() {
-        UserAuthentication auth = new UserAuthentication(5, "suspended@example.com", "Suspended", "developer", "suspended", null);
+        UserAuthentication auth = new UserAuthentication(4, "suspended@example.com", "Suspended", "developer", "suspended", null);
 
         assertEquals("suspended", auth.getStatus());
     }

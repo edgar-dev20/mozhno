@@ -115,6 +115,23 @@ public class ClientFlagService {
                     }
                 }
 
+                if (s.getSegmentIds() != null) {
+                    for (Integer segId : s.getSegmentIds()) {
+                        List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(segId, Collections.emptyList());
+                        for (SegmentContextWithName sc : segContexts) {
+                            String fieldName = sc.getContextDefinitionName();
+                            String op = sc.getOperator() != null ? sc.getOperator() : Operator.IN.getValue();
+                            String ctxType = ContextType.fromValue(sc.getContextType()).getValue();
+                            String key = fieldName + "|" + op;
+                            ConstraintMerge merge = constraintsMerged.computeIfAbsent(key,
+                                k -> new ConstraintMerge(fieldName, op, ctxType));
+                            for (String val : FeatureFlagEvaluator.splitValues(sc.getContextValues())) {
+                                merge.values.add(val);
+                            }
+                        }
+                    }
+                }
+
                 if (s.getContextValuesJson() != null) {
                     List<FlagConstraintParser.StrategyConstraint> parsed = parseStrategyConstraints(s.getContextValuesJson());
                     for (FlagConstraintParser.StrategyConstraint sc : parsed) {

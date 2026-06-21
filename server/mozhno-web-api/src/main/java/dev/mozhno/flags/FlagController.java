@@ -115,7 +115,7 @@ public class FlagController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new flag")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     @Timed(value = "flags.create", description = "Time to create a flag")
     public FlagResponse create(@Valid @RequestBody FlagRequest request,
                                @AuthenticationPrincipal UserPrincipal user) {
@@ -126,7 +126,7 @@ public class FlagController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a flag")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     @Timed(value = "flags.update", description = "Time to update a flag")
     public FlagResponse update(@PathVariable Integer id,
                                @Valid @RequestBody FlagRequest request,
@@ -139,7 +139,7 @@ public class FlagController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a flag")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public void delete(@PathVariable Integer id,
                        @AuthenticationPrincipal UserPrincipal user) {
         flagService.delete(id, user.projectId());
@@ -147,7 +147,7 @@ public class FlagController {
 
     @PostMapping("/{id}/archive")
     @Operation(summary = "Archive a flag")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public FlagResponse archive(@PathVariable Integer id,
                                 @AuthenticationPrincipal UserPrincipal user) {
         Flag flag = flagService.archive(id, user.userId(), user.projectId());
@@ -156,7 +156,7 @@ public class FlagController {
 
     @PostMapping("/{id}/unarchive")
     @Operation(summary = "Unarchive a flag")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public FlagResponse unarchive(@PathVariable Integer id,
                                   @AuthenticationPrincipal UserPrincipal user) {
         Flag flag = flagService.unarchive(id, user.projectId());

@@ -16,8 +16,8 @@ public record UserUpdateRequest(
     @Schema(description = "New display name", nullable = true)
     String name,
 
-    @Pattern(regexp = "admin|developer|editor|viewer")
-    @Schema(description = "User role: admin, developer, editor, or viewer", nullable = true, example = "developer")
+    @Pattern(regexp = "admin|developer|viewer")
+    @Schema(description = "User role: admin, developer, or viewer", nullable = true, example = "developer")
     String role,
 
     @Pattern(regexp = "active|invited|suspended")

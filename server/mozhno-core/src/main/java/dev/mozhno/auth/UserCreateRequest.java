@@ -18,8 +18,8 @@ public record UserCreateRequest(
     @Schema(description = "Display name", nullable = true)
     String name,
 
-    @NotBlank @Pattern(regexp = "admin|developer|editor|viewer")
-    @Schema(description = "User role: admin, developer, editor, or viewer", example = "developer")
+    @NotBlank @Pattern(regexp = "admin|developer|viewer")
+    @Schema(description = "User role: admin, developer, or viewer", example = "developer")
     String role,
 
     @Pattern(regexp = "ru|en")

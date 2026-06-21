@@ -1,6 +1,6 @@
 # REST API Reference
 
-Complete reference for the можно REST API. All endpoints are prefixed with `/api`.
+Complete reference for the можно REST API. All management endpoints are prefixed with `/api/v1`; SDK client endpoints use `/api/client`.
 
 For interactive documentation, visit the Swagger UI at `/swagger-ui.html`. The OpenAPI 3.1 specification is available at `/v3/api-docs`.
 
@@ -9,10 +9,9 @@ For interactive documentation, visit the Swagger UI at `/swagger-ui.html`. The O
 Include your JWT or API key in the `Authorization` header for every request. See [API Overview](./overview.md#authentication) for details.
 
 ```bash
-# Environment variable used throughout this document
+# Environment variables used throughout this document
 export MOZHNO_URL="https://your-instance"
-export MOZHNO_TOKEN="X-Api-Key: <api-key>
-Authorization: Bearer <jwt-or-api-key>production_abc123"
+export MOZHNO_TOKEN="eyJhbGciOiJIUzI1NiIs..."   # JWT access token (or API key)
 ```
 
 ## Flags
@@ -47,7 +46,7 @@ curl "$MOZHNO_URL/api/v1/flags?state=ACTIVE&tags=team:checkout&page=0&size=10" \
       "key": "checkout_v2",
       "name": "Checkout Redesign v2",
       "description": "New checkout flow",
-      "type": "BOOLEAN",
+      "flagType": "RELEASE",
       "defaultValue": false,
       "state": "ACTIVE",
       "tags": ["team:checkout", "type:feature"],
@@ -89,8 +88,7 @@ POST /api/v1/flags
 | `key` | String | Yes | Unique identifier (immutable). Use `snake_case`. |
 | `name` | String | Yes | Human-readable name |
 | `description` | String | No | Flag purpose and behaviour details |
-| `type` | String | Yes | `BOOLEAN` or `STRING` |
-| `defaultValue` | Boolean/String | Yes | Value returned when no rules match |
+| `flagType` | String | Yes | `RELEASE` or `KILLSWITCH` |
 | `tags` | String[] | No | List of tags for organisation |
 
 ```bash
@@ -101,7 +99,7 @@ curl -X POST "$MOZHNO_URL/api/v1/flags" \
     "key": "checkout_v2",
     "name": "Checkout Redesign v2",
     "description": "New checkout flow with one-click purchase",
-    "type": "BOOLEAN",
+    "flagType": "RELEASE",
     "defaultValue": false,
     "tags": ["team:checkout", "type:feature"]
   }'
@@ -124,7 +122,7 @@ curl -X PUT "$MOZHNO_URL/api/v1/flags/checkout_v2" \
   -d '{
     "name": "Checkout Redesign v2",
     "description": "Updated description",
-    "type": "BOOLEAN",
+    "flagType": "RELEASE",
     "defaultValue": false,
     "state": "ACTIVE",
     "tags": ["team:checkout", "type:feature"],
@@ -136,7 +134,7 @@ curl -X PUT "$MOZHNO_URL/api/v1/flags/checkout_v2" \
         "conditions": [
           {
             "attribute": "country",
-            "operator": "EQUALS",
+            "operator": "eq",
             "value": "DE"
           }
         ],
@@ -227,12 +225,12 @@ Targeting rules are an ordered array. The first rule whose conditions all match 
       "conditions": [
         {
           "attribute": "country",
-          "operator": "EQUALS",
+          "operator": "eq",
           "value": "DE"
         },
         {
           "attribute": "plan",
-          "operator": "IN",
+          "operator": "in",
           "values": ["pro", "enterprise"]
         }
       ],
@@ -243,7 +241,7 @@ Targeting rules are an ordered array. The first rule whose conditions all match 
       "conditions": [
         {
           "attribute": "beta",
-          "operator": "EQUALS",
+          "operator": "eq",
           "value": "true"
         }
       ],
@@ -253,7 +251,7 @@ Targeting rules are an ordered array. The first rule whose conditions all match 
 }
 ```
 
-**Condition Operators:** `EQUALS`, `NOT_EQUALS`, `CONTAINS`, `NOT_CONTAINS`, `IN`, `NOT_IN`, `REGEX`, `GREATER_THAN`, `LESS_THAN`, `GREATER_THAN_OR_EQUAL`, `LESS_THAN_OR_EQUAL`, `EXISTS`, `NOT_EXISTS`, `IN_SEGMENT`
+**Condition Operators:** `in`, `not_in`, `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `contains`. `in` / `not_in` accept multiple comma-separated values; all other operators are single-value.
 
 ## Segments
 
@@ -284,7 +282,7 @@ curl -X POST "$MOZHNO_URL/api/v1/segments" \
     "conditions": [
       {
         "attribute": "beta",
-        "operator": "EQUALS",
+        "operator": "eq",
         "value": "true"
       }
     ]
@@ -398,16 +396,15 @@ curl -X POST "$MOZHNO_URL/api/v1/api-keys" \
 {
   "id": "key-001",
   "name": "Production SDK",
-  "key": "X-Api-Key: <api-key>
-Authorization: Bearer <jwt-or-api-key>production_x1y2z3a4b5c6d7e8f9",
+  "apiKey": "sk-abc123def456...",
+  "keyType": "SERVER",
   "environmentId": "env-001",
   "scopes": ["flags:read", "segments:read"],
   "createdAt": "2026-06-21T10:00:00Z"
 }
 ```
 
-> **Warning:** The full API key value (`X-Api-Key: <api-key>
-Authorization: Bearer <jwt-or-api-key>...`) is returned **only once** at creation time. Store it securely — it cannot be retrieved later.
+> **Warning:** The full API key value (`apiKey`) is returned **only once** at creation time. Store it securely — it cannot be retrieved later.
 
 ### Revoke an API Key
 
@@ -461,61 +458,61 @@ curl "$MOZHNO_URL/api/v1/audit/export?resourceType=FLAG&from=2026-06-01T00:00:00
   -o audit_june_2026.csv
 ```
 
-## SDK Rules Endpoint
+## SDK Client Endpoint
 
 Used internally by SDKs to fetch flag rules for local evaluation:
 
 ```bash
-GET /api/v1/sdk/rules
+GET /api/client/features
 ```
 
 ```bash
-curl "$MOZHNO_URL/api/v1/sdk/rules" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
+curl "$MOZHNO_URL/api/client/features" \
+  -H "X-Api-Key: sk-abc123def456..."
 ```
 
-This endpoint returns all flags and segments for the environment associated with the API key. SDKs call this on initialisation and during background polling.
+This endpoint returns all flags and segments for the environment associated with the API key. SDKs call this on initialisation and during background polling. Pass `?since={version}` to fetch only delta updates.
 
-## Webhooks
+## Integrations
 
-### List Webhooks
+### List Integrations
 
 ```bash
-GET /api/v1/webhooks
+GET /api/v1/integrations
 ```
 
-### Create a Webhook
+### Create an Integration
 
 ```bash
-POST /api/v1/webhooks
+POST /api/v1/integrations
 ```
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/v1/webhooks" \
+curl -X POST "$MOZHNO_URL/api/v1/integrations" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://your-service.example.com/webhooks/mozhno",
+    "url": "https://your-service.example.com/integrations/mozhno",
     "secret": "whsec_your_shared_secret",
     "events": ["flag.updated", "flag.archived", "audit.entry.created"],
     "active": true
   }'
 ```
 
-### Delete a Webhook
+### Delete an Integration
 
 ```bash
-DELETE /api/v1/webhooks/{webhookId}
+DELETE /api/v1/integrations/{id}
 ```
 
 ## Health Check
 
 ```bash
-GET /api/v1/health
+GET /actuator/health
 ```
 
 ```bash
-curl "$MOZHNO_URL/api/v1/health"
+curl "$MOZHNO_URL/actuator/health"
 ```
 
 **Response:**
@@ -542,7 +539,7 @@ curl -X POST "$MOZHNO_URL/api/v1/flags" \
   -d '{
     "key": "dark_mode_v2",
     "name": "Dark Mode v2",
-    "type": "BOOLEAN",
+    "flagType": "RELEASE",
     "defaultValue": false,
     "tags": ["team:ui", "type:feature"]
   }'
@@ -557,7 +554,7 @@ curl -X PATCH "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
       {
         "priority": 1,
         "conditions": [
-          {"attribute": "email", "operator": "CONTAINS", "value": "@company.com"}
+          {"attribute": "email", "operator": "contains", "value": "@company.com"}
         ],
         "targetValue": true
       }
@@ -588,7 +585,7 @@ curl -X PUT "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Dark Mode v2",
-    "type": "BOOLEAN",
+    "flagType": "RELEASE",
     "defaultValue": true,
     "state": "ACTIVE",
     "tags": ["team:ui", "type:feature"],
@@ -625,5 +622,5 @@ done
 ## Next Steps
 
 - [API Overview](./overview.md) — Authentication, rate limiting, and base URL structure.
-- [Webhooks](../guide/integrations.md) — Push-based event notifications.
+- [integrations](../guide/integrations.md) — Push-based event notifications.
 - [SDK Overview](../sdk/overview.md) — How SDKs consume the REST API.

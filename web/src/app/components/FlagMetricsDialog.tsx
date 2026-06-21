@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { BarChart3, X, Server } from '@/shared/icons';
 import * as Dialog from '@radix-ui/react-dialog';
 import {
@@ -79,6 +79,24 @@ export function FlagMetricsDialog({
   const [hasEverLoaded, setHasEverLoaded] = useState(false);
   const [filterAppName, setFilterAppName] = useState<string | null>(null);
   const [filterInstanceId, setFilterInstanceId] = useState<number | null>(null);
+
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [chartDims, setChartDims] = useState({ width: 300, height: 200 });
+  useEffect(() => {
+    const el = chartRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      if (entry) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          setChartDims({ width, height });
+        }
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open, chartReady]);
+
   const loadTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const projectId = environments[0]?.projectId ?? 0;
@@ -350,14 +368,72 @@ export function FlagMetricsDialog({
                 </div>
               </div>
 
-              <div className="flex-1 min-h-0 relative">
+              <div className="flex-1 min-h-[100px] relative">
+                <div
+                  ref={chartRef}
+                  className={`h-full transition-opacity duration-300 ${!chartReady && !hasEverLoaded ? 'invisible' : loading ? 'opacity-50' : 'opacity-100'}`}
+                >
+                  {loading && (
+                    <div className="absolute top-2 right-2 z-10">
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-sparkline-true/30 border-t-sparkline-true" />
+                    </div>
+                  )}
+                  <BarChart width={chartDims.width} height={chartDims.height} data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }} barCategoryGap="12%" maxBarSize={20}>
+                    <CartesianGrid
+                      strokeDasharray="4 4"
+                      stroke="var(--color-border)"
+                      strokeOpacity={0.06}
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="time"
+                      tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }}
+                      interval={Math.max(0, Math.floor(chartData.length / 4))}
+                      height={30}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }}
+                      allowDecimals={false}
+                      width={40}
+                    />
+                    <Tooltip
+                      cursor={{
+                        stroke: 'var(--color-sparkline-false)',
+                        strokeWidth: 1,
+                        strokeOpacity: 0.25,
+                      }}
+                      contentStyle={{
+                        backgroundColor: 'var(--color-popover)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: '12px',
+                        color: 'var(--color-popover-foreground)',
+                        boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+                        fontSize: '12px',
+                        padding: '10px 14px',
+                      }}
+                    />
+                    <Bar
+                      dataKey="falseCount"
+                      stackId="a"
+                      fill="var(--sparkline-false)"
+                      name="false"
+                    />
+                    <Bar
+                      dataKey="trueCount"
+                      stackId="a"
+                      fill="var(--sparkline-true)"
+                      name="true"
+                      radius={[3, 3, 0, 0]}
+                    />
+                  </BarChart>
+                </div>
                 {!chartReady && !hasEverLoaded ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
                     <div className="animate-spin rounded-full h-8 w-8 border-[3px] border-sparkline-true/30 border-t-sparkline-true" />
                     <span className="text-xs text-muted-foreground/40">{t('common.loading')}</span>
                   </div>
                 ) : totalTrue === 0 && totalFalse === 0 ? (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 bg-card">
                     <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-muted">
                       <BarChart3 size={28} className="text-muted-foreground/30" />
                     </div>
@@ -365,67 +441,7 @@ export function FlagMetricsDialog({
                       {t('flags.metrics.noData')}
                     </span>
                   </div>
-                ) : (
-                  <div
-                    className={`absolute inset-0 transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}
-                  >
-                    {loading && (
-                      <div className="absolute top-2 right-2 z-10">
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-sparkline-true/30 border-t-sparkline-true" />
-                      </div>
-                    )}
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }} barCategoryGap="12%" maxBarSize={20}>
-                        <CartesianGrid
-                          strokeDasharray="4 4"
-                          stroke="var(--color-border)"
-                          strokeOpacity={0.06}
-                          vertical={false}
-                        />
-                        <XAxis
-                          dataKey="time"
-                          tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }}
-                          interval={Math.max(0, Math.floor(chartData.length / 4))}
-                          height={30}
-                        />
-                        <YAxis
-                          tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }}
-                          allowDecimals={false}
-                          width={40}
-                        />
-                        <Tooltip
-                          cursor={{
-                            stroke: 'var(--color-sparkline-false)',
-                            strokeWidth: 1,
-                            strokeOpacity: 0.25,
-                          }}
-                          contentStyle={{
-                            backgroundColor: 'var(--color-popover)',
-                            border: '1px solid var(--color-border)',
-                            borderRadius: '12px',
-                            color: 'var(--color-popover-foreground)',
-                            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
-                            fontSize: '12px',
-                            padding: '10px 14px',
-                          }}
-                        />
-                        <Bar
-                          dataKey="falseCount"
-                          stackId="a"
-                          fill="var(--sparkline-false)"
-                          name="false"
-                        />
-                        <Bar
-                          dataKey="trueCount"
-                          stackId="a"
-                          fill="var(--sparkline-true)"
-                          name="true"
-                          radius={[3, 3, 0, 0]}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
+                ) : null}
               </div>
             </div>
 

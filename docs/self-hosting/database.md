@@ -29,13 +29,12 @@ GRANT ALL PRIVILEGES ON DATABASE feature_flags TO flags_user;
 
 ```
 db/migration/
-├── V1__init_schema.sql
+├── V1__initial_schema.sql
 ├── V2__add_segments.sql
-├── V3__add_strategies.sql
-├── V4__add_audit_log.sql
-├── V5__add_api_keys.sql
-├── V6__add_refresh_tokens.sql
-└── V7__add_plugin_registry.sql
+├── V3__add_api_keys.sql
+├── V4__add_last_used_at_to_api_keys.sql
+├── ...
+└── V44__add_context_strict.sql
 ```
 
 ### Соглашение об именовании
@@ -83,16 +82,10 @@ Flyway ведёт таблицу `flyway_schema_history` для отслежив
 Если `SPRING_FLYWAY_ENABLED=false`, запустите миграции вручную:
 
 ```bash
-java -jar mozhno-app.jar --spring.flyway.enabled=true --spring.flyway.migrate=true
-```
-
-Или через Maven-плагин:
+Миграции Flyway выполняются **автоматически при старте** Spring Boot (через `spring.flyway.enabled=true`). При необходимости можно запустить вручную:
 
 ```bash
-./mvnw flyway:migrate -pl mozhno-app \
-  -Dflyway.url=jdbc:postgresql://localhost:5432/feature_flags \
-  -Dflyway.user=flags_user \
-  -Dflyway.password=flags_password
+java -jar mozhno-app.jar --spring.flyway.enabled=true --spring.flyway.migrate=true
 ```
 
 ### Повторяемые миграции
@@ -111,8 +104,8 @@ R__refresh_materialized_view.sql
 
 | Переменная | По умолчанию | Продакшен | Описание |
 |------------|-------------|-----------|----------|
-| `HIKARI_MAXIMUM_POOL_SIZE` | `10` | `30` | Максимальное число соединений |
-| `HIKARI_MINIMUM_IDLE` | `5` | `5` | Минимальное число простаивающих соединений |
+| `HIKARI_MAX_POOL_SIZE` | `10` | `30` | Максимальное число соединений |
+| `HIKARI_MIN_IDLE` | `5` | `5` | Минимальное число простаивающих соединений |
 | `HIKARI_CONNECTION_TIMEOUT` | `30000` | `30000` | Таймаут получения соединения (мс) |
 | `HIKARI_IDLE_TIMEOUT` | `600000` | `600000` | Таймаут бездействия (мс) |
 | `HIKARI_MAX_LIFETIME` | `1800000` | `1800000` | Макс. время жизни соединения (мс) |
@@ -303,7 +296,7 @@ U8__drop_column_priority.sql
 Примените undo-миграцию вручную:
 
 ```bash
-./mvnw flyway:undo -pl mozhno-app
+./gradlew :mozhno-app:flywayUndo
 ```
 
 ### Стратегия 2: Repair
@@ -311,7 +304,7 @@ U8__drop_column_priority.sql
 Если миграция находится в процессе (в статусе `pending` или `failed`), исправьте её вручную и выполните repair:
 
 ```bash
-./mvnw flyway:repair -pl mozhno-app
+./gradlew :mozhno-app:flywayRepair
 ```
 
 ### Стратегия 3: Ручной откат через SQL

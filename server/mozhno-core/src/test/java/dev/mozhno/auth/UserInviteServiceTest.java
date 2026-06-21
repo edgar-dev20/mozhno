@@ -62,7 +62,7 @@ class UserInviteServiceTest {
         when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> userInviteService.inviteUser(
-            createRequest("existing@example.com", "editor"), 1))
+            createRequest("existing@example.com", "developer"), 1))
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("already exists");
     }
@@ -73,7 +73,7 @@ class UserInviteServiceTest {
         when(quotaSpi.canCreateUser(null)).thenReturn(new QuotaSpi.Blocked("users", 10, 10, "Free"));
 
         assertThatThrownBy(() -> userInviteService.inviteUser(
-            createRequest("new@example.com", "editor"), 1))
+            createRequest("new@example.com", "developer"), 1))
             .isInstanceOf(dev.mozhno.exception.QuotaExceededException.class)
             .hasMessageContaining("limit reached");
     }
@@ -209,7 +209,7 @@ class UserInviteServiceTest {
         InviteToken token = new InviteToken();
         token.setId(10);
         token.setEmail("newuser@example.com");
-        token.setRole("editor");
+        token.setRole("developer");
         token.setLocale("en");
         token.setExpiresAt(Instant.now().plus(6, java.time.temporal.ChronoUnit.DAYS));
 
@@ -226,7 +226,7 @@ class UserInviteServiceTest {
 
         assertThat(result.email()).isEqualTo("newuser@example.com");
         assertThat(result.name()).isEqualTo("John Doe");
-        assertThat(result.role()).isEqualTo("editor");
+        assertThat(result.role()).isEqualTo("developer");
         assertThat(result.status()).isEqualTo("active");
         assertThat(result.locale()).isEqualTo("en");
 
@@ -236,7 +236,7 @@ class UserInviteServiceTest {
         assertThat(saved.getEmail()).isEqualTo("newuser@example.com");
         assertThat(saved.getPasswordHash()).isEqualTo("hashed-pw");
         assertThat(saved.getName()).isEqualTo("John Doe");
-        assertThat(saved.getRole()).isEqualTo("editor");
+        assertThat(saved.getRole()).isEqualTo("developer");
         assertThat(saved.getStatus()).isEqualTo("active");
         assertThat(saved.getLocale()).isEqualTo("en");
 

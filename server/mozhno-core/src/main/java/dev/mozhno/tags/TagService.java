@@ -102,7 +102,12 @@ public class TagService {
      */
     @Transactional
     public void delete(Integer id, Integer projectId) {
-        Tag tag = tagRepository.findByIdAndProjectId(id, projectId);
+        Tag tag;
+        if (projectId != null) {
+            tag = tagRepository.findByIdAndProjectId(id, projectId);
+        } else {
+            tag = tagRepository.findById(id);
+        }
         if (tag == null) throw new NotFoundException("Tag", id);
         int deleted = tagRepository.deleteById(id, projectId);
         if (deleted == 0) throw new NotFoundException("Tag", id);

@@ -1,14 +1,14 @@
 # Database
 
-**можно.** uses PostgreSQL 16+ for all persistent storage: flags, strategies, segments, users, audit logs, and API keys. This page covers setup, connection pooling, migrations, backups, and performance.
+**можно.** uses PostgreSQL 15+ for all persistent storage: flags, strategies, segments, users, audit logs, and API keys. This page covers setup, connection pooling, migrations, backups, and performance.
 
 ## Configuration
 
 Database connection is configured via environment variables:
 
 ```bash
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/mozhno
-SPRING_DATASOURCE_USERNAME=mozhno
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/feature_flags
+SPRING_DATASOURCE_USERNAME=flags_user
 SPRING_DATASOURCE_PASSWORD=your-password
 ```
 
@@ -41,9 +41,11 @@ Migrations are embedded in the server JAR at `classpath:db/migration/` and follo
 
 ```
 V1__initial_schema.sql
-V2__add_audit_log.sql
-V3__add_segment_overrides.sql
+V2__add_segments.sql
+V3__add_api_keys.sql
+V4__add_last_used_at_to_api_keys.sql
 ...
+V44__add_context_strict.sql
 ```
 
 ### Migration Commands
@@ -130,8 +132,8 @@ Reduce `maximum-pool-size` as replica count grows to avoid exhausting PostgreSQL
 For Kubernetes deployments, set the pool size via environment variable:
 
 ```bash
-HIKARI_MAXIMUM_POOL_SIZE=30
-HIKARI_MINIMUM_IDLE=5
+HIKARI_MAX_POOL_SIZE=30
+HIKARI_MIN_IDLE=5
 ```
 
 ## Backup Strategies
@@ -225,15 +227,9 @@ ORDER BY installed_rank DESC
 LIMIT 5;
 ```
 
-### Compatibility Matrix
+### Compatibility
 
-| Server Version | Minimum DB Schema Version |
-|---------------|--------------------------|
-| 1.0.x | V1 |
-| 1.1.x | V3 |
-| 1.2.x | V5 |
-
-Flyway ensures that your database schema matches the server version. The server will not start if a required migration is missing or has been tampered with.
+The server expects all Flyway migrations up to the version it ships with to be applied. Flyway ensures that your database schema matches the server version — the server will not start if a required migration is missing or has been tampered with.
 
 ## Index Recommendations
 

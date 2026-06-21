@@ -124,7 +124,12 @@ public class EnvironmentService {
      */
     @Transactional
     public void delete(Integer id, Integer projectId) {
-        Environment env = environmentRepository.findByIdAndProjectId(id, projectId);
+        Environment env;
+        if (projectId != null) {
+            env = environmentRepository.findByIdAndProjectId(id, projectId);
+        } else {
+            env = environmentRepository.findById(id);
+        }
         if (env == null) throw new NotFoundException("Environment", id);
         int deleted = environmentRepository.deleteById(id, projectId);
         if (deleted == 0) throw new NotFoundException("Environment", id);

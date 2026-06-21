@@ -21,7 +21,7 @@ class PasswordResetTokenRepositoryTest extends BaseIntegrationTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate.update("INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?) ON CONFLICT DO NOTHING",
-            "pwdreset-test@test.com", "$2a$10$hash", "editor", "active");
+            "pwdreset-test@test.com", "$2a$10$hash", "developer", "active");
         userId = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = ?", Integer.class,
             "pwdreset-test@test.com");
     }

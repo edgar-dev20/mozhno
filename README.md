@@ -41,7 +41,7 @@ Run: cd web && npm run storybook
 ### Скриншоты
 
 | Flags | Flag detail | Settings |
-|---|---|---|---|
+|---|---|---|
 | ![Flags](web/storybook-static/screenshots/flags.svg) | ![Flag](web/storybook-static/screenshots/flag-detail.svg) | ![Settings](web/storybook-static/screenshots/settings.svg) |
 
 > Запустите проект локально (`make dev`) чтобы увидеть интерфейс.
@@ -103,12 +103,18 @@ docker compose up -d
 
 **Java**
 ```java
-var client = MozhnoClient.builder()
-    .serverUrl("https://flags.example.com")
+var config = MozhnoConfig.builder()
+    .appName("my-app")
+    .instanceId("instance-1")
+    .mozhnoUrl("https://flags.example.com")
     .apiKey("env-abc123")
     .build();
 
-boolean on = client.isFlagEnabled("new-checkout", ctx);
+var client = new DefaultMozhnoClient(config);
+client.start();
+
+var ctx = MozhnoContext.builder().userId("42").build();
+boolean on = client.isEnabled("new-checkout", ctx);
 ```
 
 **JavaScript / TypeScript**
@@ -116,11 +122,13 @@ boolean on = client.isFlagEnabled("new-checkout", ctx);
 import { MozhnoClient } from '@mozhno/client-js';
 
 const client = new MozhnoClient({
-  serverUrl: 'https://flags.example.com',
+  url: 'https://flags.example.com',
   apiKey: 'env-abc123',
+  appName: 'my-app',
 });
+await client.start();
 
-const on = await client.isEnabled('new-checkout', { userId: '42' });
+const on = client.isEnabled('new-checkout', { userId: '42' });
 ```
 
 ---
@@ -146,7 +154,7 @@ Swagger UI — [`http://localhost:8080/swagger-ui.html`](http://localhost:8080/s
 
 ### Разработка
 
-**Требования:** JDK 25, Node.js 24, PostgreSQL 15+.
+**Требования:** JDK 25 (сервер), JDK 17+ (SDK), Node.js 24, PostgreSQL 15+.
 
 ```bash
 docker compose up -d postgres

@@ -166,7 +166,7 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-    LOGIN[POST /api/auth/login]
+    LOGIN[POST /api/v1/auth/login]
 
     GITHUB[GitHub OIDC Provider<br/>priority=10<br/>Enterprise]
     AZURE[Azure AD Provider<br/>priority=20<br/>Enterprise]

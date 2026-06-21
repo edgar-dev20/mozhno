@@ -188,7 +188,7 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant JWT as JwtTokenProvider
 
-    Client->>Server: POST /api/auth/login<br/>{email, password}
+    Client->>Server: POST /api/v1/auth/login<br/>{email, password}
     Server->>Server: Проверка учётных данных
     Server->>JWT: generateAccessToken(user)
     JWT->>JWT: Подпись HMAC-SHA256
@@ -209,7 +209,7 @@ sequenceDiagram
     participant Provider as JwtTokenProvider
     participant Controller as REST Controller
 
-    Client->>Filter: GET /api/flags<br/>Authorization: Bearer <access_token>
+    Client->>Filter: GET /api/v1/flags<br/>Authorization: Bearer <access_token>
     Filter->>Provider: validateToken(access_token)
     Provider->>Provider: Проверка подписи HMAC-SHA256
     Provider->>Provider: Проверка срока действия
@@ -227,7 +227,7 @@ sequenceDiagram
     participant Server
     participant DB
 
-    Client->>Server: POST /api/auth/refresh<br/>{ refresh_token }
+    Client->>Server: POST /api/v1/auth/refresh<br/>{ refresh_token }
     Server->>Server: Хеширование refresh_token
     Server->>DB: SELECT * FROM refresh_tokens<br/>WHERE token_hash = ?<br/>FOR UPDATE
     DB-->>Server: токен найден

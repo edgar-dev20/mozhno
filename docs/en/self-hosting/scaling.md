@@ -123,8 +123,8 @@ pool_size = min(30, floor(max_connections / instances) - 2)
 Set via environment variable:
 
 ```bash
-HIKARI_MAXIMUM_POOL_SIZE=15
-HIKARI_MINIMUM_IDLE=3
+HIKARI_MAX_POOL_SIZE=15
+HIKARI_MIN_IDLE=3
 ```
 
 ## Performance Characteristics
@@ -145,10 +145,10 @@ Benchmarks on a 2 vCPU / 2 GB instance, PostgreSQL on the same network:
 
 | Endpoint | Requests/sec |
 |----------|-------------|
-| `GET /api/sdk/flags` (100 flags) | ~8,000 |
-| `GET /api/flags` (dashboard) | ~2,000 |
-| `POST /api/flags` (create) | ~500 |
-| `POST /api/auth/login` | ~1,000 |
+| `GET /api/client/features` (100 flags) | ~8,000 |
+| `GET /api/v1/flags` (dashboard) | ~2,000 |
+| `POST /api/v1/flags` (create) | ~500 |
+| `POST /api/v1/auth/login` | ~1,000 |
 
 Linear scaling: 4 instances ≈ 4× throughput (bottleneck shifts to PostgreSQL at high instance counts).
 

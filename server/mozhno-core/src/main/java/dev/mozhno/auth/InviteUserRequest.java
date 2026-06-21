@@ -11,8 +11,8 @@ public record InviteUserRequest(
     @Schema(description = "Email address of the user to invite", example = "user@example.com")
     String email,
 
-    @NotBlank @Pattern(regexp = "admin|developer|editor|viewer")
-    @Schema(description = "User role: admin, developer, editor, or viewer", example = "developer")
+    @NotBlank @Pattern(regexp = "admin|developer|viewer")
+    @Schema(description = "User role: admin, developer, or viewer", example = "developer")
     String role,
 
     @Schema(description = "Display name of the invited user", nullable = true)

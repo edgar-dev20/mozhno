@@ -57,29 +57,28 @@
 
 ## Модель разрешений (Permission Model)
 
-**можно.** использует ролевую модель доступа:
+**можно.** использует ролевую модель доступа с иерархией `ADMIN` → `DEVELOPER` → `VIEWER` (каждая роль включает права нижестоящих):
 
 | Действие | Admin | Developer | Viewer |
 |----------|-------|-----------|--------|
 | Просмотр флагов и сегментов | ✅ | ✅ | ✅ |
+| Просмотр и экспорт аудит-лога | ✅ | ✅ | ✅ |
 | Создание флагов | ✅ | ✅ | ❌ |
-| Изменение стратегий на dev/staging | ✅ | ✅ | ❌ |
-| Изменение стратегий на production | ✅ | ⚠️ * | ❌ |
-| Удаление флагов | ✅ | ❌ | ❌ |
+| Изменение стратегий и таргетинга | ✅ | ✅ | ❌ |
 | Архивация флагов | ✅ | ✅ | ❌ |
+| Управление сегментами | ✅ | ✅ | ❌ |
+| Удаление флагов | ✅ | ✅ | ❌ |
+| Управление окружениями | ✅ | ❌ | ❌ |
 | Управление API-ключами | ✅ | ❌ | ❌ |
 | Управление пользователями | ✅ | ❌ | ❌ |
-| Управление вебхуками | ✅ | ❌ | ❌ |
-| Экспорт аудит-лога | ✅ | ❌ | ❌ |
-
-*\* — настраивается: можно разрешить Developer изменять production-стратегии или ограничить только Admin.*
+| Управление интеграциями (вебхуками) | ✅ | ❌ | ❌ |
 
 ### Рекомендации по ролям
 
 | Принцип | Описание |
 |---------|----------|
-| **Принцип наименьших привилегий** | Developer не должен иметь доступ к удалению флагов и управлению ключами |
-| **Production — только Admin** | По умолчанию изменения на production только через Admin |
+| **Принцип наименьших привилегий** | Developer не имеет доступа к управлению ключами, пользователями и окружениями |
+| **Управление инфраструктурой — только Admin** | API-ключи, пользователи, окружения и интеграции доступны только роли Admin |
 | **Viewer для сторонних** | Аудиторы, менеджеры продукта — только просмотр |
 | **Регулярный аудит** | Раз в квартал проверяйте список пользователей и их роли |
 
@@ -164,8 +163,8 @@ jobs:
 ```java
 @Test
 void testNewCheckoutFlow() {
-    var ctx = new EvaluationContext().set("userId", "test-user");
-    when(client.isFlagEnabled("new-checkout", ctx)).thenReturn(true);
+    var ctx = MozhnoContext.builder().userId("test-user").build();
+    when(client.isEnabled("new-checkout", ctx)).thenReturn(true);
 
     var result = checkoutService.process(order, ctx);
 
@@ -174,8 +173,8 @@ void testNewCheckoutFlow() {
 
 @Test
 void testOldCheckoutFlow() {
-    var ctx = new EvaluationContext().set("userId", "test-user");
-    when(client.isFlagEnabled("new-checkout", ctx)).thenReturn(false);
+    var ctx = MozhnoContext.builder().userId("test-user").build();
+    when(client.isEnabled("new-checkout", ctx)).thenReturn(false);
 
     var result = checkoutService.process(order, ctx);
 
@@ -184,15 +183,15 @@ void testOldCheckoutFlow() {
 ```
 
 ```typescript
-test('new checkout flow', async () => {
-  jest.spyOn(client, 'isEnabled').mockResolvedValue(true);
-  const result = await checkoutService.process(order, { userId: 'test-user' });
+test('new checkout flow', () => {
+  jest.spyOn(client, 'isEnabled').mockReturnValue(true);
+  const result = checkoutService.process(order, { userId: 'test-user' });
   expect(result.flow).toBe('new');
 });
 
-test('old checkout flow', async () => {
-  jest.spyOn(client, 'isEnabled').mockResolvedValue(false);
-  const result = await checkoutService.process(order, { userId: 'test-user' });
+test('old checkout flow', () => {
+  jest.spyOn(client, 'isEnabled').mockReturnValue(false);
+  const result = checkoutService.process(order, { userId: 'test-user' });
   expect(result.flow).toBe('old');
 });
 ```
@@ -213,8 +212,8 @@ class CheckoutIntegrationTest {
 
     @Test
     void testWithRealFlagEvaluation() {
-        var ctx = new EvaluationContext().set("userId", "test-user");
-        boolean enabled = client.isFlagEnabled("new-checkout", ctx);
+        var ctx = MozhnoContext.builder().userId("test-user").build();
+        boolean enabled = client.isEnabled("new-checkout", ctx);
         // Поведение зависит от конфигурации флага в тестовом окружении
     }
 }
@@ -236,7 +235,7 @@ class CheckoutIntegrationTest {
 
 ```java
 // application-test.properties
-mozhno.server-url=http://localhost:8080
+mozhno.url=http://localhost:8080
 mozhno.api-key=test-env-api-key
 ```
 
@@ -276,13 +275,13 @@ pie title Распределение флагов по стадиям
 | **Флаг как конфиг** | `if (flag) timeout = 30 else timeout = 60` | Использовать настоящий конфиг, не фиче-флаг |
 | **Вечные флаги** | Флаг существует 6+ месяцев | Запланировать удаление или пометить как перманентный |
 | **Флаги без владельца** | Никто не отвечает за очистку | Назначить ответственного в описании флага |
-| **Копипаста контекста** | Дублирование `new EvaluationContext().set(...)` | Вынести в фабричный метод или middleware |
+| **Копипаста контекста** | Дублирование `MozhnoContext.builder()...` | Вынести в фабричный метод или middleware |
 
 ### Здоровые паттерны
 
 | Паттерн | Пример |
 |---------|--------|
-| **Фабрика контекста** | `ContextFactory.forUser(user)` — создаёт контекст с нужными атрибутами |
+| **Фабрика контекста** | `MozhnoContextFactory.forUser(user)` — создаёт контекст с нужными атрибутами |
 | **Middleware для контекста** | Перехватчик HTTP-запросов, автоматически добавляющий атрибуты в контекст |
 | **Feature Wrapper** | `featureService.executeIfEnabled("flag", ctx, () -> newCode())` — обёртка, убирающая повторяющийся `if` |
 | **Флаги как dependency** | Инжектить `MozhnoClient` как бин, а не создавать в каждом методе |

@@ -14,7 +14,7 @@ public record UserDto(
     String email,
     @Schema(description = "Display name")
     String name,
-    @Schema(description = "User role: ADMIN, DEVELOPER, EDITOR, or VIEWER", example = "DEVELOPER")
+    @Schema(description = "User role: ADMIN, DEVELOPER, or VIEWER", example = "DEVELOPER")
     String role,
     @Schema(description = "Account status: ACTIVE, PENDING, or DISABLED", example = "ACTIVE")
     String status,

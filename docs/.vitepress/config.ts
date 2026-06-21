@@ -46,6 +46,7 @@ const ruAdvancedSidebar = [
   { text: 'Архитектура', link: '/advanced/architecture' },
   { text: 'Open Core модель', link: '/advanced/open-core' },
   { text: 'Миграция', link: '/advanced/migration' },
+  { text: 'ADR', link: '/adr/0001-use-jdbc-template-over-jpa' },
 ]
 
 const enGuideSidebar = [
@@ -145,6 +146,11 @@ export default defineConfig({
           '/api/': [{ text: 'API', items: ruApiSidebar }],
           '/self-hosting/': [{ text: 'Self-hosting', items: ruSelfHostingSidebar }],
           '/advanced/': [{ text: 'Advanced', items: ruAdvancedSidebar }],
+          '/adr/': [{ text: 'ADR', items: [
+            { text: '0001 — JDBC Template', link: '/adr/0001-use-jdbc-template-over-jpa' },
+            { text: '0002 — SPI Open Core', link: '/adr/0002-use-spi-for-open-core' },
+            { text: '0003 — JWT over Sessions', link: '/adr/0003-use-jwt-over-sessions' },
+          ]}],
         },
 
         outline: { label: 'На странице' },
@@ -191,6 +197,11 @@ export default defineConfig({
           '/en/api/': [{ text: 'API', items: enApiSidebar }],
           '/en/self-hosting/': [{ text: 'Self-hosting', items: enSelfHostingSidebar }],
           '/en/advanced/': [{ text: 'Advanced', items: enAdvancedSidebar }],
+          '/en/adr/': [{ text: 'ADR', items: [
+            { text: '0001 — JDBC Template', link: '/en/adr/0001-use-jdbc-template-over-jpa' },
+            { text: '0002 — SPI Open Core', link: '/en/adr/0002-use-spi-for-open-core' },
+            { text: '0003 — JWT over Sessions', link: '/en/adr/0003-use-jwt-over-sessions' },
+          ]}],
         },
 
         editLink: {

@@ -152,6 +152,8 @@ class SegmentServiceTest {
 
     @Test
     void delete_shouldCallRepository() {
+        Segment seg = new Segment();
+        when(segmentRepository.findById(1)).thenReturn(seg);
         when(segmentRepository.deleteById(anyInt(), any())).thenReturn(1);
         segmentService.delete(1, null);
         verify(segmentRepository).deleteById(eq(1), any());

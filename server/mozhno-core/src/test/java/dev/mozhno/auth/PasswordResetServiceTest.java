@@ -51,7 +51,7 @@ class PasswordResetServiceTest {
         User user = new User();
         user.setId(id);
         user.setEmail("test" + id + "@example.com");
-        user.setRole("editor");
+        user.setRole("developer");
         user.setStatus(status);
         user.setLocale("ru");
         return user;

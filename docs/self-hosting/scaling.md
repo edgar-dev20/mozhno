@@ -41,12 +41,12 @@ sequenceDiagram
     participant Server1
     participant Server2
 
-    Client->>LB: POST /api/auth/login
+    Client->>LB: POST /api/v1/auth/login
     LB->>Server1: запрос
     Server1->>Server1: Проверка учётных данных
     Server1-->>Client: access_token + refresh_token
 
-    Client->>LB: GET /api/flags (Authorization: Bearer ...)
+    Client->>LB: GET /api/v1/flags (Authorization: Bearer ...)
     LB->>Server2: запрос (любой экземпляр)
     Server2->>Server2: Проверка JWT-подписи локально
     Server2->>PG: SELECT flags WHERE ...
@@ -58,7 +58,7 @@ sequenceDiagram
 | Тип | Время жизни | Ротация | Назначение |
 |-----|------------|---------|------------|
 | Access token | 15 минут | Нет | Доступ к API |
-| Refresh token | 7 дней | Семейная ротация | Обновление access-токена |
+| Refresh token | 30 дней | Семейная ротация | Обновление access-токена |
 
 Refresh-токены хранятся в базе данных. При обновлении старый токен инвалидируется через `SELECT ... FOR UPDATE` — это атомарно и безопасно при конкурентных запросах с разных экземпляров.
 
@@ -234,7 +234,7 @@ sequenceDiagram
     participant SDK
     participant Server
 
-    SDK->>Server: GET /api/flags/evaluation-data
+    SDK->>Server: GET /api/client/features
     Server->>Server: Проверка JWT
     Server->>Server: Поиск в Caffeine Cache
     alt Попадание в кеш

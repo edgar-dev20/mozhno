@@ -1,6 +1,6 @@
 # Java SDK
 
-The можно Java SDK provides local evaluation of feature flags on the JVM. Compatible with JDK 25+, supports synchronous evaluation, and integrates with Spring Boot via auto-configuration.
+The можно Java SDK provides local evaluation of feature flags on the JVM. Compatible with JDK 17+, supports synchronous evaluation, and integrates with Spring Boot via auto-configuration.
 
 ## Installation
 
@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("dev.mozhno:mozhno-client-java:1.0.0")
+    implementation("dev.mozhno:mozhno-client-java:1.0.1")
 }
 ```
 
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'dev.mozhno:mozhno-client-java:1.0.0'
+    implementation 'dev.mozhno:mozhno-client-java:1.0.1'
 }
 ```
 
@@ -38,8 +38,9 @@ The SDK uses a **builder pattern** for client construction. Create a single clie
 import dev.mozhno.sdk.MozhnoClient;
 import dev.mozhno.sdk.MozhnoConfig;
 import dev.mozhno.sdk.MozhnoContext;
+import dev.mozhno.sdk.DefaultMozhnoClient;
 
-MozhnoClient client = MozhnoConfig.builder()
+MozhnoConfig config = MozhnoConfig.builder()
     .appName("my-app")
     .instanceId("instance-1")
     .mozhnoUrl("https://mozhno.example.com")
@@ -49,6 +50,7 @@ MozhnoClient client = MozhnoConfig.builder()
     .environment("production")
     .build();
 
+MozhnoClient client = new DefaultMozhnoClient(config);
 client.start();
 ```
 
@@ -188,7 +190,7 @@ All attribute values are strings. For numeric comparisons, set `contextType: num
 ## Error Handling
 
 ```java
-MozhnoClient client = MozhnoConfig.builder()
+MozhnoConfig config = MozhnoConfig.builder()
     .appName("checkout-service")
     .instanceId("prod-1")
     .mozhnoUrl("https://mozhno.example.com")
@@ -196,6 +198,7 @@ MozhnoClient client = MozhnoConfig.builder()
     .synchronousFetchOnInitialisation(true)
     .build();
 
+MozhnoClient client = new DefaultMozhnoClient(config);
 client.start();  // Fetches initial rules synchronously if configured
 
 MozhnoContext context = MozhnoContext.builder()
@@ -234,12 +237,13 @@ public class MozhnoConfig {
 
     @Bean(destroyMethod = "stop")
     public MozhnoClient mozhnoClient() {
-        return dev.mozhno.sdk.MozhnoConfig.builder()
+        dev.mozhno.sdk.MozhnoConfig config = dev.mozhno.sdk.MozhnoConfig.builder()
             .appName("my-app")
             .instanceId(UUID.randomUUID().toString())
             .mozhnoUrl("https://mozhno.example.com")
             .apiKey(System.getenv("MOZHNO_API_KEY"))
             .build();
+        return new dev.mozhno.sdk.DefaultMozhnoClient(config);
     }
 }
 ```

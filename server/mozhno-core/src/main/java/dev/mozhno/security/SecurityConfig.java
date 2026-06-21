@@ -57,8 +57,7 @@ public class SecurityConfig {
     public RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.withDefaultRolePrefix()
             .role("ADMIN").implies("DEVELOPER")
-            .role("DEVELOPER").implies("EDITOR")
-            .role("EDITOR").implies("VIEWER")
+            .role("DEVELOPER").implies("VIEWER")
             .build();
     }
 
@@ -116,7 +115,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/me").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/projects/*/logo").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/users/*/avatar").permitAll()
-                .requestMatchers("/api/v1/**").hasAnyRole("ADMIN", "DEVELOPER", "EDITOR", "VIEWER")
+                .requestMatchers("/api/v1/**").hasAnyRole("ADMIN", "DEVELOPER", "VIEWER")
                 .anyRequest().permitAll()
             )
             .addFilterBefore(new RateLimitFilter(rateLimitProperties.isEnabled(), rateLimitProperties), UsernamePasswordAuthenticationFilter.class)

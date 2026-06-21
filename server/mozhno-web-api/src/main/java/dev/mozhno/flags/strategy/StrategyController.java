@@ -38,7 +38,7 @@ public class StrategyController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new strategy")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public FlagStrategyResponse create(@PathVariable Integer flagId,
                                        @Valid @RequestBody StrategyRequest request,
                                        @AuthenticationPrincipal UserPrincipal user) {
@@ -50,7 +50,7 @@ public class StrategyController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a strategy")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public void delete(@PathVariable Integer flagId,
                        @PathVariable Integer id,
                        @AuthenticationPrincipal UserPrincipal user) {
@@ -59,7 +59,7 @@ public class StrategyController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a strategy")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public FlagStrategyResponse update(@PathVariable Integer flagId,
                                        @PathVariable Integer id,
                                        @Valid @RequestBody StrategyRequest request,
@@ -70,7 +70,7 @@ public class StrategyController {
 
     @PutMapping
     @Operation(summary = "Upsert strategy for flag and environment")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public FlagStrategyResponse upsert(@PathVariable Integer flagId,
                                        @Valid @RequestBody StrategyRequest request,
                                        @AuthenticationPrincipal UserPrincipal user) {

@@ -72,7 +72,7 @@ public class FeatureFlagEvaluator {
             }
 
             if (hasDirect && hasSegments) {
-                if (!directOk && !segmentsOk) return false;
+                if (!directOk || !segmentsOk) return false;
             } else if (hasDirect) {
                 if (!directOk) return false;
             } else if (hasSegments) {

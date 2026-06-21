@@ -150,13 +150,13 @@ class AuthServiceTest {
         user.setId(3);
         user.setEmail("refresh@example.com");
         user.setName("Refresh User");
-        user.setRole("editor");
+        user.setRole("developer");
 
         RefreshTokenService.TokenPair newTokens = new RefreshTokenService.TokenPair("new.acc", "new.ref");
 
         when(refreshTokenService.refresh(eq("valid.old.token"), any())).thenReturn(newTokens);
         when(jwtService.parseToken("new.acc")).thenReturn(
-            new JwtToken(3, "refresh@example.com", "Refresh User", "editor", "active", null));
+            new JwtToken(3, "refresh@example.com", "Refresh User", "developer", "active", null));
         when(userRepository.findByEmail("refresh@example.com")).thenReturn(user);
 
         LoginResponse response = authService.refresh("valid.old.token");

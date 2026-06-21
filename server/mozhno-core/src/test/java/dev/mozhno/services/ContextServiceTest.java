@@ -114,6 +114,8 @@ class ContextServiceTest {
     @Test
     void deleteDefinition_shouldCallRepository() {
         when(segmentContextRepository.existsByContextDefinitionId(1)).thenReturn(false);
+        ContextDefinition def = new ContextDefinition();
+        when(contextDefinitionRepository.findById(1)).thenReturn(def);
         when(contextDefinitionRepository.deleteById(anyInt(), any())).thenReturn(1);
         contextService.deleteDefinition(1, null);
         verify(contextDefinitionRepository).deleteById(eq(1), any());
@@ -131,6 +133,7 @@ class ContextServiceTest {
     @Test
     void deleteDefinition_shouldThrowWhenNotFound() {
         when(segmentContextRepository.existsByContextDefinitionId(999)).thenReturn(false);
+        when(contextDefinitionRepository.findById(999)).thenReturn(new ContextDefinition());
         when(contextDefinitionRepository.deleteById(eq(999), any())).thenReturn(0);
         RuntimeException ex = assertThrows(RuntimeException.class, () -> contextService.deleteDefinition(999, null));
         assertTrue(ex.getMessage().contains("not found"));
