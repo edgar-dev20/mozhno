@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { Switch } from '@/app/components/ui/switch';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import type { FlagView } from '@/app/hooks/flagTypes';
@@ -43,7 +44,7 @@ const getTypeIcon = (t: string, size = 10) => {
 };
 
 const getIconColor = (t: string) =>
-  t === 'RELEASE' ? 'text-info bg-info/10' : 'text-destructive bg-destructive/10';
+  t === 'RELEASE' ? 'text-info bg-info/10' : 'text-chart-4 bg-chart-4/10';
 
 interface FlagCardHeaderProps {
   flag: FlagView;
@@ -60,6 +61,19 @@ export function FlagCardHeader({
   tags,
   onToggleFlag,
 }: FlagCardHeaderProps) {
+  const [glowKeys, setGlowKeys] = useState<Record<number, number>>({});
+
+  const handleToggle = useCallback(
+    (envId: number) => {
+      const wasEnabled = !!flag.environments[envId]?.enabled;
+      if (!wasEnabled) {
+        setGlowKeys((prev) => ({ ...prev, [envId]: (prev[envId] ?? 0) + 1 }));
+      }
+      onToggleFlag(flag, envId);
+    },
+    [flag, onToggleFlag],
+  );
+
   return (
     <>
       <div className="flex-1 min-w-0 flex items-center gap-3">
@@ -104,10 +118,14 @@ export function FlagCardHeader({
                   {env.name}
                 </span>
                 {es && (
-                  <span onClick={(e) => e.stopPropagation()}>
+                  <span
+                    key={`glow-${env.id}-${glowKeys[env.id] ?? 0}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className={(glowKeys[env.id] ?? 0) > 0 ? 'animate-flag-on' : ''}
+                  >
                     <Switch
                       checked={es.enabled}
-                      onCheckedChange={() => onToggleFlag(flag, env.id)}
+                      onCheckedChange={() => handleToggle(env.id)}
                       className="data-[state=checked]:bg-brand scale-75 origin-right"
                     />
                   </span>

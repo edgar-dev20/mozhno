@@ -8,7 +8,7 @@ export function extractDominantColor(
     c.width = size;
     c.height = size;
     const ctx = c.getContext('2d');
-    if (!ctx) return '#7c3aed';
+    if (!ctx) return '#1a6b60';
 
     const sx = Math.max(0, (img.naturalWidth - size) / 2);
     const sy = Math.max(0, (img.naturalHeight - size) / 2);
@@ -35,7 +35,7 @@ export function extractDominantColor(
       buckets.set(key, (buckets.get(key) || 0) + 1);
     }
 
-    if (buckets.size === 0) return '#7c3aed';
+    if (buckets.size === 0) return '#1a6b60';
 
     let bestKey = 0;
     let bestCount = 0;
@@ -54,7 +54,7 @@ export function extractDominantColor(
     const b = (qb << 3) | (qb >> 2);
     return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
   } catch {
-    return '#7c3aed';
+    return '#1a6b60';
   }
 }
 

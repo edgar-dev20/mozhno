@@ -122,9 +122,9 @@ export function ClientInstances() {
     const name = envName(id);
     if (name === 'Production')
       return {
-        from: '#059669',
-        to: '#10b981',
-        bg: 'from-emerald-500/10 to-emerald-600/5',
+        from: '#2d9484',
+        to: '#3db8a5',
+        bg: 'from-brand/10 to-brand/5',
         bgFlat: 'bg-success/10 text-success border-success/20',
         border: 'border-success/20',
         dot: 'bg-success',
@@ -132,9 +132,9 @@ export function ClientInstances() {
       };
     if (name === 'Development')
       return {
-        from: '#d97706',
-        to: '#f59e0b',
-        bg: 'from-amber-500/10 to-amber-600/5',
+        from: '#c08140',
+        to: '#d4995a',
+        bg: 'from-warning/10 to-warning/5',
         bgFlat: 'bg-warning/10 text-warning border-warning/20',
         border: 'border-warning/20',
         dot: 'bg-warning',
@@ -142,18 +142,17 @@ export function ClientInstances() {
       };
     if (name === 'staging')
       return {
-        from: '#7c3aed',
-        to: '#8b5cf6',
-        bg: 'from-violet-500/10 to-violet-600/5',
-        bgFlat: 'bg-brand/10 text-brand border-brand/20',
-        border: 'border-brand/20',
-        dot: 'bg-brand',
-        text: 'text-brand',
+        from: '#b86840', to: '#c87850',
+        bg: 'from-chart-4/10 to-chart-4/5',
+        bgFlat: 'bg-chart-4/10 text-chart-4 border-chart-4/20',
+        border: 'border-chart-4/20',
+        dot: 'bg-chart-4',
+        text: 'text-chart-4',
       };
     return {
-      from: '#2563eb',
-      to: '#3b82f6',
-      bg: 'from-blue-500/10 to-blue-600/5',
+      from: '#5a82a0',
+      to: '#6e94b4',
+      bg: 'from-info/10 to-info/5',
       bgFlat: 'bg-info/10 text-info border-info/20',
       border: 'border-info/20',
       dot: 'bg-info',
@@ -172,7 +171,7 @@ export function ClientInstances() {
   const getAppIcon = (appType: string, size = 14) => {
     if (appType === 'java') return <JavaIcon size={size} />;
     if (appType === 'js') return <JavaScriptIcon size={size} />;
-    return <Monitor size={size} className="text-cyan-500" />;
+    return <Monitor size={size} className="text-brand" />;
   };
 
   const cutoff = Date.now() - WINDOW_MS;
@@ -307,7 +306,7 @@ export function ClientInstances() {
         ) : recentInstances.length === 0 ? (
           <div className="bg-card rounded-xl px-6 py-16 text-center shadow-md">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-500/10 dark:to-purple-500/10 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-info/10 dark:from-primary/15 dark:to-info/15 flex items-center justify-center">
                 <Activity size={24} className="text-brand" />
               </div>
               <div>
@@ -363,8 +362,8 @@ export function ClientInstances() {
                             key={kt}
                             className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-xs font-semibold border shrink-0 leading-none ${
                               kt === 'FRONTEND'
-                                ? 'text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 border-cyan-100 dark:border-cyan-500/20'
-                                : 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20'
+                                ? 'text-warning bg-warning/10 border-warning/20'
+                                : 'text-brand bg-brand/10 border-brand/20'
                             }`}
                           >
                             {kt === 'FRONTEND' ? <Globe size={10} /> : <Server size={10} />}
@@ -584,7 +583,7 @@ export function ClientInstances() {
                                                     new Set([...prev, `${appName}:${envId}`]),
                                                 );
                                               }}
-                                              className="bg-secondary border border-dashed border-neutral-300 dark:border-neutral-700 rounded-lg px-2.5 py-2 hover:border-cyan-300 dark:hover:border-cyan-700 hover:bg-cyan-50/30 dark:hover:bg-cyan-500/5 transition-all flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-cyan-600 dark:hover:text-cyan-400 cursor-pointer"
+                                              className="bg-secondary border border-dashed border-neutral-300 dark:border-neutral-700 rounded-lg px-2.5 py-2 hover:border-brand dark:hover:border-brand hover:bg-brand/30 dark:hover:bg-brand/5 transition-all flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-brand dark:hover:text-brand cursor-pointer"
                                             >
                                               <span className="text-xs font-medium">
                                                 +{visible.length - max}

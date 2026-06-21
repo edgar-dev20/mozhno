@@ -54,7 +54,7 @@ export function getFlagTypeColor(t: string): string {
     case 'RELEASE':
       return 'text-info bg-info/10 border-info/20';
     case 'KILLSWITCH':
-      return 'text-destructive bg-destructive/10 border-destructive/20';
+      return 'text-chart-4 bg-chart-4/10 border-chart-4/20';
     default:
       return 'text-muted-foreground bg-muted border-border';
   }

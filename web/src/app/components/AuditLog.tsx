@@ -167,25 +167,25 @@ export function AuditLog() {
   const getResourceColor = (type: string) => {
     switch (type) {
       case 'flag':
-        return 'text-info bg-info/10 border-info/20';
-      case 'user':
         return 'text-brand bg-brand/10 border-brand/20';
+      case 'user':
+        return 'text-info bg-info/10 border-info/20';
       case 'tag':
         return 'text-success bg-success/10 border-success/20';
       case 'apikey':
         return 'text-warning bg-warning/10 border-warning/20';
       case 'segment':
-        return 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20';
+        return 'text-chart-4 bg-chart-4/10 border-chart-4/20';
       case 'project':
-        return 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20';
+        return 'text-info bg-info/10 border-info/20';
       case 'environment':
-        return 'text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 border-cyan-200 dark:border-cyan-500/20';
+        return 'text-success bg-success/10 border-success/20';
       case 'context':
-        return 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-500/10 border-sky-200 dark:border-sky-500/20';
+        return 'text-brand bg-brand/10 border-brand/20';
       case 'strategy':
-        return 'text-destructive bg-destructive/10 border-destructive/20';
+        return 'text-chart-4 bg-chart-4/10 border-chart-4/20';
       case 'integration':
-        return 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/20';
+        return 'text-warning bg-warning/10 border-warning/20';
       default:
         return 'text-muted-foreground bg-muted border-border';
     }

@@ -36,7 +36,7 @@ export function DashboardLayout() {
   const location = useLocation();
   const t = useT();
   const { toggleMobile } = useAppSidebar();
-  const [accentColor, setAccentColor] = useState('#7c3aed');
+  const [accentColor, setAccentColor] = useState('#1a6b60');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [logoVersion, setLogoVersion] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -136,7 +136,7 @@ export function DashboardLayout() {
           <AppSidebar />
 
           <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-            <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm transition-colors min-w-0">
+            <header className="h-14 border-b border-border bg-card flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm dark:shadow-[0_1px_3px_-1px_var(--color-brand)]/8 transition-colors min-w-0">
               <div className="flex items-center gap-3 min-w-0">
                 <button
                   className="md:hidden p-2 -ml-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
@@ -154,7 +154,7 @@ export function DashboardLayout() {
                     className="w-7 h-7 rounded-lg object-cover shrink-0"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-caption font-bold shadow-sm text-white">
+                  <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-caption font-bold shadow-sm text-white ring-1 ring-chart-4/30">
                     {(projectName ?? '?')[0].toUpperCase()}
                   </div>
                 )}

@@ -934,16 +934,16 @@ const ru = {
     noFlagsInEnv: 'Нет флагов в этом окружении',
     environments: 'Окружения',
   },
+
   userMenu: {
-    changePhoto: 'Сменить фото',
-    uploadPhoto: 'Загрузить фото',
-    lightTheme: 'Светлая тема',
-    darkTheme: 'Тёмная тема',
-    language: 'Язык',
     roleAdmin: 'Администратор',
     roleDeveloper: 'Разработчик',
     roleEditor: 'Редактор',
     roleViewer: 'Наблюдатель',
+    uploadPhoto: 'Загрузить фото',
+    changePhoto: 'Сменить фото',
+    lightTheme: 'Светлая тема',
+    darkTheme: 'Тёмная тема',
   },
   operators: {
     eq: 'равно',

@@ -15,8 +15,8 @@ const BUILTIN = [
     nameKey: 'strategies.abName' as const,
     descKey: 'strategies.abDesc' as const,
     icon: Split,
-    color: 'text-purple-600 dark:text-purple-400',
-    bg: 'bg-purple-50 dark:bg-purple-500/10',
+    color: 'text-brand dark:text-brand',
+    bg: 'bg-brand dark:bg-brand/10',
   },
   {
     nameKey: 'strategies.killswitchName' as const,

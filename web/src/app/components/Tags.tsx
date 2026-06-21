@@ -24,14 +24,14 @@ import { queryKeys } from '@/api/queryKeys';
 import { useT, type MessageKey } from '@/i18n';
 
 const COLOR_PALETTES: [MessageKey, string[]][] = [
-  ['tags.colors.red', ['#ef4444', '#dc2626', '#f87171', '#b91c1c']],
-  ['tags.colors.orange', ['#f97316', '#ea580c', '#fb923c', '#c2410c']],
-  ['tags.colors.amber', ['#f59e0b', '#d97706', '#fbbf24', '#b45309']],
-  ['tags.colors.green', ['#84cc16', '#65a30d', '#22c55e', '#16a34a', '#10b981', '#059669']],
-  ['tags.colors.teal', ['#14b8a6', '#0d9488', '#06b6d4', '#0891b2', '#0e7490']],
-  ['tags.colors.blue', ['#3b82f6', '#2563eb', '#1d4ed8', '#60a5fa']],
-  ['tags.colors.violet', ['#6366f1', '#4f46e5', '#8b5cf6', '#7c3aed', '#a855f7', '#9333ea']],
-  ['tags.colors.pink', ['#d946ef', '#c026d3', '#ec4899', '#db2777', '#be185d']],
+  ['tags.colors.red', ['#b85a50', '#c87068', '#d8847c', '#a04840']],
+  ['tags.colors.orange', ['#b86840', '#c87850', '#e09060', '#9a4828']],
+  ['tags.colors.amber', ['#b89430', '#d0a840', '#e8c050', '#987820']],
+  ['tags.colors.green', ['#4a8c5e', '#5a9e6e', '#6db87e', '#3a7048', '#2d8860', '#1d7850']],
+  ['tags.colors.teal', ['#1a6b60', '#2d9484', '#3db8a5', '#155a50', '#0e7a6e']],
+  ['tags.colors.blue', ['#4a6e8a', '#5a82a0', '#6e94b4', '#3a5870']],
+  ['tags.colors.violet', ['#2d3a32', '#4a5e50', '#5a7260', '#6b8676', '#3a4a40', '#507060']],
+  ['tags.colors.pink', ['#b87070', '#c88484', '#d89898', '#a05858', '#9a4860']],
 ];
 
 const colorHexCache: Record<string, string> = {};
@@ -39,44 +39,14 @@ const getColorName = (hex: string): string => {
   if (colorHexCache[hex]) return colorHexCache[hex];
   const normalized = hex.toLowerCase();
   const names: Record<string, string> = {
-    '#ef4444': 'Red 500',
-    '#dc2626': 'Red 600',
-    '#f87171': 'Red 400',
-    '#b91c1c': 'Red 700',
-    '#f97316': 'Orange 500',
-    '#ea580c': 'Orange 600',
-    '#fb923c': 'Orange 400',
-    '#c2410c': 'Orange 700',
-    '#f59e0b': 'Amber 500',
-    '#d97706': 'Amber 600',
-    '#fbbf24': 'Amber 400',
-    '#b45309': 'Amber 700',
-    '#84cc16': 'Lime 500',
-    '#65a30d': 'Lime 600',
-    '#22c55e': 'Green 500',
-    '#16a34a': 'Green 600',
-    '#10b981': 'Emerald 500',
-    '#059669': 'Emerald 600',
-    '#14b8a6': 'Teal 500',
-    '#0d9488': 'Teal 600',
-    '#06b6d4': 'Cyan 500',
-    '#0891b2': 'Cyan 600',
-    '#0e7490': 'Cyan 700',
-    '#3b82f6': 'Blue 500',
-    '#2563eb': 'Blue 600',
-    '#1d4ed8': 'Blue 700',
-    '#60a5fa': 'Blue 400',
-    '#6366f1': 'Indigo 500',
-    '#4f46e5': 'Indigo 600',
-    '#8b5cf6': 'Violet 500',
-    '#7c3aed': 'Violet 600',
-    '#a855f7': 'Purple 500',
-    '#9333ea': 'Purple 600',
-    '#d946ef': 'Fuchsia 500',
-    '#c026d3': 'Fuchsia 600',
-    '#ec4899': 'Pink 500',
-    '#db2777': 'Pink 600',
-    '#be185d': 'Pink 700',
+    '#b85a50': 'Red 500', '#c87068': 'Red 400', '#d8847c': 'Red 300', '#a04840': 'Red 600',
+    '#b86840': 'Terracotta 500', '#c87850': 'Terracotta 400', '#e09060': 'Terracotta 300', '#9a4828': 'Terracotta 600',
+    '#b89430': 'Gold 500', '#d0a840': 'Gold 400', '#e8c050': 'Gold 300', '#987820': 'Gold 600',
+    '#4a8c5e': 'Forest 500', '#5a9e6e': 'Forest 400', '#6db87e': 'Forest 300', '#3a7048': 'Forest 600', '#2d8860': 'Pine 500', '#1d7850': 'Pine 600',
+    '#1a6b60': 'Teal 700', '#2d9484': 'Teal 500', '#3db8a5': 'Teal 400', '#155a50': 'Teal 800', '#0e7a6e': 'Teal 900',
+    '#4a6e8a': 'Slate 500', '#5a82a0': 'Slate 400', '#6e94b4': 'Slate 300', '#3a5870': 'Slate 600',
+    '#2d3a32': 'Moss 800', '#4a5e50': 'Moss 600', '#5a7260': 'Moss 500', '#6b8676': 'Moss 400', '#3a4a40': 'Moss 700', '#507060': 'Moss 550',
+    '#b87070': 'Rose 500', '#c88484': 'Rose 400', '#d89898': 'Rose 300', '#a05858': 'Rose 600', '#9a4860': 'Rose 700',
   };
   colorHexCache[hex] = names[normalized] ?? hex;
   return colorHexCache[hex];
@@ -95,7 +65,7 @@ export function Tags() {
   const [saving, setSaving] = useState(false);
   const [formName, setFormName] = useState('');
   const [formDesc, setFormDesc] = useState('');
-  const [formColor, setFormColor] = useState('#3b82f6');
+  const [formColor, setFormColor] = useState('#1a6b60');
   const [initialTag, setInitialTag] = useState<{
     name: string;
     desc: string;
@@ -148,7 +118,7 @@ export function Tags() {
     setEditing(null);
     setFormName('');
     setFormDesc('');
-    setFormColor('#3b82f6');
+    setFormColor('#1a6b60');
     setCustomHex('');
     setError('');
     setInitialTag(null);

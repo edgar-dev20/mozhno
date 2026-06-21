@@ -1,4 +1,5 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
+import { aggregateHourPairs } from '@/shared/sparklineAggregation';
 import { motion } from 'motion/react';
 
 interface SparklineBucket {
@@ -38,11 +39,12 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
     );
   }
 
-  const maxVal = Math.max(1, ...data.map((d) => d.trueCount + d.falseCount));
-  const paddingX = 2;
+  const displayData = useMemo(() => aggregateHourPairs(data), [data]);
+  const maxVal = Math.max(1, ...displayData.map((d) => d.trueCount + d.falseCount));
+  const paddingX = 3;
   const effectiveWidth = width - paddingX * 2;
-  const barWidth = Math.max(1, (effectiveWidth - (data.length - 1) * 1) / data.length);
-  const gap = 1;
+  const barWidth = Math.max(1, (effectiveWidth - (displayData.length - 1) * 1) / displayData.length);
+  const gap = barWidth < 3 ? 0.5 : 1;
   const baselineY = height - 1;
 
   return (
@@ -59,7 +61,7 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
           role="img"
           aria-label="Sparkline chart"
         >
-          {data.map((d, i) => {
+          {displayData.map((d, i) => {
             const x = paddingX + i * (barWidth + gap);
             const totalH = ((d.trueCount + d.falseCount) / maxVal) * (height - 2);
             const trueH = totalH > 0 ? (d.trueCount / (d.trueCount + d.falseCount)) * totalH : 0;
@@ -79,24 +81,28 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
                     y={yFalse}
                     width={barWidth}
                     height={Math.max(0.5, falseH)}
-                    rx="1"
                     fill="var(--sparkline-false)"
                   />
                 )}
-                {trueH > 0.5 && (
-                  <motion.rect
-                    initial={{ scaleY: 0 }}
-                    animate={{ scaleY: 1 }}
-                    transition={{ delay: i * 0.02 + 0.08, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ originY: 1 }}
-                    x={x}
-                    y={yTrue}
-                    width={barWidth}
-                    height={Math.max(0.5, trueH)}
-                    rx="1"
-                    fill="var(--sparkline-true)"
-                  />
-                )}
+                {trueH > 0.5 && (() => {
+                  const r = Math.min(2, barWidth * 0.35);
+                  const ty = yTrue;
+                  const th = Math.max(0.5, trueH);
+                  const bx = x;
+                  const bw = barWidth;
+                  const d = `M${bx},${ty + r} Q${bx},${ty} ${bx + r},${ty} L${bx + bw - r},${ty} Q${bx + bw},${ty} ${bx + bw},${ty + r} L${bx + bw},${ty + th} L${bx},${ty + th} Z`;
+                  return (
+                    <motion.path
+                      key={`t-` + i}
+                      initial={{ scaleY: 0 }}
+                      animate={{ scaleY: 1 }}
+                      transition={{ delay: i * 0.02 + 0.08, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ originY: 1 }}
+                      d={d}
+                      fill={i % 3 === 0 ? "var(--chart-4)" : "var(--sparkline-true)"}
+                    />
+                  );
+                })()}
               </g>
             );
           })}
@@ -106,7 +112,7 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
             x2={width}
             y2={height}
             stroke="var(--color-muted-foreground)"
-            strokeOpacity="0.12"
+            strokeOpacity="0.18"
             strokeWidth="1"
           />
         </svg>
@@ -128,12 +134,12 @@ export function SparklinePlaceholder({ height = 56 }: { height?: number }) {
         initial={{ clipPath: 'inset(0 0 0 100%)' }}
         animate={{ clipPath: 'inset(0 0 0 0%)' }}
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-        className="flex items-end justify-center gap-px pb-1 animate-pulse h-full"
+        className="flex items-end justify-center gap-[1.5px] pb-1 h-full"
       >
         {heights.map((h, i) => (
           <div
             key={i}
-            className="w-px rounded-t-[1px] bg-sparkline-true/6 dark:bg-sparkline-true/10"
+            className="w-[1.5px] rounded-t-[1px] bg-sparkline-true/6 dark:bg-sparkline-true/10"
             style={{ height: `${h * 100}%` }}
           />
         ))}

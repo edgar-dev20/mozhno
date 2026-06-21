@@ -187,7 +187,7 @@ export function SdkInfo() {
         className="w-full p-5 flex items-center justify-between hover:bg-white/20 dark:hover:bg-white/5 transition-colors cursor-pointer select-none"
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500/10 to-cyan-500/10 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand/10 to-brand/10 flex items-center justify-center">
             <JavaIcon size={18} />
           </div>
           <div className="text-left">
@@ -250,14 +250,14 @@ export function SdkInfo() {
               <span
                 className={`shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border ${
                   active.keyType === 'SERVER'
-                    ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-100 dark:border-indigo-500/20'
+                    ? 'text-brand dark:text-brand bg-brand dark:bg-brand/10 border-brand dark:border-brand/20'
                     : 'text-success bg-success/10 border-success/20'
                 }`}
               >
                 {active.keyType === 'SERVER' ? (
                   <Server
                     size={12}
-                    className={active.keyType === 'SERVER' ? 'text-indigo-500' : 'text-success'}
+                    className={active.keyType === 'SERVER' ? 'text-brand' : 'text-success'}
                   />
                 ) : (
                   <Globe size={12} className="text-success" />
