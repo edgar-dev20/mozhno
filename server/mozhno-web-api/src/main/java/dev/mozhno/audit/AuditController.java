@@ -20,7 +20,7 @@ public class AuditController {
 
     @GetMapping
     @Operation(summary = "Get paginated audit log for a project")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR', 'VIEWER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'VIEWER')")
     public List<AuditEventResponse> getAll(@RequestParam(defaultValue = "0") int page,
                                            @RequestParam(defaultValue = "50") int size,
                                            @RequestParam(required = false) String dateFrom,

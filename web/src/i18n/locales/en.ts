@@ -422,13 +422,11 @@ const en = {
     role: {
       admin: 'Admin',
       developer: 'Developer',
-      editor: 'Editor',
       viewer: 'Viewer',
     },
     roleDescriptions: {
       admin: 'Full access to all sections and settings',
       developer: 'Manage flags, segments and strategies',
-      editor: 'Edit flags and segments',
       viewer: 'Read-only, no editing rights',
     },
     status: {
@@ -489,7 +487,6 @@ const en = {
       title: 'How do roles work?',
       admin: 'Admin — full access to the project, users and settings.',
       developer: 'Developer — manage flags, segments and strategies.',
-      editor: 'Editor — edit flags and segments.',
       viewer: 'Viewer — read-only, no editing rights.',
     },
     delete: {
@@ -916,9 +913,8 @@ const en = {
 
   userMenu: {
     roleAdmin: 'Administrator',
-    roleDeveloper: 'Developer',
-    roleEditor: 'Editor',
-    roleViewer: 'Viewer',
+  roleDeveloper: 'Developer',
+  roleViewer: 'Viewer',
     uploadPhoto: 'Upload photo',
     changePhoto: 'Change photo',
     lightTheme: 'Light theme',

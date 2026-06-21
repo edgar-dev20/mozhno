@@ -1,7 +1,6 @@
 import type { StorageProvider } from '../types';
 
 declare let localStorage: Storage;
-declare let globalThis: { localStorage?: Storage };
 
 export const createDefaultStorage = (): StorageProvider => {
   const ls = (typeof globalThis !== 'undefined' && globalThis.localStorage) ||

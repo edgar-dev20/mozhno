@@ -30,7 +30,7 @@ class InviteTokenRepositoryTest extends BaseIntegrationTest {
     void save_insert_shouldCreateAndReturnToken() {
         InviteToken token = new InviteToken();
         token.setEmail("invitee@test.com");
-        token.setRole("editor");
+        token.setRole("developer");
         token.setCreatedBy(userId);
         token.setTokenHash(UUID.randomUUID().toString());
         token.setExpiresAt(Instant.now().plus(7, ChronoUnit.DAYS));
@@ -39,7 +39,7 @@ class InviteTokenRepositoryTest extends BaseIntegrationTest {
 
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getEmail()).isEqualTo("invitee@test.com");
-        assertThat(saved.getRole()).isEqualTo("editor");
+        assertThat(saved.getRole()).isEqualTo("developer");
         assertThat(saved.getCreatedBy()).isEqualTo(userId);
         assertThat(saved.getTokenHash()).isEqualTo(token.getTokenHash());
         assertThat(saved.getExpiresAt()).isNotNull();
@@ -117,7 +117,7 @@ class InviteTokenRepositoryTest extends BaseIntegrationTest {
     void markUsed_shouldSetUsedAtTimestamp() {
         InviteToken token = new InviteToken();
         token.setEmail("markused@test.com");
-        token.setRole("editor");
+        token.setRole("developer");
         token.setCreatedBy(userId);
         token.setTokenHash(UUID.randomUUID().toString());
         token.setExpiresAt(Instant.now().plus(7, ChronoUnit.DAYS));

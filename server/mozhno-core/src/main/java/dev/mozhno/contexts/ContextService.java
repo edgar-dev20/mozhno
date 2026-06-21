@@ -139,7 +139,12 @@ public class ContextService {
         if (segmentContextRepository.existsByContextDefinitionId(id)) {
             throw new BadRequestException("Cannot delete context: it is used by segments");
         }
-        ContextDefinition def = contextDefinitionRepository.findByIdAndProjectId(id, projectId);
+        ContextDefinition def;
+        if (projectId != null) {
+            def = contextDefinitionRepository.findByIdAndProjectId(id, projectId);
+        } else {
+            def = contextDefinitionRepository.findById(id);
+        }
         if (def == null) throw new NotFoundException("ContextDefinition", id);
         int deleted = contextDefinitionRepository.deleteById(id, projectId);
         if (deleted == 0) throw new NotFoundException("ContextDefinition", id);

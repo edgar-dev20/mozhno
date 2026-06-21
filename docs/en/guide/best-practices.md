@@ -69,14 +69,14 @@ expires:2026-09-01
 
 ## Permission Model
 
-можно uses a role-based access model. Assign the minimum permissions necessary for each user.
+можно uses a role-based access model with the hierarchy `ADMIN` → `DEVELOPER` → `VIEWER` (each role inherits the permissions of those below it). Assign the minimum permissions necessary for each user.
 
-### Recommended Roles
+### Roles
 
-| Role | Read | Write | Admin | Typical Assignee |
-|------|------|-------|-------|------------------|
+| Role | View | Manage flags/segments/strategies | Manage keys, users, environments | Typical Assignee |
+|------|------|----------------------------------|----------------------------------|------------------|
 | **Viewer** | ✅ | ❌ | ❌ | Support, analysts, read-only dashboards |
-| **Editor** | ✅ | ✅ | ❌ | Developers, QA engineers |
+| **Developer** | ✅ | ✅ | ❌ | Developers, QA engineers |
 | **Admin** | ✅ | ✅ | ✅ | Team leads, platform engineers |
 
 ### API Key Scopes
@@ -134,7 +134,7 @@ Use the API to identify stale flags:
 ```bash
 #!/bin/bash
 # List flags not evaluated in the last 30 days
-curl "https://your-instance/api/flags?lastEvaluatedBefore=$(date -d '30 days ago' -u +%Y-%m-%dT%H:%M:%SZ)" \
+curl "https://your-instance/api/v1/flags?lastEvaluatedBefore=$(date -d '30 days ago' -u +%Y-%m-%dT%H:%M:%SZ)" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   | jq '.items[] | {key: .key, lastEvaluated: .lastEvaluatedAt, state: .state}'
 ```
@@ -145,7 +145,7 @@ Before archiving, remove the flag from your application code:
 
 ```java
 // Before: flag-guarded code
-if (client.isFlagEnabled("checkout_v2", context)) {
+if (client.isEnabled("checkout_v2", context)) {
     return newCheckoutFlow();
 }
 return oldCheckoutFlow();
@@ -167,7 +167,7 @@ Mock the SDK client in unit tests to control flag values directly:
 @Test
 void testNewCheckoutFlow() {
     MozhnoClient mockClient = mock(MozhnoClient.class);
-    when(mockClient.isFlagEnabled(eq("checkout_v2"), any())).thenReturn(true);
+    when(mockClient.isEnabled(eq("checkout_v2"), any())).thenReturn(true);
 
     CheckoutService service = new CheckoutService(mockClient);
     Result result = service.checkout(cart);
@@ -184,7 +184,7 @@ jest.mock("@mozhno/client-js");
 
 test("shows new checkout when flag is enabled", async () => {
   MozhnoClient.mockImplementation(() => ({
-    isEnabled: jest.fn().mockResolvedValue(true),
+    isEnabled: jest.fn().mockReturnValue(true),
   }));
 
   const result = await renderCheckout();
@@ -219,7 +219,7 @@ Regularly test that toggling a flag off correctly restores the old behaviour:
 
 ```bash
 # Test rollback in staging
-curl -X PATCH "$MOZHNO_STAGING_URL/api/flags/$FLAG_KEY" \
+curl -X PATCH "$MOZHNO_STAGING_URL/api/v1/flags/$FLAG_KEY" \
   -H "Authorization: Bearer $MOZHNO_JWT" \
   -H "Content-Type: application/json" \
   -d '{"archived": true}'
@@ -228,7 +228,7 @@ curl -X PATCH "$MOZHNO_STAGING_URL/api/flags/$FLAG_KEY" \
 npm run smoke-test
 
 # Re-enable
-curl -X PATCH "$MOZHNO_STAGING_URL/api/flags/$FLAG_KEY" \
+curl -X PATCH "$MOZHNO_STAGING_URL/api/v1/flags/$FLAG_KEY" \
   -H "Authorization: Bearer $MOZHNO_JWT" \
   -H "Content-Type: application/json" \
   -d '{"state": "ACTIVE"}'

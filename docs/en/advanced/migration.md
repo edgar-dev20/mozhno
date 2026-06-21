@@ -85,14 +85,14 @@ jq -c '.[]' ld_flags.json | while read -r flag; do
   NAME=$(echo "$flag" | jq -r '.name')
   DESC=$(echo "$flag" | jq -r '.description // ""')
 
-  curl -X POST "${MOZHNO_URL}/api/flags" \
+  curl -X POST "${MOZHNO_URL}/api/v1/flags" \
     -H "Authorization: Bearer ${MOZHNO_TOKEN}" \
     -H "Content-Type: application/json" \
     -d "{
       \"key\": \"${KEY}\",
       \"name\": \"${NAME}\",
       \"description\": \"${DESC}\",
-      \"type\": \"BOOLEAN\",
+      \"flagType\": \"RELEASE\",
       \"environmentId\": <env-id>
     }"
 done
@@ -103,10 +103,10 @@ done
 LaunchDarkly SDK keys are single-purpose (one per environment). In можнo., create API keys per environment through the dashboard or API:
 
 ```bash
-curl -X POST "${MOZHNO_URL}/api/environments/<env-id>/api-keys" \
+curl -X POST "${MOZHNO_URL}/api/v1/api-keys" \
   -H "Authorization: Bearer ${MOZHNO_TOKEN}" \
   -H "Content-Type: application/json" \
-  -d '{"name": "Production SDK Key", "type": "SERVER"}'
+  -d '{"name": "Production SDK Key", "environmentId": <env-id>, "type": "SERVER"}'
 # Response contains the key — save it immediately, it is not retrievable later
 ```
 
@@ -160,7 +160,7 @@ graph LR
 ### Key Differences
 
 - **Unleash sends feature toggle definitions on every SDK poll** (server-side evaluation). можнo. SDKs evaluate locally — the server sends rules, and the SDK decides.
-- **Unleash has no built-in A/B testing**. можнo. supports multivariate flags natively.
+- **Unleash has no built-in A/B testing**. можнo. Community Edition does not support multivariate flags either — flags are boolean (`RELEASE`/`KILLSWITCH`).
 - **Unleash uses string IDs**. можнo. uses numeric IDs internally; string keys are the external identifier.
 
 ## Flagsmith → можно.
@@ -193,12 +193,12 @@ curl -H "Authorization: Token ${FS_TOKEN}" \
 
 | Step | Flagsmith SDK | можнo. SDK |
 |------|-------------|-----------|
-| 1. Dependency | `flagsmith-java-client` | `mozhno-client` |
-| 2. Init | `FlagsmithClient.builder().withApiKey("...")` | `MozhnoClient.builder().withApiKey("...")` |
-| 3. Boolean flag | `client.hasFeature("flag-key")` | `client.boolFlag("flag-key", context)` |
-| 4. String flag | `client.getFeatureValue("flag-key")` | `client.stringFlag("flag-key", context)` |
-| 5. Context | `FlagsmithUser` / identity | `EvaluationContext` |
-| 6. Poll interval | Configurable (default 60 s) | Configurable (default 30 s) |
+| 1. Dependency | `flagsmith-java-client` | `dev.mozhno:mozhno-client-java` |
+| 2. Init | `FlagsmithClient.builder().withApiKey("...")` | `MozhnoConfig.builder().apiKey("...")` + `new DefaultMozhnoClient(config)` |
+| 3. Boolean flag | `client.hasFeature("flag-key")` | `client.isEnabled("flag-key", context)` |
+| 4. String flag | `client.getFeatureValue("flag-key")` | Not supported — flags are boolean |
+| 5. Context | `FlagsmithUser` / identity | `MozhnoContext` |
+| 6. Poll interval | Configurable (default 60 s) | Configurable (default 15 s) |
 
 ## SDK Switch Checklist (All Platforms)
 
@@ -207,7 +207,7 @@ Use this checklist regardless of source platform:
 ### Java SDK
 
 1. **Remove** old SDK dependency (e.g., `launchdarkly-java-server-sdk`)
-2. **Add** можнo. SDK: `implementation("ai.mozhno:mozhno-client:1.x")`
+2. **Add** можнo. SDK: `implementation("dev.mozhno:mozhno-client-java:1.0.1")`
 3. **Build client**:
 
 ```java
@@ -215,11 +215,15 @@ Use this checklist regardless of source platform:
 LDClient client = new LDClient("sdk-key-xxx");
 
 // New (можно.)
-MozhnoClient client = MozhnoClient.builder()
+MozhnoConfig config = MozhnoConfig.builder()
+    .appName("my-app")
+    .instanceId("instance-1")
     .apiKey("mz_key_xxx")
-    .serverUrl("https://mozhno.example.com")
-    .pollInterval(Duration.ofSeconds(30))
+    .mozhnoUrl("https://mozhno.example.com")
+    .fetchTogglesInterval(30)
     .build();
+MozhnoClient client = new DefaultMozhnoClient(config);
+client.start();
 ```
 
 4. **Replace flag evaluations**:
@@ -229,21 +233,21 @@ MozhnoClient client = MozhnoClient.builder()
 boolean enabled = client.boolVariation("feature-x", user, false);
 
 // New (можно.)
-boolean enabled = client.boolFlag("feature-x",
-    EvaluationContext.builder()
+boolean enabled = client.isEnabled("feature-x",
+    MozhnoContext.builder()
         .userId(user.getId())
-        .attribute("email", user.getEmail())
-        .build());
+        .addProperty("email", user.getEmail())
+        .build(), false);
 ```
 
-5. **Update context building** — можнo. uses a flat `Map<String, Object>` for attributes.
+5. **Update context building** — можнo. uses a flat map of string attributes via `MozhnoContext`.
 6. **Remove event tracking** (LaunchDarkly `client.track()`) — use audit log export or webhooks instead.
-7. **Shutdown hook**: `client.close()` in a `@PreDestroy` or shutdown hook.
+7. **Shutdown hook**: `client.stop()` in a `@PreDestroy` or shutdown hook.
 
 ### JavaScript SDK
 
 1. **Remove** old SDK dependency
-2. **Add** можнo. SDK: `npm install @mozhno/client`
+2. **Add** можнo. SDK: `npm install @mozhno/client-js`
 3. **Build client**:
 
 ```javascript
@@ -251,14 +255,15 @@ boolean enabled = client.boolFlag("feature-x",
 const client = LDClient.initialize('sdk-key-xxx', user);
 
 // New (можно.)
-import { MozhnoClient } from '@mozhno/client';
+import { MozhnoClient } from '@mozhno/client-js';
 
 const client = new MozhnoClient({
   apiKey: 'mz_key_xxx',
-  serverUrl: 'https://mozhno.example.com',
-  pollIntervalMs: 30_000,
+  url: 'https://mozhno.example.com',
+  appName: 'my-app',
+  refreshInterval: 30,
 });
-await client.initialize();
+await client.start();
 ```
 
 4. **Replace flag evaluations**:
@@ -268,7 +273,7 @@ await client.initialize();
 const enabled = await client.variation('feature-x', false);
 
 // New (можно.)
-const enabled = await client.boolFlag('feature-x', {
+const enabled = client.isEnabled('feature-x', {
   userId: user.id,
   email: user.email,
 });
@@ -293,21 +298,23 @@ const enabled = await client.boolFlag('feature-x', {
 
 можнo. evaluates flags **per environment**. A flag can be ON in production but OFF in staging. Ensure your SDK is configured with the correct environment's API key — each API key is bound to a single environment.
 
-### 3. Boolean vs Multivariate
+### 3. Boolean Only
 
-LaunchDarkly flags are always multivariate (they can return JSON). можнo. flags are explicitly `BOOLEAN` or `MULTIVARIATE`. If you used a boolean LD flag that also returned a JSON variation, split it into two можнo. flags.
+LaunchDarkly flags are always multivariate (they can return JSON). можнo. Community Edition flags are boolean only — either `RELEASE` (gradual rollout) or `KILLSWITCH` (instant disable). If you used an LD flag that returned a JSON variation, model it with application logic gated by a boolean flag.
 
 ### 4. User Targeting
 
-можнo. evaluates flags against an `EvaluationContext` — a flat map of string keys to values. Nested LaunchDarkly custom attributes must be flattened:
+можнo. evaluates flags against a `MozhnoContext` — a flat map of string keys to values. Nested LaunchDarkly custom attributes must be flattened:
 
 ```java
 // LaunchDarkly: nested attributes
 user.custom("address", Map.of("country", "US", "city", "NYC"));
 
 // можно.: flat attributes
-context.put("country", "US");
-context.put("city", "NYC");
+MozhnoContext.builder()
+    .addProperty("country", "US")
+    .addProperty("city", "NYC")
+    .build();
 ```
 
 ### 5. SDK Initialization Delay
@@ -316,7 +323,7 @@ During the first SDK poll (before the local cache is populated), flags return th
 
 ```java
 // Default value is used until first sync completes
-boolean enabled = client.boolFlag("new-feature", context);
+boolean enabled = client.isEnabled("new-feature", context);
 // enabled == false (the default) until flags are loaded
 ```
 

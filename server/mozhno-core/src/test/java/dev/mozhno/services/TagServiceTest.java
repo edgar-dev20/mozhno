@@ -99,6 +99,8 @@ class TagServiceTest {
 
     @Test
     void delete_shouldCallRepository() {
+        Tag tag = new Tag();
+        when(tagRepository.findById(1)).thenReturn(tag);
         when(tagRepository.deleteById(anyInt(), any())).thenReturn(1);
         tagService.delete(1, null);
         verify(tagRepository).deleteById(eq(1), any());

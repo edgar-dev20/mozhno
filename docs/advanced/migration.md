@@ -83,7 +83,7 @@ for flag in ld_flags:
         "key": flag["key"],
         "name": flag["name"],
         "description": flag.get("description", ""),
-        "type": "BOOLEAN" if flag["type"] == "boolean" else "MULTIVARIATE",
+        "flagType": "RELEASE",  # можно. поддерживает RELEASE и KILLSWITCH (булевы флаги)
         "environmentId": "<environment-uuid>",
         "defaultValue": str(flag["enabled"]).lower() if flag["type"] == "boolean" else flag["variations"][0],
         "strategies": [
@@ -95,7 +95,7 @@ for flag in ld_flags:
     }
 
     resp = requests.post(
-        f"{MOZHNO_API}/api/flags",
+        f"{MOZHNO_API}/api/v1/flags",
         json=mozhno_flag,
         headers={"Authorization": f"Bearer {MOZHNO_TOKEN}"}
     )
@@ -110,7 +110,7 @@ for flag in ld_flags:
 
 3. **Prerequisites (зависимости флагов)** — LaunchDarkly позволяет флагу зависеть от других флагов. **можно.** не поддерживает зависимости флагов напрямую. Реализуйте логику зависимостей на стороне приложения.
 
-4. **Experiments** — A/B-тесты LaunchDarkly не имеют прямого аналога. Используйте мультивариативные флаги с кастомной стратегией (Enterprise).
+4. **Experiments** — A/B-тесты LaunchDarkly не имеют прямого аналога. Мультивариативные флаги в можно. Community не поддерживаются (только булевы `RELEASE`/`KILLSWITCH`); используйте кастомную стратегию (Enterprise).
 
 ## Миграция с Unleash
 
@@ -160,7 +160,7 @@ with open("unleash_flags.json") as f:
     unleash_flags = json.load(f)
 
 for flag in unleash_flags:
-    flag_type = "BOOLEAN"
+    flag_type = "RELEASE"
     strategies = []
 
     for strategy in flag.get("strategies", []):
@@ -184,7 +184,7 @@ for flag in unleash_flags:
             })
 
     if flag.get("variants"):
-        flag_type = "MULTIVARIATE"
+        flag_type = "RELEASE"
         strategies.append({
             "type": "DEFAULT",
             "value": flag["variants"][0].get("name", "default")
@@ -193,13 +193,13 @@ for flag in unleash_flags:
     mozhno_flag = {
         "key": flag["name"],
         "name": flag.get("description", flag["name"]),
-        "type": flag_type,
+        "flagType": flag_type,
         "environmentId": "<environment-uuid>",
         "strategies": strategies or [{"type": "DEFAULT", "value": "false"}]
     }
 
     resp = requests.post(
-        f"{MOZHNO_API}/api/flags",
+        f"{MOZHNO_API}/api/v1/flags",
         json=mozhno_flag,
         headers={"Authorization": f"Bearer {MOZHNO_TOKEN}"}
     )
@@ -267,7 +267,7 @@ for flag_state in flagsmith_flags:
     mozhno_flag = {
         "key": feature["name"],
         "name": feature["name"],
-        "type": "MULTIVARIATE" if is_multi else "BOOLEAN",
+        "flagType": "RELEASE",
         "environmentId": "<environment-uuid>",
         "strategies": [
             {
@@ -282,7 +282,7 @@ for flag_state in flagsmith_flags:
     }
 
     resp = requests.post(
-        f"{MOZHNO_API}/api/flags",
+        f"{MOZHNO_API}/api/v1/flags",
         json=mozhno_flag,
         headers={"Authorization": f"Bearer {MOZHNO_TOKEN}"}
     )
@@ -305,7 +305,7 @@ for flag_state in flagsmith_flags:
 MOZHNO_API="http://localhost:8080"
 ADMIN_TOKEN="your-admin-token"
 
-curl -X POST "$MOZHNO_API/api/admin/api-keys" \
+curl -X POST "$MOZHNO_API/api/v1/api-keys" \
   -H "Authorization: Bearer $ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -351,10 +351,10 @@ flowchart TD
 ### Код
 
 - [ ] Удалена зависимость старого SDK (LaunchDarkly/Unleash/Flagsmith)
-- [ ] Добавлена зависимость можно. SDK (`com.mozhno:mozhno-sdk-java:1.0.0`)
+- [ ] Добавлена зависимость можно. SDK (`dev.mozhno:mozhno-client-java:1.0.1`)
 - [ ] Заменена инициализация SDK
-- [ ] Заменён вызов `isEnabled()` / `isFeatureEnabled()` на `mozhnoClient.isFlagEnabled()`
-- [ ] Заменён контекст пользователя на `EvaluationContext`
+- [ ] Заменён вызов `isEnabled()` / `isFeatureEnabled()` на `mozhnoClient.isEnabled()`
+- [ ] Заменён контекст пользователя на `MozhnoContext`
 - [ ] Проверены значения по умолчанию (fallback) — должны совпадать со старыми
 - [ ] Обновлены юнит-тесты
 - [ ] Обновлены интеграционные тесты
@@ -375,16 +375,22 @@ boolean enabled = client.boolVariation("new-checkout", user, false);
 **Стало (можно.):**
 
 ```java
-MozhnoClient client = MozhnoClient.builder()
-    .baseUrl("http://localhost:8080")
+MozhnoConfig config = MozhnoConfig.builder()
+    .appName("my-app")
+    .instanceId("instance-1")
+    .mozhnoUrl("http://localhost:8080")
     .apiKey("mozhno-api-key")
     .build();
 
-EvaluationContext ctx = new EvaluationContext()
-    .set("userId", "user-123")
-    .set("country", "RU");
+MozhnoClient client = new DefaultMozhnoClient(config);
+client.start();
 
-boolean enabled = client.isFlagEnabled("new-checkout", ctx, false);
+MozhnoContext ctx = MozhnoContext.builder()
+    .userId("user-123")
+    .addProperty("country", "RU")
+    .build();
+
+boolean enabled = client.isEnabled("new-checkout", ctx, false);
 ```
 
 ### Пример замены: JavaScript/Node.js SDK
@@ -402,16 +408,17 @@ const enabled = await ldClient.variation('new-checkout', user, false);
 **Стало (можно.):**
 
 ```javascript
-import { MozhnoClient } from '@mozhno/sdk-js';
+import { MozhnoClient } from '@mozhno/client-js';
 
 const client = new MozhnoClient({
-  baseUrl: 'http://localhost:8080',
-  apiKey: 'mozhno-api-key'
+  url: 'http://localhost:8080',
+  apiKey: 'mozhno-api-key',
+  appName: 'my-app',
 });
-await client.initialize();
+await client.start();
 
 const ctx = { userId: 'user-123', country: 'RU' };
-const enabled = await client.isFlagEnabled('new-checkout', ctx, false);
+const enabled = client.isEnabled('new-checkout', ctx);
 ```
 
 ### Валидация
@@ -442,7 +449,7 @@ const enabled = await client.isFlagEnabled('new-checkout', ctx, false);
 **Решение:** явно укажите `defaultValue` при каждом вызове SDK, не полагаясь на глобальные настройки:
 
 ```java
-boolean enabled = client.isFlagEnabled("new-checkout", ctx, /* fallback */ true);
+boolean enabled = client.isEnabled("new-checkout", ctx, /* fallback */ true);
 ```
 
 ### 4. Долгое время распространения изменений
@@ -467,16 +474,21 @@ boolean enabled = client.isFlagEnabled("new-checkout", ctx, /* fallback */ true)
 
 ### 7. Конкурентная инициализация SDK
 
-**Проблема:** приложение делает вызовы `isFlagEnabled()` до завершения инициализации SDK.
+**Проблема:** приложение делает вызовы `isEnabled()` до завершения инициализации SDK.
 
-**Решение:** дождитесь `client.initialize()` или `client.waitForInitialization()` перед первым вызовом:
+**Решение:** включите синхронную первичную загрузку через `synchronousFetchOnInitialisation(true)` — тогда `start()` блокируется до загрузки правил:
 
 ```java
-MozhnoClient client = MozhnoClient.builder()
-    .baseUrl("http://localhost:8080")
+MozhnoConfig config = MozhnoConfig.builder()
+    .appName("my-app")
+    .instanceId("instance-1")
+    .mozhnoUrl("http://localhost:8080")
     .apiKey("mozhno-api-key")
+    .synchronousFetchOnInitialisation(true)
     .build();
-client.waitForInitialization(); // блокируется до загрузки правил
+
+MozhnoClient client = new DefaultMozhnoClient(config);
+client.start(); // блокируется до загрузки правил
 ```
 
 ## Сравнение форматов
@@ -484,7 +496,7 @@ client.waitForInitialization(); // блокируется до загрузки 
 | Характеристика | LaunchDarkly | Unleash | Flagsmith | **можно.** |
 |---------------|-------------|---------|-----------|-----------|
 | Формат экспорта | JSON (REST API) | JSON (REST API) | JSON (REST API) | JSON (REST API) |
-| Массовый импорт | REST API | REST API | REST API | REST API `/api/flags` |
+| Массовый импорт | REST API | REST API | REST API | REST API `/api/v1/flags` |
 | Миграция сегментов | Ручной экспорт | Ручной экспорт | Ручной экспорт | Ручной импорт |
 | Сохранение истории | Только аудит | Только аудит | Только аудит | Не мигрируется |
 | Перенос API-ключей | Невозможно | Невозможно | Невозможно | Создать новые |

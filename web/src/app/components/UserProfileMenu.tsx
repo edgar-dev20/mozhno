@@ -69,8 +69,6 @@ export function UserProfileMenu() {
         return t('userMenu.roleAdmin');
       case 'developer':
         return t('userMenu.roleDeveloper');
-      case 'editor':
-        return t('userMenu.roleEditor');
       case 'viewer':
         return t('userMenu.roleViewer');
       default:

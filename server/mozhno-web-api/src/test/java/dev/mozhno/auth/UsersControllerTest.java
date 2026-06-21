@@ -65,17 +65,17 @@ class UsersControllerTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/users")
                 .header("Authorization", auth())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"newuser@test.com\",\"password\":\"newpass123\",\"name\":\"New User\",\"role\":\"editor\"}"))
+                .content("{\"email\":\"newuser@test.com\",\"password\":\"newpass123\",\"name\":\"New User\",\"role\":\"developer\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email").value("newuser@test.com"))
-                .andExpect(jsonPath("$.role").value("editor"));
+                .andExpect(jsonPath("$.role").value("developer"));
     }
 
     @Test
     void createUser_shouldReturnErrorWhenEmailExists() throws Exception {
         jdbcTemplate.update(
             "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
-            "dup@test.com", passwordEncoder.encode("pass1"), "editor", "active");
+            "dup@test.com", passwordEncoder.encode("pass1"), "developer", "active");
 
         mockMvc.perform(post("/api/v1/users")
                 .header("Authorization", auth())
@@ -148,7 +148,7 @@ class UsersControllerTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/users/invite")
                 .header("Authorization", auth())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"invited@test.com\",\"role\":\"editor\"}"))
+                .content("{\"email\":\"invited@test.com\",\"role\":\"developer\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.message").value("Invitation sent to invited@test.com"));
     }
@@ -157,7 +157,7 @@ class UsersControllerTest extends BaseIntegrationTest {
     void invite_shouldReturn400ForDuplicateEmail() throws Exception {
         jdbcTemplate.update(
             "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
-            "existing@test.com", passwordEncoder.encode("pass"), "editor", "active");
+            "existing@test.com", passwordEncoder.encode("pass"), "developer", "active");
 
         mockMvc.perform(post("/api/v1/users/invite")
                 .header("Authorization", auth())

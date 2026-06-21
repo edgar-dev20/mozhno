@@ -74,7 +74,7 @@ POST /api/v1/flags
 | `key` | `string` | Да | Уникальный ключ флага |
 | `name` | `string` | Да | Название флага |
 | `description` | `string` | Нет | Описание |
-| `type` | `string` | Да | `BOOLEAN` или `MULTI_VARIATE` |
+| `flagType` | `string` | Да | `RELEASE` или `KILLSWITCH` |
 | `tags` | `string[]` | Нет | Список тегов |
 | `environment` | `string` | Нет | Окружение (по умолчанию — первое активное) |
 
@@ -83,10 +83,10 @@ curl -X POST "http://localhost:8080/api/v1/flags" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "key": "new-checkout",
+    "key": "42",
     "name": "Новый чекаут",
     "description": "Переработка процесса оформления заказа",
-    "type": "BOOLEAN",
+    "flagType": "RELEASE",
     "tags": ["checkout", "ui-redesign"]
   }'
 ```
@@ -114,22 +114,22 @@ curl "http://localhost:8080/api/v1/flags?environment=production&status=active" \
 ### Получить флаг по ключу
 
 ```http
-GET /api/v1/flags/{flagKey}
+GET /api/v1/flags/{id}
 ```
 
 ```bash
-curl "http://localhost:8080/api/v1/flags/new-checkout" \
+curl "http://localhost:8080/api/v1/flags/42" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
 ### Обновить флаг
 
 ```http
-PUT /api/v1/flags/{flagKey}
+PUT /api/v1/flags/{id}
 ```
 
 ```bash
-curl -X PUT "http://localhost:8080/api/v1/flags/new-checkout" \
+curl -X PUT "http://localhost:8080/api/v1/flags/42" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -142,12 +142,12 @@ curl -X PUT "http://localhost:8080/api/v1/flags/new-checkout" \
 ### Обновить стратегии флага
 
 ```http
-PATCH /api/v1/flags/{flagKey}/strategies
+PUT /api/v1/flags/{id}/strategies
 ```
 
 ```bash
 # Gradual rollout
-curl -X PATCH "http://localhost:8080/api/v1/flags/new-checkout/strategies" \
+curl -X PUT "http://localhost:8080/api/v1/flags/42/strategies" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -162,137 +162,31 @@ curl -X PATCH "http://localhost:8080/api/v1/flags/new-checkout/strategies" \
   }'
 ```
 
-```bash
-# Default (kill switch)
-curl -X PATCH "http://localhost:8080/api/v1/flags/new-checkout/strategies" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "environment": "production",
-    "strategies": [
-      {
-        "type": "default",
-        "value": false
-      }
-    ]
-  }'
-```
+### Настройка таргетинга
 
-```bash
-# Scheduled
-curl -X PATCH "http://localhost:8080/api/v1/flags/holiday-banner/strategies" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "environment": "production",
-    "strategies": [
-      {
-        "type": "scheduled",
-        "startAt": "2026-06-25T12:00:00Z",
-        "endAt": "2026-07-01T12:00:00Z"
-      }
-    ]
-  }'
-```
-
-### Обновить таргетинг флага
-
-```http
-PATCH /api/v1/flags/{flagKey}/targeting
-```
-
-```bash
-curl -X PATCH "http://localhost:8080/api/v1/flags/new-checkout/targeting" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "environment": "production",
-    "rules": [
-      {
-        "name": "Premium RU",
-        "rules": [
-          { "attribute": "plan", "operator": "in", "value": ["premium", "business"] },
-          { "attribute": "country", "operator": "equals", "value": "RU" }
-        ],
-        "serve": true
-      },
-      {
-        "name": "Бета-тестеры",
-        "segment": "beta-testers",
-        "serve": true
-      }
-    ]
-  }'
-```
+Правила таргетинга передаются в составе тела запроса при создании или обновлении флага (`POST/PUT /api/v1/flags`) или через стратегии (`PUT /api/v1/flags/{id}/strategies`).
 
 ### Архивировать флаг
 
 ```http
-POST /api/v1/flags/{flagKey}/archive
+POST /api/v1/flags/{id}/archive
 ```
 
 ```bash
-curl -X POST "http://localhost:8080/api/v1/flags/new-checkout/archive" \
+curl -X POST "http://localhost:8080/api/v1/flags/42/archive" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
 ### Восстановить флаг
 
 ```http
-POST /api/v1/flags/{flagKey}/restore
+POST /api/v1/flags/{id}/unarchive
 ```
 
 ```bash
-curl -X POST "http://localhost:8080/api/v1/flags/new-checkout/restore" \
+curl -X POST "http://localhost:8080/api/v1/flags/42/unarchive" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
-
-### Удалить флаг
-
-```http
-DELETE /api/v1/flags/{flagKey}
-```
-
-```bash
-curl -X DELETE "http://localhost:8080/api/v1/flags/new-checkout" \
-  -H "Authorization: Bearer $JWT_TOKEN"
-```
-
-> **Предупреждение:** Удаление необратимо. Все аудит-записи, связанные с флагом, также удаляются.
-
-### Проверить таргетинг (dry-run)
-
-```http
-POST /api/v1/flags/{flagKey}/evaluate
-```
-
-```bash
-curl -X POST "http://localhost:8080/api/v1/flags/new-checkout/evaluate" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "context": {
-      "userId": "user-123",
-      "plan": "premium",
-      "country": "RU"
-    }
-  }'
-```
-
-Ответ:
-
-```json
-{
-  "enabled": true,
-  "matchedRule": "Premium RU",
-  "reason": "TARGETING_MATCH",
-  "value": null
-}
-```
-
-## Сегменты
-
-### Создать сегмент
 
 ```http
 POST /api/v1/segments
@@ -446,17 +340,16 @@ curl -X POST "http://localhost:8080/api/v1/api-keys" \
 
 ```json
 {
-  "id": "ak_abc123",
+  "id": 12,
   "name": "Production SDK Key",
-  "key": "X-Api-Key: <api-key>
-Authorization: Bearer <jwt-or-api-key>x7k2p9v4m1q8w3r6",
-  "environment": "production",
+  "apiKey": "sk-abc123def456...",
+  "keyType": "SERVER",
+  "environmentId": 3,
   "createdAt": "2026-06-21T13:41:05Z"
 }
 ```
 
-> **Предупреждение:** Значение ключа (`X-Api-Key: <api-key>
-Authorization: Bearer <jwt-or-api-key>...`) показывается **только один раз** при создании. Сохраните его немедленно.
+> **Предупреждение:** Значение ключа (`apiKey`) показывается **только один раз** при создании. Сохраните его немедленно.
 
 ### Получить все API-ключи
 
@@ -517,8 +410,8 @@ GET /api/v1/audit
 curl "http://localhost:8080/api/v1/audit?from=2026-06-14T00:00:00Z&to=2026-06-21T23:59:59Z" \
   -H "Authorization: Bearer $JWT_TOKEN"
 
-# Все изменения флага new-checkout
-curl "http://localhost:8080/api/v1/audit?entityType=FLAG&entityKey=new-checkout" \
+# Все изменения флага 42
+curl "http://localhost:8080/api/v1/audit?entityType=FLAG&entityKey=42" \
   -H "Authorization: Bearer $JWT_TOKEN"
 
 # Все действия конкретного пользователя
@@ -549,15 +442,14 @@ curl "http://localhost:8080/api/v1/audit/export?format=csv&from=2026-06-01T00:00
 ### Получить правила (полная загрузка)
 
 ```http
-GET /api/v1/sdk/rules
+GET /api/client/features
 ```
 
 Используется SDK при инициализации. Возвращает все правила флагов для окружения, привязанного к API-ключу.
 
 ```bash
-curl "http://localhost:8080/api/v1/sdk/rules" \
-  -H "X-Api-Key: X-Api-Key: <api-key>
-Authorization: Bearer <jwt-or-api-key>abc123def456"
+curl "http://localhost:8080/api/client/features" \
+  -H "X-Api-Key: sk-abc123def456..."
 ```
 
 Ответ:
@@ -568,8 +460,8 @@ Authorization: Bearer <jwt-or-api-key>abc123def456"
   "environment": "production",
   "flags": [
     {
-      "key": "new-checkout",
-      "type": "BOOLEAN",
+      "key": "42",
+      "flagType": "RELEASE",
       "strategies": [
         {
           "type": "gradual",
@@ -581,7 +473,7 @@ Authorization: Bearer <jwt-or-api-key>abc123def456"
           "name": "Premium RU",
           "rules": [
             { "attribute": "plan", "operator": "in", "value": ["premium", "business"] },
-            { "attribute": "country", "operator": "equals", "value": "RU" }
+            { "attribute": "country", "operator": "eq", "value": "RU" }
           ],
           "serve": true
         }
@@ -594,15 +486,14 @@ Authorization: Bearer <jwt-or-api-key>abc123def456"
 ### Получить дельта-обновления
 
 ```http
-GET /api/v1/sdk/rules?since={version}
+GET /api/client/features?since={version}
 ```
 
 Возвращает только правила, изменившиеся с указанной версии.
 
 ```bash
-curl "http://localhost:8080/api/v1/sdk/rules?since=41" \
-  -H "X-Api-Key: X-Api-Key: <api-key>
-Authorization: Bearer <jwt-or-api-key>abc123def456"
+curl "http://localhost:8080/api/client/features?since=41" \
+  -H "X-Api-Key: sk-abc123def456..."
 ```
 
 Ответ:
@@ -613,8 +504,8 @@ Authorization: Bearer <jwt-or-api-key>abc123def456"
   "environment": "production",
   "updated": [
     {
-      "key": "new-checkout",
-      "type": "BOOLEAN",
+      "key": "42",
+      "flagType": "RELEASE",
       "strategies": [
         {
           "type": "gradual",
@@ -627,16 +518,16 @@ Authorization: Bearer <jwt-or-api-key>abc123def456"
 }
 ```
 
-## Вебхуки
+## Интеграции
 
-### Создать вебхук
+### Создать интеграция
 
 ```http
-POST /api/v1/webhooks
+POST /api/v1/integrations
 ```
 
 ```bash
-curl -X POST "http://localhost:8080/api/v1/webhooks" \
+curl -X POST "http://localhost:8080/api/v1/integrations" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -650,7 +541,7 @@ curl -X POST "http://localhost:8080/api/v1/webhooks" \
 
 ```json
 {
-  "id": "wh_abc123",
+  "id": "abc123",
   "url": "https://your-server.example.com/hooks/mozhno",
   "secret": "whsec_x7k2p9v4m1q8w3r6",
   "events": ["flag.updated", "flag.archived", "flag.deleted"],
@@ -659,25 +550,25 @@ curl -X POST "http://localhost:8080/api/v1/webhooks" \
 }
 ```
 
-### Получить все вебхуки
+### Получить все интеграции
 
 ```http
-GET /api/v1/webhooks
+GET /api/v1/integrations
 ```
 
 ```bash
-curl "http://localhost:8080/api/v1/webhooks" \
+curl "http://localhost:8080/api/v1/integrations" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
-### Обновить вебхук
+### Обновить интеграцию
 
 ```http
-PUT /api/v1/webhooks/{webhookId}
+PUT /api/v1/integrations/{id}
 ```
 
 ```bash
-curl -X PUT "http://localhost:8080/api/v1/webhooks/wh_abc123" \
+curl -X PUT "http://localhost:8080/api/v1/integrations/wh_abc123" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -687,25 +578,25 @@ curl -X PUT "http://localhost:8080/api/v1/webhooks/wh_abc123" \
   }'
 ```
 
-### Удалить вебхук
+### Удалить интеграция
 
 ```http
-DELETE /api/v1/webhooks/{webhookId}
+DELETE /api/v1/integrations/{id}
 ```
 
 ```bash
-curl -X DELETE "http://localhost:8080/api/v1/webhooks/wh_abc123" \
+curl -X DELETE "http://localhost:8080/api/v1/integrations/wh_abc123" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
-### Отправить тестовый вебхук
+### Отправить тестовую интеграцию
 
 ```http
-POST /api/v1/webhooks/{webhookId}/test
+POST /api/v1/integrations/{id}/test
 ```
 
 ```bash
-curl -X POST "http://localhost:8080/api/v1/webhooks/wh_abc123/test" \
+curl -X POST "http://localhost:8080/api/v1/integrations/wh_abc123/test" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
@@ -730,7 +621,7 @@ curl -X POST "http://localhost:8080/api/v1/users/invite" \
 | Роль | Описание |
 |------|----------|
 | `ADMIN` | Полный доступ ко всем ресурсам |
-| `DEVELOPER` | Создание флагов, изменение стратегий (настраивается) |
+| `DEVELOPER` | Управление флагами, сегментами, стратегиями |
 | `VIEWER` | Только просмотр |
 
 ### Получить всех пользователей
@@ -812,7 +703,7 @@ TOKEN="eyJhbGciOiJIUzI1NiIs..."
 curl -s -X POST "$BASE/flags" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"key": "my-feature", "name": "Моя фича", "type": "BOOLEAN"}'
+  -d '{"key": "my-feature", "name": "Моя фича", "flagType": "RELEASE"}'
 
 # 2. Настроить gradual rollout на 1%
 curl -s -X PATCH "$BASE/flags/my-feature/strategies" \
@@ -844,6 +735,6 @@ curl -s "$BASE/audit?entityType=FLAG&entityKey=my-feature" \
 ## Что дальше?
 
 - [Обзор API](/api/overview) — аутентификация, формат, лимиты
-- [Интеграции](/guide/integrations) — вебхуки, CI/CD
+- [Интеграции](/guide/integrations) — интеграции, CI/CD
 - [SDK: Обзор](/sdk/overview) — как SDK использует API
 - [Swagger UI](http://localhost:8080/swagger-ui.html) — интерактивная документация

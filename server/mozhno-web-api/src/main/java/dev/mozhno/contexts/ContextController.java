@@ -35,7 +35,7 @@ public class ContextController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a context definition")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public ContextDefinitionResponse createDefinition(@Valid @RequestBody ContextDefinitionRequest request,
                                                       @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(user.projectId());
@@ -55,7 +55,7 @@ public class ContextController {
 
     @PutMapping("/{definitionId}")
     @Operation(summary = "Update a context definition")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public ContextDefinitionResponse updateDefinition(@PathVariable Integer definitionId,
                                                       @Valid @RequestBody ContextDefinitionRequest request,
                                                       @AuthenticationPrincipal UserPrincipal user) {
@@ -68,7 +68,7 @@ public class ContextController {
     @DeleteMapping("/{definitionId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a context definition")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public void deleteDefinition(@PathVariable Integer definitionId,
                                  @AuthenticationPrincipal UserPrincipal user) {
         contextService.deleteDefinition(definitionId, user.projectId());
@@ -85,7 +85,7 @@ public class ContextController {
     @PostMapping("/{definitionId}/values")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add values to a context definition")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public ContextValueResponse createValue(@PathVariable Integer definitionId,
                                             @Valid @RequestBody ContextValueRequest request,
                                             @AuthenticationPrincipal UserPrincipal user) {
@@ -97,7 +97,7 @@ public class ContextController {
     @PutMapping("/{definitionId}/values")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Replace all values for a context definition")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public void upsertValues(@PathVariable Integer definitionId,
                              @Valid @RequestBody ContextValueRequest request,
                              @AuthenticationPrincipal UserPrincipal user) {
@@ -114,7 +114,7 @@ public class ContextController {
 
     @PutMapping("/values/{valueId}")
     @Operation(summary = "Update a context value")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public ContextValueResponse updateValue(@PathVariable Integer valueId,
                                             @Valid @RequestBody ContextValueRequest request,
                                             @AuthenticationPrincipal UserPrincipal user) {
@@ -125,7 +125,7 @@ public class ContextController {
     @DeleteMapping("/values/{valueId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a context value")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public void deleteValue(@PathVariable Integer valueId,
                             @AuthenticationPrincipal UserPrincipal user) {
         contextService.deleteValue(valueId, user.projectId());

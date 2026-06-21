@@ -56,13 +56,18 @@ On first run, you'll be prompted to create a project and admin user.
 ### Java
 
 ```java
-var client = MozhnoClient.builder()
-    .serverUrl("http://localhost:8080")
+var config = MozhnoConfig.builder()
+    .appName("my-app")
+    .instanceId("instance-1")
+    .mozhnoUrl("http://localhost:8080")
     .apiKey("your-api-key")  // API key from «API Keys» in the dashboard
     .build();
 
-var ctx = new EvaluationContext().set("userId", "user-123");
-boolean isEnabled = client.isFlagEnabled("new-checkout", ctx);
+var client = new DefaultMozhnoClient(config);
+client.start();
+
+var ctx = MozhnoContext.builder().userId("user-123").build();
+boolean isEnabled = client.isEnabled("new-checkout", ctx);
 
 if (isEnabled) {
     // new code
@@ -77,11 +82,13 @@ if (isEnabled) {
 import { MozhnoClient } from '@mozhno/client-js';
 
 const client = new MozhnoClient({
-  serverUrl: 'http://localhost:8080',
+  url: 'http://localhost:8080',
   apiKey: 'your-api-key',
+  appName: 'my-app',
 });
+await client.start();
 
-const enabled = await client.isEnabled('new-checkout', { userId: 'user-123' });
+const enabled = client.isEnabled('new-checkout', { userId: 'user-123' });
 
 if (enabled) {
   // new code

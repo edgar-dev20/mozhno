@@ -37,7 +37,7 @@ public class TagController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a tag")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public TagResponse create(@Valid @RequestBody TagRequest request,
                               @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(user.projectId());
@@ -47,7 +47,7 @@ public class TagController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a tag")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public TagResponse update(@PathVariable Integer id,
                               @Valid @RequestBody TagRequest request,
                               @AuthenticationPrincipal UserPrincipal user) {
@@ -59,7 +59,7 @@ public class TagController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a tag")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public void delete(@PathVariable Integer id,
                        @AuthenticationPrincipal UserPrincipal user) {
         tagService.delete(id, user.projectId());

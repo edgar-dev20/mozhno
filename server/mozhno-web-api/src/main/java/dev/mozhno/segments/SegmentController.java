@@ -43,7 +43,7 @@ public class SegmentController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new segment")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public SegmentResponse create(@Valid @RequestBody SegmentRequest request,
                                   @AuthenticationPrincipal UserPrincipal user) {
         request.setProjectId(user.projectId());
@@ -55,7 +55,7 @@ public class SegmentController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a segment")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public SegmentResponse update(@PathVariable Integer id,
                                   @Valid @RequestBody SegmentRequest request,
                                   @AuthenticationPrincipal UserPrincipal user) {
@@ -69,7 +69,7 @@ public class SegmentController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a segment")
-    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER', 'EDITOR')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'DEVELOPER')")
     public void delete(@PathVariable Integer id,
                        @AuthenticationPrincipal UserPrincipal user) {
         segmentService.delete(id, user.projectId());

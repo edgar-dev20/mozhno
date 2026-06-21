@@ -22,13 +22,11 @@
 
 | Оператор | Описание | Пример |
 |----------|----------|--------|
-| `equals` | Точное совпадение | `country` equals `RU` |
-| `not_equals` | Не совпадает | `plan` not_equals `free` |
+| `eq` | Точное совпадение | `country` eq `RU` |
+| `ne` | Не совпадает | `plan` ne `free` |
 | `contains` | Содержит подстроку | `email` contains `@corp.com` |
-| `not_contains` | Не содержит | `userAgent` not_contains `bot` |
 | `in` | Входит в список | `country` in `[RU, BY, KZ]` |
 | `not_in` | Не входит в список | `plan` not_in `[free, trial]` |
-| `regex` | Соответствует регулярному выражению | `email` regex `.*@company\.com$` |
 | `gt` | Больше | `loginCount` gt `10` |
 | `gte` | Больше или равно | `age` gte `18` |
 | `lt` | Меньше | `latencyMs` lt `100` |
@@ -43,8 +41,8 @@
   "name": "Premium RU iOS",
   "rules": [
     { "attribute": "plan", "operator": "in", "value": ["premium", "business"] },
-    { "attribute": "country", "operator": "equals", "value": "RU" },
-    { "attribute": "device", "operator": "equals", "value": "ios" }
+    { "attribute": "country", "operator": "eq", "value": "RU" },
+    { "attribute": "device", "operator": "eq", "value": "ios" }
   ]
 }
 ```
@@ -59,12 +57,12 @@
 {
   "name": "Бета-тестеры",
   "rules": [
-    { "attribute": "userId", "operator": "regex", "value": "^beta-" }
+    { "attribute": "userId", "operator": "contains", "value": "beta-" }
   ]
 }
 ```
 
-Включает всех пользователей, чей `userId` начинается с `beta-`.
+Включает всех пользователей, чей `userId` содержит `beta-`.
 
 ### Корпоративные пользователи
 
@@ -72,12 +70,12 @@
 {
   "name": "Корпоративные пользователи",
   "rules": [
-    { "attribute": "email", "operator": "regex", "value": ".*@(company|corp)\\.(com|ru)$" }
+    { "attribute": "email", "operator": "contains", "value": "@company.com" }
   ]
 }
 ```
 
-Включает пользователей с email на корпоративных доменах.
+Включает пользователей с email на корпоративном домене `@company.com`.
 
 ### Платёжеспособная аудитория
 

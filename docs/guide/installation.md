@@ -115,9 +115,9 @@ APP_BASE_URL=http://localhost:8080
 Используйте Make-команды:
 
 ```bash
-make build    # сборка JAR и фронтенда
-make migrate  # применение миграций Flyway
-make run      # запуск сервера
+make dev          # запуск БД (PostgreSQL) + сервера + веб-интерфейса
+make server-run   # только сервер (Spring Boot, Gradle)
+make web-dev      # только веб-интерфейс (HMR)
 ```
 
 Сервер запустится на порту `8080`.
@@ -126,14 +126,23 @@ make run      # запуск сервера
 
 | Команда | Описание |
 |---------|----------|
-| `make build` | Полная сборка: Maven package + сборка React SPA |
-| `make migrate` | Применение миграций Flyway к базе данных |
-| `make run` | Запуск Spring Boot приложения |
+| `make dev` | Полное dev-окружение: БД + сервер + веб-интерфейс |
+| `make db-up` | Запуск PostgreSQL |
+| `make db-down` | Остановка PostgreSQL |
+| `make server-run` | Запуск Spring Boot сервера (Gradle) |
+| `make server-test` | Тесты сервера |
+| `make web-dev` | Веб-интерфейс в режиме разработки (HMR) |
+| `make web-test` | Тесты веб-интерфейса |
+| `make web-lint` | Линтинг веб-интерфейса |
+| `make js-sdk-test` | Тесты JS SDK |
+| `make java-sdk-test` | Тесты Java SDK |
+| `make docker-build` | Сборка Docker-образа |
+| `make docker-up` | Запуск полного стека через docker-compose |
+| `make docker-down` | Остановка стека |
+| `make lint` | Запуск всех линтеров |
+| `make docs-dev` | Запуск dev-сервера документации |
+| `make docs-build` | Сборка сайта документации |
 | `make clean` | Очистка сборочных артефактов |
-| `make test` | Запуск всех тестов |
-| `make docker-build` | Сборка Docker-образа локально |
-| `make docker-run` | Запуск локального Docker-образа |
-| `make lint` | Проверка стиля кода |
 
 ## Модули сервера
 

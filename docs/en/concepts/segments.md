@@ -29,15 +29,15 @@ Segment rules use the same attribute-matching system as flag rules. Each rule sp
 
 | Operator | Description | Example |
 |----------|-------------|---------|
-| `equals` | Exact match | `country equals "DE"` |
-| `notEquals` | Does not equal | `plan notEquals "free"` |
+| `eq` | Exact match | `country eq "DE"` |
+| `ne` | Does not equal | `plan ne "free"` |
 | `contains` | String contains | `email contains "@company.com"` |
-| `startsWith` | String starts with | `userId startsWith "internal-"` |
-| `endsWith` | String ends with | `email endsWith "@company.com"` |
 | `in` | Value is in list | `country in ["DE", "FR", "NL"]` |
-| `notIn` | Value is not in list | `country notIn ["US", "CA"]` |
-| `greaterThan` | Numeric greater than | `loginCount greaterThan 10` |
-| `lessThan` | Numeric less than | `age lessThan 18` |
+| `not_in` | Value is not in list | `country not_in ["US", "CA"]` |
+| `gt` | Numeric greater than | `loginCount gt 10` |
+| `gte` | Numeric greater than or equal | `age gte 18` |
+| `lt` | Numeric less than | `age lt 18` |
+| `lte` | Numeric less than or equal | `attempts lte 3` |
 
 ### Rule Combination
 
@@ -56,7 +56,7 @@ key: beta-testers
 name: Beta Testers
 rules:
   - attribute: beta
-    operator: equals
+    operator: eq
     values: ["true"]
 ```
 
@@ -109,7 +109,7 @@ key: internal-employees
 name: Internal Employees
 rules:
   - attribute: email
-    operator: endsWith
+    operator: contains
     values: ["@company.com"]
 ```
 
@@ -122,10 +122,10 @@ key: premium-active-users
 name: Premium Active Users
 rules:
   - attribute: plan
-    operator: notEquals
+    operator: ne
     values: ["free"]
   - attribute: daysSinceSignup
-    operator: greaterThan
+    operator: gt
     values: ["30"]
 ```
 
@@ -157,19 +157,20 @@ In the dashboard, segments appear as a selectable option when adding targeting r
 Given this evaluation context:
 
 ```java
-var ctx = new EvaluationContext()
-    .set("userId", "user-123")
-    .set("email", "alice@company.com")
-    .set("country", "DE")
-    .set("beta", "true")
-    .set("plan", "enterprise");
+var ctx = MozhnoContext.builder()
+    .userId("user-123")
+    .addProperty("email", "alice@company.com")
+    .addProperty("country", "DE")
+    .addProperty("beta", "true")
+    .addProperty("plan", "enterprise")
+    .build();
 ```
 
 | Segment | Match? | Reason |
 |---------|--------|--------|
-| `beta-testers` | ✅ Yes | `beta equals "true"` |
+| `beta-testers` | ✅ Yes | `beta eq "true"` |
 | `eu-users` | ✅ Yes | `country in [DE, FR, ...]` |
-| `internal-employees` | ✅ Yes | `email endsWith "@company.com"` |
+| `internal-employees` | ✅ Yes | `email contains "@company.com"` |
 | `premium-active-users` | ❌ No | `daysSinceSignup` is missing from context |
 
 When an attribute referenced in a segment rule is missing from the context, the rule does **not** match and the user is excluded from the segment.

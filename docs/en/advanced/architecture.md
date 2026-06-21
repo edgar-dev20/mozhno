@@ -73,7 +73,7 @@ sequenceDiagram
     SDK->>SDK: Parse and cache locally
 
     Note over App,SDK: Runtime Flag Evaluation
-    App->>SDK: boolFlag("feature-x", context)
+    App->>SDK: isEnabled("feature-x", context)
     SDK->>SDK: Find flag in local cache
     SDK->>SDK: Evaluate strategies against context
     SDK-->>App: true / false
@@ -109,24 +109,24 @@ sequenceDiagram
     participant DB as PostgreSQL
 
     Note over Browser,Server: Login
-    Browser->>Server: POST /api/auth/login<br/>{email, password}
+    Browser->>Server: POST /api/v1/auth/login<br/>{email, password}
     Server->>DB: SELECT user WHERE email = ?
     DB-->>Server: User (with bcrypt hash)
     Server->>Server: Verify bcrypt(password, hash)
     Server->>Server: Generate access token (15 min)
-    Server->>Server: Generate refresh token (7 days)
+    Server->>Server: Generate refresh token (30 days)
     Server->>DB: INSERT refresh_token<br/>(family_id, token_hash, expiry)
     Server-->>Browser: {accessToken, refreshToken}
 
     Note over Browser,Server: Authenticated Request
-    Browser->>Server: GET /api/flags<br/>Authorization: Bearer <accessToken>
+    Browser->>Server: GET /api/v1/flags<br/>Authorization: Bearer <accessToken>
     Server->>Server: Validate HMAC-SHA256 signature
     Server->>Server: Parse claims (sub, roles, exp)
     Server->>Server: Check exp > now
     Server-->>Browser: Flag list
 
     Note over Browser,Server: Token Refresh
-    Browser->>Server: POST /api/auth/refresh<br/>{refreshToken}
+    Browser->>Server: POST /api/v1/auth/refresh<br/>{refreshToken}
     Server->>DB: SELECT * FROM refresh_tokens<br/>WHERE token_hash = ?<br/>FOR UPDATE
     alt Token valid & not revoked
         DB-->>Server: Token row (locked)
@@ -157,7 +157,7 @@ The database uses `SELECT ... FOR UPDATE` row-level locking on refresh token loo
 | `sub` | User ID |
 | `iat` | Issued at (epoch seconds) |
 | `exp` | Expiration (epoch seconds, +15 min from `iat`) |
-| `roles` | User roles array (`["ADMIN", "EDITOR", "VIEWER"]`) |
+| `roles` | User roles array (`["ADMIN", "DEVELOPER", "VIEWER"]`) |
 
 ## SPI Extension System
 

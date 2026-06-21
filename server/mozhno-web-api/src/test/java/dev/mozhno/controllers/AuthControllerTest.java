@@ -51,7 +51,7 @@ class AuthControllerTest extends BaseIntegrationTest {
 
     @Test
     void login_shouldReturnUserAndToken() throws Exception {
-        insertUser("login@test.com", "secret123", "editor");
+        insertUser("login@test.com", "secret123", "developer");
 
         mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -60,7 +60,7 @@ class AuthControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.token").isNotEmpty())
                 .andExpect(jsonPath("$.refreshToken").isNotEmpty())
                 .andExpect(jsonPath("$.user.email").value("login@test.com"))
-                .andExpect(jsonPath("$.user.role").value("editor"))
+                .andExpect(jsonPath("$.user.role").value("developer"))
                 .andExpect(jsonPath("$.user.id").isNumber());
     }
 
@@ -268,7 +268,7 @@ class AuthControllerTest extends BaseIntegrationTest {
         String tokenHash = dev.mozhno.client.HashUtils.sha256(rawToken);
         jdbcTemplate.update(
             "INSERT INTO invite_tokens (email, role, token_hash, expires_at) VALUES (?, ?, ?, ?)",
-            "invited@test.com", "editor", tokenHash,
+            "invited@test.com", "developer", tokenHash,
             java.sql.Timestamp.from(java.time.Instant.now().plus(6, java.time.temporal.ChronoUnit.DAYS)));
 
         mockMvc.perform(post("/api/v1/auth/accept-invite")
@@ -276,7 +276,7 @@ class AuthControllerTest extends BaseIntegrationTest {
                 .content("{\"token\":\"" + rawToken + "\",\"name\":\"Invited User\",\"password\":\"password123\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("invited@test.com"))
-                .andExpect(jsonPath("$.role").value("editor"))
+                .andExpect(jsonPath("$.role").value("developer"))
                 .andExpect(jsonPath("$.status").value("active"));
     }
 

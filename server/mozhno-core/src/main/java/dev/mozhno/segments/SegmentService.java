@@ -118,7 +118,12 @@ public class SegmentService {
     @Transactional
     @CacheEvict(value = CacheNames.CLIENT_FLAGS, allEntries = true)
     public void delete(Integer id, Integer projectId) {
-        Segment segment = segmentRepository.findByIdAndProjectId(id, projectId);
+        Segment segment;
+        if (projectId != null) {
+            segment = segmentRepository.findByIdAndProjectId(id, projectId);
+        } else {
+            segment = segmentRepository.findById(id);
+        }
         if (segment == null) throw new NotFoundException("Segment", id);
         segmentContextRepository.deleteBySegmentId(id);
         int deleted = segmentRepository.deleteById(id, projectId);

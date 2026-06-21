@@ -61,8 +61,8 @@ curl -X POST "http://localhost:8080/api/v1/auth/login" \
 Используется SDK и для сервер-сервер взаимодействия. Привязан к конкретному окружению.
 
 ```bash
-curl "http://localhost:8080/api/v1/sdk/rules" \
-  -H "Authorization: Bearer <your-api-key>"
+curl "http://localhost:8080/api/client/features" \
+  -H "X-Api-Key: <your-api-key>"
 ```
 
 | Особенность | Описание |

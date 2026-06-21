@@ -34,19 +34,19 @@ Navigate to **Audit Log** in the sidebar. The page shows a chronological list of
 
 ```bash
 # List all audit entries (paginated)
-curl "https://your-instance/api/audit?page=0&size=20" \
+curl "https://your-instance/api/v1/audit?page=0&size=20" \
   -H "Authorization: Bearer $JWT_TOKEN"
 
 # Filter by resource type
-curl "https://your-instance/api/audit?resourceType=FLAG&page=0&size=20" \
+curl "https://your-instance/api/v1/audit?resourceType=FLAG&page=0&size=20" \
   -H "Authorization: Bearer $JWT_TOKEN"
 
 # Filter by flag key
-curl "https://your-instance/api/audit?resourceId=checkout_v2" \
+curl "https://your-instance/api/v1/audit?resourceId=checkout_v2" \
   -H "Authorization: Bearer $JWT_TOKEN"
 
 # Filter by date range
-curl "https://your-instance/api/audit?from=2026-06-01T00:00:00Z&to=2026-06-21T23:59:59Z" \
+curl "https://your-instance/api/v1/audit?from=2026-06-01T00:00:00Z&to=2026-06-21T23:59:59Z" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
@@ -127,7 +127,7 @@ Use the API to programmatically extract audit data:
 
 ```bash
 # Export all flag changes for June 2026
-curl "https://your-instance/api/audit/export?resourceType=FLAG&from=2026-06-01T00:00:00Z&to=2026-07-01T00:00:00Z" \
+curl "https://your-instance/api/v1/audit/export?resourceType=FLAG&from=2026-06-01T00:00:00Z&to=2026-07-01T00:00:00Z" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Accept: text/csv" \
   -o audit_june_2026.csv

@@ -36,14 +36,14 @@ class UserRepositoryTest extends BaseIntegrationTest {
 
     @Test
     void findById_shouldReturnUser() {
-        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('byid@example.com', 'hash', 'editor')");
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('byid@example.com', 'hash', 'developer')");
         Integer id = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'byid@example.com'", Integer.class);
 
         User user = userRepository.findById(id);
 
         assertNotNull(user);
         assertEquals("byid@example.com", user.getEmail());
-        assertEquals("editor", user.getRole());
+        assertEquals("developer", user.getRole());
     }
 
     @Test
@@ -66,7 +66,7 @@ class UserRepositoryTest extends BaseIntegrationTest {
     @Test
     void findAllByIds_shouldReturnUsers() {
         jdbcTemplate.execute("INSERT INTO users (email, password_hash, name, role) VALUES ('a@test.com', 'h1', 'Alice', 'admin')");
-        jdbcTemplate.execute("INSERT INTO users (email, password_hash, name, role) VALUES ('b@test.com', 'h2', 'Bob', 'editor')");
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, name, role) VALUES ('b@test.com', 'h2', 'Bob', 'developer')");
         Integer id1 = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'a@test.com'", Integer.class);
         Integer id2 = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'b@test.com'", Integer.class);
 
