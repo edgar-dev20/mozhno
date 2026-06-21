@@ -13,8 +13,6 @@ import {
   Plus,
   Trash2,
   BadgeCheck,
-  Monitor,
-  ExternalLink,
   ChevronDown,
   ChevronUp,
   Clock,
@@ -34,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/app/components/ui/select';
-import { NavLink } from 'react-router';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
@@ -52,14 +49,6 @@ export function ApiKeys() {
     queryFn: () => api.apiKeys.list(),
     enabled: !!projectId,
     staleTime: 30_000,
-  });
-
-  const { data: instances = [] } = useQuery({
-    queryKey: queryKeys.clientInstances.byProject(projectId),
-    queryFn: () => api.clientInstances.list(projectId ?? 0),
-    enabled: !!projectId,
-    staleTime: 30_000,
-    retry: 0,
   });
 
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
@@ -179,8 +168,8 @@ export function ApiKeys() {
   };
   const getKeyTypeColor = (t: string) =>
     t === 'FRONTEND'
-      ? 'text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10'
-      : 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10';
+      ? 'text-warning dark:text-warning bg-warning/10 dark:bg-warning/10'
+      : 'text-brand dark:text-brand bg-brand/10 dark:bg-brand/10';
   const getKeyTypeLabel = (t: string) => (t === 'FRONTEND' ? 'Frontend' : 'Server');
   const getKeyTypeIcon = (t: string) => (t === 'FRONTEND' ? Globe : Server);
 
@@ -227,11 +216,11 @@ export function ApiKeys() {
     const style =
       type === 'FRONTEND'
         ? {
-            on: 'bg-success/10 text-success border-success/20',
+            on: 'bg-warning/10 text-warning border-warning/20',
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
           }
         : {
-            on: 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20',
+            on: 'bg-brand/10 text-brand border-brand/20',
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
           };
     return (
@@ -469,7 +458,7 @@ export function ApiKeys() {
                                   <TypeIcon
                                     size={11}
                                     className={
-                                      k.keyType === 'FRONTEND' ? 'text-success' : 'text-indigo-500'
+                                      k.keyType === 'FRONTEND' ? 'text-success' : 'text-brand'
                                     }
                                   />
                                   {getKeyTypeLabel(k.keyType)}
@@ -531,54 +520,19 @@ export function ApiKeys() {
         )}
       </div>
 
-      <div className="bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 rounded-xl p-6 flex items-start gap-4">
-        <div className="bg-indigo-100 dark:bg-indigo-500/20 p-2 rounded-lg text-indigo-600 dark:text-indigo-400 shrink-0">
+      <div className="bg-brand/10 border border-brand/20 dark:border-brand/20 rounded-xl p-6 flex items-start gap-4">
+        <div className="bg-brand/10 dark:bg-brand/20 p-2 rounded-lg text-brand dark:text-brand shrink-0">
           <Shield size={20} />
         </div>
         <div>
-          <h4 className="text-indigo-900 dark:text-white font-medium mb-1">
+          <h4 className="text-brand dark:text-white font-medium mb-1">
             {t('apiKeys.securityTitle')}
           </h4>
-          <p className="text-sm text-indigo-700 dark:text-muted-foreground max-w-3xl">
+          <p className="text-sm text-brand dark:text-muted-foreground max-w-3xl">
             {t('apiKeys.securityDesc')}
           </p>
         </div>
       </div>
-
-      {instances.length > 0 && (
-        <div className="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-500/5 dark:to-blue-500/5 border border-cyan-100 dark:border-cyan-500/15 rounded-xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-500/10 flex items-center justify-center">
-              <Monitor size={18} className="text-cyan-600 dark:text-cyan-400" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-foreground/90">
-                {instances.length}{' '}
-                {instances.length === 1
-                  ? t('apiKeys.instancesOne')
-                  : instances.length < 5
-                    ? t('apiKeys.instancesFew')
-                    : t('apiKeys.instancesMany')}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {instances
-                  .slice(0, 3)
-                  .map((i) => i.appName)
-                  .join(', ')}
-                {instances.length > 3 &&
-                  ' ' + t('apiKeys.andMoreInstances', { count: String(instances.length - 3) })}
-              </p>
-            </div>
-          </div>
-          <NavLink
-            to="/applications"
-            className="flex items-center gap-1.5 text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors"
-          >
-            {t('apiKeys.allConnections')}
-            <ExternalLink size={14} />
-          </NavLink>
-        </div>
-      )}
 
       <SidePanel
         open={panelOpen}
@@ -657,20 +611,20 @@ export function ApiKeys() {
                   {
                     value: 'SERVER',
                     icon: Server,
-                    colorHex: '#6366f1',
-                    borderColor: 'border-indigo-500',
-                    bgSelected: 'bg-indigo-50 dark:bg-indigo-500/10',
-                    textSelected: 'text-indigo-700 dark:text-indigo-300',
+                    colorHex: '#2d9484',
+                    borderColor: 'border-brand',
+                    bgSelected: 'bg-brand/10',
+                    textSelected: 'text-brand dark:text-brand',
                     label: 'Server',
                     description: t('apiKeys.formServerDesc'),
                   },
                   {
                     value: 'FRONTEND',
                     icon: Globe,
-                    colorHex: '#059669',
-                    borderColor: 'border-success',
-                    bgSelected: 'bg-success/10',
-                    textSelected: 'text-success',
+                    colorHex: '#c08140',
+                    borderColor: 'border-warning',
+                    bgSelected: 'bg-warning/10',
+                    textSelected: 'text-warning',
                     label: 'Frontend',
                     description: t('apiKeys.formFrontendDesc'),
                   },

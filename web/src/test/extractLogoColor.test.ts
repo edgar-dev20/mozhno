@@ -43,9 +43,9 @@ function canvasWithContext(ctx: CanvasRenderingContext2D | null): HTMLCanvasElem
 
 describe('lightenForDarkMode', () => {
   describe('returns lighter colors for dark shades', () => {
-    it('lightens #7c3aed (violet)', () => {
-      const result = lightenForDarkMode('#7c3aed');
-      expect(result).toBe('#c4a6f7');
+    it('lightens #1a6b60 (forest teal)', () => {
+      const result = lightenForDarkMode('#1a6b60');
+      expect(result).toBe('#98bcb7');
     });
 
     it('lightens #000000 (black) to gray', () => {
@@ -78,17 +78,17 @@ describe('lightenForDarkMode', () => {
 
   describe('output format validation', () => {
     it('starts with #', () => {
-      const result = lightenForDarkMode('#7c3aed');
+      const result = lightenForDarkMode('#1a6b60');
       expect(result.startsWith('#')).toBe(true);
     });
 
     it('has exactly 7 characters', () => {
-      const result = lightenForDarkMode('#7c3aed');
+      const result = lightenForDarkMode('#1a6b60');
       expect(result).toHaveLength(7);
     });
 
     it('contains only valid hex characters', () => {
-      const result = lightenForDarkMode('#7c3aed');
+      const result = lightenForDarkMode('#1a6b60');
       expect(result).toMatch(/^#[0-9a-f]{6}$/);
     });
 
@@ -140,7 +140,7 @@ describe('extractDominantColor', () => {
 
     const result = extractDominantColor(img, canvas);
 
-    expect(result).toBe('#7c3aed');
+    expect(result).toBe('#1a6b60');
   });
 
   it('returns fallback #7c3aed when no canvas is passed and document.createElement returns null context', () => {
@@ -151,7 +151,7 @@ describe('extractDominantColor', () => {
 
     const result = extractDominantColor(img);
 
-    expect(result).toBe('#7c3aed');
+    expect(result).toBe('#1a6b60');
   });
 
   it('returns fallback #7c3aed when an exception occurs', () => {
@@ -166,7 +166,7 @@ describe('extractDominantColor', () => {
 
     const result = extractDominantColor(img, canvas);
 
-    expect(result).toBe('#7c3aed');
+    expect(result).toBe('#1a6b60');
     expect(failingCtx.drawImage).toHaveBeenCalled();
   });
 
@@ -179,7 +179,7 @@ describe('extractDominantColor', () => {
 
     const result = extractDominantColor(img, canvas);
 
-    expect(result).toBe('#7c3aed');
+    expect(result).toBe('#1a6b60');
   });
 
   it('returns fallback #7c3aed when all pixels are grayscale (maxC - minC < 25)', () => {
@@ -191,7 +191,7 @@ describe('extractDominantColor', () => {
 
     const result = extractDominantColor(img, canvas);
 
-    expect(result).toBe('#7c3aed');
+    expect(result).toBe('#1a6b60');
   });
 
   it('returns fallback #7c3aed when all pixels are too light (minC > 225)', () => {
@@ -203,7 +203,7 @@ describe('extractDominantColor', () => {
 
     const result = extractDominantColor(img, canvas);
 
-    expect(result).toBe('#7c3aed');
+    expect(result).toBe('#1a6b60');
   });
 
   it('extracts dominant red from pixel data', () => {

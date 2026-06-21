@@ -1,3 +1,4 @@
+import { useState, useCallback } from 'react';
 import { Settings } from '@/shared/icons';
 import { Switch } from '@/app/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
@@ -136,6 +137,13 @@ export function FlagCardEnvironmentColumn({
   const muted = !es || !es.enabled;
   const rule = buildRule(es, segments, muted, t);
 
+  const [glowKey, setGlowKey] = useState(0);
+
+  const handleToggle = useCallback(() => {
+    if (es && !es.enabled) setGlowKey((k) => k + 1);
+    onToggleFlag(flag, env.id);
+  }, [es, flag, env.id, onToggleFlag]);
+
   return (
     <div className="flex-1 bg-secondary/40 rounded-xl px-4 pt-3 pb-2 ring-1 ring-border shadow-sm transition-all flex flex-col">
       <div className="flex items-center justify-between mb-2">
@@ -150,11 +158,13 @@ export function FlagCardEnvironmentColumn({
             <Settings size={12} />
           </button>
           {es && (
-            <Switch
-              checked={es.enabled}
-              onCheckedChange={() => onToggleFlag(flag, env.id)}
-              className="data-[state=checked]:bg-brand scale-75 origin-right"
-            />
+            <span key={`col-glow-${glowKey}`} className={glowKey > 0 ? 'animate-flag-on' : ''}>
+              <Switch
+                checked={es.enabled}
+                onCheckedChange={handleToggle}
+                className="data-[state=checked]:bg-brand scale-75 origin-right"
+              />
+            </span>
           )}
         </div>
       </div>

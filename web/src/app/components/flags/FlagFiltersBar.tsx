@@ -58,7 +58,7 @@ export function FlagFiltersBar({
             onClick={() => onFlagTypeFilterChange(null)}
             className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
               !flagTypeFilter
-                ? 'bg-brand/10 text-brand border-violet-500/20'
+                ? 'bg-brand/10 text-brand border-primary/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
             }`}
           >
@@ -68,7 +68,7 @@ export function FlagFiltersBar({
             onClick={() => onFlagTypeFilterChange(flagTypeFilter === 'RELEASE' ? null : 'RELEASE')}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
               flagTypeFilter === 'RELEASE'
-                ? 'bg-info/10 text-info border-blue-500/20'
+                ? 'bg-info/10 text-info border-info/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
             }`}
           >
@@ -81,7 +81,7 @@ export function FlagFiltersBar({
             }
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
               flagTypeFilter === 'KILLSWITCH'
-                ? 'bg-destructive/10 text-destructive border-red-500/20'
+                ? 'bg-brand/10 text-brand border-primary/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
             }`}
           >
@@ -112,13 +112,13 @@ export function FlagFiltersBar({
         <span className="text-foreground/20 dark:text-foreground/70 mx-1">|</span>
         <button
           onClick={() => onSortByChange('name')}
-          className={`inline-flex items-center text-xs px-3 py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'name' ? 'bg-brand/10 text-brand border-violet-500/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+          className={`inline-flex items-center text-xs px-3 py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'name' ? 'bg-brand/10 text-brand border-primary/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
         >
           {t('flags.sortByName')}
         </button>
         <button
           onClick={() => onSortByChange('createdAt')}
-          className={`inline-flex items-center text-xs px-3 py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'createdAt' ? 'bg-brand/10 text-brand border-violet-500/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+          className={`inline-flex items-center text-xs px-3 py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'createdAt' ? 'bg-brand/10 text-brand border-primary/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
         >
           {t('flags.sortByDate')}
         </button>
@@ -133,7 +133,7 @@ export function FlagFiltersBar({
                 onTagTypeFilterChange(null);
                 onTagValueFilterChange(null);
               }}
-              className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${!selectedTagTypeFilter ? 'bg-brand/10 text-brand border-violet-500/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+              className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${!selectedTagTypeFilter ? 'bg-brand/10 text-brand border-primary/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
             >
               {t('common.all')}
             </button>
@@ -165,7 +165,7 @@ export function FlagFiltersBar({
               </span>
               <button
                 onClick={() => onTagValueFilterChange(null)}
-                className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${!selectedTagValueFilter ? 'bg-brand/10 text-brand border-violet-500/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+                className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${!selectedTagValueFilter ? 'bg-brand/10 text-brand border-primary/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
               >
                 {t('common.all')}
               </button>

@@ -1,17 +1,15 @@
 <svg width="640" height="140" viewBox="0 0 640 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="можно. включай без страха.">
   <defs>
     <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#7c3aed"/>
-      <stop offset="100%" stop-color="#6d28d9"/>
+      <stop offset="0%" stop-color="#1a6b60"/>
+      <stop offset="100%" stop-color="#2d9484"/>
     </linearGradient>
   </defs>
-
   <text x="320" y="72" text-anchor="middle" font-size="64" fill="url(#g)">
-    <tspan font-family="'Inter',-apple-system,'Helvetica Neue',Arial,sans-serif" font-weight="700" letter-spacing="0.02em">можно</tspan><tspan font-family="'JetBrains Mono','Fira Code','Consolas',monospace" font-weight="600" font-size="35" letter-spacing="0">.</tspan>
+    <tspan font-family="'Onest','Inter',Arial,sans-serif" font-weight="700" letter-spacing="0.02em">можно</tspan><tspan font-family="'JetBrains Mono','Fira Code','Consolas',monospace" font-weight="600" font-size="35" letter-spacing="0" fill="#b86840">.</tspan>
   </text>
-
   <text x="320" y="108" text-anchor="middle"
-        font-family="'Inter',-apple-system,'Helvetica Neue',Arial,sans-serif"
+        font-family="'Onest','Inter',Arial,sans-serif"
         font-size="17" font-weight="400"
-        letter-spacing="0.04em" fill="#8b80a8">включай без страха.</text>
+        letter-spacing="0.04em" fill="#5a6e60">включай без страха.</text>
 </svg>

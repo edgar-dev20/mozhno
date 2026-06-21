@@ -1,5 +1,5 @@
 import * as Slider from '@radix-ui/react-slider';
-import { Fragment } from 'react';
+import { Fragment, useState, useCallback } from 'react';
 import { Switch } from '@/app/components/ui/switch';
 import { Plus, Percent, Users, Settings, Filter, X } from '@/shared/icons';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
@@ -56,6 +56,16 @@ export function FlagEnvironmentPanel({
   envName,
 }: FlagEnvironmentPanelProps) {
   const t = useT();
+
+  const [glowKey, setGlowKey] = useState(0);
+
+  const handleEnvRuleToggle = useCallback(
+    (v: boolean) => {
+      if (v) setGlowKey((k) => k + 1);
+      onEnvRuleEnabledChange(v);
+    },
+    [onEnvRuleEnabledChange],
+  );
 
   function newGroupId(): string {
     return `g_${Math.random().toString(36).slice(2, 7)}_${Math.random().toString(36).slice(2, 5)}`;
@@ -157,11 +167,13 @@ export function FlagEnvironmentPanel({
           <span className="text-xs font-medium text-muted-foreground/80">
             {envRuleEnabled ? t('common.enabled') : t('flags.off')}
           </span>
-          <Switch
-            checked={envRuleEnabled}
-            onCheckedChange={onEnvRuleEnabledChange}
-            className="!bg-switch-background data-[state=checked]:!bg-brand dark:data-[state=checked]:!bg-brand"
-          />
+          <span key={`env-glow-${glowKey}`} className={glowKey > 0 ? 'animate-flag-on' : ''}>
+            <Switch
+              checked={envRuleEnabled}
+              onCheckedChange={handleEnvRuleToggle}
+              className="!bg-switch-background data-[state=checked]:!bg-brand dark:data-[state=checked]:!bg-brand"
+            />
+          </span>
         </div>
       </div>
 
@@ -366,7 +378,7 @@ export function FlagEnvironmentPanel({
             {segments.map((seg) => {
               const checked = envRuleSegments.includes(seg.id);
               const hasContext = (seg.context?.length ?? 0) > 0;
-              const segColor = seg.color || '#3b82f6';
+              const segColor = seg.color || '#1a6b60';
               return (
                 <div
                   key={seg.id}

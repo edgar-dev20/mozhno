@@ -69,8 +69,8 @@ describe('getFlagTypeColor', () => {
     expect(getFlagTypeColor('RELEASE')).toContain('info');
   });
 
-  it('returns destructive for KILLSWITCH', () => {
-    expect(getFlagTypeColor('KILLSWITCH')).toContain('destructive');
+  it('returns chart-4 for KILLSWITCH', () => {
+    expect(getFlagTypeColor('KILLSWITCH')).toContain('chart-4');
   });
 
   it('returns muted for unknown types', () => {

@@ -912,16 +912,16 @@ const en = {
     noFlagsInEnv: 'No flags in this environment',
     environments: 'Environments',
   },
+
   userMenu: {
-    changePhoto: 'Change photo',
-    uploadPhoto: 'Upload photo',
-    lightTheme: 'Light theme',
-    darkTheme: 'Dark theme',
-    language: 'Language',
-    roleAdmin: 'Admin',
+    roleAdmin: 'Administrator',
     roleDeveloper: 'Developer',
     roleEditor: 'Editor',
     roleViewer: 'Viewer',
+    uploadPhoto: 'Upload photo',
+    changePhoto: 'Change photo',
+    lightTheme: 'Light theme',
+    darkTheme: 'Dark theme',
   },
   operators: {
     eq: 'equals',

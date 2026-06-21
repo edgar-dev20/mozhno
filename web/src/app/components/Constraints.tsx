@@ -25,16 +25,16 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   [ContextType.SEMVER]: <Settings2 size={13} />,
 };
 const TYPE_COLORS: Record<string, string> = {
-  [ContextType.STRING]: '#3b82f6',
-  [ContextType.NUMBER]: '#f97316',
-  [ContextType.TIME]: '#06b6d4',
-  [ContextType.SEMVER]: '#8b5cf6',
+  [ContextType.STRING]: '#5a82a0',
+  [ContextType.NUMBER]: '#c08140',
+  [ContextType.TIME]: '#2d9484',
+  [ContextType.SEMVER]: '#4a8c5e',
 };
 const TYPE_COLORS_BAR: Record<string, string> = {
-  '#3b82f6': 'linear-gradient(to right, #3b82f6, #93bbfd)',
-  '#f97316': 'linear-gradient(to right, #f97316, #fdba74)',
-  '#06b6d4': 'linear-gradient(to right, #06b6d4, #67e8f9)',
-  '#8b5cf6': 'linear-gradient(to right, #8b5cf6, #6ee7b7)',
+  '#5a82a0': 'linear-gradient(to right, #5a82a0, #9ab8d4)',
+  '#c08140': 'linear-gradient(to right, #c08140, #e0b068)',
+  '#2d9484': 'linear-gradient(to right, #2d9484, #5ac4b4)',
+  '#4a8c5e': 'linear-gradient(to right, #4a8c5e, #8ac89e)',
 };
 
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
@@ -292,7 +292,7 @@ export function Constraints() {
         <TableSkeleton rows={4} cols={4} />
       ) : contexts.length === 0 ? (
         <EmptyState
-          icon={<Box size={28} className="text-sky-400 dark:text-sky-500" />}
+          icon={<Box size={28} className="text-info dark:text-info" />}
           title={t('constraints.emptyTitle')}
           description={t('constraints.emptyDescription')}
           buttonLabel={t('constraints.create')}
@@ -439,14 +439,14 @@ export function Constraints() {
               editing ? (
                 <>
                   {t('constraints.keyHintEditPrefix')}
-                  <code className="text-xs font-mono text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-1 py-0.5 rounded">
+                  <code className="text-xs font-mono text-brand bg-brand dark:bg-brand/10 px-1 py-0.5 rounded">
                     context['{formKey}']
                   </code>
                 </>
               ) : (
                 <>
                   {t('constraints.keyHintCreatePrefix')}
-                  <code className="text-xs font-mono text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-1 py-0.5 rounded">
+                  <code className="text-xs font-mono text-brand bg-brand dark:bg-brand/10 px-1 py-0.5 rounded">
                     context['user_id']
                   </code>
                 </>
@@ -578,7 +578,7 @@ export function Constraints() {
                   <Plus size={14} />
                 </button>
                 <label
-                  className="cursor-pointer text-indigo-500 hover:text-indigo-400 transition-colors shrink-0 px-1 py-2"
+                  className="cursor-pointer text-brand hover:text-brand transition-colors shrink-0 px-1 py-2"
                   title={t('constraints.uploadTooltip')}
                 >
                   <Upload size={14} />

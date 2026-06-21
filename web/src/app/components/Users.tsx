@@ -794,7 +794,7 @@ export function Users() {
                   [
                     {
                       value: 'admin',
-                      colorHex: '#d97706',
+                      colorHex: '#c08140',
                       borderColor: 'border-warning',
                       bgHover: 'group-hover:bg-warning/10',
                       bgSelected: 'bg-warning/10',
@@ -803,16 +803,16 @@ export function Users() {
                     },
                     {
                       value: 'developer',
-                      colorHex: '#2563eb',
-                      borderColor: 'border-info',
-                      bgHover: 'group-hover:bg-info/10',
-                      bgSelected: 'bg-info/10',
-                      textSelected: 'text-info',
+                      colorHex: '#2d9484',
+                      borderColor: 'border-brand',
+                      bgHover: 'group-hover:bg-brand/10',
+                      bgSelected: 'bg-brand/10',
+                      textSelected: 'text-brand',
                       description: t('users.roleDescriptions.developer'),
                     },
                     {
                       value: 'viewer',
-                      colorHex: '#525252',
+                      colorHex: '#5a7260',
                       borderColor: 'border-neutral-400',
                       bgHover: 'group-hover:bg-secondary dark:group-hover:bg-neutral-500/10',
                       bgSelected: 'bg-secondary dark:bg-neutral-500/10',

@@ -158,7 +158,7 @@ function NavLinkItem({
       className={({ isActive: active }) =>
         `flex items-center gap-3 rounded-lg transition-all duration-200 text-body-sm font-medium w-full text-left px-3 py-2.5 ${
           active
-            ? 'bg-accent shadow-sm font-semibold text-foreground'
+            ? 'bg-accent shadow-sm font-semibold text-chart-4'
             : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
         }`
       }

@@ -55,21 +55,21 @@ export const OPERATOR_LABELS: Record<string, string> = {
 };
 
 export const OPERATOR_COLORS: Record<string, string> = {
-  [Operator.IN]: 'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20',
+  [Operator.IN]: 'text-brand dark:text-brand bg-brand/10 border-brand/20',
   [Operator.NOT_IN]:
-    'text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500/20',
-  [Operator.EQ]: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20',
-  [Operator.NE]: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/20',
-  [Operator.GT]: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
-  [Operator.GTE]: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
-  [Operator.LT]: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
-  [Operator.LTE]: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
+    'text-brand dark:text-brand bg-brand/10 border-brand/20',
+  [Operator.EQ]: 'text-success dark:text-success bg-success/10 border-success/20',
+  [Operator.NE]: 'text-brand dark:text-brand bg-brand/10 border-brand/20',
+  [Operator.GT]: 'text-warning dark:text-warning bg-warning/10 border-warning/20',
+  [Operator.GTE]: 'text-warning dark:text-warning bg-warning/10 border-warning/20',
+  [Operator.LT]: 'text-warning dark:text-warning bg-warning/10 border-warning/20',
+  [Operator.LTE]: 'text-warning dark:text-warning bg-warning/10 border-warning/20',
   [Operator.CONTAINS]:
-    'text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 border-cyan-200 dark:border-cyan-500/20',
+    'text-brand dark:text-brand bg-brand/10 border-brand/20',
   after:
-    'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
+    'text-warning dark:text-warning bg-warning/10 border-warning/20',
   before:
-    'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20',
+    'text-warning dark:text-warning bg-warning/10 border-warning/20',
 };
 
 export function getOperatorsForType(type: string | undefined): OperatorDef[] {

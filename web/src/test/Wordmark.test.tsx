@@ -13,14 +13,13 @@ describe('Wordmark', () => {
     expect(screen.getByText('.')).toBeInTheDocument();
   });
 
-  it('has gradient classes', () => {
+  it('has gradient on text and copper period', () => {
     const { container } = render(<Wordmark text="Test" />);
     const spans = container.querySelectorAll('span');
     expect(spans.length).toBeGreaterThanOrEqual(2);
-    spans.forEach((span) => {
-      expect(span.className).toContain('from-gradient-start');
-      expect(span.className).toContain('to-gradient-end');
-    });
+    expect(spans[0].className).toContain('from-gradient-start');
+    expect(spans[0].className).toContain('to-gradient-end');
+    expect(spans[1].style.color).toBe('rgb(184, 104, 64)');
   });
 
   it('default size is lg', () => {

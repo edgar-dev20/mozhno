@@ -63,8 +63,8 @@ export function ConstraintRow({
         onClick={onToggle}
         className={`group cursor-pointer flex items-center gap-3 px-3.5 py-2.5 rounded-lg border transition-all ${
           isActive
-            ? 'bg-indigo-50/70 dark:bg-indigo-500/8 border-indigo-300 dark:border-indigo-500/30 shadow-sm rounded-b-none border-b-indigo-200 dark:border-b-indigo-500/20'
-            : 'bg-input-background border-border hover:border-indigo-200 dark:hover:border-indigo-500/20 hover:shadow-sm'
+            ? 'bg-brand/10 dark:bg-brand/8 border-brand/30 dark:border-brand/30 shadow-sm rounded-b-none'
+            : 'bg-input-background border-border hover:border-brand/30 dark:hover:border-brand/20 hover:shadow-sm'
         }`}
       >
         <span className="shrink-0 text-[11px] font-semibold text-foreground/80 min-w-0 truncate">
@@ -77,14 +77,14 @@ export function ConstraintRow({
           {displayValues}
         </span>
         <span
-          className={`shrink-0 transition-transform duration-200 ${isActive ? 'text-indigo-500 rotate-90' : 'text-muted-foreground/40 group-hover:text-muted-foreground'}`}
+          className={`shrink-0 transition-transform duration-200 ${isActive ? 'text-brand rotate-90' : 'text-muted-foreground/40 group-hover:text-muted-foreground'}`}
         >
           <ChevronRight size={14} />
         </span>
       </div>
 
       {isActive && (
-        <div className="bg-indigo-50/30 dark:bg-indigo-500/3 border border-t-0 border-indigo-300 dark:border-indigo-500/30 rounded-b-lg px-3.5 py-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="bg-accent dark:bg-brand/3 border border-t-0 border-brand/30 dark:border-brand/30 rounded-b-lg px-3.5 py-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="space-y-2">
             <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
               {t('flags.detailCard.context')}

@@ -616,7 +616,7 @@ export function Settings() {
                                           e.stopPropagation();
                                           startEditEnv(env);
                                         }}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-500/30 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-brand dark:hover:text-brand hover:border-brand dark:hover:border-brand/30 hover:bg-brand dark:hover:bg-brand/10 transition-all"
                                       >
                                         <SettingsIcon size={12} />
                                         {t('common.edit')}

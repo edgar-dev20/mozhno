@@ -28,7 +28,7 @@ export function OnboardingStepper({
           <div
             key={i}
             className={`w-2 h-2 rounded-full transition-colors ${
-              i === currentStep ? 'bg-primary' : i < currentStep ? 'bg-primary/50' : 'bg-border'
+              i === currentStep ? 'bg-chart-4' : i < currentStep ? 'bg-primary/50' : 'bg-border'
             }`}
           />
         ))}

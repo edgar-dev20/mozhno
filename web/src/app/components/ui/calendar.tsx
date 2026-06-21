@@ -252,7 +252,7 @@ function Calendar({
         selected: 'bg-brand text-brand-foreground shadow-sm [&.today]:ring-brand/40',
         range_start: 'bg-brand text-brand-foreground rounded-l-xl',
         range_end: 'bg-brand text-brand-foreground rounded-r-xl',
-        range_middle: 'bg-brand/15 dark:bg-brand/20 text-foreground rounded-none',
+        range_middle: 'bg-chart-4/15 dark:bg-chart-4/20 text-foreground rounded-none',
         today: 'ring-1 ring-brand/30 dark:ring-brand/40 font-semibold',
         outside:
           'text-muted-foreground/30 dark:text-muted-foreground/20 aria-selected:text-muted-foreground',

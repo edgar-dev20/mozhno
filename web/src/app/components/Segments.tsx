@@ -68,7 +68,7 @@ export function Segments() {
   const [formName, setFormName] = useState('');
   const [formDesc, setFormDesc] = useState('');
   const [formIcon, setFormIcon] = useState('Users');
-  const [formColor, setFormColor] = useState('#7c3aed');
+  const [formColor, setFormColor] = useState('#1a6b60');
   const [formContexts, setFormContexts] = useState<SegmentContextEntry[]>([]);
   const [initialSegment, setInitialSegment] = useState<{
     name: string;
@@ -88,7 +88,7 @@ export function Segments() {
     setFormName('');
     setFormDesc('');
     setFormIcon('Users');
-    setFormColor('#7c3aed');
+    setFormColor('#1a6b60');
     setFormContexts([]);
     setError('');
     setShowCustomize(false);
@@ -101,7 +101,7 @@ export function Segments() {
     setFormName(s.name);
     setFormDesc(s.description ?? '');
     setFormIcon(s.icon ?? 'Users');
-    setFormColor(s.color ?? '#7c3aed');
+    setFormColor(s.color ?? '#1a6b60');
     const initContexts = (s.context ?? []).map((c, i) => {
       const ctx = contexts.find((cd) => cd.id === c.contextDefinitionId);
       const op = c.operator ?? Operator.IN;
@@ -117,7 +117,7 @@ export function Segments() {
       name: s.name,
       desc: s.description ?? '',
       icon: s.icon ?? 'Users',
-      color: s.color ?? '#7c3aed',
+      color: s.color ?? '#1a6b60',
       contexts: JSON.parse(JSON.stringify(initContexts)),
     });
     setError('');
@@ -288,7 +288,7 @@ export function Segments() {
           name: editing.name,
           description: editing.description ?? '',
           icon: editing.icon ?? 'Users',
-          color: editing.color ?? '#7c3aed',
+          color: editing.color ?? '#1a6b60',
         };
         const afterSimple: Record<string, unknown> = {
           name: formName,
@@ -413,12 +413,12 @@ export function Segments() {
                 transition={{ duration: 0.2, delay: idx * 0.03 }}
                 className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 relative group"
               >
-                <ColorBar color={s.color || '#7c3aed'} />
+                <ColorBar color={s.color || '#1a6b60'} />
                 <div className="p-5">
                   <div className="flex justify-between items-start mb-4">
                     <ColorIcon
                       size="lg"
-                      color={s.color || '#7c3aed'}
+                      color={s.color || '#1a6b60'}
                       icon={<SegmentIcon name={s.icon || 'Users'} size={24} />}
                       shadow
                       onClick={() => openEdit(s)}
@@ -626,7 +626,7 @@ export function Segments() {
           <div className="pt-4 border-t border-border">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Settings size={16} className="text-indigo-600 dark:text-indigo-400" />
+                <Settings size={16} className="text-brand dark:text-brand" />
                 <label className="text-sm font-medium text-foreground/80">
                   {t('segments.targetingRules.title')}
                 </label>
@@ -636,7 +636,7 @@ export function Segments() {
               </div>
               <button
                 onClick={addContext}
-                className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 flex items-center gap-1 font-medium"
+                className="text-xs text-brand dark:text-brand hover:text-brand flex items-center gap-1 font-medium"
               >
                 <Plus size={12} />
                 {t('segments.targetingRules.add')}
@@ -827,7 +827,7 @@ export function Segments() {
                           </div>
                           {!strict && (
                           <label
-                            className="cursor-pointer text-indigo-500 hover:text-indigo-400 transition-colors shrink-0"
+                            className="cursor-pointer text-brand hover:text-brand transition-colors shrink-0"
                             title={t('segments.targetingRules.uploadTooltip')}
                           >
                             <Upload size={14} />
@@ -893,18 +893,18 @@ export function Segments() {
             </div>
           </div>
 
-          <div className="p-4 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-lg">
+          <div className="p-4 bg-brand dark:bg-brand/10 border border-brand dark:border-brand/20 rounded-lg">
             <div className="flex gap-3">
               <div className="shrink-0 mt-0.5">
-                <div className="w-5 h-5 rounded-full bg-indigo-600 dark:bg-indigo-500 flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full bg-brand dark:bg-brand flex items-center justify-center">
                   <Settings size={12} className="text-white" />
                 </div>
               </div>
               <div>
-                <h5 className="text-xs font-semibold text-indigo-900 dark:text-indigo-200 mb-1">
+                <h5 className="text-xs font-semibold text-brand dark:text-brand mb-1">
                   {t('segments.infoBox.title')}
                 </h5>
-                <p className="text-xs text-indigo-700 dark:text-indigo-300">
+                <p className="text-xs text-brand dark:text-brand">
                   {t('segments.infoBox.description')}
                 </p>
               </div>

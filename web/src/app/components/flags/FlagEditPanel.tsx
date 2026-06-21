@@ -146,7 +146,7 @@ export function FlagEditPanel({
           >
             <Rocket
               size={18}
-              className={flagType === 'RELEASE' ? 'text-blue-500' : 'text-muted-foreground'}
+              className={flagType === 'RELEASE' ? 'text-info' : 'text-muted-foreground'}
             />
             {t('flags.release')}
           </button>
@@ -300,14 +300,14 @@ export function FlagEditPanel({
         {flag.archivedBy && (
           <>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Archive size={12} className="text-violet-500" />
+              <Archive size={12} className="text-primary" />
               <span>
                 {t('flags.archivedBy')}{' '}
                 <span className="font-medium text-foreground/80">{flag.archivedBy}</span>
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock size={12} className="text-violet-500" />
+              <Clock size={12} className="text-primary" />
               <span>
                 {t('flags.archivedAt')}{' '}
                 <span className="font-medium text-foreground/80">

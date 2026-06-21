@@ -165,14 +165,16 @@ export function FlagMetricsDialog({
       now.getUTCHours(),
     );
     const result = [];
-    for (let i = 47; i >= 0; i--) {
-      const t = currentHourMs - i * 3600000;
-      const iso = new Date(t).toISOString();
-      const found = buckets.get(t);
+    for (let i = 23; i >= 0; i--) {
+      const t1 = currentHourMs - (i * 2 + 1) * 3600000;
+      const t2 = currentHourMs - i * 2 * 3600000;
+      const iso = new Date(t2).toISOString();
+      const m1 = buckets.get(t1);
+      const m2 = buckets.get(t2);
       result.push({
         time: formatHourBucket(iso),
-        trueCount: found?.evaluationTrueCount ?? 0,
-        falseCount: found?.evaluationFalseCount ?? 0,
+        trueCount: (m1?.evaluationTrueCount ?? 0) + (m2?.evaluationTrueCount ?? 0),
+        falseCount: (m1?.evaluationFalseCount ?? 0) + (m2?.evaluationFalseCount ?? 0),
       });
     }
     return result;
@@ -264,7 +266,7 @@ export function FlagMetricsDialog({
           <div className="flex-shrink-0 px-5 py-3.5 border-b border-border flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="relative shrink-0">
-                <div className="bg-gradient-to-r from-gradient-start/10 to-gradient-end/10 dark:from-blue-500/5 dark:to-violet-500/5 rounded-lg p-1.5">
+                <div className="bg-gradient-to-r from-gradient-start/10 to-gradient-end/10 dark:from-primary/5 dark:to-info/5 rounded-lg p-1.5">
                   <BarChart3 size={18} className="text-brand" />
                 </div>
               </div>
@@ -367,17 +369,17 @@ export function FlagMetricsDialog({
                       </div>
                     )}
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+                      <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }} barCategoryGap="12%" maxBarSize={20}>
                         <CartesianGrid
                           strokeDasharray="4 4"
                           stroke="var(--color-border)"
-                          strokeOpacity={0.12}
+                          strokeOpacity={0.06}
                           vertical={false}
                         />
                         <XAxis
                           dataKey="time"
                           tick={{ fontSize: 10, fill: 'var(--color-muted-foreground)' }}
-                          interval={Math.max(0, Math.floor(chartData.length / 6))}
+                          interval={Math.max(0, Math.floor(chartData.length / 4))}
                           height={30}
                         />
                         <YAxis
@@ -406,7 +408,6 @@ export function FlagMetricsDialog({
                           stackId="a"
                           fill="var(--sparkline-false)"
                           name="false"
-                          radius={[3, 3, 0, 0]}
                         />
                         <Bar
                           dataKey="trueCount"
