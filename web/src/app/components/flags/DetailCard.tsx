@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { X, Trash2 } from '@/shared/icons';
 import { MultiValueChips } from '@/app/components/flags/MultiValueChips';
 import { ContextType } from '@/app/components/contextTypes';
@@ -40,7 +40,6 @@ export function DetailCard({
   const t = useT();
   const cardRef = useRef<HTMLDivElement>(null);
   const singleInputRef = useRef<HTMLInputElement>(null);
-  const [focusedKey, setFocusedKey] = useState(0);
 
   const hasContext = group !== null && group.contextDefId !== 0;
   const isMulti = isMultiOperator(group?.operator ?? '');
@@ -134,7 +133,7 @@ export function DetailCard({
                 {isMulti ? (
                   <div className="p-3 bg-secondary/50 rounded-xl border border-border">
                     <MultiValueChips
-                      key={`multi-${focusedKey}`}
+                      key={group.id}
                       values={group.values}
                       onChange={(vals) => onChange({ ...group, values: vals })}
                       autoFocus

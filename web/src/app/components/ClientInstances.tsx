@@ -54,7 +54,7 @@ export function ClientInstances() {
   const [searchQuery, setSearchQuery] = useState('');
   const [langFilter, setLangFilter] = useState<'all' | 'java' | 'js'>('all');
 
-  const timeAgo = (d: string) => {
+  const timeAgo = useCallback((d: string) => {
     if (!d) return '';
     const diff = Date.now() - new Date(d).getTime();
     const mins = Math.floor(diff / 60000);
@@ -64,7 +64,7 @@ export function ClientInstances() {
     if (hours < 24) return t('users.time.hoursAgo', { n: String(hours) });
     const days = Math.floor(hours / 24);
     return t('users.time.daysAgo', { n: String(days) });
-  };
+  }, [t]);
 
   const { data: instances = [], isLoading: loading } = useQuery({
     queryKey: queryKeys.clientInstances.filtered(projectId, envFilter),
@@ -174,7 +174,8 @@ export function ClientInstances() {
     return <Monitor size={size} className="text-brand" />;
   };
 
-  const cutoff = Date.now() - WINDOW_MS;
+  // eslint-disable-next-line react-hooks/purity
+  const cutoff = useMemo(() => Date.now() - WINDOW_MS, []);
   const recentInstances = instances.filter((inst) => new Date(inst.lastSeenAt).getTime() > cutoff);
 
   const filtered = recentInstances.filter((inst) => {

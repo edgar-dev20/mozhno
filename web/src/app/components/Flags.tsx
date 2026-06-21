@@ -1,4 +1,4 @@
-import { useEffect, useCallback, lazy, Suspense } from 'react';
+import { useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { Plus, Zap, Archive } from '@/shared/icons';
@@ -44,7 +44,7 @@ export function Flags() {
   const { data: environments = [] } = useEnvironmentsQuery();
   const { data: enrichedData, isLoading: flagsLoading } = useEnrichedFlagsQuery(projectId);
 
-  const flags = enrichedData?.flags ?? [];
+  const flags = useMemo(() => enrichedData?.flags ?? [], [enrichedData?.flags]);
   const segments = enrichedData?.segments ?? [];
   const tags = enrichedData?.tags ?? [];
   const contexts = enrichedData?.contexts ?? [];

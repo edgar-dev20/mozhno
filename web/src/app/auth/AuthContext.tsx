@@ -32,7 +32,10 @@ export { AuthContext };
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserDto | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    const t = getToken();
+    return !!t;
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,26 +47,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const t = getToken();
-    if (t) {
-      api.auth
-        .me()
-        .then((u) => setUser(u))
-        .catch(async () => {
-          const rt = getRefreshToken();
-          if (rt) {
-            try {
-              const res = await api.auth.refresh();
-              setUser(res.user);
-              return;
-            } catch {}
-          }
-          clearAuth();
-          setUser(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    if (!t) return;
+
+    api.auth
+      .me()
+      .then((u) => setUser(u))
+      .catch(async () => {
+        const rt = getRefreshToken();
+        if (rt) {
+          try {
+            const res = await api.auth.refresh();
+            setUser(res.user);
+            return;
+          } catch {}
+        }
+        clearAuth();
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const login = useCallback(async (email: string, password: string, rememberMe: boolean) => {

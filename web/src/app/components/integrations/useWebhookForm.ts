@@ -35,7 +35,7 @@ export interface WebhookFormState {
   expandedCats: Set<EventCategoryKey>;
   error: string;
   editing: Integration | null;
-  initialRef: React.MutableRefObject<InitialState | null>;
+  initial: InitialState | null;
   headerIdRef: React.MutableRefObject<number>;
   urlError: string | null;
   isDirty: boolean;
@@ -81,7 +81,7 @@ export function useWebhookForm() {
   );
   const [error, setError] = useState('');
 
-  const initialRef = useRef<InitialState | null>(null);
+  const [initial, setInitial] = useState<InitialState | null>(null);
   const headerIdRef = useRef(0);
 
   const urlError = useMemo(() => {
@@ -92,24 +92,23 @@ export function useWebhookForm() {
   const currentHeaders = useMemo(() => buildHeadersMap(formHeaders), [formHeaders]);
 
   const isDirty = useMemo(() => {
-    const orig = initialRef.current;
-    if (!orig) return false;
+    if (!initial) return false;
     if (!editing) return formName.trim() !== '' || formUrl.trim() !== '';
     const curHdrs = buildHeadersMap(formHeaders);
-    const origHdrs = orig.headers;
+    const origHdrs = initial.headers;
     if (Object.keys(curHdrs).length !== Object.keys(origHdrs).length) return true;
     for (const k of Object.keys(curHdrs)) {
       if (curHdrs[k] !== origHdrs[k]) return true;
     }
     return (
-      formName !== orig.name ||
-      formUrl !== orig.url ||
-      formBody !== orig.body ||
-      formEnabled !== orig.enabled ||
-      formEvents.length !== orig.events.length ||
-      formEvents.some((e) => !orig.events.includes(e))
+      formName !== initial.name ||
+      formUrl !== initial.url ||
+      formBody !== initial.body ||
+      formEnabled !== initial.enabled ||
+      formEvents.length !== initial.events.length ||
+      formEvents.some((e) => !initial.events.includes(e))
     );
-  }, [formName, formUrl, formHeaders, formBody, formEnabled, formEvents, editing]);
+  }, [formName, formUrl, formHeaders, formBody, formEnabled, formEvents, editing, initial]);
 
   const curlCommand = useMemo(
     () => buildCurlCommand(formUrl, formHeaders, formBody),
@@ -133,14 +132,14 @@ export function useWebhookForm() {
     setCopied(false);
     setExpandedCats(new Set(EVENT_CATEGORY_KEYS));
     setError('');
-    initialRef.current = {
+    setInitial({
       name: '',
       url: '',
       headers: { 'Content-Type': 'application/json' },
       body: defaultBody,
       enabled: false,
       events: [],
-    };
+    });
   }, []);
 
   const openEdit = useCallback((item: Integration) => {
@@ -163,14 +162,14 @@ export function useWebhookForm() {
     setShowTemplateHelp(false);
     setExpandedCats(new Set(EVENT_CATEGORY_KEYS));
     setError('');
-    initialRef.current = {
+    setInitial({
       name: item.name,
       url: cfg.url,
       headers: { ...cfg.headers },
       body: cfg.body,
       enabled: item.enabled,
       events: [...evts],
-    };
+    });
   }, []);
 
   const addHeaderRow = useCallback(() => {
@@ -243,7 +242,7 @@ export function useWebhookForm() {
     expandedCats,
     error,
     editing,
-    initialRef,
+    initial,
     headerIdRef,
     urlError,
     isDirty,
