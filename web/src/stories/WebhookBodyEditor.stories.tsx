@@ -12,6 +12,6 @@ const meta: Meta<typeof WebhookBodyEditor> = {
 export default meta;
 type Story = StoryObj<typeof WebhookBodyEditor>;
 
-export const Empty: Story = { render: () => { const [b, sb] = useState("{}"); return <WebhookBodyEditor body={b} headers={[]} showTemplateHelp={false} copiedVar={null} onBodyChange={sb} onToggleTemplateHelp={fn()} onCopyTemplateVar={fn()} />; } };
+export const Empty: Story = { render: function EmptyRender() { const [b, sb] = useState("{}"); return <WebhookBodyEditor body={b} headers={[]} showTemplateHelp={false} copiedVar={null} onBodyChange={sb} onToggleTemplateHelp={fn()} onCopyTemplateVar={fn()} />; } };
 
-export const WithBody: Story = { render: () => { const [b, sb] = useState('{"flagKey":"{{flagKey}}","enabled":true}'); return <WebhookBodyEditor body={b} headers={[]} showTemplateHelp={false} copiedVar={null} onBodyChange={sb} onToggleTemplateHelp={fn()} onCopyTemplateVar={fn()} />; } };
+export const WithBody: Story = { render: function WithBodyRender() { const [b, sb] = useState('{"flagKey":"{{flagKey}}","enabled":true}'); return <WebhookBodyEditor body={b} headers={[]} showTemplateHelp={false} copiedVar={null} onBodyChange={sb} onToggleTemplateHelp={fn()} onCopyTemplateVar={fn()} />; } };

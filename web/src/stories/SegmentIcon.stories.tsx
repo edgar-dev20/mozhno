@@ -29,5 +29,5 @@ export const All: Story = {
 };
 
 export const Picker: Story = {
-  render: () => { const [v, sv] = useState("Users"); return <SegmentIconPicker value={v} onChange={sv} />; },
+  render: function PickerRender() { const [v, sv] = useState("Users"); return <SegmentIconPicker value={v} onChange={sv} />; },
 };

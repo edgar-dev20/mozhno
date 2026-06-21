@@ -12,6 +12,21 @@ const meta: Meta<typeof MultiValueChips> = {
 export default meta;
 type Story = StoryObj<typeof MultiValueChips>;
 
-export const Empty: Story = { render: () => { const [v, s] = useState<string[]>([]); return <MultiValueChips values={v} onChange={s} />; } };
-export const WithValues: Story = { render: () => { const [v, s] = useState<string[]>(["US", "CA", "UK"]); return <MultiValueChips values={v} onChange={s} />; } };
-export const WithValidValues: Story = { render: () => { const [v, s] = useState<string[]>(["US"]); return <MultiValueChips values={v} onChange={s} validValues={["US", "CA", "UK", "DE", "FR"]} />; } };
+function EmptyRender() {
+  const [v, s] = useState<string[]>([]);
+  return <MultiValueChips values={v} onChange={s} />;
+}
+
+function WithValuesRender() {
+  const [v, s] = useState<string[]>(["US", "CA", "UK"]);
+  return <MultiValueChips values={v} onChange={s} />;
+}
+
+function WithValidValuesRender() {
+  const [v, s] = useState<string[]>(["US"]);
+  return <MultiValueChips values={v} onChange={s} validValues={["US", "CA", "UK", "DE", "FR"]} />;
+}
+
+export const Empty: Story = { render: EmptyRender };
+export const WithValues: Story = { render: WithValuesRender };
+export const WithValidValues: Story = { render: WithValidValuesRender };

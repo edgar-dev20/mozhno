@@ -21,6 +21,7 @@ const SidebarCtx = createContext<{
   mobileOpen: boolean;
 }>({ collapsed: false, setCollapsed: () => {}, toggleMobile: () => {}, mobileOpen: false });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAppSidebar() {
   return useContext(SidebarCtx);
 }

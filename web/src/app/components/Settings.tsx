@@ -52,7 +52,7 @@ export function Settings() {
 
   const { data: environments = [] } = useEnvironmentsQuery();
 
-  const { data: _settings } = useQuery({
+  useQuery({
     queryKey: queryKeys.settings.byProject(projectId),
     queryFn: () => api.settings.get(),
     enabled: !!projectId,

@@ -168,7 +168,7 @@ export function Flags() {
         });
       }
     },
-    [editing.mode, editing.flag, envRulePercent, envRuleSegments, envRuleConstraints, envRuleEnabled],
+    [editing.mode, editing.flag, editing.envId, envRulePercent, envRuleSegments, envRuleConstraints, envRuleEnabled, closePanel, queryClient, setEditing, setInitialEnvRulePercent, setInitialEnvRuleSegments, setInitialEnvRuleConstraints, setInitialEnvRuleEnabled],
   );
 
   const { save, showDiff, confirmDiff, closeDiff, saving, error, diffOpen, diffChanges } =
@@ -253,7 +253,7 @@ export function Flags() {
 
   useEffect(() => {
     if (!panelOpen) setActiveGroupId(null);
-  }, [panelOpen]);
+  }, [panelOpen, setActiveGroupId]);
 
   useEffect(() => {
     const targetKey = searchParams.get('open');
@@ -261,14 +261,14 @@ export function Flags() {
       setExpandedKeys(new Set([...expandedKeys, targetKey]));
       document.getElementById(`flag-card-${targetKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }, [flags, searchParams]);
+  }, [flags, searchParams, expandedKeys, setExpandedKeys]);
 
   const handleMetricsClick = useCallback(
     (flagId: number, flagName: string, envId: number) => {
       setMetricsTarget({ flagId, flagName, envId });
       setMetricsDialogOpen(true);
     },
-    [],
+    [setMetricsDialogOpen, setMetricsTarget],
   );
 
   return (

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { X, Trash2 } from '@/shared/icons';
 import { MultiValueChips } from '@/app/components/flags/MultiValueChips';
 import { ContextType } from '@/app/components/contextTypes';
@@ -22,7 +22,6 @@ import type { ContextDefinition } from '@/api';
 interface DetailCardProps {
   group: ConstraintGroup | null;
   contexts: ContextDefinition[];
-  initialGroup: ConstraintGroup | null;
   onChange: (group: ConstraintGroup) => void;
   onRemove: () => void;
   onClose: () => void;
@@ -34,7 +33,6 @@ const CARD_TRANSITION =
 export function DetailCard({
   group,
   contexts,
-  initialGroup,
   onChange,
   onRemove,
   onClose,
@@ -42,14 +40,17 @@ export function DetailCard({
   const t = useT();
   const cardRef = useRef<HTMLDivElement>(null);
   const singleInputRef = useRef<HTMLInputElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
   const [focusedKey, setFocusedKey] = useState(0);
 
   const hasContext = group !== null && group.contextDefId !== 0;
   const isMulti = isMultiOperator(group?.operator ?? '');
   const ctxDef = hasContext ? (Array.isArray(contexts) ? contexts.find((c) => c.id === group?.contextDefId) : undefined) : undefined;
   const contextType = ctxDef?.type;
+
+  const isOpen = group !== null;
+  const shouldRender = group !== null;
+
+  const handleTransitionEnd = () => {};
 
   const previewValues = group?.values.length
     ? group.values.length === 1
