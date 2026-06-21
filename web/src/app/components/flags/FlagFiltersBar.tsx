@@ -58,7 +58,7 @@ export function FlagFiltersBar({
             onClick={() => onFlagTypeFilterChange(null)}
             className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
               !flagTypeFilter
-                ? 'bg-chart-4/10 text-chart-4 border-chart-4/20'
+                ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
             }`}
           >
