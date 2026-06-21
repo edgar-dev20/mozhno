@@ -239,7 +239,7 @@ export default defineConfig({
   },
 
   sitemap: {
-    hostname: 'https://docs.mozhno.dev',
+    hostname: 'https://mozhno-dev.github.io/mozhno',
   },
 
   transformHead: async (context: any) => {
@@ -258,8 +258,8 @@ export default defineConfig({
       ['meta', { property: 'og:description', content: description }],
       ['meta', { property: 'og:locale', content: isRu ? 'ru_RU' : 'en_US' }],
       ['meta', { name: 'description', content: description }],
-      ['link', { rel: 'alternate', hreflang: 'ru', href: `https://docs.mozhno.dev${isRu ? path : path.replace('/en', '')}` }],
-      ['link', { rel: 'alternate', hreflang: 'en', href: `https://docs.mozhno.dev${isRu ? '/en' + path : path}` }],
+      ['link', { rel: 'alternate', hreflang: 'ru', href: `https://mozhno-dev.github.io/mozhno${isRu ? path : path.replace('/en', '')}` }],
+      ['link', { rel: 'alternate', hreflang: 'en', href: `https://mozhno-dev.github.io/mozhno${isRu ? '/en' + path : path}` }],
     ]
   },
 })
