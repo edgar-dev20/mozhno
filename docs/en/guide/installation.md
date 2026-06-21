@@ -16,7 +16,7 @@ This guide covers all installation methods for **можно.** — from a quick 
 The fastest way to get running is with the official Docker image.
 
 ```bash
-docker pull ghcr.io/edgar-dev20/mozhno:latest
+docker pull ghcr.io/mozhno-dev/mozhno:latest
 ```
 
 ### With Docker Compose
@@ -40,7 +40,7 @@ services:
       retries: 5
 
   mozhno:
-    image: ghcr.io/edgar-dev20/mozhno:latest
+    image: ghcr.io/mozhno-dev/mozhno:latest
     ports:
       - '8080:8080'
     environment:
@@ -67,7 +67,7 @@ The dashboard will be available at `http://localhost:8080`.
 ### Step 1: Clone the repository
 
 ```bash
-git clone https://github.com/edgar-dev20/mozhno.git
+git clone https://github.com/mozhno-dev/mozhno.git
 cd mozhno
 ```
 

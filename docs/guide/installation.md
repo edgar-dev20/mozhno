@@ -16,7 +16,7 @@
 Готовый образ публикуется в GitHub Container Registry:
 
 ```
-ghcr.io/edgar-dev20/mozhno:latest
+ghcr.io/mozhno-dev/mozhno:latest
 ```
 
 ### Docker Compose
@@ -40,7 +40,7 @@ services:
       retries: 5
 
   mozhno:
-    image: ghcr.io/edgar-dev20/mozhno:latest
+    image: ghcr.io/mozhno-dev/mozhno:latest
     ports:
       - '8080:8080'
     environment:
@@ -76,7 +76,7 @@ docker compose up -d
 ### Шаг 1: Клонируйте репозиторий
 
 ```bash
-git clone https://github.com/edgar-dev20/mozhno.git
+git clone https://github.com/mozhno-dev/mozhno.git
 cd mozhno
 ```
 

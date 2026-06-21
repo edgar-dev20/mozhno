@@ -7,7 +7,7 @@
 Официальный образ публикуется в GitHub Container Registry:
 
 ```
-ghcr.io/edgar-dev20/mozhno:latest
+ghcr.io/mozhno-dev/mozhno:latest
 ```
 
 Образ собирается по трёхэтапному Dockerfile:
@@ -51,7 +51,7 @@ services:
           cpus: '0.25'
 
   mozhno:
-    image: ghcr.io/edgar-dev20/mozhno:latest
+    image: ghcr.io/mozhno-dev/mozhno:latest
     restart: unless-stopped
     ports:
       - '${SERVER_PORT:-8080}:8080'
@@ -260,8 +260,8 @@ openssl rand -base64 32
 Перед развёртыванием проверьте образ сканером:
 
 ```bash
-docker scout quickview ghcr.io/edgar-dev20/mozhno:latest
-trivy image ghcr.io/edgar-dev20/mozhno:latest
+docker scout quickview ghcr.io/mozhno-dev/mozhno:latest
+trivy image ghcr.io/mozhno-dev/mozhno:latest
 ```
 
 ## Сборка образа локально
@@ -275,7 +275,7 @@ make docker-build
 Или вручную:
 
 ```bash
-docker build -t ghcr.io/edgar-dev20/mozhno:latest .
+docker build -t ghcr.io/mozhno-dev/mozhno:latest .
 ```
 
 Dockerfile использует многоэтапную сборку (multi-stage build), поэтому итоговый образ не содержит Node.js, npm-зависимости или JDK — только JRE и артефакты.
@@ -286,9 +286,9 @@ Flyway-миграции запускаются автоматически при
 
 ## Где брать образ
 
-- **GitHub Container Registry:** `ghcr.io/edgar-dev20/mozhno:latest`
-- **Теги версий:** `ghcr.io/edgar-dev20/mozhno:v1.0.0`
-- **Digest (для неизменяемости):** `ghcr.io/edgar-dev20/mozhno@sha256:...`
+- **GitHub Container Registry:** `ghcr.io/mozhno-dev/mozhno:latest`
+- **Теги версий:** `ghcr.io/mozhno-dev/mozhno:v1.0.0`
+- **Digest (для неизменяемости):** `ghcr.io/mozhno-dev/mozhno@sha256:...`
 
 Рекомендуется фиксировать конкретную версию или digest для продакшен-окружения, чтобы избежать неожиданных изменений.
 

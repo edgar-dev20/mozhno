@@ -38,7 +38,7 @@ dependencies {
 </dependency>
 ```
 
-> **Tip:** Check the [GitHub releases page](https://github.com/edgar-dev20/mozhno/releases) for the latest version.
+> **Tip:** Check the [GitHub releases page](https://github.com/mozhno-dev/mozhno/releases) for the latest version.
 
 ## Configuration
 

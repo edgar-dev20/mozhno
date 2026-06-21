@@ -54,7 +54,7 @@ spec:
         readOnlyRootFilesystem: true
       containers:
         - name: mozhno
-          image: ghcr.io/edgar-dev20/mozhno:latest
+          image: ghcr.io/mozhno-dev/mozhno:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
