@@ -1,6 +1,6 @@
 # Java SDK
 
-Java SDK для **можно.** — клиентская библиотека для JVM-приложений. Поддерживает Java 21+, Spring Boot 3.x/4.x, работает в любых окружениях JVM.
+Java SDK для **можно.** — клиентская библиотека для JVM-приложений. Поддерживает JDK 25+, Spring Boot 4.0, работает в любых окружениях JVM.
 
 ## Установка
 
@@ -9,32 +9,22 @@ Java SDK для **можно.** — клиентская библиотека д
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("com.mozhno:client-java:1.0.0")
+    implementation("dev.mozhno:mozhno-client-java:1.0.0")
 }
 ```
 
 ```groovy
 // build.gradle
 dependencies {
-    implementation 'com.mozhno:client-java:1.0.0'
+    implementation 'dev.mozhno:mozhno-client-java:1.0.0'
 }
-```
-
-### Maven
-
-```xml
-<dependency>
-    <groupId>com.mozhno</groupId>
-    <artifactId>client-java</artifactId>
-    <version>1.0.0</version>
-</dependency>
 ```
 
 ### Системные требования
 
 | Требование | Минимальная версия |
 |------------|-------------------|
-| Java | 21+ |
+| JDK | 25+ |
 | Совместимость | Любой JVM-фреймворк (Spring Boot, Quarkus, Micronaut, Vanilla Java) |
 
 ## Конфигурация
@@ -50,7 +40,7 @@ import com.mozhno.client.EvaluationContext;
 
 MozhnoClient client = MozhnoClient.builder()
     .serverUrl("http://localhost:8080")
-    .apiKey("mz_env_abc123def456")
+    .apiKey("<api-key>")
     .pollInterval(30)              // секунды (опционально)
     .connectTimeout(5000)          // миллисекунды (опционально)
     .readTimeout(10000)            // миллисекунды (опционально)
@@ -63,7 +53,7 @@ MozhnoClient client = MozhnoClient.builder()
 | Метод | Тип | Обязательно | По умолчанию | Описание |
 |-------|-----|-------------|-------------|----------|
 | `serverUrl(String)` | `String` | Да | — | URL сервера **можно.** |
-| `apiKey(String)` | `String` | Да | — | API-ключ окружения. Формат: `mz_env_...` |
+| `apiKey(String)` | `String` | Да | — | API-ключ окружения |
 | `pollInterval(int)` | `int` | Нет | `30` | Интервал опроса сервера (секунды) |
 | `connectTimeout(int)` | `int` | Нет | `5000` | Таймаут TCP-соединения (мс) |
 | `readTimeout(int)` | `int` | Нет | `10000` | Таймаут чтения ответа (мс) |
@@ -96,7 +86,7 @@ public class MozhnoConfig {
 ```properties
 # application.properties
 mozhno.server-url=http://localhost:8080
-mozhno.api-key=mz_env_abc123def456
+mozhno.api-key=<api-key>
 ```
 
 ```yaml
@@ -166,9 +156,9 @@ if (client.isFlagEnabled("new-checkout", ctx)) {
 }
 ```
 
-### getFlagValue
+### isEnabled (детальная)
 
-Возвращает значение мультивариативного флага.
+Возвращает результат оценки флага с явным контекстом и значением по умолчанию.
 
 ```java
 String getFlagValue(String flagKey, EvaluationContext ctx, String defaultValue)
@@ -212,16 +202,7 @@ boolean darkMode = allFlags.getOrDefault("dark-mode", false);
 
 Полезно для логирования или отправки всех состояний флагов в аналитику при старте сессии.
 
-### getFlagEvaluation
-
-Возвращает результат оценки с метаданными.
-
-```java
-FlagEvaluation getFlagEvaluation(String flagKey, EvaluationContext ctx)
-```
-
-```java
-FlagEvaluation eval = client.getFlagEvaluation("new-feature", ctx);
+### isEnabled with context
 
 System.out.println("Результат: " + eval.isEnabled());
 System.out.println("Вариант: " + eval.getValue());
@@ -355,7 +336,7 @@ SDK автоматически повторяет запросы при сете
 // Блокирующий вызов — выполнится загрузка правил
 MozhnoClient client = MozhnoClient.builder()
     .serverUrl("http://localhost:8080")
-    .apiKey("mz_env_abc123")
+    .apiKey("<api-key>")
     .build();
 
 // После build() клиент сразу готов к использованию
@@ -369,7 +350,7 @@ boolean enabled = client.isFlagEnabled("test-flag", ctx);
 ```java
 try (var client = MozhnoClient.builder()
         .serverUrl("http://localhost:8080")
-        .apiKey("mz_env_abc123")
+        .apiKey("<api-key>")
         .build()) {
 
     for (var user : users) {
@@ -437,7 +418,7 @@ public class CheckoutService {
             return executeNewCheckout(order, user);
         }
 
-        // Мультивариативный флаг
+        // KILLSWITCH флаг
         String design = mozhno.getFlagValue("checkout-design", ctx, "A");
         return executeOldCheckout(order, user, design);
     }

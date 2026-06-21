@@ -28,7 +28,7 @@ export class MozhnoClient extends EventEmitter {
   private flags: Map<string, FeatureFlag> = new Map();
   private clientToggles: Map<string, boolean> = new Map();
   private context: MozhnoContext;
-  private metricsBuffer: Record<string, number> = {};
+  private metricsBuffer: Record<string, { t: number; f: number }> = {};
   private running = false;
   private fetchTimer: ReturnType<typeof setInterval> | null = null;
   private metricsTimer: ReturnType<typeof setInterval> | null = null;
@@ -93,14 +93,17 @@ export class MozhnoClient extends EventEmitter {
     const targetingKey = this.getTargetingKey(ctx);
 
     if (this.config.mode === 'client') {
-      return this.clientToggles.get(flagKey) || false;
+      const enabled = this.clientToggles.get(flagKey) || false;
+      this.recordMetric(flagKey, enabled);
+      return enabled;
     }
 
     const flag = this.flags.get(flagKey);
     if (!flag) return false;
 
-    this.recordMetric(flagKey);
-    return isFlagEnabled(flag, ctx, targetingKey);
+    const result = isFlagEnabled(flag, ctx, targetingKey);
+    this.recordMetric(flagKey, result);
+    return result;
   }
 
   private getTargetingKey(context: MozhnoContext): string {
@@ -242,8 +245,13 @@ export class MozhnoClient extends EventEmitter {
     }
   }
 
-  private recordMetric(flagKey: string): void {
-    this.metricsBuffer[flagKey] = (this.metricsBuffer[flagKey] || 0) + 1;
+  private recordMetric(flagKey: string, enabled: boolean): void {
+    const entry = this.metricsBuffer[flagKey] || (this.metricsBuffer[flagKey] = { t: 0, f: 0 });
+    if (enabled) {
+      entry.t++;
+    } else {
+      entry.f++;
+    }
   }
 
   private async sendMetrics(): Promise<void> {
@@ -253,12 +261,19 @@ export class MozhnoClient extends EventEmitter {
     const snapshot = { ...this.metricsBuffer };
     this.metricsBuffer = {};
 
-    const ok = await this.fetcher.sendMetrics(snapshot);
+    const payload: Record<string, { t: number; f: number }> = {};
+    for (const key of keys) {
+      payload[key] = { t: snapshot[key].t, f: snapshot[key].f };
+    }
+
+    const ok = await this.fetcher.sendMetrics(payload);
     if (ok) {
       this.emit('sent');
     } else {
-      for (const [k, v] of Object.entries(snapshot)) {
-        this.metricsBuffer[k] = (this.metricsBuffer[k] || 0) + v;
+      for (const [k, v] of Object.entries(payload)) {
+        const buf = this.metricsBuffer[k] || (this.metricsBuffer[k] = { t: 0, f: 0 });
+        buf.t += v.t;
+        buf.f += v.f;
       }
     }
   }

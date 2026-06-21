@@ -5,10 +5,10 @@
 <p align="center">Open-source feature flag management platform.</p>
 
 <p align="center">
-  <a href="https://github.com/edgar-dev20/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/edgar-dev20/mozhno/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI" /></a>
+  <a href="https://github.com/mozhno-dev/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mozhno-dev/mozhno/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL_v3-blue?style=flat-square" alt="AGPL v3" /></a>
-  <a href="https://github.com/edgar-dev20/mozhno/pkgs/container/mozhno"><img src="https://img.shields.io/badge/Docker-ghcr.io-blue?style=flat-square&logo=docker" alt="Docker" /></a>
-  <a href="https://github.com/edgar-dev20/mozhno/stargazers"><img src="https://img.shields.io/github/stars/edgar-dev20/mozhno?style=flat-square&logo=github&color=fedc32" alt="Stars" /></a>
+  <a href="https://github.com/mozhno-dev/mozhno/pkgs/container/mozhno"><img src="https://img.shields.io/badge/Docker-ghcr.io-blue?style=flat-square&logo=docker" alt="Docker" /></a>
+  <a href="https://github.com/mozhno-dev/mozhno/stargazers"><img src="https://img.shields.io/github/stars/mozhno-dev/mozhno?style=flat-square&logo=github&color=fedc32" alt="Stars" /></a>
 </p>
 
 <p align="right"><a href="README.md">Русский</a></p>
@@ -23,10 +23,10 @@
 
 | Category | Description |
 |----------|-------------|
-| **Flags** | Boolean, multivariate, percentage rollouts, attribute-based rules |
+| **Flags** | RELEASE & KILLSWITCH, percentage rollouts, attribute-based rules |
 | **Contexts** | Evaluate flags against arbitrary user or request attributes |
 | **Segments** | Reusable user groups with shared targeting rules |
-| **Strategies** | Pluggable rollout logic: default, gradual, scheduled, custom |
+| **Strategies** | Per-environment configuration: constraints, segments, percentage rollout |
 | **API Keys** | Per-environment keys with granular permissions |
 | **Audit Log** | Full change history for every flag and configuration |
 | **SDKs** | Native Java & JavaScript clients — evaluate flags locally, zero network calls |
@@ -48,7 +48,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   mozhno:
-    image: ghcr.io/edgar-dev20/mozhno:latest
+    image: ghcr.io/mozhno-dev/mozhno:latest
     ports:
       - '8080:8080'
     environment:
@@ -143,10 +143,11 @@ cd web && npm ci && npm run dev
 cd server && ./gradlew check   # Server tests
 cd web && npm test             # Web UI tests
 cd sdks/js && npm test         # JS SDK tests
+cd server && ./gradlew :mozhno-client-java:check   # Java SDK tests
 ```
 
 ---
 
 ### License
 
-[GNU AGPL v3.0](LICENSE) · © 2025 [Edgar](https://github.com/edgar-dev20)
+[GNU AGPL v3.0](LICENSE) · © 2025 [Edgar](https://github.com/mozhno-dev)

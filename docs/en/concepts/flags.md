@@ -4,169 +4,121 @@ A **flag** (feature toggle) is the central unit of configuration in **можно
 
 ## Flag Types
 
-### Boolean Flags
+### RELEASE
 
-The simplest form of flag. Returns `true` or `false` — a feature is either enabled or disabled.
+Standard feature flag for gradual rollout of new functionality. Enabled for target audiences through targeting rules and percentage rollout.
 
 ```java
-boolean enabled = client.isFlagEnabled("new-checkout", ctx);
-if (enabled) {
+if (client.isEnabled("new-checkout")) {
     // show new checkout flow
 } else {
     // show old checkout flow
 }
 ```
 
-Use boolean flags for:
+Use RELEASE flags for:
 - Gradual rollouts of new features
-- Kill switches for emergency shutoffs
-- A/B test toggles (show variant A or B)
+- Per-environment feature configuration
 
-### Multivariate Flags
+### KILLSWITCH
 
-Returns one of several predefined values instead of just `true`/`false`. Each variant is a named value of type `string`, `number`, or `json`.
+Emergency switch to instantly disable functionality. Typically enabled (active) for everyone, disabled during incidents. Always checked with `isEnabled()` — if it returns `false`, the feature is blocked.
 
 ```java
-String variant = client.getFlagValue("checkout-theme", ctx, "default");
-switch (variant) {
-    case "blue"  -> applyTheme("blue");
-    case "green" -> applyTheme("green");
-    default      -> applyTheme("default");
+if (!client.isEnabled("kill-payment-gw")) {
+    throw new ServiceUnavailableException();
 }
 ```
 
-Use multivariate flags for:
-- Configuration values that differ per environment or user segment (e.g., API endpoint URLs)
-- Multi-variant experiments
-- Feature configurations with more than two states
+## Targeting Rules (Contexts)
 
-### Variant Distribution
+Rules determine *who* sees a flag by matching context attributes. Rules within a context are evaluated with AND logic — all must match.
 
-For multivariate flags, you define how traffic is split across variants. The distribution must sum to 100%.
+### Operators
 
-| Variant | Value | Distribution |
-|---------|-------|-------------|
-| Control | `"default"` | 50% |
-| Blue    | `"blue"`    | 25% |
-| Green   | `"green"`   | 25% |
+| Operator | Description | Example |
+|----------|-------------|---------|
+| `in` | Value is in a list | `country` in `[RU, BY, KZ]` |
+| `not_in` | Value is not in a list | `country` not_in `[US, CA]` |
+| `eq` | Equality (numeric for `contextType: number`) | `age` eq `18` |
+| `ne` | Not equal | `plan` ne `free` |
+| `gt` | Greater than | `version` gt `2.0` |
+| `gte` | Greater than or equal | `age` gte `21` |
+| `lt` | Less than | `priority` lt `5` |
+| `lte` | Less than or equal | `retries` lte `3` |
+| `contains` | String contains | `email` contains `@company.com` |
 
-## Flag Rules
+### Context Types
 
-Flag rules determine *who* sees a flag. Rules are evaluated top-to-bottom; the first matching rule determines the result.
+| `contextType` | Behavior | Example |
+|---------------|----------|---------|
+| `string` (default) | String comparison | `country` in `[RU, KZ]` |
+| `number` | Numeric comparison | `age` gte `18` |
+| `time` | ISO8601 date comparison | `eventDate` gt `2026-01-01T00:00:00Z` |
+| `semver` | Semantic version comparison | `appVersion` gte `2.1.0` |
 
-### Rule Types
-
-**Individual Targeting**
-Target specific users by their identifier. Useful for allowlisting team members during development.
-
-```json
-{
-  "type": "individual",
-  "attribute": "userId",
-  "values": ["user-001", "user-002", "user-003"],
-  "serve": true
-}
-```
-
-**Attribute Matching**
-Target users based on any context attribute. Supports operators: `equals`, `notEquals`, `contains`, `startsWith`, `endsWith`, `in`, `notIn`, `greaterThan`, `lessThan`.
+### Rule Example
 
 ```json
 {
-  "type": "attribute",
-  "attribute": "country",
+  "field": "country",
   "operator": "in",
-  "values": ["DE", "FR", "NL"],
-  "serve": true
+  "values": ["DE", "FR", "NL"]
 }
 ```
 
-**Segment Targeting**
-Reference a predefined [segment](/en/concepts/segments) by its key. Segments are reusable across multiple flags.
+Rules are grouped into **contexts** (context definitions). All rules within a context must pass (AND logic).
 
-```json
-{
-  "type": "segment",
-  "segmentKey": "beta-testers",
-  "serve": true
-}
-```
+## Segments
 
-### Percentage Rollout
+A **segment** is a reusable group of users defined by matching rules (contexts). Referenced by flag strategies — at least one segment must match for the strategy to apply (OR logic).
 
-A special rule that enables the flag for a random percentage of traffic. The percentage is applied deterministically based on a context attribute (default: `userId`), so the same user always gets the same result.
+Examples:
+- "EU users" — country in list of EU codes
+- "Premium subscribers" — plan equals premium
+- "Beta testers" — specific userIds
 
-```json
-{
-  "type": "percentage",
-  "percentage": 20,
-  "attribute": "userId",
-  "serve": true
-}
-```
+## Percentage Rollout
 
-With `attribute: "userId"`, user `user-123` will consistently be in or out of the 20% bucket — the assignment is stable across calls.
+Percentage rollout distributes flag visibility deterministically using MurmurHash3 over `flagKey + userId` (or `sessionId`). The same user always gets the same result.
 
-### Default Rule
+| Percentage | Behavior |
+|------------|----------|
+| 0% | Flag off for everyone |
+| 25% | Flag on for ~25% of users |
+| 50% | Flag on for ~50% of users |
+| 100% | Flag on for everyone |
 
-The last rule in every flag configuration. If no rules above match, the default rule applies. It's commonly set to `serve: false` for gradual rollouts.
+## Evaluation Logic
 
-```json
-{
-  "type": "default",
-  "serve": false
-}
-```
+When `isEnabled()` is called, the SDK evaluates in this order:
+
+1. **Flag disabled?** → return `false`
+2. **No strategy?** → return `true`
+3. **Check constraints:** all context rules must match (AND)
+4. **Check segments:** at least one segment must match (OR)
+5. **Both constraints and segments present:** either passing grants access (OR)
+6. **Percentage rollout:** MurmurHash3 hash of `flagKey + userId`, modulo 100 comparison
+7. **Nothing matched** → return `false`
 
 ## Flag Lifecycle
 
-Flags have a defined lifecycle that helps teams manage technical debt from stale toggles.
-
-```mermaid
-stateDiagram-v2
-    [*] --> Draft
-    Draft --> Active
-    Active --> Paused
-    Paused --> Active
-    Active --> Deprecated
-    Deprecated --> Removed
-    Removed --> [*]
-```
+Flags have two states:
 
 | State | Description |
 |-------|-------------|
-| **Draft** | Flag is being configured. Not served by the SDK. |
-| **Active** | Flag is live and being evaluated by SDKs. |
-| **Paused** | Flag is temporarily disabled. Acts as if the default rule returns `false`. |
-| **Deprecated** | Flag should be removed from code. Still served but shows a warning in the dashboard. |
-| **Removed** | Flag is archived. SDKs no longer receive its configuration. |
+| **Active** | Flag is live and available to SDKs |
+| **Archived** | Flag is archived. SDKs no longer receive its configuration |
 
-### Best Practices for Lifecycle Management
+Per-environment, a flag can be **enabled** or **disabled** via strategy configuration.
 
-1. **Create as Draft** — configure rules and test before activating.
-2. **Move to Deprecated** once the feature is stable and the flag is no longer needed in code.
-3. **Clean up** — remove the flag from your application code, then archive it (Removed state).
-4. **Avoid leaving flags in Paused** — either activate or deprecate them.
+## Best Practices
 
-## Flag Evaluation Example
-
-Given this flag configuration for `new-checkout`:
-
-1. Individual targeting: `userId` is `user-001` → **`true`**
-2. Percentage rollout: 20% of users → **`true`**
-3. Default rule → **`false`**
-
-The SDK evaluates:
-
-```
-Rule 1: ctx.userId == "user-001"?  → yes → return true
-Rule 1: ctx.userId == "user-002"?  → no  → continue
-Rule 2: user-002 in 20% bucket?    → yes → return true
-Rule 2: user-003 in 20% bucket?    → no  → continue
-Rule 3: default                    → return false
-```
-
-Rules are short-circuit evaluated — the first match wins.
+1. **Naming** — use descriptive kebab-case keys: `checkout-v2`, `ai-search-enabled`, `dark-mode-rollout`
+2. **Clean up stale flags** — archive flags at 100% rollout after 2+ weeks of stability
+3. **Avoid flag nesting** — `if (flagA && flagB)` is hard to debug; use segments instead
+4. **Document flags** — fill in the description field in the dashboard
+5. **Monitor** — track which flags are active and for how long
 
 ## Related Pages
 

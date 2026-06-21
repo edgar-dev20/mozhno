@@ -2,25 +2,21 @@
 
 Deploy **можно.** on Kubernetes with production-grade configuration: high availability, auto-scaling, rolling updates, and health probes.
 
-## Architecture
+## Manifest Overview
 
-```mermaid
-graph TD
-    IN[Ingress / Load Balancer] --> SVC[Service: ClusterIP :8080]
-    SVC --> P1[Pod 1]
-    SVC --> P2[Pod 2]
-    P1 --> DB[(PostgreSQL)]
-    P2 --> DB
-    HPA[HorizontalPodAutoscaler] -.-> DEPL[Deployment]
-    DEPL --> P1
-    DEPL --> P2
+All manifests are in the `k8s/` directory:
+
+```
+k8s/
+├── deployment.yaml    — Deployment + Service + PDB + HPA
+└── config.yaml        — Secrets + ConfigMap
 ```
 
-## Prerequisites
+Apply with:
 
-- Kubernetes 1.27+
-- `kubectl` configured for your cluster
-- PostgreSQL 16 accessible from the cluster (managed or StatefulSet)
+```bash
+kubectl apply -f k8s/
+```
 
 ## Deployment Manifest
 
@@ -28,7 +24,7 @@ graph TD
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mozhno
+  name: mozhno-server
   labels:
     app: mozhno
 spec:
@@ -46,12 +42,7 @@ spec:
       labels:
         app: mozhno
     spec:
-      terminationGracePeriodSeconds: 60
-      securityContext:
-        runAsUser: 1001
-        runAsGroup: 1001
-        fsGroup: 1001
-        runAsNonRoot: true
+      terminationGracePeriodSeconds: 45
       containers:
         - name: mozhno
           image: ghcr.io/mozhno-dev/mozhno:latest
@@ -59,35 +50,35 @@ spec:
           ports:
             - containerPort: 8080
               name: http
-              protocol: TCP
           env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:+UseZGC -XX:MaxRAMPercentage=75.0"
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
-                  name: mozhno-secrets
-                  key: database-url
+                  name: mozhno-db
+                  key: url
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: mozhno-secrets
-                  key: database-username
+                  name: mozhno-db
+                  key: username
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mozhno-secrets
-                  key: database-password
+                  name: mozhno-db
+                  key: password
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: mozhno-secrets
-                  key: jwt-secret
-            - name: JAVA_OPTS
-              value: >-
-                -XX:+UseZGC
-                -XX:MaxRAMPercentage=75
-                -XX:+ExitOnOutOfMemoryError
-                -XX:ConcGCThreads=2
-                -XX:ParallelGCThreads=2
+                  name: mozhno-jwt
+                  key: secret
+            - name: APP_BASE_URL
+              value: "https://flags.example.com"
+            - name: HIKARI_MAX_POOL_SIZE
+              value: "30"
+            - name: HIKARI_MIN_IDLE
+              value: "5"
           resources:
             requests:
               memory: "512Mi"
@@ -97,41 +88,35 @@ spec:
               cpu: "2000m"
           readinessProbe:
             httpGet:
-              path: /actuator/health/readiness
+              path: /actuator/health
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
-            timeoutSeconds: 5
+            timeoutSeconds: 3
             failureThreshold: 3
           livenessProbe:
             httpGet:
-              path: /actuator/health/liveness
+              path: /actuator/health
               port: 8080
             initialDelaySeconds: 60
-            periodSeconds: 20
+            periodSeconds: 15
             timeoutSeconds: 5
-            failureThreshold: 3
+            failureThreshold: 5
           startupProbe:
             httpGet:
               path: /actuator/health
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 5
-            timeoutSeconds: 5
+            timeoutSeconds: 3
             failureThreshold: 30
           securityContext:
-            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
-          volumeMounts:
-            - name: tmp
-              mountPath: /tmp
-      volumes:
-        - name: tmp
-          emptyDir:
-            sizeLimit: 64Mi
 ```
 
 ## Rolling Update Strategy
@@ -140,10 +125,11 @@ spec:
 |-----------|-------|-------------|
 | `maxUnavailable` | `0` | Never drop below the desired replica count during updates |
 | `maxSurge` | `1` | Allow one extra pod during rollout for zero-downtime |
+| `terminationGracePeriodSeconds` | `45` | Time for graceful shutdown before force kill |
 
-With 2 replicas, a rolling update creates a 3rd pod with the new version, waits for it to become ready, then terminates one old pod. This guarantees at least 2 healthy pods at all times.
+With 2 replicas, a rolling update creates a 3rd pod with the new version, waits for it to become ready, then terminates one old pod.
 
-The JVM is configured with ZGC (`-XX:+UseZGC`) for sub-millisecond pause times, ensuring no request timeouts during GC cycles.
+The JVM is configured with ZGC (`-XX:+UseZGC`) for sub-millisecond pause times and `-XX:MaxRAMPercentage=75.0` for proper container memory management.
 
 ## Horizontal Pod Autoscaler (HPA)
 
@@ -156,7 +142,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: mozhno
+    name: mozhno-server
   minReplicas: 2
   maxReplicas: 8
   metrics:
@@ -172,19 +158,6 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
-  behavior:
-    scaleDown:
-      stabilizationWindowSeconds: 300
-      policies:
-        - type: Percent
-          value: 50
-          periodSeconds: 60
-    scaleUp:
-      stabilizationWindowSeconds: 0
-      policies:
-        - type: Percent
-          value: 100
-          periodSeconds: 15
 ```
 
 | Parameter | Value | Reason |
@@ -193,8 +166,6 @@ spec:
 | `maxReplicas` | 8 | Reasonable upper bound for most deployments |
 | CPU target | 70% | Trigger scale-out before saturation |
 | Memory target | 80% | Leave headroom for GC and spikes |
-| Scale-down window | 5 min | Avoid flapping from brief traffic dips |
-| Scale-up window | 0 | React immediately to traffic surges |
 
 ## Pod Disruption Budget (PDB)
 
@@ -210,7 +181,7 @@ spec:
       app: mozhno
 ```
 
-`minAvailable: 1` ensures that at least one pod remains available during voluntary disruptions (node drains, cluster upgrades). Combined with 2 replicas and `maxUnavailable: 0`, the deployment tolerates one node failure without downtime.
+`minAvailable: 1` ensures that at least one pod remains available during voluntary disruptions (node drains, cluster upgrades).
 
 ## Service
 
@@ -218,7 +189,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mozhno
+  name: mozhno-server
   labels:
     app: mozhno
 spec:
@@ -232,7 +203,7 @@ spec:
       protocol: TCP
 ```
 
-`ClusterIP` is sufficient — expose the service externally via Ingress or a LoadBalancer at the edge, not directly.
+`ClusterIP` is sufficient — expose the service externally via Ingress.
 
 ### Ingress Example
 
@@ -257,72 +228,109 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: mozhno
+                name: mozhno-server
                 port:
                   number: 8080
 ```
 
 ## Health Probes
 
-| Probe | Endpoint | Initial Delay | Period | Failure Threshold | Purpose |
-|-------|----------|---------------|--------|-------------------|---------|
-| **startup** | `/actuator/health` | 10s | 5s | 30 (150s total) | Wait for JVM + Flyway + cache warm |
-| **liveness** | `/actuator/health/liveness` | 60s | 20s | 3 | Detect deadlocked/unresponsive JVM |
-| **readiness** | `/actuator/health/readiness` | 30s | 10s | 3 | Stop routing to pod if DB is unreachable |
+| Probe | Endpoint | Initial Delay | Period | Failure Threshold | Max Wait |
+|-------|----------|---------------|--------|-------------------|----------|
+| **startup** | `/actuator/health` | 10s | 5s | 30 | 150s total |
+| **liveness** | `/actuator/health` | 60s | 15s | 5 | 75s total |
+| **readiness** | `/actuator/health` | 30s | 10s | 3 | 30s total |
 
-- **Startup probe** gives the JVM up to 150 seconds to start (including Flyway migrations) before Kubernetes kills the pod. The liveness probe is disabled until startup succeeds.
-- **Liveness probe** checks that the JVM is alive. A failed liveness probe triggers a pod restart.
-- **Readiness probe** checks that the pod can serve traffic (DB is reachable). A failed readiness probe removes the pod from the Service endpoints without restarting it.
+- **Startup probe** gives the JVM up to 150 seconds to start (including Flyway migrations) before Kubernetes kills the pod. Liveness probe is disabled until startup succeeds.
+- **Liveness probe** detects deadlocked/unresponsive JVM. Five consecutive failures trigger a pod restart.
+- **Readiness probe** checks that the pod can serve traffic. A failed readiness probe removes the pod from the Service endpoints without restarting it.
 
 ## Secrets Management
+
+Secrets are split into two objects for separate lifecycle management:
 
 ```yaml
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mozhno-secrets
+  name: mozhno-db
   labels:
     app: mozhno
 type: Opaque
 stringData:
-  database-url: jdbc:postgresql://postgres.production:5432/mozhno
-  database-username: mozhno
-  database-password: <strong-random-password>
-  jwt-secret: <64-character-hex-secret>
+  url: jdbc:postgresql://postgres-service:5432/feature_flags
+  username: flags_user
+  password: change-me
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mozhno-jwt
+  labels:
+    app: mozhno
+type: Opaque
+stringData:
+  secret: ""
 ```
 
-In production, use a secrets management solution:
-
-| Approach | Tool |
-|----------|------|
-| External Secrets Operator | Sync from AWS Secrets Manager, GCP Secret Manager, Azure Key Vault, HashiCorp Vault |
-| Sealed Secrets | Encrypt secrets for GitOps workflows |
-| SOPS + Age | Encrypt secret files in Git |
-
-### External Secrets Operator Example
+In production, use External Secrets Operator:
 
 ```yaml
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: mozhno-secrets
+  name: mozhno-db
 spec:
   refreshInterval: 1h
   secretStoreRef:
     name: vault-backend
     kind: SecretStore
   target:
-    name: mozhno-secrets
+    name: mozhno-db
   data:
-    - secretKey: database-url
+    - secretKey: url
       remoteRef:
         key: mozhno/production/database-url
-    - secretKey: database-password
+    - secretKey: username
+      remoteRef:
+        key: mozhno/production/database-username
+    - secretKey: password
       remoteRef:
         key: mozhno/production/database-password
-    - secretKey: jwt-secret
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: mozhno-jwt
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+  target:
+    name: mozhno-jwt
+  data:
+    - secretKey: secret
       remoteRef:
         key: mozhno/production/jwt-secret
+```
+
+## ConfigMap
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mozhno-config
+  labels:
+    app: mozhno
+data:
+  APP_BASE_URL: "https://flags.example.com"
+  CLIENT_MAX_METRICS_PER_KEY: "1000"
+  HIKARI_MAX_POOL_SIZE: "30"
+  HIKARI_MIN_IDLE: "5"
+  CACHE_TTL_MINUTES: "5"
+  LOG_LEVEL_APP: "INFO"
 ```
 
 ## Security Context
@@ -330,9 +338,7 @@ spec:
 | Setting | Value | Effect |
 |---------|-------|--------|
 | `runAsNonRoot` | `true` | Block containers that run as root |
-| `runAsUser` / `runAsGroup` | `1001` | Mozhno user inside the image |
-| `fsGroup` | `1001` | Volume ownership |
-| `readOnlyRootFilesystem` | `true` | Immutable container filesystem |
+| `runAsUser` | `1000` | Mozhno user inside the image |
 | `allowPrivilegeEscalation` | `false` | No `setuid` binaries |
 | `capabilities.drop` | `ALL` | No Linux capabilities |
 
@@ -349,10 +355,10 @@ General guidance:
 | Workload Size | CPU Request | CPU Limit | Memory Request | Memory Limit |
 |---------------|-------------|-----------|----------------|--------------|
 | Small (<100 flags) | 100m | 500m | 256Mi | 1Gi |
-| Medium (100–1000 flags) | 250m | 2000m | 512Mi | 2Gi |
+| Medium (100-1000 flags) | 250m | 2000m | 512Mi | 2Gi |
 | Large (1000+ flags) | 500m | 4000m | 1Gi | 4Gi |
 
-The `MaxRAMPercentage=75` JVM flag means the heap will use 75% of the memory limit. For a 2Gi limit, that's 1.5Gi heap, leaving ~500Mi for off-heap memory, Metaspace, thread stacks, and OS overhead.
+The `MaxRAMPercentage=75.0` JVM flag means the heap will use 75% of the memory limit. For a 2Gi limit, that's 1.5Gi heap, leaving ~500Mi for off-heap memory, Metaspace, thread stacks, and OS overhead.
 
 ## Verification
 
@@ -362,7 +368,7 @@ After deploying, verify everything is healthy:
 kubectl get pods -l app=mozhno
 kubectl get hpa mozhno-hpa
 kubectl get pdb mozhno-pdb
-kubectl get svc mozhno
+kubectl get svc mozhno-server
 kubectl logs -l app=mozhno --tail=20
 ```
 

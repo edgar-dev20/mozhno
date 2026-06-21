@@ -1,53 +1,59 @@
 # Targeting Rules
 
-Targeting rules determine **which users receive which flag value** at evaluation time. Each rule is a logical expression evaluated against the context attributes you provide at runtime.
+Targeting rules determine **which users receive which flag value** at evaluation time. Each rule is a constraint evaluated against the context attributes you provide at runtime.
 
 ## How Targeting Works
 
-When an SDK evaluates a flag, it processes the flag's targeting rules in order:
+When an SDK evaluates a flag, it processes in this order:
+
+1. **Flag enabled?** — if the flag (or strategy) is disabled, return `false`
+2. **Context constraints** — all must match (AND logic)
+3. **Segments** — at least one must match (OR logic)
+4. **If both constraints and segments are present** — either passing grants access (OR)
+5. **Percentage rollout** — deterministic distribution via MurmurHash3
+6. **Default** — if nothing is configured, return `true`
 
 ```mermaid
 flowchart TD
-    A[SDK evaluates flag] --> B{Rules present?}
-    B -->|No| C[Return default value]
-    B -->|Yes| D[Evaluate first rule]
-    D --> E{Rule matches?}
-    E -->|Yes| F[Return rule target value]
-    E -->|No| G{More rules?}
-    G -->|Yes| D
-    G -->|No| H{Percentage rollout?}
-    H -->|Yes| I[Evaluate rollout]
-    H -->|No| C
+    Start[Start evaluation] --> CheckEnabled{Flag enabled?}
+    CheckEnabled -->|No| ReturnFalse[Return false]
+    CheckEnabled -->|Yes| HasConstraints{Constraints present?}
+    HasConstraints -->|Yes| EvalConstraints[Evaluate all constraints<br/>AND logic]
+    HasConstraints -->|No| HasSegments{Segments present?}
+    EvalConstraints --> ConstraintsOk{All match?}
+    ConstraintsOk -->|No| HasSegments
+    ConstraintsOk -->|Yes| Rollout[Percentage rollout]
+    HasSegments -->|Yes| EvalSegments[Evaluate segments<br/>OR logic]
+    HasSegments -->|No| Rollout
+    EvalSegments --> SegmentsOk{Any segment matches?}
+    SegmentsOk -->|No| ConstraintsOk
+    SegmentsOk -->|Yes| Rollout
+    Rollout --> ReturnTrue[Return true]
 ```
-
-The **first matching rule wins**. If no rule matches, the percentage rollout is evaluated. If there is no rollout, the default value is returned.
 
 ## Context Attributes
 
-The evaluation context is a set of key-value pairs your application sends at runtime. Typical attributes:
+The evaluation context is a set of key-value pairs your application sends at runtime. All values are strings.
 
-| Attribute | Type | Example | Description |
-|-----------|------|---------|-------------|
-| `userId` | String | `"user-12345"` | Unique user identifier |
-| `email` | String | `"alice@example.com"` | User email address |
-| `country` | String | `"DE"` | ISO 3166 country code |
-| `plan` | String | `"pro"` | Subscription tier |
-| `beta` | Boolean | `true` | Whether the user is in the beta programme |
-| `tenantId` | String | `"org-789"` | Multi-tenant identifier |
-| `appVersion` | String | `"2.4.1"` | Application version |
-| `custom` | Any | `{"role": "admin"}` | Arbitrary custom data |
+| Attribute | Example | Description |
+|-----------|---------|-------------|
+| `userId` | `"user-12345"` | Unique user identifier (used for rollout hashing) |
+| `sessionId` | `"sess-abc"` | Session identifier (fallback for rollout hashing) |
+| `country` | `"DE"` | ISO 3166 country code |
+| `plan` | `"enterprise"` | Subscription tier |
+| `appVersion` | `"2.4.1"` | Application version (semver comparison) |
 
-### Providing Context to SDKs
+### Providing Context
 
 **Java:**
 ```java
-EvaluationContext context = EvaluationContext.builder()
-    .set("userId", "user-12345")
-    .set("country", "DE")
-    .set("plan", "pro")
+MozhnoContext context = MozhnoContext.builder()
+    .userId("user-12345")
+    .addProperty("country", "DE")
+    .addProperty("plan", "enterprise")
     .build();
 
-boolean enabled = client.isFlagEnabled("premium_features", context);
+boolean enabled = client.isEnabled("premium_features", context);
 ```
 
 **JavaScript:**
@@ -55,136 +61,80 @@ boolean enabled = client.isFlagEnabled("premium_features", context);
 const context = {
   userId: "user-12345",
   country: "DE",
-  plan: "pro",
+  plan: "enterprise",
 };
 
-const enabled = await client.isEnabled("premium_features", context);
+const enabled = client.isEnabled("premium_features", context);
 ```
 
-## Operators
+## Constraint Operators
 
-Each targeting rule compares an attribute against one or more values using an operator.
+Each constraint compares a context field against one or more values using an operator:
 
 | Operator | Description | Example |
 |----------|-------------|---------|
-| **Equals** | Exact match | `country equals "DE"` |
-| **Not Equals** | Does not match | `plan not equals "free"` |
-| **Contains** | Substring match | `email contains "@example.com"` |
-| **Not Contains** | Substring does not appear | `email not contains "@competitor.com"` |
-| **In** | Value is in a list | `country in ["DE", "FR", "ES"]` |
-| **Not In** | Value is not in a list | `country not in ["US", "CA"]` |
-| **Regex** | Regular expression match | `email regex "^[a-z]+@example\\.com$"` |
-| **Greater Than** | Numeric comparison | `appVersion greater than "2.0.0"` |
-| **Less Than** | Numeric comparison | `appVersion less than "3.0.0"` |
-| **Greater Than or Equal** | Numeric comparison | `appVersion >= "1.5.0"` |
-| **Less Than or Equal** | Numeric comparison | `appVersion <= "2.9.9"` |
-| **Exists** | Attribute is present | `beta exists` |
-| **Not Exists** | Attribute is absent | `beta not exists` |
+| `in` | Value is in a list | `country` in `["DE", "FR", "ES"]` |
+| `not_in` | Value is NOT in a list | `country` not_in `["US", "CA"]` |
+| `eq` | Equal (numeric for `contextType: number`) | `plan` eq `"enterprise"` |
+| `ne` | Not equal | `plan` ne `"free"` |
+| `gt` | Greater than | `appVersion` gt `"2.0.0"` |
+| `gte` | Greater than or equal | `age` gte `"18"` |
+| `lt` | Less than | `priority` lt `"5"` |
+| `lte` | Less than or equal | `retries` lte `"3"` |
+| `contains` | Substring match | `email` contains `"@example.com"` |
 
-> **Tip:** The `in` and `not in` operators are more readable than multiple OR conditions. Use them for list-based targeting like country allow-lists.
+### Context Types
 
-### Semantic Version Comparison
+The `contextType` determines how values are compared:
 
-The comparison operators (`>`, `<`, `>=`, `<=`) support semantic version strings:
+| Type | Comparison | Example |
+|------|------------|---------|
+| `string` (default) | String comparison | `country` in `["DE"]` |
+| `number` | Numeric (double) | `age` gte `"18"` |
+| `time` | ISO8601 datetime | `eventDate` gt `"2026-01-01T00:00:00Z"` |
+| `semver` | Semantic versioning | `appVersion` gte `"2.1.0"` |
 
-```
-appVersion greater than "2.0.0"
-```
+Semantic version comparison correctly handles `"2.10.0"` > `"2.9.0"`.
 
-This correctly compares `"2.10.0"` as greater than `"2.9.0"`, not lexicographically.
+## Combining Constraints
 
-## Combining Multiple Rules
+Within a single strategy, all constraints use **AND** logic — every constraint must match for the flag to be enabled:
 
-Rules are combined with **AND** logic within a single rule entry and evaluated top-to-bottom with **first-match-wins** (OR) logic across entries.
-
-### Single Rule (AND logic)
-
-A single rule can have multiple conditions. All conditions must be true for the rule to match:
-
-| Attribute | Operator | Value |
-|-----------|----------|-------|
-| `country` | equals | `"DE"` |
-| `plan` | in | `["pro", "enterprise"]` |
-
-This rule matches when `country` is `"DE"` **AND** `plan` is either `"pro"` or `"enterprise"`.
-
-### Multiple Rules (OR logic / priority ordering)
-
-When you add multiple rule entries, they are evaluated in priority order:
-
-```mermaid
-flowchart LR
-    R1["Rule 1: country=DE AND plan=enterprise → true"] -->|first match| V1["Value: true"]
-    R2["Rule 2: country=DE → true"] -->|only if R1 fails| V2["Value: true"]
-    R3["Rule 3: email ends with @example.com → true"] -->|only if R1,R2 fail| V3["Value: true"]
+```json
+{
+  "constraints": [
+    {"field": "country", "operator": "in", "values": ["DE", "FR"]},
+    {"field": "plan", "operator": "eq", "values": ["enterprise"]}
+  ]
+}
 ```
 
-Use reorder handles in the dashboard to change rule priority. Drag rules up (higher priority) or down (lower priority).
+This means: `country` is DE or FR **AND** `plan` is enterprise.
 
-### Example: Production Ramp-Up
-
-| Priority | Conditions | Target Value |
-|----------|------------|--------------|
-| 1 | `userId in ["qa-tester-1", "qa-tester-2"]` | `true` |
-| 2 | `tenantId equals "internal-demo"` | `true` |
-| 3 | `country in ["DE", "FR"]` AND `plan equals "enterprise"` | `true` |
-| (fallback) | none | `false` (default) |
-
-Internal QA team gets the feature first, followed by the internal demo tenant, then a subset of paying customers.
+Multiple constraints on the same `(field, operator)` are merged — any matching value passes that constraint (OR within a constraint group).
 
 ## Using Segments in Targeting
 
-A **segment** is a reusable set of targeting conditions. Instead of repeating the same conditions across multiple flags, define a segment once and reference it.
+A **segment** is a reusable set of constraints. Reference segments in a strategy rather than repeating rules:
 
-### Creating a Segment
+- **Within a segment**: All constraints must match (AND logic)
+- **Across segments**: At least one segment must match (OR logic)
+- **Constraints + segments**: Either passing grants access (OR between them)
 
-1. Navigate to **Segments** in the dashboard.
-2. Click **New Segment**.
-3. Provide a name (e.g., `beta_testers`).
-4. Define the matching conditions (e.g., `beta equals true`).
+> **Tip:** Segments are evaluated at flag evaluation time against the provided context. Changes to a segment immediately affect all flags that reference it.
 
-### Referencing a Segment in a Rule
+## Percentage Rollout
 
-In the flag targeting editor, add a rule condition with the **Segment** operator:
+When percentage rollout is configured:
 
-| Attribute | Operator | Value |
-|-----------|----------|-------|
-| — | in segment | `beta_testers` |
-| `country` | equals | `"DE"` |
-
-This rule matches users who are beta testers **AND** are located in Germany.
-
-> **Tip:** Segments are evaluated at flag evaluation time against the provided context, not pre-computed. Changes to a segment immediately affect all flags that reference it. Use the [audit log](./audit.md) to track segment modifications.
-
-### Segment Dependencies
-
-Monitor which flags use a segment from the segment detail page. Before deleting a segment, verify no active flags reference it.
-
-## Evaluation Logic with Segments
-
-```mermaid
-flowchart TD
-    Start[Start evaluation] --> CheckContext{Context has<br/>required attributes?}
-    CheckContext -->|No| Skip[Skip rule]
-    CheckContext -->|Yes| EvalEach[Evaluate each condition]
-    EvalEach --> HasSegment{Condition uses<br/>segment?}
-    HasSegment -->|Yes| EvalSegment[Evaluate segment rules<br/>against context]
-    HasSegment -->|No| EvalDirect[Evaluate operator<br/>against value]
-    EvalSegment --> Result{All conditions<br/>match?}
-    EvalDirect --> Result
-    Result -->|Yes| Return[Return target value]
-    Result -->|No| NextRule[Try next rule]
+```
+hash = MurmurHash3(flagKey + userId) % 100
+if hash < percentage → enabled
 ```
 
-## Practical Tips
-
-- **Start with broad rules** and narrow down as you gain confidence.
-- **Use segments** for concepts that apply to multiple flags (environments, user tiers, experiments).
-- **Test in staging** with a rule targeting `userId equals "qa-user"` before going to production.
-- **Audit regularly**: check that rules still make sense and remove stale conditions.
-- **Avoid regex on large datasets**: regex evaluation is client-side and fast, but overly broad patterns can cause unexpected matches.
+The same user always gets the same result for the same flag. If `userId` is absent, `sessionId` is used instead. 100% rollout enables the flag for everyone; 0% disables it.
 
 ## Next Steps
 
-- Set up a [Gradual Rollout](./rollout.md) for rules that should apply to a percentage of users.
+- Set up a [Gradual Rollout](./rollout.md) for percentage-based releases.
 - Learn about [SDK Evaluation](../sdk/overview.md) to understand how context flows from your app to the SDK.

@@ -21,10 +21,10 @@ export function Integrations() {
   const queryClient = useQueryClient();
   const t = useT();
 
-  const { data: project } = useProjectQuery();
+  const { data: project, isLoading: projectLoading } = useProjectQuery();
   const projectId = project?.id ?? null;
 
-  const { data: items = [], isLoading: loading } = useQuery({
+  const { data: items = [], isLoading: loading, isError, error } = useQuery({
     queryKey: queryKeys.integrations.byProject(projectId),
     queryFn: async () => {
       if (!projectId) return [];
@@ -143,8 +143,16 @@ export function Integrations() {
         storageKey="integrations"
       />
 
-      {loading ? (
+      {projectLoading || loading ? (
         <IntegrationCardSkeletonList count={3} />
+      ) : isError ? (
+        <EmptyState
+          icon={<Webhook size={28} className="text-destructive" />}
+          title={t('integrations.loadError')}
+          description={getErrorMessage(error)}
+          buttonLabel={t('common.retry')}
+          onAction={() => queryClient.invalidateQueries({ queryKey: queryKeys.integrations.byProject(projectId) })}
+        />
       ) : items.length === 0 ? (
         <EmptyState
           icon={<Webhook size={28} className="text-info" />}

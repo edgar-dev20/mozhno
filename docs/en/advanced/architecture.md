@@ -53,7 +53,7 @@ graph TD
 | **UI Primitives** | Radix UI | — | Headless accessible components, unstyled by default |
 | **Docs / API** | SpringDoc OpenAPI | 2.x | Swagger UI, request validation, schema generation |
 | **Metrics** | Micrometer | — | Actuator integration, Prometheus support |
-| **Build** | Gradle / Maven | — | Multi-module, reproducible builds |
+| **Build** | Gradle | — | Multi-module, reproducible builds |
 
 ## Flag Evaluation Flow
 
@@ -66,7 +66,7 @@ sequenceDiagram
     participant Cache as Caffeine Cache
 
     Note over SDK: Initialization
-    SDK->>Server: GET /api/sdk/flags<br/>Authorization: Bearer <api-key>
+    SDK->>Server: GET /api/client/features<br/>Authorization: Bearer <api-key>
     Server->>DB: SELECT flags for environment
     DB-->>Server: Flag list with rules
     Server-->>SDK: JSON payload
@@ -79,7 +79,7 @@ sequenceDiagram
     SDK-->>App: true / false
 
     Note over SDK,Server: Background Sync (every 30s)
-    SDK->>Server: GET /api/sdk/flags?since=<timestamp>
+    SDK->>Server: GET /api/client/features?since=<timestamp>
     Server->>Cache: Check flag cache
     alt Cache Hit
         Cache-->>Server: Cached flags

@@ -5,7 +5,7 @@
 ## Development Setup
 
 ```bash
-git clone https://github.com/edgar-dev20/mozhno.git
+git clone https://github.com/mozhno-dev/mozhno.git
 cd mozhno
 cp .env.example .env
 ```

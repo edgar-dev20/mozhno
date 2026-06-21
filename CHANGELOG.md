@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Multi-stage Docker image with web UI embedded into Spring Boot fat JAR
 - CI pipeline with path-based filtering for server, web, and SDK tests
-- Docker release workflow publishing to `ghcr.io/edgar-dev20/mozhno` (amd64 + arm64)
+- Docker release workflow publishing to `ghcr.io/mozhno-dev/mozhno` (amd64 + arm64)
 - Java SDK publishing to GitHub Packages Maven (`dev.mozhno:mozhno-client-java`)
 - JavaScript SDK publishing to GitHub Packages npm (`@mozhno/client-js`)
 - StarChart.cc integration in README

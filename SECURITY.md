@@ -35,7 +35,7 @@ Security reports are welcome for:
 - The web dashboard (React SPA)
 - Java SDK (`dev.mozhno:mozhno-client-java`)
 - JavaScript SDK (`@mozhno/client-js`)
-- Docker images published to `ghcr.io/edgar-dev20/mozhno`
+- Docker images published to `ghcr.io/mozhno-dev/mozhno`
 
 Out of scope:
 - Issues in third-party dependencies (report to the respective project)

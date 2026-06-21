@@ -7,7 +7,7 @@ With it you can:
 - **Toggle features** on production without deploying code
 - **Roll out gradually** — first 1% of users, then 10%, then everyone
 - **Target specific users** — show a feature only to users from a certain country, on a Premium plan, or on a specific device
-- **Run A/B tests** with multivariate flags
+- **Toggle features instantly** — kill switches without deployment
 - **Track all changes** through the audit log
 
 ## How It Works
@@ -29,8 +29,8 @@ graph LR
 
 | Concept | Description |
 |---------|-------------|
-| **Flag** | A named toggle point in code. Can be boolean (on/off) or multivariate (A/B/C). |
-| **Strategy** | How a flag is rolled out: instant, gradual, scheduled, or custom logic. |
+| **Flag** | A named toggle point in code. Types: RELEASE (feature flag) or KILLSWITCH (emergency shutoff). |
+| **Strategy** | Per-environment flag configuration: enabled/disabled, context constraints, segments, percentage rollout. |
 | **Segment** | A reusable user group with shared targeting rules. |
 | **Context** | User or request attributes used to evaluate flag rules. |
 | **Environment** | dev / staging / production — a flag can have different settings on each. |

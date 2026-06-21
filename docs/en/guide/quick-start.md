@@ -47,8 +47,8 @@ On first run, you'll be prompted to create a project and admin user.
 
 1. In the dashboard, click **"Create Flag"**
 2. Enter a flag key, e.g. `new-checkout`
-3. Choose type: **Boolean** (on/off)
-4. Choose strategy: **Default** (standard rollout)
+3. Choose type: **RELEASE** (standard feature flag)
+4. Choose strategy: enable the flag for the desired environment
 5. Click **"Save"**
 
 ## Step 5: Add the flag to your code

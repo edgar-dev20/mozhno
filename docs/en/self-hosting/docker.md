@@ -20,21 +20,20 @@ The web dashboard will be available at `http://localhost:8080`.
 ## docker-compose.yml
 
 ```yaml
-version: "3.8"
 
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
     container_name: mozhno-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: mozhno
-      POSTGRES_USER: mozhno
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_DB: feature_flags
+      POSTGRES_USER: flags_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-flags_password}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mozhno -d mozhno"]
+      test: ["CMD-SHELL", "pg_isready -U flags_user -d feature_flags"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -52,30 +51,33 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
-    user: "1001:1001"
+    user: "1000:1000"
     read_only: true
     tmpfs:
-      - /tmp:size=64M
+      - /tmp:size=128M
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mozhno
-      SPRING_DATASOURCE_USERNAME: mozhno
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-changeme}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/feature_flags
+      SPRING_DATASOURCE_USERNAME: flags_user
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-flags_password}
 
       JWT_SECRET: ${JWT_SECRET:-}
-      JWT_ACCESS_TOKEN_EXPIRATION: 15m
-      JWT_REFRESH_TOKEN_EXPIRATION: 7d
+      JWT_ACCESS_TOKEN_TTL_MINUTES: "15"
+      JWT_REFRESH_TOKEN_TTL_DAYS: "30"
 
       SERVER_PORT: "8080"
+      HIKARI_MAX_POOL_SIZE: "30"
+      HIKARI_MIN_IDLE: "5"
+      CACHE_TTL_MINUTES: "5"
 
-      JAVA_OPTS: >
+      JAVA_TOOL_OPTIONS: >
         -XX:+UseZGC
-        -XX:MaxRAMPercentage=75
+        -XX:MaxRAMPercentage=75.0
         -XX:+ExitOnOutOfMemoryError
     depends_on:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:8080/actuator/health"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -105,17 +107,19 @@ networks:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `SPRING_DATASOURCE_URL` | Yes | — | JDBC URL for PostgreSQL |
-| `SPRING_DATASOURCE_USERNAME` | Yes | — | Database user |
-| `SPRING_DATASOURCE_PASSWORD` | Yes | — | Database password |
+| `SPRING_DATASOURCE_URL` | No | `jdbc:postgresql://localhost:5432/feature_flags` | JDBC URL for PostgreSQL |
+| `SPRING_DATASOURCE_USERNAME` | No | `flags_user` | Database user |
+| `SPRING_DATASOURCE_PASSWORD` | No | `flags_password` | Database password |
+| `HIKARI_MAX_POOL_SIZE` | No | `20` | Maximum database connections |
+| `HIKARI_MIN_IDLE` | No | `5` | Minimum idle database connections |
 
 ### JWT
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `JWT_SECRET` | Yes | — | HMAC-SHA256 signing secret. Minimum 32 characters. |
-| `JWT_ACCESS_TOKEN_EXPIRATION` | No | `15m` | Access token lifetime |
-| `JWT_REFRESH_TOKEN_EXPIRATION` | No | `7d` | Refresh token lifetime |
+| `JWT_SECRET` | Yes | — | HMAC-SHA256 signing secret. Minimum 32 bytes. |
+| `JWT_ACCESS_TOKEN_TTL_MINUTES` | No | `15` | Access token lifetime in minutes |
+| `JWT_REFRESH_TOKEN_TTL_DAYS` | No | `30` | Refresh token lifetime in days |
 
 ### Server
 
@@ -127,20 +131,23 @@ networks:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `JAVA_OPTS` | No | See below | JVM arguments |
+| `JAVA_TOOL_OPTIONS` | No | See below | JVM arguments |
 
 JVM defaults:
 - `-XX:+UseZGC` — Z Garbage Collector for low-latency pause times
-- `-XX:MaxRAMPercentage=75` — Max heap at 75% of container memory limit
+- `-XX:MaxRAMPercentage=75.0` — Max heap at 75% of container memory limit
 - `-XX:+ExitOnOutOfMemoryError` — Fail fast on OOM instead of hanging
+- `-Djava.security.egd=file:/dev/./urandom` — Faster random number generation
 
 ### Optional
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `LOGGING_LEVEL_ROOT` | No | `INFO` | Root log level (`DEBUG`, `INFO`, `WARN`, `ERROR`) |
+| `LOGGING_LEVEL_DEV_MOZHNO` | No | `INFO` | Application log level (`DEBUG`, `INFO`, `WARN`, `ERROR`) |
 | `SPRING_FLYWAY_ENABLED` | No | `true` | Run Flyway migrations on startup |
-| `CORS_ALLOWED_ORIGINS` | No | `*` | CORS allowed origins |
+| `CACHE_TTL_MINUTES` | No | `5` | In-memory cache TTL in minutes |
+| `CLIENT_MAX_METRICS_PER_KEY` | No | `1000` | Max stored metrics per client key |
+| `APP_BASE_URL` | No | `http://localhost:8080` | Public base URL of the server |
 
 ## Health Checks
 
@@ -187,11 +194,11 @@ ports:
 
 ### Non-Root User
 
-The container runs as user `1001:1001` (named `mozhno`), not as root. This limits the impact of a container escape.
+The container runs as user `1000:1000` (named `mozhno`), not as root. This limits the impact of a container escape.
 
 ### Read-Only Filesystem
 
-The container filesystem is mounted read-only (`read_only: true`). A writable `/tmp` is provided as a `tmpfs` volume (64 MB in memory) for temporary files required by the JVM. No persistent data is written inside the container — all state lives in PostgreSQL.
+The container filesystem is mounted read-only (`read_only: true`). A writable `/tmp` is provided as a `tmpfs` volume (128 MB in memory) for temporary files required by the JVM.
 
 ### Secrets Management
 
@@ -237,8 +244,8 @@ The official image is built in three stages:
 | Stage | Base Image | Purpose |
 |-------|-----------|---------|
 | `web-builder` | `node:24-alpine` | Builds React 19 SPA with Vite |
-| `java-builder` | `jdk-25-alpine` | Compiles Spring Boot application |
-| `runtime` | `jre-noble` | Minimal runtime with JRE only |
+| `java-builder` | `eclipse-temurin:25-jdk-alpine` | Compiles Spring Boot application with Gradle |
+| `runtime` | `eclipse-temurin:25-jre-noble` | Minimal runtime with JRE only |
 
 The resulting image contains only the JRE and the pre-built static resources embedded in the server JAR — no JDK, no Node.js, no build toolchain.
 

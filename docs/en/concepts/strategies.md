@@ -1,161 +1,74 @@
 # Strategies
 
-A **strategy** defines the rollout logic for a flag — *how* the flag is delivered to users. Strategies are pluggable components that can be chained together for complex rollout scenarios.
+A **strategy** defines *how* a flag behaves on a specific environment. Each flag can have different strategy configurations per environment (dev, staging, production).
 
-## Strategy Chain
+## Strategy Configuration
 
-Strategies are evaluated in order. The first strategy that "matches" the current context determines the result. If no strategy matches, the flag defaults to its fallback value.
+Each strategy consists of:
 
-```mermaid
-flowchart LR
-    A[Evaluate Flag] --> B{Strategy 1}
-    B -->|Match| C[Return Value]
-    B -->|No Match| D{Strategy 2}
-    D -->|Match| C
-    D -->|No Match| E{Strategy N}
-    E -->|Match| C
-    E -->|No Match| F[Fallback: false]
-```
+| Component | Description |
+|-----------|-------------|
+| **Enabled** | Whether the flag is active on this environment |
+| **Context** | Set of attribute-based rules (constraints) for targeting |
+| **Segments** | Reusable user groups to target (OR logic) |
+| **Percentage** | Deterministic hash-based rollout (0-100) |
 
-This chaining model allows progressive rollouts:
+## How Strategies Work
 
-1. **Target specific users** (individual strategy) — hand-picked testers see it first
-2. **Target a segment** (segment strategy) — then the beta group
-3. **Roll out gradually** (gradual strategy) — then 10% of all users
-4. **Everyone else** — off until the next phase
+A strategy is evaluated in a fixed order:
 
-## Built-in Strategies
+1. **Check enabled** — if disabled, return `false`
+2. **Evaluate context rules** — all constraints must match (AND logic)
+3. **Evaluate segments** — at least one segment must match (OR logic)
+4. **When both present** — either constraints or segments passing grants access
+5. **Percentage rollout** — MurmurHash3 hash of `flagKey + userId` compared against percentage
+6. **Default** — if nothing matched, return `false`
 
-### Default Strategy
+## Targeting with Context Rules
 
-The simplest strategy. The flag is either on or off for everyone that reaches this strategy in the chain.
+Context rules match user attributes using operators:
 
-```yaml
-type: default
-value: true
-```
-
-Parameters:
-- `value` — `true` or `false`
-
-Use cases:
-- Kill switches (default: `false`, override to `true` to disable)
-- Global feature flags with no targeting
-- As the last strategy in a chain (catch-all)
-
-### Gradual Strategy
-
-Enables the flag for a percentage of users, deterministically based on a context attribute.
-
-```yaml
-type: gradual
-percentage: 25
-attribute: userId
-```
-
-Parameters:
-- `percentage` — integer from 0 to 100
-- `attribute` — context attribute used for hashing (defaults to `userId`)
-
-The percentage assignment is **stable**: user `user-123` will consistently be in the same bucket across calls, as long as the percentage value doesn't change.
-
-```
-hash(userId + flagKey) % 100 < percentage → match
-```
-
-Gradual strategies are ideal for:
-
-- **Canary releases** — start at 5%, monitor, increase to 25%, 50%, 100%
-- **Dark launches** — release to 1% of traffic to validate in production
-- **A/B tests** — split traffic equally between control and experiment
-
-### Scheduled Strategy
-
-Enables the flag within a specific time window. Outside the window, the strategy does not match and evaluation falls through to the next strategy.
-
-```yaml
-type: scheduled
-startAt: "2026-07-01T00:00:00Z"
-endAt: "2026-07-15T23:59:59Z"
-```
-
-Parameters:
-- `startAt` — ISO 8601 datetime when the flag becomes active
-- `endAt` — ISO 8601 datetime when the flag deactivates
-
-Use cases:
-- **Time-limited promotions** — "free shipping" banner active only during a sale
-- **Feature announcements** — enable a feature on a specific launch date
-- **Maintenance windows** — disable a feature during scheduled maintenance
-
-Scheduled strategies use the server's clock at evaluation time. The SDK's local clock is used for local evaluation — ensure server and application clocks are synchronized (NTP).
-
-### Custom Strategies
-
-Custom strategies implement the `FlagEvaluationStrategy` interface from `mozhno-spi`. They can contain arbitrary logic and access external data sources.
-
-```java
-public class RegionBasedStrategy implements FlagEvaluationStrategy {
-
-    @Override
-    public String getType() {
-        return "region-based";
-    }
-
-    @Override
-    public StrategyResult evaluate(
-            FlagConfiguration flag,
-            EvaluationContext ctx,
-            Map<String, Object> params) {
-
-        String userRegion = ctx.getString("region");
-        String allowedRegion = (String) params.get("region");
-
-        if (userRegion != null && userRegion.equals(allowedRegion)) {
-            return StrategyResult.match(flag.getDefaultValue());
-        }
-
-        return StrategyResult.noMatch();
-    }
+```json
+{
+  "constraints": [
+    {"field": "country", "operator": "in", "values": ["DE", "FR", "NL"]},
+    {"field": "plan", "operator": "eq", "values": ["enterprise"]}
+  ]
 }
 ```
 
-Register the strategy through the SPI system and it becomes available in the dashboard alongside built-in strategies.
+All constraints must pass for the flag to be enabled (AND logic). If a context attribute is missing, the rule evaluates to `false`.
 
-Custom strategies are an enterprise feature — the SPI extension point is available in the community edition, but loading external strategy implementations requires the enterprise plugin framework.
+## Targeting with Segments
 
-## Strategy Configuration in the Dashboard
+Segments are reusable groups defined separately and referenced by key. A strategy can reference multiple segments — matching any one grants access (OR logic).
 
-When you create or edit a flag in the web dashboard, you configure strategies in the **Rollout** section:
+## Percentage Rollout
 
-1. **Add a strategy** — choose from Default, Gradual, Scheduled, or any registered custom strategies
-2. **Set parameters** — percentage, time range, attribute, target values
-3. **Order strategies** — drag to reorder; the first match wins
-4. **Preview** — enter a sample context to see which strategy would match
+Percentage rollout uses deterministic hashing so the same user always gets the same result:
 
-## Chaining Example: Staged Rollout
-
-A common pattern for rolling out a critical feature:
-
-```mermaid
-flowchart TB
-    subgraph "Flag: payment-v2"
-        S1["Strategy 1: Individual<br/>userIds: [dev-1, dev-2]<br/>→ true"]
-        S2["Strategy 2: Segment<br/>segment: internal-employees<br/>→ true"]
-        S3["Strategy 3: Gradual<br/>percentage: 10%<br/>→ true"]
-        S4["Strategy 4: Default<br/>→ false"]
-    end
+```
+hash = MurmurHash3(flagKey + userId) % 100
+if hash < percentage → enabled
+else → disabled
 ```
 
-1. **Phase 1** — Only the two developers testing the feature (`dev-1`, `dev-2`)
-2. **Phase 2** — Entire internal team via segment
-3. **Phase 3** — 10% of real users via gradual rollout (monitor error rates)
-4. **Phase 4** — Increase gradual percentage to 50%, then 100%
-5. **Phase 5** — Remove the first two strategies, keep only Default → `true`
+If `userId` is not available, `sessionId` is used instead.
+
+## Per-Environment Strategies
+
+Strategies are configured per environment:
+
+| Environment | Strategy |
+|-------------|----------|
+| **dev** | 100% rollout, no rules — all developers see the feature |
+| **staging** | 50% rollout + `beta: true` segment — subset of staging users |
+| **production** | 10% rollout + country rules — gradual global rollout |
+
+Each environment has its own API key. The SDK receives only the strategy for its environment.
 
 ## Related Pages
 
-- [Flags](/en/concepts/flags) — flag types and targeting rules
-- [Segments](/en/concepts/segments) — reusable user groups used in strategies
-- [Environments](/en/concepts/environments) — per-environment strategy configuration
-- [Overview](/en/concepts/overview) — how strategies fit into the evaluation flow
+- [Flags](/en/concepts/flags) — flag types and evaluation logic
+- [Segments](/en/concepts/segments) — reusable user groups
+- [Environments](/en/concepts/environments) — environment isolation

@@ -15,8 +15,8 @@ ghcr.io/mozhno-dev/mozhno:latest
 | Этап | Базовый образ | Назначение |
 |------|---------------|------------|
 | `web-builder` | `node:24-alpine` | Сборка React 19 SPA фронтенда |
-| `java-builder` | `eclipse-temurin:25-alpine` | Компиляция Spring Boot JAR |
-| `runtime` | `ubuntu:noble` (JRE) | Финальный образ для запуска |
+| `java-builder` | `eclipse-temurin:25-jdk-alpine` | Компиляция Spring Boot JAR |
+| `runtime` | `eclipse-temurin:25-jre-noble` | Финальный образ: только JRE |
 
 Финальный образ содержит только JRE, собранный JAR и статические файлы фронтенда — без JDK и Node.js.
 
@@ -67,22 +67,19 @@ services:
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-flags_user}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-flags_password}
 
-      SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: '30'
-      SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE: '5'
-      SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT: '30000'
-      SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT: '600000'
-      SPRING_DATASOURCE_HIKARI_MAX_LIFETIME: '1800000'
+      HIKARI_MAX_POOL_SIZE: '30'
+      HIKARI_MIN_IDLE: '5'
+      HIKARI_CONNECTION_TIMEOUT: '10000'
 
       JWT_SECRET: ${JWT_SECRET}
-      JWT_ACCESS_TOKEN_EXPIRATION: '900000'
-      JWT_REFRESH_TOKEN_EXPIRATION: '604800000'
-      JWT_REFRESH_TOKEN_ROTATION_ENABLED: 'true'
+      JWT_ACCESS_TOKEN_TTL_MINUTES: '15'
+      JWT_REFRESH_TOKEN_TTL_DAYS: '30'
+      CACHE_TTL_MINUTES: '5'
 
-      JAVA_OPTS: >
+      JAVA_TOOL_OPTIONS: >
         -XX:+UseZGC
-        -XX:MaxRAMPercentage=75
-        -XX:+ZGenerational
-        -XX:ConcGCThreads=4
+        -XX:MaxRAMPercentage=75.0
+        -XX:+ExitOnOutOfMemoryError
         -Djava.security.egd=file:/dev/./urandom
     networks:
       - mozhno-net
@@ -121,14 +118,16 @@ JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 
 ## Переменные окружения
 
-### Обязательные
+### База данных
 
-| Переменная | Описание | Пример |
-|------------|----------|--------|
-| `JWT_SECRET` | Секретный ключ подписи JWT. Минимум 256 бит | `openssl rand -base64 32` |
-| `SPRING_DATASOURCE_URL` | JDBC URL подключения к PostgreSQL | `jdbc:postgresql://postgres:5432/feature_flags` |
-| `SPRING_DATASOURCE_USERNAME` | Пользователь базы данных | `flags_user` |
-| `SPRING_DATASOURCE_PASSWORD` | Пароль базы данных | `secure-password-here` |
+| Переменная | По умолчанию | Описание |
+|------------|-------------|----------|
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | JDBC URL подключения к PostgreSQL |
+| `SPRING_DATASOURCE_USERNAME` | `flags_user` | Пользователь базы данных |
+| `SPRING_DATASOURCE_PASSWORD` | `flags_password` | Пароль базы данных |
+| `HIKARI_MAX_POOL_SIZE` | `20` | Максимальное число соединений. Для продакшена — 30 |
+| `HIKARI_MIN_IDLE` | `5` | Минимальное число простаивающих соединений |
+| `HIKARI_CONNECTION_TIMEOUT` | `10000` | Таймаут ожидания соединения из пула (мс) |
 
 ### Сервер
 
@@ -136,24 +135,16 @@ JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 |------------|-------------|----------|
 | `SERVER_PORT` | `8080` | Порт HTTP-сервера |
 | `APP_BASE_URL` | `http://localhost:8080` | Публичный URL. Влияет на CORS и генерацию ссылок |
+| `CACHE_TTL_MINUTES` | `5` | Время жизни кеша правил в минутах |
+| `CLIENT_MAX_METRICS_PER_KEY` | `1000` | Максимум хранимых метрик на API-ключ |
 
 ### JWT
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `JWT_ACCESS_TOKEN_EXPIRATION` | `900000` | Время жизни access-токена (мс). По умолчанию 15 минут |
-| `JWT_REFRESH_TOKEN_EXPIRATION` | `604800000` | Время жизни refresh-токена (мс). По умолчанию 7 дней |
-| `JWT_REFRESH_TOKEN_ROTATION_ENABLED` | `true` | Включение семейной ротации refresh-токенов |
-
-### Пул соединений HikariCP
-
-| Переменная | По умолчанию | Описание |
-|------------|-------------|----------|
-| `SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE` | `10` | Максимальное число соединений. Для продакшена — 30 |
-| `SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE` | `5` | Минимальное число простаивающих соединений |
-| `SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT` | `30000` | Таймаут ожидания соединения из пула (мс) |
-| `SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT` | `600000` | Таймаут бездействия перед закрытием соединения (мс) |
-| `SPRING_DATASOURCE_HIKARI_MAX_LIFETIME` | `1800000` | Максимальное время жизни соединения (мс) |
+| `JWT_SECRET` | — (обязательно) | Секретный ключ подписи JWT. Минимум 256 бит |
+| `JWT_ACCESS_TOKEN_TTL_MINUTES` | `15` | Время жизни access-токена в минутах |
+| `JWT_REFRESH_TOKEN_TTL_DAYS` | `30` | Время жизни refresh-токена в днях |
 
 ### Flyway
 
@@ -193,10 +184,9 @@ PostgreSQL проверяется утилитой `pg_isready` каждые 10 
 Настройки JVM для контейнера:
 
 ```
--XX:+UseZGC              — Z Garbage Collector (низкие паузы)
--XX:MaxRAMPercentage=75  — JVM использует не более 75% памяти контейнера
--XX:+ZGenerational       — поколенческий режим ZGC (JDK 25+)
--XX:ConcGCThreads=4      — 4 потока конкуррентной сборки
+-XX:+UseZGC                           — Z Garbage Collector (низкие паузы)
+-XX:MaxRAMPercentage=75.0             — JVM использует не более 75% памяти контейнера
+-Djava.security.egd=file:/dev/./urandom  — ускорение генерации случайных чисел
 ```
 
 ## Сетевая конфигурация

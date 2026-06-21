@@ -36,33 +36,32 @@ pnpm add @mozhno/client-js
 import { MozhnoClient } from '@mozhno/client-js';
 
 const client = new MozhnoClient({
-  serverUrl: 'http://localhost:8080',
-  apiKey: 'mz_env_abc123def456',
+  url: 'http://localhost:8080',
+  apiKey: '<api-key>',
+  appName: 'my-app',
+  refreshInterval: 15,
 });
-
-await client.initialize();  // загружает правила с сервера
 ```
 
 ### Параметры конфигурации
 
 | Параметр | Тип | Обязательно | По умолчанию | Описание |
 |----------|-----|-------------|-------------|----------|
-| `serverUrl` | `string` | Да | — | URL сервера **можно.** |
+| `url` | `string` | Да | — | URL сервера **можно.** |
 | `apiKey` | `string` | Да | — | API-ключ окружения |
-| `pollInterval` | `number` | Нет | `30` | Интервал опроса (секунды) |
-| `connectTimeout` | `number` | Нет | `5000` | Таймаут соединения (мс) |
-| `readTimeout` | `number` | Нет | `10000` | Таймаут чтения (мс) |
-| `maxRetries` | `number` | Нет | `3` | Максимум повторных попыток |
-| `autoInit` | `boolean` | Нет | `false` | Автоинициализация при создании |
-| `logger` | `Logger` | Нет | `console` | Кастомный логгер |
+| `appName` | `string` | Да | — | Имя вашего приложения |
+| `refreshInterval` | `number` | Нет | `15` | Интервал поллинга (секунды) |
+| `metricsInterval` | `number` | Нет | `60` | Интервал отправки метрик (секунды) |
+| `environment` | `string` | Нет | `"default"` | Имя окружения |
+| `disableMetrics` | `boolean` | Нет | `false` | Отключить метрики |
 
 ### Расширенная конфигурация
 
 ```typescript
 const client = new MozhnoClient({
-  serverUrl: process.env.MOZHNO_URL || 'http://localhost:8080',
+  url: process.env.MOZHNO_URL || 'http://localhost:8080',
   apiKey: process.env.MOZHNO_API_KEY!,
-  pollInterval: 60,        // на проде — реже
+  refreshInterval: 60,        // на проде — реже
   connectTimeout: 3000,
   readTimeout: 8000,
   maxRetries: 5,
@@ -87,7 +86,7 @@ let instance: MozhnoClient | null = null;
 export async function getMozhnoClient(): Promise<MozhnoClient> {
   if (!instance) {
     instance = new MozhnoClient({
-      serverUrl: process.env.MOZHNO_URL!,
+      url: process.env.MOZHNO_URL!,
       apiKey: process.env.MOZHNO_API_KEY!,
       autoInit: false,
     });
@@ -127,9 +126,9 @@ if (enabled) {
 }
 ```
 
-### getValue
+### isEnabled (детальное)
 
-Возвращает значение мультивариативного флага.
+Проверяет, включён ли флаг для переданного контекста.
 
 ```typescript
 getValue(flagKey: string, ctx: EvaluationContext, defaultValue?: string): Promise<string>
@@ -286,7 +285,7 @@ export function MozhnoProvider({
   defaultContext,
 }: {
   children: React.ReactNode;
-  config: { serverUrl: string; apiKey: string };
+  config: { url: string; apiKey: string };
   defaultContext?: EvaluationContext;
 }) {
   const [client, setClient] = useState<MozhnoClient | null>(null);
@@ -306,7 +305,7 @@ export function MozhnoProvider({
       });
 
     return () => { c.close(); };
-  }, [config.serverUrl, config.apiKey]);
+  }, [config.url, config.apiKey]);
 
   const isEnabled = async (flagKey: string, ctx?: EvaluationContext) => {
     if (!client) return false;
@@ -392,7 +391,7 @@ export default function App() {
   return (
     <MozhnoProvider
       config={{
-        serverUrl: import.meta.env.VITE_MOZHNO_URL,
+        url: import.meta.env.VITE_MOZHNO_URL,
         apiKey: import.meta.env.VITE_MOZHNO_API_KEY,
       }}
       defaultContext={{
@@ -549,11 +548,11 @@ stateDiagram-v2
 
 ```typescript
 // Явная инициализация
-const client = new MozhnoClient({ serverUrl, apiKey, autoInit: false });
+const client = new MozhnoClient({ url, apiKey, autoInit: false });
 await client.initialize();  // блокирующая загрузка правил
 
 // Автоинициализация
-const client = new MozhnoClient({ serverUrl, apiKey, autoInit: true });
+const client = new MozhnoClient({ url, apiKey, autoInit: true });
 // Конструктор запускает initialize() асинхронно
 // Используйте client.waitForInit() для ожидания готовности
 await client.waitForInit();
@@ -589,7 +588,7 @@ import { Request, Response, NextFunction } from 'express';
 import { MozhnoClient, EvaluationContext } from '@mozhno/client-js';
 
 const mozhno = new MozhnoClient({
-  serverUrl: process.env.MOZHNO_URL!,
+  url: process.env.MOZHNO_URL!,
   apiKey: process.env.MOZHNO_API_KEY!,
   autoInit: true,
 });
@@ -648,7 +647,7 @@ let client: MozhnoClient;
 export function getMozhnoClient(): MozhnoClient {
   if (!client) {
     client = new MozhnoClient({
-      serverUrl: process.env.MOZHNO_URL!,
+      url: process.env.MOZHNO_URL!,
       apiKey: process.env.MOZHNO_API_KEY!,
       autoInit: true,
     });

@@ -231,7 +231,7 @@ initContainers:
 | Feature | Community | Enterprise |
 |---------|-----------|------------|
 | Feature flags (boolean) | ✅ | ✅ |
-| Feature flags (multivariate) | ✅ | ✅ |
+| Feature flags (advanced targeting) | ✅ | ✅ |
 | Percentage rollout | ✅ | ✅ |
 | User segments | ✅ | ✅ |
 | Custom strategies | ✅ | ✅ |

@@ -18,228 +18,192 @@ flowchart TD
     end
 
     SDK -->|1. Fetch rules on init| API
-    API -->|2. Return flag rules + segments| SDK
+    API -->|2. Return flags + rules| SDK
     SDK -->|3. Store in memory| Cache
 
-    App[Application Code] -->|isEnabled / getValue| Eval
+    App[Application Code] -->|isEnabled| Eval
     Eval -->|Read rules| Cache
     Eval -->|Evaluate against context| Eval
     Eval -->|Return value| App
 
     SDK -->|Background polling| API
-    API -->|Updated rules| SDK
+    API -->|Updated flags (ETag)| SDK
     SDK -->|Refresh| Cache
 ```
 
 ### How Local Evaluation Works
 
-1. **Initialisation:** The SDK connects to the можно server and downloads all flag rules, targeting configurations, and segments for the environment associated with your API key.
+1. **Initialisation:** The SDK connects to the можно server and downloads all flag rules and targeting configurations for the environment associated with your API key.
 2. **Caching:** Rules are stored in an in-memory cache within your application process.
-3. **Evaluation:** When your code calls `isFlagEnabled()` or `getFlagValue()`, the SDK evaluates the rules locally against the provided context. No network call is made.
-4. **Background Sync:** The SDK periodically polls the server for rule updates. Changes are applied to the in-memory cache automatically.
+3. **Evaluation:** When your code calls `isEnabled()`, the SDK evaluates the rules locally against the provided context. No network call is made.
+4. **Background Sync:** The SDK periodically polls the server for rule updates. Uses `If-None-Match` / `ETag` for efficient delta detection.
 
 > **Tip:** Local evaluation means flag checks are **sub-millisecond** and work even during temporary network disruptions. The SDK always falls back to the last known rule set.
 
-## Polling vs Streaming
+## Evaluation Logic
 
-можно SDKs support two mechanisms for receiving rule updates:
+The SDK evaluates flags in this order:
 
-| Mechanism | Latency | Resource Usage | Configuration |
-|-----------|---------|----------------|---------------|
-| **Polling** | Up to polling interval (default: 30 seconds) | Low (periodic HTTP request) | Default mode. Configure via `pollingIntervalMs`. |
-| **Streaming (SSE)** | Near real-time (< 1 second) | Persistent connection | Enable with `streamUpdates(true)`. Uses Server-Sent Events. |
+1. **Flag disabled?** → `false`
+2. **No activation/strategy?** → `true`
+3. **Constraints** (AND): all attribute rules must match the context
+4. **Segments** (OR): at least one segment must match
+5. **Both present:** either constraints or segments passing grants access (OR)
+6. **Percentage rollout:** MurmurHash3 over `flagKey + (userId || sessionId)`, compared against configured percentage
+7. **Nothing matched** → `false`
 
-### Polling
+### Supported Operators
 
-The SDK sends a `GET` request to the server at a configurable interval. If the server detects that rules have changed (via ETag or `If-None-Match`), it returns the updated data. Otherwise, it returns `304 Not Modified`, saving bandwidth.
+| Operator | Description |
+|----------|-------------|
+| `in` | Value is in a list |
+| `not_in` | Value is not in a list |
+| `eq` | Equal (numeric for `contextType: number`) |
+| `ne` | Not equal |
+| `gt` | Greater than |
+| `gte` | Greater than or equal |
+| `lt` | Less than |
+| `lte` | Less than or equal |
+| `contains` | Substring match |
 
-### Streaming (SSE)
+### Context Types
 
-When streaming is enabled, the SDK opens a persistent SSE connection to the server. The server pushes updates as soon as they occur. This is recommended for production environments where flag changes need to propagate quickly.
+| Type | Behavior |
+|------|----------|
+| `string` (default) | Plain string comparison |
+| `number` | Numeric comparison (`Double.parseDouble`) |
+| `time` | ISO8601 date comparison |
+| `semver` | Semantic version comparison |
 
-```mermaid
-sequenceDiagram
-    participant SDK
-    participant Server
+## Polling
 
-    SDK->>Server: GET /api/sdk/rules/stream (SSE)
-    Server-->>SDK: event: rules<br/>data: {...initial rules...}
+The SDK uses HTTP polling to stay in sync. Default polling interval is **15 seconds** (configurable via `fetchTogglesInterval` / `refreshInterval`).
 
-    Note over Server: Flag updated by admin
-
-    Server-->>SDK: event: update<br/>data: {"flagKey": "checkout_v2", ...}
-
-    Note over SDK: Apply update to local cache
-
-    SDK->>SDK: Re-evaluate on next call
-```
-
-> **Tip:** Use polling during development and testing. Enable streaming for production deployments that require fast rule propagation.
+The server supports `ETag` / `If-None-Match` conditional requests — if nothing changed, the server returns `304 Not Modified`, saving bandwidth.
 
 ## Caching Strategy
 
-### Cache Structure
+The SDK maintains an in-memory map of all flag rules. On each poll:
 
-The SDK maintains a compact, immutable representation of all flag rules. The cache is structured for efficient evaluation:
-
-```
-Cache
-├── Flags Map (key → FlagDefinition)
-│   ├── flagKey: "checkout_v2"
-│   │   ├── targetingRules: [...]
-│   │   ├── rolloutPercentage: 25
-│   │   ├── defaultVariant: false
-│   │   └── state: ACTIVE
-│   └── ...
-└── Segments Map (name → SegmentDefinition)
-    ├── name: "beta_testers"
-    │   └── conditions: [...]
-    └── ...
-```
-
-### Cache Update Behaviour
+- **Full refresh** on initial fetch
+- **Conditional refresh** via ETag on subsequent polls
+- Cache is replaced atomically — no partial updates
+- Cache is not persisted to disk — fresh rules on restart
 
 | Scenario | Behaviour |
 |----------|-----------|
-| **Rule update from server** | Entire flag or segment definition is replaced atomically. No partial updates. |
-| **New flag added** | Flag is inserted into the cache. Available immediately for evaluation. |
-| **Flag deleted** | Flag is removed from the cache. Subsequent evaluations return the SDK's default value. |
-| **Flag archived/paused** | Flag stays in cache with updated state. Evaluations return default value. |
-| **Network failure** | SDK continues serving from the last successful cache state. |
+| **Rule update from server** | Entire flag set replaced atomically |
+| **Network failure** | Last known rules continue to serve |
+| **Flag not found** | `isEnabled()` returns `false` |
+| **Missing context attribute** | Constraint evaluates to `false` (rule doesn't match) |
 
-### Cache Persistence
+## Client Initialisation
 
-The SDK does **not** persist the cache to disk. On application restart, the SDK re-fetches rules from the server. This ensures the application always starts with a fresh, consistent rule set.
-
-## General SDK API Surface
-
-All можно SDKs expose a consistent set of methods, tailored to the language's idioms.
-
-| Method | Description | Returns |
-|--------|-------------|---------|
-| `isFlagEnabled(key, context)` | Check if a boolean flag is enabled | `boolean` |
-| `getFlagValue(key, context)` | Get the value of any flag (boolean or string) | `boolean` or `String` |
-| `getFlags(context)` | Get all flag values at once | `Map<String, Object>` |
-| `close()` / `shutdown()` | Gracefully close the client, stopping background tasks | `void` |
-
-### Evaluation Context
-
-Every evaluation method accepts a context object with arbitrary key-value pairs:
+### Java SDK
 
 ```java
-// Java
-EvaluationContext context = EvaluationContext.builder()
-    .set("userId", "12345")
-    .set("country", "DE")
-    .set("plan", "enterprise")
+MozhnoClient client = MozhnoConfig.builder()
+    .appName("my-app")
+    .instanceId("instance-1")
+    .mozhnoUrl("https://mozhno.example.com")
+    .apiKey("<api-key>")
+    .fetchTogglesInterval(15)
+    .sendMetricsInterval(60)
+    .environment("production")
+    .build();
+
+client.start();
+boolean enabled = client.isEnabled("checkout_v2", context);
+```
+
+### JavaScript / TypeScript SDK
+
+```typescript
+import { MozhnoClient } from "@mozhno/client-js";
+
+const client = new MozhnoClient({
+  url: "https://mozhno.example.com",
+  apiKey: "<api-key>",
+  appName: "my-app",
+  refreshInterval: 15,
+  metricsInterval: 60,
+  environment: "production",
+});
+
+await client.start();
+const enabled = client.isEnabled("checkout_v2", { userId: "42" });
+```
+
+### Configuration Options
+
+| Option | JS Key | Java Key | Default | Description |
+|--------|--------|----------|---------|-------------|
+| Server URL | `url` | `mozhnoUrl` | **Required** | Base URL of your можно instance |
+| API Key | `apiKey` | `apiKey` | **Required** | API key for the environment |
+| Application name | `appName` | `appName` | **Required** | Your application identifier |
+| Instance ID | `instanceId` | `instanceId` | **Required** (Java) | Unique instance identifier |
+| Poll interval (s) | `refreshInterval` | `fetchTogglesInterval` | `15` | Polling interval in seconds |
+| Metrics interval (s) | `metricsInterval` | `sendMetricsInterval` | `60` | Metrics reporting interval |
+| Environment | `environment` | `environment` | `"default"` | Environment name |
+| Disable metrics | `disableMetrics` | `disableMetrics` | `false` | Disable metrics reporting |
+
+## Evaluation Context
+
+The context carries user/request attributes used for targeting:
+
+**Java:**
+```java
+MozhnoContext context = MozhnoContext.builder()
+    .userId("12345")
+    .sessionId("session-abc")
+    .addProperty("country", "DE")
+    .addProperty("plan", "enterprise")
     .build();
 ```
 
-```js
-// JavaScript
+**JavaScript:**
+```typescript
 const context = {
   userId: "12345",
+  sessionId: "session-abc",
   country: "DE",
   plan: "enterprise",
 };
 ```
 
-Context attributes are matched against targeting rules and used for percentage rollout hashing. Provide enough attributes to satisfy all targeting conditions you have configured.
-
-## Client Initialisation Pattern
-
-All SDKs follow the same initialisation pattern:
-
-```mermaid
-sequenceDiagram
-    participant App
-    participant Builder
-    participant Client
-    participant Server
-
-    App->>Builder: Create builder with serverUrl + apiKey
-    App->>Builder: Configure options (polling, timeout, etc.)
-    App->>Builder: build()
-    Builder->>Client: Instantiate client
-    Client->>Server: Fetch initial rule set
-    Server-->>Client: Return rules
-    Client-->>App: Client ready
-    Note over Client: Background sync starts
-```
-
-The client is a **singleton** — create one instance per application and reuse it across all threads, requests, or components.
-
-```java
-// Java
-MozhnoClient client = MozhnoClient.builder()
-    .serverUrl("https://mozhno.example.com")
-    .apiKey("mz_sk_production_abc123")
-    .pollingIntervalMs(30_000)
-    .streamUpdates(true)
-    .build();
-```
-
-```js
-// JavaScript
-import { MozhnoClient } from "@mozhno/client-js";
-
-const client = new MozhnoClient({
-  serverUrl: "https://mozhno.example.com",
-  apiKey: "mz_sk_production_abc123",
-  pollingIntervalMs: 30000,
-  streaming: true,
-});
-```
-
-### Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `serverUrl` | String | **Required** | Base URL of your можно instance |
-| `apiKey` | String | **Required** | API key with `flags:read` scope |
-| `pollingIntervalMs` | Integer | `30000` | Polling interval in milliseconds |
-| `streamUpdates` / `streaming` | Boolean | `false` | Enable SSE streaming for real-time updates |
-| `connectTimeoutMs` | Integer | `5000` | Connection timeout for HTTP requests |
-| `readTimeoutMs` | Integer | `10000` | Read timeout for HTTP requests |
-| `maxRetries` | Integer | `3` | Maximum retry attempts for failed requests |
-| `retryBackoffMs` | Integer | `1000` | Initial backoff between retries (exponential) |
-
 ## Error Handling & Resilience
-
-The SDK is designed to be resilient to server unavailability:
 
 | Failure Scenario | SDK Behaviour |
 |------------------|---------------|
-| **Initial fetch fails** | Client creation throws an exception. Application should retry or fail fast. |
-| **Background poll fails** | SDK logs a warning and retries with backoff. Last known rules continue to be used. |
-| **Flag key not found** | `isFlagEnabled` returns `false`; `getFlagValue` returns `null`. |
-| **Context missing attribute** | Rule condition that references missing attribute evaluates to `false` (rule does not match). |
-| **Invalid context type** | SDK throws `IllegalArgumentException` (Java) or `TypeError` (JS). |
+| **Initial fetch fails** | Client throws an exception / rejects promise |
+| **Background poll fails** | Retry with exponential backoff (1s → 2s → 4s). Last known rules continue to serve. |
+| **Flag key not found** | `isEnabled()` returns `false` |
+| **Context missing attribute** | Rule referencing missing attribute evaluates to `false` |
 
-> **Warning:** If the initial fetch fails, the SDK does **not** silently start with empty rules. This avoids the risk of all flags returning defaults and silently breaking features. Handle initialisation failures explicitly in your application startup.
+> **Warning:** If the initial fetch fails, the SDK does **not** silently start with empty rules. Handle initialisation failures explicitly in your application startup.
 
 ## SDK Comparison
 
-| Feature | [Java SDK](./java.md) | [JavaScript SDK](./javascript.md) |
-|---------|----------------------|----------------------------------|
+| Feature | Java SDK | JavaScript SDK |
+|---------|----------|----------------|
 | **Platform** | JVM 25+ | Node.js, Browser |
-| **Package** | Maven / Gradle | npm (`@mozhno/client-js`) |
-| **Evaluation** | Synchronous | Async (Promise-based) |
-| **Streaming** | SSE via OkHttp | SSE via EventSource / fetch |
-| **Thread safety** | Fully thread-safe | Single-threaded event loop |
-| **Framework integration** | Spring Boot auto-config | React hook (`useFlag`) |
+| **Package** | `dev.mozhno:mozhno-client-java` (Gradle) | `@mozhno/client-js` (npm) |
+| **Evaluation** | Synchronous | Synchronous (in-memory cache) |
+| **Thread safety** | Fully thread-safe (ConcurrentHashMap) | Single-threaded event loop |
+| **Circuit breaker** | Yes (5 failures → 60s cooldown) | No |
+| **Spring Boot** | Auto-configuration (`mozhno.*` properties) | N/A |
 
 ## Performance Characteristics
 
 | Metric | Typical Value |
 |--------|---------------|
-| **Initial fetch latency** | 50–200 ms (depending on rule set size) |
-| **Local evaluation time** | < 1 ms per flag check |
-| **Memory overhead** | ~1 KB per flag (rule definitions) |
-| **Background poll data transfer** | < 1 KB (304 Not Modified) or ~100 KB (full refresh for 500 flags) |
+| **Initial fetch latency** | 50-200 ms |
+| **Local evaluation time** | < 1 ms |
+| **Memory overhead** | ~1 KB per flag |
+| **Polling payload (no changes)** | 0 bytes (304 Not Modified) |
 
 ## Next Steps
 
-- [Java SDK](./java.md) — Maven/Gradle setup, builder API, full reference.
-- [JavaScript SDK](./javascript.md) — npm setup, React integration, async patterns.
+- [Java SDK](./java.md) — Gradle setup, builder API, full reference.
+- [JavaScript SDK](./javascript.md) — npm setup, async patterns.
 - [REST API](../api/rest.md) — Programmatic access to flags, segments, and environments.

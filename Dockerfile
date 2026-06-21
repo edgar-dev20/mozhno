@@ -39,8 +39,8 @@ FROM eclipse-temurin:25-jre-noble AS runtime
 
 LABEL org.opencontainers.image.title="Mozhno Feature Flags Server" \
       org.opencontainers.image.description="Self-hosted feature flag management platform with native SDKs" \
-      org.opencontainers.image.url="https://github.com/edgar-dev20/mozhno" \
-      org.opencontainers.image.source="https://github.com/edgar-dev20/mozhno" \
+      org.opencontainers.image.url="https://github.com/mozhno-dev/mozhno" \
+      org.opencontainers.image.source="https://github.com/mozhno-dev/mozhno" \
       org.opencontainers.image.licenses="AGPL-3.0" \
       org.opencontainers.image.vendor="Mozhno"
 
