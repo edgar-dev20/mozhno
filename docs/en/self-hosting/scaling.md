@@ -123,8 +123,8 @@ pool_size = min(30, floor(max_connections / instances) - 2)
 Set via environment variable:
 
 ```bash
-SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=15
-SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=3
+HIKARI_MAXIMUM_POOL_SIZE=15
+HIKARI_MINIMUM_IDLE=3
 ```
 
 ## Performance Characteristics
@@ -166,7 +166,7 @@ Linear scaling: 4 instances ≈ 4× throughput (bottleneck shifts to PostgreSQL 
 For consistent performance under load:
 
 ```bash
-JAVA_OPTS="
+JAVA_TOOL_OPTIONS="
   -XX:+UseZGC
   -XX:MaxRAMPercentage=75
   -XX:+ExitOnOutOfMemoryError

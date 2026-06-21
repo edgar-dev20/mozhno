@@ -60,7 +60,7 @@ Remember: Claude is capable of extraordinary creative work. Don't hold back, sho
 ## Project Overview
 
 Mozhno is an **open-core feature flag management platform**. Monorepo:
-- `/server` — Spring Boot 3.x + PostgreSQL (Java)
+- `/server` — Spring Boot 4.0 + PostgreSQL (Java)
 - `/web` — React 19 SPA, published as `@mozhno/core-ui` npm package
 
 ## Tech Stack

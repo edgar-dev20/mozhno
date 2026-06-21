@@ -612,6 +612,7 @@ const en = {
     title: 'Integrations',
     description: 'Connect external services and tools',
     loading: 'Loading integrations...',
+    loadError: 'Failed to load integrations',
     emptyTitle: 'No integrations',
     emptyDescription: 'Connect services to extend capabilities',
     comingSoon: 'Coming soon',

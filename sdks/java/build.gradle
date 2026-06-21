@@ -53,7 +53,7 @@ publishing {
             pom {
                 name = 'Mozhno Client Java'
                 description = 'Java SDK for Mozhno Feature Flags — evaluate feature flags and toggles from any JVM application'
-                url = 'https://github.com/edgar-dev20/mozhno'
+                url = 'https://github.com/mozhno-dev/mozhno'
                 inceptionYear = '2025'
 
                 licenses {
@@ -65,15 +65,15 @@ publishing {
 
                 developers {
                     developer {
-                        id = 'edgar-dev20'
+                        id = 'mozhno-dev'
                         name = 'Edgar'
                     }
                 }
 
                 scm {
-                    connection = 'scm:git:git://github.com/edgar-dev20/mozhno.git'
-                    developerConnection = 'scm:git:ssh://github.com/edgar-dev20/mozhno.git'
-                    url = 'https://github.com/edgar-dev20/mozhno'
+                    connection = 'scm:git:git://github.com/mozhno-dev/mozhno.git'
+                    developerConnection = 'scm:git:ssh://github.com/mozhno-dev/mozhno.git'
+                    url = 'https://github.com/mozhno-dev/mozhno'
                 }
             }
         }
@@ -82,7 +82,7 @@ publishing {
     repositories {
         maven {
             name = 'GitHubPackages'
-            url = 'https://maven.pkg.github.com/edgar-dev20/mozhno'
+            url = 'https://maven.pkg.github.com/mozhno-dev/mozhno'
             credentials {
                 username = System.getenv('GITHUB_ACTOR')
                 password = System.getenv('GITHUB_TOKEN')

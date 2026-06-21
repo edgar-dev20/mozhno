@@ -330,7 +330,7 @@ LaunchDarkly and Flagsmith have built-in webhooks for flag change events. мож
 
 ### 8. API Rate Limits
 
-можнo. does not enforce hard rate limits by default, but the SDK polls every 30 seconds per instance. With 1000 SDK instances, that's ~33 requests/second — well within the capacity of a single server. If you use the REST API directly for flag management, batch operations where possible.
+можнo. does not enforce hard rate limits by default, but the SDK polls every 15 seconds per instance. With 1000 SDK instances, that's ~66 requests/second — within the capacity of a single server. If you use the REST API directly for flag management, batch operations where possible.
 
 ## Verification Checklist
 

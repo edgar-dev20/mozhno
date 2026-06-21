@@ -1,23 +1,23 @@
 # Default owner for everything in the repo
-* @edgar-dev20
+* @mozhno-dev
 
 # Server-side (Spring Boot, Gradle)
-server/** @edgar-dev20
+server/** @mozhno-dev
 
 # Web UI (React, TypeScript, Tailwind)
-web/** @edgar-dev20
+web/** @mozhno-dev
 
 # Java SDK
-sdks/java/** @edgar-dev20
+sdks/java/** @mozhno-dev
 
 # JavaScript SDK
-sdks/js/** @edgar-dev20
+sdks/js/** @mozhno-dev
 
 # CI/CD, Docker, GitHub Actions
-.github/** @edgar-dev20
-Dockerfile @edgar-dev20
-.dockerignore @edgar-dev20
-docker-compose.yml @edgar-dev20
+.github/** @mozhno-dev
+Dockerfile @mozhno-dev
+.dockerignore @mozhno-dev
+docker-compose.yml @mozhno-dev
 
 # Documentation
-*.md @edgar-dev20
+*.md @mozhno-dev

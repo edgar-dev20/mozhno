@@ -4,7 +4,7 @@
 
 ## Модульная структура
 
-**можно.** разделён на четыре Maven-модуля, образующих строгий граф зависимостей:
+**можно.** разделён на четыре Gradle-модуля, образующих строгий граф зависимостей:
 
 ```mermaid
 graph TD
@@ -83,7 +83,7 @@ graph TD
 
 ## Встраивание фронтенда
 
-React 19 SPA собирается отдельно (Node.js 24, Webpack/Vite), результат помещается в `static/`. При сборке JAR статические файлы копируются в ресурсы `mozhno-app`:
+React 19 SPA собирается отдельно (Node.js 24, Vite), результат помещается в `static/`. При сборке JAR статические файлы копируются в ресурсы `mozhno-app`:
 
 ```
 mozhno-app/src/main/resources/static/
@@ -101,23 +101,34 @@ Docker-образ использует трёхэтапную сборку:
 ```dockerfile
 # Этап 1: Сборка фронтенда
 FROM node:24-alpine AS web-builder
-WORKDIR /app
-COPY mozhno-web/ .
-RUN npm ci && npm run build
+WORKDIR /src/web
+COPY web/package.json web/package-lock.json ./
+RUN npm ci --ignore-scripts
+COPY web/ ./
+RUN npx vite build --outDir /static --emptyOutDir --config vite.config.js
 
 # Этап 2: Сборка Java
-FROM eclipse-temurin:25-alpine AS java-builder
-WORKDIR /app
-COPY . .
-COPY --from=web-builder /app/dist ./mozhno-app/src/main/resources/static/
-RUN ./mvnw package -DskipTests
+FROM eclipse-temurin:25-jdk-alpine AS java-builder
+WORKDIR /src
+COPY server/ ./server/
+COPY sdks/java/ ./sdks/java/
+COPY --from=web-builder /static ./server/mozhno-app/src/main/resources/static
+WORKDIR /src/server
+RUN ./gradlew --no-daemon :mozhno-app:bootJar -x javadoc
 
 # Этап 3: Runtime
-FROM ubuntu:noble
-RUN apt-get update && apt-get install -y openjdk-25-jre-headless
-COPY --from=java-builder /app/mozhno-app/target/*.jar app.jar
-USER 1000
-ENTRYPOINT ["java", "-jar", "app.jar"]
+FROM eclipse-temurin:25-jre-noble AS runtime
+RUN apt-get update && apt-get install -y --no-install-recommends wget \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r mozhno && useradd -r -g mozhno mozhno
+COPY --from=java-builder /src/server/mozhno-app/build/libs/mozhno.jar /app/mozhno.jar
+USER mozhno
+EXPOSE 8080
+ENTRYPOINT ["java", \
+    "-XX:+UseZGC", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "-Djava.security.egd=file:/dev/./urandom", \
+    "-jar", "/app/mozhno.jar"]
 ```
 
 ## Поток оценки флага
@@ -129,39 +140,39 @@ flowchart TD
     START([SDK вызывает<br/>isEnabled flagKey, context])
     LOAD[Загрузка конфигурации<br/>флага из кеша]
     CHECK_FLAG{Флаг существует<br/>и активен?}
-    DEFAULT[Вернуть<br/>значение по умолчанию]
-    IS_MULTI{Флаг<br/>мультивариативный?}
-    MULTI_VAL[Вернуть строковое<br/>значение варианта]
-    STRATEGIES[Итерация по стратегиям<br/>в порядке приоритета]
-    NEXT_STRATEGY{Есть следующая<br/>стратегия?}
-    EVALUATE_TYPE{Тип стратегии}
-    DEF_STRAT[Default:<br/>вернуть on/off]
-    GRAD_STRAT[Gradual:<br/>hash userId % 100<br/>сравнить с процентом]
-    SCHED_STRAT[Scheduled:<br/>текущее время в<br/>диапазоне активации?]
-    CUSTOM_STRAT[Custom:<br/>вызов FeatureGateSpi]
-    MATCH{Стратегия<br/>совпала?}
-    RETURN_TRUE[Вернуть true<br/>или значение варианта]
+    DEFAULT[Вернуть false]
+    CHECK_ENABLED{Флаг/стратегия<br/>включены?}
+    HAS_CONSTRAINTS{Есть контекстные<br/>правила?}
+    EVAL_CONSTRAINTS[Проверка всех<br/>правил: AND-логика]
+    CONSTRAINTS_OK{Все правила<br/>совпали?}
+    HAS_SEGMENTS{Есть сегменты?}
+    EVAL_SEGMENTS[Проверка сегментов:<br/>OR-логика]
+    SEGMENTS_OK{Хотя бы один<br/>сегмент совпал?}
+    HAS_PERCENTAGE{Задан процентный<br/>роллаут?}
+    EVAL_PERCENTAGE[MurmurHash3 от<br/>flagKey + userId<br/>bucket < percentage?]
+    RETURN_TRUE[Вернуть true]
     RETURN_FALSE[Вернуть false]
 
     START --> LOAD
     LOAD --> CHECK_FLAG
     CHECK_FLAG -->|Нет| DEFAULT
-    CHECK_FLAG -->|Да| IS_MULTI
-    IS_MULTI -->|Нет| STRATEGIES
-    IS_MULTI -->|Да| MULTI_VAL
-    STRATEGIES --> NEXT_STRATEGY
-    NEXT_STRATEGY -->|Нет| RETURN_FALSE
-    NEXT_STRATEGY -->|Да| EVALUATE_TYPE
-    EVALUATE_TYPE --> DEF_STRAT
-    EVALUATE_TYPE --> GRAD_STRAT
-    EVALUATE_TYPE --> SCHED_STRAT
-    EVALUATE_TYPE --> CUSTOM_STRAT
-    DEF_STRAT --> MATCH
-    GRAD_STRAT --> MATCH
-    SCHED_STRAT --> MATCH
-    CUSTOM_STRAT --> MATCH
-    MATCH -->|Да| RETURN_TRUE
-    MATCH -->|Нет| NEXT_STRATEGY
+    CHECK_FLAG -->|Да| CHECK_ENABLED
+    CHECK_ENABLED -->|Нет| RETURN_FALSE
+    CHECK_ENABLED -->|Да| HAS_CONSTRAINTS
+    HAS_CONSTRAINTS -->|Да| EVAL_CONSTRAINTS
+    HAS_CONSTRAINTS -->|Нет| HAS_SEGMENTS
+    EVAL_CONSTRAINTS --> CONSTRAINTS_OK
+    CONSTRAINTS_OK -->|Да| HAS_PERCENTAGE
+    CONSTRAINTS_OK -->|Нет| HAS_SEGMENTS
+    HAS_SEGMENTS -->|Да| EVAL_SEGMENTS
+    HAS_SEGMENTS -->|Нет| HAS_PERCENTAGE
+    EVAL_SEGMENTS --> SEGMENTS_OK
+    SEGMENTS_OK -->|Да| HAS_PERCENTAGE
+    SEGMENTS_OK -->|Нет| CONSTRAINTS_OK
+    HAS_PERCENTAGE -->|Да| EVAL_PERCENTAGE
+    HAS_PERCENTAGE -->|Нет| RETURN_TRUE
+    EVAL_PERCENTAGE -->|Да| RETURN_TRUE
+    EVAL_PERCENTAGE -->|Нет| RETURN_FALSE
 ```
 
 **Ключевой момент:** оценка флага происходит **локально в SDK** без сетевого запроса к серверу. Правила загружаются фоновым процессом и кешируются. Это даёт латентность < 1 мс.
@@ -267,7 +278,7 @@ graph TB
 
     PG[(PostgreSQL 15+<br/>PersistentVolume<br/>WAL-архивация)]
 
-    SDK[Java/Python/Node.js SDK]
+    SDK[Java/Node.js SDK]
     SDK2[Внешнее приложение]
 
     SPA --> INGRESS

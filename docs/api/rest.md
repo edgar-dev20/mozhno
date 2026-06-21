@@ -448,13 +448,15 @@ curl -X POST "http://localhost:8080/api/v1/api-keys" \
 {
   "id": "ak_abc123",
   "name": "Production SDK Key",
-  "key": "mz_env_x7k2p9v4m1q8w3r6",
+  "key": "X-Api-Key: <api-key>
+Authorization: Bearer <jwt-or-api-key>x7k2p9v4m1q8w3r6",
   "environment": "production",
   "createdAt": "2026-06-21T13:41:05Z"
 }
 ```
 
-> **Предупреждение:** Значение ключа (`mz_env_...`) показывается **только один раз** при создании. Сохраните его немедленно.
+> **Предупреждение:** Значение ключа (`X-Api-Key: <api-key>
+Authorization: Bearer <jwt-or-api-key>...`) показывается **только один раз** при создании. Сохраните его немедленно.
 
 ### Получить все API-ключи
 
@@ -554,7 +556,8 @@ GET /api/v1/sdk/rules
 
 ```bash
 curl "http://localhost:8080/api/v1/sdk/rules" \
-  -H "X-Api-Key: mz_env_abc123def456"
+  -H "X-Api-Key: X-Api-Key: <api-key>
+Authorization: Bearer <jwt-or-api-key>abc123def456"
 ```
 
 Ответ:
@@ -598,7 +601,8 @@ GET /api/v1/sdk/rules?since={version}
 
 ```bash
 curl "http://localhost:8080/api/v1/sdk/rules?since=41" \
-  -H "X-Api-Key: mz_env_abc123def456"
+  -H "X-Api-Key: X-Api-Key: <api-key>
+Authorization: Bearer <jwt-or-api-key>abc123def456"
 ```
 
 Ответ:

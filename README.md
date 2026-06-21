@@ -5,10 +5,10 @@
 <p align="center">Платформа управления фиче-флагами с открытым кодом.</p>
 
 <p align="center">
-  <a href="https://github.com/edgar-dev20/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/edgar-dev20/mozhno/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI" /></a>
+  <a href="https://github.com/mozhno-dev/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mozhno-dev/mozhno/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL_v3-blue?style=flat-square" alt="AGPL v3" /></a>
-  <a href="https://github.com/edgar-dev20/mozhno/pkgs/container/mozhno"><img src="https://img.shields.io/badge/Docker-ghcr.io-blue?style=flat-square&logo=docker" alt="Docker" /></a>
-  <a href="https://github.com/edgar-dev20/mozhno/stargazers"><img src="https://img.shields.io/github/stars/edgar-dev20/mozhno?style=flat-square&logo=github&color=fedc32" alt="Stars" /></a>
+  <a href="https://github.com/mozhno-dev/mozhno/pkgs/container/mozhno"><img src="https://img.shields.io/badge/Docker-ghcr.io-blue?style=flat-square&logo=docker" alt="Docker" /></a>
+  <a href="https://github.com/mozhno-dev/mozhno/stargazers"><img src="https://img.shields.io/github/stars/mozhno-dev/mozhno?style=flat-square&logo=github&color=fedc32" alt="Stars" /></a>
 </p>
 
 <p align="right"><a href="README.en.md">English</a></p>
@@ -23,10 +23,10 @@
 
 | Категория | Описание |
 |-----------|----------|
-| **Флаги** | Булевы, мультивариативные, процентный роллаут, правила на основе атрибутов |
+| **Флаги** | RELEASE и KILLSWITCH, процентный роллаут, правила на основе атрибутов |
 | **Контексты** | Оценка флагов по произвольным атрибутам пользователя или запроса |
 | **Сегменты** | Переиспользуемые группы пользователей с общими правилами таргетинга |
-| **Стратегии** | Подключаемая логика раскатки: дефолтная, плавная, по расписанию, кастомная |
+| **Стратегии** | Конфигурация на окружение: правила, сегменты, процентный роллаут |
 | **API-ключи** | Ключи на каждое окружение с гранулярными правами |
 | **Аудит** | Полная история изменений каждого флага и конфигурации |
 | **SDK** | Нативные клиенты для Java и JavaScript — оценка флагов локально, без сетевого вызова |
@@ -41,10 +41,10 @@ Run: cd web && npm run storybook
 ### Скриншоты
 
 | Flags | Flag detail | Settings |
-|---|---|---|
-| ![Flags](docs/screenshots/flags.svg) | ![Flag](docs/screenshots/flag-detail.svg) | ![Settings](docs/screenshots/settings.svg) |
+|---|---|---|---|
+| ![Flags](web/storybook-static/screenshots/flags.svg) | ![Flag](web/storybook-static/screenshots/flag-detail.svg) | ![Settings](web/storybook-static/screenshots/settings.svg) |
 
-> Запустите npm run dev и сделайте скриншоты. Чтобы увидеть интерфейс сейчас, запустите проект локально.
+> Запустите проект локально (`make dev`) чтобы увидеть интерфейс.
 
 ---
 
@@ -63,7 +63,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   mozhno:
-    image: ghcr.io/edgar-dev20/mozhno:latest
+    image: ghcr.io/mozhno-dev/mozhno:latest
     ports:
       - '8080:8080'
     environment:
@@ -158,10 +158,11 @@ cd web && npm ci && npm run dev
 cd server && ./gradlew check   # Тесты сервера
 cd web && npm test             # Тесты веб-интерфейса
 cd sdks/js && npm test         # Тесты JS SDK
+cd server && ./gradlew :mozhno-client-java:check   # Тесты Java SDK
 ```
 
 ---
 
 ### Лицензия
 
-[GNU AGPL v3.0](LICENSE) · © 2025 [Edgar](https://github.com/edgar-dev20)
+[GNU AGPL v3.0](LICENSE) · © 2025 [Edgar](https://github.com/mozhno-dev)

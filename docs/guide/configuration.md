@@ -9,6 +9,8 @@
 | `SERVER_PORT` | `8080` | Порт, на котором слушает HTTP-сервер |
 | `APP_BASE_URL` | `http://localhost:8080` | Публичный URL сервера. Используется для генерации ссылок и CORS |
 | `JWT_SECRET` | — | Секретный ключ для подписи JWT-токенов. **Обязателен**. Минимум 256 бит |
+| `CACHE_TTL_MINUTES` | `5` | Время жизни ин-мемори кеша правил в минутах |
+| `CLIENT_MAX_METRICS_PER_KEY` | `1000` | Максимальное количество хранимых метрик на API-ключ |
 
 ## База данных
 
@@ -22,10 +24,9 @@
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE` | `10` | Максимальный размер пула соединений HikariCP |
-| `SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE` | `5` | Минимальное количество простаивающих соединений |
-| `SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT` | `30000` | Таймаут получения соединения (мс) |
-| `SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT` | `600000` | Таймаут бездействия соединения (мс) |
+| `HIKARI_MAX_POOL_SIZE` | `20` | Максимальный размер пула соединений HikariCP |
+| `HIKARI_MIN_IDLE` | `5` | Минимальное количество простаивающих соединений |
+| `HIKARI_CONNECTION_TIMEOUT` | `10000` | Таймаут получения соединения (мс) |
 
 ## Flyway (миграции)
 
@@ -39,9 +40,10 @@
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
 | `JWT_SECRET` | — | Секретный ключ подписи JWT. **Обязателен** |
-| `JWT_ACCESS_TOKEN_EXPIRATION` | `900000` | Время жизни access-токена в миллисекундах (по умолчанию 15 минут) |
-| `JWT_REFRESH_TOKEN_EXPIRATION` | `604800000` | Время жизни refresh-токена в миллисекундах (по умолчанию 7 дней) |
-| `JWT_REFRESH_TOKEN_ROTATION_ENABLED` | `true` | Ротация refresh-токенов: при обновлении старый токен инвалидируется |
+| `JWT_ACCESS_TOKEN_TTL_MINUTES` | `15` | Время жизни access-токена в минутах |
+| `JWT_REFRESH_TOKEN_TTL_DAYS` | `30` | Время жизни refresh-токена в днях |
+
+Refresh-токены используют **семейную ротацию** (family rotation). При каждом обновлении старый refresh-токен инвалидируется, новый сохраняется в ту же «семью». Если украденный токен используется повторно, вся семья аннулируется.
 
 ## Swagger / OpenAPI
 
@@ -66,13 +68,16 @@ SERVER_PORT=8080
 APP_BASE_URL=http://localhost:8080
 
 # JWT
-JWT_ACCESS_TOKEN_EXPIRATION=900000
-JWT_REFRESH_TOKEN_EXPIRATION=604800000
-JWT_REFRESH_TOKEN_ROTATION_ENABLED=true
+JWT_ACCESS_TOKEN_TTL_MINUTES=15
+JWT_REFRESH_TOKEN_TTL_DAYS=30
 
 # Пул соединений
-SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=20
-SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=5
+HIKARI_MAX_POOL_SIZE=20
+HIKARI_MIN_IDLE=5
+
+# Кеш
+CACHE_TTL_MINUTES=5
+CLIENT_MAX_METRICS_PER_KEY=1000
 ```
 
 ## Продакшен-рекомендации
@@ -87,9 +92,19 @@ SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=5
 
 3. **APP_BASE_URL** — укажите реальный домен (`https://flags.example.com`) для корректной работы CORS и генерации ссылок.
 
-4. **Пул соединений** — для продакшена увеличьте `MAXIMUM_POOL_SIZE` до 20–50 в зависимости от нагрузки.
+4. **Пул соединений** — для продакшена увеличьте `HIKARI_MAX_POOL_SIZE` до 20–50 в зависимости от нагрузки.
 
-5. **Refresh token rotation** — оставляйте включённым (`true`) для безопасности.
+5. **Refresh token rotation** — включена по умолчанию. Ротация предотвращает перехват токенов.
+
+## SMTP (почта)
+
+| Переменная | По умолчанию | Описание |
+|------------|-------------|----------|
+| `SMTP_HOST` | `localhost` | Хост SMTP-сервера |
+| `SMTP_PORT` | `587` | Порт SMTP-сервера |
+| `SMTP_USERNAME` | — | Имя пользователя SMTP |
+| `SMTP_PASSWORD` | — | Пароль SMTP |
+| `EMAIL_FROM` | `noreply@mozhno.dev` | Адрес отправителя писем |
 
 ## Что дальше?
 

@@ -211,51 +211,33 @@ DELETE FROM audit_log WHERE created_at < NOW() - INTERVAL '2 years';
 
 ## Интеграция с внешними системами
 
-### Вебхуки аудита
+Настройте [вебхук](/guide/integrations) на одно из событий (например, `flag.updated`) для получения оповещений при изменениях.
 
-Подпишитесь на события аудита для интеграции с SIEM-системами:
-
-```json
-{
-  "url": "https://your-siem.example.com/hooks/mozhno",
-  "events": ["flag.updated", "flag.deleted", "segment.updated", "apikey.created", "apikey.revoked"],
-  "secret": "whsec_your_secret"
-}
-```
-
-Подробнее: [Интеграции](/guide/integrations)
-
-### Пример: отправка в Slack
+### Пример: еженедельный отчёт аудита
 
 ```yaml
-# .github/workflows/audit-notify.yml
-name: Audit Notification
+# .github/workflows/audit-weekly.yml
+name: Audit Weekly Report
 on:
   schedule:
     - cron: '0 9 * * 1'  # Каждый понедельник в 9:00
 
 jobs:
-  notify:
+  report:
     runs-on: ubuntu-latest
     steps:
       - name: Получить аудит за неделю
         run: |
-          curl "${{ secrets.MOZHNO_URL }}/api/v1/audit?from=$(date -d '7 days ago' -Iseconds)&to=$(date -Iseconds)" \
+          curl "${{ secrets.MOZHNO_URL }}/api/v1/audit?dateFrom=$(date -d '7 days ago' +%Y-%m-%d)" \
             -H "Authorization: Bearer ${{ secrets.MOZHNO_TOKEN }}" \
             -o audit.json
-
-      - name: Отправить в Slack
-        uses: slackapi/slack-github-action@v1
-        with:
-          payload: |
-            {
-              "text": "Еженедельный отчёт аудита можно.",
-              "blocks": [...]
-            }
+        env:
+          MOZHNO_URL: ${{ secrets.MOZHNO_URL }}
+          MOZHNO_TOKEN: ${{ secrets.MOZHNO_TOKEN }}
 ```
 
 ## Что дальше?
 
-- [Интеграции](/guide/integrations) — вебхуки, CI/CD, Slack
+- [Интеграции](/guide/integrations) — настройка вебхуков
 - [Лучшие практики](/guide/best-practices) — стратегия очистки и управление флагами
 - [Работа с флагами](/guide/flags-workflow) — жизненный цикл флага

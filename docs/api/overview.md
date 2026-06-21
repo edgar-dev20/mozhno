@@ -1,10 +1,10 @@
 # Обзор API
 
-**можно.** предоставляет REST API для программного управления флагами, сегментами, окружениями и API-ключами. На этой странице — общие принципы: аутентификация, формат запросов, лимиты и версионирование.
+**можно.** предоставляет REST API для программного управления флагами, сегментами, окружениями и API-ключами. На этой странице — общие принципы: аутентификация, формат запросов, ошибки и версионирование.
 
 ## Базовый URL
 
-Все запросы к API выполняются относительно базового URL сервера **можно.**:
+Все запросы к API выполняются относительно базового URL сервера:
 
 ```
 http://localhost:8080/api/v1
@@ -18,18 +18,11 @@ https://flags.example.com/api/v1
 
 ## Аутентификация
 
-**можно.** поддерживает два метода аутентификации:
-
-| Метод | Использование | Заголовок |
-|-------|--------------|-----------|
-| **JWT Bearer Token** | Веб-панель, администрирование, полный доступ | `Authorization: Bearer <jwt>` |
-| **API Key** | SDK, CI/CD, сервер-сервер | `X-Api-Key: <api-key>` |
+**можно.** поддерживает два метода аутентификации через заголовок `Authorization: Bearer`:
 
 ### JWT Bearer Token
 
-Используется для доступа к веб-панели и полного управления ресурсами.
-
-**Получение токена:**
+Используется для доступа к веб-панели и управления ресурсами.
 
 ```bash
 curl -X POST "http://localhost:8080/api/v1/auth/login" \
@@ -41,168 +34,106 @@ curl -X POST "http://localhost:8080/api/v1/auth/login" \
 
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+  "token": "eyJhbGciOiJIUzI1NiIs...",
   "refreshToken": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...",
-  "expiresIn": 900000,
-  "tokenType": "Bearer"
+  "user": {
+    "id": 1,
+    "email": "admin@example.com",
+    "name": "Admin",
+    "role": "ADMIN",
+    "status": "ACTIVE",
+    "avatar": null,
+    "locale": "ru",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "lastActiveAt": "2026-06-21T10:00:00Z"
+  }
 }
 ```
 
-**Использование:**
-
-```bash
-curl "http://localhost:8080/api/v1/flags" \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
-```
-
-**Обновление токена:**
-
-```bash
-curl -X POST "http://localhost:8080/api/v1/auth/refresh" \
-  -H "Content-Type: application/json" \
-  -d '{"refreshToken": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4..."}'
-```
-
-| Параметр JWT | Значение по умолчанию | Описание |
-|-------------|----------------------|----------|
-| Access token TTL | 15 минут | Настраивается через `JWT_ACCESS_TOKEN_EXPIRATION` |
-| Refresh token TTL | 7 дней | Настраивается через `JWT_REFRESH_TOKEN_EXPIRATION` |
-| Refresh token rotation | Включена | Старый refresh-токен инвалидируется при обновлении |
+| Параметр | Значение по умолчанию | Описание |
+|----------|----------------------|----------|
+| Access token TTL | 15 минут | Настраивается через `JWT_ACCESS_TOKEN_TTL_MINUTES` |
+| Refresh token TTL | 30 дней | Настраивается через `JWT_REFRESH_TOKEN_TTL_DAYS` |
+| Refresh token rotation | Включена | Семейная ротация: старый токен инвалидируется при обновлении |
 
 ### API Key
 
 Используется SDK и для сервер-сервер взаимодействия. Привязан к конкретному окружению.
 
-**Формат ключа:** `mz_env_<random>`
-
-**Создание ключа** — в веб-панели: **Настройки → API-ключи → «Создать ключ»**.
-
-**Использование:**
-
 ```bash
 curl "http://localhost:8080/api/v1/sdk/rules" \
-  -H "X-Api-Key: mz_env_abc123def456"
+  -H "Authorization: Bearer <your-api-key>"
 ```
 
 | Особенность | Описание |
 |-------------|----------|
-| Привязка к окружению | Один ключ = одно окружение (dev, staging, production) |
-| Отзыв | Можно отозвать ключ в любой момент |
-| Ротация | Создайте новый ключ, обновите приложения, отзовите старый |
+| **Формат** | Base64url-encoded 32-байтная случайная строка (43 символа, без префикса) |
+| **Типы** | `SERVER` (чтение+запись) или `FRONTEND` (только чтение) |
+| **Привязка к окружению** | Один ключ = одно окружение |
+| **Отзыв** | Можно отозвать ключ в любой момент |
+| **Ротация** | Создайте новый ключ, обновите приложения, отзовите старый |
 
 > **Предупреждение:** Никогда не коммитьте API-ключи в репозиторий. Используйте переменные окружения или secrets manager.
 
 ## Формат запросов и ответов
 
-### Content-Type
+- **Content-Type:** `application/json`
+- **Accept:** `application/json`
 
-Все запросы и ответы — JSON:
-
-```
-Content-Type: application/json
-Accept: application/json
-```
-
-### Тело запроса
+### Успешный ответ (один объект)
 
 ```json
 {
-  "key": "new-checkout",
+  "id": 1,
+  "key": "checkout_v2",
   "name": "Новый чекаут",
   "description": "Переработка оформления заказа",
-  "type": "BOOLEAN",
-  "tags": ["checkout", "ui-redesign"]
+  "flagType": "RELEASE",
+  "enabled": true,
+  "archived": false,
+  "tags": ["checkout", "ui-redesign"],
+  "createdAt": "2026-06-21T13:41:05Z"
 }
 ```
 
-### Тело ответа
-
-Успешный ответ:
+### Список (пагинация)
 
 ```json
 {
-  "data": {
-    "id": "f_abc123",
-    "key": "new-checkout",
-    "name": "Новый чекаут",
-    "type": "BOOLEAN",
-    "tags": ["checkout", "ui-redesign"],
-    "createdAt": "2026-06-21T13:41:05Z",
-    "updatedAt": "2026-06-21T13:41:05Z"
-  }
+  "items": [...],
+  "page": 0,
+  "size": 20,
+  "totalItems": 147,
+  "totalPages": 8
 }
 ```
 
-### Ошибки
+### Ошибка
 
 ```json
 {
-  "error": {
-    "code": "FLAG_NOT_FOUND",
-    "message": "Флаг с ключом 'unknown-flag' не найден",
-    "details": {
-      "flagKey": "unknown-flag"
-    }
-  }
+  "error": "человекочитаемое сообщение",
+  "code": "NOT_FOUND",
+  "traceId": "abc123"
 }
 ```
 
-| HTTP-код | Значение |
-|----------|----------|
-| `200` | Успех |
-| `201` | Создано |
-| `204` | Успех, без содержимого (например, удаление) |
-| `400` | Ошибка валидации: неверные данные |
-| `401` | Не аутентифицирован: отсутствует или недействителен токен/ключ |
-| `403` | Нет прав: роль не позволяет выполнить действие |
-| `404` | Не найдено: ресурс не существует |
-| `409` | Конфликт: флаг с таким ключом уже существует |
-| `429` | Слишком много запросов: превышен rate limit |
-| `500` | Внутренняя ошибка сервера |
-
-## Rate Limiting
-
-| План | Лимит запросов | Окно |
-|------|---------------|------|
-| **Open Core** | 60 запросов/мин | 1 минута |
-| **SDK (получение правил)** | 120 запросов/мин | 1 минута |
-
-При превышении лимита возвращается `429 Too Many Requests` с заголовками:
-
-```http
-HTTP/1.1 429 Too Many Requests
-X-RateLimit-Limit: 60
-X-RateLimit-Remaining: 0
-X-RateLimit-Reset: 1718970000
-Retry-After: 45
-```
-
-| Заголовок | Описание |
-|-----------|----------|
-| `X-RateLimit-Limit` | Максимальное количество запросов в окне |
-| `X-RateLimit-Remaining` | Оставшееся количество запросов |
-| `X-RateLimit-Reset` | Unix timestamp сброса лимита |
-| `Retry-After` | Секунд до сброса лимита |
-
-## Версионирование
-
-API версионируется через URL-префикс:
-
-```
-/api/v1/flags
-/api/v1/segments
-/api/v1/audit
-```
-
-| Версия | Статус |
-|--------|--------|
-| `v1` | Текущая стабильная |
-
-Обратная совместимость гарантируется в пределах мажорной версии (v1). Новые поля могут добавляться, но существующие не удаляются и не меняют тип.
+| HTTP-код | Код ошибки | Описание |
+|----------|------------|----------|
+| `400` | `BAD_REQUEST` | Неверные параметры запроса |
+| `400` | `VALIDATION_ERROR` | Ошибка валидации тела запроса |
+| `401` | `UNAUTHORIZED` | Отсутствует или недействителен токен/ключ |
+| `401` | `INVALID_CREDENTIALS` | Неверный email или пароль |
+| `401` | `TOKEN_REUSE` | Обнаружен повторно использованный refresh-токен |
+| `403` | `FORBIDDEN` | Недостаточно прав |
+| `404` | `NOT_FOUND` | Ресурс не найден |
+| `409` | `CONFLICT` | Ресурс уже существует |
+| `405` | `METHOD_NOT_ALLOWED` | Неверный HTTP-метод |
+| `500` | `INTERNAL_ERROR` | Внутренняя ошибка сервера |
 
 ## Пагинация
 
-Коллекции (списки флагов, записи аудита) поддерживают пагинацию:
+Коллекции поддерживают пагинацию:
 
 ```bash
 curl "http://localhost:8080/api/v1/flags?page=0&size=20" \
@@ -213,106 +144,55 @@ curl "http://localhost:8080/api/v1/flags?page=0&size=20" \
 |----------|-----|-------------|----------|
 | `page` | `int` | `0` | Номер страницы (0-based) |
 | `size` | `int` | `20` | Размер страницы (макс. 100) |
-| `sort` | `string` | `createdAt,desc` | Сортировка: `поле,направление` |
-
-Ответ с пагинацией:
-
-```json
-{
-  "data": [...],
-  "page": {
-    "number": 0,
-    "size": 20,
-    "totalElements": 147,
-    "totalPages": 8
-  }
-}
-```
-
-## Фильтрация
-
-Многие коллекции поддерживают фильтрацию через query-параметры:
-
-```bash
-# Флаги по окружению
-curl "http://localhost:8080/api/v1/flags?environment=production" \
-  -H "Authorization: Bearer $TOKEN"
-
-# Флаги по тегу
-curl "http://localhost:8080/api/v1/flags?tag=checkout" \
-  -H "Authorization: Bearer $TOKEN"
-
-# Флаги по статусу
-curl "http://localhost:8080/api/v1/flags?status=active" \
-  -H "Authorization: Bearer $TOKEN"
-
-# Аудит по дате
-curl "http://localhost:8080/api/v1/audit?from=2026-06-01T00:00:00Z&to=2026-06-21T23:59:59Z" \
-  -H "Authorization: Bearer $TOKEN"
-```
 
 ## Категории API
 
-```mermaid
-graph TD
-    A[REST API v1] --> B[Флаги]
-    A --> C[Сегменты]
-    A --> D[Окружения]
-    A --> E[API-ключи]
-    A --> F[Аудит]
-    A --> G[SDK]
-    A --> H[Аутентификация]
-    A --> I[Вебхуки]
-```
-
-| Категория | Базовый путь | Документация |
+| Категория | Базовый путь | Используется |
 |-----------|-------------|-------------|
-| **Флаги** | `/api/v1/flags` | [REST API](/api/rest#флаги) |
-| **Сегменты** | `/api/v1/segments` | [REST API](/api/rest#сегменты) |
-| **Окружения** | `/api/v1/environments` | [REST API](/api/rest#окружения) |
-| **API-ключи** | `/api/v1/api-keys` | [REST API](/api/rest#api-ключи) |
-| **Аудит** | `/api/v1/audit` | [REST API](/api/rest#аудит) |
-| **SDK (правила)** | `/api/v1/sdk` | [Обзор SDK](/sdk/overview) |
-| **Аутентификация** | `/api/v1/auth` | Текущая страница |
-| **Вебхуки** | `/api/v1/webhooks` | [Интеграции](/guide/integrations) |
+| **Флаги** | `/api/v1/flags` | Панель, CI/CD |
+| **Сегменты** | `/api/v1/segments` | Панель |
+| **Окружения** | `/api/v1/environments` | Панель |
+| **Контексты** | `/api/v1/contexts` | Панель |
+| **API-ключи** | `/api/v1/api-keys` | Панель |
+| **Аудит** | `/api/v1/audit` | Панель |
+| **Проекты** | `/api/v1/projects` | Панель |
+| **Пользователи** | `/api/v1/users` | Панель (Admin) |
+| **Настройки** | `/api/v1/settings` | Панель (Admin) |
+| **Интеграции** | `/api/v1/integrations` | Панель |
+| **Теги** | `/api/v1/tags` | Панель |
+| **Метрики** | `/api/v1/metrics` | Панель |
+| **Аутентификация** | `/api/v1/auth` | Логин, обновление, выход |
+
+### SDK-эндпоинты
+
+| Endpoint | Метод | Аутентификация | Описание |
+|----------|--------|----------------|----------|
+| `/api/client/features` | `GET` | API Key | Получение всех флагов окружения (ETag) |
+| `/api/client/evaluate` | `POST` | API Key | Оценка флагов для переданного контекста |
+| `/api/client/metrics` | `POST` | API Key | Отправка метрик использования |
 
 ## Swagger UI и OpenAPI
 
-### Swagger UI
-
-Интерактивная документация API доступна по адресу:
+Интерактивная документация API:
 
 ```
 http://localhost:8080/swagger-ui.html
 ```
 
-Swagger UI позволяет просматривать все endpoints, заполнять параметры и выполнять запросы прямо из браузера.
-
-### OpenAPI 3.1 спецификация
-
-Машиночитаемая спецификация в формате OpenAPI 3.1:
+OpenAPI 3.1 спецификация:
 
 ```
 http://localhost:8080/v3/api-docs
 ```
 
-Используйте для генерации клиентских библиотек:
+Генерация клиентских библиотек:
 
 ```bash
-# Генерация Java-клиента через openapi-generator
 openapi-generator generate \
   -i http://localhost:8080/v3/api-docs \
   -g java \
   -o ./generated-client
-
-# Генерация TypeScript-клиента
-openapi-generator generate \
-  -i http://localhost:8080/v3/api-docs \
-  -g typescript-axios \
-  -o ./generated-client
 ```
-
-Пути Swagger и OpenAPI настраиваются через переменные окружения:
 
 | Переменная | По умолчанию |
 |------------|-------------|
@@ -321,46 +201,33 @@ openapi-generator generate \
 
 ## Примеры использования
 
-### Создание флага через API
+### Создание флага
 
 ```bash
 curl -X POST "http://localhost:8080/api/v1/flags" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "key": "new-checkout",
+    "key": "checkout_v2",
     "name": "Новый чекаут",
     "description": "Переработка оформления заказа",
-    "type": "BOOLEAN",
-    "tags": ["checkout", "ui-redesign"]
+    "flagType": "RELEASE",
+    "projectId": 1
   }'
-```
-
-### Получение всех флагов
-
-```bash
-curl "http://localhost:8080/api/v1/flags?environment=production&page=0&size=50" \
-  -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
 ### Получение правил для SDK
 
 ```bash
-curl "http://localhost:8080/api/v1/sdk/rules" \
-  -H "X-Api-Key: mz_env_abc123def456"
+curl "http://localhost:8080/api/client/features" \
+  -H "Authorization: Bearer <api-key>"
 ```
 
-### Обновление стратегии флага
+### Архивирование флага
 
 ```bash
-curl -X PATCH "http://localhost:8080/api/v1/flags/new-checkout/strategies" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "type": "gradual",
-    "percentage": 50,
-    "environment": "production"
-  }'
+curl -X POST "http://localhost:8080/api/v1/flags/42/archive" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ## Что дальше?

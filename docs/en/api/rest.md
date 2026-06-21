@@ -11,7 +11,8 @@ Include your JWT or API key in the `Authorization` header for every request. See
 ```bash
 # Environment variable used throughout this document
 export MOZHNO_URL="https://your-instance"
-export MOZHNO_TOKEN="mz_sk_production_abc123"
+export MOZHNO_TOKEN="X-Api-Key: <api-key>
+Authorization: Bearer <jwt-or-api-key>production_abc123"
 ```
 
 ## Flags
@@ -397,14 +398,16 @@ curl -X POST "$MOZHNO_URL/api/v1/api-keys" \
 {
   "id": "key-001",
   "name": "Production SDK",
-  "key": "mz_sk_production_x1y2z3a4b5c6d7e8f9",
+  "key": "X-Api-Key: <api-key>
+Authorization: Bearer <jwt-or-api-key>production_x1y2z3a4b5c6d7e8f9",
   "environmentId": "env-001",
   "scopes": ["flags:read", "segments:read"],
   "createdAt": "2026-06-21T10:00:00Z"
 }
 ```
 
-> **Warning:** The full API key value (`mz_sk_...`) is returned **only once** at creation time. Store it securely — it cannot be retrieved later.
+> **Warning:** The full API key value (`X-Api-Key: <api-key>
+Authorization: Bearer <jwt-or-api-key>...`) is returned **only once** at creation time. Store it securely — it cannot be retrieved later.
 
 ### Revoke an API Key
 

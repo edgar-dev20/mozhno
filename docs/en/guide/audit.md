@@ -19,7 +19,7 @@ Each audit entry contains:
 |-------|-------------|
 | **Timestamp** | UTC timestamp of the change |
 | **Actor** | Email of the user or API key name that made the change |
-| **Action** | `CREATED`, `UPDATED`, `DELETED`, `ARCHIVED`, `RESTORED`, `PAUSED`, `RESUMED` |
+| **Action** | `CREATED`, `UPDATED`, `DELETED`, `ARCHIVED`, `RESTORED` |
 | **Resource type** | `FLAG`, `SEGMENT`, `API_KEY`, `ENVIRONMENT` |
 | **Resource identifier** | Flag key, segment name, etc. |
 | **Diff** | Before/after snapshot of the changed fields |
@@ -135,7 +135,7 @@ curl "https://your-instance/api/audit/export?resourceType=FLAG&from=2026-06-01T0
 
 ### Integration with External Tools
 
-Use [webhooks](./integrations.md) to stream audit events to your SIEM or monitoring platform in real time. Configure a webhook for the `audit.entry.created` event to forward each change as it happens.
+Use [webhooks](./integrations.md) to stream audit events to external systems. Configure a webhook for `flag.updated` or other resource events to forward changes as they happen.
 
 ## Use Cases
 
@@ -172,5 +172,5 @@ Audit log entries are retained indefinitely on self-hosted installations. Ensure
 
 ## Next Steps
 
-- Configure [Webhooks](./integrations.md) to forward audit events to external systems.
+- Configure [Webhooks](./integrations.md) to forward events to external systems.
 - Review [Best Practices](./best-practices.md) for flag cleanup strategies informed by audit data.

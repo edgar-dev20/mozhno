@@ -130,8 +130,8 @@ Reduce `maximum-pool-size` as replica count grows to avoid exhausting PostgreSQL
 For Kubernetes deployments, set the pool size via environment variable:
 
 ```bash
-SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=30
-SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=5
+HIKARI_MAXIMUM_POOL_SIZE=30
+HIKARI_MINIMUM_IDLE=5
 ```
 
 ## Backup Strategies

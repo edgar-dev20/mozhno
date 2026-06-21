@@ -111,12 +111,12 @@ R__refresh_materialized_view.sql
 
 | Переменная | По умолчанию | Продакшен | Описание |
 |------------|-------------|-----------|----------|
-| `SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE` | `10` | `30` | Максимальное число соединений |
-| `SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE` | `5` | `5` | Минимальное число простаивающих соединений |
-| `SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT` | `30000` | `30000` | Таймаут получения соединения (мс) |
-| `SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT` | `600000` | `600000` | Таймаут бездействия (мс) |
-| `SPRING_DATASOURCE_HIKARI_MAX_LIFETIME` | `1800000` | `1800000` | Макс. время жизни соединения (мс) |
-| `SPRING_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD` | `0` | `60000` | Обнаружение утечек соединений (мс) |
+| `HIKARI_MAXIMUM_POOL_SIZE` | `10` | `30` | Максимальное число соединений |
+| `HIKARI_MINIMUM_IDLE` | `5` | `5` | Минимальное число простаивающих соединений |
+| `HIKARI_CONNECTION_TIMEOUT` | `30000` | `30000` | Таймаут получения соединения (мс) |
+| `HIKARI_IDLE_TIMEOUT` | `600000` | `600000` | Таймаут бездействия (мс) |
+| `HIKARI_MAX_LIFETIME` | `1800000` | `1800000` | Макс. время жизни соединения (мс) |
+| `HIKARI_LEAK_DETECTION_THRESHOLD` | `0` | `60000` | Обнаружение утечек соединений (мс) |
 
 ### Расчёт размера пула
 
@@ -176,7 +176,7 @@ curl http://localhost:8080/actuator/health
 Настройка leak detection для продакшена:
 
 ```
-SPRING_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD=60000
+HIKARI_LEAK_DETECTION_THRESHOLD=60000
 ```
 
 HikariCP будет логировать предупреждения, если соединение не возвращено в пул за 60 секунд.

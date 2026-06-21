@@ -6,7 +6,7 @@ This guide covers all installation methods for **можно.** — from a quick 
 
 | Requirement | Version | Notes |
 |-------------|---------|-------|
-| JDK | 25+ | Required for building from source. Temurin or GraalVM recommended. |
+| JDK | 25+ | Required for building from source. Eclipse Temurin recommended. |
 | Node.js | 24+ | Required for the React 19 SPA frontend build. |
 | PostgreSQL | 15+ | Required for all deployment methods. |
 | Docker | 24+ | Optional. Required for containerized deployment. |
@@ -95,42 +95,21 @@ See [Configuration](/en/guide/configuration) for all available variables.
 
 ### Step 4: Build and run
 
-**можно.** uses a modular Maven project with a Makefile for common tasks.
+**можно.** uses a multi-module Gradle project with a Makefile for common tasks.
 
 ```bash
-# Build the entire project (backend + frontend)
-make build
+# Start PostgreSQL
+make db-up
 
-# Run database migrations
-make migrate
-
-# Start the server
-make run
+# Build frontend and start server
+make server-run
 ```
 
-Alternatively, use Maven directly:
+Or run manually:
 
 ```bash
-./mvnw clean package -DskipTests
-java -jar mozhno-app/target/mozhno-app-*.jar
-```
-
-### Build from source without Make
-
-If you don't have `make` installed:
-
-```bash
-# Build backend
-./mvnw clean package -DskipTests
-
-# Build frontend (React 19 SPA)
-cd mozhno-web
-npm ci
-npm run build
-cd ..
-
-# Run
-java -jar mozhno-app/target/mozhno-app.jar
+cd web && npm ci && npm run build:static
+cd server && ./gradlew :mozhno-app:bootRun
 ```
 
 ## Make Commands
@@ -139,13 +118,18 @@ The project includes a `Makefile` with common operations:
 
 | Command | Description |
 |---------|-------------|
-| `make build` | Build backend JAR and frontend bundle |
-| `make run` | Start the server on port 8080 |
-| `make migrate` | Run Flyway database migrations |
+| `make dev` | Start PostgreSQL for development |
+| `make db-up` | Start PostgreSQL container |
+| `make db-down` | Stop PostgreSQL container |
+| `make server-run` | Build frontend + run Spring Boot server |
+| `make server-test` | Run server tests |
+| `make web-dev` | Run web UI in dev mode (HMR) |
+| `make web-test` | Run web UI tests |
+| `make web-lint` | Lint web UI |
+| `make docker-build` | Build Docker image locally |
+| `make docker-up` | Start full stack via docker-compose |
+| `make docker-down` | Stop full stack |
 | `make clean` | Remove build artifacts |
-| `make test` | Run the full test suite |
-| `make docker-build` | Build the Docker image locally |
-| `make docker-run` | Run with Docker Compose |
 
 ## Database Setup
 
@@ -174,7 +158,7 @@ Kubernetes manifests are provided in the `k8s/` directory:
 kubectl apply -f k8s/
 ```
 
-This deploys PostgreSQL (StatefulSet), the **можно.** server (Deployment with HPA), ConfigMaps, Secrets, and a PDB. See [Kubernetes](/en/self-hosting/kubernetes) for detailed instructions.
+This deploys the **можно.** server (Deployment + Service + HPA + PDB), Secrets, and ConfigMap. See [Kubernetes](/en/self-hosting/kubernetes) for detailed instructions.
 
 ## Verifying the Installation
 

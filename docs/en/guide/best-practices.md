@@ -22,17 +22,17 @@ A consistent naming scheme keeps flags discoverable and prevents collisions acro
 
 | Good | Poor | Why |
 |------|------|-----|
-| `checkout_one_click_v2` | `flag_42` | Descriptive vs. opaque |
-| `auth_sso_saml` | `new_auth` | Specific vs. vague |
-| `search_ranking_ml_v3` | `search_v3` | Includes purpose |
-| `billing_tax_eu_vat` | `tax_stuff` | Scoped and precise |
+| `checkout-one-click-v2` | `flag_42` | Descriptive vs. opaque |
+| `auth-sso-saml` | `new_auth` | Specific vs. vague |
+| `search-ranking-ml-v3` | `search_v3` | Includes purpose |
+| `billing-tax-eu-vat` | `tax_stuff` | Scoped and precise |
 
 ### Naming Rules
 
-- Use **snake_case** (lowercase with underscores).
+- Use **kebab-case** (lowercase with hyphens).
 - Start with the **service or domain name**.
-- Include a **version suffix** (`_v2`, `_v3`) when iterating on a feature.
-- Use **descriptive action words** for kill switches: `checkout_payment_disable_provider_x`.
+- Include a **version suffix** (`-v2`, `-v3`) when iterating on a feature.
+- Use **descriptive action words** for kill switches: `kill-payment-provider-x`.
 
 ### Tagging Strategy
 
@@ -124,7 +124,7 @@ Run through this checklist weekly for all flags you own:
 1. **Rollout at 100% for > 2 weeks?** → Schedule code removal and archive the flag.
 2. **Flag has not been evaluated in > 30 days?** → Investigate. It may be dead code.
 3. **Flag has an `expires` tag in the past?** → Archive or extend the expiry.
-4. **Flag is paused and > 60 days old?** → Archive if no intention to re-enable.
+4. **Flag is archived and > 60 days old?** → Delete permanently if code removed.
 5. **Flag description is empty or outdated?** → Update it.
 
 ### Automated Cleanup Script
@@ -222,7 +222,7 @@ Regularly test that toggling a flag off correctly restores the old behaviour:
 curl -X PATCH "$MOZHNO_STAGING_URL/api/flags/$FLAG_KEY" \
   -H "Authorization: Bearer $MOZHNO_JWT" \
   -H "Content-Type: application/json" \
-  -d '{"state": "PAUSED"}'
+  -d '{"archived": true}'
 
 # Run smoke tests — should see old behaviour
 npm run smoke-test
@@ -252,7 +252,7 @@ Track these metrics in your team's dashboard:
 | **Total active flags** | < 50 per service | Dashboard count |
 | **Flags at 100% rollout > 30 days** | 0 | API query |
 | **Flags never evaluated in 60 days** | 0 | API query (`lastEvaluatedBefore`) |
-| **Paused flags > 90 days** | 0 | Dashboard filter by state |
+| **Archived flags > 90 days** | 0 | Dashboard filter by state |
 | **Average flag lifetime** | < 90 days | Creation-to-archive duration |
 
 ### Flag Debt Reduction Workflow

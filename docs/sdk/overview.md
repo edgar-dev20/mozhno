@@ -27,283 +27,166 @@ graph TD
 
 ### Принцип локальной оценки
 
-В отличие от централизованных систем, где приложение на каждый чих ходит к серверу, SDK **можно.** работает так:
-
 1. **Старт:** SDK загружает все правила флагов с сервера **один раз**.
 2. **Кеширование:** Правила сохраняются в памяти.
-3. **Локальная оценка:** Каждый вызов `isEnabled()` / `getValue()` оценивается **локально** — без задержки сети.
-4. **Фоновое обновление:** SDK периодически опрашивает сервер на предмет изменений и обновляет кеш.
-
-Преимущества локальной оценки:
+3. **Локальная оценка:** Каждый вызов `isEnabled()` оценивается **локально** — без задержки сети.
+4. **Фоновое обновление:** SDK периодически опрашивает сервер (по умолчанию каждые 15 секунд) и обновляет кеш. Используется `ETag` / `If-None-Match` для эффективных дельта-обновлений.
 
 | Преимущество | Описание |
 |--------------|----------|
 | **Нулевая задержка** | Оценка флага: доли микросекунды |
 | **Нет single point of failure** | Если сервер недоступен, SDK продолжает работать с закешированными правилами |
 | **Масштабируемость** | Сервер не нагружается запросами оценки флагов |
-| **Offline-режим** | Приложение работает даже без связи с сервером |
 
-## Синхронизация правил: Polling vs Streaming
+## Логика оценки
 
-**можно.** SDK использует механизм **Polling** (периодический опрос) для обновления правил.
+SDK оценивает флаг в следующем порядке:
+
+1. **Флаг выключен?** → `false`
+2. **Нет стратегии/activation?** → `true`
+3. **Ограничения (constraints):** все правила должны совпасть с контекстом (И)
+4. **Сегменты:** хотя бы один сегмент должен совпасть (ИЛИ)
+5. **Если есть и то, и другое:** достаточно совпадения одного (ИЛИ)
+6. **Процентный роллаут:** MurmurHash3 от `flagKey + (userId || sessionId)`, сравнение с процентом
+7. **Ничего не совпало** → `false`
+
+### Поддерживаемые операторы
+
+| Оператор | Описание |
+|----------|----------|
+| `in` | Значение входит в список |
+| `not_in` | Значение не входит в список |
+| `eq` | Равенство (числовое для `contextType: number`) |
+| `ne` | Неравенство |
+| `gt` | Больше |
+| `gte` | Больше или равно |
+| `lt` | Меньше |
+| `lte` | Меньше или равно |
+| `contains` | Подстрока |
+
+### Типы контекста
+
+| Тип | Поведение |
+|-----|-----------|
+| `string` (по умолчанию) | Строковое сравнение |
+| `number` | Числовое сравнение |
+| `time` | Сравнение ISO8601 дат |
+| `semver` | Семантическое версионирование |
+
+## Синхронизация правил
+
+SDK использует механизм **Polling** (периодический опрос). Интервал по умолчанию — **15 секунд**.
 
 ```mermaid
 sequenceDiagram
     participant SDK
     participant Server
 
-    SDK->>Server: GET /api/v1/sdk/rules
-    Server-->>SDK: Все правила (JSON)
+    SDK->>Server: GET /api/client/features (If-None-Match)
+    Server-->>SDK: 200 + JSON (или 304 Not Modified)
     Note over SDK: Кеширование в памяти
 
-    loop Каждые N секунд
-        SDK->>Server: GET /api/v1/sdk/rules?since=<timestamp>
-        Server-->>SDK: Изменённые правила (дельта)
-        Note over SDK: Обновление кеша
+    loop Каждые 15 секунд
+        SDK->>Server: GET /api/client/features (If-None-Match)
+        Server-->>SDK: 304 Not Modified (или обновлённые флаги)
+        Note over SDK: Атомарное обновление кеша
     end
 ```
 
-### Polling (текущая реализация)
-
 | Параметр | Значение по умолчанию | Описание |
 |----------|----------------------|----------|
-| Интервал опроса | 30 секунд | Как часто SDK проверяет обновления |
-| Начальная загрузка | При создании клиента | Полная загрузка всех правил |
-| Дельта-обновления | Через `?since=<timestamp>` | Передаются только изменённые правила |
-| Retry при ошибке | Экспоненциальный backoff | 1с → 2с → 4с → 8с → максимум 60с |
+| Интервал опроса | 15 секунд | `refreshInterval` (JS) / `fetchTogglesInterval` (Java) |
+| Retry при ошибке | Экспоненциальный backoff | 1с → 2с → 4с |
+| Circuit breaker (Java) | 5 ошибок → 60с пауза | Защита от перегрузки сервера |
 
-### Streaming (в Roadmap)
+## Инициализация клиента
 
-В будущих версиях SDK будет поддерживать Server-Sent Events (SSE) или WebSocket для мгновенной доставки изменений:
-
-```
-GET /api/v1/sdk/rules/stream
-Content-Type: text/event-stream
-
-event: flag-updated
-data: {"key": "new-checkout", "version": 42, ...}
-
-event: flag-deleted
-data: {"key": "old-feature"}
-```
-
-## Стратегия кеширования
-
-### Уровни кеша
-
-```mermaid
-graph TD
-    REQ[Запрос isEnabled] --> L1{L1: Память}
-    L1 -->|Hit| RESULT[Результат]
-    L1 -->|Miss| L2{L2: Загрузка с сервера}
-    L2 -->|Успешно| L1
-    L2 -->|Ошибка| L3{L3: Stale cache}
-    L3 -->|Есть| RESULT
-    L3 -->|Нет| DEFAULT[Значение по умолчанию]
-```
-
-### Поведение кеша
-
-| Сценарий | Поведение |
-|----------|-----------|
-| **Нормальная работа** | Правила в памяти, оценка мгновенная |
-| **Обновление правил** | Фоновый поток обновляет кеш, атомарная замена |
-| **Сервер недоступен** | Используется последний успешный кеш |
-| **Холодный старт без сервера** | Ошибка инициализации, значения по умолчанию |
-| **Сервер вернулся** | Следующий цикл поллинга восстанавливает связь |
-
-### Инвалидация кеша
-
-Кеш инвалидируется атомарно — полная замена набора правил:
-
-```
-Версия правил: 1 (начальная загрузка)
-Версия правил: 2 (флаг new-feature изменён)
-Версия правил: 3 (флаг old-feature удалён)
-```
-
-SDK всегда работает с одной целостной версией правил. Это гарантирует консистентность: оценка флага всегда использует правила из одного снапшота.
-
-## Общая поверхность API SDK
-
-Все SDK реализуют единый контракт:
+### Java SDK
 
 ```java
-// Java
-public interface MozhnoClient {
-    boolean isFlagEnabled(String flagKey, EvaluationContext ctx);
-    String getFlagValue(String flagKey, EvaluationContext ctx, String defaultValue);
-    Map<String, Boolean> getFlags(EvaluationContext ctx);
-    FlagEvaluation getFlagEvaluation(String flagKey, EvaluationContext ctx);
-    void close();
-}
+MozhnoClient client = MozhnoConfig.builder()
+    .appName("my-app")
+    .instanceId("instance-1")
+    .mozhnoUrl("http://localhost:8080")
+    .apiKey("<api-key>")
+    .fetchTogglesInterval(15)
+    .sendMetricsInterval(60)
+    .environment("production")
+    .build();
+
+client.start();
+boolean enabled = client.isEnabled("new-checkout", context);
 ```
+
+### JavaScript / TypeScript SDK
 
 ```typescript
-// TypeScript
-interface MozhnoClient {
-  isEnabled(flagKey: string, ctx: EvaluationContext): Promise<boolean>;
-  getValue(flagKey: string, ctx: EvaluationContext, defaultValue?: string): Promise<string>;
-  getAllFlags(ctx: EvaluationContext): Promise<Record<string, boolean>>;
-  getEvaluation(flagKey: string, ctx: EvaluationContext): Promise<FlagEvaluation>;
-  close(): void;
-}
+import { MozhnoClient } from '@mozhno/client-js';
+
+const client = new MozhnoClient({
+  url: 'http://localhost:8080',
+  apiKey: '<api-key>',
+  appName: 'my-app',
+  refreshInterval: 15,
+  metricsInterval: 60,
+  environment: 'production',
+});
+
+await client.start();
+const enabled = client.isEnabled('new-checkout', { userId: 'user-123' });
 ```
 
-### Основные методы
+### Общие параметры конфигурации
 
-| Метод | Назначение | Возвращает |
-|-------|------------|------------|
-| `isFlagEnabled` / `isEnabled` | Проверить, включён ли булев флаг | `boolean` |
-| `getFlagValue` / `getValue` | Получить значение мультивариативного флага | `String` / `string` |
-| `getFlags` / `getAllFlags` | Получить все флаги для переданного контекста | `Map<String, Boolean>` / `Record<string, boolean>` |
-| `getFlagEvaluation` / `getEvaluation` | Получить результат с метаданными (какое правило сработало) | `FlagEvaluation` |
+| Параметр | JS ключ | Java ключ | По умолчанию | Описание |
+|----------|---------|-----------|-------------|----------|
+| URL сервера | `url` | `mozhnoUrl` | **Обязательно** | Базовый URL сервера |
+| API-ключ | `apiKey` | `apiKey` | **Обязательно** | API-ключ окружения |
+| Имя приложения | `appName` | `appName` | **Обязательно** | Идентификатор приложения |
+| ID экземпляра | `instanceId` | `instanceId` | **Обязательно** (Java) | Уникальный ID инстанса |
+| Интервал опроса (с) | `refreshInterval` | `fetchTogglesInterval` | `15` | Частота поллинга |
+| Интервал метрик (с) | `metricsInterval` | `sendMetricsInterval` | `60` | Частота отправки метрик |
+| Окружение | `environment` | `environment` | `"default"` | Имя окружения |
+| Отключить метрики | `disableMetrics` | `disableMetrics` | `false` | Отключение метрик |
 
-### Контекст оценки
+## Контекст оценки
 
 Контекст — это map атрибутов, описывающих текущий запрос или пользователя:
 
 ```java
-var ctx = new EvaluationContext()
-    .set("userId", "user-123")
-    .set("email", "user@example.com")
-    .set("country", "RU")
-    .set("plan", "premium")
-    .withHashProperty("userId");  // для детерминированного роллаута
+MozhnoContext context = MozhnoContext.builder()
+    .userId("user-123")
+    .sessionId("session-abc")
+    .addProperty("country", "RU")
+    .addProperty("plan", "premium")
+    .build();
 ```
 
 ```typescript
-const ctx: EvaluationContext = {
+const context = {
   userId: 'user-123',
-  email: 'user@example.com',
+  sessionId: 'session-abc',
   country: 'RU',
   plan: 'premium',
 };
 ```
 
-### Результат оценки с метаданными
-
-```java
-FlagEvaluation eval = client.getFlagEvaluation("new-feature", ctx);
-
-eval.isEnabled();         // true / false
-eval.getValue();          // для multi-variate: "A", "B", "C"
-eval.getMatchedRule();    // какое правило сработало (или null)
-eval.getReason();         // причина: TARGETING_MATCH, DEFAULT, ERROR
-eval.getFlagKey();        // ключ флага
-eval.getFlagVersion();    // версия правил
-```
-
-## Инициализация клиента
-
-Общий паттерн инициализации для всех SDK:
-
-```mermaid
-sequenceDiagram
-    participant App
-    participant SDK
-
-    App->>SDK: builder() / new MozhnoClient()
-    App->>SDK: .serverUrl(...)
-    App->>SDK: .apiKey(...)
-    App->>SDK: .pollInterval(...)  // опционально
-    App->>SDK: .build() / await init()
-
-    SDK->>Server: GET /api/v1/sdk/rules
-    Server-->>SDK: Правила (JSON)
-
-    Note over SDK: Клиент готов
-
-    App->>SDK: isEnabled("flag", ctx)
-    SDK-->>App: true / false
-```
-
-### Общие параметры конфигурации
-
-| Параметр | Тип | Обязательно | По умолчанию | Описание |
-|----------|-----|-------------|-------------|----------|
-| `serverUrl` | `string` | Да | — | URL сервера **можно.** |
-| `apiKey` | `string` | Да | — | API-ключ окружения |
-| `pollInterval` | `int` | Нет | `30` | Интервал опроса в секундах |
-| `connectTimeout` | `int` | Нет | `5000` | Таймаут соединения в мс |
-| `readTimeout` | `int` | Нет | `10000` | Таймаут чтения в мс |
-| `maxRetries` | `int` | Нет | `3` | Максимальное количество повторных попыток |
-
 ## Обработка ошибок
 
-### Уровни деградации
-
-| Ситуация | Поведение | Пример |
-|----------|-----------|--------|
-| **Сервер недоступен при старте** | Клиент не инициализируется, выбрасывается исключение | `MozhnoClientException` |
-| **Сервер недоступен в работе** | Используется закешированное состояние | Лог WARN, работа продолжается |
-| **Флаг не найден** | Возвращается значение по умолчанию (`false` / `defaultValue`) | Лог DEBUG |
-| **Ошибка в правилах** | Флаг возвращает значение по умолчанию | Лог ERROR с деталями |
-| **Контекст null** | `NullPointerException` / `TypeError` | Быстрое падение, не silently ignore |
-| **Сеть недоступна** | Закешированные правила, фоновые ретраи | Лог WARN |
-
-### Рекомендации по обработке
-
-```java
-try {
-    boolean enabled = client.isFlagEnabled("new-feature", ctx);
-    // используем результат
-} catch (MozhnoClientException e) {
-    // Критическая ошибка: клиент не инициализирован
-    log.error("Mozhno SDK unavailable, using safe defaults", e);
-    boolean enabled = false;  // безопасное значение по умолчанию
-}
-```
-
-> **Совет:** Всегда задавайте осмысленное значение по умолчанию. Для новых фич — `false`. Для kill switch — `true` (чтобы при недоступности SDK фича продолжала работать).
-
-## Жизненный цикл подключения
-
-```mermaid
-stateDiagram-v2
-    [*] --> Создание
-    Создание --> Инициализация
-    Инициализация --> Активен: правила загружены
-    Инициализация --> Ошибка: сервер недоступен
-    Активен --> Обновление: фоновый поллинг
-    Обновление --> Активен
-    Активен --> ОшибкаСети: сеть потеряна
-    ОшибкаСети --> Активен: сеть восстановлена
-    Активен --> Закрыт: close()
-    Ошибка --> Закрыт
-    Закрыт --> [*]
-```
-
-### Завершение работы
-
-Всегда вызывайте `close()` / `shutdown()` при остановке приложения:
-
-```java
-// Java — через try-with-resources
-try (var client = MozhnoClient.builder().serverUrl(...).apiKey(...).build()) {
-    // работа с клиентом
-}  // автоматический close()
-```
-
-```typescript
-// TypeScript
-process.on('SIGTERM', () => {
-  client.close();
-  process.exit(0);
-});
-```
-
-Это останавливает фоновые потоки поллинга и освобождает ресурсы.
+| Ситуация | Поведение |
+|----------|-----------|
+| **Сервер недоступен при старте** | Клиент выбрасывает исключение / отклоняет Promise |
+| **Сервер недоступен в работе** | Используется закешированное состояние |
+| **Флаг не найден** | Возвращается `false` |
+| **Атрибут отсутствует в контексте** | Правило с этим атрибутом возвращает `false` |
+| **Сеть недоступна** | Закешированные правила, фоновые ретраи |
 
 ## Поддерживаемые SDK
 
-| Язык | Пакет | Статус | Документация |
-|------|-------|--------|-------------|
-| **Java** | `com.mozhno:client-java` | Стабильный | [Java SDK](/sdk/java) |
-| **JavaScript / TypeScript** | `@mozhno/client-js` | Стабильный | [JS SDK](/sdk/javascript) |
-| **Python** | `mozhno-client` | В разработке | — |
-| **Go** | `github.com/mozhno/client-go` | В разработке | — |
-| **.NET** | `Mozhno.Client` | В разработке | — |
+| Язык | Пакет | Документация |
+|------|-------|-------------|
+| **Java** | `dev.mozhno:mozhno-client-java` (Gradle) | [Java SDK](/sdk/java) |
+| **JavaScript / TypeScript** | `@mozhno/client-js` (npm) | [JS SDK](/sdk/javascript) |
 
 ## Что дальше?
 

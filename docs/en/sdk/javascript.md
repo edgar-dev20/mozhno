@@ -24,15 +24,15 @@ Create a single client instance and reuse it throughout your application:
 import { MozhnoClient } from "@mozhno/client-js";
 
 const client = new MozhnoClient({
-  serverUrl: "https://mozhno.example.com",
-  apiKey: "mz_sk_production_abc123",
-  pollingIntervalMs: 30000,
-  streaming: true,
-  connectTimeoutMs: 5000,
-  readTimeoutMs: 10000,
-  maxRetries: 3,
-  retryBackoffMs: 1000,
+  url: "https://mozhno.example.com",
+  apiKey: "<api-key>",
+  appName: "my-app",
+  refreshInterval: 15,
+  metricsInterval: 60,
+  environment: "production",
 });
+
+await client.start();
 ```
 
 ### TypeScript
@@ -41,42 +41,49 @@ const client = new MozhnoClient({
 import { MozhnoClient, MozhnoClientOptions } from "@mozhno/client-js";
 
 const options: MozhnoClientOptions = {
-  serverUrl: "https://mozhno.example.com",
-  apiKey: "mz_sk_production_abc123",
-  streaming: true,
-};
-
-const client = new MozhnoClient(options);
-```
-
 ### Configuration Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `serverUrl` | `string` | **Required** | Base URL of your можно instance |
-| `apiKey` | `string` | **Required** | API key with `flags:read` scope |
-| `pollingIntervalMs` | `number` | `30000` | Polling interval in milliseconds |
-| `streaming` | `boolean` | `false` | Enable SSE streaming for real-time updates |
-| `connectTimeoutMs` | `number` | `5000` | Connection timeout in milliseconds |
-| `readTimeoutMs` | `number` | `10000` | Read timeout in milliseconds |
-| `maxRetries` | `number` | `3` | Maximum retries for failed server requests |
-| `retryBackoffMs` | `number` | `1000` | Initial backoff between retries (exponential) |
+| `url` | `string` | **Required** | Base URL of your можно instance |
+| `apiKey` | `string` | **Required** | API key for the target environment |
+| `appName` | `string` | **Required** | Your application identifier |
+| `refreshInterval` | `number` | `15` | Polling interval in seconds |
+| `metricsInterval` | `number` | `60` | Metrics reporting interval in seconds |
+| `environment` | `string` | `"default"` | Environment name |
+| `disableMetrics` | `boolean` | `false` | Disable metrics reporting |
+| `stickyAnonId` | `boolean` | `true` | Auto-generate anonymous ID for sticky bucketing |
 
 ## Initialisation
 
-The client automatically fetches rules on creation and begins background synchronisation. The constructor returns immediately; rules are loaded asynchronously.
+The client must be explicitly started before use. Call `await client.start()` to fetch initial rules and begin background synchronisation.
 
 ### Waiting for Initialisation
 
 ```js
 const client = new MozhnoClient({
-  serverUrl: "https://mozhno.example.com",
-  apiKey: "mz_sk_production_abc123",
+  url: "https://mozhno.example.com",
+  apiKey: "<api-key>",
+  appName: "my-app",
 });
 
-await client.initialize();
+await client.start();
 
 console.log("Mozhno client ready");
+```
+
+> **Tip:** Call `await client.start()` during application startup to ensure rules are loaded before serving requests. If initialisation fails, the promise rejects — handle this to fail fast or fall back to safe defaults.
+
+### Error Handling During Initialisation
+
+```js
+try {
+  const client = new MozhnoClient({ url: "...", apiKey: "...", appName: "..." });
+  await client.start();
+} catch (error) {
+  console.error("Failed to initialize Mozhno client:", error.message);
+  process.exit(1);
+}
 ```
 
 > **Tip:** Call `await client.initialize()` during application startup to ensure rules are loaded before serving requests. If initialisation fails, the promise rejects — handle this to fail fast or fall back to safe defaults.
@@ -209,8 +216,8 @@ The `@mozhno/client-js` package includes React hooks and a provider component.
 import { MozhnoProvider, createMozhnoClient } from "@mozhno/client-js/react";
 
 const client = createMozhnoClient({
-  serverUrl: "https://mozhno.example.com",
-  apiKey: "mz_sk_production_abc123",
+  url: "https://mozhno.example.com",
+  apiKey: "<api-key>",
   streaming: true,
 });
 
@@ -279,8 +286,8 @@ import { MozhnoClient } from "@mozhno/client-js";
 import { useState, useEffect } from "react";
 
 const client = new MozhnoClient({
-  serverUrl: "https://mozhno.example.com",
-  apiKey: "mz_sk_production_abc123",
+  url: "https://mozhno.example.com",
+  apiKey: "<api-key>",
 });
 
 function useFeatureFlag(flagKey: string) {
@@ -304,8 +311,8 @@ import { MozhnoClient } from "@mozhno/client-js";
 
 const app = express();
 const client = new MozhnoClient({
-  serverUrl: "https://mozhno.example.com",
-  apiKey: "mz_sk_production_abc123",
+  url: "https://mozhno.example.com",
+  apiKey: "<api-key>",
 });
 
 await client.initialize();
@@ -339,7 +346,7 @@ let client: MozhnoClient;
 export function getMozhnoClient(): MozhnoClient {
   if (!client) {
     client = new MozhnoClient({
-      serverUrl: process.env.MOZHNO_SERVER_URL!,
+      url: process.env.MOZHNO_SERVER_URL!,
       apiKey: process.env.MOZHNO_API_KEY!,
       streaming: true,
     });
@@ -379,8 +386,8 @@ export default async function DashboardPage() {
   import { MozhnoClient } from "https://cdn.example.com/@mozhno/client-js/index.js";
 
   const client = new MozhnoClient({
-    serverUrl: "https://mozhno.example.com",
-    apiKey: "mz_sk_browser_public_xyz",
+    url: "https://mozhno.example.com",
+    apiKey: "<api-key>",
   });
 
   await client.initialize();
@@ -445,9 +452,9 @@ stateDiagram-v2
 ```ts
 // Client options
 interface MozhnoClientOptions {
-  serverUrl: string;
+  url: string;
   apiKey: string;
-  pollingIntervalMs?: number;
+  refreshInterval?: number;
   streaming?: boolean;
   connectTimeoutMs?: number;
   readTimeoutMs?: number;

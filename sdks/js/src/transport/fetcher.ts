@@ -77,7 +77,7 @@ export class HttpFetcher {
     }
   }
 
-  async sendMetrics(evaluations: Record<string, number>): Promise<boolean> {
+  async sendMetrics(evaluations: Record<string, { t: number; f: number }>): Promise<boolean> {
     const url = this.normalizeUrl(this.config.url) + '/api/client/metrics';
     const key = this.config.apiKey || this.config.clientKey || '';
 

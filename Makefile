@@ -50,14 +50,14 @@ docker-down: ## Stop full stack
 lint: web-lint ## Run all linters
 
 docs-dev: ## Start docs dev server
-	cd site && npm run dev
+	@echo "Docs dev server is served from the main vitepress config"
 
 docs-build: ## Build docs site
-	cd site && npm run build
+	@echo "Docs build is handled by the main vitepress config"
 
 docs-preview: ## Preview built docs site
-	cd site && npm run preview
+	@echo "Docs preview is handled by the main vitepress config"
 
 clean: ## Clean build artifacts
 	cd server && ./gradlew clean
-	rm -rf web/dist sdks/js/dist site/.vitepress/dist
+	rm -rf web/dist sdks/js/dist

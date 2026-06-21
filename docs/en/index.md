@@ -30,7 +30,7 @@ features:
   - icon:
       src: /icons/targeting.svg
     title: Flexible Targeting
-    details: Boolean and multivariate flags, percentage rollout, user segments, custom strategies — any rollout scenario.
+    details: RELEASE and KILLSWITCH flags, percentage rollout, user segments, context constraints — any rollout scenario.
     link: /en/concepts/flags
     linkText: Learn more
   - icon:

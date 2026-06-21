@@ -2,59 +2,67 @@
 
 **можно.** is an open-core feature flag management platform. This page gives a high-level overview of all core concepts and how they fit together.
 
-## Architecture at a Glance
-
-```mermaid
-graph TB
-    Dashboard[Web Dashboard] --> API[REST API]
-    SDKs[Java & JS/TS SDKs] --> API
-    API --> Core[mozhno-core]
-    Core --> SPI[mozhno-spi]
-    Core --> DB[(PostgreSQL)]
-    SPI --> Plugins[Enterprise Plugins]
-```
-
-The server is a Spring Boot 4.0 application built on JDK 25 with a React 19 SPA frontend. It uses `JdbcTemplate` for database access (no JPA) and Flyway for schema migrations.
-
 ## Core Concepts
 
 ### Flags
 
-A **flag** (feature toggle) controls whether a feature is enabled or disabled for a given request. Flags come in two types:
+A **flag** (feature toggle) controls whether a feature is enabled or disabled for a given request. Two types:
 
-- **Boolean** — simple on/off toggle
-- **Multivariate** — returns one of several predefined values (e.g., a string, number, or JSON)
+- **RELEASE** — standard flag for gradual rollout of new features
+- **KILLSWITCH** — emergency switch to instantly disable functionality
 
 Flags are evaluated in real time by the SDK using locally cached rules — no network calls on the hot path.
 
 See [Flags](/en/concepts/flags).
 
+### Strategies
+
+A **strategy** defines *how* a flag behaves on a specific environment. Each strategy includes:
+
+- **Enabled/disabled** state for that environment
+- **Context** — set of constraints (field/operator/values rules) the user must match
+- **Segments** — reusable user groups to target
+- **Percentage rollout** — deterministic hash-based distribution
+
+Evaluation logic: constraints (AND) → segments (OR) → percentage rollout. First match wins.
+
+See [Strategies](/en/concepts/strategies).
+
 ### Segments
 
-A **segment** is a reusable group of users defined by matching rules. Instead of repeating the same targeting conditions across multiple flags, you define a segment once and reference it from any flag.
+A **segment** is a reusable group of users defined by matching rules (contexts). Instead of repeating the same targeting conditions across multiple flags, you define a segment once and reference it from any flag.
 
 Examples: "beta testers" (users with `beta: true`), "EU users" (users where `country` is in a list of EU country codes), "internal employees" (users with email ending in `@company.com`).
 
 See [Segments](/en/concepts/segments).
 
-### Strategies
+### Contexts
 
-A **strategy** determines *how* a flag is rolled out. Strategies are pluggable — the platform ships with three built-in strategies and supports custom ones via SPI:
+**Contexts** define attribute-based rules for targeting. Operands include `in`, `not_in`, `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `contains`. Context types (`string`, `number`, `time`, `semver`) control comparison behavior.
 
-- **Default** — the flag is either on or off for everyone
-- **Gradual** — progressively increase the percentage of users who see the flag
-- **Scheduled** — enable the flag between specific dates/times
-- **Custom** — implement any rollout logic via the SPI extension point
+Evaluation happens **locally** in the SDK with no network call. Rules are fetched in the background and cached.
 
-Strategies are chained: if the first strategy doesn't match, the next one is tried. If none match, the flag defaults to off.
+```java
+MozhnoContext ctx = MozhnoContext.builder()
+    .userId("user-123")
+    .addProperty("country", "DE")
+    .addProperty("plan", "enterprise")
+    .build();
+```
 
-See [Strategies](/en/concepts/strategies).
+```typescript
+const ctx = {
+  userId: 'user-123',
+  country: 'DE',
+  plan: 'enterprise',
+};
+```
 
 ### Environments
 
 An **environment** is an isolated namespace for flag configuration — typically `dev`, `staging`, and `production`. Each environment has:
 
-- Its own set of flag configurations (a flag can be on in dev but off in prod)
+- Its own set of strategy configurations (a flag can be on in dev but off in prod)
 - Its own API keys with granular permissions
 - Independent targeting rules
 
@@ -62,26 +70,12 @@ See [Environments](/en/concepts/environments).
 
 ### API Keys
 
-**API keys** are used by SDKs and external services to authenticate with the server. Keys are scoped to a single environment and can have read, write, or admin permissions. You create and manage API keys from the web dashboard.
+**API keys** authenticate SDKs and external services with the server. Keys are scoped to a single environment. Two types:
 
-A typical setup:
-- Dev environment: read+write key for developer machines
-- Staging: read-only key for CI/CD pipelines
-- Production: read-only key for the live application, admin key for the operations team
+- **SERVER** — read/write access for backend SDKs
+- **FRONTEND** — read-only access for browser-based SDKs
 
-### Context
-
-**Context** is the set of attributes passed to the SDK during flag evaluation. It describes the current user or request and is used by targeting rules and segments to decide whether a flag should be enabled.
-
-```java
-var ctx = new EvaluationContext()
-    .set("userId", "user-123")
-    .set("country", "DE")
-    .set("plan", "enterprise")
-    .set("beta", true);
-```
-
-Context can include any arbitrary key-value pairs. Common attributes: user ID, email, country, subscription tier, device type, user agent.
+Create and manage API keys from the web dashboard.
 
 ### Audit Log
 
@@ -92,39 +86,11 @@ Every change to flags, segments, strategies, environments, and API keys is recor
 - Timestamp of the change
 - The environment where the change was applied
 
-The audit log is accessible from the web dashboard and via the REST API, giving teams full visibility into configuration history.
-
-## How Flag Evaluation Works
-
-```mermaid
-sequenceDiagram
-    participant App as Your Application
-    participant SDK as SDK (Local Cache)
-    participant Server as можно. Server
-
-    App->>SDK: isEnabled("new-checkout", ctx)
-    SDK->>SDK: Check cached rules
-    alt Cache valid
-        SDK-->>App: true/false
-    else Cache stale
-        SDK->>Server: Fetch flag rules
-        Server-->>SDK: Rules + segments
-        SDK->>SDK: Evaluate locally
-        SDK-->>App: true/false
-    end
-```
-
-1. Your application calls the SDK with a flag key and evaluation context
-2. The SDK checks its local cache of flag rules
-3. If the cache is fresh, the SDK evaluates the flag locally in microseconds
-4. If the cache is stale, the SDK fetches updated rules from the server, then evaluates locally
-5. The SDK caches the new rules for subsequent calls
-
-This local-evaluation architecture eliminates network latency on every flag check.
+The audit log is accessible from the web dashboard and via the REST API.
 
 ## Module Architecture
 
-**можно.** is organized as a multi-module Maven project:
+**можно.** is organized as a multi-module Gradle project:
 
 | Module | Purpose |
 |--------|---------|
@@ -133,7 +99,7 @@ This local-evaluation architecture eliminates network latency on every flag chec
 | `mozhno-web-api` | REST controllers, DTOs, request/response mapping |
 | `mozhno-app` | Spring Boot application entry point, auto-configuration, Flyway migrations |
 
-The SPI layer is the foundation of the open-core model. Community features live in `mozhno-core`; enterprise features (SSO, billing, webhooks) are implemented as SPI plugins loaded at startup.
+Server — Spring Boot 4.0 / JDK 25. Web UI — React 19 SPA (Vite, Tailwind CSS 4, Radix UI). SDKs fetch flag rules once and evaluate locally.
 
 ## Related Pages
 
