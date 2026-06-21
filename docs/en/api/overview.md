@@ -7,13 +7,13 @@ The можно REST API provides programmatic access to feature flags, segments,
 All API requests use your можно instance as the base URL:
 
 ```
-https://<your-mozhno-instance>/api
+https://<your-mozhno-instance>/api/v1
 ```
 
 For local development:
 
 ```
-http://localhost:8080/api
+http://localhost:8080/api/v1
 ```
 
 ## Authentication
@@ -26,7 +26,7 @@ Used for **human users** accessing the web dashboard and API interactively. JWTs
 
 ```bash
 # Obtain a JWT
-curl -X POST https://your-instance/api/auth/login \
+curl -X POST https://your-instance/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "alice@example.com", "password": "your-password"}'
 
@@ -37,14 +37,14 @@ curl -X POST https://your-instance/api/auth/login \
 Use the JWT in the `Authorization` header:
 
 ```bash
-curl https://your-instance/api/flags \
+curl https://your-instance/api/v1/flags \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIs..."
 ```
 
 | Property | Description |
 |----------|-------------|
 | **Lifetime** | Configurable (default: 24 hours) |
-| **Refresh** | Supported via `/api/auth/refresh` |
+| **Refresh** | Supported via `/api/v1/auth/refresh` |
 | **Scope** | Full access based on user role (Viewer, Editor, Admin) |
 
 ### API Key
@@ -52,7 +52,7 @@ curl https://your-instance/api/flags \
 Used for **machine clients** — SDKs, CI/CD pipelines, and automated scripts. API keys are created and managed in the dashboard under **Settings → API Keys**.
 
 ```bash
-curl https://your-instance/api/flags \
+curl https://your-instance/api/v1/flags \
   -H "Authorization: Bearer mz_sk_production_abc123"
 ```
 
@@ -77,7 +77,7 @@ API keys must include the `Authorization: Bearer` prefix, just like JWTs.
 ### Example Request
 
 ```bash
-curl -X POST https://your-instance/api/flags \
+curl -X POST https://your-instance/api/v1/flags \
   -H "Authorization: Bearer mz_sk_production_abc123" \
   -H "Content-Type: application/json" \
   -d '{
@@ -112,7 +112,7 @@ When rate-limited, the API returns `429 Too Many Requests` with a `Retry-After` 
 
 ## API Versioning
 
-можно does not use URL path versioning. The API is designed to be backward-compatible:
+можно uses URL path versioning via the /api/v1 prefix. The API is designed to be backward-compatible within major versions:
 
 - **New fields** may be added to response payloads — clients should ignore unknown fields.
 - **New optional parameters** may be added to requests — clients should only send what they need.
@@ -130,7 +130,7 @@ List endpoints support cursor-based and offset-based pagination:
 
 ```bash
 # Offset pagination (default)
-curl "https://your-instance/api/flags?page=0&size=20" \
+curl "https://your-instance/api/v1/flags?page=0&size=20" \
   -H "Authorization: Bearer $JWT_TOKEN"
 
 # Response includes pagination metadata
@@ -179,7 +179,7 @@ Error responses return a `4xx` or `5xx` status code with a JSON body:
   "message": "Flag with key 'nonexistent_flag' not found",
   "status": 404,
   "timestamp": "2026-06-21T10:30:00Z",
-  "path": "/api/flags/nonexistent_flag"
+  "path": "/api/v1/flags/nonexistent_flag"
 }
 ```
 
@@ -231,12 +231,12 @@ Each API key is bound to a specific environment. Resources (flags, segments) are
 
 ```bash
 # Production environment (api key: mz_sk_production_...)
-curl https://your-instance/api/flags \
+curl https://your-instance/api/v1/flags \
   -H "Authorization: Bearer mz_sk_production_abc123"
 # → Returns only production flags
 
 # Staging environment (api key: mz_sk_staging_...)
-curl https://your-instance/api/flags \
+curl https://your-instance/api/v1/flags \
   -H "Authorization: Bearer mz_sk_staging_xyz789"
 # → Returns only staging flags
 ```
