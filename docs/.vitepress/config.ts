@@ -204,11 +204,11 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/edgar-dev20/mozhno' },
+      { icon: 'github', link: 'https://github.com/mozhno-dev/mozhno' },
     ],
 
     editLink: {
-      pattern: 'https://github.com/edgar-dev20/mozhno/edit/main/site/:path',
+      pattern: 'https://github.com/mozhno-dev/mozhno/edit/main/docs/:path',
       text: 'Редактировать страницу',
     },
 

@@ -47,7 +47,7 @@ services:
       - mozhno-net
 
   mozhno:
-    image: ghcr.io/edgar-dev20/mozhno:latest
+    image: ghcr.io/mozhno-dev/mozhno:latest
     container_name: mozhno-server
     restart: unless-stopped
     ports:

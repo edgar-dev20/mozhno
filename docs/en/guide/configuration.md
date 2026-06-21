@@ -71,7 +71,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
 
   mozhno:
-    image: ghcr.io/edgar-dev20/mozhno:latest
+    image: ghcr.io/mozhno-dev/mozhno:latest
     ports:
       - '8080:8080'
     environment:

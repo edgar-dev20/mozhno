@@ -16,7 +16,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   mozhno:
-    image: ghcr.io/edgar-dev20/mozhno:latest
+    image: ghcr.io/mozhno-dev/mozhno:latest
     ports:
       - '8080:8080'
     environment:

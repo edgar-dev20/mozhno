@@ -14,7 +14,7 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: GitHub
-      link: https://github.com/edgar-dev20/mozhno
+      link: https://github.com/mozhno-dev/mozhno
 
 features:
   - icon: 🚀
