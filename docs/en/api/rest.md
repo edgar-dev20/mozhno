@@ -19,7 +19,7 @@ export MOZHNO_TOKEN="mz_sk_production_abc123"
 ### List All Flags
 
 ```bash
-GET /api/flags
+GET /api/v1/flags
 ```
 
 **Query Parameters:**
@@ -33,7 +33,7 @@ GET /api/flags
 | `search` | String | — | Search by key or name |
 
 ```bash
-curl "$MOZHNO_URL/api/flags?state=ACTIVE&tags=team:checkout&page=0&size=10" \
+curl "$MOZHNO_URL/api/v1/flags?state=ACTIVE&tags=team:checkout&page=0&size=10" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
@@ -67,18 +67,18 @@ curl "$MOZHNO_URL/api/flags?state=ACTIVE&tags=team:checkout&page=0&size=10" \
 ### Get a Single Flag
 
 ```bash
-GET /api/flags/{flagKey}
+GET /api/v1/flags/{flagKey}
 ```
 
 ```bash
-curl "$MOZHNO_URL/api/flags/checkout_v2" \
+curl "$MOZHNO_URL/api/v1/flags/checkout_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
 ### Create a Flag
 
 ```bash
-POST /api/flags
+POST /api/v1/flags
 ```
 
 **Request Body:**
@@ -93,7 +93,7 @@ POST /api/flags
 | `tags` | String[] | No | List of tags for organisation |
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/flags" \
+curl -X POST "$MOZHNO_URL/api/v1/flags" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -111,13 +111,13 @@ curl -X POST "$MOZHNO_URL/api/flags" \
 ### Update a Flag
 
 ```bash
-PUT /api/flags/{flagKey}
+PUT /api/v1/flags/{flagKey}
 ```
 
 Replaces the entire flag configuration. All fields except `key` are writable.
 
 ```bash
-curl -X PUT "$MOZHNO_URL/api/flags/checkout_v2" \
+curl -X PUT "$MOZHNO_URL/api/v1/flags/checkout_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -148,26 +148,26 @@ curl -X PUT "$MOZHNO_URL/api/flags/checkout_v2" \
 ### Patch a Flag (Partial Update)
 
 ```bash
-PATCH /api/flags/{flagKey}
+PATCH /api/v1/flags/{flagKey}
 ```
 
 Update specific fields without sending the full object. Useful for toggling state or adjusting rollout.
 
 ```bash
 # Change rollout percentage only
-curl -X PATCH "$MOZHNO_URL/api/flags/checkout_v2" \
+curl -X PATCH "$MOZHNO_URL/api/v1/flags/checkout_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"rolloutPercentage": 75}'
 
 # Pause a flag
-curl -X PATCH "$MOZHNO_URL/api/flags/checkout_v2" \
+curl -X PATCH "$MOZHNO_URL/api/v1/flags/checkout_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"state": "PAUSED"}'
 
 # Resume a flag
-curl -X PATCH "$MOZHNO_URL/api/flags/checkout_v2" \
+curl -X PATCH "$MOZHNO_URL/api/v1/flags/checkout_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"state": "ACTIVE"}'
@@ -176,11 +176,11 @@ curl -X PATCH "$MOZHNO_URL/api/flags/checkout_v2" \
 ### Archive a Flag
 
 ```bash
-POST /api/flags/{flagKey}/archive
+POST /api/v1/flags/{flagKey}/archive
 ```
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/flags/checkout_v2/archive" \
+curl -X POST "$MOZHNO_URL/api/v1/flags/checkout_v2/archive" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
@@ -189,11 +189,11 @@ curl -X POST "$MOZHNO_URL/api/flags/checkout_v2/archive" \
 ### Restore a Flag
 
 ```bash
-POST /api/flags/{flagKey}/restore
+POST /api/v1/flags/{flagKey}/restore
 ```
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/flags/checkout_v2/restore" \
+curl -X POST "$MOZHNO_URL/api/v1/flags/checkout_v2/restore" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
@@ -202,11 +202,11 @@ curl -X POST "$MOZHNO_URL/api/flags/checkout_v2/restore" \
 ### Delete a Flag
 
 ```bash
-DELETE /api/flags/{flagKey}
+DELETE /api/v1/flags/{flagKey}
 ```
 
 ```bash
-curl -X DELETE "$MOZHNO_URL/api/flags/checkout_v2" \
+curl -X DELETE "$MOZHNO_URL/api/v1/flags/checkout_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
@@ -259,22 +259,22 @@ Targeting rules are an ordered array. The first rule whose conditions all match 
 ### List Segments
 
 ```bash
-GET /api/segments
+GET /api/v1/segments
 ```
 
 ```bash
-curl "$MOZHNO_URL/api/segments" \
+curl "$MOZHNO_URL/api/v1/segments" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
 ### Create a Segment
 
 ```bash
-POST /api/segments
+POST /api/v1/segments
 ```
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/segments" \
+curl -X POST "$MOZHNO_URL/api/v1/segments" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -293,13 +293,13 @@ curl -X POST "$MOZHNO_URL/api/segments" \
 ### Update a Segment
 
 ```bash
-PUT /api/segments/{segmentName}
+PUT /api/v1/segments/{segmentName}
 ```
 
 ### Delete a Segment
 
 ```bash
-DELETE /api/segments/{segmentName}
+DELETE /api/v1/segments/{segmentName}
 ```
 
 ## Environments
@@ -307,11 +307,11 @@ DELETE /api/segments/{segmentName}
 ### List Environments
 
 ```bash
-GET /api/environments
+GET /api/v1/environments
 ```
 
 ```bash
-curl "$MOZHNO_URL/api/environments" \
+curl "$MOZHNO_URL/api/v1/environments" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
@@ -341,11 +341,11 @@ curl "$MOZHNO_URL/api/environments" \
 ### Create an Environment
 
 ```bash
-POST /api/environments
+POST /api/v1/environments
 ```
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/environments" \
+curl -X POST "$MOZHNO_URL/api/v1/environments" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -360,18 +360,18 @@ curl -X POST "$MOZHNO_URL/api/environments" \
 ### List API Keys
 
 ```bash
-GET /api/api-keys
+GET /api/v1/api-keys
 ```
 
 ```bash
-curl "$MOZHNO_URL/api/api-keys" \
+curl "$MOZHNO_URL/api/v1/api-keys" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
 ### Create an API Key
 
 ```bash
-POST /api/api-keys
+POST /api/v1/api-keys
 ```
 
 | Field | Type | Required | Description |
@@ -381,7 +381,7 @@ POST /api/api-keys
 | `scopes` | String[] | Yes | Permissions: `flags:read`, `flags:write`, `segments:read`, `segments:write`, `admin` |
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/api-keys" \
+curl -X POST "$MOZHNO_URL/api/v1/api-keys" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -409,11 +409,11 @@ curl -X POST "$MOZHNO_URL/api/api-keys" \
 ### Revoke an API Key
 
 ```bash
-DELETE /api/api-keys/{keyId}
+DELETE /api/v1/api-keys/{keyId}
 ```
 
 ```bash
-curl -X DELETE "$MOZHNO_URL/api/api-keys/key-001" \
+curl -X DELETE "$MOZHNO_URL/api/v1/api-keys/key-001" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
@@ -424,7 +424,7 @@ curl -X DELETE "$MOZHNO_URL/api/api-keys/key-001" \
 ### List Audit Entries
 
 ```bash
-GET /api/audit
+GET /api/v1/audit
 ```
 
 | Parameter | Type | Default | Description |
@@ -439,20 +439,20 @@ GET /api/audit
 | `to` | ISO 8601 | — | End of date range |
 
 ```bash
-curl "$MOZHNO_URL/api/audit?resourceType=FLAG&resourceId=checkout_v2&from=2026-06-01T00:00:00Z" \
+curl "$MOZHNO_URL/api/v1/audit?resourceType=FLAG&resourceId=checkout_v2&from=2026-06-01T00:00:00Z" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
 ### Export Audit Data
 
 ```bash
-GET /api/audit/export
+GET /api/v1/audit/export
 ```
 
 Accepts the same filtering parameters as the list endpoint. Returns CSV by default.
 
 ```bash
-curl "$MOZHNO_URL/api/audit/export?resourceType=FLAG&from=2026-06-01T00:00:00Z&to=2026-07-01T00:00:00Z" \
+curl "$MOZHNO_URL/api/v1/audit/export?resourceType=FLAG&from=2026-06-01T00:00:00Z&to=2026-07-01T00:00:00Z" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Accept: text/csv" \
   -o audit_june_2026.csv
@@ -463,11 +463,11 @@ curl "$MOZHNO_URL/api/audit/export?resourceType=FLAG&from=2026-06-01T00:00:00Z&t
 Used internally by SDKs to fetch flag rules for local evaluation:
 
 ```bash
-GET /api/sdk/rules
+GET /api/v1/sdk/rules
 ```
 
 ```bash
-curl "$MOZHNO_URL/api/sdk/rules" \
+curl "$MOZHNO_URL/api/v1/sdk/rules" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
@@ -478,17 +478,17 @@ This endpoint returns all flags and segments for the environment associated with
 ### List Webhooks
 
 ```bash
-GET /api/webhooks
+GET /api/v1/webhooks
 ```
 
 ### Create a Webhook
 
 ```bash
-POST /api/webhooks
+POST /api/v1/webhooks
 ```
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/webhooks" \
+curl -X POST "$MOZHNO_URL/api/v1/webhooks" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -502,17 +502,17 @@ curl -X POST "$MOZHNO_URL/api/webhooks" \
 ### Delete a Webhook
 
 ```bash
-DELETE /api/webhooks/{webhookId}
+DELETE /api/v1/webhooks/{webhookId}
 ```
 
 ## Health Check
 
 ```bash
-GET /api/health
+GET /api/v1/health
 ```
 
 ```bash
-curl "$MOZHNO_URL/api/health"
+curl "$MOZHNO_URL/api/v1/health"
 ```
 
 **Response:**
@@ -533,7 +533,7 @@ curl "$MOZHNO_URL/api/health"
 
 ```bash
 # 1. Create a draft flag
-curl -X POST "$MOZHNO_URL/api/flags" \
+curl -X POST "$MOZHNO_URL/api/v1/flags" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -545,7 +545,7 @@ curl -X POST "$MOZHNO_URL/api/flags" \
   }'
 
 # 2. Add targeting rule for internal team
-curl -X PATCH "$MOZHNO_URL/api/flags/dark_mode_v2" \
+curl -X PATCH "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -562,25 +562,25 @@ curl -X PATCH "$MOZHNO_URL/api/flags/dark_mode_v2" \
   }'
 
 # 3. Start 10% rollout to external users
-curl -X PATCH "$MOZHNO_URL/api/flags/dark_mode_v2" \
+curl -X PATCH "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"rolloutPercentage": 10, "rolloutAttribute": "userId"}'
 
 # 4. Increase to 50%
-curl -X PATCH "$MOZHNO_URL/api/flags/dark_mode_v2" \
+curl -X PATCH "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"rolloutPercentage": 50}'
 
 # 5. Full rollout
-curl -X PATCH "$MOZHNO_URL/api/flags/dark_mode_v2" \
+curl -X PATCH "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"rolloutPercentage": 100}'
 
 # 6. Remove targeting rules, rely on default
-curl -X PUT "$MOZHNO_URL/api/flags/dark_mode_v2" \
+curl -X PUT "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -594,7 +594,7 @@ curl -X PUT "$MOZHNO_URL/api/flags/dark_mode_v2" \
   }'
 
 # 7. Archive after code cleanup
-curl -X POST "$MOZHNO_URL/api/flags/dark_mode_v2/archive" \
+curl -X POST "$MOZHNO_URL/api/v1/flags/dark_mode_v2/archive" \
   -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
@@ -602,11 +602,11 @@ curl -X POST "$MOZHNO_URL/api/flags/dark_mode_v2/archive" \
 
 ```bash
 # Pause flags by tag (all payment-service flags)
-PAYMENT_FLAGS=$(curl -s "$MOZHNO_URL/api/flags?state=ACTIVE&tags=service:payments" \
+PAYMENT_FLAGS=$(curl -s "$MOZHNO_URL/api/v1/flags?state=ACTIVE&tags=service:payments" \
   -H "Authorization: Bearer $MOZHNO_TOKEN" | jq -r '.items[].key')
 
 for flag in $PAYMENT_FLAGS; do
-  curl -X PATCH "$MOZHNO_URL/api/flags/$flag" \
+  curl -X PATCH "$MOZHNO_URL/api/v1/flags/$flag" \
     -H "Authorization: Bearer $MOZHNO_TOKEN" \
     -H "Content-Type: application/json" \
     -d '{"state": "PAUSED"}'

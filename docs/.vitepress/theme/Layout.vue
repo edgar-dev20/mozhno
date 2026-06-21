@@ -41,47 +41,88 @@ function smoothScroll() {
   }
 }
 
-async function fixHeroDot() {
-  if (typeof window === 'undefined') return
-  for (let i = 0; i < 5; i++) {
-    await new Promise(r => setTimeout(r, 100))
-    const el = document.querySelector('.VPHomeHero .name')
-    if (el && !(el as HTMLElement).dataset.dotFixed) {
-      ;(el as HTMLElement).dataset.dotFixed = '1'
-      const text = el.textContent || ''
-      const dotIdx = text.lastIndexOf('.')
-      if (dotIdx === -1) return
-      el.innerHTML = ''
-      ;(el as HTMLElement).style.display = 'inline-flex'
-      ;(el as HTMLElement).style.alignItems = 'baseline'
-      const s1 = document.createElement('span')
-      s1.textContent = text.slice(0, dotIdx)
-      s1.style.cssText = 'font-weight:750;background:linear-gradient(135deg,oklch(0.48 0.17 175),oklch(0.36 0.13 170));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent'
-      const s2 = document.createElement('span')
-      s2.textContent = '.'
-      s2.style.cssText = 'font-family:"JetBrains Mono","Fira Code","Consolas",monospace;font-weight:600;font-size:0.5em;color:#b86840;margin-left:-0.1em'
-      el.appendChild(s1)
-      el.appendChild(s2)
-      return
-    }
+function getMermaidConfig() {
+  const dark = document.documentElement.classList.contains('dark')
+  return dark ? {
+    startOnLoad: false,
+    securityLevel: 'loose',
+    theme: 'base',
+    themeVariables: {
+      borderRadius: 10,
+      primaryColor: '#2d9484',
+      primaryBorderColor: '#3db8a5',
+      primaryTextColor: '#ffffff',
+      lineColor: '#d4834a',
+      secondaryColor: '#1d302c',
+      tertiaryColor: '#263834',
+      textColor: '#d0dbd8',
+      mainBkg: '#222a28',
+      nodeBorder: '#1a6b60',
+      clusterBkg: '#1a2523',
+      clusterBorder: '#1a6b60',
+      titleColor: '#3db8a5',
+      edgeLabelBackground: '#1d302c',
+      nodeTextColor: '#ffffff',
+    },
+  } : {
+    startOnLoad: false,
+    securityLevel: 'loose',
+    theme: 'base',
+    themeVariables: {
+      borderRadius: 10,
+      primaryColor: '#2d9484',
+      primaryBorderColor: '#1a6b60',
+      primaryTextColor: '#0a1a16',
+      lineColor: '#CD7F32',
+      secondaryColor: '#e8f5f3',
+      tertiaryColor: '#f0f8f6',
+      textColor: '#0a1a16',
+      mainBkg: '#fafffe',
+      nodeBorder: '#1a6b60',
+      clusterBkg: '#f0f8f6',
+      clusterBorder: '#2d9484',
+      titleColor: '#0a1a16',
+      edgeLabelBackground: '#e8f5f3',
+      nodeTextColor: '#0a1a16',
+    },
   }
+}
+
+async function runMermaid() {
+  const { default: m } = await import('mermaid')
+  document.querySelectorAll('pre.mermaid').forEach(el => {
+    if (!(el as HTMLElement).dataset.mermaidCode) {
+      (el as HTMLElement).dataset.mermaidCode = el.textContent || ''
+    }
+  })
+  m.initialize(getMermaidConfig())
+  await m.run({ querySelector: 'pre.mermaid' })
+  document.querySelectorAll('pre.mermaid').forEach(el => ((el as HTMLElement).style.opacity = '1'))
 }
 
 async function renderDiagrams() {
   if (typeof window === 'undefined') return
   await nextTick()
-  await fixHeroDot()
   await new Promise(r => setTimeout(r, 200))
-  try {
-    const { default: m } = await import('mermaid')
-    m.initialize({ startOnLoad: false, securityLevel: 'loose' })
-    await m.run({ querySelector: 'pre.mermaid' })
-  } catch {}
+  try { await runMermaid() } catch {}
+}
+
+async function reRenderDiagrams() {
+  if (typeof window === 'undefined') return
+  const blocks = document.querySelectorAll<HTMLElement>('pre.mermaid')
+  if (!blocks.length) return
+  blocks.forEach(el => {
+    const code = el.dataset.mermaidCode
+    if (code) { el.innerHTML = code; el.removeAttribute('data-processed') }
+  })
+  try { await runMermaid() } catch {}
 }
 
 onMounted(() => {
   smoothScroll()
   renderDiagrams()
+  const observer = new MutationObserver(() => reRenderDiagrams())
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
 })
 watch(() => route.path, () => {
   animateContent()
@@ -114,7 +155,7 @@ watch(() => route.path, () => {
   font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
   font-weight: 600;
   font-size: 0.6em;
-  color: #b86840;
+  color: var(--vp-c-copper-1);
   margin-left: -0.15em;
 }
 .brand-badge {

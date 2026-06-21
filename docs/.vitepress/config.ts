@@ -102,7 +102,7 @@ export default defineConfig({
   base: '/mozhno/',
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/mozhno/logo.svg' }],
+
     ['meta', { name: 'theme-color', content: '#3d4f7a' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:image', content: '/mozhno/og-image.png' }],
@@ -192,6 +192,17 @@ export default defineConfig({
           '/en/self-hosting/': [{ text: 'Self-hosting', items: enSelfHostingSidebar }],
           '/en/advanced/': [{ text: 'Advanced', items: enAdvancedSidebar }],
         },
+
+        editLink: {
+          text: 'Edit this page',
+        },
+
+        outline: { label: 'On this page' },
+        docFooter: { prev: 'Previous', next: 'Next' },
+        darkModeSwitchLabel: 'Theme',
+        sidebarMenuLabel: 'Menu',
+        returnToTopLabel: 'Back to top',
+        langMenuLabel: 'Language',
       },
     },
   },
