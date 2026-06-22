@@ -30,6 +30,17 @@ if (!client.isEnabled("kill-payment-gw")) {
 }
 ```
 
+### When to Use Each
+
+| | RELEASE | KILLSWITCH |
+|---|---------|------------|
+| **Purpose** | Enables new functionality | Disables broken functionality |
+| **Code pattern** | `if (isEnabled)` — new code | `if (!isEnabled)` — block |
+| **Default state** | Off (gradually enabled) | On (instantly disabled) |
+| **Scenario** | Rolling out a new feature: 1% → 100% | Service degradation: payment gateway is down — disable it |
+| **Example key** | `new-checkout` | `kill-payment-gateway` |
+| **Rollback** | Set `enabled: false` or 0% | Set `enabled: false` |
+
 ## Targeting Rules (Contexts)
 
 Rules determine *who* sees a flag by matching context attributes. Rules within a context are evaluated with AND logic — all must match.

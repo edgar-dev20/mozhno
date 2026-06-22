@@ -51,7 +51,15 @@ On first run, you'll be prompted to create a project and admin user.
 4. Choose strategy: enable the flag for the desired environment
 5. Click **"Save"**
 
-## Step 5: Add the flag to your code
+## Step 5: Get your API key
+
+1. In the dashboard, go to **"API Keys"**
+2. Click **"Create Key"**
+3. Enter a name (e.g., `my-app`)
+4. Select type **SERVER** and environment **production**
+5. Copy the key value — it is shown only once
+
+## Step 6: Add the flag to your code
 
 ### Java
 

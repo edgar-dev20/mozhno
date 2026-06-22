@@ -56,6 +56,22 @@ After creating a flag, configure the strategy per environment:
 5. Set **percentage rollout** (0–100%)
 6. Save
 
+## Full Lifecycle: Creation to Archive
+
+```mermaid
+flowchart LR
+    A[Create<br/>flag] --> B[dev<br/>100% rollout]
+    B --> C[staging<br/>QA testing]
+    C --> D[production<br/>1% canary]
+    D --> E[10%]
+    E --> F[50%]
+    F --> G[100%]
+    G --> H[Remove<br/>old code]
+    H --> I[Archive<br/>flag]
+```
+
+Each stage is a strategy change on a specific environment. Stages D–G are a gradual production rollout with metrics monitoring at each step.
+
 ## Typical Team Workflow
 
 1. **Create flag** — developer creates flag with description

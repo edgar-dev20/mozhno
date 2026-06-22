@@ -15,15 +15,17 @@ With it you can:
 ```mermaid
 graph LR
     A[Developer] -->|Creates flag| B[Web Dashboard]
-    B -->|Saves rules| C[Mozhno Server]
-    D[SDK in your app] -->|Fetches rules| C
-    D -->|Evaluates flag locally| E[Your Application]
+    B -->|Saves strategies| C[Mozhno Server]
+    C -->|Returns rules<br/>per API key| D[SDK in your app]
+    D -->|Evaluates flag locally<br/>in microseconds| E[Your Application]
+    F[dev / staging / production] --- C
 ```
 
-1. You create a flag in the web dashboard and configure rules: which users, on which environments, with what rollout percentage.
-2. The SDK in your application fetches rules from the server once and caches them.
-3. On each flag evaluation, the SDK makes the decision **locally** — zero network latency.
-4. When rules change, the SDK receives updates in the background.
+1. You create a flag in the web dashboard and configure a strategy: for which environment, with what rules and rollout percentage.
+2. You create an API key for the target environment (dev, staging, production) and pass it to the SDK.
+3. The SDK fetches rules from the server using this key once and caches them.
+4. On each `isEnabled()` call, the SDK evaluates the flag **locally** — zero network latency.
+5. When rules change, the SDK receives updates in the background (every 15 seconds).
 
 ## Key Concepts
 
