@@ -21,7 +21,7 @@ A strategy is evaluated in a fixed order:
 2. **Evaluate context rules** — all constraints must match (AND logic)
 3. **Evaluate segments** — at least one segment must match (OR logic)
 4. **When both present** — either constraints or segments passing grants access
-5. **Percentage rollout** — MurmurHash3 hash of `flagKey + userId` compared against percentage
+5. **Percentage rollout** — MurmurHash32 hash of `flagKey + userId` compared against percentage
 6. **Default** — if nothing matched, return `false`
 
 ## Targeting with Context Rules
@@ -48,7 +48,7 @@ Segments are reusable groups defined separately and referenced by key. A strateg
 Percentage rollout uses deterministic hashing so the same user always gets the same result:
 
 ```
-hash = MurmurHash3(flagKey + userId) % 100
+hash = MurmurHash32(flagKey + userId) % 100
 if hash < percentage → enabled
 else → disabled
 ```

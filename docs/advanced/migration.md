@@ -83,15 +83,8 @@ for flag in ld_flags:
         "key": flag["key"],
         "name": flag["name"],
         "description": flag.get("description", ""),
-        "flagType": "RELEASE",  # можно. поддерживает RELEASE и KILLSWITCH (булевы флаги)
-        "environmentId": "<environment-uuid>",
-        "defaultValue": str(flag["enabled"]).lower() if flag["type"] == "boolean" else flag["variations"][0],
-        "strategies": [
-            {
-                "type": "DEFAULT",
-                "value": str(flag["enabled"]).lower()
-            }
-        ]
+        "flagType": "RELEASE",
+        "projectId": 1
     }
 
     resp = requests.post(
@@ -161,41 +154,15 @@ with open("unleash_flags.json") as f:
 
 for flag in unleash_flags:
     flag_type = "RELEASE"
-    strategies = []
-
-    for strategy in flag.get("strategies", []):
-        name = strategy["name"]
-        params = strategy.get("parameters", {})
-
-        if name == "default":
-            strategies.append({"type": "DEFAULT", "value": "true"})
-        elif name == "gradualRolloutUserId":
-            strategies.append({
-                "type": "GRADUAL",
-                "percentage": int(params.get("percentage", 100)),
-                "attribute": "userId"
-            })
-        elif name == "userWithId":
-            strategies.append({
-                "type": "GRADUAL",
-                "percentage": 100,
-                "attribute": "userId",
-                "userIds": params.get("userIds", "").split(",")
-            })
 
     if flag.get("variants"):
         flag_type = "RELEASE"
-        strategies.append({
-            "type": "DEFAULT",
-            "value": flag["variants"][0].get("name", "default")
-        })
 
     mozhno_flag = {
         "key": flag["name"],
         "name": flag.get("description", flag["name"]),
         "flagType": flag_type,
-        "environmentId": "<environment-uuid>",
-        "strategies": strategies or [{"type": "DEFAULT", "value": "false"}]
+        "projectId": 1
     }
 
     resp = requests.post(
@@ -262,23 +229,12 @@ with open("flagsmith_flags.json") as f:
 
 for flag_state in flagsmith_flags:
     feature = flag_state["feature"]
-    is_multi = bool(flag_state.get("multivariate_options"))
 
     mozhno_flag = {
         "key": feature["name"],
         "name": feature["name"],
         "flagType": "RELEASE",
-        "environmentId": "<environment-uuid>",
-        "strategies": [
-            {
-                "type": "DEFAULT",
-                "value": flag_state.get("feature_state_value") or
-                         (str(flag_state["enabled"]).lower() if not is_multi else (
-                             flag_state["multivariate_options"][0].get("string_value", "default")
-                             if flag_state.get("multivariate_options") else "default"
-                         ))
-            }
-        ]
+        "projectId": 1
     }
 
     resp = requests.post(
@@ -310,8 +266,9 @@ curl -X POST "$MOZHNO_API/api/v1/api-keys" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "production-sdk",
-    "environmentId": "<environment-uuid>",
-    "permissions": ["flags:read", "segments:read", "evaluation:read"]
+    "keyType": "SERVER",
+    "environmentId": 3,
+    "projectId": 1
   }'
 ```
 

@@ -134,15 +134,15 @@ jobs:
     steps:
       - name: Поиск просроченных флагов
         run: |
-          curl "${{ secrets.MOZHNO_URL }}/api/v1/flags?environment=production" \
+          curl "${{ secrets.MOZHNO_URL }}/api/v1/flags?includeArchived=false" \
             -H "Authorization: Bearer ${{ secrets.MOZHNO_TOKEN }}" | \
-            jq -r '.[] | select(.rolloutPercentage == 100) | "\(.key): включён на 100%"'
+            jq -r '.items[] | select(.enabled == true) | "\(.key): активен \(.createdAt)"'
 
       - name: Поиск флагов без описания
         run: |
           curl "${{ secrets.MOZHNO_URL }}/api/v1/flags" \
             -H "Authorization: Bearer ${{ secrets.MOZHNO_TOKEN }}" | \
-            jq -r '.[] | select(.description == null or .description == "") | "⚠ Нет описания: \(.key)"'
+            jq -r '.items[] | select(.description == null or .description == "") | "⚠ Нет описания: \(.key)"'
 ```
 
 ### Календарь очистки

@@ -62,12 +62,12 @@ curl -X POST "http://localhost:8080/api/v1/auth/login" \
 
 ```bash
 curl "http://localhost:8080/api/client/features" \
-  -H "X-Api-Key: <your-api-key>"
+  -H "Authorization: Bearer <your-api-key>"
 ```
 
 | Особенность | Описание |
 |-------------|----------|
-| **Формат** | Base64url-encoded 32-байтная случайная строка (43 символа, без префикса) |
+| **Формат** | 64-символьная Base64url-encoded случайная строка (без префикса) |
 | **Типы** | `SERVER` (чтение+запись) или `FRONTEND` (только чтение) |
 | **Привязка к окружению** | Один ключ = одно окружение |
 | **Отзыв** | Можно отозвать ключ в любой момент |

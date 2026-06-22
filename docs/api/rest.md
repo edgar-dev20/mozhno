@@ -25,10 +25,18 @@ POST /api/v1/auth/login
 
 ```json
 {
-  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+  "token": "eyJhbGciOiJIUzI1NiIs...",
   "refreshToken": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...",
-  "expiresIn": 900000,
-  "tokenType": "Bearer"
+  "user": {
+    "id": 1,
+    "email": "admin@example.com",
+    "name": "Admin",
+    "role": "ADMIN",
+    "status": "ACTIVE",
+    "locale": "ru",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "lastActiveAt": "2026-06-21T10:00:00Z"
+  }
 }
 ```
 
@@ -61,6 +69,36 @@ curl -X POST "http://localhost:8080/api/v1/auth/logout" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
+### Текущий пользователь
+
+```http
+GET /api/v1/auth/me
+```
+
+```bash
+curl "http://localhost:8080/api/v1/auth/me" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### Выбор проекта
+
+```http
+POST /api/v1/auth/select-project
+```
+
+### Восстановление пароля
+
+```http
+POST /api/v1/auth/forgot-password
+POST /api/v1/auth/reset-password
+```
+
+### Принятие приглашения
+
+```http
+POST /api/v1/auth/accept-invite
+```
+
 ## Флаги
 
 ### Создать флаг
@@ -76,17 +114,18 @@ POST /api/v1/flags
 | `description` | `string` | Нет | Описание |
 | `flagType` | `string` | Да | `RELEASE` или `KILLSWITCH` |
 | `tags` | `string[]` | Нет | Список тегов |
-| `environment` | `string` | Нет | Окружение (по умолчанию — первое активное) |
+| `projectId` | `long` | Да | ID проекта |
 
 ```bash
 curl -X POST "http://localhost:8080/api/v1/flags" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "key": "42",
+    "key": "new-checkout",
     "name": "Новый чекаут",
     "description": "Переработка процесса оформления заказа",
     "flagType": "RELEASE",
+    "projectId": 1,
     "tags": ["checkout", "ui-redesign"]
   }'
 ```
@@ -99,19 +138,16 @@ GET /api/v1/flags
 
 | Параметр | Тип | По умолчанию | Описание |
 |----------|-----|-------------|----------|
-| `environment` | `string` | — | Фильтр по окружению |
-| `tag` | `string` | — | Фильтр по тегу |
-| `status` | `string` | — | `active`, `archived`, `all` |
+| `includeArchived` | `boolean` | `false` | Включить архивные флаги |
 | `page` | `int` | `0` | Страница |
 | `size` | `int` | `20` | Размер страницы |
-| `sort` | `string` | `createdAt,desc` | Сортировка |
 
 ```bash
-curl "http://localhost:8080/api/v1/flags?environment=production&status=active" \
+curl "http://localhost:8080/api/v1/flags?includeArchived=true" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
-### Получить флаг по ключу
+### Получить флаг по ID
 
 ```http
 GET /api/v1/flags/{id}
@@ -121,6 +157,20 @@ GET /api/v1/flags/{id}
 curl "http://localhost:8080/api/v1/flags/42" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
+
+### Флаги по окружению
+
+```http
+GET /api/v1/flags/by-environment
+```
+
+### Обогащённые флаги (dashboard)
+
+```http
+GET /api/v1/flags/enriched
+```
+
+Возвращает флаги со связанными сегментами, тегами, контекстами и окружениями.
 
 ### Обновить флаг
 
@@ -142,29 +192,21 @@ curl -X PUT "http://localhost:8080/api/v1/flags/42" \
 ### Обновить стратегии флага
 
 ```http
-PUT /api/v1/flags/{id}/strategies
+PUT /api/v1/flags/{flagId}/strategies
 ```
 
+Настройка стратегии для окружения:
+
 ```bash
-# Gradual rollout
 curl -X PUT "http://localhost:8080/api/v1/flags/42/strategies" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "environment": "production",
-    "strategies": [
-      {
-        "type": "gradual",
-        "percentage": 25,
-        "hashProperty": "userId"
-      }
-    ]
+    "environmentId": 3,
+    "enabled": true,
+    "percentage": 25
   }'
 ```
-
-### Настройка таргетинга
-
-Правила таргетинга передаются в составе тела запроса при создании или обновлении флага (`POST/PUT /api/v1/flags`) или через стратегии (`PUT /api/v1/flags/{id}/strategies`).
 
 ### Архивировать флаг
 
@@ -188,6 +230,10 @@ curl -X POST "http://localhost:8080/api/v1/flags/42/unarchive" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
+## Сегменты
+
+### Создать сегмент
+
 ```http
 POST /api/v1/segments
 ```
@@ -197,13 +243,9 @@ curl -X POST "http://localhost:8080/api/v1/segments" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "key": "beta-testers",
     "name": "Бета-тестеры",
     "description": "Пользователи с ID, начинающимся на beta-",
-    "rules": [
-      { "attribute": "userId", "operator": "starts_with", "value": "beta-" },
-      { "attribute": "email", "operator": "not_contains", "value": "@test.com" }
-    ]
+    "projectId": 1
   }'
 ```
 
@@ -218,44 +260,41 @@ curl "http://localhost:8080/api/v1/segments" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
-### Получить сегмент по ключу
+### Получить сегмент по ID
 
 ```http
-GET /api/v1/segments/{segmentKey}
+GET /api/v1/segments/{id}
 ```
 
 ```bash
-curl "http://localhost:8080/api/v1/segments/beta-testers" \
+curl "http://localhost:8080/api/v1/segments/5" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
 ### Обновить сегмент
 
 ```http
-PUT /api/v1/segments/{segmentKey}
+PUT /api/v1/segments/{id}
 ```
 
 ```bash
-curl -X PUT "http://localhost:8080/api/v1/segments/beta-testers" \
+curl -X PUT "http://localhost:8080/api/v1/segments/5" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Бета-тестеры (расширенный)",
-    "rules": [
-      { "attribute": "userId", "operator": "starts_with", "value": "beta-" },
-      { "attribute": "plan", "operator": "not_in", "value": ["free"] }
-    ]
+    "description": "Обновлённое описание"
   }'
 ```
 
 ### Удалить сегмент
 
 ```http
-DELETE /api/v1/segments/{segmentKey}
+DELETE /api/v1/segments/{id}
 ```
 
 ```bash
-curl -X DELETE "http://localhost:8080/api/v1/segments/beta-testers" \
+curl -X DELETE "http://localhost:8080/api/v1/segments/5" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
@@ -272,9 +311,8 @@ curl -X POST "http://localhost:8080/api/v1/environments" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "key": "staging",
     "name": "Staging",
-    "description": "Предпродакшен-окружение"
+    "projectId": 1
   }'
 ```
 
@@ -289,30 +327,35 @@ curl "http://localhost:8080/api/v1/environments" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
+### Получить окружение по ID
+
+```http
+GET /api/v1/environments/{id}
+```
+
 ### Обновить окружение
 
 ```http
-PUT /api/v1/environments/{envKey}
+PUT /api/v1/environments/{id}
 ```
 
 ```bash
-curl -X PUT "http://localhost:8080/api/v1/environments/staging" \
+curl -X PUT "http://localhost:8080/api/v1/environments/2" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Staging (Test)",
-    "description": "Обновлённое описание"
+    "name": "Staging (Test)"
   }'
 ```
 
 ### Удалить окружение
 
 ```http
-DELETE /api/v1/environments/{envKey}
+DELETE /api/v1/environments/{id}
 ```
 
 ```bash
-curl -X DELETE "http://localhost:8080/api/v1/environments/staging" \
+curl -X DELETE "http://localhost:8080/api/v1/environments/2" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
@@ -332,7 +375,9 @@ curl -X POST "http://localhost:8080/api/v1/api-keys" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Production SDK Key",
-    "environment": "production"
+    "keyType": "SERVER",
+    "environmentId": 3,
+    "projectId": 1
   }'
 ```
 
@@ -342,7 +387,7 @@ curl -X POST "http://localhost:8080/api/v1/api-keys" \
 {
   "id": 12,
   "name": "Production SDK Key",
-  "apiKey": "sk-abc123def456...",
+  "apiKey": "dGhpcyBpcyBhIDY0LWNoYXJhY3RlciBiYXNlNjR1cmwgZW5jb2RlZCBrZXk",
   "keyType": "SERVER",
   "environmentId": 3,
   "createdAt": "2026-06-21T13:41:05Z"
@@ -358,33 +403,28 @@ GET /api/v1/api-keys
 ```
 
 ```bash
-curl "http://localhost:8080/api/v1/api-keys?environment=production" \
+curl "http://localhost:8080/api/v1/api-keys" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
-### Отозвать API-ключ
+### Обновить API-ключ
 
 ```http
-POST /api/v1/api-keys/{keyId}/revoke
+PUT /api/v1/api-keys/{id}
 ```
-
-```bash
-curl -X POST "http://localhost:8080/api/v1/api-keys/ak_abc123/revoke" \
-  -H "Authorization: Bearer $JWT_TOKEN"
-```
-
-После отзыва ключ немедленно перестаёт работать. Все SDK, использующие этот ключ, перестанут получать обновления.
 
 ### Удалить API-ключ
 
 ```http
-DELETE /api/v1/api-keys/{keyId}
+DELETE /api/v1/api-keys/{id}
 ```
 
 ```bash
-curl -X DELETE "http://localhost:8080/api/v1/api-keys/ak_abc123" \
+curl -X DELETE "http://localhost:8080/api/v1/api-keys/12" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
+
+После удаления ключ немедленно перестаёт работать. Все SDK, использующие этот ключ, перестанут получать обновления.
 
 ## Аудит
 
@@ -396,131 +436,90 @@ GET /api/v1/audit
 
 | Параметр | Тип | По умолчанию | Описание |
 |----------|-----|-------------|----------|
-| `from` | `datetime` | — | Начало периода (ISO 8601) |
-| `to` | `datetime` | — | Конец периода (ISO 8601) |
-| `actor` | `string` | — | Email пользователя |
-| `entityType` | `string` | — | `FLAG`, `SEGMENT`, `API_KEY`, `ENVIRONMENT` |
-| `entityKey` | `string` | — | Ключ объекта |
-| `action` | `string` | — | Тип действия |
 | `page` | `int` | `0` | Страница |
 | `size` | `int` | `20` | Размер страницы |
+| `dateFrom` | `datetime` | — | Начало периода (ISO 8601) |
+| `dateTo` | `datetime` | — | Конец периода (ISO 8601) |
 
 ```bash
 # Все изменения за последнюю неделю
-curl "http://localhost:8080/api/v1/audit?from=2026-06-14T00:00:00Z&to=2026-06-21T23:59:59Z" \
+curl "http://localhost:8080/api/v1/audit?dateFrom=2026-06-14T00:00:00Z&dateTo=2026-06-21T23:59:59Z" \
   -H "Authorization: Bearer $JWT_TOKEN"
-
-# Все изменения флага 42
-curl "http://localhost:8080/api/v1/audit?entityType=FLAG&entityKey=42" \
-  -H "Authorization: Bearer $JWT_TOKEN"
-
-# Все действия конкретного пользователя
-curl "http://localhost:8080/api/v1/audit?actor=admin@example.com" \
-  -H "Authorization: Bearer $JWT_TOKEN"
-```
-
-### Экспорт аудита
-
-```http
-GET /api/v1/audit/export
-```
-
-| Параметр | Тип | По умолчанию | Описание |
-|----------|-----|-------------|----------|
-| `format` | `string` | `json` | `csv`, `json`, `pdf` |
-| `from` | `datetime` | — | Начало периода |
-| `to` | `datetime` | — | Конец периода |
-
-```bash
-curl "http://localhost:8080/api/v1/audit/export?format=csv&from=2026-06-01T00:00:00Z&to=2026-06-30T23:59:59Z" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  -o audit-report.csv
 ```
 
 ## SDK
 
-### Получить правила (полная загрузка)
+### Получить правила флагов
 
 ```http
 GET /api/client/features
 ```
 
-Используется SDK при инициализации. Возвращает все правила флагов для окружения, привязанного к API-ключу.
+Используется SDK при инициализации. Возвращает все правила флагов для окружения, привязанного к API-ключу. Поддерживает ETag / If-None-Match для эффективного кеширования.
 
 ```bash
 curl "http://localhost:8080/api/client/features" \
-  -H "X-Api-Key: sk-abc123def456..."
+  -H "Authorization: Bearer <api-key>"
 ```
 
 Ответ:
 
 ```json
 {
-  "version": 42,
   "environment": "production",
   "flags": [
     {
-      "key": "42",
+      "key": "new-checkout",
+      "name": "Новый чекаут",
       "flagType": "RELEASE",
-      "strategies": [
-        {
-          "type": "gradual",
-          "percentage": 50
-        }
-      ],
-      "targeting": [
-        {
-          "name": "Premium RU",
-          "rules": [
-            { "attribute": "plan", "operator": "in", "value": ["premium", "business"] },
-            { "attribute": "country", "operator": "eq", "value": "RU" }
-          ],
-          "serve": true
-        }
-      ]
+      "enabled": true,
+      "activation": {
+        "rollOut": 50,
+        "constraints": [
+          { "field": "country", "operator": "in", "values": ["RU", "BY"] }
+        ],
+        "segments": [
+          { "name": "Premium Users", "constraints": [...] }
+        ]
+      }
     }
   ]
 }
 ```
 
-### Получить дельта-обновления
+### Оценка флагов (client-side)
 
 ```http
-GET /api/client/features?since={version}
+POST /api/client/evaluate
 ```
 
-Возвращает только правила, изменившиеся с указанной версии.
+Оценивает флаги на сервере для переданного контекста (режим `mode: 'client'`).
 
 ```bash
-curl "http://localhost:8080/api/client/features?since=41" \
-  -H "X-Api-Key: sk-abc123def456..."
+curl -X POST "http://localhost:8080/api/client/evaluate" \
+  -H "Authorization: Bearer <api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"context": {"userId": "user-123", "country": "RU"}}'
 ```
 
-Ответ:
+### Отправка метрик
 
-```json
-{
-  "version": 42,
-  "environment": "production",
-  "updated": [
-    {
-      "key": "42",
-      "flagType": "RELEASE",
-      "strategies": [
-        {
-          "type": "gradual",
-          "percentage": 50
-        }
-      ]
-    }
-  ],
-  "deleted": ["old-feature"]
-}
+```http
+POST /api/client/metrics
+```
+
+Отправка накопленных SDK метрик использования флагов.
+
+```bash
+curl -X POST "http://localhost:8080/api/client/metrics" \
+  -H "Authorization: Bearer <api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"metrics": [{"flagKey": "new-checkout", "trueCount": 150, "falseCount": 50}]}'
 ```
 
 ## Интеграции
 
-### Создать интеграция
+### Создать интеграцию
 
 ```http
 POST /api/v1/integrations
@@ -531,23 +530,13 @@ curl -X POST "http://localhost:8080/api/v1/integrations" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://your-server.example.com/hooks/mozhno",
-    "events": ["flag.updated", "flag.archived", "flag.deleted"],
-    "active": true
+    "name": "My Webhook",
+    "enabled": true,
+    "type": "custom_webhook",
+    "configJson": "{\"url\":\"https://your-server.example.com/hooks/mozhno\"}",
+    "eventSubscriptionsJson": "[\"flag.updated\",\"flag.archived\",\"flag.deleted\"]",
+    "projectId": 1
   }'
-```
-
-Ответ:
-
-```json
-{
-  "id": "abc123",
-  "url": "https://your-server.example.com/hooks/mozhno",
-  "secret": "whsec_x7k2p9v4m1q8w3r6",
-  "events": ["flag.updated", "flag.archived", "flag.deleted"],
-  "active": true,
-  "createdAt": "2026-06-21T13:41:05Z"
-}
 ```
 
 ### Получить все интеграции
@@ -568,35 +557,39 @@ PUT /api/v1/integrations/{id}
 ```
 
 ```bash
-curl -X PUT "http://localhost:8080/api/v1/integrations/wh_abc123" \
+curl -X PUT "http://localhost:8080/api/v1/integrations/1" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://new-endpoint.example.com/hooks/mozhno",
-    "events": ["flag.updated", "flag.archived", "flag.deleted", "flag.created"],
-    "active": true
+    "name": "My Webhook",
+    "enabled": false,
+    "type": "custom_webhook",
+    "configJson": "{\"url\":\"https://new-endpoint.example.com/hooks\"}",
+    "eventSubscriptionsJson": "[\"flag.updated\",\"flag.archived\",\"flag.deleted\",\"flag.created\"]"
   }'
 ```
 
-### Удалить интеграция
+### Удалить интеграцию
 
 ```http
 DELETE /api/v1/integrations/{id}
 ```
 
 ```bash
-curl -X DELETE "http://localhost:8080/api/v1/integrations/wh_abc123" \
+curl -X DELETE "http://localhost:8080/api/v1/integrations/1" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
-### Отправить тестовую интеграцию
+### Проверить квоту вебхуков
 
 ```http
-POST /api/v1/integrations/{id}/test
+GET /api/v1/integrations/webhook-limit
 ```
 
+Возвращает оставшееся количество доступных отправок вебхуков.
+
 ```bash
-curl -X POST "http://localhost:8080/api/v1/integrations/wh_abc123/test" \
+curl "http://localhost:8080/api/v1/integrations/webhook-limit" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
@@ -635,48 +628,247 @@ curl "http://localhost:8080/api/v1/users" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
-### Изменить роль пользователя
+### Получить пользователя
 
 ```http
-PATCH /api/v1/users/{userId}/role
+GET /api/v1/users/{id}
+```
+
+### Обновить пользователя
+
+```http
+PUT /api/v1/users/{id}
 ```
 
 ```bash
-curl -X PATCH "http://localhost:8080/api/v1/users/u_abc123/role" \
+curl -X PUT "http://localhost:8080/api/v1/users/5" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"role": "ADMIN"}'
+  -d '{"name": "Новое имя", "role": "ADMIN"}'
 ```
 
 ### Удалить пользователя
 
 ```http
-DELETE /api/v1/users/{userId}
+DELETE /api/v1/users/{id}
 ```
 
 ```bash
-curl -X DELETE "http://localhost:8080/api/v1/users/u_abc123" \
+curl -X DELETE "http://localhost:8080/api/v1/users/5" \
   -H "Authorization: Bearer $JWT_TOKEN"
 ```
+
+## Теги
+
+### Создать тег
+
+```http
+POST /api/v1/tags
+```
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/tags" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "checkout",
+    "color": "#3b82f6",
+    "projectId": 1
+  }'
+```
+
+### Получить все теги
+
+```http
+GET /api/v1/tags
+```
+
+```bash
+curl "http://localhost:8080/api/v1/tags" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### Получить тег по ID
+
+```http
+GET /api/v1/tags/{id}
+```
+
+### Обновить тег
+
+```http
+PUT /api/v1/tags/{id}
+```
+
+### Удалить тег
+
+```http
+DELETE /api/v1/tags/{id}
+```
+
+## Контексты
+
+### Создать определение контекста
+
+```http
+POST /api/v1/contexts
+```
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/contexts" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Страна",
+    "contextKey": "country",
+    "contextType": "string",
+    "projectId": 1
+  }'
+```
+
+### Получить все контексты
+
+```http
+GET /api/v1/contexts
+```
+
+### Получить контекст по ID
+
+```http
+GET /api/v1/contexts/{definitionId}
+```
+
+### Обновить контекст
+
+```http
+PUT /api/v1/contexts/{definitionId}
+```
+
+### Удалить контекст
+
+```http
+DELETE /api/v1/contexts/{definitionId}
+```
+
+### Управление значениями контекста
+
+```http
+GET    /api/v1/contexts/{definitionId}/values
+POST   /api/v1/contexts/{definitionId}/values
+PUT    /api/v1/contexts/{definitionId}/values
+GET    /api/v1/contexts/values/{valueId}
+PUT    /api/v1/contexts/values/{valueId}
+DELETE /api/v1/contexts/values/{valueId}
+```
+
+## Метрики
+
+### Метрики флага
+
+```http
+GET /api/v1/flags/{flagId}/metrics
+```
+
+| Параметр | Тип | Описание |
+|----------|-----|----------|
+| `environmentId` | `long` | ID окружения |
+| `instanceId` | `string` | ID экземпляра SDK |
+| `appName` | `string` | Имя приложения |
+
+```bash
+curl "http://localhost:8080/api/v1/flags/42/metrics?environmentId=3" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### Метрики проекта
+
+```http
+GET /api/v1/metrics
+```
+
+| Параметр | Тип | Описание |
+|----------|-----|----------|
+| `environmentId` | `long` | ID окружения |
+
+## Настройки проекта
+
+### Получить настройки
+
+```http
+GET /api/v1/settings
+```
+
+### Обновить настройки
+
+```http
+PUT /api/v1/settings
+```
+
+```bash
+curl -X PUT "http://localhost:8080/api/v1/settings" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "requireMfa": false,
+    "sessionTimeoutHours": 8
+  }'
+```
+
+## Проекты
+
+### Получить все проекты
+
+```http
+GET /api/v1/projects
+```
+
+### Получить проект по ID
+
+```http
+GET /api/v1/projects/{id}
+```
+
+### Создать проект
+
+```http
+POST /api/v1/projects
+```
+
+### Обновить проект
+
+```http
+PUT /api/v1/projects/{id}
+```
+
+### Удалить проект
+
+```http
+DELETE /api/v1/projects/{id}
+```
+
+### Экземпляры SDK
+
+```http
+GET /api/v1/projects/{id}/client-instances
+```
+
+| Параметр | Тип | Описание |
+|----------|-----|----------|
+| `environmentId` | `long` | ID окружения |
 
 ## Коды ошибок API
 
 | HTTP-код | Код ошибки | Описание |
 |----------|-----------|----------|
-| `400` | `VALIDATION_ERROR` | Неверные данные запроса |
-| `400` | `INVALID_FLAG_TYPE` | Некорректный тип флага |
-| `401` | `UNAUTHORIZED` | Отсутствует или недействителен токен |
-| `401` | `INVALID_API_KEY` | Недействительный API-ключ |
-| `401` | `TOKEN_EXPIRED` | JWT-токен истёк |
+| `400` | `BAD_REQUEST` | Неверные параметры запроса |
+| `400` | `VALIDATION_ERROR` | Ошибка валидации тела запроса |
+| `401` | `UNAUTHORIZED` | Отсутствует или недействителен токен/ключ |
+| `401` | `INVALID_CREDENTIALS` | Неверный email или пароль |
+| `401` | `TOKEN_REUSE` | Обнаружен повторно использованный refresh-токен |
+| `402` | `QUOTA_EXCEEDED` | Превышена квота ресурсов |
 | `403` | `FORBIDDEN` | Недостаточно прав |
-| `403` | `PRODUCTION_CHANGE_DENIED` | Нет прав на изменение production |
-| `404` | `FLAG_NOT_FOUND` | Флаг не найден |
-| `404` | `SEGMENT_NOT_FOUND` | Сегмент не найден |
-| `404` | `ENVIRONMENT_NOT_FOUND` | Окружение не найдено |
-| `404` | `API_KEY_NOT_FOUND` | API-ключ не найден |
-| `409` | `FLAG_KEY_EXISTS` | Флаг с таким ключом уже существует |
-| `409` | `SEGMENT_KEY_EXISTS` | Сегмент с таким ключом уже существует |
-| `409` | `ENVIRONMENT_KEY_EXISTS` | Окружение с таким ключом уже существует |
+| `404` | `NOT_FOUND` | Ресурс не найден |
+| `409` | `CONFLICT` | Конфликт: ресурс уже существует |
 | `429` | `RATE_LIMIT_EXCEEDED` | Превышен лимит запросов |
 | `500` | `INTERNAL_ERROR` | Внутренняя ошибка сервера |
 
@@ -703,33 +895,33 @@ TOKEN="eyJhbGciOiJIUzI1NiIs..."
 curl -s -X POST "$BASE/flags" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"key": "my-feature", "name": "Моя фича", "flagType": "RELEASE"}'
+  -d '{"key": "my-feature", "name": "Моя фича", "flagType": "RELEASE", "projectId": 1}'
 
-# 2. Настроить gradual rollout на 1%
-curl -s -X PATCH "$BASE/flags/my-feature/strategies" \
+# 2. Настроить стратегию: 1% роллаут
+curl -s -X PUT "$BASE/flags/42/strategies" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"environment": "production", "strategies": [{"type": "gradual", "percentage": 1}]}'
+  -d '{"environmentId": 3, "enabled": true, "percentage": 1}'
 
 # 3. Увеличить до 50% (через день)
-curl -s -X PATCH "$BASE/flags/my-feature/strategies" \
+curl -s -X PUT "$BASE/flags/42/strategies" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"environment": "production", "strategies": [{"type": "gradual", "percentage": 50}]}'
+  -d '{"environmentId": 3, "enabled": true, "percentage": 50}'
 
 # 4. Включить для всех (100%)
-curl -s -X PATCH "$BASE/flags/my-feature/strategies" \
+curl -s -X PUT "$BASE/flags/42/strategies" \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"environment": "production", "strategies": [{"type": "default", "value": true}]}'
+  -d '{"environmentId": 3, "enabled": true, "percentage": 100}'
 
 # 5. Архивировать
-curl -s -X POST "$BASE/flags/my-feature/archive" \
+curl -s -X POST "$BASE/flags/42/archive" \
   -H "Authorization: Bearer $TOKEN"
 
 # 6. Проверить аудит
-curl -s "$BASE/audit?entityType=FLAG&entityKey=my-feature" \
-  -H "Authorization: Bearer $TOKEN" | jq '.data[] | {action: .action, timestamp: .timestamp}'
+curl -s "$BASE/audit?dateFrom=2026-01-01T00:00:00Z" \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ## Что дальше?

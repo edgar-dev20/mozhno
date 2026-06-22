@@ -82,9 +82,6 @@ Flyway ведёт таблицу `flyway_schema_history` для отслежив
 Если `SPRING_FLYWAY_ENABLED=false`, запустите миграции вручную:
 
 ```bash
-Миграции Flyway выполняются **автоматически при старте** Spring Boot (через `spring.flyway.enabled=true`). При необходимости можно запустить вручную:
-
-```bash
 java -jar mozhno-app.jar --spring.flyway.enabled=true --spring.flyway.migrate=true
 ```
 

@@ -1,626 +1,772 @@
 # REST API Reference
 
-Complete reference for the можно REST API. All management endpoints are prefixed with `/api/v1`; SDK client endpoints use `/api/client`.
+Complete reference for the можно REST API v1. Each endpoint includes method, path, parameters, and `curl` examples.
 
-For interactive documentation, visit the Swagger UI at `/swagger-ui.html`. The OpenAPI 3.1 specification is available at `/v3/api-docs`.
+> **Tip:** Interactive documentation is available via Swagger UI at [`/swagger-ui.html`](http://localhost:8080/swagger-ui.html). OpenAPI 3.1 spec — [`/v3/api-docs`](http://localhost:8080/v3/api-docs).
 
 ## Authentication
 
-Include your JWT or API key in the `Authorization` header for every request. See [API Overview](./overview.md#authentication) for details.
+### Login
+
+```http
+POST /api/v1/auth/login
+```
+
+**Request body:**
+
+```json
+{
+  "email": "admin@example.com",
+  "password": "your-password"
+}
+```
+
+**Response:**
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4...",
+  "user": {
+    "id": 1,
+    "email": "admin@example.com",
+    "name": "Admin",
+    "role": "ADMIN",
+    "status": "ACTIVE",
+    "locale": "en",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "lastActiveAt": "2026-06-21T10:00:00Z"
+  }
+}
+```
 
 ```bash
-# Environment variables used throughout this document
-export MOZHNO_URL="https://your-instance"
-export MOZHNO_TOKEN="eyJhbGciOiJIUzI1NiIs..."   # JWT access token (or API key)
+curl -X POST "http://localhost:8080/api/v1/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "admin@example.com", "password": "your-password"}'
+```
+
+### Refresh Token
+
+```http
+POST /api/v1/auth/refresh
+```
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/auth/refresh" \
+  -H "Content-Type: application/json" \
+  -d '{"refreshToken": "dGhpcyBpcyBhIHJlZnJlc2ggdG9rZW4..."}'
+```
+
+### Logout
+
+```http
+POST /api/v1/auth/logout
+```
+
+```bash
+curl -X POST "http://localhost:8080/api/v1/auth/logout" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### Current User
+
+```http
+GET /api/v1/auth/me
+```
+
+```bash
+curl "http://localhost:8080/api/v1/auth/me" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### Select Project
+
+```http
+POST /api/v1/auth/select-project
+```
+
+### Password Recovery
+
+```http
+POST /api/v1/auth/forgot-password
+POST /api/v1/auth/reset-password
+```
+
+### Accept Invitation
+
+```http
+POST /api/v1/auth/accept-invite
 ```
 
 ## Flags
 
-### List All Flags
+### Create Flag
 
-```bash
-GET /api/v1/flags
-```
-
-**Query Parameters:**
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `page` | Integer | `0` | Page number (zero-indexed) |
-| `size` | Integer | `20` | Items per page (max: 100) |
-| `state` | String | — | Filter: `ACTIVE`, `PAUSED`, `DRAFT`, `ARCHIVED` |
-| `tags` | String | — | Comma-separated tags filter |
-| `search` | String | — | Search by key or name |
-
-```bash
-curl "$MOZHNO_URL/api/v1/flags?state=ACTIVE&tags=team:checkout&page=0&size=10" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
-```
-
-**Response:**
-
-```json
-{
-  "items": [
-    {
-      "key": "checkout_v2",
-      "name": "Checkout Redesign v2",
-      "description": "New checkout flow",
-      "flagType": "RELEASE",
-      "defaultValue": false,
-      "state": "ACTIVE",
-      "tags": ["team:checkout", "type:feature"],
-      "rolloutPercentage": 25,
-      "targetingRules": [],
-      "createdAt": "2026-06-01T10:00:00Z",
-      "updatedAt": "2026-06-15T14:30:00Z",
-      "createdBy": "alice@example.com"
-    }
-  ],
-  "page": 0,
-  "size": 10,
-  "totalItems": 1,
-  "totalPages": 1
-}
-```
-
-### Get a Single Flag
-
-```bash
-GET /api/v1/flags/{flagKey}
-```
-
-```bash
-curl "$MOZHNO_URL/api/v1/flags/checkout_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
-```
-
-### Create a Flag
-
-```bash
+```http
 POST /api/v1/flags
 ```
 
-**Request Body:**
-
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `key` | String | Yes | Unique identifier (immutable). Use `snake_case`. |
-| `name` | String | Yes | Human-readable name |
-| `description` | String | No | Flag purpose and behaviour details |
-| `flagType` | String | Yes | `RELEASE` or `KILLSWITCH` |
-| `tags` | String[] | No | List of tags for organisation |
+| `key` | `string` | Yes | Unique flag key |
+| `name` | `string` | Yes | Flag name |
+| `description` | `string` | No | Description |
+| `flagType` | `string` | Yes | `RELEASE` or `KILLSWITCH` |
+| `tags` | `string[]` | No | Tag list |
+| `projectId` | `long` | Yes | Project ID |
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/v1/flags" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
+curl -X POST "http://localhost:8080/api/v1/flags" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "key": "checkout_v2",
-    "name": "Checkout Redesign v2",
-    "description": "New checkout flow with one-click purchase",
+    "key": "new-checkout",
+    "name": "New Checkout",
+    "description": "Checkout flow redesign",
     "flagType": "RELEASE",
-    "defaultValue": false,
-    "tags": ["team:checkout", "type:feature"]
+    "projectId": 1,
+    "tags": ["checkout", "ui-redesign"]
   }'
 ```
 
-**Response:** `201 Created` with the full flag object.
+### List All Flags
 
-### Update a Flag
-
-```bash
-PUT /api/v1/flags/{flagKey}
+```http
+GET /api/v1/flags
 ```
 
-Replaces the entire flag configuration. All fields except `key` are writable.
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `includeArchived` | `boolean` | `false` | Include archived flags |
+| `page` | `int` | `0` | Page number |
+| `size` | `int` | `20` | Page size |
 
 ```bash
-curl -X PUT "$MOZHNO_URL/api/v1/flags/checkout_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
+curl "http://localhost:8080/api/v1/flags?includeArchived=true" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### Get Flag by ID
+
+```http
+GET /api/v1/flags/{id}
+```
+
+```bash
+curl "http://localhost:8080/api/v1/flags/42" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### Flags by Environment
+
+```http
+GET /api/v1/flags/by-environment
+```
+
+### Enriched Flags (Dashboard)
+
+```http
+GET /api/v1/flags/enriched
+```
+
+Returns flags with associated segments, tags, contexts, and environments.
+
+### Update Flag
+
+```http
+PUT /api/v1/flags/{id}
+```
+
+```bash
+curl -X PUT "http://localhost:8080/api/v1/flags/42" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Checkout Redesign v2",
+    "name": "New Checkout v2",
     "description": "Updated description",
-    "flagType": "RELEASE",
-    "defaultValue": false,
-    "state": "ACTIVE",
-    "tags": ["team:checkout", "type:feature"],
-    "rolloutPercentage": 50,
-    "rolloutAttribute": "userId",
-    "targetingRules": [
-      {
-        "priority": 1,
-        "conditions": [
-          {
-            "attribute": "country",
-            "operator": "eq",
-            "value": "DE"
-          }
-        ],
-        "targetValue": true
-      }
-    ]
+    "tags": ["checkout", "ui-redesign", "v2"]
   }'
 ```
 
-### Patch a Flag (Partial Update)
+### Update Flag Strategies
 
-```bash
-PATCH /api/v1/flags/{flagKey}
+```http
+PUT /api/v1/flags/{flagId}/strategies
 ```
 
-Update specific fields without sending the full object. Useful for toggling state or adjusting rollout.
+Configure strategy for an environment:
 
 ```bash
-# Change rollout percentage only
-curl -X PATCH "$MOZHNO_URL/api/v1/flags/checkout_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
+curl -X PUT "http://localhost:8080/api/v1/flags/42/strategies" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"rolloutPercentage": 75}'
-
-# Pause a flag
-curl -X PATCH "$MOZHNO_URL/api/v1/flags/checkout_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"state": "PAUSED"}'
-
-# Resume a flag
-curl -X PATCH "$MOZHNO_URL/api/v1/flags/checkout_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"state": "ACTIVE"}'
+  -d '{
+    "environmentId": 3,
+    "enabled": true,
+    "percentage": 25
+  }'
 ```
 
-### Archive a Flag
+### Archive Flag
 
-```bash
-POST /api/v1/flags/{flagKey}/archive
+```http
+POST /api/v1/flags/{id}/archive
 ```
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/v1/flags/checkout_v2/archive" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
+curl -X POST "http://localhost:8080/api/v1/flags/42/archive" \
+  -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
-**Response:** `200 OK` — flag state changed to `ARCHIVED`.
+### Unarchive Flag
 
-### Restore a Flag
-
-```bash
-POST /api/v1/flags/{flagKey}/restore
-```
-
-```bash
-curl -X POST "$MOZHNO_URL/api/v1/flags/checkout_v2/restore" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
-```
-
-**Response:** `200 OK` — flag state changed to `ACTIVE`.
-
-### Delete a Flag
-
-```bash
-DELETE /api/v1/flags/{flagKey}
+```http
+POST /api/v1/flags/{id}/unarchive
 ```
 
 ```bash
-curl -X DELETE "$MOZHNO_URL/api/v1/flags/checkout_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
+curl -X POST "http://localhost:8080/api/v1/flags/42/unarchive" \
+  -H "Authorization: Bearer $JWT_TOKEN"
 ```
-
-**Response:** `204 No Content`
-
-> **Warning:** Deletion is permanent and irreversible. The flag key should not be referenced in any application code. Consider archiving instead.
-
-### Targeting Rules Schema
-
-Targeting rules are an ordered array. The first rule whose conditions all match determines the returned value.
-
-```json
-{
-  "targetingRules": [
-    {
-      "priority": 1,
-      "conditions": [
-        {
-          "attribute": "country",
-          "operator": "eq",
-          "value": "DE"
-        },
-        {
-          "attribute": "plan",
-          "operator": "in",
-          "values": ["pro", "enterprise"]
-        }
-      ],
-      "targetValue": true
-    },
-    {
-      "priority": 2,
-      "conditions": [
-        {
-          "attribute": "beta",
-          "operator": "eq",
-          "value": "true"
-        }
-      ],
-      "targetValue": true
-    }
-  ]
-}
-```
-
-**Condition Operators:** `in`, `not_in`, `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `contains`. `in` / `not_in` accept multiple comma-separated values; all other operators are single-value.
 
 ## Segments
 
-### List Segments
+### Create Segment
 
-```bash
-GET /api/v1/segments
-```
-
-```bash
-curl "$MOZHNO_URL/api/v1/segments" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
-```
-
-### Create a Segment
-
-```bash
+```http
 POST /api/v1/segments
 ```
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/v1/segments" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
+curl -X POST "http://localhost:8080/api/v1/segments" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "beta_testers",
-    "description": "Users enrolled in the beta programme",
-    "conditions": [
-      {
-        "attribute": "beta",
-        "operator": "eq",
-        "value": "true"
-      }
-    ]
+    "name": "Beta Testers",
+    "description": "Users with beta- prefix",
+    "projectId": 1
   }'
 ```
 
-### Update a Segment
+### List All Segments
 
-```bash
-PUT /api/v1/segments/{segmentName}
+```http
+GET /api/v1/segments
 ```
 
-### Delete a Segment
-
 ```bash
-DELETE /api/v1/segments/{segmentName}
+curl "http://localhost:8080/api/v1/segments" \
+  -H "Authorization: Bearer $JWT_TOKEN"
+```
+
+### Get Segment by ID
+
+```http
+GET /api/v1/segments/{id}
+```
+
+### Update Segment
+
+```http
+PUT /api/v1/segments/{id}
+```
+
+### Delete Segment
+
+```http
+DELETE /api/v1/segments/{id}
 ```
 
 ## Environments
 
-### List Environments
+### Create Environment
 
-```bash
-GET /api/v1/environments
-```
-
-```bash
-curl "$MOZHNO_URL/api/v1/environments" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
-```
-
-**Response:**
-
-```json
-{
-  "items": [
-    {
-      "id": "env-001",
-      "name": "Production",
-      "key": "production",
-      "description": "Production environment",
-      "createdAt": "2026-01-01T00:00:00Z"
-    },
-    {
-      "id": "env-002",
-      "name": "Staging",
-      "key": "staging",
-      "description": "Pre-production staging environment",
-      "createdAt": "2026-01-01T00:00:00Z"
-    }
-  ]
-}
-```
-
-### Create an Environment
-
-```bash
+```http
 POST /api/v1/environments
 ```
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/v1/environments" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
+curl -X POST "http://localhost:8080/api/v1/environments" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Development",
-    "key": "development",
-    "description": "Local development environment"
+    "name": "Staging",
+    "projectId": 1
   }'
 ```
+
+### List All Environments
+
+```http
+GET /api/v1/environments
+```
+
+### Get Environment by ID
+
+```http
+GET /api/v1/environments/{id}
+```
+
+### Update Environment
+
+```http
+PUT /api/v1/environments/{id}
+```
+
+### Delete Environment
+
+```http
+DELETE /api/v1/environments/{id}
+```
+
+> **Warning:** You cannot delete an environment with active API keys. Revoke all keys for the environment first.
 
 ## API Keys
 
-### List API Keys
+### Create API Key
 
-```bash
-GET /api/v1/api-keys
-```
-
-```bash
-curl "$MOZHNO_URL/api/v1/api-keys" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
-```
-
-### Create an API Key
-
-```bash
+```http
 POST /api/v1/api-keys
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | String | Yes | Human-readable key name |
-| `environmentId` | String | Yes | Environment this key belongs to |
-| `scopes` | String[] | Yes | Permissions: `flags:read`, `flags:write`, `segments:read`, `segments:write`, `admin` |
-
 ```bash
-curl -X POST "$MOZHNO_URL/api/v1/api-keys" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
+curl -X POST "http://localhost:8080/api/v1/api-keys" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Production SDK",
-    "environmentId": "env-001",
-    "scopes": ["flags:read", "segments:read"]
+    "name": "Production SDK Key",
+    "keyType": "SERVER",
+    "environmentId": 3,
+    "projectId": 1
   }'
 ```
 
-**Response:**
+Response:
 
 ```json
 {
-  "id": "key-001",
-  "name": "Production SDK",
-  "apiKey": "sk-abc123def456...",
+  "id": 12,
+  "name": "Production SDK Key",
+  "apiKey": "dGhpcyBpcyBhIDY0LWNoYXJhY3RlciBiYXNlNjR1cmwgZW5jb2RlZCBrZXk",
   "keyType": "SERVER",
-  "environmentId": "env-001",
-  "scopes": ["flags:read", "segments:read"],
-  "createdAt": "2026-06-21T10:00:00Z"
+  "environmentId": 3,
+  "createdAt": "2026-06-21T13:41:05Z"
 }
 ```
 
-> **Warning:** The full API key value (`apiKey`) is returned **only once** at creation time. Store it securely — it cannot be retrieved later.
+> **Warning:** The key value (`apiKey`) is shown **only once** on creation. Save it immediately.
 
-### Revoke an API Key
+### List All API Keys
 
-```bash
-DELETE /api/v1/api-keys/{keyId}
+```http
+GET /api/v1/api-keys
 ```
 
-```bash
-curl -X DELETE "$MOZHNO_URL/api/v1/api-keys/key-001" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
+### Update API Key
+
+```http
+PUT /api/v1/api-keys/{id}
 ```
 
-**Response:** `204 No Content`
+### Delete API Key
 
-## Audit Log
+```http
+DELETE /api/v1/api-keys/{id}
+```
 
-### List Audit Entries
+## Audit
 
-```bash
+### Get Audit Records
+
+```http
 GET /api/v1/audit
 ```
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `page` | Integer | `0` | Page number |
-| `size` | Integer | `20` | Items per page |
-| `resourceType` | String | — | `FLAG`, `SEGMENT`, `API_KEY`, `ENVIRONMENT` |
-| `resourceId` | String | — | Flag key or segment name |
-| `action` | String | — | `CREATED`, `UPDATED`, `DELETED`, `ARCHIVED`, `RESTORED`, `PAUSED`, `RESUMED` |
-| `actor` | String | — | User email |
-| `from` | ISO 8601 | — | Start of date range |
-| `to` | ISO 8601 | — | End of date range |
+| `page` | `int` | `0` | Page number |
+| `size` | `int` | `20` | Page size |
+| `dateFrom` | `datetime` | — | Start of period (ISO 8601) |
+| `dateTo` | `datetime` | — | End of period (ISO 8601) |
 
 ```bash
-curl "$MOZHNO_URL/api/v1/audit?resourceType=FLAG&resourceId=checkout_v2&from=2026-06-01T00:00:00Z" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
+curl "http://localhost:8080/api/v1/audit?dateFrom=2026-06-14T00:00:00Z&dateTo=2026-06-21T23:59:59Z" \
+  -H "Authorization: Bearer $JWT_TOKEN"
 ```
 
-### Export Audit Data
+## SDK
 
-```bash
-GET /api/v1/audit/export
-```
+### Get Feature Flags
 
-Accepts the same filtering parameters as the list endpoint. Returns CSV by default.
-
-```bash
-curl "$MOZHNO_URL/api/v1/audit/export?resourceType=FLAG&from=2026-06-01T00:00:00Z&to=2026-07-01T00:00:00Z" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
-  -H "Accept: text/csv" \
-  -o audit_june_2026.csv
-```
-
-## SDK Client Endpoint
-
-Used internally by SDKs to fetch flag rules for local evaluation:
-
-```bash
+```http
 GET /api/client/features
 ```
 
+Used by SDKs on initialization. Returns all flag rules for the environment bound to the API key. Supports ETag / If-None-Match for efficient caching.
+
 ```bash
-curl "$MOZHNO_URL/api/client/features" \
-  -H "X-Api-Key: sk-abc123def456..."
+curl "http://localhost:8080/api/client/features" \
+  -H "Authorization: Bearer <api-key>"
 ```
 
-This endpoint returns all flags and segments for the environment associated with the API key. SDKs call this on initialisation and during background polling. Pass `?since={version}` to fetch only delta updates.
+### Evaluate Flags (Client-side)
+
+```http
+POST /api/client/evaluate
+```
+
+Evaluates flags server-side for the given context (`mode: 'client'`).
+
+```bash
+curl -X POST "http://localhost:8080/api/client/evaluate" \
+  -H "Authorization: Bearer <api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"context": {"userId": "user-123", "country": "US"}}'
+```
+
+### Submit Metrics
+
+```http
+POST /api/client/metrics
+```
+
+Sends accumulated SDK usage metrics.
+
+```bash
+curl -X POST "http://localhost:8080/api/client/metrics" \
+  -H "Authorization: Bearer <api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{"metrics": [{"flagKey": "new-checkout", "trueCount": 150, "falseCount": 50}]}'
+```
 
 ## Integrations
 
-### List Integrations
+### Create Integration
 
-```bash
-GET /api/v1/integrations
-```
-
-### Create an Integration
-
-```bash
+```http
 POST /api/v1/integrations
 ```
 
 ```bash
-curl -X POST "$MOZHNO_URL/api/v1/integrations" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
+curl -X POST "http://localhost:8080/api/v1/integrations" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "url": "https://your-service.example.com/integrations/mozhno",
-    "secret": "whsec_your_shared_secret",
-    "events": ["flag.updated", "flag.archived", "audit.entry.created"],
-    "active": true
+    "name": "My Webhook",
+    "enabled": true,
+    "type": "custom_webhook",
+    "configJson": "{\"url\":\"https://your-server.example.com/hooks/mozhno\"}",
+    "eventSubscriptionsJson": "[\"flag.updated\",\"flag.archived\",\"flag.deleted\"]",
+    "projectId": 1
   }'
 ```
 
-### Delete an Integration
+### List All Integrations
 
-```bash
+```http
+GET /api/v1/integrations
+```
+
+### Update Integration
+
+```http
+PUT /api/v1/integrations/{id}
+```
+
+### Delete Integration
+
+```http
 DELETE /api/v1/integrations/{id}
 ```
 
-## Health Check
+### Check Webhook Quota
 
-```bash
-GET /actuator/health
+```http
+GET /api/v1/integrations/webhook-limit
+```
+
+## Users
+
+### Invite User
+
+```http
+POST /api/v1/users/invite
 ```
 
 ```bash
-curl "$MOZHNO_URL/actuator/health"
-```
-
-**Response:**
-
-```json
-{
-  "status": "UP",
-  "components": {
-    "db": { "status": "UP" },
-    "diskSpace": { "status": "UP" }
-  }
-}
-```
-
-## Common Workflows
-
-### Create, Rollout, and Archive a Flag (Full Lifecycle)
-
-```bash
-# 1. Create a draft flag
-curl -X POST "$MOZHNO_URL/api/v1/flags" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
+curl -X POST "http://localhost:8080/api/v1/users/invite" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "key": "dark_mode_v2",
-    "name": "Dark Mode v2",
-    "flagType": "RELEASE",
-    "defaultValue": false,
-    "tags": ["team:ui", "type:feature"]
+    "email": "developer@example.com",
+    "role": "DEVELOPER"
   }'
-
-# 2. Add targeting rule for internal team
-curl -X PATCH "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "state": "ACTIVE",
-    "targetingRules": [
-      {
-        "priority": 1,
-        "conditions": [
-          {"attribute": "email", "operator": "contains", "value": "@company.com"}
-        ],
-        "targetValue": true
-      }
-    ]
-  }'
-
-# 3. Start 10% rollout to external users
-curl -X PATCH "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"rolloutPercentage": 10, "rolloutAttribute": "userId"}'
-
-# 4. Increase to 50%
-curl -X PATCH "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"rolloutPercentage": 50}'
-
-# 5. Full rollout
-curl -X PATCH "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"rolloutPercentage": 100}'
-
-# 6. Remove targeting rules, rely on default
-curl -X PUT "$MOZHNO_URL/api/v1/flags/dark_mode_v2" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Dark Mode v2",
-    "flagType": "RELEASE",
-    "defaultValue": true,
-    "state": "ACTIVE",
-    "tags": ["team:ui", "type:feature"],
-    "rolloutPercentage": 0,
-    "targetingRules": []
-  }'
-
-# 7. Archive after code cleanup
-curl -X POST "$MOZHNO_URL/api/v1/flags/dark_mode_v2/archive" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN"
 ```
 
-### Emergency Kill Switch
+| Role | Description |
+|------|-------------|
+| `ADMIN` | Full access to all resources |
+| `DEVELOPER` | Flag, segment, and strategy management |
+| `VIEWER` | Read-only access |
+
+### List All Users
+
+```http
+GET /api/v1/users
+```
+
+### Get User
+
+```http
+GET /api/v1/users/{id}
+```
+
+### Update User
+
+```http
+PUT /api/v1/users/{id}
+```
+
+### Delete User
+
+```http
+DELETE /api/v1/users/{id}
+```
+
+## Tags
+
+### Create Tag
+
+```http
+POST /api/v1/tags
+```
 
 ```bash
-# Pause flags by tag (all payment-service flags)
-PAYMENT_FLAGS=$(curl -s "$MOZHNO_URL/api/v1/flags?state=ACTIVE&tags=service:payments" \
-  -H "Authorization: Bearer $MOZHNO_TOKEN" | jq -r '.items[].key')
-
-for flag in $PAYMENT_FLAGS; do
-  curl -X PATCH "$MOZHNO_URL/api/v1/flags/$flag" \
-    -H "Authorization: Bearer $MOZHNO_TOKEN" \
-    -H "Content-Type: application/json" \
-    -d '{"state": "PAUSED"}'
-  echo "Paused: $flag"
-done
+curl -X POST "http://localhost:8080/api/v1/tags" \
+  -H "Authorization: Bearer $JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "checkout",
+    "color": "#3b82f6",
+    "projectId": 1
+  }'
 ```
 
-## API Documentation
+### List All Tags
 
-- **Swagger UI:** `https://your-instance/swagger-ui.html`
-- **OpenAPI 3.1 Spec:** `https://your-instance/v3/api-docs`
+```http
+GET /api/v1/tags
+```
 
-## Next Steps
+### Get Tag by ID
 
-- [API Overview](./overview.md) — Authentication, rate limiting, and base URL structure.
-- [integrations](../guide/integrations.md) — Push-based event notifications.
-- [SDK Overview](../sdk/overview.md) — How SDKs consume the REST API.
+```http
+GET /api/v1/tags/{id}
+```
+
+### Update Tag
+
+```http
+PUT /api/v1/tags/{id}
+```
+
+### Delete Tag
+
+```http
+DELETE /api/v1/tags/{id}
+```
+
+## Contexts
+
+### Create Context Definition
+
+```http
+POST /api/v1/contexts
+```
+
+### List All Contexts
+
+```http
+GET /api/v1/contexts
+```
+
+### Get Context by ID
+
+```http
+GET /api/v1/contexts/{definitionId}
+```
+
+### Update Context
+
+```http
+PUT /api/v1/contexts/{definitionId}
+```
+
+### Delete Context
+
+```http
+DELETE /api/v1/contexts/{definitionId}
+```
+
+### Context Values
+
+```http
+GET    /api/v1/contexts/{definitionId}/values
+POST   /api/v1/contexts/{definitionId}/values
+PUT    /api/v1/contexts/{definitionId}/values
+GET    /api/v1/contexts/values/{valueId}
+PUT    /api/v1/contexts/values/{valueId}
+DELETE /api/v1/contexts/values/{valueId}
+```
+
+## Metrics
+
+### Flag Metrics
+
+```http
+GET /api/v1/flags/{flagId}/metrics
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `environmentId` | `long` | Environment ID |
+| `instanceId` | `string` | SDK instance ID |
+| `appName` | `string` | Application name |
+
+### Project Metrics
+
+```http
+GET /api/v1/metrics
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `environmentId` | `long` | Environment ID |
+
+## Project Settings
+
+### Get Settings
+
+```http
+GET /api/v1/settings
+```
+
+### Update Settings
+
+```http
+PUT /api/v1/settings
+```
+
+## Projects
+
+### List All Projects
+
+```http
+GET /api/v1/projects
+```
+
+### Get Project by ID
+
+```http
+GET /api/v1/projects/{id}
+```
+
+### Create Project
+
+```http
+POST /api/v1/projects
+```
+
+### Update Project
+
+```http
+PUT /api/v1/projects/{id}
+```
+
+### Delete Project
+
+```http
+DELETE /api/v1/projects/{id}
+```
+
+### SDK Client Instances
+
+```http
+GET /api/v1/projects/{id}/client-instances
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `environmentId` | `long` | Environment ID |
+
+## API Error Codes
+
+| HTTP Code | Error Code | Description |
+|-----------|-----------|-------------|
+| `400` | `BAD_REQUEST` | Invalid request parameters |
+| `400` | `VALIDATION_ERROR` | Request body validation error |
+| `401` | `UNAUTHORIZED` | Missing or invalid token/key |
+| `401` | `INVALID_CREDENTIALS` | Wrong email or password |
+| `401` | `TOKEN_REUSE` | Reused refresh token detected |
+| `402` | `QUOTA_EXCEEDED` | Resource quota exceeded |
+| `403` | `FORBIDDEN` | Insufficient permissions |
+| `404` | `NOT_FOUND` | Resource not found |
+| `409` | `CONFLICT` | Resource already exists |
+| `429` | `RATE_LIMIT_EXCEEDED` | Request rate limit exceeded |
+| `500` | `INTERNAL_ERROR` | Internal server error |
+
+## Swagger UI and OpenAPI
+
+| Resource | URL |
+|----------|-----|
+| **Swagger UI** | [`/swagger-ui.html`](http://localhost:8080/swagger-ui.html) |
+| **OpenAPI 3.1 JSON** | [`/v3/api-docs`](http://localhost:8080/v3/api-docs) |
+| **OpenAPI 3.1 YAML** | [`/v3/api-docs.yaml`](http://localhost:8080/v3/api-docs.yaml) |
+
+## Complete Flag Lifecycle via API
+
+```bash
+#!/bin/bash
+BASE="http://localhost:8080/api/v1"
+TOKEN="eyJhbGciOiJIUzI1NiIs..."
+
+# 1. Create flag
+curl -s -X POST "$BASE/flags" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"key": "my-feature", "name": "My Feature", "flagType": "RELEASE", "projectId": 1}'
+
+# 2. Configure strategy: 1% rollout
+curl -s -X PUT "$BASE/flags/42/strategies" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"environmentId": 3, "enabled": true, "percentage": 1}'
+
+# 3. Increase to 50%
+curl -s -X PUT "$BASE/flags/42/strategies" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"environmentId": 3, "enabled": true, "percentage": 50}'
+
+# 4. Enable for all (100%)
+curl -s -X PUT "$BASE/flags/42/strategies" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"environmentId": 3, "enabled": true, "percentage": 100}'
+
+# 5. Archive
+curl -s -X POST "$BASE/flags/42/archive" \
+  -H "Authorization: Bearer $TOKEN"
+
+# 6. Check audit
+curl -s "$BASE/audit?dateFrom=2026-01-01T00:00:00Z" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+## Related Pages
+
+- [API Overview](/en/api/overview) — authentication, format, limits
+- [Integrations](/en/guide/integrations) — webhook integrations, CI/CD
+- [SDK Overview](/en/sdk/overview) — how SDK uses the API
+- [Swagger UI](http://localhost:8080/swagger-ui.html) — interactive documentation

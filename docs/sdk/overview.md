@@ -47,7 +47,7 @@ SDK оценивает флаг в следующем порядке:
 3. **Ограничения (constraints):** все правила должны совпасть с контекстом (И)
 4. **Сегменты:** хотя бы один сегмент должен совпасть (ИЛИ)
 5. **Если есть и то, и другое:** достаточно совпадения одного (ИЛИ)
-6. **Процентный роллаут:** MurmurHash3 от `flagKey + (userId || sessionId)`, сравнение с процентом
+6. **Процентный роллаут:** MurmurHash32 от `flagKey + (userId || sessionId)`, сравнение с процентом
 7. **Ничего не совпало** → `false`
 
 ### Поддерживаемые операторы
@@ -104,7 +104,7 @@ sequenceDiagram
 ### Java SDK
 
 ```java
-MozhnoClient client = MozhnoConfig.builder()
+MozhnoConfig config = MozhnoConfig.builder()
     .appName("my-app")
     .instanceId("instance-1")
     .mozhnoUrl("http://localhost:8080")
@@ -114,6 +114,7 @@ MozhnoClient client = MozhnoConfig.builder()
     .environment("production")
     .build();
 
+MozhnoClient client = new DefaultMozhnoClient(config);
 client.start();
 boolean enabled = client.isEnabled("new-checkout", context);
 ```

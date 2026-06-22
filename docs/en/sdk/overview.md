@@ -49,7 +49,7 @@ The SDK evaluates flags in this order:
 3. **Constraints** (AND): all attribute rules must match the context
 4. **Segments** (OR): at least one segment must match
 5. **Both present:** either constraints or segments passing grants access (OR)
-6. **Percentage rollout:** MurmurHash3 over `flagKey + (userId || sessionId)`, compared against configured percentage
+6. **Percentage rollout:** MurmurHash32 over `flagKey + (userId || sessionId)`, compared against configured percentage
 7. **Nothing matched** → `false`
 
 ### Supported Operators
@@ -102,16 +102,17 @@ The SDK maintains an in-memory map of all flag rules. On each poll:
 ### Java SDK
 
 ```java
-MozhnoClient client = MozhnoConfig.builder()
+MozhnoConfig config = MozhnoConfig.builder()
     .appName("my-app")
     .instanceId("instance-1")
-    .mozhnoUrl("https://mozhno.example.com")
+    .mozhnoUrl("http://localhost:8080")
     .apiKey("<api-key>")
     .fetchTogglesInterval(15)
     .sendMetricsInterval(60)
     .environment("production")
     .build();
 
+MozhnoClient client = new DefaultMozhnoClient(config);
 client.start();
 boolean enabled = client.isEnabled("checkout_v2", context);
 ```
