@@ -8,7 +8,7 @@
 |------------|-------------|----------|
 | `SERVER_PORT` | `8080` | Порт, на котором слушает HTTP-сервер |
 | `APP_BASE_URL` | `http://localhost:8080` | Публичный URL сервера. Используется для генерации ссылок и CORS |
-| `JWT_SECRET` | — | Секретный ключ для подписи JWT-токенов. **Обязателен**. Минимум 256 бит |
+| `JWT_SECRET` | — (dev-ключ по умолчанию) | Секретный ключ для подписи JWT-токенов. **Обязателен в продакшене**. Минимум 256 бит |
 | `CACHE_TTL_MINUTES` | `5` | Время жизни ин-мемори кеша правил в минутах |
 | `CLIENT_MAX_METRICS_PER_KEY` | `1000` | Максимальное количество хранимых метрик на API-ключ |
 
@@ -39,7 +39,7 @@
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `JWT_SECRET` | — | Секретный ключ подписи JWT. **Обязателен** |
+| `JWT_SECRET` | — (dev-ключ по умолчанию) | Секретный ключ подписи JWT. **Обязателен в продакшене** |
 | `JWT_ACCESS_TOKEN_TTL_MINUTES` | `15` | Время жизни access-токена в минутах |
 | `JWT_REFRESH_TOKEN_TTL_DAYS` | `30` | Время жизни refresh-токена в днях |
 
@@ -95,6 +95,56 @@ CLIENT_MAX_METRICS_PER_KEY=1000
 4. **Пул соединений** — для продакшена увеличьте `HIKARI_MAX_POOL_SIZE` до 20–50 в зависимости от нагрузки.
 
 5. **Refresh token rotation** — включена по умолчанию. Ротация предотвращает перехват токенов.
+
+## Дополнительные настройки безопасности
+
+### Rate Limiting
+
+| Переменная | По умолчанию | Описание |
+|------------|-------------|----------|
+| `APP_RATE_LIMIT_ENABLED` | `true` | Включение rate limiting |
+| `APP_RATE_LIMIT_LOGIN_CAPACITY` | `5` | Ёмкость корзины для логина |
+| `APP_RATE_LIMIT_LOGIN_REFILL_TOKENS` | `5` | Токенов за интервал для логина |
+| `APP_RATE_LIMIT_LOGIN_REFILL_MINUTES` | `1` | Интервал пополнения для логина (мин) |
+| `APP_RATE_LIMIT_PASSWORD_RESET_CAPACITY` | `3` | Ёмкость для сброса пароля |
+| `APP_RATE_LIMIT_PASSWORD_RESET_REFILL_TOKENS` | `3` | Токенов за интервал для сброса |
+| `APP_RATE_LIMIT_PASSWORD_RESET_REFILL_MINUTES` | `60` | Интервал пополнения для сброса (мин) |
+| `APP_RATE_LIMIT_REFRESH_CAPACITY` | `10` | Ёмкость для обновления токенов |
+| `APP_RATE_LIMIT_REFRESH_REFILL_TOKENS` | `10` | Токенов за интервал для refresh |
+| `APP_RATE_LIMIT_REFRESH_REFILL_MINUTES` | `1` | Интервал пополнения для refresh (мин) |
+| `APP_RATE_LIMIT_CLIENT_CAPACITY` | `1000` | Ёмкость для SDK-клиентов |
+| `APP_RATE_LIMIT_CLIENT_REFILL_TOKENS` | `1000` | Токенов за интервал для SDK |
+| `APP_RATE_LIMIT_CLIENT_REFILL_MINUTES` | `1` | Интервал пополнения для SDK (мин) |
+| `APP_RATE_LIMIT_API_WRITE_CAPACITY` | `100` | Ёмкость для admin write-операций |
+| `APP_RATE_LIMIT_API_WRITE_REFILL_TOKENS` | `100` | Токенов за интервал для write |
+| `APP_RATE_LIMIT_API_WRITE_REFILL_MINUTES` | `1` | Интервал пополнения для write (мин) |
+
+### CORS
+
+| Переменная | По умолчанию | Описание |
+|------------|-------------|----------|
+| `APP_CORS_ALLOWED_ORIGINS` | `""` | Разрешённые origin для CORS (через запятую) |
+
+### JWT
+
+| Переменная | По умолчанию | Описание |
+|------------|-------------|----------|
+| `JWT_ISSUER` | `mozhno` | Издатель токенов (iss claim) |
+
+### Аудит
+
+| Переменная | По умолчанию | Описание |
+|------------|-------------|----------|
+| `AUDIT_RETENTION_DAYS` | `365` | Срок хранения записей аудита в днях |
+
+### Прочее
+
+| Переменная | По умолчанию | Описание |
+|------------|-------------|----------|
+| `APP_UPLOAD_DIR` | `./uploads` | Директория для загружаемых файлов (лого, аватары) |
+| `APP_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Срок хранения неактивных экземпляров SDK |
+| `HIKARI_LEAK_DETECTION` | `30000` | Порог детекции утечек соединений (мс) |
+| `CACHE_TYPE` | `caffeine` | Тип кеша |
 
 ## SMTP (почта)
 

@@ -75,7 +75,7 @@ curl "http://localhost:8080/api/v1/flags" \
 
 | Property | Description |
 |----------|-------------|
-| **Format** | Raw Base64url-encoded 32-byte random string (43 characters, no prefix) |
+| **Format** | 64-character Base64url-encoded random string (no prefix) |
 | **Environment** | Each key is bound to a specific environment |
 | **Types** | `SERVER` (read+write) or `FRONTEND` (read-only) |
 | **Lifetime** | Until revoked |
@@ -229,7 +229,7 @@ curl -X POST "http://localhost:8080/api/v1/flags" \
 
 ```bash
 curl "http://localhost:8080/api/client/features" \
-  -H "Authorization: Bearer <api-key>"
+  -H "Authorization: Bearer <your-api-key>"
 ```
 
 ### Archive a Flag

@@ -74,7 +74,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       JWT_ACCESS_TOKEN_TTL_MINUTES: '15'
       JWT_REFRESH_TOKEN_TTL_DAYS: '30'
-      CACHE_TTL_MINUTES: '5'
+      JWT_ISSUER: 'mozhno'
 
       JAVA_TOOL_OPTIONS: >
         -XX:+UseZGC
@@ -152,6 +152,25 @@ JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 |------------|-------------|----------|
 | `SPRING_FLYWAY_ENABLED` | `true` | Автоматический запуск миграций при старте |
 | `SPRING_FLYWAY_LOCATIONS` | `classpath:db/migration` | Путь к SQL-файлам миграций |
+
+### SMTP (почта)
+
+| Переменная | По умолчанию | Описание |
+|------------|-------------|----------|
+| `SMTP_HOST` | `localhost` | Хост SMTP-сервера |
+| `SMTP_PORT` | `587` | Порт SMTP-сервера |
+| `SMTP_USERNAME` | — | Имя пользователя SMTP |
+| `SMTP_PASSWORD` | — | Пароль SMTP |
+| `EMAIL_FROM` | `noreply@mozhno.dev` | Адрес отправителя писем |
+
+### Прочее
+
+| Переменная | По умолчанию | Описание |
+|------------|-------------|----------|
+| `CACHE_TYPE` | `caffeine` | Тип кеша |
+| `APP_CORS_ALLOWED_ORIGINS` | `""` | Разрешённые origin для CORS |
+| `JWT_ISSUER` | `mozhno` | Издатель JWT-токенов |
+| `AUDIT_RETENTION_DAYS` | `365` | Срок хранения записей аудита |
 
 ## Проверки здоровья (Health Checks)
 

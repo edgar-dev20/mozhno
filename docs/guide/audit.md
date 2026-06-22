@@ -76,10 +76,7 @@ graph LR
 
 | Фильтр | Пример |
 |--------|--------|
-| Последний час | `from=now-1h` |
-| Последние 24 часа | `from=now-24h` |
-| Последняя неделя | `from=now-7d` |
-| Произвольный диапазон | `from=2026-06-01T00:00:00Z&to=2026-06-21T23:59:59Z` |
+| Произвольный диапазон | `dateFrom=2026-06-01T00:00:00Z&dateTo=2026-06-21T23:59:59Z` |
 
 ### По пользователю
 
@@ -120,37 +117,14 @@ graph LR
 
 ## Экспорт аудит-лога
 
-### Форматы экспорта
-
-| Формат | Назначение |
-|--------|------------|
-| **CSV** | Анализ в Excel, Google Sheets |
-| **JSON** | Интеграция с внешними системами, SIEM |
-| **PDF** | Отчёты для compliance |
+> **Enterprise-функция:** Экспорт аудит-лога в CSV/JSON/PDF доступен в Enterprise-версии **можно.** через `FeatureGateSpi.audit.export`. Подробнее — [Open Core](/advanced/open-core).
 
 ### Экспорт через веб-панель
 
 1. Настройте фильтры для нужного диапазона записей
-2. Нажмите **«Экспорт»**
+2. Если Enterprise-функция активна — нажмите **«Экспорт»**
 3. Выберите формат
 4. Скачайте файл
-
-### Экспорт через REST API
-
-```bash
-# Экспорт аудит-лога в JSON за последние 7 дней
-curl "http://localhost:8080/api/v1/audit?from=2026-06-14T00:00:00Z&to=2026-06-21T23:59:59Z" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  -H "Accept: application/json" \
-  -o audit-export.json
-```
-
-```bash
-# Экспорт в CSV
-curl "http://localhost:8080/api/v1/audit/export?from=2026-06-14T00:00:00Z&to=2026-06-21T23:59:59Z&format=csv" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  -o audit-export.csv
-```
 
 ### Поля в экспортированном CSV
 
@@ -181,8 +155,7 @@ curl "http://localhost:8080/api/v1/audit/export?from=2026-06-14T00:00:00Z&to=202
 
 | Параметр | Значение по умолчанию | Описание |
 |----------|----------------------|----------|
-| Хранение | Бессрочно | Записи не удаляются автоматически |
-| Ротация | Настраивается | При необходимости настройте задачу очистки старых записей через SQL |
+| `AUDIT_RETENTION_DAYS` | `365` | Срок хранения записей аудита в днях |
 
 Для продакшен-сред с большим объёмом изменений рекомендуется настроить периодическую очистку:
 
@@ -228,7 +201,7 @@ jobs:
     steps:
       - name: Получить аудит за неделю
         run: |
-          curl "${{ secrets.MOZHNO_URL }}/api/v1/audit?dateFrom=$(date -d '7 days ago' +%Y-%m-%d)" \
+          curl "${{ secrets.MOZHNO_URL }}/api/v1/audit?dateFrom=$(date -d '7 days ago' -u +%Y-%m-%dT00:00:00Z)&dateTo=$(date -u +%Y-%m-%dT23:59:59Z)" \
             -H "Authorization: Bearer ${{ secrets.MOZHNO_TOKEN }}" \
             -o audit.json
         env:

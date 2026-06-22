@@ -80,7 +80,7 @@ Examples:
 
 ## Percentage Rollout
 
-Percentage rollout distributes flag visibility deterministically using MurmurHash3 over `flagKey + userId` (or `sessionId`). The same user always gets the same result.
+Percentage rollout distributes flag visibility deterministically using MurmurHash32 over `flagKey + userId` (or `sessionId`). The same user always gets the same result.
 
 | Percentage | Behavior |
 |------------|----------|
@@ -98,7 +98,7 @@ When `isEnabled()` is called, the SDK evaluates in this order:
 3. **Check constraints:** all context rules must match (AND)
 4. **Check segments:** at least one segment must match (OR)
 5. **Both constraints and segments present:** either passing grants access (OR)
-6. **Percentage rollout:** MurmurHash3 hash of `flagKey + userId`, modulo 100 comparison
+6. **Percentage rollout:** MurmurHash32 hash of `flagKey + userId`, modulo 100 comparison
 7. **Nothing matched** → return `false`
 
 ## Flag Lifecycle

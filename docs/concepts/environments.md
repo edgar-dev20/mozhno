@@ -45,36 +45,37 @@ API-ключ — это способ авторизации SDK при подк�
 
 ### Создание API-ключа
 
-1. Перейдите в веб-панели в раздел **«API-ключи»** нужного окружения
+1. Перейдите в веб-панели в раздел **«API-ключи»**
 2. Нажмите **«Создать ключ»**
-3. Укажите имя (например, `backend-service`, `mobile-app`)
-4. Выберите права доступа
+3. Укажите имя (например, `backend-service`, `mobile-app`) и выберите тип (`SERVER` или `FRONTEND`)
+4. Выберите окружение, к которому привязан ключ
 5. Скопируйте сгенерированный ключ и сохраните в безопасном месте
 
 ### Права доступа
 
-| Право | Описание |
-|-------|----------|
-| **Чтение флагов** | SDK может загружать правила и оценивать флаги |
-| **Управление флагами** | Создание, изменение, удаление флагов через API |
-| **Управление сегментами** | Создание и редактирование сегментов |
-| **Администрирование** | Полный доступ: пользователи, проекты, окружения |
+| Тип ключа | Описание |
+|-----------|----------|
+| **SERVER** | Полный доступ: чтение правил флагов и запись метрик (`/api/client/features`, `/api/client/metrics`). Для серверных SDK. |
+| **FRONTEND** | Клиентский доступ: оценка флагов и отправка метрик (`/api/client/evaluate`, `/api/client/metrics`). Для браузерных/мобильных SDK. |
 
-API-ключи для SDK обычно требуют только право **«Чтение флагов»**.
+API-ключи для серверных SDK обычно используют тип **SERVER**.
 
 ### Передача ключа в SDK
 
 ```java
-var client = MozhnoClient.builder()
-    .serverUrl("http://localhost:8080")
-    .apiKey("prd-abc123def456")  // ключ от production
+var config = MozhnoConfig.builder()
+    .mozhnoUrl("http://localhost:8080")
+    .apiKey("dGhpcyBpcyBhbiBhcGkga2V5...")  // ключ от production
+    .appName("my-app")
+    .instanceId("instance-1")
     .build();
+var client = new DefaultMozhnoClient(config);
 ```
 
 ```typescript
 const client = new MozhnoClient({
-  serverUrl: 'http://localhost:8080',
-  apiKey: 'prd-abc123def456',  // ключ от production
+  url: 'http://localhost:8080',
+  apiKey: 'dGhpcyBpcyBhbiBhcGkga2V5...',  // ключ от production
 });
 ```
 

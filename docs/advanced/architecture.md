@@ -20,10 +20,10 @@ graph TD
 
 | Модуль | Назначение | Ключевые классы |
 |--------|------------|-----------------|
-| `mozhno-spi` | Интерфейсы расширений (SPI) | `AuthenticationProviderSpi`, `AuthenticationFlowSpi`, `QuotaSpi`, `BillingSpi`, `FeatureGateSpi`, `PluginSlot` |
-| `mozhno-core` | Бизнес-логика, движок флагов, хранение | `FlagService`, `SegmentService`, `StrategyEvaluator`, `AuditService`, `FlagRowMapper` |
-| `mozhno-web-api` | REST-контроллеры, Spring Security, JWT, OpenAPI | `FlagController`, `AuthController`, `JwtTokenProvider`, `SecurityConfig` |
-| `mozhno-app` | Точка входа, статические ресурсы, миграции Flyway | `MozhnoApplication`, `application.properties`, `db/migration/*.sql` |
+| `mozhno-spi` | Интерфейсы расширений (SPI) | `AuthenticationProviderSpi`, `AuthenticationFlowSpi`, `QuotaSpi`, `BillingSpi`, `FeatureGateSpi`, `AuditSpi`, `MetricsSinkSpi` |
+| `mozhno-core` | Бизнес-логика, движок флагов, хранение | `FlagService`, `SegmentService`, `StrategyService`, `AuditService`, `ConstraintEvaluator` |
+| `mozhno-web-api` | REST-контроллеры, Spring Security, JWT, OpenAPI | `FlagController`, `AuthController`, `JwtService`, `SecurityConfig` |
+| `mozhno-app` | Точка входа, статические ресурсы, миграции Flyway | `Server`, `application.yml`, `db/migration/*.sql` |
 
 ### Направление зависимостей
 
@@ -149,7 +149,7 @@ flowchart TD
     EVAL_SEGMENTS[Проверка сегментов:<br/>OR-логика]
     SEGMENTS_OK{Хотя бы один<br/>сегмент совпал?}
     HAS_PERCENTAGE{Задан процентный<br/>роллаут?}
-    EVAL_PERCENTAGE[MurmurHash3 от<br/>flagKey + userId<br/>bucket < percentage?]
+    EVAL_PERCENTAGE[MurmurHash32 от<br/>flagKey + userId<br/>bucket < percentage?]
     RETURN_TRUE[Вернуть true]
     RETURN_FALSE[Вернуть false]
 
@@ -186,7 +186,7 @@ sequenceDiagram
     participant Client as Клиент (браузер)
     participant Server as Сервер можно.
     participant DB as PostgreSQL
-    participant JWT as JwtTokenProvider
+    participant JWT as JwtService
 
     Client->>Server: POST /api/v1/auth/login<br/>{email, password}
     Server->>Server: Проверка учётных данных
@@ -205,8 +205,8 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Filter as JwtAuthFilter
-    participant Provider as JwtTokenProvider
+    participant Filter as SecurityFilterChain
+    participant Provider as JwtService
     participant Controller as REST Controller
 
     Client->>Filter: GET /api/v1/flags<br/>Authorization: Bearer <access_token>
@@ -254,7 +254,10 @@ mozhno-spi/
 ├── QuotaSpi.java                    — квоты и лимиты
 ├── BillingSpi.java                  — биллинг и платёжная информация
 ├── FeatureGateSpi.java              — управление Enterprise-функциями
-└── PluginSlot.java                  — слоты для UI-плагинов
+├── AuditSpi.java                    — аудит и хранение событий
+├── MetricsSinkSpi.java              — экспорт метрик
+├── NotificationSpi.java             — уведомления
+└── WebhookSpi.java                  — доставка вебхуков
 ```
 
 Подробнее — на странице [Open Core](/advanced/open-core).

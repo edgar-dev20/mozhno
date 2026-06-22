@@ -109,7 +109,8 @@ html { scroll-behavior: smooth; }
 .vp-doc thead { background:var(--vp-c-bg-soft); }
 .vp-doc th { font-weight:600; color:var(--vp-c-text-1); }
 .vp-doc a { color:var(--vp-c-brand-1); text-decoration:underline; text-underline-offset:2px; transition:color 150ms cubic-bezier(0,0,0.2,1); }
-.vp-doc a:hover { color:var(--vp-c-brand-2); }`n::selection { background:var(--vp-c-brand-soft); color:var(--vp-c-text-1); }
+.vp-doc a:hover { color:var(--vp-c-brand-2); }
+::selection { background:var(--vp-c-brand-soft); color:var(--vp-c-text-1); }
 .vp-doc hr { border-color:var(--vp-c-divider); }
 
 pre.mermaid { opacity:0; transition:opacity 0.15s ease; }
@@ -137,7 +138,8 @@ pre.mermaid .cluster rect {
   rx: 10px;
   ry: 10px;
 }
-.VPFeature .icon { width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:var(--vp-c-bg-soft); border-radius:10px; margin-bottom:12px; }`n.VPFeature { border-radius:var(--radius); border:1px solid var(--vp-c-gutter); background:var(--vp-c-bg-alt); box-shadow:var(--vp-shadow-1); padding: 28px; transition:box-shadow 150ms cubic-bezier(0,0,0.2,1),border-color 150ms ease; }
+.VPFeature .icon { width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:var(--vp-c-bg-soft); border-radius:10px; margin-bottom:12px; }
+.VPFeature { border-radius:var(--radius); border:1px solid var(--vp-c-gutter); background:var(--vp-c-bg-alt); box-shadow:var(--vp-shadow-1); padding: 28px; transition:box-shadow 150ms cubic-bezier(0,0,0.2,1),border-color 150ms ease; }
 .VPFeature:hover { box-shadow:var(--vp-shadow-2); border-color:var(--vp-c-copper-soft); }
 
 
@@ -148,3 +150,13 @@ pre.mermaid .cluster rect {
 /* Back-to-top button */
 .VPBackToTop { border-radius:var(--radius); border:1px solid var(--vp-c-border); box-shadow:var(--vp-shadow-1); background:var(--vp-c-bg-alt); }
 .VPBackToTop:hover { border-color:var(--vp-c-brand-1); }
+
+:root { --vp-layout-max-width: 1872px; }
+@media (min-width: 1440px) {
+  .VPDoc.has-aside .content-container { max-width: 100%; }
+  .vp-doc { max-width: none; }
+}
+@media (min-width: 960px) {
+  .vp-doc table { display: table; width: 100%; }
+  .vp-doc table th, .vp-doc table td { white-space: nowrap; }
+}
