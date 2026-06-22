@@ -110,6 +110,6 @@ graph LR
 
 ## Что дальше?
 
-- [API-ключи](/api/overview) — работа с REST API
+- [API-ключи](/concepts/api-keys) — работа с API-ключами
 - [Стратегии](/concepts/strategies) — механика роллаута
 - [Флаги](/concepts/flags) — жизненный цикл флага

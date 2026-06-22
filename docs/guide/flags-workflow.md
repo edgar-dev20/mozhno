@@ -121,4 +121,5 @@ curl -X POST "http://localhost:8080/api/v1/flags/42/unarchive" \
 - [Таргетинг](/guide/targeting) — настройка правил и сегментов
 - [Роллаут](/guide/rollout) — процентная раскатка
 - [Аудит](/guide/audit) — отслеживание изменений
+- [Метрики](/guide/metrics) — мониторинг использования флагов
 - [Лучшие практики](/guide/best-practices) — управление флаговым долгом
