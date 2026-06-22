@@ -12,8 +12,10 @@ const ruGuidesSidebar = [
   { text: 'Таргетинг', link: '/guide/targeting' },
   { text: 'Роллаут', link: '/guide/rollout' },
   { text: 'Аудит', link: '/guide/audit' },
+  { text: 'Метрики', link: '/guide/metrics' },
   { text: 'Интеграции', link: '/guide/integrations' },
   { text: 'Лучшие практики', link: '/guide/best-practices' },
+  { text: 'Решение проблем', link: '/guide/troubleshooting' },
 ]
 
 const ruConceptsSidebar = [
@@ -22,6 +24,8 @@ const ruConceptsSidebar = [
   { text: 'Сегменты', link: '/concepts/segments' },
   { text: 'Стратегии', link: '/concepts/strategies' },
   { text: 'Окружения', link: '/concepts/environments' },
+  { text: 'API-ключи', link: '/concepts/api-keys' },
+  { text: 'Пользователи и роли', link: '/concepts/users' },
 ]
 
 const ruSdkSidebar = [
@@ -40,10 +44,12 @@ const ruSelfHostingSidebar = [
   { text: 'Kubernetes', link: '/self-hosting/kubernetes' },
   { text: 'База данных', link: '/self-hosting/database' },
   { text: 'Масштабирование', link: '/self-hosting/scaling' },
+  { text: 'Мониторинг', link: '/self-hosting/monitoring' },
 ]
 
 const ruAdvancedSidebar = [
   { text: 'Архитектура', link: '/advanced/architecture' },
+  { text: 'Безопасность', link: '/advanced/security' },
   { text: 'Open Core модель', link: '/advanced/open-core' },
   { text: 'Миграция', link: '/advanced/migration' },
   { text: 'ADR', link: '/adr/0001-use-jdbc-template-over-jpa' },
@@ -61,8 +67,10 @@ const enGuidesSidebar = [
   { text: 'Targeting', link: '/en/guide/targeting' },
   { text: 'Rollout', link: '/en/guide/rollout' },
   { text: 'Audit', link: '/en/guide/audit' },
+  { text: 'Metrics', link: '/en/guide/metrics' },
   { text: 'Integrations', link: '/en/guide/integrations' },
   { text: 'Best Practices', link: '/en/guide/best-practices' },
+  { text: 'Troubleshooting', link: '/en/guide/troubleshooting' },
 ]
 
 const enConceptsSidebar = [
@@ -71,6 +79,8 @@ const enConceptsSidebar = [
   { text: 'Segments', link: '/en/concepts/segments' },
   { text: 'Strategies', link: '/en/concepts/strategies' },
   { text: 'Environments', link: '/en/concepts/environments' },
+  { text: 'API Keys', link: '/en/concepts/api-keys' },
+  { text: 'Users & Roles', link: '/en/concepts/users' },
 ]
 
 const enSdkSidebar = [
@@ -89,10 +99,12 @@ const enSelfHostingSidebar = [
   { text: 'Kubernetes', link: '/en/self-hosting/kubernetes' },
   { text: 'Database', link: '/en/self-hosting/database' },
   { text: 'Scaling', link: '/en/self-hosting/scaling' },
+  { text: 'Monitoring', link: '/en/self-hosting/monitoring' },
 ]
 
 const enAdvancedSidebar = [
   { text: 'Architecture', link: '/en/advanced/architecture' },
+  { text: 'Security', link: '/en/advanced/security' },
   { text: 'Open Core Model', link: '/en/advanced/open-core' },
   { text: 'Migration', link: '/en/advanced/migration' },
 ]
@@ -138,8 +150,10 @@ export default defineConfig({
             { text: 'Таргетинг', link: '/guide/targeting' },
             { text: 'Роллаут', link: '/guide/rollout' },
             { text: 'Аудит', link: '/guide/audit' },
+            { text: 'Метрики', link: '/guide/metrics' },
             { text: 'Интеграции', link: '/guide/integrations' },
             { text: 'Лучшие практики', link: '/guide/best-practices' },
+            { text: 'Решение проблем', link: '/guide/troubleshooting' },
           ],
           '/concepts/': [{ text: 'Концепты', items: ruConceptsSidebar }],
           '/sdk/': [{ text: 'SDK', items: ruSdkSidebar }],
@@ -189,8 +203,10 @@ export default defineConfig({
             { text: 'Targeting', link: '/en/guide/targeting' },
             { text: 'Rollout', link: '/en/guide/rollout' },
             { text: 'Audit', link: '/en/guide/audit' },
+            { text: 'Metrics', link: '/en/guide/metrics' },
             { text: 'Integrations', link: '/en/guide/integrations' },
             { text: 'Best Practices', link: '/en/guide/best-practices' },
+            { text: 'Troubleshooting', link: '/en/guide/troubleshooting' },
           ],
           '/en/concepts/': [{ text: 'Concepts', items: enConceptsSidebar }],
           '/en/sdk/': [{ text: 'SDK', items: enSdkSidebar }],
