@@ -113,7 +113,7 @@ html { scroll-behavior: smooth; }
 ::selection { background:var(--vp-c-brand-soft); color:var(--vp-c-text-1); }
 .vp-doc hr { border-color:var(--vp-c-divider); }
 
-pre.mermaid { opacity:0; transition:opacity 0.15s ease; }
+pre.mermaid { opacity:0; transition:opacity 0.15s ease; display: flex; justify-content: center; }
 pre.mermaid svg { max-width:100%; height:auto; }
 
 .edit-link-button { display:inline-flex; align-items:center; gap:4px; color:var(--vp-c-text-2); padding:4px 10px; border-radius:6px; font-size:0.8125rem; font-weight:500; transition:color 150ms ease,background 150ms ease; }
