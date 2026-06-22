@@ -7,11 +7,11 @@ SDK **можно.** — это клиентские библиотеки, кот
 ```mermaid
 graph TD
     subgraph "Ваше приложение"
-        SDK[SDK можно.]
+        SDK[SDK mozhno]
         EVAL[Локальная оценка]
         CACHE[Кеш правил]
     end
-    subgraph "Сервер можно."
+    subgraph "Сервер mozhno"
         API[REST API]
         DB[(PostgreSQL)]
     end
@@ -147,7 +147,7 @@ const enabled = client.isEnabled('new-checkout', { userId: 'user-123' });
 | ID экземпляра | `instanceId` | `instanceId` | **Обязательно** (Java) | Уникальный ID инстанса |
 | Интервал опроса (с) | `refreshInterval` | `fetchTogglesInterval` | `15` | Частота поллинга |
 | Интервал метрик (с) | `metricsInterval` | `sendMetricsInterval` | `60` | Частота отправки метрик |
-| Окружение | `environment` | `environment` | `"default"` | Имя окружения |
+| Окружение | `environment` | `environment` | `null` (Java) / `"default"` (JS) | Имя окружения |
 | Отключить метрики | `disableMetrics` | `disableMetrics` | `false` | Отключение метрик |
 
 ## Контекст оценки

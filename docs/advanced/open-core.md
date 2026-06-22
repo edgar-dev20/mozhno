@@ -125,17 +125,6 @@ public interface BillingSpi {
 
 ### FeatureGateSpi
 
-Управление Enterprise-функциями. Возвращает `true` для функций, доступных в текущей лицензии.
-
-```java
-public interface FeatureGateSpi {
-
-    boolean isEnabled(String featureKey);
-
-    Set<String> getEnabledFeatures();
-}
-```
-
 | Enterprise-функция | Feature Key | Описание |
 |--------------------|-------------|----------|
 | SSO / OIDC | `auth.sso` | Вход через Google, GitHub, Azure AD |
@@ -143,7 +132,7 @@ public interface FeatureGateSpi {
 | Расширенные стратегии | `strategy.advanced` | ML-based targeting, advanced rollout patterns |
 | Аналитика | `analytics.dashboard` | Панель аналитики использования флагов |
 | Аудит-экспорт | `audit.export` | Экспорт аудит-лога в CSV/JSON |
-| Распределённый кеш | `cache.distributed` | Redis Pub/Sub для мгновенной инвалидации |
+| Распределённый кеш | `cache.distributed` | Redis: `spring.cache.type=redis` + `spring-boot-starter-data-redis` |
 | HA-режим | `ha.mode` | Поддержка высокой доступности с несколькими подами |
 
 ## Приоритетная цепочка (Priority Chain)

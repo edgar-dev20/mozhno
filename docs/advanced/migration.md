@@ -7,8 +7,8 @@
 ```mermaid
 flowchart LR
     EXPORT[Экспорт флагов<br/>из текущей платформы]
-    TRANSFORM[Трансформация<br/>в формат можно.]
-    IMPORT[Импорт в можно.<br/>через REST API]
+    TRANSFORM[Трансформация<br/>в формат mozhno]
+    IMPORT[Импорт в mozhno<br/>через REST API]
     SDK[Замена SDK<br/>в приложениях]
     DECOMM[Вывод старой<br/>платформы]
 

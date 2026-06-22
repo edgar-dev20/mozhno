@@ -1,47 +1,44 @@
 # Environments
 
-An **environment** is an isolated namespace for flag configuration. Environments let you manage flags independently across `dev`, `staging`, and `production` — with separate settings and API keys for each.
+An **environment** is an isolated namespace for flag configuration. **можно.** does not hardcode environments — you control which environments exist and can add/remove them as needed.
 
-## Environment Model
+## Default Environments
+
+When a project is created, **можно.** automatically provisions two environments:
+
+| Environment | Key | Purpose |
+|-------------|-----|---------|
+| **Development** | `Development` | Local development and experiments |
+| **Production** | `Production` | Live environment, real users |
+
+You can add, rename, and remove environments. The Community limit is **3 environments** per project. Enterprise allows lifting this limit via the `EnvironmentLimitProvider` SPI.
+
+Typical practice: add a third **Staging** environment between Development and Production for pre-production testing.
+
+## Environment Isolation
 
 ```mermaid
 graph TB
-    subgraph "dev"
+    subgraph "Development"
         F1[Flag: new-checkout<br/>Status: enabled]
-        K1[API Key dev-xxxx]
+        K1[API Key]
     end
-    subgraph "staging"
-        F2[Flag: new-checkout<br/>Status: enabled for 50%]
-        K2[API Key stg-xxxx]
-    end
-    subgraph "production"
+    subgraph "Production"
         F3[Flag: new-checkout<br/>Status: disabled]
-        K3[API Key prd-xxxx]
+        K3[API Key]
     end
     SDK1[Java SDK dev] --> K1
-    SDK2[Node.js SDK staging] --> K2
     SDK3[Java SDK production] --> K3
 ```
 
 The same flag `new-checkout` can have different settings per environment:
 
-- **dev** — enabled for all developers
-- **staging** — enabled for 50% of users (load testing)
-- **production** — disabled (not yet ready for release)
-
-## Default Environments
-
-**можно.** ships with three predefined environments:
-
-| Environment | Key | Purpose |
-|-------------|-----|---------|
-| **Development** | `dev` | Local development and experiments |
-| **Staging** | `staging` | Pre-production testing, QA |
-| **Production** | `production` | Live environment, real users |
+- **Development** — enabled for all developers
+- **Production** — disabled (not yet ready for release)
 
 ## API Keys
 
-API keys are how SDKs authenticate with the server. Keys are **bound to an environment**: a key from `dev` cannot access `production` flags.
+API keys are how SDKs authenticate with the server. Keys are **bound to an environment**: a key from `Development` cannot access `Production` flags.
 
 ### Creating an API Key
 
@@ -58,14 +55,12 @@ API keys are how SDKs authenticate with the server. Keys are **bound to an envir
 | **SERVER** | Full access: read flag rules and write metrics (`/api/client/features`, `/api/client/metrics`). For server-side SDKs. |
 | **FRONTEND** | Client access: evaluate flags and send metrics (`/api/client/evaluate`, `/api/client/metrics`). For browser/mobile SDKs. |
 
-Server-side SDKs typically use the **SERVER** key type.
-
 ### Passing the Key to the SDK
 
 ```java
 var config = MozhnoConfig.builder()
     .mozhnoUrl("http://localhost:8080")
-    .apiKey("your-api-key-here")  // production key
+    .apiKey("your-api-key-here")
     .appName("my-app")
     .instanceId("instance-1")
     .build();
@@ -75,7 +70,7 @@ var client = new DefaultMozhnoClient(config);
 ```typescript
 const client = new MozhnoClient({
   url: 'http://localhost:8080',
-  apiKey: 'your-api-key-here',  // production key
+  apiKey: 'your-api-key-here',
 });
 ```
 
@@ -98,12 +93,11 @@ Each flag has **independent configuration** in each environment:
 
 ```mermaid
 graph LR
-    DEV[dev: enabled, 100%] --> STG[staging: enabled, 50%]
-    STG --> PRD1[production: disabled]
-    PRD1 --> PRD2[production: Gradual 1%]
-    PRD2 --> PRD3[production: Gradual 10%]
-    PRD3 --> PRD4[production: Gradual 50%]
-    PRD4 --> PRD5[production: Gradual 100%]
+    DEV[Development: enabled, 100%] --> PRD1[Production: disabled]
+    PRD1 --> PRD2[Production: 1%]
+    PRD2 --> PRD3[Production: 10%]
+    PRD3 --> PRD4[Production: 50%]
+    PRD4 --> PRD5[Production: 100%]
 ```
 
 ## Related Pages

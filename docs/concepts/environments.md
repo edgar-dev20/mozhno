@@ -2,42 +2,39 @@
 
 Окружения — это логически изолированные контексты для управления флагами. Каждое окружение имеет собственные настройки флагов, собственные API-ключи и независимый жизненный цикл изменений.
 
-## Стандартные окружения
+## Окружения по умолчанию
 
-**можно.** поставляется с тремя предопределёнными окружениями:
+При создании проекта **можно.** автоматически создаёт два окружения:
 
 | Окружение | Ключ | Назначение |
 |-----------|------|------------|
-| **Development** | `dev` | Локальная разработка и эксперименты |
-| **Staging** | `staging` | Предпродакшен-тестирование, интеграция |
-| **Production** | `production` | Боевое окружение, реальные пользователи |
+| **Development** | `Development` | Локальная разработка и эксперименты |
+| **Production** | `Production` | Боевое окружение, реальные пользователи |
+
+Вы можете добавлять, переименовывать и удалять окружения. В Community-версии лимит — **3 окружения** на проект. Enterprise-версия позволяет снять лимит через `EnvironmentLimitProvider` SPI.
+
+Типичная практика: добавить третье окружение **Staging** между Development и Production для предпродакшен-тестирования.
 
 ## Изоляция окружений
 
 ```mermaid
 graph TB
-    subgraph "dev"
+    subgraph "Development"
         F1[Флаг: new-checkout<br/>Статус: включён]
-        K1[API-ключ dev-xxxx]
+        K1[API-ключ]
     end
-    subgraph "staging"
-        F2[Флаг: new-checkout<br/>Статус: включён для 50%]
-        K2[API-ключ stg-xxxx]
-    end
-    subgraph "production"
+    subgraph "Production"
         F3[Флаг: new-checkout<br/>Статус: выключен]
-        K3[API-ключ prd-xxxx]
+        K3[API-ключ]
     end
     SDK1[Java SDK dev] --> K1
-    SDK2[Node.js SDK staging] --> K2
     SDK3[Java SDK production] --> K3
 ```
 
 Один и тот же флаг `new-checkout` может иметь разные настройки в разных окружениях:
 
-- **dev** — включён для всех разработчиков
-- **staging** — включён для 50% пользователей (тестирование под нагрузкой)
-- **production** — выключен (ещё не готов к релизу)
+- **Development** — включён для всех разработчиков
+- **Production** — выключен (ещё не готов к релизу)
 
 ## API-ключи
 
@@ -100,13 +97,14 @@ API-ключи можно ротировать (создать новый, уд�
 
 ```mermaid
 graph LR
-    DEV[dev: включён, 100%] --> STG[staging: включён, 50%]
-    STG --> PRD1[production: выключен]
-    PRD1 --> PRD2[production: Gradual 1%]
-    PRD2 --> PRD3[production: Gradual 10%]
-    PRD3 --> PRD4[production: Gradual 50%]
-    PRD4 --> PRD5[production: Gradual 100%]
+    DEV[Development: включён, 100%] --> PRD1[Production: выключен]
+    PRD1 --> PRD2[Production: 1%]
+    PRD2 --> PRD3[Production: 10%]
+    PRD3 --> PRD4[Production: 50%]
+    PRD4 --> PRD5[Production: 100%]
 ```
+
+*(Staging добавляется вручную между Development и Production при необходимости.)*
 
 ## Что дальше?
 

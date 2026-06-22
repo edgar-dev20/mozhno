@@ -10,8 +10,8 @@ When an SDK evaluates a flag, it processes in this order:
 2. **Context constraints** — all must match (AND logic)
 3. **Segments** — at least one must match (OR logic)
 4. **If both constraints and segments are present** — either passing grants access (OR)
-5. **Percentage rollout** — deterministic distribution via MurmurHash3
-6. **Default** — if nothing is configured, return `true`
+5. **Percentage rollout** — deterministic distribution via MurmurHash32
+6. **Default** — if nothing is configured, return `false`
 
 ```mermaid
 flowchart TD
@@ -128,7 +128,7 @@ A **segment** is a reusable set of constraints. Reference segments in a strategy
 When percentage rollout is configured:
 
 ```
-hash = MurmurHash3(flagKey + userId) % 100
+hash = MurmurHash32(flagKey + userId) % 100
 if hash < percentage → enabled
 ```
 

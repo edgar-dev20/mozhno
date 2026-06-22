@@ -4,10 +4,10 @@ Percentage rollout lets you gradually expose a feature to a fraction of your use
 
 ## How Percentage Rollout Works
 
-можно uses a deterministic MurmurHash3 algorithm based on the flag key and user identifier to assign each evaluation to an in-group or out-group:
+можно uses a deterministic MurmurHash32 algorithm based on the flag key and user identifier to assign each evaluation to an in-group or out-group:
 
 ```
-hash = MurmurHash3(flagKey + (userId || sessionId)) % 100
+hash = MurmurHash32(flagKey + (userId || sessionId)) % 100
 if hash < percentage → enabled
 ```
 

@@ -1,6 +1,6 @@
 # Strategies
 
-A **strategy** defines *how* a flag behaves on a specific environment. Each flag can have different strategy configurations per environment (dev, staging, production).
+A **strategy** defines *how* a flag behaves on a specific environment. Each flag can have different strategy configurations per environment.
 
 ## Strategy Configuration
 

@@ -113,7 +113,7 @@ POST /api/v1/flags
 | `name` | `string` | Yes | Flag name |
 | `description` | `string` | No | Description |
 | `flagType` | `string` | Yes | `RELEASE` or `KILLSWITCH` |
-| `tags` | `string[]` | No | Tag list |
+| `tags` | `object[]` | No | `{tagId, value}` objects |
 | `projectId` | `long` | Yes | Project ID |
 
 ```bash
@@ -126,7 +126,7 @@ curl -X POST "http://localhost:8080/api/v1/flags" \
     "description": "Checkout flow redesign",
     "flagType": "RELEASE",
     "projectId": 1,
-    "tags": ["checkout", "ui-redesign"]
+    "tags": [{"tagId": 1, "value": "checkout"}, {"tagId": 2, "value": "ui-redesign"}]
   }'
 ```
 
@@ -403,11 +403,32 @@ curl "http://localhost:8080/api/v1/audit?dateFrom=2026-06-14T00:00:00Z&dateTo=20
 GET /api/client/features
 ```
 
-Used by SDKs on initialization. Returns all flag rules for the environment bound to the API key. Supports ETag / If-None-Match for efficient caching.
+Used by SDKs on initialization. Returns an array of flags for the environment bound to a SERVER API key.
 
 ```bash
 curl "http://localhost:8080/api/client/features" \
   -H "Authorization: Bearer <api-key>"
+```
+
+Response — a JSON array:
+
+```json
+[
+  {
+    "name": "New Checkout",
+    "key": "new-checkout",
+    "enabled": true,
+    "activation": {
+      "rollOut": 50,
+      "constraints": [
+        { "field": "country", "operator": "in", "values": ["US", "CA"], "contextType": "string" }
+      ],
+      "segments": [
+        { "name": "Premium Users", "constraints": [...] }
+      ]
+    }
+  }
+]
 ```
 
 ### Evaluate Flags (Client-side)
@@ -422,7 +443,7 @@ Evaluates flags server-side for the given context (`mode: 'client'`).
 curl -X POST "http://localhost:8080/api/client/evaluate" \
   -H "Authorization: Bearer <api-key>" \
   -H "Content-Type: application/json" \
-  -d '{"context": {"userId": "user-123", "country": "US"}}'
+  -d '{"context": {"userId": "user-123", "country": "US"}, "toggles": ["new-checkout"]}'
 ```
 
 ### Submit Metrics
@@ -437,7 +458,7 @@ Sends accumulated SDK usage metrics.
 curl -X POST "http://localhost:8080/api/client/metrics" \
   -H "Authorization: Bearer <api-key>" \
   -H "Content-Type: application/json" \
-  -d '{"metrics": [{"flagKey": "new-checkout", "trueCount": 150, "falseCount": 50}]}'
+  -d '{"evaluations": {"new-checkout": {"t": 150, "f": 50}}}'
 ```
 
 ## Integrations

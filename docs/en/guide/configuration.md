@@ -55,7 +55,8 @@ These must be set for the server to start:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `CACHE_TTL_MINUTES` | `5` | In-memory cache TTL for flag rules (minutes) |
+| `CACHE_TYPE` | `caffeine` | Spring cache type. `caffeine` — in-memory (default). For Redis add `spring-boot-starter-data-redis` and set to `redis` |
+| `CACHE_TTL_MINUTES` | `5` | Cache TTL in minutes |
 | `CLIENT_MAX_METRICS_PER_KEY` | `1000` | Maximum stored metrics entries per client API key |
 
 ## Docker Compose Example

@@ -6,7 +6,7 @@ Technical architecture of **можно.** — module structure, tech stack, eval
 
 ```mermaid
 graph TD
-    subgraph "можно. Application"
+    subgraph "mozhno Application"
         APP[mozhno-app<br/>Entry point, static resources, Flyway]
         API[mozhno-web-api<br/>REST controllers, Spring Security 6, JWT, OpenAPI]
         CORE[mozhno-core<br/>Business logic, flag engine, storage, caching]
@@ -31,16 +31,16 @@ graph TD
 
 | Module | Role | Key Classes |
 |--------|------|-------------|
-| **mozhno-spi** | Interface definitions for the plugin system. No dependencies on other modules. | `AuthenticationProviderSpi`, `FeatureGateSpi`, `QuotaSpi`, `BillingSpi`, `PluginSlot`, `PremiumPlugin` |
-| **mozhno-core** | Business logic: flag evaluation engine, user/segment storage, audit trail, caching layer. Depends on `mozhno-spi`. | `FlagService`, `SegmentService`, `AuditService`, `FlagEvaluator`, `CaffeineCacheConfig` |
-| **mozhno-web-api** | REST API layer: controllers, Spring Security 6 filter chain, JWT processing, OpenAPI/Swagger docs. Depends on `mozhno-core`. | `FlagController`, `AuthController`, `JwtTokenProvider`, `SecurityConfig`, `ApiKeyFilter` |
-| **mozhno-app** | Spring Boot entry point, embedded static React SPA, Flyway migration runner. Depends on all modules above. | `MozhnoApplication`, `FlywayConfig`, `StaticResourceConfig` |
+| **mozhno-spi** | Interface definitions for the plugin system. No dependencies on other modules. | `AuthenticationProviderSpi`, `FeatureGateSpi`, `QuotaSpi`, `BillingSpi`, `AuditSpi`, `MetricsSinkSpi` |
+| **mozhno-core** | Business logic: flag evaluation engine, user/segment storage, audit trail. Depends on `mozhno-spi`. | `FlagService`, `SegmentService`, `AuditService`, `FeatureFlagEvaluator` |
+| **mozhno-web-api** | REST API layer: controllers, Spring Security 6 filter chain, JWT processing, OpenAPI/Swagger docs. Depends on `mozhno-core`. | `FlagController`, `AuthController`, `JwtService`, `SecurityConfig` |
+| **mozhno-app** | Spring Boot entry point, embedded static React SPA, Flyway migration runner. Depends on all modules above. | `Server`, `application.yml`, `db/migration/*.sql` |
 
 ## Tech Stack
 
 | Layer | Technology | Version | Rationale |
 |-------|-----------|---------|-----------|
-| **Runtime** | JDK | 25 | Virtual threads, ZGC, latest LTS features |
+| **Runtime** | JDK | 25 | ZGC, latest features |
 | **Framework** | Spring Boot | 4.0 | DI, auto-configuration, Actuator, production-ready defaults |
 | **Database Access** | JdbcTemplate + RowMapper | — | Direct SQL, no ORM overhead, predictable query plans |
 | **Migrations** | Flyway | 10.x | Schema versioning, repeatable migrations, CI/CD integration |

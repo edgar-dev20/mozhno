@@ -13,7 +13,7 @@ spring:
   application:
     name: feature-flags
   cache:
-    type: ${CACHE_TYPE:caffeine}
+    type: caffeine
     caffeine:
       spec: maximumSize=5000,expireAfterWrite=${CACHE_TTL_MINUTES:5}m
   datasource:

@@ -113,7 +113,7 @@ POST /api/v1/flags
 | `name` | `string` | Да | Название флага |
 | `description` | `string` | Нет | Описание |
 | `flagType` | `string` | Да | `RELEASE` или `KILLSWITCH` |
-| `tags` | `string[]` | Нет | Список тегов |
+| `tags` | `object[]` | Нет | Объекты `{tagId, value}` |
 | `projectId` | `long` | Да | ID проекта |
 
 ```bash
@@ -126,7 +126,7 @@ curl -X POST "http://localhost:8080/api/v1/flags" \
     "description": "Переработка процесса оформления заказа",
     "flagType": "RELEASE",
     "projectId": 1,
-    "tags": ["checkout", "ui-redesign"]
+    "tags": [{"tagId": 1, "value": "checkout"}, {"tagId": 2, "value": "ui-redesign"}]
   }'
 ```
 
@@ -140,7 +140,7 @@ GET /api/v1/flags
 |----------|-----|-------------|----------|
 | `includeArchived` | `boolean` | `false` | Включить архивные флаги |
 | `page` | `int` | `0` | Страница |
-| `size` | `int` | `20` | Размер страницы |
+| `size` | `int` | `50` | Размер страницы (макс. 200) |
 
 ```bash
 curl "http://localhost:8080/api/v1/flags?includeArchived=true" \
@@ -311,8 +311,7 @@ curl -X POST "http://localhost:8080/api/v1/environments" \
   -H "Authorization: Bearer $JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Staging",
-    "projectId": 1
+    "name": "Staging"
   }'
 ```
 
@@ -376,8 +375,7 @@ curl -X POST "http://localhost:8080/api/v1/api-keys" \
   -d '{
     "name": "Production SDK Key",
     "keyType": "SERVER",
-    "environmentId": 3,
-    "projectId": 1
+    "environmentId": 3
   }'
 ```
 
@@ -437,7 +435,7 @@ GET /api/v1/audit
 | Параметр | Тип | По умолчанию | Описание |
 |----------|-----|-------------|----------|
 | `page` | `int` | `0` | Страница |
-| `size` | `int` | `20` | Размер страницы |
+| `size` | `int` | `50` | Размер страницы (макс. 200) |
 | `dateFrom` | `datetime` | — | Начало периода (ISO 8601) |
 | `dateTo` | `datetime` | — | Конец периода (ISO 8601) |
 
@@ -455,36 +453,32 @@ curl "http://localhost:8080/api/v1/audit?dateFrom=2026-06-14T00:00:00Z&dateTo=20
 GET /api/client/features
 ```
 
-Используется SDK при инициализации. Возвращает все правила флагов для окружения, привязанного к API-ключу. Поддерживает ETag / If-None-Match для эффективного кеширования.
+Используется SDK при инициализации. Возвращает массив флагов для окружения, привязанного к API-ключу SERVER.
 
 ```bash
 curl "http://localhost:8080/api/client/features" \
   -H "Authorization: Bearer <api-key>"
 ```
 
-Ответ:
+Ответ — массив объектов:
 
 ```json
-{
-  "environment": "production",
-  "flags": [
-    {
-      "key": "new-checkout",
-      "name": "Новый чекаут",
-      "flagType": "RELEASE",
-      "enabled": true,
-      "activation": {
-        "rollOut": 50,
-        "constraints": [
-          { "field": "country", "operator": "in", "values": ["RU", "BY"] }
-        ],
-        "segments": [
-          { "name": "Premium Users", "constraints": [...] }
-        ]
-      }
+[
+  {
+    "name": "Новый чекаут",
+    "key": "new-checkout",
+    "enabled": true,
+    "activation": {
+      "rollOut": 50,
+      "constraints": [
+        { "field": "country", "operator": "in", "values": ["RU", "BY"], "contextType": "string" }
+      ],
+      "segments": [
+        { "name": "Premium Users", "constraints": [...] }
+      ]
     }
-  ]
-}
+  }
+]
 ```
 
 ### Оценка флагов (client-side)
@@ -499,7 +493,7 @@ POST /api/client/evaluate
 curl -X POST "http://localhost:8080/api/client/evaluate" \
   -H "Authorization: Bearer <api-key>" \
   -H "Content-Type: application/json" \
-  -d '{"context": {"userId": "user-123", "country": "RU"}}'
+  -d '{"context": {"userId": "user-123", "country": "RU"}, "toggles": ["new-checkout"]}'
 ```
 
 ### Отправка метрик
@@ -514,7 +508,7 @@ POST /api/client/metrics
 curl -X POST "http://localhost:8080/api/client/metrics" \
   -H "Authorization: Bearer <api-key>" \
   -H "Content-Type: application/json" \
-  -d '{"metrics": [{"flagKey": "new-checkout", "trueCount": 150, "falseCount": 50}]}'
+  -d '{"evaluations": {"new-checkout": {"t": 150, "f": 50}}}'
 ```
 
 ## Интеграции
