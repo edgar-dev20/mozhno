@@ -44,7 +44,7 @@ Clicking the sparkline opens the **Flag Metrics** dialog with a full chart and f
 
 | Filter | Description |
 |--------|-------------|
-| **Environment** | dev / staging / production |
+| **Environment** | Development / Production |
 | **Instance** | A specific SDK instance |
 | **Application** | Application name |
 | **Period** | Last hour / 24 hours / 7 days / 30 days |

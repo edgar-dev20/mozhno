@@ -145,7 +145,7 @@ const enabled = client.isEnabled("checkout_v2", { userId: "42" });
 | Instance ID | `instanceId` | `instanceId` | **Required** (Java) | Unique instance identifier |
 | Poll interval (s) | `refreshInterval` | `fetchTogglesInterval` | `15` | Polling interval in seconds |
 | Metrics interval (s) | `metricsInterval` | `sendMetricsInterval` | `60` | Metrics reporting interval |
-| Environment | `environment` | `environment` | `"default"` | Environment name |
+| Environment | `environment` | `environment` | `null` (Java) / `"default"` (JS) | Environment name |
 | Disable metrics | `disableMetrics` | `disableMetrics` | `false` | Disable metrics reporting |
 
 ## Evaluation Context

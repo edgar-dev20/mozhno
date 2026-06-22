@@ -5,9 +5,8 @@
 ```mermaid
 graph TD
     FLAG[Флаг<br/>new-checkout]
-    ENV1[dev<br/>стратегия: 100%]
-    ENV2[staging<br/>стратегия: 50%]
-    ENV3[production<br/>стратегия: выключен]
+    ENV1[Development<br/>стратегия: 100%]
+    ENV2[Production<br/>стратегия: выключен]
     STRATEGY[Стратегия]
     RULES[Контекстные правила<br/>country = RU AND plan = premium]
     SEGMENT[Сегмент<br/>«Бета-тестеры»]
@@ -17,8 +16,7 @@ graph TD
 
     FLAG --> ENV1
     FLAG --> ENV2
-    FLAG --> ENV3
-    ENV3 --> STRATEGY
+    ENV2 --> STRATEGY
     STRATEGY --> RULES
     STRATEGY --> SEGMENT
     STRATEGY --> PCT
@@ -27,7 +25,7 @@ graph TD
 ```
 
 1. **Флаг** — точка переключения в коде. Один и тот же флаг (`new-checkout`) живёт во всех окружениях.
-2. **Окружение** (dev, staging, production) — у каждого своя независимая стратегия для флага.
+2. **Окружение** (Development, Production) — у каждого своя независимая стратегия для флага.
 3. **Стратегия** — комбинация из контекстных правил, сегментов и процентного роллаута. Определяет, кто увидит фичу.
 4. **Контекст** — атрибуты пользователя, которые SDK передаёт при оценке флага.
 5. **API-ключ** — ключ, по которому SDK получает правила конкретного окружения.
@@ -81,7 +79,7 @@ boolean enabled = client.isEnabled("new-checkout", ctx);
 
 ### Окружение
 
-Логически изолированный контекст для флагов: **dev**, **staging**, **production**. Каждое окружение имеет собственные настройки стратегий и собственные API-ключи. Флаг, включённый в dev, может быть выключен в production.
+Логически изолированный контекст для флагов. При создании проекта автоматически создаются **Development** и **Production**. Можно добавлять свои (например, Staging). Лимит Community — 3 окружения на проект.
 
 Подробнее: [Окружения](/concepts/environments)
 
@@ -101,5 +99,5 @@ boolean enabled = client.isEnabled("new-checkout", ctx);
 
 - [Флаги](/concepts/flags) — типы флагов и жизненный цикл
 - [Стратегии](/concepts/strategies) — механика роллаута
-- [Окружения](/concepts/environments) — изоляция dev / staging / production
+- [Окружения](/concepts/environments) — изоляция окружений и лимиты
 - [API-ключи](/concepts/api-keys) — управление доступом SDK

@@ -14,6 +14,8 @@ Role hierarchy: `ADMIN` includes `DEVELOPER` permissions, `DEVELOPER` includes `
 
 ## Inviting a User
 
+The first administrator is created on initial setup via the onboarding wizard. Subsequent users are invited through the web dashboard or REST API.
+
 ### Via the Web Dashboard
 
 1. Go to the **Users** section (ADMIN only)

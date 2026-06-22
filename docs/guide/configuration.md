@@ -9,7 +9,7 @@
 | `SERVER_PORT` | `8080` | Порт, на котором слушает HTTP-сервер |
 | `APP_BASE_URL` | `http://localhost:8080` | Публичный URL сервера. Используется для генерации ссылок и CORS |
 | `JWT_SECRET` | — (dev-ключ по умолчанию) | Секретный ключ для подписи JWT-токенов. **Обязателен в продакшене**. Минимум 256 бит |
-| `CACHE_TTL_MINUTES` | `5` | Время жизни ин-мемори кеша правил в минутах |
+| `CACHE_TTL_MINUTES` | `5` | TTL кеша Caffeine в минутах. При multi-node уменьшите до `1` или `0`. Подробнее — [Масштабирование](/self-hosting/scaling#нюанс-multi-node) |
 | `CLIENT_MAX_METRICS_PER_KEY` | `1000` | Максимальное количество хранимых метрик на API-ключ |
 
 ## База данных
@@ -144,7 +144,7 @@ CLIENT_MAX_METRICS_PER_KEY=1000
 | `APP_UPLOAD_DIR` | `./uploads` | Директория для загружаемых файлов (лого, аватары) |
 | `APP_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Срок хранения неактивных экземпляров SDK |
 | `HIKARI_LEAK_DETECTION` | `30000` | Порог детекции утечек соединений (мс) |
-| `CACHE_TYPE` | `caffeine` | Тип кеша |
+| `CACHE_TYPE` | `caffeine` | Spring-тип кеша. `caffeine` — in-memory (Community). Для Redis добавьте `spring-boot-starter-data-redis` и смените на `redis` |
 
 ## SMTP (почта)
 

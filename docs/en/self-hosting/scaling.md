@@ -70,39 +70,59 @@ server {
 }
 ```
 
-## Caching Layers
+## Caching
 
-можно. uses **Caffeine** — a high-performance, in-process cache for the JVM. There is no external cache (Redis, Memcached) required for standard operation.
+**можно.** uses **Caffeine** — a local in-memory cache within a single JVM. No Redis, no distributed cache required.
 
 ### What Is Cached
 
-| Cache | TTL | Purpose |
-|-------|-----|---------|
-| Flag rules | 30 s (stale-while-revalidate) | SDK flag streaming endpoint |
-| API key validation | 5 min | Inbound request authentication |
-| User sessions | Duration of access token | Avoid DB lookup per request |
+| Cache | Data Stored | Invalidation |
+|-------|-----------|-------------|
+| `clientFlags` | `GET /api/client/features` response for SDKs | `@CacheEvict` on any flag, segment, strategy, or context change |
+| `flags` | Flag queries (admin panel) | `@CacheEvict` on flag create/update/delete |
+| `segments` | Segment queries | `@CacheEvict` on segment create/update/delete |
+| `projects` | Project list | `@CacheEvict` on project create/update/delete |
+| `tags` | Tag list | `@CacheEvict` on tag create/update/delete |
+| `contextDefinitions` | Context definitions | `@CacheEvict` on context create/update/delete |
 
-### Caffeine Configuration
+All caches share a **single TTL** — `CACHE_TTL_MINUTES` (default 5 minutes). Maximum size: 5000 entries per cache.
 
-```java
-Cache<Long, FeatureFlag> flagCache = Caffeine.newBuilder()
-    .expireAfterWrite(30, TimeUnit.SECONDS)
-    .maximumSize(10_000)
-    .recordStats()
-    .build();
+### How Invalidation Works
+
+When a flag is changed via REST API:
+
+```
+POST /api/v1/flags/42 → @CacheEvict(allEntries = true) → clientFlags cache cleared
 ```
 
-Caffeine uses the Window TinyLFU eviction policy — nearly optimal hit rates with low memory overhead. Cache statistics are exposed via `/actuator/metrics` (Micrometer).
+**But only on the instance that handled the request.** Other instances learn about the change via TTL.
 
-### Cache Consistency
+### Multi-Node Nuance
 
-Each instance has its own local cache. When a flag is updated via the REST API:
+```mermaid
+graph LR
+    Admin -->|POST /api/v1/flags/42| LB
+    LB -->|request lands on| S1[Instance 1]
+    S1 -->|@CacheEvict<br/>locally| C1[Caffeine ✓ cleared]
+    S1 --> PG[(PostgreSQL)]
+    
+    S2[Instance 2] -->|cache NOT cleared<br/>waits for TTL| C2[Caffeine ✗ stale]
+    
+    SDK -->|GET /api/client/features| S2
+    S2 -->|returns stale rules| SDK
+```
 
-1. The write goes to PostgreSQL on the handling instance
-2. The updated `updated_at` timestamp serves as a version marker
-3. Other instances pick up the change on their next TTL expiration (max 30 s staleness)
+Instance 1: cache cleared instantly. Instance 2: cache stale until TTL expiry (up to 5 minutes).
 
-For instant propagation across all instances (Enterprise), webhook events or a message queue can be configured.
+This is not a bug — it's expected behavior for a local cache. Feature flags do not require real-time consistency. A few minutes of staleness is acceptable for gradual rollouts.
+
+### Recommendations
+
+| Scenario | `CACHE_TTL_MINUTES` | Why |
+|----------|---------------------|-----|
+| **1 instance** | `5` (default) | Cache cleared instantly on changes |
+| **Multi-node** | `1` or `0` | Minimize inconsistency window between instances. `0` = cache disabled |
+| **Enterprise** | `5` + Redis | Add `spring-boot-starter-data-redis`, switch `CACHE_TYPE` to `redis`, configure `SPRING_DATA_REDIS_*`. Invalidation via Redis Pub/Sub — instant across all instances |
 
 ## Connection Pool Sizing
 

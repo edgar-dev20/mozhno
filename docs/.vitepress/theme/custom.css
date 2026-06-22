@@ -106,8 +106,12 @@ html { scroll-behavior: smooth; }
 .vp-doc .custom-block { border-radius:var(--radius); border:1px solid var(--vp-c-border); }
 .vp-doc .custom-block.tip { border-left-color: var(--vp-c-copper-1); }
 .vp-doc table { border-radius:var(--radius); overflow:hidden; border:1px solid var(--vp-c-border); box-shadow:var(--vp-shadow-1); }
-.vp-doc thead { background:var(--vp-c-bg-soft); }
+.vp-doc table th { background:oklch(0.48 0.17 175 / 0.2) !important; }
+:root.dark .vp-doc table th { background:oklch(0.58 0.18 175 / 0.2) !important; }
 .vp-doc th { font-weight:600; color:var(--vp-c-text-1); }
+.vp-doc tbody tr:nth-child(even) { background:oklch(0.93 0.002 200); }
+:root.dark .vp-doc tbody tr:nth-child(even) { background:var(--vp-c-bg-soft); }
+.vp-doc tbody td { border-top:1px solid var(--vp-c-border); }
 .vp-doc a { color:var(--vp-c-brand-1); text-decoration:underline; text-underline-offset:2px; transition:color 150ms cubic-bezier(0,0,0.2,1); }
 .vp-doc a:hover { color:var(--vp-c-brand-2); }
 ::selection { background:var(--vp-c-brand-soft); color:var(--vp-c-text-1); }
@@ -159,5 +163,4 @@ pre.mermaid .cluster rect {
 
 @media (min-width: 960px) {
   .vp-doc table { display: table; width: 100%; }
-  .vp-doc table th, .vp-doc table td { white-space: nowrap; }
 }

@@ -49,7 +49,7 @@ Common edits include:
 
 After creating a flag, configure the strategy per environment:
 
-1. Select the environment (dev, staging, production)
+1. Select the environment (Development, Production)
 2. Set **enabled** state
 3. Add **context constraints** for targeting
 4. Attach **segments** (reusable user groups)

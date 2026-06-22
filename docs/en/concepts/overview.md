@@ -5,9 +5,8 @@ All key concepts in **можно.** form a unified system. Here's how they work 
 ```mermaid
 graph TD
     FLAG[Flag<br/>new-checkout]
-    ENV1[dev<br/>strategy: 100%]
-    ENV2[staging<br/>strategy: 50%]
-    ENV3[production<br/>strategy: off]
+    ENV1[Development<br/>strategy: 100%]
+    ENV2[Production<br/>strategy: off]
     STRATEGY[Strategy]
     RULES[Constraint rules<br/>country = US AND plan = premium]
     SEGMENT[Segment<br/>"Beta Testers"]
@@ -17,8 +16,7 @@ graph TD
 
     FLAG --> ENV1
     FLAG --> ENV2
-    FLAG --> ENV3
-    ENV3 --> STRATEGY
+    ENV2 --> STRATEGY
     STRATEGY --> RULES
     STRATEGY --> SEGMENT
     STRATEGY --> PCT
@@ -27,7 +25,7 @@ graph TD
 ```
 
 1. **Flag** — a toggle point in your code. The same flag (`new-checkout`) exists across all environments.
-2. **Environment** (dev, staging, production) — each has its own independent strategy for the flag.
+2. **Environment** (Development, Production) — each has its own independent strategy for the flag.
 3. **Strategy** — a combination of constraint rules, segments, and percentage rollout. Determines who sees the feature.
 4. **Context** — user attributes that the SDK passes when evaluating a flag.
 5. **API key** — the key the SDK uses to fetch rules for a specific environment.
@@ -101,5 +99,5 @@ See [Audit](/en/guide/audit).
 
 - [Flags](/en/concepts/flags) — flag types and lifecycle
 - [Strategies](/en/concepts/strategies) — rollout mechanics
-- [Environments](/en/concepts/environments) — dev / staging / production isolation
+- [Environments](/en/concepts/environments) — environment isolation and limits
 - [API Keys](/en/concepts/api-keys) — SDK access management

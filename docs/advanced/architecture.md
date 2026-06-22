@@ -21,7 +21,7 @@ graph TD
 | Модуль | Назначение | Ключевые классы |
 |--------|------------|-----------------|
 | `mozhno-spi` | Интерфейсы расширений (SPI) | `AuthenticationProviderSpi`, `AuthenticationFlowSpi`, `QuotaSpi`, `BillingSpi`, `FeatureGateSpi`, `AuditSpi`, `MetricsSinkSpi` |
-| `mozhno-core` | Бизнес-логика, движок флагов, хранение | `FlagService`, `SegmentService`, `StrategyService`, `AuditService`, `ConstraintEvaluator` |
+| `mozhno-core` | Бизнес-логика, движок флагов, хранение | `FlagService`, `SegmentService`, `StrategyService`, `AuditService`, `FeatureFlagEvaluator` |
 | `mozhno-web-api` | REST-контроллеры, Spring Security, JWT, OpenAPI | `FlagController`, `AuthController`, `JwtService`, `SecurityConfig` |
 | `mozhno-app` | Точка входа, статические ресурсы, миграции Flyway | `Server`, `application.yml`, `db/migration/*.sql` |
 
@@ -184,7 +184,7 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant Client as Клиент (браузер)
-    participant Server as Сервер можно.
+    participant Server as Сервер mozhno
     participant DB as PostgreSQL
     participant JWT as JwtService
 

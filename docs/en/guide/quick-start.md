@@ -41,22 +41,22 @@ docker compose up -d
 
 Navigate to [`http://localhost:8080`](http://localhost:8080).
 
-On first run, you'll be prompted to create a project and admin user.
+## Step 4: Create the administrator and project
 
-## Step 4: Create your first flag
+On first run, the onboarding wizard will open:
 
-1. In the dashboard, click **"Create Flag"**
-2. Enter a flag key, e.g. `new-checkout`
-3. Choose type: **RELEASE** (standard feature flag)
-4. Choose strategy: enable the flag for the desired environment
-5. Click **"Save"**
+1. **Create the administrator** — enter an email and password. This is the first account with the ADMIN role.
+2. **Create a project** — enter name, description, and optionally a logo.
+3. **Create the first flag** — enter a key (e.g., `new-checkout`) and a name.
+
+Once the wizard is complete, you'll be taken to the dashboard.
 
 ## Step 5: Get your API key
 
 1. In the dashboard, go to **"API Keys"**
 2. Click **"Create Key"**
 3. Enter a name (e.g., `my-app`)
-4. Select type **SERVER** and environment **production**
+4. Select type **SERVER** and the **Production** environment
 5. Copy the key value — it is shown only once
 
 ## Step 6: Add the flag to your code
