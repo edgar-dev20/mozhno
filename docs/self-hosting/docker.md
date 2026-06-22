@@ -301,6 +301,94 @@ Flyway-миграции запускаются автоматически при
 
 Рекомендуется фиксировать конкретную версию или digest для продакшен-окружения, чтобы избежать неожиданных изменений.
 
+## Обновление версии
+
+Для обновления на новую версию:
+
+```bash
+# 1. Обновить тег образа в docker-compose.yml
+#    image: ghcr.io/mozhno-dev/mozhno:v1.1.0
+
+# 2. Загрузить новый образ и перезапустить
+docker compose pull mozhno
+docker compose up -d mozhno
+
+# 3. Flyway автоматически применит новые миграции при старте
+```
+
+Процесс безопасен: старый контейнер работает до готовности нового. Health check гарантирует, что трафик пойдёт только после успешного старта.
+
+### Откат версии
+
+```bash
+# Вернуть тег старой версии в docker-compose.yml
+docker compose pull mozhno
+docker compose up -d mozhno
+```
+
+Flyway-миграции не откатываются автоматически. Если новая версия добавила миграции, откат кода безопасен (миграции совместимы вперёд).
+
+## Обратный прокси и TLS
+
+Для продакшена всегда размещайте **можно.** за обратным прокси с HTTPS.
+
+### Nginx
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name flags.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/flags.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/flags.example.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+В `docker-compose.yml` закройте порт от внешнего доступа:
+
+```yaml
+ports:
+  - '127.0.0.1:8080:8080'
+```
+
+И установите `APP_BASE_URL` на ваш домен:
+
+```yaml
+APP_BASE_URL: https://flags.example.com
+```
+
+### Caddy (автоматический TLS)
+
+```
+flags.example.com {
+    reverse_proxy localhost:8080
+}
+```
+
+## Чеклист для продакшена
+
+| # | Действие | Команда / переменная |
+|---|----------|---------------------|
+| 1 | Сгенерировать JWT-секрет | `openssl rand -base64 32` → `JWT_SECRET` |
+| 2 | Сложный пароль БД | `SPRING_DATASOURCE_PASSWORD` |
+| 3 | Указать реальный домен | `APP_BASE_URL=https://flags.example.com` |
+| 4 | Настроить CORS | `APP_CORS_ALLOWED_ORIGINS=https://app.example.com` |
+| 5 | Закрыть порт от внешнего доступа | `ports: ['127.0.0.1:8080:8080']` |
+| 6 | Поставить TLS через Nginx/Caddy/Traefik | См. секцию выше |
+| 7 | Увеличить пул соединений | `HIKARI_MAX_POOL_SIZE=30` |
+| 8 | Настроить SMTP для писем | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` |
+| 9 | Фиксировать версию образа | `image: ghcr.io/mozhno-dev/mozhno:v1.0.0` |
+| 10 | Настроить бэкап PostgreSQL | `pg_dump` или WAL-архивация, см. [База данных](/self-hosting/database) |
+| 11 | Настроить мониторинг | Prometheus, алерты — см. [Мониторинг](/self-hosting/monitoring) |
+
 ## Что дальше?
 
 - [Kubernetes](/self-hosting/kubernetes) — оркестрация в кластере
