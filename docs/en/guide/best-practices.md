@@ -156,6 +156,69 @@ return newCheckoutFlow();
 
 > **Tip:** When removing a flag, do it in a separate PR from the feature work. This makes it easy to audit and revert if needed.
 
+## Code Architecture Patterns
+
+### How to Organize Flags in Your Codebase
+
+| Pattern | Example | Best For |
+|---------|---------|----------|
+| **Inline** | `if (client.isEnabled("flag", ctx)) { ... }` | Single flags, quick start |
+| **Feature Wrapper** | `featureService.ifEnabled("flag", ctx, () -> newCode())` | Many flags in one service — eliminates repeated `if` statements |
+| **Context Factory** | `MozhnoContextFactory.forUser(user)` | Same attributes passed to dozens of flag checks |
+| **Middleware** | HTTP/gRPC interceptor adding attributes to context | Attributes from request headers (userId, tenantId, country) |
+
+### Feature Wrapper (Java)
+
+```java
+@Service
+public class FeatureService {
+    private final MozhnoClient client;
+
+    public <T> T ifEnabled(String flag, MozhnoContext ctx,
+                           Supplier<T> newCode, Supplier<T> oldCode) {
+        return client.isEnabled(flag, ctx) ? newCode.get() : oldCode.get();
+    }
+}
+
+var result = featureService.ifEnabled("new-checkout", ctx,
+    () -> processNew(order),
+    () -> processOld(order)
+);
+```
+
+### Middleware (Express)
+
+```typescript
+app.use((req, res, next) => {
+  req.flagContext = {
+    userId: req.headers['x-user-id'] as string,
+    country: req.headers['x-country'] as string,
+    tenantId: req.headers['x-tenant-id'] as string,
+  };
+  next();
+});
+
+app.get('/checkout', (req, res) => {
+  const enabled = client.isEnabled('new-checkout', req.flagContext);
+  res.json(enabled ? newFlow() : oldFlow());
+});
+```
+
+### Context Factory (Java)
+
+```java
+public class MozhnoContextFactory {
+    public static MozhnoContext forRequest(HttpServletRequest req) {
+        return MozhnoContext.builder()
+            .userId(req.getHeader("X-User-Id"))
+            .addProperty("tenantId", req.getHeader("X-Tenant-Id"))
+            .addProperty("country", req.getHeader("X-Country"))
+            .addProperty("device", req.getHeader("X-Device"))
+            .build();
+    }
+}
+```
+
 ## Testing with Feature Flags
 
 ### Unit Testing

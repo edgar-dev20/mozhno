@@ -63,7 +63,16 @@ On first run, you'll be prompted to create a project and admin user.
 
 ### Java
 
+Add the dependency to `build.gradle`:
+
+```groovy
+repositories { mavenCentral() }
+dependencies { implementation 'dev.mozhno:mozhno-client-java:1.0.1' }
+```
+
 ```java
+import dev.mozhno.sdk.*;
+
 var config = MozhnoConfig.builder()
     .appName("my-app")
     .instanceId("instance-1")
@@ -85,6 +94,12 @@ if (isEnabled) {
 ```
 
 ### JavaScript / TypeScript
+
+Install the package:
+
+```bash
+npm install @mozhno/client-js
+```
 
 ```typescript
 import { MozhnoClient } from '@mozhno/client-js';

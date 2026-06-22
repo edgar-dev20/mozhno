@@ -174,14 +174,28 @@ const context = {
 
 ## Error Handling & Resilience
 
-| Failure Scenario | SDK Behaviour |
-|------------------|---------------|
-| **Initial fetch fails** | Client throws an exception / rejects promise |
-| **Background poll fails** | Retry with exponential backoff (1s → 2s → 4s). Last known rules continue to serve. |
-| **Flag key not found** | `isEnabled()` returns `false` |
-| **Context missing attribute** | Rule referencing missing attribute evaluates to `false` |
+### SDK Startup
 
-> **Warning:** If the initial fetch fails, the SDK does **not** silently start with empty rules. Handle initialisation failures explicitly in your application startup.
+| Scenario | Java SDK | JS SDK |
+|----------|----------|--------|
+| **Server reachable at startup** | Fetches rules, client ready | Fetches rules, client ready |
+| **Server unreachable at startup** | Throws exception with `synchronousFetchOnInitialisation(true)`. Otherwise starts and retries in background | Promise is rejected |
+| **Server goes down during runtime** | Uses cached state. Background retries | Uses cached state. Background retries |
+
+> **Tip:** In production, use `synchronousFetchOnInitialisation(false)` (default) — the SDK starts even if the server is temporarily down, and catches up when connectivity is restored.
+
+### Flag Evaluation
+
+| Scenario | Behavior |
+|----------|----------|
+| **Flag not found** | Returns `false` (fail-closed) |
+| **Flag exists, cache empty** | Returns `false` — safe default |
+| **Context attribute missing** | Rule referencing that attribute returns `false` |
+| **Network unavailable** | Cached rules continue to work |
+
+### Propagation Delay
+
+Flag changes in the dashboard reach the SDK within one **polling interval** (default 15 seconds).
 
 ## SDK Comparison
 

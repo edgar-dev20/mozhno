@@ -63,7 +63,16 @@ docker compose up -d
 
 ### Java
 
+Добавьте зависимость в `build.gradle`:
+
+```groovy
+repositories { mavenCentral() }
+dependencies { implementation 'dev.mozhno:mozhno-client-java:1.0.1' }
+```
+
 ```java
+import dev.mozhno.sdk.*;
+
 var config = MozhnoConfig.builder()
     .appName("my-app")
     .instanceId("instance-1")
@@ -85,6 +94,12 @@ if (isEnabled) {
 ```
 
 ### JavaScript / TypeScript
+
+Установите пакет:
+
+```bash
+npm install @mozhno/client-js
+```
 
 ```typescript
 import { MozhnoClient } from '@mozhno/client-js';

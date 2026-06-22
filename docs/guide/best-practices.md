@@ -154,6 +154,70 @@ jobs:
 | **Раз в месяц** | Удалить архивные флаги старше месяца |
 | **Раз в квартал** | Полный аудит активных флагов, обновление описаний |
 
+## Архитектурные паттерны
+
+### Паттерны организации флагов в коде
+
+| Паттерн | Код | Когда применять |
+|---------|-----|-----------------|
+| **Инлайн** | `if (client.isEnabled("flag", ctx)) { ... }` | Единичные флаги, быстрый старт |
+| **Feature Wrapper** | `featureService.ifEnabled("flag", ctx, () -> newCode())` | Много флагов в одном сервисе — убирает повторяющийся `if` |
+| **Фабрика контекста** | `MozhnoContexFactory.forUser(user)` | Один и тот же набор атрибутов передаётся в десятках мест |
+| **Middleware** | Перехватчик HTTP/gRPC, добавляющий атрибуты в контекст | Атрибуты из заголовков запроса (userId, tenantId, country) |
+
+### Пример: Feature Wrapper на Java
+
+```java
+@Service
+public class FeatureService {
+    private final MozhnoClient client;
+
+    public <T> T ifEnabled(String flag, MozhnoContext ctx,
+                           Supplier<T> newCode, Supplier<T> oldCode) {
+        return client.isEnabled(flag, ctx) ? newCode.get() : oldCode.get();
+    }
+}
+
+// Использование:
+var result = featureService.ifEnabled("new-checkout", ctx,
+    () -> processNew(order),   // новый код
+    () -> processOld(order)    // старый код
+);
+```
+
+### Пример: Middleware на Express
+
+```typescript
+app.use((req, res, next) => {
+  req.flagContext = {
+    userId: req.headers['x-user-id'] as string,
+    country: req.headers['x-country'] as string,
+    tenantId: req.headers['x-tenant-id'] as string,
+  };
+  next();
+});
+
+app.get('/checkout', (req, res) => {
+  const enabled = client.isEnabled('new-checkout', req.flagContext);
+  res.json(enabled ? newFlow() : oldFlow());
+});
+```
+
+### Пример: Фабрика контекста на Java
+
+```java
+public class MozhnoContextFactory {
+    public static MozhnoContext forRequest(HttpServletRequest req) {
+        return MozhnoContext.builder()
+            .userId(req.getHeader("X-User-Id"))
+            .addProperty("tenantId", req.getHeader("X-Tenant-Id"))
+            .addProperty("country", req.getHeader("X-Country"))
+            .addProperty("device", req.getHeader("X-Device"))
+            .build();
+    }
+}
+```
+
 ## Тестирование с фиче-флагами
 
 ### Модульное тестирование

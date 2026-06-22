@@ -252,8 +252,85 @@ The resulting image contains only the JRE and the pre-built static resources emb
 ## Upgrading
 
 ```bash
+# 1. Update the image tag in docker-compose.yml
+#    image: ghcr.io/mozhno-dev/mozhno:v1.1.0
+
+# 2. Pull the new image and restart
 docker compose pull mozhno
-docker compose up -d
+docker compose up -d mozhno
+
+# 3. Flyway automatically applies new migrations on startup
 ```
 
-Flyway migrations run automatically on startup. Downtime is typically a few seconds. For zero-downtime upgrades, see [Kubernetes](/en/self-hosting/kubernetes).
+The process is safe: the old container runs until the new one is ready. The health check ensures traffic is routed only after a successful start.
+
+### Rolling Back
+
+```bash
+# Revert to the old tag in docker-compose.yml
+docker compose pull mozhno
+docker compose up -d mozhno
+```
+
+Flyway migrations are not automatically rolled back. If the new version added migrations, rolling back the code is safe (migrations are forward-compatible).
+
+## Reverse Proxy & TLS
+
+In production, always place **можно.** behind a reverse proxy with HTTPS.
+
+### Nginx
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name flags.example.com;
+
+    ssl_certificate     /etc/letsencrypt/live/flags.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/flags.example.com/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+In `docker-compose.yml`, bind the port to localhost only:
+
+```yaml
+ports:
+  - '127.0.0.1:8080:8080'
+```
+
+And set `APP_BASE_URL` to your domain:
+
+```yaml
+APP_BASE_URL: https://flags.example.com
+```
+
+### Caddy (Automatic TLS)
+
+```
+flags.example.com {
+    reverse_proxy localhost:8080
+}
+```
+
+## Production Checklist
+
+| # | Action | Command / Variable |
+|---|--------|-------------------|
+| 1 | Generate JWT secret | `openssl rand -base64 32` → `JWT_SECRET` |
+| 2 | Strong database password | `SPRING_DATASOURCE_PASSWORD` |
+| 3 | Set public domain | `APP_BASE_URL=https://flags.example.com` |
+| 4 | Configure CORS | `APP_CORS_ALLOWED_ORIGINS=https://app.example.com` |
+| 5 | Bind port to localhost only | `ports: ['127.0.0.1:8080:8080']` |
+| 6 | Set up TLS via Nginx/Caddy/Traefik | See section above |
+| 7 | Increase connection pool | `HIKARI_MAX_POOL_SIZE=30` |
+| 8 | Configure SMTP for emails | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` |
+| 9 | Pin the image version | `image: ghcr.io/mozhno-dev/mozhno:v1.0.0` |
+| 10 | Set up PostgreSQL backups | `pg_dump` or WAL archiving, see [Database](/en/self-hosting/database) |
+| 11 | Set up monitoring | Prometheus, alerts — see [Monitoring](/en/self-hosting/monitoring) |
