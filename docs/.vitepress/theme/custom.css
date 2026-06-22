@@ -152,10 +152,11 @@ pre.mermaid .cluster rect {
 .VPBackToTop:hover { border-color:var(--vp-c-brand-1); }
 
 :root { --vp-layout-max-width: 1872px; }
-@media (min-width: 1440px) {
-  .VPDoc.has-aside .content-container { max-width: 100%; }
-  .vp-doc { max-width: none; }
+
+.VPDoc.has-aside .content-container {
+  max-width: 896px !important;
 }
+
 @media (min-width: 960px) {
   .vp-doc table { display: table; width: 100%; }
   .vp-doc table th, .vp-doc table td { white-space: nowrap; }
