@@ -1,109 +1,105 @@
 # Overview
 
-**можно.** is an open-core feature flag management platform. This page gives a high-level overview of all core concepts and how they fit together.
+All key concepts in **можно.** form a unified system. Here's how they work together:
 
-## Core Concepts
+```mermaid
+graph TD
+    FLAG[Flag<br/>new-checkout]
+    ENV1[dev<br/>strategy: 100%]
+    ENV2[staging<br/>strategy: 50%]
+    ENV3[production<br/>strategy: off]
+    STRATEGY[Strategy]
+    RULES[Constraint rules<br/>country = US AND plan = premium]
+    SEGMENT[Segment<br/>"Beta Testers"]
+    PCT[Percentage rollout<br/>25%]
+    SDK[SDK]
+    CTX[Context<br/>userId, country, plan]
+
+    FLAG --> ENV1
+    FLAG --> ENV2
+    FLAG --> ENV3
+    ENV3 --> STRATEGY
+    STRATEGY --> RULES
+    STRATEGY --> SEGMENT
+    STRATEGY --> PCT
+    SDK -->|evaluates| FLAG
+    CTX -->|passes attributes| SDK
+```
+
+1. **Flag** — a toggle point in your code. The same flag (`new-checkout`) exists across all environments.
+2. **Environment** (dev, staging, production) — each has its own independent strategy for the flag.
+3. **Strategy** — a combination of constraint rules, segments, and percentage rollout. Determines who sees the feature.
+4. **Context** — user attributes that the SDK passes when evaluating a flag.
+5. **API key** — the key the SDK uses to fetch rules for a specific environment.
+
+---
 
 ### Flags
 
-A **flag** (feature toggle) controls whether a feature is enabled or disabled for a given request. Two types:
+A named toggle point in your code. Two types:
 
-- **RELEASE** — standard flag for gradual rollout of new features
-- **KILLSWITCH** — emergency switch to instantly disable functionality
-
-Flags are evaluated in real time by the SDK using locally cached rules — no network calls on the hot path.
+| Type | Code Pattern | Use For |
+|------|-------------|---------|
+| **RELEASE** | `if (isEnabled("flag")) { new code }` | Gradual rollout of new features |
+| **KILLSWITCH** | `if (!isEnabled("kill-xxx")) { block }` | Instant emergency shutdown |
 
 See [Flags](/en/concepts/flags).
 
 ### Strategies
 
-A **strategy** defines *how* a flag behaves on a specific environment. Each strategy includes:
+Defines *how* a flag behaves on a specific environment. A strategy includes:
 
-- **Enabled/disabled** state for that environment
-- **Context** — set of constraints (field/operator/values rules) the user must match
-- **Segments** — reusable user groups to target
-- **Percentage rollout** — deterministic hash-based distribution
-
-Evaluation logic: constraints (AND) → segments (OR) → percentage rollout. First match wins.
+- **State** — enabled/disabled on this environment
+- **Constraint rules** — conditions the user must match (AND logic)
+- **Segments** — reusable user groups (OR logic between segments)
+- **Percentage rollout** — deterministic distribution via MurmurHash32
 
 See [Strategies](/en/concepts/strategies).
 
 ### Segments
 
-A **segment** is a reusable group of users defined by matching rules (contexts). Instead of repeating the same targeting conditions across multiple flags, you define a segment once and reference it from any flag.
+A reusable **user group** defined by shared attributes. Instead of duplicating targeting rules across flags, define a segment once and reference it.
 
-Examples: "beta testers" (users with `beta: true`), "EU users" (users where `country` is in a list of EU country codes), "internal employees" (users with email ending in `@company.com`).
+Examples: "US users", "Premium subscribers", "Beta testers".
 
 See [Segments](/en/concepts/segments).
 
-### Contexts
+### Context
 
-**Contexts** define attribute-based rules for targeting. Operands include `in`, `not_in`, `eq`, `ne`, `gt`, `gte`, `lt`, `lte`, `contains`. Context types (`string`, `number`, `time`, `semver`) control comparison behavior.
-
-Evaluation happens **locally** in the SDK with no network call. Rules are fetched in the background and cached.
+User or request attributes that the SDK passes when evaluating a flag:
 
 ```java
 MozhnoContext ctx = MozhnoContext.builder()
     .userId("user-123")
-    .addProperty("country", "DE")
-    .addProperty("plan", "enterprise")
+    .addProperty("country", "US")
+    .addProperty("plan", "premium")
     .build();
+boolean enabled = client.isEnabled("new-checkout", ctx);
 ```
 
-```typescript
-const ctx = {
-  userId: 'user-123',
-  country: 'DE',
-  plan: 'enterprise',
-};
-```
+See [Targeting](/en/guide/targeting).
 
 ### Environments
 
-An **environment** is an isolated namespace for flag configuration — typically `dev`, `staging`, and `production`. Each environment has:
-
-- Its own set of strategy configurations (a flag can be on in dev but off in prod)
-- Its own API keys with granular permissions
-- Independent targeting rules
+Isolated namespaces for flags: **dev**, **staging**, **production**. Each environment has its own strategy configurations and API keys. A flag enabled in dev can be disabled in production.
 
 See [Environments](/en/concepts/environments).
 
 ### API Keys
 
-**API keys** authenticate SDKs and external services with the server. Keys are scoped to a single environment. Two types:
+SDK authentication keys, bound to an environment and project. Two types: **SERVER** (backend SDKs) and **FRONTEND** (browser/mobile SDKs).
 
-- **SERVER** — read/write access for backend SDKs
-- **FRONTEND** — read-only access for browser-based SDKs
+See [API Keys](/en/concepts/api-keys).
 
-Create and manage API keys from the web dashboard.
+### Audit
 
-### Audit Log
+All flag, segment, and strategy changes are recorded in an immutable audit log: who changed what and when.
 
-Every change to flags, segments, strategies, environments, and API keys is recorded in an immutable **audit log**. Each entry includes:
-
-- The user who made the change
-- What was changed (field-level diff)
-- Timestamp of the change
-- The environment where the change was applied
-
-The audit log is accessible from the web dashboard and via the REST API.
-
-## Module Architecture
-
-**можно.** is organized as a multi-module Gradle project:
-
-| Module | Purpose |
-|--------|---------|
-| `mozhno-spi` | Service Provider Interface — extension points for enterprise plugins |
-| `mozhno-core` | Core business logic: flag evaluation, segment matching, strategy engine |
-| `mozhno-web-api` | REST controllers, DTOs, request/response mapping |
-| `mozhno-app` | Spring Boot application entry point, auto-configuration, Flyway migrations |
-
-Server — Spring Boot 4.0 / JDK 25. Web UI — React 19 SPA (Vite, Tailwind CSS 4, Radix UI). SDKs fetch flag rules once and evaluate locally.
+See [Audit](/en/guide/audit).
 
 ## Related Pages
 
-- [Flags](/en/concepts/flags) — flag types, rules, and lifecycle
-- [Segments](/en/concepts/segments) — reusable user groups
-- [Strategies](/en/concepts/strategies) — rollout strategies and chaining
-- [Environments](/en/concepts/environments) — environment isolation and API keys
+- [Flags](/en/concepts/flags) — flag types and lifecycle
+- [Strategies](/en/concepts/strategies) — rollout mechanics
+- [Environments](/en/concepts/environments) — dev / staging / production isolation
+- [API Keys](/en/concepts/api-keys) — SDK access management
