@@ -80,6 +80,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
         req.setDescription("High-value users");
         SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
         entry.setContextDefinitionId(contextDefId);
+        entry.setOperator("in");
         entry.setContextValues("[\"web\",\"mobile\"]");
         req.setContext(List.of(entry));
 
@@ -134,6 +135,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
         req.setDescription("Updated description");
         SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
         entry.setContextDefinitionId(contextDefId);
+        entry.setOperator("in");
         entry.setContextValues("[\"mobile\"]");
         req.setContext(List.of(entry));
 
@@ -158,6 +160,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
         reqWithContext.setDescription("Test");
         SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
         entry.setContextDefinitionId(contextDefId);
+        entry.setOperator("in");
         entry.setContextValues("[\"web\"]");
         reqWithContext.setContext(List.of(entry));
 
