@@ -38,7 +38,7 @@ features:
     title: Гранулярные права
     details: API-ключи на каждое окружение, JWT-аутентификация, полная история изменений. Контролируйте, кто и когда менял конфигурацию.
     link: /guide/audit
-    linkText: Про аудит
+    linkText: Об аудите
   - icon:
       src: /icons/opencore.svg
     title: Open Core
