@@ -37,24 +37,6 @@ healthcheck:
   start_period: 60s
 ```
 
-### Kubernetes Usage
-
-```yaml
-livenessProbe:
-  httpGet:
-    path: /actuator/health
-    port: 8080
-  initialDelaySeconds: 60
-  periodSeconds: 15
-
-readinessProbe:
-  httpGet:
-    path: /actuator/health
-    port: 8080
-  initialDelaySeconds: 30
-  periodSeconds: 10
-```
-
 ## Prometheus Metrics
 
 ### Endpoint
@@ -138,6 +120,6 @@ Sensitive data (JWT, API keys, passwords) is automatically masked via `Sensitive
 ## Related Pages
 
 - [Docker](/en/self-hosting/docker) — healthcheck and environment variables
-- [Kubernetes](/en/self-hosting/kubernetes) — liveness/readiness probes
+- [Scaling](/en/self-hosting/scaling) — horizontal scaling
 - [Scaling](/en/self-hosting/scaling) — horizontal scaling
 - [Metrics](/en/guide/metrics) — flag usage metrics

@@ -19,7 +19,7 @@ CREATE DATABASE feature_flags OWNER flags_user;
 GRANT ALL PRIVILEGES ON DATABASE feature_flags TO flags_user;
 ```
 
-В Kubernetes — через StatefulSet или внешний управляемый сервис (Cloud SQL, RDS).
+Для продакшена используйте управляемый PostgreSQL (Yandex Managed Service for PostgreSQL, Cloud SQL, RDS) или собственный сервер с настроенной репликацией.
 
 ## Flyway-миграции
 
@@ -55,9 +55,6 @@ V<версия>__<описание>.sql
 ```bash
 # docker-compose
 docker compose up -d
-
-# Kubernetes — поды применяют миграции при запуске
-kubectl apply -f k8s/
 
 # Ручной запуск
 make migrate
@@ -220,50 +217,6 @@ restore_command = 'cp /archive/%f %p'
 recovery_target_time = '2026-06-21 14:00:00'
 ```
 
-### Kubernetes CronJob для бэкапов
-
-```yaml
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: mozhno-backup
-spec:
-  schedule: '0 2 * * *'
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          restartPolicy: OnFailure
-          containers:
-            - name: backup
-              image: postgres:15-alpine
-              command:
-                - /bin/sh
-                - -c
-                - |
-                  pg_dump -h postgres.db.svc.cluster.local \
-                    -U $(PGUSER) -d feature_flags -Fc \
-                    -f /backups/mozhno_$(date +%Y%m%d_%H%M%S).dump
-              env:
-                - name: PGUSER
-                  valueFrom:
-                    secretKeyRef:
-                      name: mozhno-secrets
-                      key: SPRING_DATASOURCE_USERNAME
-                - name: PGPASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: mozhno-secrets
-                      key: SPRING_DATASOURCE_PASSWORD
-              volumeMounts:
-                - name: backup
-                  mountPath: /backups
-          volumes:
-            - name: backup
-              persistentVolumeClaim:
-                claimName: mozhno-backups
-```
-
 ### Восстановление из бэкапа
 
 ```bash
@@ -397,6 +350,6 @@ SPRING_DATASOURCE_URL=jdbc:postgresql://host:5432/feature_flags?ssl=true&sslmode
 ## Что дальше?
 
 - [Docker](/self-hosting/docker) — контейнеризация PostgreSQL и приложения
-- [Kubernetes](/self-hosting/kubernetes) — StatefulSet, PV, PVC для продакшен-окружения
+- [Масштабирование](/self-hosting/scaling) — конфигурация пула соединений, репликация
 - [Масштабирование](/self-hosting/scaling) — sizing пула соединений при горизонтальном масштабировании
 - [Конфигурация](/intro/configuration) — все переменные окружения для БД

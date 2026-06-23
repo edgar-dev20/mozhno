@@ -129,7 +129,7 @@ PostgreSQL max_connections = (max-pool-size × replicas) + 10 (admin overhead)
 
 Reduce `maximum-pool-size` as replica count grows to avoid exhausting PostgreSQL connection limits. Adjust `max_connections` in `postgresql.conf` to match.
 
-For Kubernetes deployments, set the pool size via environment variable:
+Set the pool size via environment variable:
 
 ```bash
 HIKARI_MAX_POOL_SIZE=30
@@ -176,45 +176,6 @@ archive_command = 'test ! -f /archive/%f && cp %p /archive/%f'
 ```
 
 This enables recovery to any point in time, not just the last backup.
-
-### Kubernetes CronJob
-
-```yaml
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: mozhno-backup
-spec:
-  schedule: "0 2 * * *"
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-            - name: pgdump
-              image: postgres:16-alpine
-              command:
-                - sh
-                - -c
-                - |
-                  pg_dump -h postgres -U mozhno -d mozhno \
-                    --format=custom --compress=9 \
-                    --file=/backup/mozhno_$(date -u +%Y%m%d_%H%M%S).dump
-              env:
-                - name: PGPASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      name: mozhno-secrets
-                      key: database-password
-              volumeMounts:
-                - name: backup
-                  mountPath: /backup
-          restartPolicy: OnFailure
-          volumes:
-            - name: backup
-              persistentVolumeClaim:
-                claimName: mozhno-backup-pvc
-```
 
 ## Database Versioning
 
@@ -298,5 +259,4 @@ public List<FeatureFlag> findByEnvironment(long environmentId) {
 ## Related Pages
 
 - [Docker](/en/self-hosting/docker) — Docker deployment with PostgreSQL
-- [Kubernetes](/en/self-hosting/kubernetes) — Kubernetes deployment
 - [Scaling](/en/self-hosting/scaling) — Connection pool sizing across replicas

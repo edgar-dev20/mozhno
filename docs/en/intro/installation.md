@@ -150,16 +150,6 @@ jdbc:postgresql://postgres:5432/feature_flags
 jdbc:postgresql://host:5432/feature_flags?ssl=true&sslmode=require
 ```
 
-## Kubernetes
-
-Kubernetes manifests are provided in the `k8s/` directory:
-
-```bash
-kubectl apply -f k8s/
-```
-
-This deploys the **можно**<span class=brand-dot>.</span> server (Deployment + Service + HPA + PDB), Secrets, and ConfigMap. See [Kubernetes](/en/self-hosting/kubernetes) for detailed instructions.
-
 ## Verifying the Installation
 
 Once the server starts, open the web dashboard at `http://localhost:8080`. You'll be prompted to create an initial project and admin user.

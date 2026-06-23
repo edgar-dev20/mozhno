@@ -214,18 +214,6 @@ services:
       - ./plugins/mozhno-enterprise.jar:/app/plugins/mozhno-enterprise.jar:ro
 ```
 
-For Kubernetes, bundle it in a custom image or use an init container:
-
-```yaml
-initContainers:
-  - name: enterprise-plugin
-    image: registry.example.com/mozhno-enterprise:latest
-    command: ["cp", "/mozhno-enterprise.jar", "/plugins/"]
-    volumeMounts:
-      - name: plugins
-        mountPath: /plugins
-```
-
 ## Community vs Enterprise
 
 | Feature | Community | Enterprise |
