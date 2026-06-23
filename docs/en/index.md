@@ -48,7 +48,7 @@ features:
   - icon:
       src: /icons/deploy.svg
     title: Production Ready
-    details: Docker, Kubernetes, PostgreSQL. Health checks, HPA, PDB, metrics. Horizontal scaling without sticky sessions.
+    details: Docker, PostgreSQL. Health checks, metrics. Horizontal scaling without sticky sessions.
     link: /en/self-hosting/docker
     linkText: Deploy
 ---

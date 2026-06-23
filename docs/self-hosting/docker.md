@@ -391,7 +391,7 @@ flags.example.com {
 
 ## Что дальше?
 
-- [Kubernetes](/self-hosting/kubernetes) — оркестрация в кластере
+- [Масштабирование](/self-hosting/scaling) — горизонтальное масштабирование
 - [База данных](/self-hosting/database) — настройка PostgreSQL, бэкапы, пул соединений
 - [Масштабирование](/self-hosting/scaling) — горизонтальное масштабирование и кеширование
 - [Конфигурация](/intro/configuration) — полный список переменных окружения

@@ -223,6 +223,6 @@ Key metrics to watch:
 
 ## Related Pages
 
-- [Kubernetes](/en/self-hosting/kubernetes) — HPA, PDB, rolling updates
+- [Database](/en/self-hosting/database) — backups, replication, configuration
 - [Database](/en/self-hosting/database) — Connection pool, backups
 - [Docker](/en/self-hosting/docker) — Single-node deployment

@@ -100,19 +100,6 @@ server {
 }
 ```
 
-### Kubernetes
-
-В Kubernetes балансировка обеспечивается Service (kube-proxy) и Ingress-контроллером:
-
-```yaml
-spec:
-  type: ClusterIP
-  ports:
-    - port: 8080
-```
-
-kube-proxy распределяет трафик между подами. Ingress (nginx-ingress, Traefik) добавляет TLS-терминацию и балансировку на уровне HTTP.
-
 ## Кеширование
 
 **можно**<span class=brand-dot>.</span> использует **Caffeine** — локальный in-memory кеш в рамках одной JVM. Без Redis, без распределённого кеша.
@@ -268,8 +255,7 @@ sequenceDiagram
 | hikaricp_active_connections | Actuator | > 80% от max |
 | hikaricp_pending_connections | Actuator | > 0 постоянно |
 | jvm_memory_used | Actuator | > 85% лимита |
-| cpu_usage | cAdvisor / metrics-server | > 70% (триггер HPA) |
-| pod_restarts | Kubernetes | > 0 за 5 мин |
+| cpu_usage | cAdvisor / metrics-server | > 70% |
 
 Подключение Prometheus и Grafana:
 
@@ -296,7 +282,7 @@ spec:
 
 ## Что дальше?
 
-- [Kubernetes](/self-hosting/kubernetes) — HPA, Deployment, пробы
+- [База данных](/self-hosting/database) — бэкапы, репликация, конфигурация
 - [База данных](/self-hosting/database) — пул соединений, индексы
 - [Docker](/self-hosting/docker) — ресурсные ограничения контейнера
 - [Архитектура](/advanced/architecture) — модульная структура сервера

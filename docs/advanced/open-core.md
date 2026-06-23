@@ -189,19 +189,6 @@ mozhno:
 
 Spring Boot обнаруживает Enterprise-классы через component scan. SPI-провайдеры регистрируются через `@AutoConfiguration` в `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`.
 
-### Kubernetes
-
-```yaml
-volumes:
-  - name: enterprise-jar
-    persistentVolumeClaim:
-      claimName: mozhno-enterprise
-volumeMounts:
-  - name: enterprise-jar
-    mountPath: /opt/mozhno/lib
-    readOnly: true
-```
-
 ### Переменные окружения для Enterprise
 
 | Переменная | Описание |
@@ -323,4 +310,4 @@ GET /api/admin/plugins/slots
 - [Архитектура](/advanced/architecture) — модульная структура сервера
 - [Миграция](/advanced/migration) — переход с LaunchDarkly, Unleash, Flagsmith
 - [Docker](/self-hosting/docker) — деплой Community и Enterprise
-- [Kubernetes](/self-hosting/kubernetes) — оркестрация в кластере
+- [Миграция](/advanced/migration) — переход с LaunchDarkly, Unleash, Flagsmith

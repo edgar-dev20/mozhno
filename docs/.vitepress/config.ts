@@ -42,7 +42,6 @@ const ruApiSidebar = [
 
 const ruSelfHostingSidebar = [
   { text: 'Docker', link: '/self-hosting/docker' },
-  { text: 'Kubernetes', link: '/self-hosting/kubernetes' },
   { text: 'База данных', link: '/self-hosting/database' },
   { text: 'Масштабирование', link: '/self-hosting/scaling' },
   { text: 'Мониторинг', link: '/self-hosting/monitoring' },
@@ -98,7 +97,6 @@ const enApiSidebar = [
 
 const enSelfHostingSidebar = [
   { text: 'Docker', link: '/en/self-hosting/docker' },
-  { text: 'Kubernetes', link: '/en/self-hosting/kubernetes' },
   { text: 'Database', link: '/en/self-hosting/database' },
   { text: 'Scaling', link: '/en/self-hosting/scaling' },
   { text: 'Monitoring', link: '/en/self-hosting/monitoring' },

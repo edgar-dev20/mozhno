@@ -67,7 +67,7 @@ graph TD
 |------------|------------|
 | **PostgreSQL** | Персистентное хранение всех данных |
 | **Docker** | Контейнеризация, трёхэтапная сборка |
-| **Kubernetes** | Оркестрация, авто-масштабирование, отказоустойчивость |
+| **Docker Compose** | Локальный и небольшой продакшен-деплой |
 
 ### Почему JdbcTemplate, а не JPA/Hibernate
 
@@ -270,27 +270,18 @@ graph TB
         SPA[React 19 SPA<br/>Tailwind CSS 4<br/>Radix UI]
     end
 
-    subgraph "Kubernetes Cluster"
-        INGRESS[Ingress<br/>TLS termination]
-        subgraph "Pods (2–8)"
-            P1[mozhno-1<br/>Spring Boot 4.0<br/>JdbcTemplate<br/>Caffeine Cache]
-            P2[mozhno-2<br/>Spring Boot 4.0<br/>JdbcTemplate<br/>Caffeine Cache]
-        end
-        SVC[Service<br/>ClusterIP :8080]
+    subgraph "Docker-инстанс (1–N)"
+        SRV[mozhno<br/>Spring Boot 4.0<br/>JdbcTemplate<br/>Caffeine Cache]
     end
 
-    PG[(PostgreSQL 15+<br/>PersistentVolume<br/>WAL-архивация)]
+    PG[(PostgreSQL 15+)]
 
     SDK[Java/Node.js SDK]
     SDK2[Внешнее приложение]
 
-    SPA --> INGRESS
-    INGRESS --> SVC
-    SVC --> P1
-    SVC --> P2
-    P1 --> PG
-    P2 --> PG
-    SDK2 --> INGRESS
+    SPA --> SRV
+    SRV --> PG
+    SDK2 --> SRV
 ```
 
 ## Что дальше?
@@ -298,4 +289,4 @@ graph TB
 - [Open Core](/advanced/open-core) — Community vs Enterprise, SPI-интерфейсы, плагины
 - [Миграция](/advanced/migration) — переход с LaunchDarkly, Unleash, Flagsmith
 - [Docker](/self-hosting/docker) — продакшен-деплой
-- [Kubernetes](/self-hosting/kubernetes) — оркестрация и масштабирование
+- [Масштабирование](/self-hosting/scaling) — горизонтальное масштабирование

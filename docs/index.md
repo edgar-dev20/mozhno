@@ -48,7 +48,7 @@ features:
   - icon:
       src: /icons/deploy.svg
     title: Готово к продакшену
-    details: Docker, Kubernetes, PostgreSQL. Health checks, HPA, PDB, метрики. Горизонтальное масштабирование без sticky sessions.
+    details: Docker, PostgreSQL. Health checks, метрики. Горизонтальное масштабирование без sticky sessions.
     link: /self-hosting/docker
     linkText: Деплой
 ---

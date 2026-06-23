@@ -169,4 +169,4 @@ graph TD
 - [Конфигурация](/intro/configuration) — все переменные окружения
 - [Быстрый старт](/intro/quick-start) — создайте первый флаг за 5 минут
 - [Docker](/self-hosting/docker) — продакшен-деплой
-- [Kubernetes](/self-hosting/kubernetes) — манифесты из `k8s/`
+- [Docker](/self-hosting/docker) — контейнерный деплой

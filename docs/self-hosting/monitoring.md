@@ -37,24 +37,6 @@ healthcheck:
   start_period: 60s
 ```
 
-### Использование в Kubernetes
-
-```yaml
-livenessProbe:
-  httpGet:
-    path: /actuator/health
-    port: 8080
-  initialDelaySeconds: 60
-  periodSeconds: 15
-
-readinessProbe:
-  httpGet:
-    path: /actuator/health
-    port: 8080
-  initialDelaySeconds: 30
-  periodSeconds: 10
-```
-
 ## Prometheus-метрики
 
 ### Endpoint
@@ -138,6 +120,6 @@ scrape_configs:
 ## Что дальше?
 
 - [Docker](/self-hosting/docker) — healthcheck и переменные окружения
-- [Kubernetes](/self-hosting/kubernetes) — liveness/readiness probes
+- [Масштабирование](/self-hosting/scaling) — горизонтальное масштабирование
 - [Масштабирование](/self-hosting/scaling) — горизонтальное масштабирование
 - [Метрики](/guide/metrics) — метрики использования флагов
