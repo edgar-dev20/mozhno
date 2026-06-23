@@ -1,6 +1,6 @@
 # Quick Start
 
-Get **можно.** running in 5 minutes with Docker Compose.
+Get **можно**<span class=brand-dot>.</span> running in 5 minutes with Docker Compose.
 
 ## Step 1: Create docker-compose.yml
 
@@ -101,24 +101,6 @@ Install the package:
 npm install @mozhno/client-js
 ```
 
-```typescript
-import { MozhnoClient } from '@mozhno/client-js';
-
-const client = new MozhnoClient({
-  url: 'http://localhost:8080',
-  apiKey: 'your-api-key',
-  appName: 'my-app',
-});
-await client.start();
-
-const enabled = client.isEnabled('new-checkout', { userId: 'user-123' });
-
-if (enabled) {
-  // new code
-} else {
-  // old code
-}
-```
 
 ## What's Next?
 

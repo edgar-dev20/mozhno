@@ -1,6 +1,6 @@
 # Security
 
-**можно.** implements multiple layers of protection: JWT authentication for the web dashboard, API keys for SDKs, rate limiting to prevent attacks, and security headers for browser protection.
+**можно**<span class=brand-dot>.</span> implements multiple layers of protection: JWT authentication for the web dashboard, API keys for SDKs, rate limiting to prevent attacks, and security headers for browser protection.
 
 ## Authentication
 

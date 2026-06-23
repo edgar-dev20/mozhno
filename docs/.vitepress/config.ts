@@ -21,8 +21,9 @@ const ruGuidesSidebar = [
 const ruConceptsSidebar = [
   { text: 'Обзор', link: '/concepts/overview' },
   { text: 'Флаги', link: '/concepts/flags' },
+  { text: 'Контексты', link: '/concepts/contexts' },
   { text: 'Сегменты', link: '/concepts/segments' },
-  { text: 'Стратегии', link: '/concepts/strategies' },
+  { text: 'Правила активации', link: '/concepts/strategies' },
   { text: 'Окружения', link: '/concepts/environments' },
   { text: 'API-ключи', link: '/concepts/api-keys' },
   { text: 'Пользователи и роли', link: '/concepts/users' },
@@ -76,8 +77,9 @@ const enGuidesSidebar = [
 const enConceptsSidebar = [
   { text: 'Overview', link: '/en/concepts/overview' },
   { text: 'Flags', link: '/en/concepts/flags' },
+  { text: 'Contexts', link: '/en/concepts/contexts' },
   { text: 'Segments', link: '/en/concepts/segments' },
-  { text: 'Strategies', link: '/en/concepts/strategies' },
+  { text: 'Activation Rules', link: '/en/concepts/strategies' },
   { text: 'Environments', link: '/en/concepts/environments' },
   { text: 'API Keys', link: '/en/concepts/api-keys' },
   { text: 'Users & Roles', link: '/en/concepts/users' },

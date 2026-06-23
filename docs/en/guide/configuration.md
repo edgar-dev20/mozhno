@@ -1,6 +1,6 @@
 # Configuration
 
-**можно.** is configured entirely through environment variables. All settings have sensible defaults so you only need to set what differs from the standard setup.
+**можно**<span class=brand-dot>.</span> is configured entirely through environment variables. All settings have sensible defaults so you only need to set what differs from the standard setup.
 
 ## Required Variables
 
@@ -36,14 +36,14 @@ These must be set for the server to start:
 | `JWT_ACCESS_TOKEN_TTL_MINUTES` | `15` | Access token lifetime in minutes |
 | `JWT_REFRESH_TOKEN_TTL_DAYS` | `30` | Refresh token lifetime in days |
 
-**можно.** uses JWT authentication with refresh token family rotation. When a refresh token is used, both the old access and refresh tokens are invalidated and new ones are issued. If a stolen (already-revoked) token is presented, the entire token family is revoked — locking out the attacker.
+**можно**<span class=brand-dot>.</span> uses JWT authentication with refresh token family rotation. When a refresh token is used, both the old access and refresh tokens are invalidated and new ones are issued. If a stolen (already-revoked) token is presented, the entire token family is revoked — locking out the attacker.
 
 ## Logging
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `LOGGING_LEVEL_ROOT` | `INFO` | Root log level. Set to `DEBUG` for troubleshooting. |
-| `LOGGING_LEVEL_DEV_MOZHNO` | `INFO` | Log level for **можно.** application code |
+| `LOGGING_LEVEL_DEV_MOZHNO` | `INFO` | Log level for **можно**<span class=brand-dot>.</span> application code |
 
 ## CORS
 

@@ -1,6 +1,6 @@
 # Monitoring & Health Checks
 
-**можно.** provides endpoints for health checks, Prometheus metrics, and distributed tracing via Spring Boot Actuator and Micrometer.
+**можно**<span class=brand-dot>.</span> provides endpoints for health checks, Prometheus metrics, and distributed tracing via Spring Boot Actuator and Micrometer.
 
 ## Health Check
 
@@ -94,7 +94,7 @@ scrape_configs:
 
 ## Distributed Tracing
 
-**можно.** uses Micrometer Tracing with Brave. Each request receives a `traceId` and `spanId`, passed in headers:
+**можно**<span class=brand-dot>.</span> uses Micrometer Tracing with Brave. Each request receives a `traceId` and `spanId`, passed in headers:
 
 | Header | Description |
 |--------|-------------|

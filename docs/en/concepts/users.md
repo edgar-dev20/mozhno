@@ -1,6 +1,6 @@
 # Users & Roles
 
-**можно.** supports team collaboration with three access roles. Each user has their own account; invitations are sent via the web dashboard or REST API.
+**можно**<span class=brand-dot>.</span> supports team collaboration with three access roles. Each user has their own account; invitations are sent via the web dashboard or REST API.
 
 ## Roles
 

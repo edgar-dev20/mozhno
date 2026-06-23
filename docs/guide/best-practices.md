@@ -1,6 +1,6 @@
 # Лучшие практики
 
-Свод рекомендаций по работе с фиче-флагами в **можно.**: от именования до стратегии очистки и управления флаговым долгом.
+Свод рекомендаций по работе с фиче-флагами в **можно**<span class=brand-dot>.</span>: от именования до стратегии очистки и управления флаговым долгом.
 
 ## Именование флагов
 
@@ -57,7 +57,7 @@
 
 ## Модель разрешений (Permission Model)
 
-**можно.** использует ролевую модель доступа с иерархией `ADMIN` → `DEVELOPER` → `VIEWER` (каждая роль включает права нижестоящих):
+**можно**<span class=brand-dot>.</span> использует ролевую модель доступа с иерархией `ADMIN` → `DEVELOPER` → `VIEWER` (каждая роль включает права нижестоящих):
 
 | Действие | Admin | Developer | Viewer |
 |----------|-------|-----------|--------|
@@ -187,21 +187,6 @@ var result = featureService.ifEnabled("new-checkout", ctx,
 
 ### Пример: Middleware на Express
 
-```typescript
-app.use((req, res, next) => {
-  req.flagContext = {
-    userId: req.headers['x-user-id'] as string,
-    country: req.headers['x-country'] as string,
-    tenantId: req.headers['x-tenant-id'] as string,
-  };
-  next();
-});
-
-app.get('/checkout', (req, res) => {
-  const enabled = client.isEnabled('new-checkout', req.flagContext);
-  res.json(enabled ? newFlow() : oldFlow());
-});
-```
 
 ### Пример: Фабрика контекста на Java
 
@@ -246,25 +231,12 @@ void testOldCheckoutFlow() {
 }
 ```
 
-```typescript
-test('new checkout flow', () => {
-  jest.spyOn(client, 'isEnabled').mockReturnValue(true);
-  const result = checkoutService.process(order, { userId: 'test-user' });
-  expect(result.flow).toBe('new');
-});
 
-test('old checkout flow', () => {
-  jest.spyOn(client, 'isEnabled').mockReturnValue(false);
-  const result = checkoutService.process(order, { userId: 'test-user' });
-  expect(result.flow).toBe('old');
-});
-```
-
-> **Совет:** Мокайте SDK-клиент в тестах, а не сервер **можно.**. Тесты должны быть быстрыми и не зависеть от сети.
+> **Совет:** Мокайте SDK-клиент в тестах, а не сервер **можно**<span class=brand-dot>.</span>. Тесты должны быть быстрыми и не зависеть от сети.
 
 ### Интеграционное тестирование
 
-Для интеграционных тестов поднимите реальный сервер **можно.** в тестовом окружении:
+Для интеграционных тестов поднимите реальный сервер **можно**<span class=brand-dot>.</span> в тестовом окружении:
 
 ```java
 @SpringBootTest

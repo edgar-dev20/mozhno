@@ -1,6 +1,6 @@
 # Docker
 
-Deploy **можно.** with Docker Compose. One command to get the server, PostgreSQL database, and all dependencies running.
+Deploy **можно**<span class=brand-dot>.</span> with Docker Compose. One command to get the server, PostgreSQL database, and all dependencies running.
 
 ## Prerequisites
 
@@ -276,7 +276,7 @@ Flyway migrations are not automatically rolled back. If the new version added mi
 
 ## Reverse Proxy & TLS
 
-In production, always place **можно.** behind a reverse proxy with HTTPS.
+In production, always place **можно**<span class=brand-dot>.</span> behind a reverse proxy with HTTPS.
 
 ### Nginx
 

@@ -1,6 +1,6 @@
 # Open Core
 
-**можно.** follows an Open Core model. The Community Edition is fully functional under AGPL v3. Enterprise features are delivered as a pluggable JAR — no fork, no feature gates in the core code.
+**можно**<span class=brand-dot>.</span> follows an Open Core model. The Community Edition is fully functional under AGPL v3. Enterprise features are delivered as a pluggable JAR — no fork, no feature gates in the core code.
 
 ## How It Works
 

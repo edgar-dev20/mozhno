@@ -188,21 +188,6 @@ var result = featureService.ifEnabled("new-checkout", ctx,
 
 ### Middleware (Express)
 
-```typescript
-app.use((req, res, next) => {
-  req.flagContext = {
-    userId: req.headers['x-user-id'] as string,
-    country: req.headers['x-country'] as string,
-    tenantId: req.headers['x-tenant-id'] as string,
-  };
-  next();
-});
-
-app.get('/checkout', (req, res) => {
-  const enabled = client.isEnabled('new-checkout', req.flagContext);
-  res.json(enabled ? newFlow() : oldFlow());
-});
-```
 
 ### Context Factory (Java)
 

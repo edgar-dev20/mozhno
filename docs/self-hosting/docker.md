@@ -1,6 +1,6 @@
 # Docker-деплой
 
-Развёртывание **можно.** в Docker для продакшен-окружения: полный `docker-compose.yml`, переменные окружения, проверки здоровья, ресурсные ограничения, безопасность и сетевые настройки.
+Развёртывание **можно**<span class=brand-dot>.</span> в Docker для продакшен-окружения: полный `docker-compose.yml`, переменные окружения, проверки здоровья, ресурсные ограничения, безопасность и сетевые настройки.
 
 ## Образ
 
@@ -174,7 +174,7 @@ JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 
 ## Проверки здоровья (Health Checks)
 
-Контейнер **можно.** предоставляет эндпоинт `/actuator/health` для проверки готовности:
+Контейнер **можно**<span class=brand-dot>.</span> предоставляет эндпоинт `/actuator/health` для проверки готовности:
 
 ```bash
 curl http://localhost:8080/actuator/health
@@ -196,9 +196,9 @@ PostgreSQL проверяется утилитой `pg_isready` каждые 10 
 |-----------|----------|-------------|------------|
 | PostgreSQL | CPU limit | 1.0 | 2.0 |
 | PostgreSQL | Memory limit | 1G | 2G |
-| **можно.** | CPU limit | 2.0 | 4.0 |
-| **можно.** | Memory limit | 2G | 4G |
-| **можно.** | Memory reservation | 512M | 1G |
+| **можно**<span class=brand-dot>.</span> | CPU limit | 2.0 | 4.0 |
+| **можно**<span class=brand-dot>.</span> | Memory limit | 2G | 4G |
+| **можно**<span class=brand-dot>.</span> | Memory reservation | 512M | 1G |
 
 Настройки JVM для контейнера:
 
@@ -330,7 +330,7 @@ Flyway-миграции не откатываются автоматически
 
 ## Обратный прокси и TLS
 
-Для продакшена всегда размещайте **можно.** за обратным прокси с HTTPS.
+Для продакшена всегда размещайте **можно**<span class=brand-dot>.</span> за обратным прокси с HTTPS.
 
 ### Nginx
 

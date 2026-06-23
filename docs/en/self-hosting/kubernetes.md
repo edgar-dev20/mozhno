@@ -1,6 +1,6 @@
 # Kubernetes
 
-Deploy **можно.** on Kubernetes with production-grade configuration: high availability, auto-scaling, rolling updates, and health probes.
+Deploy **можно**<span class=brand-dot>.</span> on Kubernetes with production-grade configuration: high availability, auto-scaling, rolling updates, and health probes.
 
 ## Manifest Overview
 

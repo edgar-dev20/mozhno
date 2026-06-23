@@ -1,74 +1,65 @@
-# Strategies
+# Activation Rules
 
-A **strategy** defines *how* a flag behaves on a specific environment. Each flag can have different strategy configurations per environment.
+Activation rules determine **who** sees a feature in a given environment. Each flag has independent rules for each environment.
 
-## Strategy Configuration
+## How Rules Work
 
-Each strategy consists of:
+```mermaid
+flowchart TD
+    A["Is the flag enabled?"] -->|no| X[false]
+    A -->|yes| B["Context matches?<br/>(all attributes AND)"]
+    B -->|yes| D["Hash of userId<br/>below rollout percentage?"]
+    B -->|no| C["In any segment?<br/>(OR between segments)"]
+    C -->|yes| D
+    C -->|no| X
+    D -->|yes| Y[true]
+    D -->|no| X
+```
 
-| Component | Description |
-|-----------|-------------|
-| **Enabled** | Whether the flag is active on this environment |
-| **Context** | Set of attribute-based rules (constraints) for targeting |
-| **Segments** | Reusable user groups to target (OR logic) |
-| **Percentage** | Deterministic hash-based rollout (0-100) |
+1. **State** — if the flag is disabled, the check ends at `false`.
+2. **Context** — user attributes (`country=US`, `plan=premium`). All must match — **AND**.
+3. **Segments** — if context didn't match, attached segments are checked. The flag enables if the user is in any one of them — **OR between segments**.
+4. **Rollout** — a deterministic hash of `flagKey + userId` is compared against the rollout percentage. Below → `true`.
 
-## How Strategies Work
+## Context Constraints
 
-A strategy is evaluated in a fixed order:
-
-1. **Check enabled** — if disabled, return `false`
-2. **Evaluate context rules** — all constraints must match (AND logic)
-3. **Evaluate segments** — at least one segment must match (OR logic)
-4. **When both present** — either constraints or segments passing grants access
-5. **Percentage rollout** — MurmurHash32 hash of `flagKey + userId` compared against percentage
-6. **Default** — if nothing matched, return `false`
-
-## Targeting with Context Rules
-
-Context rules match user attributes using operators:
+Constraints match attributes passed to the SDK. If context doesn't match — move on to segments.
 
 ```json
 {
   "constraints": [
-    {"field": "country", "operator": "in", "values": ["DE", "FR", "NL"]},
-    {"field": "plan", "operator": "eq", "values": ["enterprise"]}
+    { "field": "country", "operator": "in", "values": ["US", "CA"] },
+    { "field": "plan", "operator": "eq", "values": ["premium"] }
   ]
 }
 ```
 
-All constraints must pass for the flag to be enabled (AND logic). If a context attribute is missing, the rule evaluates to `false`.
+All rules within a group use **AND** logic. If an attribute is missing from the context, the rule returns `false`.
 
-## Targeting with Segments
+## Segments
 
-Segments are reusable groups defined separately and referenced by key. A strategy can reference multiple segments — matching any one grants access (OR logic).
+Reusable user groups. Attach them to activation rules by reference — no need to duplicate conditions across flags.
+
+A flag can reference multiple segments — matching any one is enough (**OR**). See [Segments](/en/concepts/segments).
 
 ## Percentage Rollout
 
-Percentage rollout uses deterministic hashing so the same user always gets the same result:
+MurmurHash32 of `flagKey + userId` (or `sessionId` if `userId` is absent). The same user always lands in the same bucket.
 
-```
-hash = MurmurHash32(flagKey + userId) % 100
-if hash < percentage → enabled
-else → disabled
-```
+## Rules & Environments
 
-If `userId` is not available, `sessionId` is used instead.
+Activation rules are configured independently per environment. The same flag can be enabled for everyone in Development and only for beta testers in Production.
 
-## Per-Environment Strategies
+| Environment | Rules |
+|-------------|-------|
+| **Development** | Enabled, 100% rollout — all developers see the feature |
+| **Production** | Enabled, «Beta Testers» segment + 10% rollout — gradual launch |
 
-Strategies are configured per environment:
+The SDK receives rules only for the environment its API key is bound to.
 
-| Environment | Strategy |
-|-------------|----------|
-| **dev** | 100% rollout, no rules — all developers see the feature |
-| **staging** | 50% rollout + `beta: true` segment — subset of staging users |
-| **production** | 10% rollout + country rules — gradual global rollout |
+## What's Next
 
-Each environment has its own API key. The SDK receives only the strategy for its environment.
-
-## Related Pages
-
-- [Flags](/en/concepts/flags) — flag types and evaluation logic
-- [Segments](/en/concepts/segments) — reusable user groups
-- [Environments](/en/concepts/environments) — environment isolation
+- [Flags](/en/concepts/flags) — flag types and lifecycle
+- [Contexts](/en/concepts/contexts) — attributes and operators
+- [Segments](/en/concepts/segments) — reusable groups
+- [Environments](/en/concepts/environments) — isolation and limits

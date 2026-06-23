@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Common issues when working with **можно.** and how to solve them.
+Common issues when working with **можно**<span class=brand-dot>.</span> and how to solve them.
 
 ## SDK
 

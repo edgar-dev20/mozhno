@@ -1,10 +1,10 @@
 # Open Core модель
 
-Как устроена модель Open Core в **можно.**: Community Edition, Enterprise-расширения через SPI, цепочка приоритетов, деплой Enterprise JAR и плагинная система.
+Как устроена модель Open Core в **можно**<span class=brand-dot>.</span>: Community Edition, Enterprise-расширения через SPI, цепочка приоритетов, деплой Enterprise JAR и плагинная система.
 
 ## Модель Open Core
 
-**можно.** распространяется по модели Open Core:
+**можно**<span class=brand-dot>.</span> распространяется по модели Open Core:
 
 - **Community Edition (CE)** — AGPL v3. Полнофункциональная система фича-флагов: RELEASE и KILLSWITCH флаги, контекстные правила и сегменты, процентный роллаут, аудит, API-ключи, JWT-аутентификация, REST API, React-панель.
 - **Enterprise Edition (EE)** — коммерческая лицензия. Дополнительные модули, подключаемые через SPI: SSO/OIDC, расширенные стратегии, биллинг, квоты, кастомные UI-панели, приоритетная поддержка.
@@ -41,7 +41,7 @@ graph TB
     CE_UI --> CE_API
 ```
 
-Community Edition полностью функциональна и не требует Enterprise-компонентов. Все SPI-интерфейсы имеют реализации по умолчанию в ядре **можно.**, обеспечивающие базовое поведение.
+Community Edition полностью функциональна и не требует Enterprise-компонентов. Все SPI-интерфейсы имеют реализации по умолчанию в ядре **можно**<span class=brand-dot>.</span>, обеспечивающие базовое поведение.
 
 ## SPI-интерфейсы
 
@@ -212,7 +212,7 @@ volumeMounts:
 
 ## Плагинная система (Plugin Slots)
 
-Пользовательский интерфейс **можно.** поддерживает расширение через слоты — именованные точки в React-дереве, в которые Enterprise-плагины могут вставить свои компоненты.
+Пользовательский интерфейс **можно**<span class=brand-dot>.</span> поддерживает расширение через слоты — именованные точки в React-дереве, в которые Enterprise-плагины могут вставить свои компоненты.
 
 ### Доступные слоты
 
@@ -290,18 +290,6 @@ GET /api/admin/plugins/slots
 
 и рендерит их в соответствующих местах UI:
 
-```typescript
-const { data: slots } = useQuery('pluginSlots', fetchPluginSlots);
-
-return (
-  <Sidebar>
-    <StandardNavigation />
-    {slots
-      .filter(s => s.slotLocation === 'sidebar.admin')
-      .map(slot => <PluginComponent key={slot.id} slot={slot} />)}
-  </Sidebar>
-);
-```
 
 ## Community vs Enterprise: сводная таблица
 
