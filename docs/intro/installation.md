@@ -67,7 +67,7 @@ docker compose up -d
 
 ### Переменные окружения для Docker
 
-Все переменные передаются через секцию `environment` в docker-compose. Полный список — на странице [Конфигурация](/guide/configuration).
+Все переменные передаются через секцию `environment` в docker-compose. Полный список — на странице [Конфигурация](/intro/configuration).
 
 ## Ручная установка
 
@@ -166,7 +166,7 @@ graph TD
 
 ## Что дальше?
 
-- [Конфигурация](/guide/configuration) — все переменные окружения
-- [Быстрый старт](/guide/quick-start) — создайте первый флаг за 5 минут
+- [Конфигурация](/intro/configuration) — все переменные окружения
+- [Быстрый старт](/intro/quick-start) — создайте первый флаг за 5 минут
 - [Docker](/self-hosting/docker) — продакшен-деплой
 - [Kubernetes](/self-hosting/kubernetes) — манифесты из `k8s/`

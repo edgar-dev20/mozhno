@@ -208,5 +208,5 @@ const context = {
 
 - [Java SDK](/sdk/java) — установка, конфигурация и API для Java
 - [JavaScript / TypeScript SDK](/sdk/javascript) — установка и интеграция с React
-- [Быстрый старт](/guide/quick-start) — создание первого флага
+- [Быстрый старт](/intro/quick-start) — создание первого флага
 - [REST API](/api/rest) — прямое взаимодействие с API сервера

@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /en/guide/getting-started
+      link: /en/intro/getting-started
     - theme: alt
       text: GitHub
       link: https://github.com/mozhno-dev/mozhno
@@ -19,7 +19,7 @@ features:
       src: /icons/rocket.svg
     title: Instant Setup
     details: Docker Compose — one command and the server is ready. The web dashboard is built-in, no separate frontend to configure.
-    link: /en/guide/quick-start
+    link: /en/intro/quick-start
     linkText: Start in 5 minutes
   - icon:
       src: /icons/sdk.svg

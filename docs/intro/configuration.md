@@ -158,6 +158,6 @@ CLIENT_MAX_METRICS_PER_KEY=1000
 
 ## Что дальше?
 
-- [Установка](/guide/installation) — как развернуть сервер
+- [Установка](/intro/installation) — как развернуть сервер
 - [Флаги](/concepts/flags) — типы флагов и правила
 - [Окружения](/concepts/environments) — dev, staging, production

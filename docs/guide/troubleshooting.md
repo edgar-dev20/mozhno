@@ -144,5 +144,5 @@ proxy_connect_timeout 10s;
 ## Что дальше?
 
 - [Мониторинг](/self-hosting/monitoring) — health checks, метрики, логи
-- [Конфигурация](/guide/configuration) — все переменные окружения
+- [Конфигурация](/intro/configuration) — все переменные окружения
 - [SDK: Обзор](/sdk/overview) — архитектура клиентских библиотек

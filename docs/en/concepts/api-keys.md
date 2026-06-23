@@ -6,10 +6,10 @@ An API key is how SDKs authenticate with the **можно**<span class=brand-dot
 
 **можно**<span class=brand-dot>.</span> supports two types of API keys:
 
-| Type | Permissions | Endpoints | Use For |
-|------|------------|-----------|---------|
-| **SERVER** | Read flag rules + write metrics | `GET /api/client/features`, `POST /api/client/metrics` | Server-side SDKs (Java, Node.js backend) |
-| **FRONTEND** | Evaluate flags + send metrics | `POST /api/client/evaluate`, `POST /api/client/metrics` | Browser and mobile SDKs |
+| Type | Permissions | Features | Use For |
+|------|------------|----------|---------|
+| **SERVER** | Read rules + write metrics | Receives full flag config, evaluates locally | Server-side SDKs (Java, Node.js backend) |
+| **FRONTEND** | Evaluate flags + send metrics | Sends context to server, receives result | Browser and mobile SDKs |
 
 ### When to Use SERVER
 
@@ -31,7 +31,7 @@ An API key is a 64-character Base64url string without a prefix:
 dGhpcyBpcyBhIDY0LWNoYXJhY3RlciBiYXNlNjR1cmwgZW5jb2RlZCBrZXk
 ```
 
-The key value is shown **only once** on creation. Save it immediately — the value cannot be recovered.
+The key can be viewed in the API Keys section of the web dashboard at any time.
 
 ## Creating a Key
 
@@ -44,23 +44,7 @@ The key value is shown **only once** on creation. Save it immediately — the va
 5. Select an environment
 6. Copy the key and store it securely
 
-### Via REST API
-
-```bash
-curl -X POST "http://localhost:8080/api/v1/api-keys" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Production SDK Key",
-    "keyType": "SERVER",
-    "environmentId": 3,
-    "projectId": 1
-  }'
-```
-
 ## Passing the Key to the SDK
-
-### Java
 
 ```java
 MozhnoConfig config = MozhnoConfig.builder()
@@ -73,58 +57,18 @@ MozhnoConfig config = MozhnoConfig.builder()
 var client = new DefaultMozhnoClient(config);
 ```
 
-### JavaScript / TypeScript
-
-
-## Key Rotation
-
-Rotation replaces a key without application downtime. The process:
-
-```mermaid
-graph LR
-    A[Create new key] --> B[Add new key<br/>to app configuration]
-    B --> C[Remove old key<br/>from configuration]
-    C --> D[Revoke old key]
-```
-
-1. **Create a new key** in the web dashboard
-2. **Add the new key** to your application's environment variables or secrets manager
-3. **Restart the application** or update configuration live
-4. **Delete the old key** via the web dashboard
-
-> **Recommendation:** rotate keys at least once per quarter.
-
 ## Key Revocation
 
 Deleting a key via the dashboard or API (`DELETE /api/v1/api-keys/{id}`) immediately cuts off access for all clients using that key. The server returns `401` on all subsequent requests.
 
 ## Security
 
-| Rule | Why |
-|------|-----|
-| **Never commit keys to a repository** | A key in Git = a key for everyone with repo access |
-| **Use a secrets manager** | Environment variables, HashiCorp Vault, AWS Secrets Manager |
-| **Different keys for different environments** | A dev key must not grant access to production |
-| **Least privilege** | For SDK clients — SERVER or FRONTEND, not an admin JWT |
-| **Rotate regularly** | At least quarterly |
+- Never commit keys to a repository — use a secrets manager or environment variables.
+- Different keys for different environments: a dev key must not grant access to production.
+- Least privilege: for SDK clients — SERVER or FRONTEND, not an admin JWT.
+- Rotate keys at least once per year.
 
-### What Not to Do
-
-```java
-// ❌ Key hardcoded in source
-var config = MozhnoConfig.builder()
-    .apiKey("dGhpcyBpcyBhIDY0LWNo...")  // visible to everyone in the repo
-    .build();
-```
-
-### What to Do
-
-```java
-// ✅ Key from environment variable
-var config = MozhnoConfig.builder()
-    .apiKey(System.getenv("MOZHNO_API_KEY"))
-    .build();
-```
+See [Security](/en/advanced/security) for details.
 
 ## Related Pages
 

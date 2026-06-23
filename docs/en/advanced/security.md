@@ -84,7 +84,7 @@ Uses the **Token Bucket** algorithm (Bucket4j). Limits are applied to the client
 
 Exceeding the limit returns `429 RATE_LIMIT_EXCEEDED`.
 
-All limits are configurable via environment variables — see [Configuration](/en/guide/configuration#rate-limiting).
+All limits are configurable via environment variables — see [Configuration](/en/intro/configuration#rate-limiting).
 
 ## Browser Protection
 
@@ -119,5 +119,5 @@ APP_CORS_ALLOWED_ORIGINS=https://app.example.com
 
 - [API Keys](/en/concepts/api-keys) — access key management
 - [Users & Roles](/en/concepts/users) — role model
-- [Configuration](/en/guide/configuration) — all environment variables
+- [Configuration](/en/intro/configuration) — all environment variables
 - [Docker](/en/self-hosting/docker) — secure deployment

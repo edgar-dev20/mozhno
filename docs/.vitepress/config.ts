@@ -1,10 +1,10 @@
 import { defineConfig } from 'vitepress'
 
 const ruGuideSidebar = [
-  { text: 'Введение', link: '/guide/getting-started' },
-  { text: 'Быстрый старт', link: '/guide/quick-start' },
-  { text: 'Установка', link: '/guide/installation' },
-  { text: 'Конфигурация', link: '/guide/configuration' },
+  { text: 'Введение', link: '/intro/getting-started' },
+  { text: 'Быстрый старт', link: '/intro/quick-start' },
+  { text: 'Установка', link: '/intro/installation' },
+  { text: 'Конфигурация', link: '/intro/configuration' },
 ]
 
 const ruGuidesSidebar = [
@@ -57,10 +57,10 @@ const ruAdvancedSidebar = [
 ]
 
 const enGuideSidebar = [
-  { text: 'Introduction', link: '/en/guide/getting-started' },
-  { text: 'Quick Start', link: '/en/guide/quick-start' },
-  { text: 'Installation', link: '/en/guide/installation' },
-  { text: 'Configuration', link: '/en/guide/configuration' },
+  { text: 'Introduction', link: '/en/intro/getting-started' },
+  { text: 'Quick Start', link: '/en/intro/quick-start' },
+  { text: 'Installation', link: '/en/intro/installation' },
+  { text: 'Configuration', link: '/en/intro/configuration' },
 ]
 
 const enGuidesSidebar = [
@@ -133,7 +133,7 @@ export default defineConfig({
 
       themeConfig: {
         nav: [
-          { text: 'Введение', link: '/guide/getting-started' },
+          { text: 'Введение', link: '/intro/getting-started' },
           { text: 'Концепты', link: '/concepts/overview' },
           { text: 'Руководства', link: '/guide/flags-workflow' },
           { text: 'SDK', link: '/sdk/overview' },
@@ -143,11 +143,13 @@ export default defineConfig({
         ],
 
         sidebar: {
+          '/intro/': [
+            { text: 'Введение', link: '/intro/getting-started' },
+            { text: 'Быстрый старт', link: '/intro/quick-start' },
+            { text: 'Установка', link: '/intro/installation' },
+            { text: 'Конфигурация', link: '/intro/configuration' },
+          ],
           '/guide/': [
-            { text: 'Введение', link: '/guide/getting-started' },
-            { text: 'Быстрый старт', link: '/guide/quick-start' },
-            { text: 'Установка', link: '/guide/installation' },
-            { text: 'Конфигурация', link: '/guide/configuration' },
             { text: 'Работа с флагами', link: '/guide/flags-workflow' },
             { text: 'Таргетинг', link: '/guide/targeting' },
             { text: 'Роллаут', link: '/guide/rollout' },
@@ -186,7 +188,7 @@ export default defineConfig({
 
       themeConfig: {
         nav: [
-          { text: 'Guide', link: '/en/guide/getting-started' },
+          { text: 'Guide', link: '/en/intro/getting-started' },
           { text: 'Concepts', link: '/en/concepts/overview' },
           { text: 'Guides', link: '/en/guide/flags-workflow' },
           { text: 'SDK', link: '/en/sdk/overview' },
@@ -196,11 +198,13 @@ export default defineConfig({
         ],
 
         sidebar: {
+          '/en/intro/': [
+            { text: 'Introduction', link: '/en/intro/getting-started' },
+            { text: 'Quick Start', link: '/en/intro/quick-start' },
+            { text: 'Installation', link: '/en/intro/installation' },
+            { text: 'Configuration', link: '/en/intro/configuration' },
+          ],
           '/en/guide/': [
-            { text: 'Introduction', link: '/en/guide/getting-started' },
-            { text: 'Quick Start', link: '/en/guide/quick-start' },
-            { text: 'Installation', link: '/en/guide/installation' },
-            { text: 'Configuration', link: '/en/guide/configuration' },
             { text: 'Flag Workflow', link: '/en/guide/flags-workflow' },
             { text: 'Targeting', link: '/en/guide/targeting' },
             { text: 'Rollout', link: '/en/guide/rollout' },

@@ -399,4 +399,4 @@ SPRING_DATASOURCE_URL=jdbc:postgresql://host:5432/feature_flags?ssl=true&sslmode
 - [Docker](/self-hosting/docker) — контейнеризация PostgreSQL и приложения
 - [Kubernetes](/self-hosting/kubernetes) — StatefulSet, PV, PVC для продакшен-окружения
 - [Масштабирование](/self-hosting/scaling) — sizing пула соединений при горизонтальном масштабировании
-- [Конфигурация](/guide/configuration) — все переменные окружения для БД
+- [Конфигурация](/intro/configuration) — все переменные окружения для БД
