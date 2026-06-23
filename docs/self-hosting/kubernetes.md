@@ -1,6 +1,6 @@
 # Kubernetes-деплой
 
-Развёртывание **можно.** в кластере Kubernetes: Deployment, Service, HPA, PDB, пробы и управление секретами.
+Развёртывание **можно**<span class=brand-dot>.</span> в кластере Kubernetes: Deployment, Service, HPA, PDB, пробы и управление секретами.
 
 ## Обзор манифестов
 

@@ -1,10 +1,10 @@
 # Environments
 
-An **environment** is an isolated namespace for flag configuration. **можно.** does not hardcode environments — you control which environments exist and can add/remove them as needed.
+An **environment** is an isolated namespace for flag configuration. **можно**<span class=brand-dot>.</span> does not hardcode environments — you control which environments exist and can add/remove them as needed.
 
 ## Default Environments
 
-When a project is created, **можно.** automatically provisions two environments:
+When a project is created, **можно**<span class=brand-dot>.</span> automatically provisions two environments:
 
 | Environment | Key | Purpose |
 |-------------|-----|---------|
@@ -67,12 +67,6 @@ var config = MozhnoConfig.builder()
 var client = new DefaultMozhnoClient(config);
 ```
 
-```typescript
-const client = new MozhnoClient({
-  url: 'http://localhost:8080',
-  apiKey: 'your-api-key-here',
-});
-```
 
 ### Rotation and Revocation
 

@@ -4,7 +4,7 @@
 
 ## Окружения по умолчанию
 
-При создании проекта **можно.** автоматически создаёт два окружения:
+При создании проекта **можно**<span class=brand-dot>.</span> автоматически создаёт два окружения:
 
 | Окружение | Ключ | Назначение |
 |-----------|------|------------|
@@ -69,12 +69,6 @@ var config = MozhnoConfig.builder()
 var client = new DefaultMozhnoClient(config);
 ```
 
-```typescript
-const client = new MozhnoClient({
-  url: 'http://localhost:8080',
-  apiKey: 'dGhpcyBpcyBhbiBhcGkga2V5...',  // ключ от production
-});
-```
 
 ### Ротация и отзыв
 

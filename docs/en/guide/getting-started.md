@@ -1,6 +1,6 @@
 # Introduction
 
-**можно.** is a feature flag management server for teams of any size.
+**можно**<span class=brand-dot>.</span> is a feature flag management server for teams of any size.
 
 With it you can:
 

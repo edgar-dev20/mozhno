@@ -1,6 +1,6 @@
 # Metrics & Analytics
 
-**можно.** collects feature flag usage metrics: how many times a flag was evaluated and what result it returned. Metrics are visualized in the web dashboard via sparkline charts and accessible through the REST API.
+**можно**<span class=brand-dot>.</span> collects feature flag usage metrics: how many times a flag was evaluated and what result it returned. Metrics are visualized in the web dashboard via sparkline charts and accessible through the REST API.
 
 ## How Metrics Are Collected
 
@@ -110,14 +110,6 @@ MozhnoConfig config = MozhnoConfig.builder()
     .build();
 ```
 
-```typescript
-const client = new MozhnoClient({
-  url: 'http://localhost:8080',
-  apiKey: '<api-key>',
-  appName: 'my-app',
-  disableMetrics: true,
-});
-```
 
 ## Exporting Metrics via SPI
 

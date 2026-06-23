@@ -1,6 +1,6 @@
 # Migration
 
-Migrate from LaunchDarkly, Unleash, or Flagsmith to **можно.**. This guide covers flag export/import, API key migration, SDK replacement, and common pitfalls.
+Migrate from LaunchDarkly, Unleash, or Flagsmith to **можно**<span class=brand-dot>.</span>. This guide covers flag export/import, API key migration, SDK replacement, and common pitfalls.
 
 ## General Migration Strategy
 

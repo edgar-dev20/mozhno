@@ -1,6 +1,6 @@
 # REST API Reference
 
-Полный справочник по REST API **можно.** v1. Для каждого endpoint приведены метод, путь, параметры и примеры `curl`.
+Полный справочник по REST API **можно**<span class=brand-dot>.</span> v1. Для каждого endpoint приведены метод, путь, параметры и примеры `curl`.
 
 > **Совет:** Интерактивная документация доступна через Swagger UI по адресу [`/swagger-ui.html`](http://localhost:8080/swagger-ui.html). OpenAPI 3.1 спецификация — [`/v3/api-docs`](http://localhost:8080/v3/api-docs).
 

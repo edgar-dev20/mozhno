@@ -1,6 +1,6 @@
 # JavaScript / TypeScript SDK
 
-JavaScript/TypeScript SDK для **можно.** — клиентская библиотека для Node.js и браузерных приложений. Полная поддержка TypeScript, типы включены в пакет.
+JavaScript/TypeScript SDK для **можно**<span class=brand-dot>.</span> — клиентская библиотека для Node.js и браузерных приложений. Полная поддержка TypeScript, типы включены в пакет.
 
 ## Установка
 
@@ -72,7 +72,7 @@ await client.start();
 
 | Опция | Тип | Обязательно | По умолчанию | Описание |
 |-------|-----|-------------|-------------|----------|
-| `url` | `string` | Да | — | URL сервера **можно.** |
+| `url` | `string` | Да | — | URL сервера **можно**<span class=brand-dot>.</span> |
 | `appName` | `string` | Да | — | Идентификатор приложения |
 | `apiKey` | `string` | Нет | — | API-ключ окружения |
 | `clientKey` | `string` | Нет | — | Клиентский ключ (для `mode: 'client'`) |

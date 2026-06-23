@@ -1,6 +1,6 @@
 # Architecture
 
-Technical architecture of **можно.** — module structure, tech stack, evaluation flow, and authentication.
+Technical architecture of **можно**<span class=brand-dot>.</span> — module structure, tech stack, evaluation flow, and authentication.
 
 ## Module Diagram
 

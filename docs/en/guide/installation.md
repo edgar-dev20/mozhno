@@ -1,6 +1,6 @@
 # Installation
 
-This guide covers all installation methods for **можно.** — from a quick Docker setup to a full manual deployment.
+This guide covers all installation methods for **можно**<span class=brand-dot>.</span> — from a quick Docker setup to a full manual deployment.
 
 ## Prerequisites
 
@@ -95,7 +95,7 @@ See [Configuration](/en/guide/configuration) for all available variables.
 
 ### Step 4: Build and run
 
-**можно.** uses a multi-module Gradle project with a Makefile for common tasks.
+**можно**<span class=brand-dot>.</span> uses a multi-module Gradle project with a Makefile for common tasks.
 
 ```bash
 # Start PostgreSQL
@@ -133,7 +133,7 @@ The project includes a `Makefile` with common operations:
 
 ## Database Setup
 
-**можно.** uses Flyway for schema migrations. Migrations run automatically on server startup via Spring Boot auto-configuration.
+**можно**<span class=brand-dot>.</span> uses Flyway for schema migrations. Migrations run automatically on server startup via Spring Boot auto-configuration.
 
 The server connects using Spring's `JdbcTemplate` — no JPA or ORM layer. This keeps database access explicit and lightweight.
 
@@ -158,7 +158,7 @@ Kubernetes manifests are provided in the `k8s/` directory:
 kubectl apply -f k8s/
 ```
 
-This deploys the **можно.** server (Deployment + Service + HPA + PDB), Secrets, and ConfigMap. See [Kubernetes](/en/self-hosting/kubernetes) for detailed instructions.
+This deploys the **можно**<span class=brand-dot>.</span> server (Deployment + Service + HPA + PDB), Secrets, and ConfigMap. See [Kubernetes](/en/self-hosting/kubernetes) for detailed instructions.
 
 ## Verifying the Installation
 

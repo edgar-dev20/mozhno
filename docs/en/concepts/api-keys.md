@@ -1,10 +1,10 @@
 # API Keys
 
-An API key is how SDKs authenticate with the **можно.** server. Each key is bound to a specific environment and project, determining which flags the client can access and what operations are allowed.
+An API key is how SDKs authenticate with the **можно**<span class=brand-dot>.</span> server. Each key is bound to a specific environment and project, determining which flags the client can access and what operations are allowed.
 
 ## Key Types
 
-**можно.** supports two types of API keys:
+**можно**<span class=brand-dot>.</span> supports two types of API keys:
 
 | Type | Permissions | Endpoints | Use For |
 |------|------------|-----------|---------|
@@ -75,14 +75,6 @@ var client = new DefaultMozhnoClient(config);
 
 ### JavaScript / TypeScript
 
-```typescript
-const client = new MozhnoClient({
-  url: 'http://localhost:8080',
-  apiKey: 'your-api-key-here',  // SERVER
-  // or clientKey for FRONTEND
-  appName: 'my-app',
-});
-```
 
 ## Key Rotation
 

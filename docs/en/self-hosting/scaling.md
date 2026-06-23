@@ -1,6 +1,6 @@
 # Scaling
 
-**можно.** is designed for horizontal scaling. Every server instance is stateless — all persistent state lives in PostgreSQL. Add more replicas to handle more traffic.
+**можно**<span class=brand-dot>.</span> is designed for horizontal scaling. Every server instance is stateless — all persistent state lives in PostgreSQL. Add more replicas to handle more traffic.
 
 ## Stateless Architecture
 
@@ -72,7 +72,7 @@ server {
 
 ## Caching
 
-**можно.** uses **Caffeine** — a local in-memory cache within a single JVM. No Redis, no distributed cache required.
+**можно**<span class=brand-dot>.</span> uses **Caffeine** — a local in-memory cache within a single JVM. No Redis, no distributed cache required.
 
 ### What Is Cached
 

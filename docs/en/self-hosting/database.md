@@ -1,6 +1,6 @@
 # Database
 
-**можно.** uses PostgreSQL 15+ for all persistent storage: flags, strategies, segments, users, audit logs, and API keys. This page covers setup, connection pooling, migrations, backups, and performance.
+**можно**<span class=brand-dot>.</span> uses PostgreSQL 15+ for all persistent storage: flags, strategies, segments, users, audit logs, and API keys. This page covers setup, connection pooling, migrations, backups, and performance.
 
 ## Configuration
 
