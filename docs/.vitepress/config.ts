@@ -114,13 +114,13 @@ const enAdvancedSidebar = [
 export default defineConfig({
   title: 'можно.',
   description: 'Documentation for можно. — open-core feature flag management platform',
-  base: '/mozhno/',
+  base: '/',
 
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/mozhno/favicon.svg' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
     ['meta', { name: 'theme-color', content: '#3d4f7a' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:image', content: '/mozhno/og-image.png' }],
+    ['meta', { property: 'og:image', content: '/og-image.png' }],
   ],
 
   locales: {
@@ -284,7 +284,7 @@ export default defineConfig({
   },
 
   sitemap: {
-    hostname: 'https://mozhno-dev.github.io/mozhno',
+    hostname: 'https://docs.mozhno.dev',
   },
 
   transformHead: async (context: any) => {
@@ -303,8 +303,8 @@ export default defineConfig({
       ['meta', { property: 'og:description', content: description }],
       ['meta', { property: 'og:locale', content: isRu ? 'ru_RU' : 'en_US' }],
       ['meta', { name: 'description', content: description }],
-      ['link', { rel: 'alternate', hreflang: 'ru', href: `https://mozhno-dev.github.io/mozhno${isRu ? path : path.replace('/en', '')}` }],
-      ['link', { rel: 'alternate', hreflang: 'en', href: `https://mozhno-dev.github.io/mozhno${isRu ? '/en' + path : path}` }],
+      ['link', { rel: 'alternate', hreflang: 'ru', href: `https://docs.mozhno.dev${isRu ? path : path.replace('/en', '')}` }],
+      ['link', { rel: 'alternate', hreflang: 'en', href: `https://docs.mozhno.dev${isRu ? '/en' + path : path}` }],
     ]
   },
 })
