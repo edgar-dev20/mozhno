@@ -104,6 +104,6 @@ npm install @mozhno/client-js
 
 ## What's Next?
 
-- [Installation](/en/guide/installation) — manual setup and production configuration
-- [Configuration](/en/guide/configuration) — all environment variables
+- [Installation](/en/intro/installation) — manual setup and production configuration
+- [Configuration](/en/intro/configuration) — all environment variables
 - [Flags](/en/concepts/flags) — learn about flag types and rules

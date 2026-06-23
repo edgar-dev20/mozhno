@@ -235,4 +235,4 @@ curl -X POST "http://localhost:8080/api/v1/flags/42/archive" \
 - [REST API Reference](/api/rest) — полный список endpoints с примерами
 - [Интеграции](/guide/integrations) — CI/CD, вебхуки, GitHub Actions
 - [SDK: Обзор](/sdk/overview) — как SDK взаимодействует с API
-- [Конфигурация](/guide/configuration) — переменные окружения сервера
+- [Конфигурация](/intro/configuration) — переменные окружения сервера

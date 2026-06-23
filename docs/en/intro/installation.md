@@ -91,7 +91,7 @@ export SPRING_DATASOURCE_PASSWORD=flags_password
 export JWT_SECRET=$(openssl rand -base64 32)
 ```
 
-See [Configuration](/en/guide/configuration) for all available variables.
+See [Configuration](/en/intro/configuration) for all available variables.
 
 ### Step 4: Build and run
 
@@ -184,6 +184,6 @@ http://localhost:8080/v3/api-docs
 
 ## Next Steps
 
-- [Configuration](/en/guide/configuration) — all environment variables and their defaults
-- [Quick Start](/en/guide/quick-start) — create your first flag in 5 minutes
+- [Configuration](/en/intro/configuration) — all environment variables and their defaults
+- [Quick Start](/en/intro/quick-start) — create your first flag in 5 minutes
 - [Docker Deployment](/en/self-hosting/docker) — production Docker configuration

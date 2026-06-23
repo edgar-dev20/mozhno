@@ -40,7 +40,7 @@ graph LR
 
 ## Ready to Try?
 
-Head over to [Quick Start](/en/guide/quick-start) — get the server running in 5 minutes.
+Head over to [Quick Start](/en/intro/quick-start) — get the server running in 5 minutes.
 
 On first launch, the onboarding wizard will walk you through creating your admin account, project, and first flag — then you're in.
 

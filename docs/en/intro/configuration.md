@@ -111,6 +111,6 @@ services:
 
 ## Next Steps
 
-- [Installation](/en/guide/installation) — Docker and manual setup
+- [Installation](/en/intro/installation) — Docker and manual setup
 - [Flags](/en/concepts/flags) — understanding flag types and rules
 - [Environments](/en/concepts/environments) — configuring dev, staging, production

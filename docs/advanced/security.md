@@ -84,7 +84,7 @@ sequenceDiagram
 
 При превышении возвращается `429 RATE_LIMIT_EXCEEDED`.
 
-Все лимиты настраиваются через переменные окружения — см. [Конфигурацию](/guide/configuration#rate-limiting).
+Все лимиты настраиваются через переменные окружения — см. [Конфигурацию](/intro/configuration#rate-limiting).
 
 ## Защита браузера
 
@@ -119,5 +119,5 @@ APP_CORS_ALLOWED_ORIGINS=https://app.example.com
 
 - [API-ключи](/concepts/api-keys) — управление ключами доступа
 - [Пользователи и роли](/concepts/users) — ролевая модель
-- [Конфигурация](/guide/configuration) — все переменные окружения
+- [Конфигурация](/intro/configuration) — все переменные окружения
 - [Docker](/self-hosting/docker) — безопасный деплой

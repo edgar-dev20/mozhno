@@ -79,19 +79,6 @@ Includes all users whose `userId` contains `beta-`.
 
 Includes users with email on the `@company.com` corporate domain.
 
-### Paying Users
-
-```json
-{
-  "name": "Paying Users",
-  "rules": [
-    { "field": "plan", "operator": "not_in", "values": ["free", "trial"] }
-  ]
-}
-```
-
-Excludes free and trial users.
-
 ## What's Next
 
 - [Flags](/en/concepts/flags) — flag types and targeting rules

@@ -9,7 +9,7 @@ hero:
   actions:
     - theme: brand
       text: Быстрый старт
-      link: /guide/getting-started
+      link: /intro/getting-started
     - theme: alt
       text: GitHub
       link: https://github.com/mozhno-dev/mozhno
@@ -19,7 +19,7 @@ features:
       src: /icons/rocket.svg
     title: Мгновенный запуск
     details: Docker Compose — одна команда, и сервер готов. Веб-панель уже встроена, не нужно настраивать отдельный фронтенд.
-    link: /guide/quick-start
+    link: /intro/quick-start
     linkText: Запустить за 5 минут
   - icon:
       src: /icons/sdk.svg

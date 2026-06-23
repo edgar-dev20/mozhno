@@ -144,5 +144,5 @@ proxy_connect_timeout 10s;
 ## Related Pages
 
 - [Monitoring](/en/self-hosting/monitoring) — health checks, metrics, logs
-- [Configuration](/en/guide/configuration) — all environment variables
+- [Configuration](/en/intro/configuration) — all environment variables
 - [SDK Overview](/en/sdk/overview) — client library architecture
