@@ -1,6 +1,6 @@
-# Targeting Rules
+# Targeting
 
-Targeting rules determine **which users receive which flag value** at evaluation time. Each rule is a constraint evaluated against the context attributes you provide at runtime.
+Targeting determines **which users** see a feature. **можно**<span class=brand-dot>.</span> uses constraints, segments, and percentage rollout for precise audience control.
 
 ## How Targeting Works
 
@@ -11,7 +11,7 @@ When an SDK evaluates a flag, it processes in this order:
 3. **Segments** — at least one must match (OR logic)
 4. **If both constraints and segments are present** — either passing grants access (OR)
 5. **Percentage rollout** — deterministic distribution via MurmurHash32
-6. **Default** — if nothing is configured, return `false`
+6. **Default** — if nothing is configured, return `true`
 
 ```mermaid
 flowchart TD
@@ -69,72 +69,56 @@ const enabled = client.isEnabled("premium_features", context);
 
 ## Constraint Operators
 
-Each constraint compares a context field against one or more values using an operator:
-
-| Operator | Description | Example |
-|----------|-------------|---------|
-| `in` | Value is in a list | `country` in `["DE", "FR", "ES"]` |
-| `not_in` | Value is NOT in a list | `country` not_in `["US", "CA"]` |
-| `eq` | Equal (numeric for `contextType: number`) | `plan` eq `"enterprise"` |
-| `ne` | Not equal | `plan` ne `"free"` |
-| `gt` | Greater than | `appVersion` gt `"2.0.0"` |
-| `gte` | Greater than or equal | `age` gte `"18"` |
-| `lt` | Less than | `priority` lt `"5"` |
-| `lte` | Less than or equal | `retries` lte `"3"` |
-| `contains` | Substring match | `email` contains `"@example.com"` |
-
-### Context Types
-
-The `contextType` determines how values are compared:
-
-| Type | Comparison | Example |
-|------|------------|---------|
-| `string` (default) | String comparison | `country` in `["DE"]` |
-| `number` | Numeric (double) | `age` gte `"18"` |
-| `time` | ISO8601 datetime | `eventDate` gt `"2026-01-01T00:00:00Z"` |
-| `semver` | Semantic versioning | `appVersion` gte `"2.1.0"` |
-
-Semantic version comparison correctly handles `"2.10.0"` > `"2.9.0"`.
-
-## Combining Constraints
-
-Within a single strategy, all constraints use **AND** logic — every constraint must match for the flag to be enabled:
+Each constraint compares a context field against one or more values using an operator. All constraints within a strategy use **AND** logic.
 
 ```json
 {
-  "constraints": [
-    {"field": "country", "operator": "in", "values": ["DE", "FR"]},
-    {"field": "plan", "operator": "eq", "values": ["enterprise"]}
-  ]
+  "field": "country",
+  "operator": "in",
+  "values": ["DE", "FR", "ES"]
 }
 ```
 
-This means: `country` is DE or FR **AND** `plan` is enterprise.
+The context type determines how the operator interprets the value. See the full operator-type compatibility matrix at [Contexts](/en/concepts/contexts#context-types-and-operators).
 
-Multiple constraints on the same `(field, operator)` are merged — any matching value passes that constraint (OR within a constraint group).
+## Segments
 
-## Using Segments in Targeting
+A **segment** is a reusable group of users with its own set of constraints. Within a segment, all constraints use AND logic. A strategy can reference multiple segments — matching **any** of them is enough (OR logic). See [Segments](/en/concepts/segments) for details.
 
-A **segment** is a reusable set of constraints. Reference segments in a strategy rather than repeating rules:
+### Benefits of Segments
 
-- **Within a segment**: All constraints must match (AND logic)
-- **Across segments**: At least one segment must match (OR logic)
-- **Constraints + segments**: Either passing grants access (OR between them)
-
-> **Tip:** Segments are evaluated at flag evaluation time against the provided context. Changes to a segment immediately affect all flags that reference it.
+| Benefit | Description |
+|---------|-------------|
+| **Single source of truth** | Change the segment — all flags update automatically |
+| **DRY** | Don't repeat the same rules on every flag |
+| **Audit** | See who changed the segment composition and when |
 
 ## Percentage Rollout
 
-When percentage rollout is configured:
+Deterministic distribution via hashing:
 
 ```
-hash = MurmurHash32(flagKey + userId) % 100
+hash = MurmurHash32(flagKey + identifier) % 100
 if hash < percentage → enabled
 ```
 
-The same user always gets the same result for the same flag. If `userId` is absent, `sessionId` is used instead. 100% rollout enables the flag for everyone; 0% disables it.
+The same identifier always gets the same result for the same flag. The identifier is `userId`, with `sessionId` as fallback.
+
+> **Important:** If neither `userId` nor `sessionId` is provided, the hash is seeded with just the flag key — all anonymous users land in the same bucket (either all get the feature, or none do). The SDK logs a warning in this case.
+
+100% rollout enables the flag for everyone; 0% disables it.
+
+## Combining Constraints and Segments
+
+A strategy can contain both constraints and segments simultaneously:
+
+- Passing **either** is enough — constraints OR any of the segments
+- Neither constraints nor any segment match → flag returns `false` (rollout is not applied)
+- Passed → percentage rollout is then applied
 
 ## Next Steps
 
-- Set up a [Gradual Rollout](./rollout.md) for percentage-based releases.
-- Learn about [SDK Evaluation](../sdk/overview.md) to understand how context flows from your app to the SDK.
+- [Rollout](/en/guide/rollout) — percentage rollouts and canary releases
+- [Segments](/en/concepts/segments) — reusable user groups
+- [Flags](/en/concepts/flags) — flag types and lifecycle
+- [SDK Overview](/en/sdk/overview) — how the SDK evaluates rules locally

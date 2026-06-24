@@ -27,11 +27,11 @@ Navigate to **Flags** and click **New Flag**. Required fields:
 
 After creation the flag is immediately active. Configure activation rules — otherwise the flag returns `false` for everyone.
 
-> **Tip:** The flag key is its identifier in code (`isEnabled("new-checkout", ctx)`). Make keys descriptive. Avoid `flag-42`.
+> **Tip:** The flag key is its identifier in code (`isEnabled("new-checkout", ctx)`). Make keys descriptive. Avoid `flag-42`. See [Best Practices](./best-practices.md#naming-conventions) for naming conventions.
 
 ## Editing a Flag
 
-All fields except **key** can be modified. Changes are recorded in the [audit log](./audit.md) with full diff details.
+All fields except **key** can be modified. Every change is recorded in the [audit log](./audit.md).
 
 Common edits:
 - Adjusting activation rules (enabled, constraints, segments, percentage)
@@ -52,7 +52,9 @@ flowchart LR
     H --> I[Archive<br/>flag]
 ```
 
-Each stage is a change to activation rules on a specific environment. Stages D–G are gradual production rollout with metrics monitoring at each step.
+Each stage is a change to activation rules on a specific environment. Canary launch and gradual rollout in production — with metrics monitoring at each step.
+
+An example workflow — adjust to your team's needs:
 
 | Stage | Environment | Configuration | Who |
 |-------|-------------|---------------|-----|
@@ -76,38 +78,41 @@ Each stage is a change to activation rules on a specific environment. Stages D�
 - Aborted experiment flag
 - Test flag from local development
 
-### Via API
-
-```bash
-# Archive
-curl -X POST "http://localhost:8080/api/v1/flags/42/archive" \
-  -H "Authorization: Bearer $TOKEN"
-
-# Restore from archive
-curl -X POST "http://localhost:8080/api/v1/flags/42/unarchive" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-## Naming Conventions
-
-Use kebab-case with meaningful prefixes:
-
-| Type | Prefix | Example |
-|------|--------|---------|
-| Standard feature | none | `new-checkout`, `ai-search` |
-| Kill switch | `kill-` | `kill-payment-gw`, `kill-third-party` |
-| Experiment | `exp-` | `exp-pricing-layout`, `exp-cta-color` |
-| Temporary | `tmp-` | `tmp-holiday-banner-2026` |
-
 ## Organizing Flags with Tags
 
-Group flags by team, type, and service:
+Tags are flag metadata in `key:value` format. They let you group and filter flags independently of their names. A single flag can have multiple tags.
 
-| Tag | Purpose | Example Flags |
-|-----|---------|---------------|
-| `team:checkout` | Checkout team | `new-checkout`, `one-click-buy` |
-| `type:killswitch` | Emergency switches | `kill-payment-gw`, `kill-third-party` |
-| `service:api` | API service | `rate-limit-v2`, `new-auth` |
+### Why Tags Matter
+
+You have 50 flags. Keys are descriptive, but finding all flags owned by the checkout team is impossible without tags:
+
+| Task | Without tags | With tags |
+|------|-------------|-----------|
+| Find all checkout team flags | Scroll through all 50 flags | Filter `team:checkout` — 3 flags |
+| Show all emergency kill switches | Search by `kill-` prefix in keys | Filter `type:killswitch` — reliable |
+| Find flags for a specific service | Guess from names | Filter `service:api` |
+
+### Creating Tags
+
+Tags are created in the **Tags** section in the sidebar. Each tag is a pair:
+
+| Field | Example |
+|-------|---------|
+| Tag name | `team` |
+| Value | `checkout` |
+
+Once created, a tag can be assigned to any flag during creation or editing.
+
+### Recommended Categories
+
+| Category | Format | Examples |
+|----------|--------|----------|
+| Team | `team:name` | `team:checkout`, `team:platform` |
+| Flag type | `type:purpose` | `type:killswitch`, `type:experiment` |
+| Service | `service:name` | `service:api`, `service:payments` |
+| Status | `status:state` | `status:deprecated`, `status:permanent` |
+
+A flag can carry multiple tags: `team:checkout`, `type:killswitch`, `service:api` — the flag belongs to a team, is classified by type, and is bound to a service simultaneously.
 
 ## Next Steps
 
