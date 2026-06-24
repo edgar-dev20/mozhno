@@ -42,7 +42,7 @@ features:
   - icon:
       src: /icons/opencore.svg
     title: Complete Audit Trail
-    details: Who changed what and when — full history in the dashboard. See the exact diff between versions. No «who turned this on at 3 AM» without an answer.
+    details: Who changed what and when — full history in the dashboard. Every action is recorded. No «who turned this on at 3 AM» without an answer.
     link: /en/guide/audit
     linkText: About audit
   - icon:
