@@ -17,40 +17,40 @@ hero:
 features:
   - icon:
       src: /icons/rocket.svg
-    title: Мгновенный запуск
-    details: Docker Compose — одна команда, и сервер готов. Веб-панель уже встроена, не нужно настраивать отдельный фронтенд.
-    link: /intro/quick-start
-    linkText: Запустить за 5 минут
+    title: Флаги без деплоя
+    details: Включайте и выключайте фичи в продакшене мгновенно. RELEASE для постепенной раскатки, KILLSWITCH для аварийного отключения. Никаких релизных циклов ради одной фичи.
+    link: /concepts/flags
+    linkText: Как работают флаги
   - icon:
       src: /icons/sdk.svg
-    title: Нативные SDK
-    details: Java и JavaScript SDK оценивают флаги локально, без сетевых вызовов. Загрузка правил один раз — решение за микросекунды.
+    title: Локальная оценка в SDK
+    details: SDK оценивают флаги прямо в вашем приложении — никаких сетевых запросов на каждый isEnabled(). Латентность меньше 1 мс, сервер не бутылочное горлышко.
     link: /sdk/overview
     linkText: Смотреть SDK
   - icon:
       src: /icons/targeting.svg
-    title: Гибкий таргетинг
-    details: RELEASE и KILLSWITCH флаги, процентный роллаут, сегменты пользователей, контекстные правила — любой сценарий раскатки.
-    link: /concepts/flags
-    linkText: Изучить возможности
+    title: Гибкие правила активации
+    details: Процентный роллаут, сегменты, контекстные условия — комбинируйте в одной стратегии. AND-логика для правил, OR-логика для сегментов. Любой сценарий раскатки.
+    link: /guide/targeting
+    linkText: Про таргетинг
   - icon:
       src: /icons/permissions.svg
-    title: Гранулярные права
-    details: API-ключи на каждое окружение, JWT-аутентификация, полная история изменений. Контролируйте, кто и когда менял конфигурацию.
-    link: /guide/audit
-    linkText: Об аудите
+    title: Изолированные окружения
+    details: Development, Staging, Production — независимые настройки на каждом. Флаг включён у разработчиков, на 10% в проде, выключен в staging. Никаких пересечений.
+    link: /concepts/environments
+    linkText: Про окружения
   - icon:
       src: /icons/opencore.svg
-    title: Open Core
-    details: Community-версия с полной функциональностью. Enterprise-расширения (SSO, биллинг, вебхуки) через SPI-плагины без форка.
-    link: /advanced/open-core
-    linkText: Архитектура
+    title: Аудит каждого изменения
+    details: Кто, когда и что изменил — полная история в панели. Видна разница между версиями. Никаких «кто это включил в три часа ночи» без ответа.
+    link: /guide/audit
+    linkText: Про аудит
   - icon:
       src: /icons/deploy.svg
-    title: Готово к продакшену
-    details: Docker, PostgreSQL. Health checks, метрики. Горизонтальное масштабирование без sticky sessions.
-    link: /self-hosting/docker
-    linkText: Деплой
+    title: REST API и вебхуки
+    details: Автоматизируйте через CI/CD. Меняйте флаги из пайплайна. Интегрируйтесь с Mattermost. Управление флагами без ручного труда.
+    link: /guide/integrations
+    linkText: Про интеграции
 ---
 
 

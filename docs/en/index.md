@@ -17,40 +17,40 @@ hero:
 features:
   - icon:
       src: /icons/rocket.svg
-    title: Instant Setup
-    details: Docker Compose — one command and the server is ready. The web dashboard is built-in, no separate frontend to configure.
-    link: /en/intro/quick-start
-    linkText: Start in 5 minutes
+    title: Flags Without Deployment
+    details: Toggle features in production instantly. RELEASE for gradual rollout, KILLSWITCH for emergency shutdown. No release cycles for a single feature.
+    link: /en/concepts/flags
+    linkText: How flags work
   - icon:
       src: /icons/sdk.svg
-    title: Native SDKs
-    details: Java and JavaScript SDKs evaluate flags locally, no network calls. Rules loaded once — decisions in microseconds.
+    title: Local Evaluation in SDK
+    details: SDKs evaluate flags inside your application — no network calls on every isEnabled(). Sub-millisecond latency, server is not a bottleneck.
     link: /en/sdk/overview
     linkText: Explore SDKs
   - icon:
       src: /icons/targeting.svg
-    title: Flexible Targeting
-    details: RELEASE and KILLSWITCH flags, percentage rollout, user segments, context constraints — any rollout scenario.
-    link: /en/concepts/flags
-    linkText: Learn more
+    title: Flexible Activation Rules
+    details: Percentage rollout, segments, context constraints — combine in a single strategy. AND logic for constraints, OR logic for segments. Any rollout scenario.
+    link: /en/guide/targeting
+    linkText: About targeting
   - icon:
       src: /icons/permissions.svg
-    title: Granular Permissions
-    details: API keys per environment, JWT authentication, complete audit log. Know who changed what and when.
+    title: Isolated Environments
+    details: Development, Staging, Production — independent settings per environment. Flag on for developers, at 10% in prod, off in staging. No cross-environment leaks.
+    link: /en/concepts/environments
+    linkText: About environments
+  - icon:
+      src: /icons/opencore.svg
+    title: Complete Audit Trail
+    details: Who changed what and when — full history in the dashboard. See the exact diff between versions. No «who turned this on at 3 AM» without an answer.
     link: /en/guide/audit
     linkText: About audit
   - icon:
-      src: /icons/opencore.svg
-    title: Open Core
-    details: Community edition with full functionality. Enterprise extensions (SSO, billing, webhooks) via SPI plugins, no forking.
-    link: /en/advanced/open-core
-    linkText: Architecture
-  - icon:
       src: /icons/deploy.svg
-    title: Production Ready
-    details: Docker, PostgreSQL. Health checks, metrics. Horizontal scaling without sticky sessions.
-    link: /en/self-hosting/docker
-    linkText: Deploy
+    title: REST API and Webhooks
+    details: Automate via CI/CD. Toggle flags from your pipeline. Integrate with Mattermost. Manage flags without manual work.
+    link: /en/guide/integrations
+    linkText: About integrations
 ---
 
 
