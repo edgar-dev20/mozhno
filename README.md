@@ -173,4 +173,4 @@ cd server && ./gradlew :mozhno-client-java:check   # Тесты Java SDK
 
 ### Лицензия
 
-[GNU AGPL v3.0](LICENSE) · © 2025 [Edgar](https://github.com/mozhno-dev)
+[GNU AGPL v3.0](LICENSE) · © 2026 Edgar Gilmanov
