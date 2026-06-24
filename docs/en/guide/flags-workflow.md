@@ -1,66 +1,48 @@
 # Flag Lifecycle & Workflow
 
-The feature flag lifecycle in можно has two main states: **Active** and **Archived**. This document covers the complete workflow, from creating your first flag to managing flags in a team environment.
+The complete feature flag lifecycle in **можно**<span class=brand-dot>.</span>: from creation to archival. Flag organization with tags, naming conventions, and typical team workflow.
 
-## Flag Lifecycle States
+## Flag Lifecycle
 
-```mermaid
-stateDiagram-v2
-    [*] --> Active: Create flag
-    Active --> Active: Edit strategy
-    Active --> Archived: Archive
-    Archived --> Active: Unarchive (restore)
-    Archived --> [*]: Delete permanently
-```
+A flag in **можно**<span class=brand-dot>.</span> has two states:
 
-| State | Description |
+| State | What happens |
 |-------|-------------|
-| **Active** | Flag is live. SDKs evaluate rules and return values. Default after creation. |
-| **Archived** | Flag removed from active evaluation. Retained for audit and historical reference. |
+| **Active** | Flag is visible in the dashboard. SDKs fetch its configuration and evaluate locally. Default state after creation. |
+| **Archived** | Flag hidden from main lists. SDKs stop receiving its configuration. Audit history is preserved. |
 
-Per-environment, a strategy controls whether the flag is **enabled** or **disabled**, along with constraints, segments, and percentage rollout.
+Activation rules are configured **per environment** — enabled/disabled, context constraints, segments, and percentage rollout. See [Targeting](./targeting.md) and [Rollout](./rollout.md).
 
 ## Creating a Flag
 
-Navigate to the **Flags** page and click **New Flag**. Fill in the required fields:
+Navigate to **Flags** and click **New Flag**. Required fields:
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| **Key** | Yes | Unique identifier, immutable after creation. Use kebab-case (e.g., `dark-mode-v2`). |
+| **Key** | Yes | Unique identifier, immutable after creation |
 | **Name** | Yes | Human-readable label shown in the dashboard. |
-| **Description** | No | Details about the flag's purpose and expected behaviour. |
-| **Type** | Yes | `RELEASE` (standard feature flag) or `KILLSWITCH` (emergency disable). |
-| **Tags** | No | Labels for organization and filtering. |
+| **Description** | No | What the flag does and why it exists. |
+| **Type** | Yes | `RELEASE` — standard feature flag for gradual rollout. `KILLSWITCH` — emergency shutoff. |
+| **Tags** | No | Labels for grouping and filtering. |
 
-After creation, configure the strategy for the target environment(s) before the flag takes effect.
+After creation the flag is immediately active. Configure activation rules — otherwise the flag returns `false` for everyone.
 
-> **Tip:** Keep flag keys descriptive and scoped to their domain. Prefer `checkout-redesign` over `flag-42`.
+> **Tip:** The flag key is its identifier in code (`isEnabled("new-checkout", ctx)`). Make keys descriptive. Avoid `flag-42`.
 
 ## Editing a Flag
 
-All fields except the **key** can be modified. Changes are recorded in the [audit log](./audit.md) with full diff details.
+All fields except **key** can be modified. Changes are recorded in the [audit log](./audit.md) with full diff details.
 
-Common edits include:
-- Adjusting strategy configuration (enabled, percentage, constraints, segments)
+Common edits:
+- Adjusting activation rules (enabled, constraints, segments, percentage)
 - Updating name and description
 - Managing tags
 
-## Configuring a Strategy
-
-After creating a flag, configure the strategy per environment:
-
-1. Select the environment (Development, Production)
-2. Set **enabled** state
-3. Add **context constraints** for targeting
-4. Attach **segments** (reusable user groups)
-5. Set **percentage rollout** (0–100%)
-6. Save
-
-## Full Lifecycle: Creation to Archive
+## Typical Team Workflow
 
 ```mermaid
 flowchart LR
-    A[Create<br/>flag] --> B[dev<br/>100% rollout]
+    A[Create<br/>flag] --> B[dev<br/>100%]
     B --> C[staging<br/>QA testing]
     C --> D[production<br/>1% canary]
     D --> E[10%]
@@ -70,67 +52,67 @@ flowchart LR
     H --> I[Archive<br/>flag]
 ```
 
-Each stage is a strategy change on a specific environment. Stages D–G are a gradual production rollout with metrics monitoring at each step.
+Each stage is a change to activation rules on a specific environment. Stages D–G are gradual production rollout with metrics monitoring at each step.
 
-## Typical Team Workflow
-
-1. **Create flag** — developer creates flag with description
-2. **Development** — flag enabled in dev for all (100% or no constraints)
-3. **Testing** — flag enabled in staging for QA (segment)
-4. **Canary** — 1-5% rollout in production, monitor metrics
-5. **Gradual rollout** — increase: 5% → 25% → 50% → 100%
-6. **Code cleanup** — remove old code path after full rollout
-7. **Archive flag** — move to archive via dashboard or API
+| Stage | Environment | Configuration | Who |
+|-------|-------------|---------------|-----|
+| Create | — | Flag created, no rules yet | Developer |
+| Development | dev | Enabled, 100% | Developer |
+| Testing | staging | Enabled, QA segment | QA |
+| Canary | production | 1–5% | Release engineer |
+| Rollout | production | 10% → 50% → 100% | Release engineer |
+| Cleanup | — | Old code removed from app | Developer |
+| Archive | — | Flag archived | Developer |
 
 ## Archive and Delete
 
 ### When to Archive
-- Flag at 100% rollout and old code removed
+- Flag at 100% and old code removed
 - Need to preserve audit history
 - Flag may be needed again
 
 ### When to Delete
 - Flag created in error (typo in key)
 - Aborted experiment flag
-- Test flag for local development
+- Test flag from local development
 
-### Archive via API
+### Via API
 
 ```bash
+# Archive
 curl -X POST "http://localhost:8080/api/v1/flags/42/archive" \
   -H "Authorization: Bearer $TOKEN"
-```
 
-### Restore from Archive
-
-```bash
+# Restore from archive
 curl -X POST "http://localhost:8080/api/v1/flags/42/unarchive" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
-## Flag Organization
-
-### Tags
-
-Group flags using tags:
-
-| Tag | Description | Example Flags |
-|-----|-------------|---------------|
-| `team:checkout` | Checkout team | `new-checkout`, `one-click-buy` |
-| `type:killswitch` | Emergency switches | `kill-payment-gw`, `kill-third-party` |
-
-### Naming Conventions
+## Naming Conventions
 
 Use kebab-case with meaningful prefixes:
 
-- **Standard features:** `new-checkout`, `ai-search-enabled`
-- **Kill switch:** `kill-payment-gateway`, `kill-third-party-api`
-- **Experiments:** `exp-pricing-layout`, `exp-cta-placement`
-- **Temporary:** `tmp-holiday-banner-2026`
+| Type | Prefix | Example |
+|------|--------|---------|
+| Standard feature | none | `new-checkout`, `ai-search` |
+| Kill switch | `kill-` | `kill-payment-gw`, `kill-third-party` |
+| Experiment | `exp-` | `exp-pricing-layout`, `exp-cta-color` |
+| Temporary | `tmp-` | `tmp-holiday-banner-2026` |
+
+## Organizing Flags with Tags
+
+Group flags by team, type, and service:
+
+| Tag | Purpose | Example Flags |
+|-----|---------|---------------|
+| `team:checkout` | Checkout team | `new-checkout`, `one-click-buy` |
+| `type:killswitch` | Emergency switches | `kill-payment-gw`, `kill-third-party` |
+| `service:api` | API service | `rate-limit-v2`, `new-auth` |
 
 ## Next Steps
 
-- [Targeting](./targeting.md) — Configure rules and segments
-- [Rollout](./rollout.md) — Percentage rollouts
-- [Audit](./audit.md) — Track changes
+- [Targeting](./targeting.md) — Constraints and segments
+- [Rollout](./rollout.md) — Percentage rollouts and canary releases
+- [Audit](./audit.md) — Who changed what and when
+- [Metrics](./metrics.md) — Flag usage monitoring
 - [Best Practices](./best-practices.md) — Flag debt management
