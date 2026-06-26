@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { Camera, Sun, Moon, LogOut, ChevronDown, Loader2, Globe } from '@/shared/icons';
-import { useTheme } from 'next-themes';
+import { Camera, LogOut, ChevronDown, Loader2, Globe } from '@/shared/icons';
 import { useAuth } from '@/app/auth/useAuth';
 import { api } from '@/api';
 import { useLocale, useT } from '@/i18n';
@@ -19,7 +18,6 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar'
 import { Badge } from '@/shared/components/Badge';
 
 export function UserProfileMenu() {
-  const { theme, setTheme } = useTheme();
   const { user, logout, updateUser } = useAuth();
   const { locale, setLocale } = useLocale();
   const t = useT();
@@ -138,23 +136,6 @@ export function UserProfileMenu() {
             : hasAvatar
               ? t('userMenu.changePhoto')
               : t('userMenu.uploadPhoto')}
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          className="cursor-pointer"
-        >
-          {theme === 'dark' ? (
-            <>
-              <Sun size={16} />
-              {t('userMenu.lightTheme')}
-            </>
-          ) : (
-            <>
-              <Moon size={16} />
-              {t('userMenu.darkTheme')}
-            </>
-          )}
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

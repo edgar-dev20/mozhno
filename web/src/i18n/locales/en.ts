@@ -3,6 +3,7 @@ import type { MessagesShape } from './ru';
 const en = {
   common: {
     appName: 'mozhno',
+    docs: 'Docs',
     loading: 'Loading...',
     save: 'Save',
     cancel: 'Cancel',
