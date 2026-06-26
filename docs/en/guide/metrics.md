@@ -72,10 +72,7 @@ MozhnoConfig config = MozhnoConfig.builder()
 
 ## Limits
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| Send interval (SDK) | 60 seconds | `sendMetricsInterval` / `metricsInterval` |
-| Max metrics per API key | 1000 | `CLIENT_MAX_METRICS_PER_KEY` |
+Default 60 seconds.
 
 ## Related Pages
 
