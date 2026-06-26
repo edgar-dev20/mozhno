@@ -44,14 +44,7 @@ Each record contains:
 
 Each flag page displays a sparkline chart — a miniature graph showing the flag's evaluation trend over the selected period. The green line represents `true`, the gray line `false`.
 
-Clicking the sparkline opens the **Flag Metrics** dialog with a full chart and filters:
-
-| Filter | Description |
-|--------|-------------|
-| **Environment** | Development / Production |
-| **Instance** | A specific SDK instance |
-| **Application** | Application name |
-| **Period** | Last hour / 24 hours / 7 days / 30 days |
+Clicking the sparkline opens a dialog with a full chart and a list of SDK instances grouped by application. Filter by application name and specific instance. Metrics are retained for the last 48 hours.
 
 ## Metrics REST API
 
