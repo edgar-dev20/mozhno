@@ -23,44 +23,6 @@ The request body is built from a template you define, with event variable substi
 | **Events** | Which system events trigger the webhook |
 | **Enabled** | Active / inactive toggle |
 
-### REST API
-
-```bash
-curl -X POST "http://localhost:8080/api/v1/integrations" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "My webhook",
-    "enabled": true,
-    "type": "custom_webhook",
-    "configJson": "{\"url\":\"https://my-server.example.com/hooks\",\"headers\":{\"Content-Type\":\"application/json\"},\"body\":\"{ \\\"event\\\": \\\"[[events.action]]\\\", \\\"resource\\\": \\\"[[events.resourceName]]\\\" }\"}",
-    "eventSubscriptionsJson": "[\"flag.created\",\"flag.updated\",\"flag.archived\"]"
-  }'
-```
-
-List:
-
-```bash
-curl "http://localhost:8080/api/v1/integrations" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-Update:
-
-```bash
-curl -X PUT "http://localhost:8080/api/v1/integrations/1" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"enabled": false, "name": "My webhook", "type": "custom_webhook", "configJson": "...", "eventSubscriptionsJson": "..."}'
-```
-
-Delete:
-
-```bash
-curl -X DELETE "http://localhost:8080/api/v1/integrations/1" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
 ## Event Types
 
 | Event | Trigger |

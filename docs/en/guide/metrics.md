@@ -4,12 +4,12 @@
 
 ## How Metrics Are Collected
 
-The SDK accumulates `true`/`false` counters for each flag in a local buffer (`ConcurrentHashMap`). At a configurable interval (default: 60 seconds), the buffer is sent to the server in a single request:
+The SDK accumulates `true`/`false` counters for each flag in memory and sends them to the server in a single request at a configurable interval (default: 60 seconds):
 
 ```mermaid
 sequenceDiagram
     participant App as Application
-    participant SDK as SDK (in-memory buffer)
+    participant SDK as SDK
     participant Server
 
     loop Each isEnabled()
