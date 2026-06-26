@@ -4,12 +4,12 @@
 
 ## Как собираются метрики
 
-SDK накапливает счётчики `true`/`false` для каждого флага в локальном буфере (`ConcurrentHashMap`). Раз в заданный интервал (по умолчанию — 60 секунд) буфер отправляется на сервер одним запросом:
+SDK накапливает счётчики `true`/`false` для каждого флага в памяти и отправляет их на сервер одним запросом раз в заданный интервал (по умолчанию — 60 секунд):
 
 ```mermaid
 sequenceDiagram
     participant App as Приложение
-    participant SDK as SDK (буфер в памяти)
+    participant SDK as SDK
     participant Server
 
     loop Каждый isEnabled()
