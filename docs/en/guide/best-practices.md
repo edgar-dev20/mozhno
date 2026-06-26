@@ -253,15 +253,6 @@ test("shows new checkout when flag is enabled", async () => {
 });
 ```
 
-### Testing in Staging
-
-Before enabling a flag in production:
-
-1. Enable the flag at 100% in staging.
-2. Run end-to-end tests against staging.
-3. Manually verify the feature with targeted rules (`userId equals "qa-user"`).
-4. Test edge cases: missing context attributes, connection failures (SDK should return defaults).
-
 ## Flag Debt Management
 
 **Flag debt** is the accumulated cost of maintaining stale or unnecessary feature flags. Left unchecked, it leads to:
