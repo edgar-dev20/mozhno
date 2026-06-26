@@ -4,23 +4,27 @@
 
 ## How Metrics Are Collected
 
-The SDK accumulates evaluation counters for each flag in memory and sends them to the server at a configurable interval (default: 60 seconds):
+The SDK accumulates `true`/`false` counters for each flag in a local buffer (`ConcurrentHashMap`). At a configurable interval (default: 60 seconds), the buffer is sent to the server in a single request:
 
 ```mermaid
 sequenceDiagram
-    participant App
-    participant SDK
+    participant App as Application
+    participant SDK as SDK (in-memory buffer)
     participant Server
 
-    loop Flag evaluation
-        App->>SDK: isEnabled("new-checkout", ctx)
-        SDK-->>App: true/false
+    loop Each isEnabled()
+        App->>SDK: isEnabled("flag", ctx)
         Note over SDK: trueCount++ or falseCount++
     end
 
-    loop Every 60 seconds
-        SDK->>Server: POST /api/client/metrics
-        Note over Server: Saves to flag_metrics
+    Note over SDK: Interval elapsed:<br/>snapshot buffer,<br/>clear buffer
+
+    SDK->>Server: POST /api/client/metrics<br/>{flag: {t: 150, f: 50}}
+
+    alt Success
+        Note over Server: Saves to flag_metrics<br/>aggregating into hourly buckets
+    else Network error
+        Note over SDK: Merges counters<br/>back into buffer
     end
 ```
 
@@ -32,7 +36,7 @@ Each record contains:
 | `environmentId` | Environment ID |
 | `evaluationTrueCount` | Number of `true` returns |
 | `evaluationFalseCount` | Number of `false` returns |
-| `timeBucket` | Time interval (rounded to the minute) |
+| `timeBucket` | Hourly interval |
 | `instanceId` | SDK instance identifier |
 | `appName` | Application name |
 
