@@ -1,140 +1,108 @@
 # Percentage Rollout & Canary Releases
 
-Percentage rollout lets you gradually expose a feature to a fraction of your user base. Combined with targeting rules, it enables safe canary release patterns and controlled rollback.
+Percentage rollout lets you gradually expose a feature to a fraction of your user base. **можно**<span class=brand-dot>.</span> uses deterministic MurmurHash32 hashing for consistent bucketing.
 
 ## How Percentage Rollout Works
 
-можно uses a deterministic MurmurHash32 algorithm based on the flag key and user identifier to assign each evaluation to an in-group or out-group:
+Percentage rollout is the `percentage` field (0–100) in a flag's strategy settings. When evaluating a flag, the SDK computes:
 
 ```
-hash = MurmurHash32(flagKey + (userId || sessionId)) % 100
+hash = MurmurHash32(flagKey + identifier) % 100
 if hash < percentage → enabled
 ```
 
-The same context always produces the same result — a given user does not flip between enabled and disabled on repeat evaluations.
+MurmurHash32 guarantees **deterministic bucketing**: the same user always gets the same result for the same flag at the same percentage.
+
+The identifier is `userId`, with `sessionId` as fallback. If neither is provided, all anonymous users land in the same bucket. The SDK logs a warning.
+
+100% enables for everyone; 0% disables for everyone.
 
 ```mermaid
-flowchart LR
-    Eval[Evaluation request] --> Hash[Hash flagKey + userId]
-    Hash --> Bucket{hash mod 100 < rollout%?}
-    Bucket -->|Yes| ReturnTrue[Return true]
-    Bucket -->|No| ReturnDefault[Return default]
+graph LR
+    Eval[Flag evaluation] --> Hash[MurmurHash32<br/>flagKey + identifier]
+    Hash --> Bucket{hash % 100<br/>< percentage?}
+    Bucket -->|Yes| True[true]
+    Bucket -->|No| False[false]
 ```
 
-> **Important:** Percentage rollout is applied only after constraints and segments. Targeting rules have higher priority. See [Targeting Rules](./targeting.md) for the full evaluation order.
+## Example Rollout Strategy
 
-## Setting Up a Percentage Rollout
+One possible scenario — adjust the percentages and duration to your project:
 
-In the dashboard, configure the strategy for a flag on a specific environment:
-
-1. Navigate to the flag detail page.
-2. Add or edit a strategy for the target environment.
-3. Set the **percentage** (0–100).
-4. Configure optional **context constraints** and **segments** for additional targeting.
-
-### Rollout Hash Attribute
-
-The rollout uses `userId` from the evaluation context as the hashing key. If `userId` is absent, `sessionId` is used as a fallback. If neither is present, the hash seed is just the flag key (all anonymous users get the same bucket).
-
-> **Warning:** Always send `userId` or `sessionId` in your evaluation context for proper percentage rollout distribution.
-
-## Gradual Rollout Strategies
-
-### Strategy 1: Linear Ramp-Up
-
-Increase the percentage incrementally over days or hours while monitoring metrics:
-
-```
-0% → 5% → 25% → 50% → 100%
+```mermaid
+graph LR
+    S0["0%<br/>Off"] -->|Verify| S1["1%<br/>Canary"]
+    S1 -->|Monitor 30 min| S2["5%<br/>Extended"]
+    S2 -->|Monitor 2 hr| S3["25%<br/>Quarter"]
+    S3 -->|Monitor 1 day| S4["50%<br/>Half"]
+    S4 -->|Monitor 1 day| S5["100%<br/>All"]
 ```
 
-| Stage | Percentage | Duration | Action |
-|-------|------------|----------|--------|
-| **Internal** | 0% (targeted) | Ongoing | QA and internal users only (use targeting rules) |
-| **Canary** | 5% | 1–2 hours | Monitor error rates and latency |
-| **Beta** | 25% | 1 day | Check conversion metrics, user feedback |
-| **General** | 50% | 1 day | Validate at scale |
-| **Full** | 100% | — | All users; consider archiving the flag |
+| Stage | Percentage | Duration | What to Check |
+|-------|------------|----------|---------------|
+| **Preparation** | 0% | Before launch | Flag created, strategy configured, code deployed |
+| **Canary** | 1% | 30 min | Errors, latency, resource usage. Rollback if anomalies |
+| **Extended** | 5% | 2 hr | Metric stability, business indicators |
+| **Quarter** | 25% | 1 day | Behavior across diverse audience |
+| **Half** | 50% | 1 day | Compare metrics with old variant |
+| **All** | 100% | — | Feature fully enabled |
 
-### Strategy 2: Ring Deployment
-
-Target by infrastructure ring or environment:
-
-| Ring | Who | Mechanisms |
-|------|-----|------------|
-| **Ring 0** | CI/CD test suite | Targeting rule: `userId` in `["ci-test"]` |
-| **Ring 1** | Internal employees | Segment: `internal_employees` (email contains `@company.com`) |
-| **Ring 2** | Staging environment | Separate staging instance |
-| **Ring 3** | Canary (5% production) | Percentage rollout: 5% |
-| **Ring 4** | Production (100%) | Percentage rollout: 100% |
+> **Tip:** Don't skip stages. Even a "safe" feature can cause unexpected load spikes. A 1% canary catches issues with minimal impact.
 
 ## Canary Release Pattern
 
-A canary release deploys a new version alongside the existing one, routing a small percentage of traffic via a feature flag.
+A canary release routes a small percentage of traffic to a new version via a feature flag:
 
 ```mermaid
 graph LR
     LB[Load Balancer] --> Old[Service v1<br/>stable]
     LB --> New[Service v2<br/>canary]
     New --> Flag[Mozhno Flag:<br/>canary_checkout]
-    Flag -->|5% match| NewHandler[New handler logic]
-    Flag -->|95% default| OldHandler[Old handler logic]
+    Flag -->|5%| NewHandler[New handler]
+    Flag -->|95%| OldHandler[Old handler]
 ```
 
-### Implementing a Canary with можно
+1. Create a RELEASE flag with default disabled
+2. Deploy both v1 and v2 of the service
+3. v2 code checks `client.isEnabled("flag", context)` before executing new logic
+4. Set strategy with **percentage rollout to 5%**
+5. Monitor error rates, latency, and business metrics for the canary group
+6. Gradually increase the percentage or **roll back to 0%** if issues arise
 
-1. **Create a RELEASE flag** `checkout_v2` with default disabled.
-2. **Deploy** both v1 and v2 of the service.
-3. The v2 code checks `client.isEnabled("checkout_v2", context)` before executing new logic.
-4. In можно, set a strategy with **percentage rollout to 5%** for `checkout_v2`.
-5. v1 ignores the flag and runs the stable path.
-6. **Monitor** error rates, latency, and business metrics for the 5% canary group.
-7. Gradually increase the percentage or **roll back to 0%** if issues arise.
+## Rollout and Targeting
 
-## Combining Targeting Rules with Rollout
+Percentage rollout applies **after** targeting rules: the user must first pass constraints and segments, and only then is the percentage check applied. See [Combining Constraints and Segments](/en/guide/targeting#combining-constraints-and-segments).
 
-Targeting rules and percentage rollout work together:
+## Rollback
 
-```mermaid
-flowchart TD
-    Start[Evaluate] --> Constraints{Targeting constraints}
-    Constraints -->|Match| ReturnTrue[Return true]
-    Constraints -->|No match| Segments{Segments}
-    Segments -->|Match| ReturnTrue
-    Segments -->|No match| Rollout{Percentage rollout}
-    Rollout -->|In bucket| ReturnTrue
-    Rollout -->|Out of bucket| Default[Return default]
+### Instant Rollback
+
+Set the percentage to 0 or disable the strategy (`enabled: false`) — the feature is instantly disabled for everyone.
+
+### Kill Switch
+
+For emergencies, use a **KILLSWITCH** flag type: when disabled in the dashboard, `isEnabled()` returns `false` for everyone — functionality is blocked immediately.
+
+```java
+if (!client.isEnabled("payment-gateway-killswitch")) {
+    throw new ServiceUnavailableException();
+}
 ```
 
-**Example: Internal + 10% external:**
+## Example Per-Environment Configuration
 
-| Priority | Type | Configuration |
-|----------|------|---------------|
-| 1 | Constraint rule | `email` contains `"@company.com"` |
-| — | Percentage rollout | 10% rollout |
-| — | Default | `false` |
+One possible approach — independent rollout per environment:
 
-All employees get the feature (constraint match), and 10% of external users get it via rollout. The remaining 90% of external users see the default.
+| Environment | Percentage | Rules |
+|-------------|------------|-------|
+| **dev** | 100% | No restrictions |
+| **staging** | 100% | QA segment |
+| **production** | 1% → 100% | Gradual rollout |
 
-## Rollback Procedures
-
-### Emergency Rollback (Kill Switch)
-
-If a feature causes incidents, disable the strategy or set percentage to 0%.
-
-**Dashboard:** Disable the strategy on the flag detail page.
-
-**API:**
-```bash
-curl -X PUT "https://your-instance/api/v1/flags/42/strategies" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"flagId": 42, "environmentId": 3, "enabled": false}'
-```
-
-For instant kill switches, use a KILLSWITCH flag type — disabled by default, enable it to block a feature immediately.
+This lets you test freely on dev and staging while performing cautious rollouts on production.
 
 ## Next Steps
 
-- Review [Audit Log](./audit.md) to track who modified rollout percentages.
-- Learn about [SDK Evaluation](../sdk/overview.md) to understand how rollouts are computed locally.
+- [Targeting](/en/guide/targeting) — constraints and segments
+- [Flag Workflow](/en/guide/flags-workflow) — flag lifecycle
+- [Audit](/en/guide/audit) — track all rollout changes
