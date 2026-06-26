@@ -127,18 +127,6 @@ Run through this checklist weekly for all flags you own:
 4. **Flag is archived and > 60 days old?** → Delete permanently if code removed.
 5. **Flag description is empty or outdated?** → Update it.
 
-### Automated Cleanup Script
-
-Use the API to identify stale flags:
-
-```bash
-#!/bin/bash
-# List flags not evaluated in the last 30 days
-curl "https://your-instance/api/v1/flags?lastEvaluatedBefore=$(date -d '30 days ago' -u +%Y-%m-%dT%H:%M:%SZ)" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  | jq '.items[] | {key: .key, lastEvaluated: .lastEvaluatedAt, state: .state}'
-```
-
 ### Code Removal Pattern
 
 Before archiving, remove the flag from your application code:

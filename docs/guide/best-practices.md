@@ -117,43 +117,6 @@ graph TD
 6. **Заархивировать флаг** в веб-панели
 7. **Документировать удаление** в описании флага: дата, причина
 
-### Автоматизация очистки
-
-Добавьте в CI проверку «просроченных» флагов:
-
-```yaml
-# .github/workflows/flag-cleanup-check.yml
-name: Flag Cleanup Check
-on:
-  schedule:
-    - cron: '0 8 * * 1'  # Каждый понедельник
-
-jobs:
-  stale-flags:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Поиск просроченных флагов
-        run: |
-          curl "${{ secrets.MOZHNO_URL }}/api/v1/flags?includeArchived=false" \
-            -H "Authorization: Bearer ${{ secrets.MOZHNO_TOKEN }}" | \
-            jq -r '.items[] | select(.enabled == true) | "\(.key): активен \(.createdAt)"'
-
-      - name: Поиск флагов без описания
-        run: |
-          curl "${{ secrets.MOZHNO_URL }}/api/v1/flags" \
-            -H "Authorization: Bearer ${{ secrets.MOZHNO_TOKEN }}" | \
-            jq -r '.items[] | select(.description == null or .description == "") | "⚠ Нет описания: \(.key)"'
-```
-
-### Календарь очистки
-
-| Периодичность | Действие |
-|---------------|----------|
-| **Еженедельно** | Проверить флаги на 100% дольше 2 недель |
-| **Раз в спринт** | Заархивировать флаги после удаления старого кода |
-| **Раз в месяц** | Удалить архивные флаги старше месяца |
-| **Раз в квартал** | Полный аудит активных флагов, обновление описаний |
-
 ## Архитектурные паттерны
 
 ### Паттерны организации флагов в коде
