@@ -1,6 +1,6 @@
 package dev.mozhno.logging;
 
-import com.fasterxml.jackson.core.JsonStreamContext;
+import tools.jackson.core.TokenStreamContext;
 import net.logstash.logback.mask.ValueMasker;
 
 import java.util.Set;
@@ -57,12 +57,12 @@ public class SensitiveDataMasker implements ValueMasker {
     private static final String MASKED = "****";
 
     @Override
-    public Object mask(JsonStreamContext context, Object value) {
+    public Object mask(TokenStreamContext context, Object value) {
         if (!(value instanceof CharSequence cs)) {
             return value;
         }
 
-        String fieldName = context.getCurrentName();
+        String fieldName = context.currentName();
         if (fieldName == null) {
             return value;
         }
