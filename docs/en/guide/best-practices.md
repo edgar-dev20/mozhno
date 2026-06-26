@@ -152,6 +152,7 @@ return newCheckoutFlow();
 |---------|---------|----------|
 | **Inline** | `if (client.isEnabled("flag", ctx)) { ... }` | Single flags, quick start |
 | **Feature Wrapper** | `featureService.ifEnabled("flag", ctx, () -> newCode())` | Many flags in one service — eliminates repeated `if` statements |
+| **ContextProvider** | Client auto-injects context via `MozhnoContextProvider` | Spring apps — avoid passing context to every `isEnabled()` |
 | **Context Factory** | `MozhnoContextFactory.forUser(user)` | Same attributes passed to dozens of flag checks |
 | **Middleware** | HTTP/gRPC interceptor adding attributes to context | Attributes from request headers (userId, tenantId, country) |
 
@@ -190,6 +191,30 @@ public class MozhnoContextFactory {
             .build();
     }
 }
+```
+
+### MozhnoContextProvider (Java)
+
+```java
+@Configuration
+public class MozhnoConfig {
+
+    @Bean
+    public MozhnoContextProvider contextProvider() {
+        return () -> {
+            var request = ((ServletRequestAttributes)
+                RequestContextHolder.currentRequestAttributes()).getRequest();
+            return MozhnoContext.builder()
+                .userId(request.getHeader("X-User-Id"))
+                .addProperty("tenantId", request.getHeader("X-Tenant-Id"))
+                .addProperty("country", request.getHeader("X-Country"))
+                .build();
+        };
+    }
+}
+
+// Context is automatically injected — no need to pass it explicitly:
+boolean enabled = client.isEnabled("new-checkout");
 ```
 
 ## Testing with Feature Flags
