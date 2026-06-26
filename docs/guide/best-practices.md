@@ -222,27 +222,6 @@ void testOldCheckoutFlow() {
 
 > **Совет:** Мокайте SDK-клиент в тестах, а не сервер **можно**<span class=brand-dot>.</span>. Тесты должны быть быстрыми и не зависеть от сети.
 
-### Интеграционное тестирование
-
-Для интеграционных тестов поднимите реальный сервер **можно**<span class=brand-dot>.</span> в тестовом окружении:
-
-```java
-@SpringBootTest
-@AutoConfigureMockMvc
-class CheckoutIntegrationTest {
-
-    @Autowired
-    private MozhnoClient client;
-
-    @Test
-    void testWithRealFlagEvaluation() {
-        var ctx = MozhnoContext.builder().userId("test-user").build();
-        boolean enabled = client.isEnabled("new-checkout", ctx);
-        // Поведение зависит от конфигурации флага в тестовом окружении
-    }
-}
-```
-
 ### Тестирование стратегий роллаута
 
 | Сценарий | Как тестировать |

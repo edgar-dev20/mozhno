@@ -253,18 +253,6 @@ test("shows new checkout when flag is enabled", async () => {
 });
 ```
 
-### Integration Testing
-
-Test both flag states in your CI pipeline:
-
-```yaml
-- name: Test with flag enabled
-  run: MOZHNO_FLAG_overrides='{"checkout_v2":true}' npm test
-
-- name: Test with flag disabled
-  run: MOZHNO_FLAG_overrides='{"checkout_v2":false}' npm test
-```
-
 ### Testing in Staging
 
 Before enabling a flag in production:
@@ -273,27 +261,6 @@ Before enabling a flag in production:
 2. Run end-to-end tests against staging.
 3. Manually verify the feature with targeted rules (`userId equals "qa-user"`).
 4. Test edge cases: missing context attributes, connection failures (SDK should return defaults).
-
-### Testing Rollback
-
-Regularly test that toggling a flag off correctly restores the old behaviour:
-
-```bash
-# Test rollback in staging
-curl -X PATCH "$MOZHNO_STAGING_URL/api/v1/flags/$FLAG_KEY" \
-  -H "Authorization: Bearer $MOZHNO_JWT" \
-  -H "Content-Type: application/json" \
-  -d '{"archived": true}'
-
-# Run smoke tests — should see old behaviour
-npm run smoke-test
-
-# Re-enable
-curl -X PATCH "$MOZHNO_STAGING_URL/api/v1/flags/$FLAG_KEY" \
-  -H "Authorization: Bearer $MOZHNO_JWT" \
-  -H "Content-Type: application/json" \
-  -d '{"state": "ACTIVE"}'
-```
 
 ## Flag Debt Management
 
