@@ -127,6 +127,7 @@ graph TD
 | **Feature Wrapper** | `featureService.ifEnabled("flag", ctx, () -> newCode())` | Много флагов в одном сервисе — убирает повторяющийся `if` |
 | **Фабрика контекста** | `MozhnoContexFactory.forUser(user)` | Один и тот же набор атрибутов передаётся в десятках мест |
 | **Middleware** | Перехватчик HTTP/gRPC, добавляющий атрибуты в контекст | Атрибуты из заголовков запроса (userId, tenantId, country) |
+| **ContextProvider** | `client` сам получает контекст через `MozhnoContextProvider` | Spring-приложения — не передавать контекст в каждый `isEnabled()` |
 
 ### Пример: Feature Wrapper на Java
 
@@ -164,6 +165,30 @@ public class MozhnoContextFactory {
             .build();
     }
 }
+```
+
+### Пример: MozhnoContextProvider
+
+```java
+@Configuration
+public class MozhnoConfig {
+
+    @Bean
+    public MozhnoContextProvider contextProvider() {
+        return () -> {
+            var request = ((ServletRequestAttributes)
+                RequestContextHolder.currentRequestAttributes()).getRequest();
+            return MozhnoContext.builder()
+                .userId(request.getHeader("X-User-Id"))
+                .addProperty("tenantId", request.getHeader("X-Tenant-Id"))
+                .addProperty("country", request.getHeader("X-Country"))
+                .build();
+        };
+    }
+}
+
+// Использование — контекст подставляется автоматически:
+boolean enabled = client.isEnabled("new-checkout");
 ```
 
 ## Тестирование с фиче-флагами
