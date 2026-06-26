@@ -46,53 +46,6 @@ sequenceDiagram
 
 При клике на sparkline открывается диалог с полным графиком и списком SDK-экземпляров, сгруппированных по приложениям. Доступна фильтрация по приложению и конкретному экземпляру. Метрики хранятся за последние 48 часов.
 
-## REST API для метрик
-
-### Метрики флага
-
-```http
-GET /api/v1/flags/{flagId}/metrics
-```
-
-| Параметр | Тип | Описание |
-|----------|-----|----------|
-| `environmentId` | `long` | ID окружения |
-| `instanceId` | `string` | ID экземпляра SDK |
-| `appName` | `string` | Имя приложения |
-
-```bash
-curl "http://localhost:8080/api/v1/flags/42/metrics?environmentId=3" \
-  -H "Authorization: Bearer $JWT_TOKEN"
-```
-
-Ответ:
-
-```json
-{
-  "metrics": [
-    {
-      "timeBucket": "2026-06-21T13:41:00Z",
-      "trueCount": 150,
-      "falseCount": 50,
-      "instanceId": "instance-1",
-      "appName": "web-app"
-    }
-  ]
-}
-```
-
-### Метрики проекта
-
-```http
-GET /api/v1/metrics
-```
-
-| Параметр | Тип | Описание |
-|----------|-----|----------|
-| `environmentId` | `long` | ID окружения |
-
-Возвращает агрегированные метрики по всем флагам проекта.
-
 ## Отключение метрик
 
 Если метрики не нужны, отключите их в SDK:
@@ -107,16 +60,6 @@ MozhnoConfig config = MozhnoConfig.builder()
     .build();
 ```
 
-
-## Экспорт метрик через SPI
-
-Через `MetricsSinkSpi` метрики можно направить во внешние системы:
-
-| Назначение | Реализация |
-|------------|------------|
-| Prometheus | Стандартный эндпоинт `/actuator/prometheus` |
-| Datadog, New Relic | Enterprise-реализация `MetricsSinkSpi` |
-| Локальное хранение | `JdbcMetricsSinkProvider` (по умолчанию) |
 
 ## Что значат метрики
 
