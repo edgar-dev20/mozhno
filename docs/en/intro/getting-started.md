@@ -44,4 +44,4 @@ Head over to [Quick Start](/en/intro/quick-start) — get the server running in 
 
 On first launch, the onboarding wizard will walk you through creating your admin account, project, and first flag — then you're in.
 
-- [Troubleshooting](/en/guide/troubleshooting) — if something goes wrong
+- [Flag Workflow](/en/guide/flags-workflow) — full lifecycle: creation to archival

@@ -69,8 +69,8 @@ client.start();
 | `instanceId(String)` | `String` | Да | — | Уникальный идентификатор экземпляра |
 | `mozhnoUrl(String)` | `String` | Да | — | Базовый URL сервера **можно**<span class=brand-dot>.</span> |
 | `apiKey(String)` | `String` | Да | — | API-ключ окружения |
-| `fetchTogglesInterval(int)` | `int` | Нет | `15` | Интервал опроса флагов (секунды) |
-| `sendMetricsInterval(int)` | `int` | Нет | `60` | Интервал отправки метрик (секунды) |
+| `fetchTogglesInterval(int)` | `int` | Нет | `15 сек` | Интервал опроса флагов |
+| `sendMetricsInterval(int)` | `int` | Нет | `60 сек` | Интервал отправки метрик |
 | `environment(String)` | `String` | Нет | `null` | Имя окружения |
 | `disableMetrics(boolean)` | `boolean` | Нет | `false` | Отключить отправку метрик |
 | `synchronousFetchOnInitialisation(boolean)` | `boolean` | Нет | `false` | Блокировать на первичной загрузке правил |
@@ -114,57 +114,6 @@ public class CheckoutService {
 }
 ```
 
-## API Reference
-
-### MozhnoClient
-
-Главная точка входа. Потокобезопасен, рассчитан на долгоживущий синглтон.
-
-```java
-public interface MozhnoClient {
-    void start();
-    void stop();
-    boolean isEnabled(String flagKey);
-    boolean isEnabled(String flagKey, boolean defaultReturn);
-    boolean isEnabled(String flagKey, MozhnoContext context);
-    boolean isEnabled(String flagKey, MozhnoContext context, boolean defaultReturn);
-    void addEventListener(EventListener listener);
-}
-```
-
-#### `isEnabled(...)`
-
-Проверяет, включён ли флаг. Перегрузки без параметра `defaultReturn` работают **fail-closed** — возвращают `false`, если флаг не найден. Перегрузки с `defaultReturn` возвращают переданное значение по умолчанию.
-
-```java
-MozhnoContext context = MozhnoContext.builder()
-    .userId("user-12345")
-    .addProperty("country", "RU")
-    .addProperty("plan", "enterprise")
-    .build();
-
-boolean enabled = client.isEnabled("new-checkout", context, false);
-
-if (enabled) {
-    renderNewCheckout();
-} else {
-    renderOldCheckout();
-}
-```
-
-| Параметр | Тип | Описание |
-|----------|-----|----------|
-| `flagKey` | `String` | Ключ флага |
-| `context` | `MozhnoContext` | Контекст оценки с атрибутами пользователя/запроса |
-| `defaultReturn` | `boolean` | Значение, возвращаемое если флаг не найден (по умолчанию `false`) |
-
-#### Жизненный цикл: `start()` / `stop()`
-
-```java
-client.start();   // запускает фоновый поллинг правил
-client.stop();    // останавливает поллинг, сбрасывает метрики, завершает executor
-```
-
 ## MozhnoContext
 
 Объект контекста на основе билдера для передачи атрибутов в момент оценки.
@@ -175,8 +124,6 @@ import dev.mozhno.sdk.MozhnoContext;
 MozhnoContext context = MozhnoContext.builder()
     .userId("user-12345")
     .sessionId("session-abc")
-    .appName("my-app")
-    .environment("production")
     .addProperty("country", "RU")
     .addProperty("plan", "enterprise")
     .addProperty("appVersion", "2.4.1")
@@ -194,92 +141,6 @@ MozhnoContext context = MozhnoContext.builder()
 | `appName(String)` | Имя приложения |
 | `environment(String)` | Имя окружения |
 | `addProperty(String key, String value)` | Произвольный атрибут |
-
-## Обработка ошибок
-
-```java
-MozhnoConfig config = MozhnoConfig.builder()
-    .appName("checkout-service")
-    .instanceId("prod-1")
-    .mozhnoUrl("https://mozhno.example.com")
-    .apiKey(System.getenv("MOZHNO_API_KEY"))
-    .synchronousFetchOnInitialisation(true)
-    .build();
-
-MozhnoClient client = new DefaultMozhnoClient(config);
-client.start();  // при synchronousFetchOnInitialisation(true) правила грузятся синхронно
-
-MozhnoContext context = MozhnoContext.builder()
-    .userId(userId)
-    .build();
-
-boolean enabled = client.isEnabled("new-checkout", context, false);
-```
-
-| Сценарий сбоя | Поведение |
-|---------------|-----------|
-| **Первичная загрузка не удалась** | Исключение при `synchronousFetchOnInitialisation(true)`. Иначе — фоновый ретрай. |
-| **Флаг не найден** | Возвращается `defaultReturn` (по умолчанию `false`) |
-| **Сетевая ошибка при поллинге** | Экспоненциальный backoff (1s → 2s → 4s). Circuit breaker после 5 ошибок подряд (пауза 60s). |
-
-## Жизненный цикл соединения
-
-```mermaid
-stateDiagram-v2
-    [*] --> Started : new DefaultMozhnoClient() + start()
-    Started --> Ready : Правила загружены
-    Started --> Retrying : Загрузка не удалась (async-режим)
-    Retrying --> Ready : Загрузка успешна
-    Ready --> Ready : Фоновая синхронизация
-    Ready --> Stopped : stop()
-    Stopped --> [*]
-```
-
-## Паттерны использования
-
-### Синглтон-клиент в Spring
-
-```java
-@Configuration
-public class MozhnoClientConfig {
-
-    @Bean(destroyMethod = "stop")
-    public MozhnoClient mozhnoClient() {
-        MozhnoConfig config = MozhnoConfig.builder()
-            .appName("my-app")
-            .instanceId(UUID.randomUUID().toString())
-            .mozhnoUrl("https://mozhno.example.com")
-            .apiKey(System.getenv("MOZHNO_API_KEY"))
-            .build();
-        return new DefaultMozhnoClient(config);
-    }
-}
-```
-
-Spring вызовет `stop()` при остановке контекста.
-
-### Контекст на каждый запрос
-
-```java
-public boolean isFeatureEnabled(String featureKey, HttpServletRequest request) {
-    MozhnoContext context = MozhnoContext.builder()
-        .userId(request.getHeader("X-User-Id"))
-        .addProperty("tenantId", request.getHeader("X-Tenant-Id"))
-        .build();
-    return client.isEnabled(featureKey, context, false);
-}
-```
-
-## Производительность
-
-| Сценарий | Типичная задержка |
-|----------|-------------------|
-| `isEnabled` (локальная оценка, одно правило) | < 0.1 мс |
-| `isEnabled` (локальная оценка, 10 правил) | < 0.5 мс |
-| Первичная загрузка (100 флагов, LAN) | ~50 мс |
-| Фоновый поллинг (без изменений) | ~5 мс (ответ 304) |
-
-SDK рассчитан на высокую нагрузку. Оценка флага не выделяет память после прогрева кеша. Потокобезопасность обеспечивается `ConcurrentHashMap`.
 
 ## Что дальше?
 

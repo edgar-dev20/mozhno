@@ -15,7 +15,6 @@ const ruGuidesSidebar = [
   { text: 'Метрики', link: '/guide/metrics' },
   { text: 'Интеграции', link: '/guide/integrations' },
   { text: 'Лучшие практики', link: '/guide/best-practices' },
-  { text: 'Решение проблем', link: '/guide/troubleshooting' },
 ]
 
 const ruConceptsSidebar = [
@@ -37,7 +36,6 @@ const ruSdkSidebar = [
 
 const ruApiSidebar = [
   { text: 'Обзор API', link: '/api/overview' },
-  { text: 'REST API Reference', link: '/api/rest' },
 ]
 
 const ruSelfHostingSidebar = [
@@ -70,7 +68,6 @@ const enGuidesSidebar = [
   { text: 'Metrics', link: '/en/guide/metrics' },
   { text: 'Integrations', link: '/en/guide/integrations' },
   { text: 'Best Practices', link: '/en/guide/best-practices' },
-  { text: 'Troubleshooting', link: '/en/guide/troubleshooting' },
 ]
 
 const enConceptsSidebar = [
@@ -155,7 +152,6 @@ export default defineConfig({
             { text: 'Метрики', link: '/guide/metrics' },
             { text: 'Интеграции', link: '/guide/integrations' },
             { text: 'Лучшие практики', link: '/guide/best-practices' },
-            { text: 'Решение проблем', link: '/guide/troubleshooting' },
           ],
           '/concepts/': [{ text: 'Концепты', items: ruConceptsSidebar }],
           '/sdk/': [{ text: 'SDK', items: ruSdkSidebar }],
@@ -210,7 +206,6 @@ export default defineConfig({
             { text: 'Metrics', link: '/en/guide/metrics' },
             { text: 'Integrations', link: '/en/guide/integrations' },
             { text: 'Best Practices', link: '/en/guide/best-practices' },
-            { text: 'Troubleshooting', link: '/en/guide/troubleshooting' },
           ],
           '/en/concepts/': [{ text: 'Concepts', items: enConceptsSidebar }],
           '/en/sdk/': [{ text: 'SDK', items: enSdkSidebar }],

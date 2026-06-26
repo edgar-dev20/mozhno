@@ -1,162 +1,135 @@
 # Best Practices
 
-This guide covers naming conventions, permission models, cleanup strategies, testing patterns, and flag debt management for teams using можно at scale.
+Recommendations for working with feature flags in **можно**<span class=brand-dot>.</span>: from naming conventions to cleanup strategies.
 
-## Naming Conventions
+## Flag Naming
 
-A consistent naming scheme keeps flags discoverable and prevents collisions across teams and services.
+A good flag name is self-documenting and unambiguous. A bad one requires telepathy.
 
-### Recommended Pattern
+### Naming Convention
 
 ```
-<domain>_<feature>_<detail>
+<functionality>-<action/status>
 ```
 
-| Component | Description | Example |
-|-----------|-------------|---------|
-| `domain` | Service or business area | `checkout`, `auth`, `search`, `billing` |
-| `feature` | The feature being gated | `redesign`, `upsell`, `darkmode` |
-| `detail` | Variant or version (optional) | `v2`, `experiment_a`, `beta` |
+| Pattern | Example | Good/Bad |
+|---------|---------|----------|
+| `new-component` | `new-checkout` | Good |
+| `feature-enabled` | `ai-search-enabled` | Good |
+| `kill-component` | `kill-payment-gw` | Good |
+| `experiment-description` | `exp-cta-color` | Good |
+| `flag1` | — | Bad |
+| `test` | — | Bad |
+| `feature_flag_new` | — | Bad (uninformative) |
 
-**Examples:**
+### Recommendations
 
-| Good | Poor | Why |
+| Rule | Example |
+|------|---------|
+| **kebab-case** | `new-checkout`, `dark-mode-rollout` |
+| **Latin letters, digits, and hyphens only** | `api-v2`, `search-v3` |
+| **Don't use `flag` or `feature` in the key** | ❌ `feature-new-checkout-flag` → ✅ `new-checkout` |
+| **Kill switch — prefix `kill-`** | `kill-payment-gateway`, `kill-third-party-api` |
+| **Experiments — prefix `exp-`** | `exp-pricing-layout`, `exp-cta-placement` |
+| **Temporary features — prefix `tmp-`** | `tmp-holiday-banner-2026` |
+| **Permanent configuration — prefix `cfg-`** | `cfg-rate-limit`, `cfg-max-upload-size` |
+
+### Naming Flag Keys
+
+| Rule | Good | Bad |
 |------|------|-----|
-| `checkout-one-click-v2` | `flag_42` | Descriptive vs. opaque |
-| `auth-sso-saml` | `new_auth` | Specific vs. vague |
-| `search-ranking-ml-v3` | `search_v3` | Includes purpose |
-| `billing-tax-eu-vat` | `tax_stuff` | Scoped and precise |
-
-### Naming Rules
-
-- Use **kebab-case** (lowercase with hyphens).
-- Start with the **service or domain name**.
-- Include a **version suffix** (`-v2`, `-v3`) when iterating on a feature.
-- Use **descriptive action words** for kill switches: `kill-payment-provider-x`.
-
-### Tagging Strategy
-
-Supplement keys with tags for cross-cutting organisation:
-
-```
-team:platform
-owner:alice
-type:kill-switch
-env:production
-service:api-gateway
-temporary:true
-expires:2026-09-01
-```
-
-> **Tip:** The `temporary` and `expires` tags are community conventions. There is no automatic expiry in можно — use these tags to identify flags for manual cleanup.
+| Short meaningful identifiers | `A`, `B`, `control`, `treatment` | `variant1`, `variant2` |
+| Control group — `control` or `A` | `control` | `old`, `current` |
+| Explain variants in the flag description | A = old design, B = new | — |
 
 ## When to Archive vs Delete
 
 | Criterion | Archive | Delete |
 |-----------|---------|--------|
-| Flag still referenced in any codebase | ✅ | ❌ |
-| Feature fully rolled out and stable | ✅ | ❌ |
-| Need to preserve audit history | ✅ | ❌ |
-| Possible future rollback needed | ✅ | ❌ |
-| Flag was an aborted experiment | ✅ | ✅ (if code removed) |
-| Flag created in error (never used) | ❌ | ✅ |
-| All code references have been removed | ✅ | ✅ |
-| Flag key conflicts with a new flag | ❌ | ✅ |
+| Flag served its purpose, old code removed | ✅ Yes | ❌ No |
+| Audit history must be preserved | ✅ Yes | ❌ No |
+| Experiment flag, never went to production | ❌ No | ✅ Yes |
+| Flag created by mistake (typo in key) | ❌ No | ✅ Yes |
+| Test flag for local development | ❌ No | ✅ Yes |
+| Duplicate flag | ❌ No | ✅ Yes |
 
-**Default rule:** Archive first. Delete only when you are certain the flag key will never be needed again.
-
-> **Warning:** Deleting a flag that is still referenced in application code will cause SDK evaluations to return an error for that key. Remove all code references before deletion.
+> **Tip:** Default rule — archive. Deletion is irreversible. If in doubt, archive and delete after a month if the flag is truly not needed.
 
 ## Permission Model
 
-можно uses a role-based access model with the hierarchy `ADMIN` → `DEVELOPER` → `VIEWER` (each role inherits the permissions of those below it). Assign the minimum permissions necessary for each user.
+**можно**<span class=brand-dot>.</span> uses a role-based access model with the hierarchy `ADMIN` → `DEVELOPER` → `VIEWER` (each role includes the privileges of lower roles):
 
-### Roles
+| Action | Admin | Developer | Viewer |
+|--------|-------|-----------|--------|
+| View flags and segments | ✅ | ✅ | ✅ |
+| View and export audit log | ✅ | ✅ | ✅ |
+| Create flags | ✅ | ✅ | ❌ |
+| Modify strategies and targeting | ✅ | ✅ | ❌ |
+| Archive flags | ✅ | ✅ | ❌ |
+| Manage segments | ✅ | ✅ | ❌ |
+| Delete flags | ✅ | ✅ | ❌ |
+| Manage environments | ✅ | ❌ | ❌ |
+| Manage API keys | ✅ | ❌ | ❌ |
+| Manage users | ✅ | ❌ | ❌ |
+| Manage integrations (webhooks) | ✅ | ❌ | ❌ |
 
-| Role | View | Manage flags/segments/strategies | Manage keys, users, environments | Typical Assignee |
-|------|------|----------------------------------|----------------------------------|------------------|
-| **Viewer** | ✅ | ❌ | ❌ | Support, analysts, read-only dashboards |
-| **Developer** | ✅ | ✅ | ❌ | Developers, QA engineers |
-| **Admin** | ✅ | ✅ | ✅ | Team leads, platform engineers |
+### Role Recommendations
 
-### API Key Scopes
+| Principle | Description |
+|-----------|-------------|
+| **Least privilege** | Developer cannot manage keys, users, or environments |
+| **Infrastructure — admin only** | API keys, users, environments, and integrations are admin-only |
+| **Viewer for external parties** | Auditors, product managers — view only |
+| **Regular audit** | Review the user list and roles quarterly |
 
-Create separate API keys with limited scopes for different environments and services:
+## Cleanup Strategy
 
-| Key Name | Environment | Permissions | Used By |
-|----------|-------------|-------------|---------|
-| `sdk-production` | Production | `flags:read`, `segments:read` | Production application servers |
-| `sdk-staging` | Staging | `flags:read`, `segments:read` | Staging application servers |
-| `ci-cd-bot` | All | `flags:read`, `flags:write` | CI/CD pipelines |
-| `monitoring-bot` | Production | `flags:read` | Monitoring dashboards |
+Flags left in code after full rollout create **flag debt** — technical debt specific to feature flag systems.
 
-> **Tip:** Never share API keys between environments. A compromised staging key should not affect production flags.
+### Signs of Flag Debt
 
-### JWT vs API Keys
+- `if (flag)` constructs with dead old-code branches
+- Flags at 100% for over a month
+- Complex dependency chains between flags
+- Code that is hard to understand without knowing flag state
 
-| Auth Method | Use Case | Example |
-|-------------|----------|---------|
-| **JWT** | Dashboard access (human users) | Web UI login sessions |
-| **API Key** | SDK and API access (machine clients) | Java SDK, CI/CD scripts |
-
-## Cleanup Strategies
-
-Feature flags accumulate over time. Without a cleanup process, you end up with **flag debt**: stale flags that clutter the dashboard, slow down evaluation, and confuse developers.
-
-### Flag Lifecycle Timeline
+### Cleanup Process
 
 ```mermaid
-gantt
-    title Flag Lifecycle
-    dateFormat  YYYY-MM-DD
-    section checkout_v2
-    Create & develop     :2026-01-01, 14d
-    Rollout (0→100%)     :2026-01-15, 30d
-    Stabilize            :2026-02-15, 14d
-    Remove code refs     :2026-03-01, 7d
-    Archive flag         :milestone, 2026-03-08, 1d
+graph TD
+    A[Flag at 100%] --> B{> 2 weeks?}
+    B -->|No| C[Wait]
+    B -->|Yes| D[Remove old code]
+    D --> E[Merge PR]
+    E --> F[Archive flag]
+    F --> G{Month passed?}
+    G -->|Yes| H[Delete flag]
+    G -->|No| F
 ```
 
-### Weekly Flag Review Checklist
+### Flag Cleanup Checklist
 
-Run through this checklist weekly for all flags you own:
+1. **Flag at 100%** for at least 2 weeks
+2. **Metrics are stable** — no regressions
+3. **Old code not needed** — no rollback planned
+4. **Remove `if (flag)`**: keep only the new code, delete old code
+5. **Remove SDK import/dependency** if this was the last flag
+6. **Archive the flag** in the dashboard
+7. **Document the removal** in the flag description: date, reason
 
-1. **Rollout at 100% for > 2 weeks?** → Schedule code removal and archive the flag.
-2. **Flag has not been evaluated in > 30 days?** → Investigate. It may be dead code.
-3. **Flag has an `expires` tag in the past?** → Archive or extend the expiry.
-4. **Flag is archived and > 60 days old?** → Delete permanently if code removed.
-5. **Flag description is empty or outdated?** → Update it.
+## Architecture Patterns
 
-### Code Removal Pattern
+### Patterns for Organizing Flags in Code
 
-Before archiving, remove the flag from your application code:
-
-```java
-// Before: flag-guarded code
-if (client.isEnabled("checkout_v2", context)) {
-    return newCheckoutFlow();
-}
-return oldCheckoutFlow();
-
-// After: flag removed, new code is the default
-return newCheckoutFlow();
-```
-
-> **Tip:** When removing a flag, do it in a separate PR from the feature work. This makes it easy to audit and revert if needed.
-
-## Code Architecture Patterns
-
-### How to Organize Flags in Your Codebase
-
-| Pattern | Example | Best For |
-|---------|---------|----------|
+| Pattern | Code | When to Use |
+|---------|------|-------------|
 | **Inline** | `if (client.isEnabled("flag", ctx)) { ... }` | Single flags, quick start |
-| **Feature Wrapper** | `featureService.ifEnabled("flag", ctx, () -> newCode())` | Many flags in one service — eliminates repeated `if` statements |
-| **ContextProvider** | Client auto-injects context via `MozhnoContextProvider` | Spring apps — avoid passing context to every `isEnabled()` |
-| **Context Factory** | `MozhnoContextFactory.forUser(user)` | Same attributes passed to dozens of flag checks |
+| **Feature Wrapper** | `featureService.ifEnabled("flag", ctx, () -> newCode())` | Many flags in one service — eliminates repeated `if` |
+| **Context Factory** | `MozhnoContextFactory.forUser(user)` | Same attribute set passed to dozens of calls |
 | **Middleware** | HTTP/gRPC interceptor adding attributes to context | Attributes from request headers (userId, tenantId, country) |
+| **ContextProvider** | `client` auto-injects context via `MozhnoContextProvider` | Spring apps — no need to pass context to every `isEnabled()` |
 
-### Feature Wrapper (Java)
+### Example: Feature Wrapper (Java)
 
 ```java
 @Service
@@ -169,16 +142,14 @@ public class FeatureService {
     }
 }
 
+// Usage:
 var result = featureService.ifEnabled("new-checkout", ctx,
     () -> processNew(order),
     () -> processOld(order)
 );
 ```
 
-### Middleware (Express)
-
-
-### Context Factory (Java)
+### Example: Context Factory (Java)
 
 ```java
 public class MozhnoContextFactory {
@@ -193,7 +164,7 @@ public class MozhnoContextFactory {
 }
 ```
 
-### MozhnoContextProvider (Java)
+### Example: MozhnoContextProvider (Java)
 
 ```java
 @Configuration
@@ -213,7 +184,7 @@ public class MozhnoConfig {
     }
 }
 
-// Context is automatically injected — no need to pass it explicitly:
+// Context is automatically injected:
 boolean enabled = client.isEnabled("new-checkout");
 ```
 
@@ -221,93 +192,46 @@ boolean enabled = client.isEnabled("new-checkout");
 
 ### Unit Testing
 
-Mock the SDK client in unit tests to control flag values directly:
+Test **both** code paths — with and without the flag:
 
-**Java:**
 ```java
 @Test
 void testNewCheckoutFlow() {
-    MozhnoClient mockClient = mock(MozhnoClient.class);
-    when(mockClient.isEnabled(eq("checkout_v2"), any())).thenReturn(true);
+    var ctx = MozhnoContext.builder().userId("test-user").build();
+    when(client.isEnabled("new-checkout", ctx)).thenReturn(true);
 
-    CheckoutService service = new CheckoutService(mockClient);
-    Result result = service.checkout(cart);
+    var result = checkoutService.process(order, ctx);
 
-    assertThat(result).isInstanceOf(NewCheckoutResult.class);
+    assertThat(result.getFlow()).isEqualTo("new");
+}
+
+@Test
+void testOldCheckoutFlow() {
+    var ctx = MozhnoContext.builder().userId("test-user").build();
+    when(client.isEnabled("new-checkout", ctx)).thenReturn(false);
+
+    var result = checkoutService.process(order, ctx);
+
+    assertThat(result.getFlow()).isEqualTo("old");
 }
 ```
 
-**JavaScript:**
-```js
-import { MozhnoClient } from "@mozhno/client-js";
+> **Tip:** Mock the SDK client in tests, not the **можно**<span class=brand-dot>.</span> server. Tests should be fast and network-independent.
 
-jest.mock("@mozhno/client-js");
+## Anti-patterns
 
-test("shows new checkout when flag is enabled", async () => {
-  MozhnoClient.mockImplementation(() => ({
-    isEnabled: jest.fn().mockReturnValue(true),
-  }));
-
-  const result = await renderCheckout();
-  expect(result.type).toBe("new_checkout");
-});
-```
-
-## Flag Debt Management
-
-**Flag debt** is the accumulated cost of maintaining stale or unnecessary feature flags. Left unchecked, it leads to:
-
-- Increased SDK evaluation overhead.
-- Dashboard clutter and confusion.
-- Risk of accidentally toggling a forgotten flag.
-- Bloated codebase with dead code paths.
-
-### Measuring Flag Debt
-
-Track these metrics in your team's dashboard:
-
-| Metric | Target | How to Measure |
-|--------|--------|----------------|
-| **Total active flags** | < 50 per service | Dashboard count |
-| **Flags at 100% rollout > 30 days** | 0 | API query |
-| **Flags never evaluated in 60 days** | 0 | API query (`lastEvaluatedBefore`) |
-| **Archived flags > 90 days** | 0 | Dashboard filter by state |
-| **Average flag lifetime** | < 90 days | Creation-to-archive duration |
-
-### Flag Debt Reduction Workflow
-
-```mermaid
-flowchart TD
-    Review[Weekly flag review] --> Identify[Identify stale flags]
-    Identify --> RemoveCode[Remove code references]
-    RemoveCode --> Archive[Archive flag]
-    Archive --> Wait[Wait 1 release cycle]
-    Wait --> Verify{Any issues?}
-    Verify -->|No| Delete[Delete permanently]
-    Verify -->|Yes| Restore[Restore flag]
-```
-
-### Preventing Flag Debt
-
-- **Set an `expires` tag** on every temporary flag during creation.
-- **Create a ticket** in your issue tracker for flag removal when the flag is created. Link the ticket to the flag key.
-- **Enforce flag ownership:** every flag must have an `owner` tag. The owner is responsible for its entire lifecycle.
-- **Include flag removal in Definition of Done:** a feature is not "done" until the flag is archived and code references removed.
-- **Limit total active flags:** agree on a team maximum and treat exceeding it as a blocker.
-
-## Environment Strategy
-
-| Environment | Instance | Flag Behaviour |
-|-------------|----------|----------------|
-| **Local development** | Local Docker (`make dev`) | Flags can be toggled freely |
-| **CI** | Ephemeral | Use SDK test mode or override file |
-| **Staging** | Shared staging instance | Mirror of production flags; test rollouts here first |
-| **Production** | Production instance | Controlled changes only; require PR approval for flag modifications |
-
-> **Tip:** Use the `make web-dev` command to run the dashboard locally. The Swagger UI is available at `http://localhost:8080/swagger-ui.html` for API exploration.
+| Anti-pattern | Why It's Bad | How to Fix |
+|-------------|-------------|-----------|
+| **Flag on flag** | `if (flagA && flagB)` — impossible to debug | Merge into a segment or single flag |
+| **Flags in loops** | Checking flag on every iteration — overhead | Check flag before the loop |
+| **Flag as config** | `if (flag) timeout = 30 else timeout = 60` | Use actual config, not a feature flag |
+| **Eternal flags** | Flag exists 6+ months | Schedule removal or mark as permanent |
+| **Ownerless flags** | No one is responsible for cleanup | Assign an owner in the flag description |
+| **Context copy-paste** | Duplicated `MozhnoContext.builder()...` | Extract to factory method or middleware |
 
 ## Next Steps
 
-- Learn about the [Java SDK](../sdk/java.md) or [JavaScript SDK](../sdk/javascript.md) for application integration.
-- Read the [API Overview](../api/overview.md) for programmatic flag management.
-- Set up [Audit Log](./audit.md) monitoring to track who makes changes.
+- [Flag Workflow](/en/guide/flags-workflow) — lifecycle and team process
+- [Targeting](/en/guide/targeting) — rules and segments
+- [Audit](/en/guide/audit) — tracking changes
+- [SDK Overview](/en/sdk/overview) — SDK architecture and code integration
