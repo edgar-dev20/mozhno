@@ -1,15 +1,11 @@
 package dev.mozhno.logging;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonStreamContext;
-import com.fasterxml.jackson.core.filter.FilteringGeneratorDelegate;
+import tools.jackson.core.TokenStreamContext;
+
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.io.StringWriter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -157,17 +153,17 @@ class SensitiveDataMaskerTest {
         assertThat(masker.mask(fieldContext("flagName"), "new-feature")).isEqualTo("new-feature");
     }
 
-    private static JsonStreamContext fieldContext(String fieldName) {
-        try {
-            StringWriter sw = new StringWriter();
-            JsonGenerator gen = new JsonFactory().createGenerator(sw);
-            gen.writeStartObject();
-            gen.writeFieldName(fieldName);
-            JsonStreamContext ctx = gen.getOutputContext();
-            gen.close();
-            return ctx;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private static TokenStreamContext fieldContext(String fieldName) {
+        return new TokenStreamContext() {
+            @Override
+            public String currentName() {
+                return fieldName;
+            }
+
+            @Override
+            public TokenStreamContext getParent() {
+                return null;
+            }
+        };
     }
 }
