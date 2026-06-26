@@ -4,23 +4,27 @@
 
 ## Как собираются метрики
 
-SDK накапливает счётчики оценок каждого флага в памяти и отправляет их на сервер с заданным интервалом (по умолчанию — 60 секунд):
+SDK накапливает счётчики `true`/`false` для каждого флага в локальном буфере (`ConcurrentHashMap`). Раз в заданный интервал (по умолчанию — 60 секунд) буфер отправляется на сервер одним запросом:
 
 ```mermaid
 sequenceDiagram
-    participant App
-    participant SDK
+    participant App as Приложение
+    participant SDK as SDK (буфер в памяти)
     participant Server
 
-    loop Оценка флагов
-        App->>SDK: isEnabled("new-checkout", ctx)
-        SDK-->>App: true/false
+    loop Каждый isEnabled()
+        App->>SDK: isEnabled("flag", ctx)
         Note over SDK: trueCount++ или falseCount++
     end
 
-    loop Каждые 60 секунд
-        SDK->>Server: POST /api/client/metrics
-        Note over Server: Сохраняет в flag_metrics
+    Note over SDK: Интервал истёк:<br/>снять снапшот буфера,<br/>очистить буфер
+
+    SDK->>Server: POST /api/client/metrics<br/>{flag: {t: 150, f: 50}}
+
+    alt Успех
+        Note over Server: Сохраняет в flag_metrics<br/>агрегируя в часовые бакеты
+    else Ошибка сети
+        Note over SDK: Возвращает счётчики<br/>обратно в буфер
     end
 ```
 
@@ -32,7 +36,7 @@ sequenceDiagram
 | `environmentId` | ID окружения |
 | `evaluationTrueCount` | Количество возвратов `true` |
 | `evaluationFalseCount` | Количество возвратов `false` |
-| `timeBucket` | Временной интервал (округление до минуты) |
+| `timeBucket` | Часовой интервал |
 | `instanceId` | Идентификатор экземпляра SDK |
 | `appName` | Имя приложения |
 
