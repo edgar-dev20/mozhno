@@ -1,176 +1,78 @@
 # Audit Log
 
-Every change in можно is recorded in an immutable audit log. You can review who changed what, when, and see the exact difference between versions.
+Every change in **можно**<span class=brand-dot>.</span> is recorded: who changed what and when. The audit log stores the full history of changes to flags, segments, API keys, and settings.
 
-## Audit Log Overview
+## What Gets Logged
 
-The audit log captures changes to all managed resources:
-
-| Resource | Tracked Changes |
-|----------|-----------------|
-| **Flags** | Creation, state changes, targeting rules, rollout percentage, default value, type, tags, description |
-| **Segments** | Creation, deletion, condition changes, name |
-| **API Keys** | Creation, revocation, scope changes |
-| **Environments** | Creation, deletion, configuration changes |
-
-Each audit entry contains:
-
-| Field | Description |
-|-------|-------------|
-| **Timestamp** | UTC timestamp of the change |
-| **Actor** | Email of the user or API key name that made the change |
-| **Action** | `CREATED`, `UPDATED`, `DELETED`, `ARCHIVED`, `RESTORED` |
-| **Resource type** | `FLAG`, `SEGMENT`, `API_KEY`, `ENVIRONMENT` |
-| **Resource identifier** | Flag key, segment name, etc. |
-| **Diff** | Before/after snapshot of the changed fields |
+| Resource | Events |
+|----------|--------|
+| **Flags** | Creation, strategy changes, targeting changes, renaming, archival, restoration, deletion |
+| **Segments** | Creation, rule changes, renaming, deletion |
+| **API keys** | Creation, regeneration, revocation, deletion |
+| **Environments** | Creation, renaming, deletion |
+| **Project** | Settings changes, renaming |
+| **Users** | Invitation, role change, deletion |
 
 ## Viewing the Audit Log
 
 ### Dashboard
 
-Navigate to **Audit Log** in the sidebar. The page shows a chronological list of all changes with infinite scroll and filtering.
+The **Audit** section is accessible from the main menu.
 
-### API
+Each entry contains:
 
-```bash
-# List all audit entries (paginated)
-curl "https://your-instance/api/v1/audit?page=0&size=20" \
-  -H "Authorization: Bearer $JWT_TOKEN"
+| Field | Description | Example |
+|-------|-------------|---------|
+| **Date and time** | When the change occurred (UTC) | `2026-06-21 13:41:05` |
+| **User** | Who made the change | `admin@example.com` |
+| **Resource** | What was changed | `Flag new-checkout` |
+| **Action** | Type of change | `Strategy updated` |
+| **Details** | Additional event information | `Key: new-checkout` |
 
-# Filter by resource type
-curl "https://your-instance/api/v1/audit?resourceType=FLAG&page=0&size=20" \
-  -H "Authorization: Bearer $JWT_TOKEN"
+## Filtering the Audit Log
 
-# Filter by flag key
-curl "https://your-instance/api/v1/audit?resourceId=checkout_v2" \
-  -H "Authorization: Bearer $JWT_TOKEN"
+### By Time
 
-# Filter by date range
-curl "https://your-instance/api/v1/audit?from=2026-06-01T00:00:00Z&to=2026-06-21T23:59:59Z" \
-  -H "Authorization: Bearer $JWT_TOKEN"
-```
+Arbitrary date range filtering is available.
 
-## Filtering Audit Entries
+### By User
 
-The dashboard provides filter controls:
+Shows every action by a specific administrator or developer.
 
-| Filter | Type | Description |
-|--------|------|-------------|
-| **Date range** | Date picker | Show changes within a time window |
-| **Resource type** | Dropdown | `Flags`, `Segments`, `API Keys`, `Environments` |
-| **Action** | Dropdown | `Created`, `Updated`, `Deleted`, `Archived`, `Restored`, `Paused`, `Resumed` |
-| **Actor** | Text input | Filter by user email |
-| **Resource ID** | Text input | Filter by specific flag key or segment name |
+### By Resource
 
-Filters combine with AND logic. For example: "Resource type: Flags AND Date: Last 7 days AND Action: Updated" shows flag changes in the past week.
+Full change history of a single flag — from creation to archival.
 
-## Diff View
+### By Action Type
 
-When a resource is updated, the audit entry shows a diff of the changed fields. Click any audit entry to expand the diff view.
+Creation, update, deletion, archival, authentication.
 
-### Example Diff: Flag Rollout Change
+### Combining Filters
 
-```diff
-Flag: checkout_v2
-Changed by: alice@example.com
-Date: 2026-06-21T10:30:00Z
+Show all flag changes made by a developer in the last week — combine time, user, resource, and action filters.
 
-  "rolloutPercentage": {
--   "before": 10,
-+   "after": 25
-  }
-```
+## Audit Log Storage
 
-### Example Diff: Targeting Rule Addition
+**можно**<span class=brand-dot>.</span> stores the audit log in PostgreSQL. Entries are never modified — the audit log is an append-only store.
 
-```diff
-Flag: premium_features
-Changed by: bob@example.com
-Date: 2026-06-21T11:00:00Z
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `AUDIT_RETENTION_DAYS` | `365` | How long audit entries are kept |
 
-  "targetingRules": {
--   "before": [
--     {
--       "conditions": [{"attribute": "plan", "operator": "EQUALS", "value": "enterprise"}],
--       "targetValue": true
--     }
--   ],
-+   "after": [
-+     {
-+       "conditions": [{"attribute": "plan", "operator": "EQUALS", "value": "enterprise"}],
-+       "targetValue": true
-+     },
-+     {
-+       "conditions": [{"attribute": "country", "operator": "EQUALS", "value": "DE"}],
-+       "targetValue": true
-+     }
-+   ]
-  }
-```
+Entries older than this are automatically purged once per day.
 
-> **Tip:** The diff view shows the complete field value, not just the changed portions. Use this to understand the full before and after state of each change.
+### Integrity
 
-## Exporting Audit Data
+- Entries are **never edited** after creation
+- Entries **cannot be deleted** via the dashboard (direct SQL only)
+- Each entry has a unique ID and microsecond-precision timestamp
 
-### Dashboard Export
+## Integration with External Systems
 
-From the audit log page, click **Export** to download a CSV file of the currently filtered results. The CSV includes:
-
-```
-Timestamp, Actor, Action, Resource Type, Resource ID, Summary
-2026-06-21T10:30:00Z, alice@example.com, UPDATED, FLAG, checkout_v2, Rollout changed from 10% to 25%
-```
-
-### API Export
-
-Use the API to programmatically extract audit data:
-
-```bash
-# Export all flag changes for June 2026
-curl "https://your-instance/api/v1/audit/export?resourceType=FLAG&from=2026-06-01T00:00:00Z&to=2026-07-01T00:00:00Z" \
-  -H "Authorization: Bearer $JWT_TOKEN" \
-  -H "Accept: text/csv" \
-  -o audit_june_2026.csv
-```
-
-### Integration with External Tools
-
-Use [webhooks](./integrations.md) to stream audit events to external systems. Configure a webhook for `flag.updated` or other resource events to forward changes as they happen.
-
-## Use Cases
-
-### Compliance and Security Review
-
-Before a release or security audit, export the audit log for all flags in the release scope. Verify:
-
-- No unauthorized changes to production flag states.
-- Rollout percentages follow the approved plan.
-- API key creation dates match onboarding records.
-
-### Incident Investigation
-
-When a feature flag change correlates with an incident:
-
-1. Filter the audit log by the affected flag key.
-2. Identify the last change before the incident start time.
-3. Review the diff to understand what changed.
-4. Share the audit entry permalink in the incident channel.
-
-### Flag Cleanup
-
-Before archiving or deleting flags, review the audit log to confirm:
-
-- The flag has not been modified recently (it is truly stable).
-- No one is still actively managing the flag.
-- The last change was a rollout completion, not a rollback.
-
-## Retention
-
-Audit log entries are retained indefinitely on self-hosted installations. Ensure your PostgreSQL instance has adequate storage for long-term audit data.
-
-> **Warning:** The audit log cannot be deleted or modified by any user. This is by design to ensure a tamper-proof history of all changes.
+Configure a [webhook](/en/guide/integrations) for an event (e.g. `flag.updated`) to receive notifications on changes.
 
 ## Next Steps
 
-- Configure [Webhooks](./integrations.md) to forward events to external systems.
-- Review [Best Practices](./best-practices.md) for flag cleanup strategies informed by audit data.
+- [Integrations](/en/guide/integrations) — configure webhooks
+- [Best Practices](/en/guide/best-practices) — cleanup strategy and flag management
+- [Flag Workflow](/en/guide/flags-workflow) — flag lifecycle
