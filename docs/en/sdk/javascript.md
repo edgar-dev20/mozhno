@@ -1,6 +1,6 @@
 # JavaScript / TypeScript SDK
 
-The можно JavaScript SDK provides local evaluation of feature flags in Node.js and browser environments. Distributed as the npm package `@mozhno/client-js` with full TypeScript definitions.
+The **можно**<span class=brand-dot>.</span> JavaScript/TypeScript SDK provides local evaluation of feature flags in Node.js and browser applications. Full TypeScript support with types included in the package.
 
 ## Installation
 
@@ -16,9 +16,13 @@ yarn add @mozhno/client-js
 pnpm add @mozhno/client-js
 ```
 
-| Package | Registry | Size |
-|---------|----------|------|
-| `@mozhno/client-js` | npm | ~15 KB gzipped |
+### Requirements
+
+| Environment | Minimum Version |
+|-------------|-----------------|
+| Node.js | 18+ |
+| Browsers | Latest 2 versions of Chrome, Firefox, Safari, Edge |
+| TypeScript | 5.0+ (optional, types included) |
 
 ## Quick Start
 
@@ -52,33 +56,32 @@ const client = new MozhnoClient({
   url: 'https://flags.example.com',
   apiKey: 'env-abc123',
   appName: 'my-app',
-  refreshInterval: 15,    // polling interval in seconds
-  metricsInterval: 60,     // metrics reporting interval in seconds
+  refreshInterval: 15,
+  metricsInterval: 60,
   disableMetrics: false,
-  stickyAnonId: true,      // auto-generate anonymous ID for sticky bucketing
+  stickyAnonId: true,
   environment: 'production',
-  mode: 'server',          // 'server' (full evaluation) or 'client' (toggles only)
 });
 await client.start();
 ```
 
 | Option | Type | Required | Default | Description |
 |--------|------|----------|---------|-------------|
-| `url` | `string` | Yes | — | Base URL of your можно instance |
+| `url` | `string` | Yes | — | URL of your **можно**<span class=brand-dot>.</span> instance |
 | `appName` | `string` | Yes | — | Application identifier |
 | `apiKey` | `string` | No | — | API key for the target environment |
 | `clientKey` | `string` | No | — | Client-side key (for `mode: 'client'`) |
 | `instanceId` | `string` | No | UUID | Unique instance identifier |
 | `mode` | `'server' \| 'client'` | No | `'server'` | Evaluation mode |
-| `refreshInterval` | `number` | No | `15` | Polling interval in seconds |
-| `metricsInterval` | `number` | No | `60` | Metrics reporting interval in seconds |
+| `refreshInterval` | `number` | No | `15 sec` | Polling interval |
+| `metricsInterval` | `number` | No | `60 sec` | Metrics reporting interval |
 | `disableMetrics` | `boolean` | No | `false` | Disable metrics reporting |
-| `stickyAnonId` | `boolean` | No | `true` | Auto-generate anonymous ID for consistent bucketing |
-| `bootstrap` | `FeatureFlag[]` | No | — | Pre-loaded rules (optional) |
+| `stickyAnonId` | `boolean` | No | `true` | Auto-generate anonymous ID for bucketing |
+| `bootstrap` | `FeatureFlag[]` | No | — | Pre-loaded rules |
 | `storageProvider` | `StorageProvider` | No | — | Custom storage provider |
+| `fetch` | `typeof fetch` | No | `globalThis.fetch` | Custom HTTP client |
 | `environment` | `string` | No | `'default'` | Environment name |
 | `context` | `MozhnoContext` | No | — | Global default context |
-| `fetch` | `typeof fetch` | No | `globalThis.fetch` | Custom HTTP client |
 
 ### Lifecycle
 
@@ -91,65 +94,6 @@ client.stop();          // stops polling and releases resources
 
 The client extends `EventEmitter` and emits events: `'ready'`, `'update'`, `'error'`, `'initialized'`, `'sent'`, `'warn'`.
 
-## API Reference
-
-### `isEnabled(flagKey, context?)`
-
-Evaluates a flag synchronously against the local rules cache. Returns `false` if the flag is not found (fail-closed).
-
-```typescript
-isEnabled(flagKey: string, context?: MozhnoContext): boolean
-```
-
-```typescript
-const ctx = { userId: 'user-123', country: 'DE' };
-if (client.isEnabled('new-checkout', ctx)) {
-  renderNew();
-} else {
-  renderOld();
-}
-```
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `flagKey` | `string` | The flag key to evaluate |
-| `context` | `MozhnoContext` (optional) | Context with user/request attributes |
-
-### `getVariant(flagKey)`
-
-Returns the active variant of a flag. Only works in `mode: 'server'`.
-
-```typescript
-getVariant(flagKey: string): { name: string; enabled: boolean } | null
-```
-
-```typescript
-const variant = client.getVariant('checkout-design');
-if (variant) {
-  switch (variant.name) {
-    case 'modern': return renderModern();
-    case 'minimal': return renderMinimal();
-  }
-}
-```
-
-### `updateContext(context)`
-
-Updates the global context (e.g. after user login).
-
-```typescript
-updateContext(context: MozhnoContext): void
-```
-
-### `setContextField(key, value)` / `removeContextField(key)`
-
-Set or remove individual context fields.
-
-```typescript
-setContextField(key: string, value: string): void
-removeContextField(key: string): void
-```
-
 ## Context (MozhnoContext)
 
 `MozhnoContext` is a plain object with optional fields:
@@ -158,9 +102,6 @@ removeContextField(key: string): void
 interface MozhnoContext {
   userId?: string;
   sessionId?: string;
-  appName?: string;
-  environment?: string;
-  currentTime?: string;   // ISO string, set automatically
   [key: string]: string | undefined;
 }
 ```
@@ -168,16 +109,15 @@ interface MozhnoContext {
 ```typescript
 const ctx = {
   userId: 'user-123',
-  email: 'alice@example.com',
   country: 'DE',
   plan: 'enterprise',
   appVersion: '2.4.1',
 };
 
-const enabled = client.isEnabled('dark_mode_v2', ctx);
+const enabled = client.isEnabled('new-checkout', ctx);
 ```
 
-If neither `userId` nor `sessionId` is provided, the SDK auto-generates a persistent anonymous ID (controlled by `stickyAnonId`) for deterministic percentage rollout.
+If neither `userId` nor `sessionId` is provided, the SDK auto-generates a persistent anonymous ID (controlled by `stickyAnonId`, default `true`) for deterministic percentage rollout.
 
 ## React Integration
 
@@ -188,7 +128,7 @@ The SDK does not ship built-in React hooks, but wrapping is straightforward:
 import React, { createContext, useContext, useEffect } from 'react';
 import { MozhnoClient, type MozhnoContext } from '@mozhno/client-js';
 
-const MozhnoReactContext = createContext<MozhnoClient | null>(null);
+const MozhnoCtx = createContext<MozhnoClient | null>(null);
 
 export function MozhnoProvider({
   client,
@@ -201,11 +141,11 @@ export function MozhnoProvider({
     client.start();
     return () => { client.stop(); };
   }, [client]);
-  return <MozhnoReactContext.Provider value={client}>{children}</MozhnoReactContext.Provider>;
+  return <MozhnoCtx.Provider value={client}>{children}</MozhnoCtx.Provider>;
 }
 
 export function useFlag(flagKey: string, ctx?: MozhnoContext): boolean {
-  const client = useContext(MozhnoReactContext);
+  const client = useContext(MozhnoCtx);
   if (!client) return false;
   return client.isEnabled(flagKey, ctx);
 }
@@ -233,13 +173,12 @@ function CheckoutPage() {
 }
 ```
 
-## Express Middleware
+## Express Integration
 
-```js
+```typescript
 import express from 'express';
 import { MozhnoClient } from '@mozhno/client-js';
 
-const app = express();
 const client = new MozhnoClient({
   url: process.env.MOZHNO_URL || 'http://localhost:8080',
   apiKey: process.env.MOZHNO_API_KEY,
@@ -248,10 +187,12 @@ const client = new MozhnoClient({
 
 await client.start();
 
+const app = express();
+
 app.get('/checkout', (req, res) => {
   const ctx = {
-    userId: req.headers['x-user-id'],
-    country: req.headers['x-country'],
+    userId: req.headers['x-user-id'] as string,
+    country: req.headers['x-country'] as string,
   };
 
   if (client.isEnabled('new-checkout', ctx)) {
@@ -260,38 +201,11 @@ app.get('/checkout', (req, res) => {
     res.json({ flow: 'old' });
   }
 });
-
-app.listen(3000);
 ```
-
-## Error Handling
-
-`isEnabled` fails safely: unknown flag → `false`, empty cache → `false`, network issues → last cached rules continue to work.
-
-Subscribe to events for error monitoring:
-
-```typescript
-client.on('error', (err) => {
-  console.error('Mozhno SDK error:', err);
-});
-
-client.on('warn', (msg) => {
-  console.warn('Mozhno SDK warning:', msg);
-});
-```
-
-## Performance
-
-| Scenario | Typical Latency |
-|----------|-----------------|
-| `isEnabled` (local eval) | < 0.1 ms |
-| Initial fetch (100 flags, LAN) | ~50 ms |
-| Background poll (no changes) | ~5 ms (304 Not Modified) |
-
-The SDK stores rules in a `Map` and evaluates flags synchronously with no memory allocation after cache warm-up.
 
 ## Next Steps
 
-- [SDK Overview](./overview.md) — Architecture and local evaluation model
-- [Java SDK](./java.md) — For JVM-based applications
-- [REST API](../api/rest.md) — Manage flags programmatically
+- [Java SDK](/en/sdk/java) — native JVM library
+- [SDK Overview](/en/sdk/overview) — architecture and shared concepts
+- [Targeting](/en/guide/targeting) — configuring rules and segments
+- [Quick Start](/en/intro/quick-start) — create your first flag

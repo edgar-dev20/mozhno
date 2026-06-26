@@ -5,24 +5,25 @@ SDK **можно**<span class=brand-dot>.</span> — это клиентские
 ## Архитектура
 
 ```mermaid
-graph TD
-    subgraph "Ваше приложение"
-        SDK[SDK mozhno]
-        EVAL[Локальная оценка]
-        CACHE[Кеш правил]
-    end
-    subgraph "Сервер mozhno"
-        API[REST API]
-        DB[(PostgreSQL)]
-    end
-
-    SDK -->|1. Загрузка правил| API
-    API -->|2. Правила| SDK
-    SDK -->|3. Сохраняет| CACHE
-    SDK -->|4. Оценивает локально| EVAL
-    SDK -->|5. Фоновый поллинг| API
-    APP[Код приложения] -->|isEnabled?| SDK
-    SDK -->|true/false| APP
+sequenceDiagram
+    participant App as Приложение
+    participant SDK as SDK
+    participant Server as Сервер
+        
+    SDK->>Server: GET /api/client/features
+    Server-->>SDK: правила флагов
+    Note over SDK: Кеширует в памяти
+        
+    Note over App,SDK: Оценка флагов
+    App->>SDK: isEnabled("flag", ctx)
+        Note over SDK: Оценивает локально<br/>по закешированным правилам
+    SDK-->>App: true / false
+        
+    Note over SDK,Server: Фоновое обновление
+    loop каждые 15 секунд
+            SDK->>Server: GET /api/client/features<br/>(If-None-Match)
+            Server-->>SDK: 304 Not Modified<br/>или обновлённые правила
+        end
 ```
 
 ### Принцип локальной оценки
@@ -40,38 +41,7 @@ graph TD
 
 ## Логика оценки
 
-SDK оценивает флаг в следующем порядке:
-
-1. **Флаг выключен?** → `false`
-2. **Нет стратегии/activation?** → `true`
-3. **Ограничения (constraints):** все правила должны совпасть с контекстом (И)
-4. **Сегменты:** хотя бы один сегмент должен совпасть (ИЛИ)
-5. **Если есть и то, и другое:** достаточно совпадения одного (ИЛИ)
-6. **Процентный роллаут:** MurmurHash32 от `flagKey + (userId || sessionId)`, сравнение с процентом
-7. **Ничего не совпало** → `false`
-
-### Поддерживаемые операторы
-
-| Оператор | Описание |
-|----------|----------|
-| `in` | Значение входит в список |
-| `not_in` | Значение не входит в список |
-| `eq` | Равенство (числовое для `contextType: number`) |
-| `ne` | Неравенство |
-| `gt` | Больше |
-| `gte` | Больше или равно |
-| `lt` | Меньше |
-| `lte` | Меньше или равно |
-| `contains` | Подстрока |
-
-### Типы контекста
-
-| Тип | Поведение |
-|-----|-----------|
-| `string` (по умолчанию) | Строковое сравнение |
-| `number` | Числовое сравнение |
-| `time` | Сравнение ISO8601 дат |
-| `semver` | Семантическое версионирование |
+Порядок оценки флага — [Таргетинг](/guide/targeting#как-работает-таргетинг). Операторы и типы контекста — [Контексты](/concepts/contexts#типы-контекста-и-операторы).
 
 ## Синхронизация правил
 
@@ -99,57 +69,6 @@ sequenceDiagram
 | Retry при ошибке | Экспоненциальный backoff | 1с → 2с → 4с |
 | Circuit breaker (Java) | 5 ошибок → 60с пауза | Защита от перегрузки сервера |
 
-## Инициализация клиента
-
-### Java SDK
-
-```java
-MozhnoConfig config = MozhnoConfig.builder()
-    .appName("my-app")
-    .instanceId("instance-1")
-    .mozhnoUrl("http://localhost:8080")
-    .apiKey("<api-key>")
-    .fetchTogglesInterval(15)
-    .sendMetricsInterval(60)
-    .environment("production")
-    .build();
-
-MozhnoClient client = new DefaultMozhnoClient(config);
-client.start();
-boolean enabled = client.isEnabled("new-checkout", context);
-```
-
-### JavaScript / TypeScript SDK
-
-```typescript
-import { MozhnoClient } from '@mozhno/client-js';
-
-const client = new MozhnoClient({
-  url: 'http://localhost:8080',
-  apiKey: '<api-key>',
-  appName: 'my-app',
-  refreshInterval: 15,
-  metricsInterval: 60,
-  environment: 'production',
-});
-
-await client.start();
-const enabled = client.isEnabled('new-checkout', { userId: 'user-123' });
-```
-
-### Общие параметры конфигурации
-
-| Параметр | JS ключ | Java ключ | По умолчанию | Описание |
-|----------|---------|-----------|-------------|----------|
-| URL сервера | `url` | `mozhnoUrl` | **Обязательно** | Базовый URL сервера |
-| API-ключ | `apiKey` | `apiKey` | **Обязательно** | API-ключ окружения |
-| Имя приложения | `appName` | `appName` | **Обязательно** | Идентификатор приложения |
-| ID экземпляра | `instanceId` | `instanceId` | **Обязательно** (Java) | Уникальный ID инстанса |
-| Интервал опроса (с) | `refreshInterval` | `fetchTogglesInterval` | `15` | Частота поллинга |
-| Интервал метрик (с) | `metricsInterval` | `sendMetricsInterval` | `60` | Частота отправки метрик |
-| Окружение | `environment` | `environment` | `null` (Java) / `"default"` (JS) | Имя окружения |
-| Отключить метрики | `disableMetrics` | `disableMetrics` | `false` | Отключение метрик |
-
 ## Контекст оценки
 
 Контекст — это map атрибутов, описывающих текущий запрос или пользователя:
@@ -174,35 +93,19 @@ const context = {
 
 ## Обработка ошибок и отказоустойчивость
 
-### Запуск SDK
-
-| Ситуация | Java SDK | JS SDK |
-|----------|----------|--------|
-| **Сервер доступен при старте** | Загружает правила, клиент готов | Загружает правила, клиент готов |
-| **Сервер недоступен при старте** | Выбрасывает исключение при `synchronousFetchOnInitialisation(true)`. Иначе — запускается и ретраит в фоне | Promise отклоняется |
-| **Сервер стал недоступен в работе** | Используется закешированное состояние. Фоновые ретраи | Используется закешированное состояние. Фоновые ретраи |
-
-> **Совет:** В продакшене используйте `synchronousFetchOnInitialisation(false)` (по умолчанию) — SDK запустится даже если сервер временно недоступен при старте, и догонит правила при восстановлении связи.
-
-### Оценка флагов
+### Правила поведения
 
 | Ситуация | Поведение |
 |----------|-----------|
+| **Сервер недоступен при старте** | SDK запускается и продолжает попытки подключения в фоне. Вызовы `isEnabled()` возвращают `false` до первой успешной загрузки правил |
+| **Сервер стал недоступен в работе** | SDK продолжает работать с закешированными правилами. Фоновые попытки переподключения |
 | **Флаг не найден** | Возвращается `false` (fail-closed) |
-| **Флаг найден, кеш пуст** | Возвращается `false` — безопасное поведение по умолчанию |
 | **Атрибут отсутствует в контексте** | Правило с этим атрибутом возвращает `false` |
-| **Сеть недоступна** | Закешированные правила продолжают работать |
+| **Кеш пуст** | Возвращается `false` |
 
 ### Задержка обновлений
 
 Изменения флага в веб-панели доходят до SDK за время **polling-интервала** (по умолчанию 15 секунд).
-
-## Поддерживаемые SDK
-
-| Язык | Пакет | Документация |
-|------|-------|-------------|
-| **Java** | `dev.mozhno:mozhno-client-java` (Gradle) | [Java SDK](/sdk/java) |
-| **JavaScript / TypeScript** | `@mozhno/client-js` (npm) | [JS SDK](/sdk/javascript) |
 
 ## Что дальше?
 

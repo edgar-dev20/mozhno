@@ -16,10 +16,6 @@ yarn add @mozhno/client-js
 pnpm add @mozhno/client-js
 ```
 
-| Пакет | Реестр | Размер |
-|-------|--------|--------|
-| `@mozhno/client-js` | npm | ~15 KB gzipped |
-
 ### Системные требования
 
 | Среда | Минимальная версия |
@@ -60,12 +56,11 @@ const client = new MozhnoClient({
   url: 'https://flags.example.com',
   apiKey: 'env-abc123',
   appName: 'my-app',
-  refreshInterval: 15,    // интервал поллинга (сек), по умолчанию 15
-  metricsInterval: 60,     // интервал отправки метрик (сек), по умолчанию 60
+  refreshInterval: 15,
+  metricsInterval: 60,
   disableMetrics: false,
-  stickyAnonId: true,      // авто-генерация анонимного ID (по умолчанию true)
+  stickyAnonId: true,
   environment: 'production',
-  mode: 'server',          // 'server' (серверная оценка) или 'client' (только тоглы)
 });
 await client.start();
 ```
@@ -78,15 +73,15 @@ await client.start();
 | `clientKey` | `string` | Нет | — | Клиентский ключ (для `mode: 'client'`) |
 | `instanceId` | `string` | Нет | UUID | Уникальный идентификатор экземпляра |
 | `mode` | `'server' \| 'client'` | Нет | `'server'` | Режим работы |
-| `refreshInterval` | `number` | Нет | `15` | Интервал поллинга правил (секунды) |
-| `metricsInterval` | `number` | Нет | `60` | Интервал отправки метрик (секунды) |
+| `refreshInterval` | `number` | Нет | `15 сек` | Интервал поллинга правил |
+| `metricsInterval` | `number` | Нет | `60 сек` | Интервал отправки метрик |
 | `disableMetrics` | `boolean` | Нет | `false` | Отключить отправку метрик |
 | `stickyAnonId` | `boolean` | Нет | `true` | Авто-ID для анонимных пользователей |
-| `bootstrap` | `FeatureFlag[]` | Нет | — | Предзагруженные правила (опционально) |
+| `bootstrap` | `FeatureFlag[]` | Нет | — | Предзагруженные правила |
 | `storageProvider` | `StorageProvider` | Нет | — | Кастомное хранилище |
+| `fetch` | `typeof fetch` | Нет | `globalThis.fetch` | Переопределение HTTP-клиента |
 | `environment` | `string` | Нет | `'default'` | Имя окружения |
 | `context` | `MozhnoContext` | Нет | — | Глобальный контекст по умолчанию |
-| `fetch` | `typeof fetch` | Нет | `globalThis.fetch` | Переопределение HTTP-клиента |
 
 ### Жизненный цикл
 
@@ -99,73 +94,6 @@ client.stop();          // останавливает поллинг и осво
 
 Клиент наследует `EventEmitter` и генерирует события: `'ready'`, `'update'`, `'error'`, `'initialized'`, `'sent'`, `'warn'`.
 
-## API Reference
-
-### `isEnabled(flagKey, context?)`
-
-Проверяет, включён ли флаг. Синхронный метод, оценивает флаг по локальному кешу правил.
-
-```typescript
-isEnabled(flagKey: string, context?: MozhnoContext): boolean
-```
-
-Возвращает `false`, если флаг не найден (fail-closed).
-
-```typescript
-const ctx = { userId: 'user-123', country: 'RU' };
-if (client.isEnabled('new-checkout', ctx)) {
-  renderNew();
-} else {
-  renderOld();
-}
-```
-
-### `getVariant(flagKey)`
-
-Возвращает активный вариант флага (для мультивариативных флагов). Работает только в `mode: 'server'`.
-
-```typescript
-getVariant(flagKey: string): { name: string; enabled: boolean } | null
-```
-
-```typescript
-const variant = client.getVariant('checkout-design');
-if (variant) {
-  switch (variant.name) {
-    case 'modern': return renderModern();
-    case 'minimal': return renderMinimal();
-  }
-}
-```
-
-### `updateContext(context)`
-
-Обновляет глобальный контекст клиента (например, после логина пользователя).
-
-```typescript
-updateContext(context: MozhnoContext): void
-```
-
-```typescript
-onUserLogin(user => {
-  client.updateContext({ userId: user.id, plan: user.plan });
-});
-```
-
-### `setContextField(key, value)` / `removeContextField(key)`
-
-Точечное изменение отдельных полей глобального контекста.
-
-```typescript
-setContextField(key: string, value: string): void
-removeContextField(key: string): void
-```
-
-```typescript
-client.setContextField('country', 'RU');
-client.removeContextField('country');
-```
-
 ## Контекст (MozhnoContext)
 
 `MozhnoContext` — это простой объект с опциональными полями для передачи атрибутов в момент оценки флага:
@@ -174,10 +102,7 @@ client.removeContextField('country');
 interface MozhnoContext {
   userId?: string;
   sessionId?: string;
-  appName?: string;
-  environment?: string;
-  currentTime?: string; // ISO-строка, устанавливается автоматически
-  [key: string]: string | undefined; // произвольные атрибуты
+  [key: string]: string | undefined;
 }
 ```
 
@@ -186,7 +111,6 @@ interface MozhnoContext {
 ```typescript
 const ctx = {
   userId: 'user-123',
-  email: 'user@example.com',
   country: 'RU',
   plan: 'premium',
   appVersion: '2.4.1',
@@ -195,7 +119,7 @@ const ctx = {
 const enabled = client.isEnabled('new-checkout', ctx);
 ```
 
-Если не передать `userId` или `sessionId`, SDK автоматически использует `stickyAnonId` для детерминированного процентного роллаута.
+Если не передан `userId` или `sessionId`, SDK автоматически использует `stickyAnonId` (по умолчанию `true`) для детерминированного процентного роллаута.
 
 ### Глобальный контекст
 
@@ -221,7 +145,7 @@ SDK не содержит встроенных React-хуков, но легко
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { MozhnoClient, type MozhnoContext } from '@mozhno/client-js';
 
-const MozhnoContext = createContext<MozhnoClient | null>(null);
+const MozhnoCtx = createContext<MozhnoClient | null>(null);
 
 export function MozhnoProvider({
   client,
@@ -234,13 +158,12 @@ export function MozhnoProvider({
     client.start();
     return () => { client.stop(); };
   }, [client]);
-  return <MozhnoContext.Provider value={client}>{children}</MozhnoContext.Provider>;
+  return <MozhnoCtx.Provider value={client}>{children}</MozhnoCtx.Provider>;
 }
 
 export function useFlag(flagKey: string, ctx?: MozhnoContext): boolean {
-  const client = useContext(MozhnoContext);
+  const client = useContext(MozhnoCtx);
   if (!client) return false;
-  // isEnabled синхронный и дёшев — не нужен useState/useEffect
   return client.isEnabled(flagKey, ctx);
 }
 ```
@@ -296,32 +219,6 @@ app.get('/checkout', (req, res) => {
   }
 });
 ```
-
-## Обработка ошибок
-
-`isEnabled` фаейлится безопасно: если флаг не найден — `false`. Если кеш пуст (до первой загрузки) — `false`. Сетевая проблема — старые закешированные правила продолжают работать.
-
-Для подписки на ошибки используйте события клиента:
-
-```typescript
-client.on('error', (err) => {
-  console.error('Mozhno SDK error:', err);
-});
-
-client.on('warn', (msg) => {
-  console.warn('Mozhno SDK warning:', msg);
-});
-```
-
-## Производительность
-
-| Сценарий | Типичная задержка |
-|----------|-------------------|
-| `isEnabled` (локальная оценка) | < 0.1 мс |
-| Первичная загрузка (100 флагов, LAN) | ~50 мс |
-| Фоновый поллинг (без изменений) | ~5 мс (304 Not Modified) |
-
-SDK хранит правила в `Map` и оценивает флаги синхронно без выделения памяти.
 
 ## Что дальше?
 

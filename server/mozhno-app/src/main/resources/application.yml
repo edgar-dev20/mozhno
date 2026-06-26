@@ -67,6 +67,9 @@ audit:
   retention-days: 365
 
 management:
+
+  server:
+    port: 9090
   tracing:
     sampling:
       probability: 1.0
@@ -76,8 +79,7 @@ management:
         include: health,info,metrics,prometheus
   endpoint:
     health:
-      show-details: when-authorized
-      roles: ADMIN
+      show-details: always
   info:
     git:
       mode: full
