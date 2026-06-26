@@ -1,6 +1,7 @@
 const ru = {
   common: {
     appName: 'можно',
+    docs: 'Документация',
     loading: 'Загрузка...',
     save: 'Сохранить',
     cancel: 'Отмена',

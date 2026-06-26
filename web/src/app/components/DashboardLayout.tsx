@@ -10,8 +10,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
 import { UserProfileMenu } from '@/app/components/UserProfileMenu';
-import { Flag, GitBranch, UserCog } from '@/shared/icons';
+import { Flag, GitBranch, UserCog, Sun, Moon, FileText } from '@/shared/icons';
 import { Menu } from 'lucide-react';
+import { cn } from '@/app/components/ui/utils';
 import { PageErrorBoundary } from '@/app/components/PageErrorBoundary';
 import { OnboardingWizard } from '@/app/components/onboarding';
 import {
@@ -31,7 +32,7 @@ import {
 } from '@/app/hooks/queries';
 
 export function DashboardLayout() {
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { user } = useAuth();
   const location = useLocation();
   const t = useT();
@@ -208,6 +209,40 @@ export function DashboardLayout() {
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="relative inline-flex h-7 w-11 shrink-0 items-center rounded-full border border-border bg-muted transition-colors duration-300 hover:bg-accent"
+                  aria-label={theme === 'dark' ? t('userMenu.lightTheme') : t('userMenu.darkTheme')}
+                >
+                  <span
+                    className={cn(
+                      'absolute flex items-center justify-center size-5 rounded-full bg-card shadow-sm transition-transform duration-300',
+                      theme === 'dark' ? 'translate-x-0.5' : 'translate-x-[21px]',
+                    )}
+                  >
+                    {theme === 'dark' ? (
+                      <Moon size={12} className="text-muted-foreground" />
+                    ) : (
+                      <Sun size={12} className="text-amber-500" />
+                    )}
+                  </span>
+                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <a
+                      href="https://docs.mozhno.dev"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center size-8 rounded-md text-muted-foreground/70 hover:text-muted-foreground hover:bg-accent transition-colors"
+                      aria-label={t('common.docs')}
+                    >
+                      <FileText size={18} />
+                    </a>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-caption">
+                    {t('common.docs')}
+                  </TooltipContent>
+                </Tooltip>
                 <UserProfileMenu />
               </div>
             </header>

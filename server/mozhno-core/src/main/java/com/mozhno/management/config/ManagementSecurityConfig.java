@@ -1,4 +1,4 @@
-package dev.mozhno.security;
+package com.mozhno.management.config;
 
 import org.springframework.boot.actuate.autoconfigure.web.ManagementContextConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class ManagementSecurityConfig {
 
     @Bean
-    @Order(-10)
+    @Order(0)
     public SecurityFilterChain managementFilterChain(HttpSecurity http) throws Exception {
         http
             .securityMatcher("/**")
