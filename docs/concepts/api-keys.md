@@ -73,5 +73,5 @@ var client = new DefaultMozhnoClient(config);
 ## Что дальше?
 
 - [Окружения](/concepts/environments) — как ключи связаны с окружениями
-- [REST API](/api/rest) — полный список endpoints для управления ключами
+- [API-ключи](/concepts/api-keys) — управление ключами
 - [Безопасность](/advanced/security) — JWT, rate limiting, CORS

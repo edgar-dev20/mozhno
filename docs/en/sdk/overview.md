@@ -112,4 +112,4 @@ Flag changes in the dashboard reach the SDK within one **polling interval** (def
 - [Java SDK](/en/sdk/java) — setup, configuration, and API for Java
 - [JavaScript / TypeScript SDK](/en/sdk/javascript) — setup and React integration
 - [Quick Start](/en/intro/quick-start) — create your first flag
-- [REST API](/en/api/rest) — programmatic server API access
+- [API Overview](/en/api/overview) — auth and base concepts

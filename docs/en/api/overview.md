@@ -241,6 +241,6 @@ curl -X POST "http://localhost:8080/api/v1/flags/42/archive" \
 
 ## Next Steps
 
-- [REST API Reference](./rest.md) — Full endpoint documentation with curl examples.
+- [Swagger UI](/swagger-ui.html) — Interactive API documentation
 - [SDK Overview](../sdk/overview.md) — How SDKs use the REST API internally.
 - [Webhooks](../guide/integrations.md) — Push-based integration for CI/CD pipelines.

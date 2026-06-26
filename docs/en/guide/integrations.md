@@ -73,5 +73,5 @@ If writing JSON config for the API, use double square brackets to avoid escaping
 
 ## Next Steps
 
-- [REST API](../api/rest.md) — Full API documentation
+- [API Overview](/en/api/overview) — auth and base concepts
 - [Audit](./audit.md) — Change history
