@@ -46,53 +46,6 @@ Each flag page displays a sparkline chart — a miniature graph showing the flag
 
 Clicking the sparkline opens a dialog with a full chart and a list of SDK instances grouped by application. Filter by application name and specific instance. Metrics are retained for the last 48 hours.
 
-## Metrics REST API
-
-### Flag Metrics
-
-```http
-GET /api/v1/flags/{flagId}/metrics
-```
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `environmentId` | `long` | Environment ID |
-| `instanceId` | `string` | SDK instance ID |
-| `appName` | `string` | Application name |
-
-```bash
-curl "http://localhost:8080/api/v1/flags/42/metrics?environmentId=3" \
-  -H "Authorization: Bearer $JWT_TOKEN"
-```
-
-Response:
-
-```json
-{
-  "metrics": [
-    {
-      "timeBucket": "2026-06-21T13:41:00Z",
-      "trueCount": 150,
-      "falseCount": 50,
-      "instanceId": "instance-1",
-      "appName": "web-app"
-    }
-  ]
-}
-```
-
-### Project Metrics
-
-```http
-GET /api/v1/metrics
-```
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `environmentId` | `long` | Environment ID |
-
-Returns aggregated metrics across all project flags.
-
 ## Disabling Metrics
 
 If metrics are not needed, disable them in the SDK:
@@ -107,16 +60,6 @@ MozhnoConfig config = MozhnoConfig.builder()
     .build();
 ```
 
-
-## Exporting Metrics via SPI
-
-Through `MetricsSinkSpi`, metrics can be directed to external systems:
-
-| Destination | Implementation |
-|-------------|----------------|
-| Prometheus | Standard endpoint `/actuator/prometheus` |
-| Datadog, New Relic | Enterprise implementation of `MetricsSinkSpi` |
-| Local storage | `JdbcMetricsSinkProvider` (default) |
 
 ## Interpreting Metrics
 
