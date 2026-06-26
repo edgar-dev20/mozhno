@@ -259,6 +259,7 @@ export default defineConfig({
   ignoreDeadLinks: [
     /^http:\/\/localhost/,
     /^https?:\/\/localhost/,
+    '/swagger-ui',
   ],
 
   markdown: {

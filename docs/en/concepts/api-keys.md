@@ -73,5 +73,5 @@ See [Security](/en/advanced/security) for details.
 ## Related Pages
 
 - [Environments](/en/concepts/environments) — how keys relate to environments
-- [REST API](/en/api/rest) — full list of key management endpoints
+- [API Keys](/en/concepts/api-keys) — key management
 - [Security](/en/advanced/security) — JWT, rate limiting, CORS

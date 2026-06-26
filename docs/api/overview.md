@@ -232,7 +232,7 @@ curl -X POST "http://localhost:8080/api/v1/flags/42/archive" \
 
 ## Что дальше?
 
-- [REST API Reference](/api/rest) — полный список endpoints с примерами
+- [Swagger UI](/swagger-ui.html) — интерактивная документация API
 - [Интеграции](/guide/integrations) — CI/CD, вебхуки, GitHub Actions
 - [SDK: Обзор](/sdk/overview) — как SDK взаимодействует с API
 - [Конфигурация](/intro/configuration) — переменные окружения сервера

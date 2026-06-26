@@ -134,4 +134,4 @@ All attribute values are strings. For numeric comparisons, set `contextType: num
 
 - [SDK Overview](./overview.md) — Architecture and evaluation model.
 - [JavaScript SDK](./javascript.md) — For Node.js and browser applications.
-- [REST API](../api/rest.md) — Manage flags programmatically.
+- [API Overview](/en/api/overview) — auth and base concepts
