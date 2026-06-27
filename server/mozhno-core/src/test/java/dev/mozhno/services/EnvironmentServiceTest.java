@@ -7,9 +7,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.environments.Environment;
-import dev.mozhno.environments.EnvironmentLimitProvider;
 import dev.mozhno.environments.EnvironmentRepository;
 import dev.mozhno.environments.EnvironmentService;
+import dev.mozhno.spi.QuotaSpi;
 
 import java.util.List;
 
@@ -26,13 +26,13 @@ class EnvironmentServiceTest {
     private DomainEventPublisher events;
 
     @Mock
-    private EnvironmentLimitProvider limitProvider;
+    private QuotaSpi quotaSpi;
 
     private EnvironmentService environmentService;
 
     @BeforeEach
     void setUp() {
-        environmentService = new EnvironmentService(environmentRepository, events, limitProvider);
+        environmentService = new EnvironmentService(environmentRepository, events, quotaSpi);
     }
 
     @Test
@@ -67,12 +67,12 @@ class EnvironmentServiceTest {
 
     @Test
     void create_shouldCreateAndReturn() {
-        when(limitProvider.getMaxEnvironments()).thenReturn(10);
-        when(environmentRepository.saveWithLimitCheck(eq(1), eq("production"), eq(10))).thenAnswer(inv -> {
+        when(quotaSpi.canCreateEnvironment(1)).thenReturn(new QuotaSpi.Allowed());
+        when(environmentRepository.save(any(Environment.class))).thenAnswer(inv -> {
             Environment e = new Environment();
             e.setId(1);
-            e.setName(inv.getArgument(1));
-            e.setProjectId(inv.getArgument(0));
+            e.setName(inv.getArgument(0, Environment.class).getName());
+            e.setProjectId(inv.getArgument(0, Environment.class).getProjectId());
             return e;
         });
 

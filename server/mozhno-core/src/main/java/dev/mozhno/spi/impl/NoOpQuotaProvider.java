@@ -55,6 +55,19 @@ public class NoOpQuotaProvider implements QuotaSpi {
     }
 
     /**
+     * Checks whether a new environment can be created in the given project.
+     *
+     * @param projectId the project identifier
+     * @return always {@link Allowed}
+     * @implNote The OSS implementation always allows environment creation
+     *           without any limit.
+     */
+    @Override
+    public QuotaResult canCreateEnvironment(Integer projectId) {
+        return new Allowed();
+    }
+
+    /**
      * Checks whether a new user can be created in the given project.
      *
      * @param projectId the project identifier
