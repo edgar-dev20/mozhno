@@ -39,7 +39,13 @@ public class EnvironmentController {
         return environmentAssembler.toResponse(env);
     }
 
-    @DeleteMapping("/{id}")
+    @GetMapping("/limit")
+    @Operation(summary = "Get max environments limit")
+    public Map<String, Integer> getLimit() {
+        return Map.of("maxEnvironments", 3);
+    }
+
+    @DeleteMapping("/{id:\\d+}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete an environment")
     @PreAuthorize("hasRole('ADMIN')")
@@ -48,13 +54,7 @@ public class EnvironmentController {
         environmentService.delete(id, user.projectId());
     }
 
-    @GetMapping("/limit")
-    @Operation(summary = "Get max environments limit for a project")
-    public Map<String, Integer> getLimit() {
-        return Map.of("maxEnvironments", environmentService.getMaxEnvironments());
-    }
-
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     @Operation(summary = "Get environment by ID")
     public EnvironmentResponse getById(@PathVariable Integer id,
                                        @AuthenticationPrincipal UserPrincipal user) {
@@ -62,7 +62,7 @@ public class EnvironmentController {
         return environmentAssembler.toResponse(env);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id:\\d+}")
     @Operation(summary = "Update an environment")
     @PreAuthorize("hasRole('ADMIN')")
     public EnvironmentResponse update(@PathVariable Integer id,

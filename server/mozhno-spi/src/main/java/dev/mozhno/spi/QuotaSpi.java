@@ -5,8 +5,8 @@ package dev.mozhno.spi;
  * <p>
  * In the Open Core architecture, the community edition imposes no quotas.
  * Licensed editions can provide an SPI implementation that enforces
- * per-workspace limits on the number of flags, segments, contexts, users,
- * and API keys, as well as audit log retention, based on the active plan.
+ * per-workspace limits on the number of flags, segments, contexts, environments,
+ * users, and API keys, as well as audit log retention, based on the active plan.
  */
 public interface QuotaSpi {
 
@@ -33,6 +33,14 @@ public interface QuotaSpi {
      * @return {@link Allowed} or a {@link Blocked} result with limit details
      */
     QuotaResult canCreateContext(Integer projectId);
+
+    /**
+     * Checks whether a new environment can be created in the given project.
+     *
+     * @param projectId the project identifier
+     * @return {@link Allowed} or a {@link Blocked} result with limit details
+     */
+    QuotaResult canCreateEnvironment(Integer projectId);
 
     /**
      * Checks whether a new user can be added to the given project.

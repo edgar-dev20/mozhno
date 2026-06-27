@@ -20,6 +20,7 @@ public class RequestContext {
     private final String userEmail;
     private final String userName;
     private final String userRole;
+    private final Integer projectId;
 
     public RequestContext() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -28,11 +29,13 @@ public class RequestContext {
             this.userEmail = userAuth.getEmail();
             this.userName = userAuth.getName();
             this.userRole = userAuth.getRole();
+            this.projectId = userAuth.getProjectId();
         } else {
             this.userId = null;
             this.userEmail = null;
             this.userName = null;
             this.userRole = null;
+            this.projectId = null;
         }
     }
 
@@ -40,6 +43,7 @@ public class RequestContext {
     public String getUserEmail() { return userEmail; }
     public String getUserName() { return userName; }
     public String getUserRole() { return userRole; }
+    public Integer getProjectId() { return projectId; }
 
     public boolean isAuthenticated() {
         return userId != null;
