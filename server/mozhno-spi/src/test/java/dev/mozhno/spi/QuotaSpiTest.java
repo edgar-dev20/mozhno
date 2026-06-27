@@ -53,6 +53,7 @@ class QuotaSpiTest {
         assertThat(quota.canCreateContext(1)).isInstanceOf(QuotaSpi.Blocked.class);
         assertThat(quota.canCreateUser(1)).isInstanceOf(QuotaSpi.Blocked.class);
         assertThat(quota.canCreateApiKey(1)).isInstanceOf(QuotaSpi.Blocked.class);
+        assertThat(quota.canCreateEnvironment(1)).isInstanceOf(QuotaSpi.Blocked.class);
     }
 
     private static class StubQuotaProvider implements QuotaSpi {
@@ -85,6 +86,11 @@ class QuotaSpiTest {
         @Override
         public QuotaResult canCreateApiKey(Integer projectId) {
             return allowed ? new Allowed() : new Blocked("API_KEY", 5, 5, "STARTER");
+        }
+
+        @Override
+        public QuotaResult canCreateEnvironment(Integer projectId) {
+            return allowed ? new Allowed() : new Blocked("ENVIRONMENT", 2, 2, "STARTER");
         }
 
         @Override
