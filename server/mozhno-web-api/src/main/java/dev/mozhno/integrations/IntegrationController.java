@@ -73,6 +73,8 @@ public class IntegrationController {
     @GetMapping("/webhook-limit")
     @Operation(summary = "Get remaining webhook delivery quota for the project")
     public Map<String, Long> getWebhookLimit(@AuthenticationPrincipal UserPrincipal user) {
-        return Map.of("remaining", webhookLimitSpi.getRemaining(user.projectId()));
+        Integer projectId = user.projectId();
+        if (projectId == null) return Map.of("remaining", 0L);
+        return Map.of("remaining", webhookLimitSpi.getRemaining(projectId));
     }
 }

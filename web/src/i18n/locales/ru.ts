@@ -330,6 +330,7 @@ const ru = {
     settings: 'Проект',
     audit: 'События',
     apiKeys: 'API Ключи',
+    billing: 'Биллинг',
     applications: 'Приложения',
   },
   errors: {

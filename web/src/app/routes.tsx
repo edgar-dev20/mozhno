@@ -8,6 +8,7 @@ import { DashboardLayout } from '@/app/components/DashboardLayout';
 import { ProtectedRoute } from '@/app/components/ProtectedRoute';
 import { AuthProvider } from '@/app/auth/AuthContext';
 import { LazyPage } from '@/shared/components/LazyPage';
+import { PremiumPageSlot } from '@/app/components/PremiumPageSlot';
 
 const Flags = lazy(() => import('@/app/components/Flags').then((m) => ({ default: m.Flags })));
 const Segments = lazy(() =>
@@ -84,6 +85,7 @@ export const router = createBrowserRouter([
               { path: 'apikeys', element: <LazyPage Component={ApiKeys} /> },
               { path: 'applications', element: <LazyPage Component={ClientInstances} /> },
               { path: 'settings', element: <LazyPage Component={Settings} /> },
+              { path: 'premium/*', element: <PremiumPageSlot /> },
             ],
           },
         ],

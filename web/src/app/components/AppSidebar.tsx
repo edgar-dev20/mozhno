@@ -10,6 +10,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/too
 import { PanelLeftIcon } from 'lucide-react';
 import { MANAGEMENT_ITEMS, ADMIN_ITEMS } from '@/app/components/navConfig';
 import type { NavItem } from '@/app/components/navConfig';
+import { PluginSlot } from '@/app/components/PluginSlot';
 
 const SIDEBAR_COOKIE = 'sidebar_state';
 const MOBILE_BP = 768;
@@ -239,6 +240,7 @@ function SidebarContent({
                   onClick={onNavigate}
                 />
               ))}
+              <PluginSlot slotId="sidebar.admin" />
             </>
           )}
         </div>
