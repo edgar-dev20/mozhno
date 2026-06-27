@@ -331,6 +331,7 @@ const en = {
     settings: 'Settings',
     audit: 'Audit log',
     apiKeys: 'API Keys',
+    billing: 'Billing',
     applications: 'Applications',
   },
   errors: {
