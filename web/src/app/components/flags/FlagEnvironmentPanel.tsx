@@ -159,9 +159,6 @@ export function FlagEnvironmentPanel({
             {t('flags.environmentTitle')}
             {envName ? ` ${envName}` : ''}
           </h4>
-          <p className="text-xs text-muted-foreground/80 mt-0.5">
-            {t('flags.environmentDescription')}
-          </p>
         </div>
         <div className="flex items-center gap-2.5 shrink-0">
           <span className="text-xs font-medium text-muted-foreground/80">
