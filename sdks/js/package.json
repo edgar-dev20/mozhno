@@ -25,7 +25,7 @@
     "format:check": "prettier --check \"src/**/*.ts\""
   },
   "keywords": ["feature-flags", "feature-toggles", "mozhno", "sdk"],
-  "license": "AGPL-3.0",
+  "license": "BUSL-1.1",
   "overrides": {
     "esbuild": "^0.28.1"
   },

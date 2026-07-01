@@ -6,7 +6,7 @@
 
 <p align="center">
   <a href="https://github.com/mozhno-dev/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mozhno-dev/mozhno/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL_v3-blue?style=flat-square" alt="AGPL v3" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-BSL_1.1-lightgrey?style=flat-square" alt="BSL 1.1" /></a>
   <a href="https://github.com/mozhno-dev/mozhno/pkgs/container/mozhno"><img src="https://img.shields.io/badge/Docker-ghcr.io-blue?style=flat-square&logo=docker" alt="Docker" /></a>
   <a href="https://github.com/mozhno-dev/mozhno/stargazers"><img src="https://img.shields.io/github/stars/mozhno-dev/mozhno?style=flat-square&logo=github&color=fedc32" alt="Stars" /></a>
 </p>
@@ -173,4 +173,4 @@ cd server && ./gradlew :mozhno-client-java:check   # Тесты Java SDK
 
 ### Лицензия
 
-[GNU AGPL v3.0](LICENSE) · © 2026 Edgar Gilmanov
+[Business Source License 1.1](LICENSE) · © 2026 Edgar Gilmanov
