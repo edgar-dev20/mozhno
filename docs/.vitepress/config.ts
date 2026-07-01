@@ -251,7 +251,7 @@ export default defineConfig({
     },
 
     footer: {
-      message: 'Released under the AGPL v3.0 License.',
+      message: 'Released under the BSL 1.1 License.',
       copyright: '© 2026 можно.',
     },
   },

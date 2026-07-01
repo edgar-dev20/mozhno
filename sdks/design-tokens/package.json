@@ -2,7 +2,7 @@
   "name": "@mozhno/design-tokens",
   "version": "1.0.0",
   "description": "Design tokens for mozhno feature flag platform — OKLCH color system, typography scale, shadows, and motion tokens",
-  "license": "AGPL-3.0",
+  "license": "BUSL-1.1",
   "main": "./index.js",
   "module": "./index.js",
   "types": "./index.d.ts",

@@ -1,12 +1,12 @@
 # Open Core
 
-**можно**<span class=brand-dot>.</span> follows an Open Core model. The Community Edition is fully functional under AGPL v3. Enterprise features are delivered as a pluggable JAR — no fork, no feature gates in the core code.
+**можно**<span class=brand-dot>.</span> follows an Open Core model. The Community Edition is fully functional under BSL 1.1. Enterprise features are delivered as a pluggable JAR — no fork, no feature gates in the core code.
 
 ## How It Works
 
 ```mermaid
 graph TD
-    subgraph "Community Edition (AGPL v3)"
+    subgraph "Community Edition (BSL 1.1)"
         SPI[mozhno-spi<br/>Extension Interfaces]
         CORE[mozhno-core<br/>Flag Engine + Storage]
         API[mozhno-web-api<br/>REST + Auth]
@@ -30,7 +30,7 @@ graph TD
 
 ### The Contract
 
-- **Community Edition** defines the **SPI interfaces** — what the system can extend. These interfaces ship in `mozhno-spi.jar` under AGPL v3.
+- **Community Edition** defines the **SPI interfaces** — what the system can extend. These interfaces ship in `mozhno-spi.jar` under BSL 1.1.
 - **Enterprise Edition** provides **implementations** of those interfaces in a separate JAR (`mozhno-enterprise.jar`). This JAR is proprietary, not open source.
 - At startup, `mozhno-app` scans the classpath for `PremiumPlugin` implementations. If it finds `mozhno-enterprise.jar`, enterprise features activate. If not, built-in defaults handle everything.
 
@@ -196,7 +196,7 @@ A single `PremiumPlugin` implementation in `mozhno-enterprise.jar` registers all
 
 ```
 mozhno-home/
-├── mozhno.jar              (Community: AGPL v3)
+├── mozhno.jar              (Community: BSL 1.1)
 ├── plugins/
 │   └── mozhno-enterprise.jar   (Enterprise: Proprietary)
 └── config/
@@ -242,9 +242,9 @@ services:
 
 ## License
 
-The Community Edition is licensed under **GNU AGPL v3**. Anyone can use, modify, and distribute it. If you modify the server and offer it as a network service, you must make your modifications available under the same license.
+The Community Edition is licensed under **GNU BSL 1.1**. Anyone can use, modify, and distribute it. If you modify the server and offer it as a network service, you must make your modifications available under the same license.
 
-The Enterprise JAR is distributed under a proprietary license. SPI interfaces in `mozhno-spi` are AGPL v3 — anyone can implement them, including for proprietary plugins.
+The Enterprise JAR is distributed under a proprietary license. SPI interfaces in `mozhno-spi` are BSL 1.1 — anyone can implement them, including for proprietary plugins.
 
 SDKs (Java, JavaScript) are licensed under **MIT** — no copyleft restrictions on the code you write with them.
 
