@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import {
   Plus,
   Users,
@@ -29,7 +29,6 @@ import {
   getInputPattern,
   getInputHint,
   getInputMode,
-  isConstraintValueValid,
   getInlineValidationError,
 } from '@/app/components/operators';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
@@ -226,32 +225,7 @@ export function Segments() {
     reader.readAsText(file);
   };
 
-  const hasInvalidConstraints = useMemo(() => {
-    return formContexts.some((c) => {
-      if (c.contextDefinitionId === 0) return false;
-      const operator = c.operator;
-      if (!operator || operator.trim() === '') return true;
-      const values = c.contextValues;
-      if (!values || values.trim() === '') return true;
-      const ctx = contexts.find((cd) => cd.id === c.contextDefinitionId);
-      const type = ctx?.type ?? ContextType.STRING;
-      const isMulti = isMultiOperator(operator);
-      const vals = values
-        .split(',')
-        .map((v) => v.trim())
-        .filter(Boolean);
-      if (!isMulti && vals.length > 1) return true;
-      if (vals.length === 0) return false;
-      if (isMulti || type === ContextType.STRING) return false;
-      return vals.some((v) => !isConstraintValueValid(type, v, operator));
-    });
-  }, [formContexts, contexts]);
-
   const doSave = async () => {
-    if (hasInvalidConstraints) {
-      setError(t('segments.errors.invalidConstraints'));
-      return;
-    }
     setError('');
     setSaving(true);
     try {
@@ -515,7 +489,6 @@ export function Segments() {
               </button>
               <GradientButton
                 onClick={confirmApplyDiff}
-                disabled={hasInvalidConstraints}
                 loading={saving}
               >
                 {t('common.applyChanges')}
