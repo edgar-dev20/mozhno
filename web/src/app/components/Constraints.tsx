@@ -439,14 +439,14 @@ export function Constraints() {
               editing ? (
                 <>
                   {t('constraints.keyHintEditPrefix')}
-                  <code className="text-xs font-mono text-brand bg-brand dark:bg-brand/10 px-1 py-0.5 rounded">
+                  <code className="text-xs font-mono text-brand bg-brand/10 px-1 py-0.5 rounded">
                     context['{formKey}']
                   </code>
                 </>
               ) : (
                 <>
                   {t('constraints.keyHintCreatePrefix')}
-                  <code className="text-xs font-mono text-brand bg-brand dark:bg-brand/10 px-1 py-0.5 rounded">
+                  <code className="text-xs font-mono text-brand bg-brand/10 px-1 py-0.5 rounded">
                     context['user_id']
                   </code>
                 </>

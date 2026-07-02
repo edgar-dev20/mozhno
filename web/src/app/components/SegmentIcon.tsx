@@ -106,9 +106,11 @@ export function SegmentIcon({ name, className = '', size = 20 }: SegmentIconProp
 export function SegmentIconPicker({
   value,
   onChange,
+  color,
 }: {
   value: string;
   onChange: (icon: string) => void;
+  color?: string;
 }) {
   return (
     <div className="max-h-[240px] overflow-hidden rounded-xl">
@@ -119,12 +121,17 @@ export function SegmentIconPicker({
             <button
               key={icon}
               type="button"
-              onClick={() => onChange(icon)}
+              onClick={(e) => { e.preventDefault(); onChange(icon); }}
               className={`p-2 rounded-lg transition-all flex items-center justify-center ${
                 isSelected
-                  ? 'bg-brand dark:bg-brand/20 ring-2 ring-brand dark:ring-brand'
+                  ? 'text-white'
                   : 'bg-secondary hover:bg-accent text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground/60'
               }`}
+              style={
+                isSelected && color
+                  ? { backgroundColor: color, boxShadow: `0 0 0 3px ${color}55` }
+                  : undefined
+              }
               title={icon}
             >
               <SegmentIcon name={icon} size={18} />

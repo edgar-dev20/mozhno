@@ -117,7 +117,7 @@ export function ClientInstances() {
     setExpandedApps(next);
   };
 
-  const envName = (id: number) => environments.find((e) => e.id === id)?.name ?? '-';
+  const envName = (id: number | null) => id != null ? (environments.find((e) => e.id === id)?.name ?? '-') : '-';
   const envGradient = (id: number) => {
     const name = envName(id);
     if (name === 'Production')

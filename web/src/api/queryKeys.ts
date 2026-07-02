@@ -29,12 +29,12 @@ export const queryKeys = {
   },
   clientInstances: {
     byProject: (projectId: number | null) => ['clientInstances', projectId] as const,
-    filtered: (projectId: number | null, envFilter: string | null) =>
+    filtered: (projectId: number | null, envFilter: number | null) =>
       ['clientInstances', projectId, envFilter] as const,
   },
   metrics: {
     sparkline: ['metrics', 'sparkline'] as const,
-    project: (projectId: number | null, envFilter: string | null) =>
+    project: (projectId: number | null, envFilter: number | null) =>
       ['metrics', 'project', projectId, envFilter] as const,
   },
   settings: {

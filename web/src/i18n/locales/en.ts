@@ -317,6 +317,7 @@ const en = {
       delete: 'Error deleting segment',
       save: 'Error saving segment',
       fileTooBig: 'File too large. Maximum size: {{size}}MB',
+      invalidConstraints: 'Fill in or remove all empty targeting rules before saving',
     },
   },
   navigation: {
