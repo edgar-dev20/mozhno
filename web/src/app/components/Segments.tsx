@@ -70,7 +70,7 @@ export function Segments() {
   const [formIcon, setFormIcon] = useState('Users');
   const [formColor, setFormColor] = useState('#1a6b60');
   const [formContexts, setFormContexts] = useState<SegmentContextEntry[]>([]);
-  const [initialSegment, setInitialSegment] = useState<{
+  const [, setInitialSegment] = useState<{
     name: string;
     desc: string;
     icon: string;
@@ -82,6 +82,13 @@ export function Segments() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [diffChanges, setDiffChanges] = useState<DiffChange[]>([]);
+  const [isDirty, setIsDirty] = useState(false);
+
+  const updateName = (v: string) => { setFormName(v); setIsDirty(true); };
+  const updateDesc = (v: string) => { setFormDesc(v); setIsDirty(true); };
+  const updateIcon = (v: string) => { setFormIcon(v); setIsDirty(true); };
+  const updateColor = (v: string) => { setFormColor(v); setIsDirty(true); };
+  const updateContexts: typeof setFormContexts = (arg) => { setFormContexts(arg); setIsDirty(true); };
 
   const openCreate = () => {
     setEditing(null);
@@ -94,6 +101,8 @@ export function Segments() {
     setShowCustomize(false);
     setActiveConditionId(null);
     setInitialSegment(null);
+    setDiffChanges([]);
+    setIsDirty(false);
     setPanelOpen(true);
   };
   const openEdit = (s: SegmentResponse) => {
@@ -123,11 +132,13 @@ export function Segments() {
     setError('');
     setShowCustomize(false);
     setActiveConditionId(null);
+    setDiffChanges([]);
+    setIsDirty(false);
     setPanelOpen(true);
   };
 
   const addContext = () => {
-    setFormContexts((prev) => [
+    updateContexts((prev) => [
       ...prev,
       { id: `sc-${Date.now()}`, contextDefinitionId: 0, operator: Operator.IN, contextValues: '' },
     ]);
@@ -147,12 +158,12 @@ export function Segments() {
     }
   };
 
-  const removeContext = (id: string) => setFormContexts((prev) => prev.filter((c) => c.id !== id));
+  const removeContext = (id: string) => updateContexts((prev) => prev.filter((c) => c.id !== id));
 
   const addValue = (id: string, value: string) => {
     const trimmed = value.trim();
     if (!trimmed) return;
-    setFormContexts((prev) =>
+    updateContexts((prev) =>
       prev.map((c) => {
         if (c.id !== id) return c;
         const isMulti = isMultiOperator(c.operator);
@@ -172,7 +183,7 @@ export function Segments() {
   };
 
   const removeValue = (id: string, index: number) => {
-    setFormContexts((prev) =>
+    updateContexts((prev) =>
       prev.map((c) => {
         if (c.id !== id) return c;
         const values = (c.contextValues ?? '')
@@ -200,7 +211,7 @@ export function Segments() {
         .split(/[\n\r,]+/)
         .map((v) => v.trim())
         .filter(Boolean);
-      setFormContexts((prev) =>
+      updateContexts((prev) =>
         prev.map((c) => {
           if (c.id !== id) return c;
           const existing = (c.contextValues ?? '')
@@ -214,18 +225,6 @@ export function Segments() {
     };
     reader.readAsText(file);
   };
-
-  const isSegmentDirty = useMemo(() => {
-    if (!editing || !initialSegment) return false;
-    return (
-      formName !== initialSegment.name ||
-      formDesc !== initialSegment.desc ||
-      formIcon !== initialSegment.icon ||
-      formColor !== initialSegment.color ||
-      JSON.stringify(formContexts.map(({ id: _id, ...rest }) => rest)) !==
-        JSON.stringify(initialSegment.contexts.map(({ id: _id2, ...rest }) => rest))
-    );
-  }, [formName, formDesc, formIcon, formColor, formContexts, editing, initialSegment]);
 
   const hasInvalidConstraints = useMemo(() => {
     return formContexts.some((c) => {
@@ -249,6 +248,10 @@ export function Segments() {
   }, [formContexts, contexts]);
 
   const doSave = async () => {
+    if (hasInvalidConstraints) {
+      setError(t('segments.errors.invalidConstraints'));
+      return;
+    }
     setError('');
     setSaving(true);
     try {
@@ -531,8 +534,7 @@ export function Segments() {
                 disabled={
                   saving ||
                   !formName ||
-                  (editing != null && !isSegmentDirty) ||
-                  hasInvalidConstraints
+                  (editing != null && !isDirty)
                 }
                 loading={saving}
               >
@@ -549,7 +551,7 @@ export function Segments() {
             <input
               type="text"
               value={formName}
-              onChange={(e) => setFormName(e.target.value)}
+              onChange={(e) => updateName(e.target.value)}
               maxLength={120}
               placeholder={t('segments.form.namePlaceholder')}
               className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
@@ -558,7 +560,7 @@ export function Segments() {
           <FormField label={t('common.description')} maxLength={160} value={formDesc}>
             <textarea
               value={formDesc}
-              onChange={(e) => setFormDesc(e.target.value)}
+              onChange={(e) => updateDesc(e.target.value)}
               maxLength={160}
               placeholder={t('segments.form.descriptionPlaceholder')}
               rows={2}
@@ -611,13 +613,13 @@ export function Segments() {
                   <label className="text-xs font-medium text-muted-foreground mb-2 block">
                     {t('common.icon')}
                   </label>
-                  <SegmentIconPicker value={formIcon} onChange={setFormIcon} />
+                  <SegmentIconPicker value={formIcon} onChange={updateIcon} color={formColor} />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-2 block">
                     {t('common.color')}
                   </label>
-                  <SegmentColorPicker value={formColor} onChange={setFormColor} icon={formIcon} />
+                  <SegmentColorPicker value={formColor} onChange={updateColor} icon={formIcon} />
                 </div>
               </div>
             )}
@@ -661,7 +663,7 @@ export function Segments() {
                 };
 
                 const updateEntry = (upd: Partial<SegmentContextEntry>) => {
-                  setFormContexts((prev) =>
+                  updateContexts((prev) =>
                     prev.map((e) => (e.id === c.id ? { ...e, ...upd } : e)),
                   );
                 };

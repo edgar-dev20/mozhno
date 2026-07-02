@@ -250,7 +250,7 @@ export function SdkInfo() {
               <span
                 className={`shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border ${
                   active.keyType === 'SERVER'
-                    ? 'text-brand dark:text-brand bg-brand dark:bg-brand/10 border-brand dark:border-brand/20'
+                    ? 'text-brand bg-brand/10 border-brand/20'
                     : 'text-success bg-success/10 border-success/20'
                 }`}
               >

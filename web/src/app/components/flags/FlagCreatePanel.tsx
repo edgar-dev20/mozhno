@@ -55,8 +55,8 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
 
   return (
     <form id="flag-create-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <div className="p-4 bg-brand dark:bg-brand/10 border border-brand dark:border-brand/20 rounded-lg">
-        <p className="text-xs text-brand dark:text-brand">
+      <div className="p-4 bg-brand/10 border border-brand/20 rounded-lg">
+        <p className="text-xs text-brand">
           {t('flags.createDescription')}
         </p>
       </div>

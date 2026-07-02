@@ -20,7 +20,8 @@ const SidebarCtx = createContext<{
   setCollapsed: (v: boolean) => void;
   toggleMobile: () => void;
   mobileOpen: boolean;
-}>({ collapsed: false, setCollapsed: () => {}, toggleMobile: () => {}, mobileOpen: false });
+  setMobileOpen: (v: boolean) => void;
+}>({ collapsed: false, setCollapsed: () => {}, toggleMobile: () => {}, mobileOpen: false, setMobileOpen: () => {} });
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAppSidebar() {
@@ -71,8 +72,8 @@ export function AppSidebarProvider({ children }: { children: React.ReactNode }) 
       return;
     }
 
-    const onEnd = (e: TransitionEvent) => {
-      if (e.propertyName !== 'width' || transitionEndBoundRef.current) return;
+    const onEnd = (e: Event) => {
+      if ((e as TransitionEvent).propertyName !== 'width' || transitionEndBoundRef.current) return;
       transitionEndBoundRef.current = true;
       aside.removeEventListener('transitionend', onEnd);
       unlockOverflow();
@@ -113,8 +114,9 @@ export function AppSidebarProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'b' || e.key === 'B' || e.code === 'KeyB')) {
         e.preventDefault();
+        e.stopPropagation();
         if (window.innerWidth < MOBILE_BP) {
           setMobileOpen((o) => !o);
         } else {
@@ -128,12 +130,12 @@ export function AppSidebarProvider({ children }: { children: React.ReactNode }) 
         }
       }
     };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    document.addEventListener('keydown', handler, { capture: true });
+    return () => document.removeEventListener('keydown', handler, { capture: true });
   }, [lockOverflow, scheduleUnlock]);
 
   return (
-    <SidebarCtx.Provider value={{ collapsed, setCollapsed, toggleMobile, mobileOpen }}>
+    <SidebarCtx.Provider value={{ collapsed, setCollapsed, toggleMobile, mobileOpen, setMobileOpen }}>
       {children}
     </SidebarCtx.Provider>
   );
@@ -195,6 +197,8 @@ function SidebarContent({
   const t = useT();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.userAgent);
+  const shortcutKey = isMac ? '⌘B' : 'Ctrl+B';
 
   return (
     <nav aria-label="Navigation" className="flex flex-col h-full">
@@ -261,8 +265,16 @@ function SidebarContent({
             onClick={() => setCollapsed(!collapsed)}
             icon={<PanelLeftIcon size={15} className={collapsed ? 'rotate-180' : ''} />}
             className="w-full"
+            title={collapsed ? shortcutKey : undefined}
           >
-            {!collapsed && t('common.collapse')}
+            {!collapsed && (
+              <span className="flex items-center gap-2">
+                <span>{t('common.collapse')}</span>
+                <kbd className="text-[10px] font-medium text-muted-foreground/50 bg-muted px-1 py-0.5 rounded leading-none">
+                  {shortcutKey}
+                </kbd>
+              </span>
+            )}
           </GradientButton>
         </div>
       )}
@@ -271,7 +283,7 @@ function SidebarContent({
 }
 
 export function AppSidebar() {
-  const { collapsed, mobileOpen, toggleMobile } = useContext(SidebarCtx);
+  const { collapsed, mobileOpen, toggleMobile, setMobileOpen } = useContext(SidebarCtx);
 
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_BP - 1}px)`);
