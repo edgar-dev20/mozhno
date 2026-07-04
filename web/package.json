@@ -87,7 +87,7 @@
     "@eslint/js": "^10.0.1"
   },
   "devDependencies": {
-    "@commitlint/cli": "^21.1.0",
+    "@commitlint/cli": "^21.2.0",
     "@commitlint/config-conventional": "^21.1.0",
     "@eslint/js": "^10.0.1",
     "@storybook/addon-a11y": "^10.4.6",
