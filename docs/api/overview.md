@@ -52,8 +52,8 @@ curl -X POST "http://localhost:8080/api/v1/auth/login" \
 
 | Параметр | Значение по умолчанию | Описание |
 |----------|----------------------|----------|
-| Access token TTL | 15 минут | Настраивается через `JWT_ACCESS_TOKEN_TTL_MINUTES` |
-| Refresh token TTL | 30 дней | Настраивается через `JWT_REFRESH_TOKEN_TTL_DAYS` |
+| Access token TTL | 15 минут | Настраивается через `MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES` |
+| Refresh token TTL | 30 дней | Настраивается через `MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS` |
 | Refresh token rotation | Включена | Семейная ротация: старый токен инвалидируется при обновлении |
 
 ### API Key
@@ -196,8 +196,8 @@ openapi-generator generate \
 
 | Переменная | По умолчанию |
 |------------|-------------|
-| `SPRINGDOC_SWAGGER_UI_PATH` | `/swagger-ui.html` |
-| `SPRINGDOC_API_DOCS_PATH` | `/v3/api-docs` |
+| `MOZHNO_SWAGGER_UI_PATH` | `/swagger-ui.html` |
+| `MOZHNO_API_DOCS_PATH` | `/v3/api-docs` |
 
 ## Примеры использования
 

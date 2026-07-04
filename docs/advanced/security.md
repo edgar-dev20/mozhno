@@ -21,10 +21,10 @@
 
 | Параметр | По умолчанию | Описание |
 |----------|-------------|----------|
-| Access token TTL | 15 минут | `JWT_ACCESS_TOKEN_TTL_MINUTES` |
-| Refresh token TTL | 30 дней | `JWT_REFRESH_TOKEN_TTL_DAYS` |
-| Секрет | Обязателен в проде | `JWT_SECRET`, минимум 256 бит |
-| Издатель | `mozhno` | `JWT_ISSUER` |
+| Access token TTL | 15 минут | `MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES` |
+| Refresh token TTL | 30 дней | `MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS` |
+| Секрет | Обязателен в проде | `MOZHNO_JWT_SECRET`, минимум 256 бит |
+| Издатель | `mozhno` | `MOZHNO_JWT_ISSUER` |
 
 ### Refresh Token Rotation (семейная ротация)
 
@@ -90,10 +90,10 @@ sequenceDiagram
 
 ### CORS
 
-Настраивается через `APP_CORS_ALLOWED_ORIGINS`. Для продакшена укажите конкретный домен:
+Настраивается через `MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS`. Для продакшена укажите конкретный домен:
 
 ```
-APP_CORS_ALLOWED_ORIGINS=https://app.example.com
+MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS=https://app.example.com
 ```
 
 ### Security-заголовки
@@ -107,11 +107,11 @@ APP_CORS_ALLOWED_ORIGINS=https://app.example.com
 
 | Рекомендация | Как сделать |
 |-------------|-------------|
-| **Сложный JWT_SECRET** | `openssl rand -base64 32` |
+| **Сложный MOZHNO_JWT_SECRET** | `openssl rand -base64 32` |
 | **HTTPS-only** | Используйте обратный прокси (Nginx, Traefik, Caddy) с TLS |
 | **Ограниченный CORS** | Укажите конкретный домен, не `*` |
 | **Secrets manager** | Не храните пароли и ключи в `docker-compose.yml` |
-| **Ротация ключей** | API-ключи — раз в квартал; JWT_SECRET — при смене команды |
+| **Ротация ключей** | API-ключи — раз в квартал; MOZHNO_JWT_SECRET — при смене команды |
 | **Не запускайте от root** | Docker: `user: '1000:1000'`, read-only FS |
 | **Логирование без секретов** | `SensitiveDataMasker` маскирует JWT, ключи, пароли в логах |
 

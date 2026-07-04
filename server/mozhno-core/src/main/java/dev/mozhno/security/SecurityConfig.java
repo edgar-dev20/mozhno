@@ -4,7 +4,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -39,19 +38,19 @@ public class SecurityConfig {
 
     private final List<AuthenticationProviderSpi> authProviders;
     private final RateLimitProperties rateLimitProperties;
-
-    @Value("${app.cors.allowed-origins:}")
-    private String allowedOrigins;
+    private final SecurityProperties securityProperties;
 
     public SecurityConfig(List<AuthenticationProviderSpi> authProviders,
-                          RateLimitProperties rateLimitProperties) {
+                          RateLimitProperties rateLimitProperties,
+                          SecurityProperties securityProperties) {
         this.authProviders = authProviders;
         this.rateLimitProperties = rateLimitProperties;
+        this.securityProperties = securityProperties;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(12);
+        return new BCryptPasswordEncoder(securityProperties.getBcryptStrength());
     }
 
     @Bean
@@ -64,15 +63,21 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        SecurityProperties.Cors corsProps = securityProperties.getCors();
         CorsConfiguration config = new CorsConfiguration();
-        if (allowedOrigins != null && !allowedOrigins.isBlank()) {
-            config.setAllowedOrigins(List.of(allowedOrigins.split(",")));
+        List<String> allowedOrigins = corsProps.getAllowedOrigins() == null ? List.of()
+            : corsProps.getAllowedOrigins().stream()
+                .filter(o -> o != null && !o.isBlank())
+                .map(String::trim)
+                .toList();
+        if (!allowedOrigins.isEmpty()) {
+            config.setAllowedOrigins(allowedOrigins);
             config.setAllowCredentials(true);
         }
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
-        config.setExposedHeaders(List.of("X-Total-Count", "Link"));
-        config.setMaxAge(3600L);
+        config.setAllowedMethods(corsProps.getAllowedMethods());
+        config.setAllowedHeaders(corsProps.getAllowedHeaders());
+        config.setExposedHeaders(corsProps.getExposedHeaders());
+        config.setMaxAge(corsProps.getMaxAgeSeconds());
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
         return source;
@@ -97,9 +102,9 @@ public class SecurityConfig {
             .headers(headers -> headers
                 .httpStrictTransportSecurity(hsts -> hsts
                     .includeSubDomains(true)
-                    .maxAgeInSeconds(31536000))
+                    .maxAgeInSeconds(securityProperties.getHeaders().getHstsMaxAgeSeconds()))
                 .contentSecurityPolicy(csp -> csp
-                    .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self'"))
+                    .policyDirectives(securityProperties.getHeaders().getContentSecurityPolicy()))
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(ex -> ex
@@ -128,7 +133,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/projects/*/logo").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/v1/users/*/avatar").permitAll()
                 .requestMatchers("/api/v1/**").hasAnyRole("ADMIN", "DEVELOPER", "VIEWER")
-                .anyRequest().permitAll()
+                .requestMatchers("/index.html", "/assets/**", "/favicon*", "/logo*.svg", "/manifest.json").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .anyRequest().denyAll()
             )
             .addFilterBefore(new RateLimitFilter(rateLimitProperties.isEnabled(), rateLimitProperties), UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(new LoggingMdcFilter(), UsernamePasswordAuthenticationFilter.class)

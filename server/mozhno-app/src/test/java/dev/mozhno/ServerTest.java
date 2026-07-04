@@ -14,7 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers(parallel = true)
 @SpringBootTest(properties = {
     "spring.flyway.enabled=true",
-    "spring.sql.init.mode=never"
+    "spring.sql.init.mode=never",
+    "mozhno.jwt.secret=dGhpc2lzYXRlc3RzZWNyZXRrZXlmb3Jqd3R0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmc="
 })
 class ServerTest {
 

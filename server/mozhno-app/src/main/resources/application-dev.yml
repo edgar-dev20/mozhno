@@ -1,9 +1,24 @@
-jwt:
-  issuer: mozhno-dev
-  access-token-ttl-minutes: 60
-  refresh-token-ttl-days: 7
+# Local development profile (contributors building from source).
+# Activate with: SPRING_PROFILES_ACTIVE=dev
+# End users of the published container should NOT use this profile; they configure via MOZHNO_* env vars.
+mozhno:
+  jwt:
+    # Dev-only default secret so the app starts without configuration. NEVER use in production.
+    secret: ZGV2LXNlY3JldC1rZXktdGhhdC1pcy1hdC1sZWFzdC0zMi1ieXRlcy1sb25nLWZvci1kZXY=
+    issuer: mozhno-dev
+    access-token-ttl-minutes: 60
+    refresh-token-ttl-days: 7
+  security:
+    # Weaker BCrypt cost for faster logins during development.
+    bcrypt-strength: 4
 
 logging:
   level:
     dev.mozhno: DEBUG
     org.flywaydb: DEBUG
+
+management:
+  health:
+    # No local SMTP in dev; skip the mail probe so /actuator/health stays UP.
+    mail:
+      enabled: false

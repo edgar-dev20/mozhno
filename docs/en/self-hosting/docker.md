@@ -56,18 +56,18 @@ services:
     tmpfs:
       - /tmp:size=128M
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/feature_flags
-      SPRING_DATASOURCE_USERNAME: flags_user
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-flags_password}
+      MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
+      MOZHNO_DB_USERNAME: flags_user
+      MOZHNO_DB_PASSWORD: ${DB_PASSWORD:-flags_password}
 
-      JWT_SECRET: ${JWT_SECRET:-}
-      JWT_ACCESS_TOKEN_TTL_MINUTES: "15"
-      JWT_REFRESH_TOKEN_TTL_DAYS: "30"
+      MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET:-}
+      MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES: "15"
+      MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS: "30"
 
-      SERVER_PORT: "8080"
-      HIKARI_MAX_POOL_SIZE: "30"
-      HIKARI_MIN_IDLE: "5"
-      CACHE_TTL_MINUTES: "5"
+      MOZHNO_SERVER_PORT: "8080"
+      MOZHNO_DB_POOL_MAX_SIZE: "30"
+      MOZHNO_DB_POOL_MIN_IDLE: "5"
+      MOZHNO_CACHE_TTL_MINUTES: "5"
 
       JAVA_TOOL_OPTIONS: >
         -XX:+UseZGC
@@ -107,25 +107,25 @@ networks:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `SPRING_DATASOURCE_URL` | No | `jdbc:postgresql://localhost:5432/feature_flags` | JDBC URL for PostgreSQL |
-| `SPRING_DATASOURCE_USERNAME` | No | `flags_user` | Database user |
-| `SPRING_DATASOURCE_PASSWORD` | No | `flags_password` | Database password |
-| `HIKARI_MAX_POOL_SIZE` | No | `20` | Maximum database connections |
-| `HIKARI_MIN_IDLE` | No | `5` | Minimum idle database connections |
+| `MOZHNO_DB_URL` | No | `jdbc:postgresql://localhost:5432/feature_flags` | JDBC URL for PostgreSQL |
+| `MOZHNO_DB_USERNAME` | No | `flags_user` | Database user |
+| `MOZHNO_DB_PASSWORD` | No | `flags_password` | Database password |
+| `MOZHNO_DB_POOL_MAX_SIZE` | No | `20` | Maximum database connections |
+| `MOZHNO_DB_POOL_MIN_IDLE` | No | `5` | Minimum idle database connections |
 
 ### JWT
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `JWT_SECRET` | Yes | — | HMAC-SHA256 signing secret. Minimum 32 bytes. |
-| `JWT_ACCESS_TOKEN_TTL_MINUTES` | No | `15` | Access token lifetime in minutes |
-| `JWT_REFRESH_TOKEN_TTL_DAYS` | No | `30` | Refresh token lifetime in days |
+| `MOZHNO_JWT_SECRET` | Yes | — | HMAC-SHA256 signing secret. Minimum 32 bytes. |
+| `MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES` | No | `15` | Access token lifetime in minutes |
+| `MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS` | No | `30` | Refresh token lifetime in days |
 
 ### Server
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `SERVER_PORT` | No | `8080` | HTTP port |
+| `MOZHNO_SERVER_PORT` | No | `8080` | HTTP port |
 
 ### JVM
 
@@ -144,10 +144,10 @@ JVM defaults:
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `LOGGING_LEVEL_DEV_MOZHNO` | No | `INFO` | Application log level (`DEBUG`, `INFO`, `WARN`, `ERROR`) |
-| `SPRING_FLYWAY_ENABLED` | No | `true` | Run Flyway migrations on startup |
-| `CACHE_TTL_MINUTES` | No | `5` | In-memory cache TTL in minutes |
-| `CLIENT_MAX_METRICS_PER_KEY` | No | `1000` | Max stored metrics per client key |
-| `APP_BASE_URL` | No | `http://localhost:8080` | Public base URL of the server |
+| `MOZHNO_FLYWAY_ENABLED` | No | `true` | Run Flyway migrations on startup |
+| `MOZHNO_CACHE_TTL_MINUTES` | No | `5` | In-memory cache TTL in minutes |
+| `MOZHNO_CLIENT_MAX_METRICS_PER_KEY` | No | `1000` | Max stored metrics per client key |
+| `MOZHNO_BASE_URL` | No | `http://localhost:8080` | Public base URL of the server |
 
 ## Health Checks
 
@@ -207,7 +207,7 @@ Never hardcode secrets in `docker-compose.yml`. Use:
 **Environment file (`.env`):**
 ```bash
 DB_PASSWORD=your-secure-database-password
-JWT_SECRET=your-64-character-hex-secret
+MOZHNO_JWT_SECRET=your-64-character-hex-secret
 ```
 
 **Docker secrets (Swarm mode):**
@@ -222,13 +222,13 @@ secrets:
 **Environment variable reference** in `docker-compose.yml`:
 ```yaml
 environment:
-  SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-  JWT_SECRET: ${JWT_SECRET}
+  MOZHNO_DB_PASSWORD: ${DB_PASSWORD}
+  MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET}
 ```
 
 ### Production Checklist
 
-- [ ] Generate a strong `JWT_SECRET` (64+ hex characters)
+- [ ] Generate a strong `MOZHNO_JWT_SECRET` (64+ hex characters)
 - [ ] Use a unique, random `DB_PASSWORD`
 - [ ] Place behind a reverse proxy with TLS (Let's Encrypt)
 - [ ] Bind to `127.0.0.1` if proxy is local
@@ -305,10 +305,10 @@ ports:
   - '127.0.0.1:8080:8080'
 ```
 
-And set `APP_BASE_URL` to your domain:
+And set `MOZHNO_BASE_URL` to your domain:
 
 ```yaml
-APP_BASE_URL: https://flags.example.com
+MOZHNO_BASE_URL: https://flags.example.com
 ```
 
 ### Caddy (Automatic TLS)
@@ -323,14 +323,14 @@ flags.example.com {
 
 | # | Action | Command / Variable |
 |---|--------|-------------------|
-| 1 | Generate JWT secret | `openssl rand -base64 32` → `JWT_SECRET` |
-| 2 | Strong database password | `SPRING_DATASOURCE_PASSWORD` |
-| 3 | Set public domain | `APP_BASE_URL=https://flags.example.com` |
-| 4 | Configure CORS | `APP_CORS_ALLOWED_ORIGINS=https://app.example.com` |
+| 1 | Generate JWT secret | `openssl rand -base64 32` → `MOZHNO_JWT_SECRET` |
+| 2 | Strong database password | `MOZHNO_DB_PASSWORD` |
+| 3 | Set public domain | `MOZHNO_BASE_URL=https://flags.example.com` |
+| 4 | Configure CORS | `MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS=https://app.example.com` |
 | 5 | Bind port to localhost only | `ports: ['127.0.0.1:8080:8080']` |
 | 6 | Set up TLS via Nginx/Caddy/Traefik | See section above |
-| 7 | Increase connection pool | `HIKARI_MAX_POOL_SIZE=30` |
-| 8 | Configure SMTP for emails | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` |
+| 7 | Increase connection pool | `MOZHNO_DB_POOL_MAX_SIZE=30` |
+| 8 | Configure SMTP for emails | `MOZHNO_SMTP_HOST`, `MOZHNO_SMTP_PORT`, `MOZHNO_SMTP_USERNAME`, `MOZHNO_SMTP_PASSWORD` |
 | 9 | Pin the image version | `image: ghcr.io/mozhno-dev/mozhno:v1.0.0` |
 | 10 | Set up PostgreSQL backups | `pg_dump` or WAL archiving, see [Database](/en/self-hosting/database) |
 | 11 | Set up monitoring | Prometheus, alerts — see [Monitoring](/en/self-hosting/monitoring) |

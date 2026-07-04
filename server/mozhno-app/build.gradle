@@ -33,6 +33,7 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.testcontainers:postgresql:1.21.3'
@@ -46,6 +47,13 @@ springBoot {
 
 tasks.named('bootJar') {
     archiveFileName = 'mozhno.jar'
+}
+
+tasks.named('bootRun') {
+    // Local development convenience: `./gradlew bootRun` starts with the dev profile,
+    // which supplies a non-production JWT secret and relaxed settings.
+    // The packaged jar stays secure-by-default (requires MOZHNO_JWT_SECRET).
+    systemProperty 'spring.profiles.active', System.getProperty('spring.profiles.active', 'dev')
 }
 
 jacocoTestCoverageVerification {

@@ -21,10 +21,10 @@ Algorithm: **HMAC-SHA256**. Token structure:
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| Access token TTL | 15 minutes | `JWT_ACCESS_TOKEN_TTL_MINUTES` |
-| Refresh token TTL | 30 days | `JWT_REFRESH_TOKEN_TTL_DAYS` |
-| Secret | Required in production | `JWT_SECRET`, minimum 256 bits |
-| Issuer | `mozhno` | `JWT_ISSUER` |
+| Access token TTL | 15 minutes | `MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES` |
+| Refresh token TTL | 30 days | `MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS` |
+| Secret | Required in production | `MOZHNO_JWT_SECRET`, minimum 256 bits |
+| Issuer | `mozhno` | `MOZHNO_JWT_ISSUER` |
 
 ### Refresh Token Rotation (Family Rotation)
 
@@ -90,10 +90,10 @@ All limits are configurable via environment variables — see [Configuration](/e
 
 ### CORS
 
-Configured via `APP_CORS_ALLOWED_ORIGINS`. In production, specify a concrete domain:
+Configured via `MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS`. In production, specify a concrete domain:
 
 ```
-APP_CORS_ALLOWED_ORIGINS=https://app.example.com
+MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS=https://app.example.com
 ```
 
 ### Security Headers
@@ -107,11 +107,11 @@ APP_CORS_ALLOWED_ORIGINS=https://app.example.com
 
 | Recommendation | How To |
 |---------------|--------|
-| **Strong JWT_SECRET** | `openssl rand -base64 32` |
+| **Strong MOZHNO_JWT_SECRET** | `openssl rand -base64 32` |
 | **HTTPS-only** | Use a reverse proxy (Nginx, Traefik, Caddy) with TLS |
 | **Restricted CORS** | Specify a concrete domain, not `*` |
 | **Secrets manager** | Don't store passwords and keys in `docker-compose.yml` |
-| **Key rotation** | API keys — quarterly; JWT_SECRET — when team changes |
+| **Key rotation** | API keys — quarterly; MOZHNO_JWT_SECRET — when team changes |
 | **Don't run as root** | Docker: `user: '1000:1000'`, read-only FS |
 | **Logging without secrets** | `SensitiveDataMasker` masks JWT, keys, passwords in logs |
 

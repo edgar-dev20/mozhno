@@ -46,6 +46,12 @@ class UserInviteServiceTest {
     @Mock
     private QuotaSpi quotaSpi;
 
+    @org.mockito.Spy
+    private AuthProperties authProperties = new AuthProperties();
+
+    @org.mockito.Spy
+    private dev.mozhno.config.MozhnoProperties mozhnoProperties = new dev.mozhno.config.MozhnoProperties();
+
     @InjectMocks
     private UserInviteService userInviteService;
 
@@ -167,7 +173,7 @@ class UserInviteServiceTest {
         ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
         verify(emailTemplateService).renderInviteEmail(linkCaptor.capture(), anyString());
         String link = linkCaptor.getValue();
-        assertThat(link).contains("/accept-invite?token=");
+        assertThat(link).contains("/accept-invite#token=");
         assertThat(link).doesNotContain("/auth/accept-invite");
     }
 
@@ -215,14 +221,14 @@ class UserInviteServiceTest {
 
         when(tokenRepository.findByHashForUpdate(anyString())).thenReturn(token);
         when(userRepository.findByEmail("newuser@example.com")).thenReturn(null);
-        when(passwordEncoder.encode("password123")).thenReturn("hashed-pw");
+        when(passwordEncoder.encode("Password123!")).thenReturn("hashed-pw");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> {
             User u = inv.getArgument(0);
             u.setId(100);
             return u;
         });
 
-        UserDto result = userInviteService.acceptInvite("valid-token", "John Doe", "password123");
+        UserDto result = userInviteService.acceptInvite("valid-token", "John Doe", "Password123!");
 
         assertThat(result.email()).isEqualTo("newuser@example.com");
         assertThat(result.name()).isEqualTo("John Doe");
@@ -260,10 +266,10 @@ class UserInviteServiceTest {
 
         when(tokenRepository.findByHashForUpdate(anyString())).thenReturn(token);
         when(userRepository.findByEmail("existing@example.com")).thenReturn(existing);
-        when(passwordEncoder.encode("newpass1")).thenReturn("hashed-newpass");
+        when(passwordEncoder.encode("Newpass1!")).thenReturn("hashed-newpass");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        UserDto result = userInviteService.acceptInvite("valid-token", "Updated Name", "newpass1");
+        UserDto result = userInviteService.acceptInvite("valid-token", "Updated Name", "Newpass1!");
 
         assertThat(result.email()).isEqualTo("existing@example.com");
         assertThat(result.name()).isEqualTo("Updated Name");
@@ -293,7 +299,7 @@ class UserInviteServiceTest {
         when(tokenRepository.findByHashForUpdate(anyString())).thenReturn(token);
         when(userRepository.findByEmail("active@example.com")).thenReturn(existing);
 
-        assertThatThrownBy(() -> userInviteService.acceptInvite("valid-token", "Name", "password1"))
+        assertThatThrownBy(() -> userInviteService.acceptInvite("valid-token", "Name", "Password1!"))
             .isInstanceOf(RuntimeException.class)
             .hasMessageContaining("cannot accept invite");
 
@@ -318,7 +324,7 @@ class UserInviteServiceTest {
             return u;
         });
 
-        UserDto result = userInviteService.acceptInvite("valid-token", null, "password1");
+        UserDto result = userInviteService.acceptInvite("valid-token", null, "Password1!");
 
         assertThat(result.name()).isEqualTo("noname@example.com");
     }

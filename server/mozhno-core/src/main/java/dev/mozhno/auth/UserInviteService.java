@@ -20,7 +20,6 @@ import static dev.mozhno.client.HashUtils.sha256;
 
 @Service
 public class UserInviteService {
-    private static final int TOKEN_TTL_DAYS = 7;
 
     private static final Map<String, String> RU_INVITE_SUBJECT = Map.of("ru", "Приглашение в Mozhno", "en", "Invitation to Mozhno");
 
@@ -31,6 +30,7 @@ public class UserInviteService {
     private final NotificationSpi notificationSpi;
     private final DomainEventPublisher events;
     private final QuotaSpi quotaSpi;
+    private final AuthProperties authProperties;
     private final String baseUrl;
 
     public UserInviteService(EmailTemplateService emailTemplateService,
@@ -40,7 +40,8 @@ public class UserInviteService {
                              NotificationSpi notificationSpi,
                              DomainEventPublisher events,
                              QuotaSpi quotaSpi,
-                             @org.springframework.beans.factory.annotation.Value("${app.base-url:http://localhost:8080}") String baseUrl) {
+                             AuthProperties authProperties,
+                             dev.mozhno.config.MozhnoProperties mozhnoProperties) {
         this.emailTemplateService = emailTemplateService;
         this.tokenRepository = tokenRepository;
         this.userRepository = userRepository;
@@ -48,7 +49,8 @@ public class UserInviteService {
         this.notificationSpi = notificationSpi;
         this.events = events;
         this.quotaSpi = quotaSpi;
-        this.baseUrl = baseUrl;
+        this.authProperties = authProperties;
+        this.baseUrl = mozhnoProperties.getBaseUrl();
     }
 
     @Transactional
@@ -72,10 +74,10 @@ public class UserInviteService {
         token.setCreatedBy(createdBy);
         token.setTokenHash(tokenHash);
         token.setLocale(locale);
-        token.setExpiresAt(Instant.now().plus(TOKEN_TTL_DAYS, ChronoUnit.DAYS));
+        token.setExpiresAt(Instant.now().plus(authProperties.getInvite().getTokenTtlDays(), ChronoUnit.DAYS));
         tokenRepository.save(token);
 
-        String inviteLink = baseUrl + "/accept-invite?token=" + rawToken;
+        String inviteLink = baseUrl + "/accept-invite#token=" + rawToken;
         String html = emailTemplateService.renderInviteEmail(inviteLink, locale);
         String subject = RU_INVITE_SUBJECT.getOrDefault(locale, "Invitation to Mozhno");
 

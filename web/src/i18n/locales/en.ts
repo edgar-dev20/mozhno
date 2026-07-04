@@ -347,7 +347,15 @@ const en = {
     server: 'Server error. Please try again later.',
     timeout: 'Server is not responding. Check your connection.',
     unexpected: 'An unexpected error occurred.',
+    rateLimited: 'Too many requests. Please wait and try again.',
     notFoundInEnvironment: 'Flag not found in environment. Try refreshing the page.',
+    auth: {
+      invalidCredentials: 'Invalid email or password',
+      emailPasswordRequired: 'Email and password are required',
+      accountSuspended: 'Account is suspended',
+      accountLocked: 'Account is temporarily locked due to too many failed attempts. Try again later.',
+      noAuthProvider: 'No authentication provider available',
+    },
   },
   validation: {
     nameRequired: 'Name is required',

@@ -4,6 +4,7 @@ export type ErrorCode =
   | 'FORBIDDEN'
   | 'NOT_FOUND'
   | 'VALIDATION'
+  | 'RATE_LIMITED'
   | 'SERVER'
   | 'TIMEOUT'
   | 'UNKNOWN';
@@ -35,9 +36,11 @@ export function createAppError(message: string, statusCode: number, details?: un
           ? 'NOT_FOUND'
           : statusCode === 400 || statusCode === 422
             ? 'VALIDATION'
-            : statusCode >= 500
-              ? 'SERVER'
-              : 'UNKNOWN';
+            : statusCode === 429
+              ? 'RATE_LIMITED'
+              : statusCode >= 500
+                ? 'SERVER'
+                : 'UNKNOWN';
 
   return new AppError(message, code, statusCode, details);
 }

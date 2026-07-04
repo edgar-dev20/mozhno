@@ -2,6 +2,7 @@ export { adjustColor, hexToOklch, oklchToHex, dimColor } from '@/shared/color';
 export { MOTION } from '@/shared/motion';
 export { AppError, isAppError, createAppError } from '@/shared/errors';
 export { getErrorMessage, getErrorCode, shouldRetry, shouldRedirect } from '@/shared/errorHandler';
+export { getTokenFromHash } from '@/shared/tokenUtils';
 export { SectionHeader } from '@/shared/components/SectionHeader';
 export { EmptyState } from '@/shared/components/EmptyState';
 export { ColorBar } from '@/shared/components/ColorBar';

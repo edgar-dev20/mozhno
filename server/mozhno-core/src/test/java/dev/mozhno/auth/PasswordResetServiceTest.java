@@ -44,6 +44,12 @@ class PasswordResetServiceTest {
     @Mock
     private DomainEventPublisher events;
 
+    @org.mockito.Spy
+    private AuthProperties authProperties = new AuthProperties();
+
+    @org.mockito.Spy
+    private dev.mozhno.config.MozhnoProperties mozhnoProperties = new dev.mozhno.config.MozhnoProperties();
+
     @InjectMocks
     private PasswordResetService passwordResetService;
 
@@ -183,7 +189,7 @@ class PasswordResetServiceTest {
         ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
         verify(emailTemplateService).renderResetPasswordEmail(linkCaptor.capture(), anyString());
         String link = linkCaptor.getValue();
-        assertThat(link).contains("/reset-password?token=");
+        assertThat(link).contains("/reset-password#token=");
         assertThat(link).doesNotContain("/auth/reset-password");
     }
 
@@ -247,7 +253,7 @@ class PasswordResetServiceTest {
 
         ArgumentCaptor<String> linkCaptor = ArgumentCaptor.forClass(String.class);
         verify(emailTemplateService).renderAdminResetPasswordEmail(linkCaptor.capture(), anyString());
-        assertThat(linkCaptor.getValue()).contains("/reset-password?token=");
+        assertThat(linkCaptor.getValue()).contains("/reset-password#token=");
         assertThat(linkCaptor.getValue()).doesNotContain("/auth/reset-password");
     }
 
@@ -295,7 +301,7 @@ class PasswordResetServiceTest {
         when(tokenRepository.findByHashForUpdate(anyString())).thenReturn(token);
         when(userRepository.findById(999)).thenReturn(null);
 
-        assertThatThrownBy(() -> passwordResetService.resetPassword("valid-token", "newpass1"))
+        assertThatThrownBy(() -> passwordResetService.resetPassword("valid-token", "Newpass1!"))
             .isInstanceOf(PasswordResetService.InvalidTokenException.class)
             .hasMessageContaining("User not found");
     }
@@ -310,11 +316,11 @@ class PasswordResetServiceTest {
 
         when(tokenRepository.findByHashForUpdate(anyString())).thenReturn(token);
         when(userRepository.findById(1)).thenReturn(user);
-        when(passwordEncoder.encode("newpassword1")).thenReturn("hashed-password");
+        when(passwordEncoder.encode("Newpassword1!")).thenReturn("hashed-password");
 
-        passwordResetService.resetPassword("valid-token", "newpassword1");
+        passwordResetService.resetPassword("valid-token", "Newpassword1!");
 
-        verify(passwordEncoder).encode("newpassword1");
+        verify(passwordEncoder).encode("Newpassword1!");
         verify(userRepository).save(user);
         assertThat(user.getPasswordHash()).isEqualTo("hashed-password");
         assertThat(user.getStatus()).isEqualTo("active");

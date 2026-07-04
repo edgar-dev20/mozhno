@@ -54,27 +54,27 @@ services:
     image: ghcr.io/mozhno-dev/mozhno:latest
     restart: unless-stopped
     ports:
-      - '${SERVER_PORT:-8080}:8080'
+      - '${MOZHNO_SERVER_PORT:-8080}:8080'
     user: '1000:1000'
     read_only: true
     tmpfs:
       - /tmp:size=128M,mode=1777
     environment:
-      SERVER_PORT: '8080'
-      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      MOZHNO_SERVER_PORT: '8080'
+      MOZHNO_BASE_URL: ${MOZHNO_BASE_URL:-http://localhost:8080}
 
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/feature_flags
-      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-flags_user}
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-flags_password}
+      MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
+      MOZHNO_DB_USERNAME: ${DB_USERNAME:-flags_user}
+      MOZHNO_DB_PASSWORD: ${DB_PASSWORD:-flags_password}
 
-      HIKARI_MAX_POOL_SIZE: '30'
-      HIKARI_MIN_IDLE: '5'
-      HIKARI_CONNECTION_TIMEOUT: '10000'
+      MOZHNO_DB_POOL_MAX_SIZE: '30'
+      MOZHNO_DB_POOL_MIN_IDLE: '5'
+      MOZHNO_DB_POOL_CONNECTION_TIMEOUT: '10000'
 
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_ACCESS_TOKEN_TTL_MINUTES: '15'
-      JWT_REFRESH_TOKEN_TTL_DAYS: '30'
-      JWT_ISSUER: 'mozhno'
+      MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET}
+      MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES: '15'
+      MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS: '30'
+      MOZHNO_JWT_ISSUER: 'mozhno'
 
       JAVA_TOOL_OPTIONS: >
         -XX:+UseZGC
@@ -113,7 +113,7 @@ networks:
 Запуск:
 
 ```bash
-JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
+MOZHNO_JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 ```
 
 ## Переменные окружения
@@ -122,55 +122,55 @@ JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | JDBC URL подключения к PostgreSQL |
-| `SPRING_DATASOURCE_USERNAME` | `flags_user` | Пользователь базы данных |
-| `SPRING_DATASOURCE_PASSWORD` | `flags_password` | Пароль базы данных |
-| `HIKARI_MAX_POOL_SIZE` | `20` | Максимальное число соединений. Для продакшена — 30 |
-| `HIKARI_MIN_IDLE` | `5` | Минимальное число простаивающих соединений |
-| `HIKARI_CONNECTION_TIMEOUT` | `10000` | Таймаут ожидания соединения из пула (мс) |
+| `MOZHNO_DB_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | JDBC URL подключения к PostgreSQL |
+| `MOZHNO_DB_USERNAME` | `flags_user` | Пользователь базы данных |
+| `MOZHNO_DB_PASSWORD` | `flags_password` | Пароль базы данных |
+| `MOZHNO_DB_POOL_MAX_SIZE` | `20` | Максимальное число соединений. Для продакшена — 30 |
+| `MOZHNO_DB_POOL_MIN_IDLE` | `5` | Минимальное число простаивающих соединений |
+| `MOZHNO_DB_POOL_CONNECTION_TIMEOUT` | `10000` | Таймаут ожидания соединения из пула (мс) |
 
 ### Сервер
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `SERVER_PORT` | `8080` | Порт HTTP-сервера |
-| `APP_BASE_URL` | `http://localhost:8080` | Публичный URL. Влияет на CORS и генерацию ссылок |
-| `CACHE_TTL_MINUTES` | `5` | Время жизни кеша правил в минутах |
-| `CLIENT_MAX_METRICS_PER_KEY` | `1000` | Максимум хранимых метрик на API-ключ |
+| `MOZHNO_SERVER_PORT` | `8080` | Порт HTTP-сервера |
+| `MOZHNO_BASE_URL` | `http://localhost:8080` | Публичный URL. Влияет на CORS и генерацию ссылок |
+| `MOZHNO_CACHE_TTL_MINUTES` | `5` | Время жизни кеша правил в минутах |
+| `MOZHNO_CLIENT_MAX_METRICS_PER_KEY` | `1000` | Максимум хранимых метрик на API-ключ |
 
 ### JWT
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `JWT_SECRET` | — (обязательно) | Секретный ключ подписи JWT. Минимум 256 бит |
-| `JWT_ACCESS_TOKEN_TTL_MINUTES` | `15` | Время жизни access-токена в минутах |
-| `JWT_REFRESH_TOKEN_TTL_DAYS` | `30` | Время жизни refresh-токена в днях |
+| `MOZHNO_JWT_SECRET` | — (обязательно) | Секретный ключ подписи JWT. Минимум 256 бит |
+| `MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES` | `15` | Время жизни access-токена в минутах |
+| `MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS` | `30` | Время жизни refresh-токена в днях |
 
 ### Flyway
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `SPRING_FLYWAY_ENABLED` | `true` | Автоматический запуск миграций при старте |
-| `SPRING_FLYWAY_LOCATIONS` | `classpath:db/migration` | Путь к SQL-файлам миграций |
+| `MOZHNO_FLYWAY_ENABLED` | `true` | Автоматический запуск миграций при старте |
+| `MOZHNO_FLYWAY_LOCATIONS` | `classpath:db/migration` | Путь к SQL-файлам миграций |
 
 ### SMTP (почта)
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `SMTP_HOST` | `localhost` | Хост SMTP-сервера |
-| `SMTP_PORT` | `587` | Порт SMTP-сервера |
-| `SMTP_USERNAME` | — | Имя пользователя SMTP |
-| `SMTP_PASSWORD` | — | Пароль SMTP |
-| `EMAIL_FROM` | `noreply@mozhno.dev` | Адрес отправителя писем |
+| `MOZHNO_SMTP_HOST` | `localhost` | Хост SMTP-сервера |
+| `MOZHNO_SMTP_PORT` | `587` | Порт SMTP-сервера |
+| `MOZHNO_SMTP_USERNAME` | — | Имя пользователя SMTP |
+| `MOZHNO_SMTP_PASSWORD` | — | Пароль SMTP |
+| `MOZHNO_MAIL_FROM` | `noreply@mozhno.dev` | Адрес отправителя писем |
 
 ### Прочее
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `CACHE_TYPE` | `caffeine` | Тип кеша |
-| `APP_CORS_ALLOWED_ORIGINS` | `""` | Разрешённые origin для CORS |
-| `JWT_ISSUER` | `mozhno` | Издатель JWT-токенов |
-| `AUDIT_RETENTION_DAYS` | `365` | Срок хранения записей аудита |
+| `MOZHNO_CACHE_TYPE` | `caffeine` | Тип кеша |
+| `MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS` | `""` | Разрешённые origin для CORS |
+| `MOZHNO_JWT_ISSUER` | `mozhno` | Издатель JWT-токенов |
+| `MOZHNO_AUDIT_RETENTION_DAYS` | `365` | Срок хранения записей аудита |
 
 ## Проверки здоровья (Health Checks)
 
@@ -252,9 +252,9 @@ tmpfs:
 
 ### Секреты
 
-Никогда не задавайте `JWT_SECRET` и пароли базы данных напрямую в `docker-compose.yml`. Используйте:
+Никогда не задавайте `MOZHNO_JWT_SECRET` и пароли базы данных напрямую в `docker-compose.yml`. Используйте:
 
-- Переменные окружения хоста (`${JWT_SECRET}`)
+- Переменные окружения хоста (`${MOZHNO_JWT_SECRET}`)
 - Docker Secrets (в Swarm-режиме)
 - Внешний менеджер секретов (HashiCorp Vault, AWS Secrets Manager)
 
@@ -291,7 +291,7 @@ Dockerfile использует многоэтапную сборку (multi-sta
 
 ## Миграции при старте
 
-Flyway-миграции запускаются автоматически при старте контейнера (`SPRING_FLYWAY_ENABLED=true`). Если база данных недоступна, контейнер завершится с ошибкой и Docker перезапустит его (`restart: unless-stopped`). Миграции идемпотентны — повторный запуск не повредит данных.
+Flyway-миграции запускаются автоматически при старте контейнера (`MOZHNO_FLYWAY_ENABLED=true`). Если база данных недоступна, контейнер завершится с ошибкой и Docker перезапустит его (`restart: unless-stopped`). Миграции идемпотентны — повторный запуск не повредит данных.
 
 ## Где брать образ
 
@@ -359,10 +359,10 @@ ports:
   - '127.0.0.1:8080:8080'
 ```
 
-И установите `APP_BASE_URL` на ваш домен:
+И установите `MOZHNO_BASE_URL` на ваш домен:
 
 ```yaml
-APP_BASE_URL: https://flags.example.com
+MOZHNO_BASE_URL: https://flags.example.com
 ```
 
 ### Caddy (автоматический TLS)
@@ -377,14 +377,14 @@ flags.example.com {
 
 | # | Действие | Команда / переменная |
 |---|----------|---------------------|
-| 1 | Сгенерировать JWT-секрет | `openssl rand -base64 32` → `JWT_SECRET` |
-| 2 | Сложный пароль БД | `SPRING_DATASOURCE_PASSWORD` |
-| 3 | Указать реальный домен | `APP_BASE_URL=https://flags.example.com` |
-| 4 | Настроить CORS | `APP_CORS_ALLOWED_ORIGINS=https://app.example.com` |
+| 1 | Сгенерировать JWT-секрет | `openssl rand -base64 32` → `MOZHNO_JWT_SECRET` |
+| 2 | Сложный пароль БД | `MOZHNO_DB_PASSWORD` |
+| 3 | Указать реальный домен | `MOZHNO_BASE_URL=https://flags.example.com` |
+| 4 | Настроить CORS | `MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS=https://app.example.com` |
 | 5 | Закрыть порт от внешнего доступа | `ports: ['127.0.0.1:8080:8080']` |
 | 6 | Поставить TLS через Nginx/Caddy/Traefik | См. секцию выше |
-| 7 | Увеличить пул соединений | `HIKARI_MAX_POOL_SIZE=30` |
-| 8 | Настроить SMTP для писем | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD` |
+| 7 | Увеличить пул соединений | `MOZHNO_DB_POOL_MAX_SIZE=30` |
+| 8 | Настроить SMTP для писем | `MOZHNO_SMTP_HOST`, `MOZHNO_SMTP_PORT`, `MOZHNO_SMTP_USERNAME`, `MOZHNO_SMTP_PASSWORD` |
 | 9 | Фиксировать версию образа | `image: ghcr.io/mozhno-dev/mozhno:v1.0.0` |
 | 10 | Настроить бэкап PostgreSQL | `pg_dump` или WAL-архивация, см. [База данных](/self-hosting/database) |
 | 11 | Настроить мониторинг | Prometheus, алерты — см. [Мониторинг](/self-hosting/monitoring) |

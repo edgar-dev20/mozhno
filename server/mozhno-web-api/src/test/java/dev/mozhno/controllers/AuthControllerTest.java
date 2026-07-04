@@ -194,7 +194,7 @@ class AuthControllerTest extends BaseIntegrationTest {
     void resetPassword_shouldReturn400ForInvalidToken() throws Exception {
         mockMvc.perform(post("/api/v1/auth/reset-password")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"token\":\"invalid-token\",\"password\":\"newpassword123\"}"))
+                .content("{\"token\":\"invalid-token\",\"password\":\"newPassword123!\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
     }
@@ -212,7 +212,7 @@ class AuthControllerTest extends BaseIntegrationTest {
 
         mockMvc.perform(post("/api/v1/auth/reset-password")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"token\":\"" + rawToken + "\",\"password\":\"newpassword123\"}"))
+                .content("{\"token\":\"" + rawToken + "\",\"password\":\"newPassword123!\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Password has been reset successfully"));
     }
@@ -230,7 +230,7 @@ class AuthControllerTest extends BaseIntegrationTest {
 
         mockMvc.perform(post("/api/v1/auth/reset-password")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"token\":\"" + rawToken + "\",\"password\":\"newpassword123\"}"))
+                .content("{\"token\":\"" + rawToken + "\",\"password\":\"newPassword123!\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
     }
@@ -248,7 +248,7 @@ class AuthControllerTest extends BaseIntegrationTest {
 
         mockMvc.perform(post("/api/v1/auth/reset-password")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"token\":\"" + rawToken + "\",\"password\":\"newpassword123\"}"))
+                .content("{\"token\":\"" + rawToken + "\",\"password\":\"newPassword123!\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
     }
@@ -257,7 +257,7 @@ class AuthControllerTest extends BaseIntegrationTest {
     void acceptInvite_shouldReturn400ForInvalidToken() throws Exception {
         mockMvc.perform(post("/api/v1/auth/accept-invite")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"token\":\"bad-invite-token\",\"name\":\"Test\",\"password\":\"password123\"}"))
+                .content("{\"token\":\"bad-invite-token\",\"name\":\"Test\",\"password\":\"Password123!\"}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").exists());
     }
@@ -273,7 +273,7 @@ class AuthControllerTest extends BaseIntegrationTest {
 
         mockMvc.perform(post("/api/v1/auth/accept-invite")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"token\":\"" + rawToken + "\",\"name\":\"Invited User\",\"password\":\"password123\"}"))
+                .content("{\"token\":\"" + rawToken + "\",\"name\":\"Invited User\",\"password\":\"Password123!\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("invited@test.com"))
                 .andExpect(jsonPath("$.role").value("developer"))

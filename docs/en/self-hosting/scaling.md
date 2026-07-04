@@ -85,7 +85,7 @@ server {
 | `tags` | Tag list | `@CacheEvict` on tag create/update/delete |
 | `contextDefinitions` | Context definitions | `@CacheEvict` on context create/update/delete |
 
-All caches share a **single TTL** — `CACHE_TTL_MINUTES` (default 5 minutes). Maximum size: 5000 entries per cache.
+All caches share a **single TTL** — `MOZHNO_CACHE_TTL_MINUTES` (default 5 minutes). Maximum size: 5000 entries per cache.
 
 ### How Invalidation Works
 
@@ -118,11 +118,11 @@ This is not a bug — it's expected behavior for a local cache. Feature flags do
 
 ### Recommendations
 
-| Scenario | `CACHE_TTL_MINUTES` | Why |
+| Scenario | `MOZHNO_CACHE_TTL_MINUTES` | Why |
 |----------|---------------------|-----|
 | **1 instance** | `5` (default) | Cache cleared instantly on changes |
 | **Multi-node** | `1` or `0` | Minimize inconsistency window between instances. `0` = cache disabled |
-| **Enterprise** | `5` + Redis | Add `spring-boot-starter-data-redis`, switch `CACHE_TYPE` to `redis`, configure `SPRING_DATA_REDIS_*`. Invalidation via Redis Pub/Sub — instant across all instances |
+| **Enterprise** | `5` + Redis | Add `spring-boot-starter-data-redis`, switch `MOZHNO_CACHE_TYPE` to `redis`, configure `SPRING_DATA_REDIS_*`. Invalidation via Redis Pub/Sub — instant across all instances |
 
 ## Connection Pool Sizing
 
@@ -143,8 +143,8 @@ pool_size = min(30, floor(max_connections / instances) - 2)
 Set via environment variable:
 
 ```bash
-HIKARI_MAX_POOL_SIZE=15
-HIKARI_MIN_IDLE=3
+MOZHNO_DB_POOL_MAX_SIZE=15
+MOZHNO_DB_POOL_MIN_IDLE=3
 ```
 
 ## Performance Characteristics

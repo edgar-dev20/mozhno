@@ -52,10 +52,10 @@ services:
     ports:
       - '8080:8080'
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/feature_flags
-      SPRING_DATASOURCE_USERNAME: flags_user
-      SPRING_DATASOURCE_PASSWORD: flags_password
-      JWT_SECRET: change-me-to-a-real-256-bit-secret
+      MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
+      MOZHNO_DB_USERNAME: flags_user
+      MOZHNO_DB_PASSWORD: flags_password
+      MOZHNO_JWT_SECRET: change-me-to-a-real-256-bit-secret
     depends_on:
       - postgres
 
@@ -122,12 +122,12 @@ const on = client.isEnabled('new-checkout', { userId: '42' });
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | PostgreSQL JDBC URL |
-| `SPRING_DATASOURCE_USERNAME` | `flags_user` | Database user |
-| `SPRING_DATASOURCE_PASSWORD` | `flags_password` | Database password |
-| `JWT_SECRET` | *(must change)* | HMAC-SHA256 signing key (≥256 bits) |
-| `APP_BASE_URL` | `http://localhost:8080` | Public base URL |
-| `SERVER_PORT` | `8080` | HTTP listen port |
+| `MOZHNO_DB_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | PostgreSQL JDBC URL |
+| `MOZHNO_DB_USERNAME` | `flags_user` | Database user |
+| `MOZHNO_DB_PASSWORD` | `flags_password` | Database password |
+| `MOZHNO_JWT_SECRET` | *(must change)* | HMAC-SHA256 signing key (≥256 bits) |
+| `MOZHNO_BASE_URL` | `http://localhost:8080` | Public base URL |
+| `MOZHNO_SERVER_PORT` | `8080` | HTTP listen port |
 
 ---
 

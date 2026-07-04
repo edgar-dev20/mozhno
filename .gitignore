@@ -91,6 +91,7 @@ server/mozhno-app/src/main/resources/static/
 ### Secrets & Credentials ###
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 *.p12

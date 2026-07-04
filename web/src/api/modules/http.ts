@@ -119,30 +119,33 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
     });
     if (!res.ok) {
       if (res.status === 401) {
-        const refreshed = await tryRefreshToken();
-        if (refreshed) {
-          headers['Authorization'] = `Bearer ${token}`;
-          const retryRes = await fetch(`${BASE_URL}${path}`, {
-            ...options,
-            headers,
-            signal: controller.signal,
-          });
-          if (!retryRes.ok) {
-            if (retryRes.status === 401 && !syncTokensFromStorage()) {
-              clearAuth();
+        const isAuthEndpoint = path.startsWith('/auth/login') || path.startsWith('/auth/refresh');
+        if (!isAuthEndpoint) {
+          const refreshed = await tryRefreshToken();
+          if (refreshed) {
+            headers['Authorization'] = `Bearer ${token}`;
+            const retryRes = await fetch(`${BASE_URL}${path}`, {
+              ...options,
+              headers,
+              signal: controller.signal,
+            });
+            if (!retryRes.ok) {
+              if (retryRes.status === 401 && !syncTokensFromStorage()) {
+                clearAuth();
+              }
+              const body = await retryRes.json().catch(() => ({}));
+              throw createAppError(
+                body.error || body.message || `HTTP ${retryRes.status}`,
+                retryRes.status,
+                body,
+              );
             }
-            const body = await retryRes.json().catch(() => ({}));
-            throw createAppError(
-              body.error || body.message || `HTTP ${retryRes.status}`,
-              retryRes.status,
-              body,
-            );
+            if (retryRes.status === 204) return undefined as T;
+            return retryRes.json();
           }
-          if (retryRes.status === 204) return undefined as T;
-          return retryRes.json();
-        }
-        if (!getRefreshToken()) {
-          clearAuth();
+          if (!getRefreshToken()) {
+            clearAuth();
+          }
         }
       }
       const body = await res.json().catch(() => ({}));

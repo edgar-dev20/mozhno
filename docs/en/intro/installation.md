@@ -44,10 +44,10 @@ services:
     ports:
       - '8080:8080'
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/feature_flags
-      SPRING_DATASOURCE_USERNAME: flags_user
-      SPRING_DATASOURCE_PASSWORD: flags_password
-      JWT_SECRET: change-me-to-a-real-256-bit-secret
+      MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
+      MOZHNO_DB_USERNAME: flags_user
+      MOZHNO_DB_PASSWORD: flags_password
+      MOZHNO_JWT_SECRET: change-me-to-a-real-256-bit-secret
     depends_on:
       postgres:
         condition: service_healthy
@@ -85,10 +85,10 @@ CREATE DATABASE feature_flags OWNER flags_user;
 Create a `.env` file or set environment variables:
 
 ```bash
-export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/feature_flags
-export SPRING_DATASOURCE_USERNAME=flags_user
-export SPRING_DATASOURCE_PASSWORD=flags_password
-export JWT_SECRET=$(openssl rand -base64 32)
+export MOZHNO_DB_URL=jdbc:postgresql://localhost:5432/feature_flags
+export MOZHNO_DB_USERNAME=flags_user
+export MOZHNO_DB_PASSWORD=flags_password
+export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)
 ```
 
 See [Configuration](/en/intro/configuration) for all available variables.

@@ -52,8 +52,8 @@ Response:
 
 | Property | Description |
 |----------|-------------|
-| **Access token lifetime** | 15 minutes (configurable via `JWT_ACCESS_TOKEN_TTL_MINUTES`) |
-| **Refresh token lifetime** | 30 days (configurable via `JWT_REFRESH_TOKEN_TTL_DAYS`) |
+| **Access token lifetime** | 15 minutes (configurable via `MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES`) |
+| **Refresh token lifetime** | 30 days (configurable via `MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS`) |
 | **Refresh rotation** | Token family rotation — old token revoked on refresh, reuse of revoked token revokes entire family |
 
 **Refresh tokens:**

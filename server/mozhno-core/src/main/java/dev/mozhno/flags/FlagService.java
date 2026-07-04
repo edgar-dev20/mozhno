@@ -26,21 +26,23 @@ import java.util.stream.Collectors;
 @Service
 public class FlagService {
 
-    private static final int MAX_TAGS_PER_FLAG = 10;
     private final FlagRepository flagRepository;
     private final TagRepository tagRepository;
     private final FlagTagValueRepository flagTagValueRepository;
     private final DomainEventPublisher events;
     private final QuotaSpi quotaSpi;
+    private final FlagsProperties flagsProperties;
 
     public FlagService(FlagRepository flagRepository,
                        TagRepository tagRepository, FlagTagValueRepository flagTagValueRepository,
-                       DomainEventPublisher events, QuotaSpi quotaSpi) {
+                       DomainEventPublisher events, QuotaSpi quotaSpi,
+                       FlagsProperties flagsProperties) {
         this.flagRepository = flagRepository;
         this.tagRepository = tagRepository;
         this.flagTagValueRepository = flagTagValueRepository;
         this.events = events;
         this.quotaSpi = quotaSpi;
+        this.flagsProperties = flagsProperties;
     }
 
     /**
@@ -168,8 +170,8 @@ public class FlagService {
         flag = flagRepository.save(flag);
 
         if (request.getTags() != null && !request.getTags().isEmpty()) {
-            if (request.getTags().size() > MAX_TAGS_PER_FLAG) {
-                throw new BadRequestException("At most " + MAX_TAGS_PER_FLAG + " tags per flag");
+            if (request.getTags().size() > flagsProperties.getMaxTagsPerFlag()) {
+                throw new BadRequestException("At most " + flagsProperties.getMaxTagsPerFlag() + " tags per flag");
             }
             validateTagIds(request.getTags());
             flagTagValueRepository.saveBatch(flag.getId(), request.getTags());
@@ -212,8 +214,8 @@ public class FlagService {
         flagTagValueRepository.deleteByFlagId(id);
 
         if (request.getTags() != null && !request.getTags().isEmpty()) {
-            if (request.getTags().size() > MAX_TAGS_PER_FLAG) {
-                throw new BadRequestException("At most " + MAX_TAGS_PER_FLAG + " tags per flag");
+            if (request.getTags().size() > flagsProperties.getMaxTagsPerFlag()) {
+                throw new BadRequestException("At most " + flagsProperties.getMaxTagsPerFlag() + " tags per flag");
             }
             validateTagIds(request.getTags());
             flagTagValueRepository.saveBatch(id, request.getTags());

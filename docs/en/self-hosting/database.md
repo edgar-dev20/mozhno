@@ -7,20 +7,20 @@
 Database connection is configured via environment variables:
 
 ```bash
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/feature_flags
-SPRING_DATASOURCE_USERNAME=flags_user
-SPRING_DATASOURCE_PASSWORD=your-password
+MOZHNO_DB_URL=jdbc:postgresql://localhost:5432/feature_flags
+MOZHNO_DB_USERNAME=flags_user
+MOZHNO_DB_PASSWORD=your-password
 ```
 
 | Variable | Description |
 |----------|-------------|
-| `SPRING_DATASOURCE_URL` | JDBC URL. Use `postgresql://` scheme, not `postgres://`. |
-| `SPRING_DATASOURCE_USERNAME` | Database user with full schema ownership |
-| `SPRING_DATASOURCE_PASSWORD` | Database password |
+| `MOZHNO_DB_URL` | JDBC URL. Use `postgresql://` scheme, not `postgres://`. |
+| `MOZHNO_DB_USERNAME` | Database user with full schema ownership |
+| `MOZHNO_DB_PASSWORD` | Database password |
 
 ## Flyway Migrations
 
-Flyway manages database schema versioning. Migrations run automatically on application startup (`SPRING_FLYWAY_ENABLED=true` by default).
+Flyway manages database schema versioning. Migrations run automatically on application startup (`MOZHNO_FLYWAY_ENABLED=true` by default).
 
 ### How It Works
 
@@ -132,8 +132,8 @@ Reduce `maximum-pool-size` as replica count grows to avoid exhausting PostgreSQL
 Set the pool size via environment variable:
 
 ```bash
-HIKARI_MAX_POOL_SIZE=30
-HIKARI_MIN_IDLE=5
+MOZHNO_DB_POOL_MAX_SIZE=30
+MOZHNO_DB_POOL_MIN_IDLE=5
 ```
 
 ## Backup Strategies
