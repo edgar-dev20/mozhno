@@ -65,7 +65,7 @@ class UsersControllerTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/users")
                 .header("Authorization", auth())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"newuser@test.com\",\"password\":\"newpass123\",\"name\":\"New User\",\"role\":\"developer\"}"))
+                .content("{\"email\":\"newuser@test.com\",\"password\":\"Newpass123!\",\"name\":\"New User\",\"role\":\"developer\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.email").value("newuser@test.com"))
                 .andExpect(jsonPath("$.role").value("developer"));
@@ -90,7 +90,7 @@ class UsersControllerTest extends BaseIntegrationTest {
         String createResp = mockMvc.perform(post("/api/v1/users")
                 .header("Authorization", auth())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"getuser@test.com\",\"password\":\"pass1234\",\"name\":\"Get Me\",\"role\":\"viewer\"}"))
+                .content("{\"email\":\"getuser@test.com\",\"password\":\"Pass1234!\",\"name\":\"Get Me\",\"role\":\"viewer\"}"))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         int userId = om.readTree(createResp).get("id").asInt();
@@ -107,7 +107,7 @@ class UsersControllerTest extends BaseIntegrationTest {
         String createResp = mockMvc.perform(post("/api/v1/users")
                 .header("Authorization", auth())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"update@test.com\",\"password\":\"pass1234\",\"name\":\"Old\",\"role\":\"viewer\"}"))
+                .content("{\"email\":\"update@test.com\",\"password\":\"Pass1234!\",\"name\":\"Old\",\"role\":\"viewer\"}"))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         int userId = om.readTree(createResp).get("id").asInt();
@@ -126,7 +126,7 @@ class UsersControllerTest extends BaseIntegrationTest {
         String createResp = mockMvc.perform(post("/api/v1/users")
                 .header("Authorization", auth())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"todelete@test.com\",\"password\":\"pass1234\",\"name\":\"Del\",\"role\":\"viewer\"}"))
+                .content("{\"email\":\"todelete@test.com\",\"password\":\"Pass1234!\",\"name\":\"Del\",\"role\":\"viewer\"}"))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         int userId = om.readTree(createResp).get("id").asInt();
@@ -201,7 +201,7 @@ class UsersControllerTest extends BaseIntegrationTest {
         String createResp = mockMvc.perform(post("/api/v1/users")
                 .header("Authorization", auth())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"resetme@test.com\",\"password\":\"pass1234\",\"name\":\"Reset Me\",\"role\":\"viewer\"}"))
+                .content("{\"email\":\"resetme@test.com\",\"password\":\"Pass1234!\",\"name\":\"Reset Me\",\"role\":\"viewer\"}"))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
         int userId = om.readTree(createResp).get("id").asInt();

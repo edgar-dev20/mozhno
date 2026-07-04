@@ -7,9 +7,20 @@ const ERROR_CODE_TO_KEY: Record<string, string> = {
   FORBIDDEN: 'errors.forbidden',
   NOT_FOUND: 'errors.notFound',
   VALIDATION: 'errors.validation',
+  RATE_LIMITED: 'errors.rateLimited',
   SERVER: 'errors.server',
   TIMEOUT: 'errors.timeout',
   UNKNOWN: 'errors.unexpected',
+};
+
+const SERVER_MESSAGE_TO_KEY: Record<string, MessageKey> = {
+  'auth.error.invalid_credentials': 'errors.auth.invalidCredentials',
+  'auth.error.email_password_required': 'errors.auth.emailPasswordRequired',
+  'auth.error.account_suspended': 'errors.auth.accountSuspended',
+  'auth.error.account_locked': 'errors.auth.accountLocked',
+  'auth.error.no_auth_provider': 'errors.auth.noAuthProvider',
+  'Authentication required': 'errors.unauthorized',
+  'Access denied': 'errors.forbidden',
 };
 
 function extractValidationDetails(error: AppError): string {
@@ -28,11 +39,13 @@ export function getErrorMessage(error: unknown): string {
     if (error.code === 'VALIDATION') {
       const detailsText = extractValidationDetails(error);
       if (detailsText !== error.message) return detailsText;
-      const key = ERROR_CODE_TO_KEY[error.code];
-      return key ? t(key as MessageKey) : error.message;
     }
     if (error.message.startsWith('HTTP ')) {
       return error.message;
+    }
+    if (error.code === 'UNAUTHORIZED') {
+      const i18nKey = SERVER_MESSAGE_TO_KEY[error.message];
+      if (i18nKey) return t(i18nKey);
     }
     const key = ERROR_CODE_TO_KEY[error.code];
     if (key) return t(key as MessageKey);

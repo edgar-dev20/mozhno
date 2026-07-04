@@ -44,11 +44,11 @@ services:
     ports:
       - '8080:8080'
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/feature_flags
-      SPRING_DATASOURCE_USERNAME: flags_user
-      SPRING_DATASOURCE_PASSWORD: flags_password
-      JWT_SECRET: change-me-to-a-real-256-bit-secret
-      APP_BASE_URL: http://localhost:8080
+      MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
+      MOZHNO_DB_USERNAME: flags_user
+      MOZHNO_DB_PASSWORD: flags_password
+      MOZHNO_JWT_SECRET: change-me-to-a-real-256-bit-secret
+      MOZHNO_BASE_URL: http://localhost:8080
     depends_on:
       postgres:
         condition: service_healthy
@@ -103,11 +103,11 @@ GRANT ALL PRIVILEGES ON DATABASE feature_flags TO flags_user;
 Создайте файл `.env` в корне проекта:
 
 ```bash
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/feature_flags
-SPRING_DATASOURCE_USERNAME=flags_user
-SPRING_DATASOURCE_PASSWORD=flags_password
-JWT_SECRET=your-256-bit-secret-change-me
-APP_BASE_URL=http://localhost:8080
+MOZHNO_DB_URL=jdbc:postgresql://localhost:5432/feature_flags
+MOZHNO_DB_USERNAME=flags_user
+MOZHNO_DB_PASSWORD=flags_password
+MOZHNO_JWT_SECRET=your-256-bit-secret-change-me
+MOZHNO_BASE_URL=http://localhost:8080
 ```
 
 ### Шаг 5: Соберите и запустите

@@ -76,7 +76,7 @@ Flyway ведёт таблицу `flyway_schema_history` для отслежив
 
 ### Ручной запуск миграций
 
-Если `SPRING_FLYWAY_ENABLED=false`, запустите миграции вручную:
+Если `MOZHNO_FLYWAY_ENABLED=false`, запустите миграции вручную:
 
 ```bash
 java -jar mozhno-app.jar --spring.flyway.enabled=true --spring.flyway.migrate=true
@@ -98,12 +98,12 @@ R__refresh_materialized_view.sql
 
 | Переменная | По умолчанию | Продакшен | Описание |
 |------------|-------------|-----------|----------|
-| `HIKARI_MAX_POOL_SIZE` | `10` | `30` | Максимальное число соединений |
-| `HIKARI_MIN_IDLE` | `5` | `5` | Минимальное число простаивающих соединений |
-| `HIKARI_CONNECTION_TIMEOUT` | `30000` | `30000` | Таймаут получения соединения (мс) |
-| `HIKARI_IDLE_TIMEOUT` | `600000` | `600000` | Таймаут бездействия (мс) |
-| `HIKARI_MAX_LIFETIME` | `1800000` | `1800000` | Макс. время жизни соединения (мс) |
-| `HIKARI_LEAK_DETECTION_THRESHOLD` | `0` | `60000` | Обнаружение утечек соединений (мс) |
+| `MOZHNO_DB_POOL_MAX_SIZE` | `10` | `30` | Максимальное число соединений |
+| `MOZHNO_DB_POOL_MIN_IDLE` | `5` | `5` | Минимальное число простаивающих соединений |
+| `MOZHNO_DB_POOL_CONNECTION_TIMEOUT` | `30000` | `30000` | Таймаут получения соединения (мс) |
+| `MOZHNO_DB_POOL_IDLE_TIMEOUT` | `600000` | `600000` | Таймаут бездействия (мс) |
+| `MOZHNO_DB_POOL_MAX_LIFETIME` | `1800000` | `1800000` | Макс. время жизни соединения (мс) |
+| `MOZHNO_DB_POOL_LEAK_DETECTION` | `0` | `60000` | Обнаружение утечек соединений (мс) |
 
 ### Расчёт размера пула
 
@@ -163,7 +163,7 @@ curl http://localhost:8080/actuator/health
 Настройка leak detection для продакшена:
 
 ```
-HIKARI_LEAK_DETECTION_THRESHOLD=60000
+MOZHNO_DB_POOL_LEAK_DETECTION=60000
 ```
 
 HikariCP будет логировать предупреждения, если соединение не возвращено в пул за 60 секунд.
@@ -333,7 +333,7 @@ CREATE INDEX idx_api_keys_env ON api_keys (environment_id);
 Для защищённого соединения с PostgreSQL:
 
 ```
-SPRING_DATASOURCE_URL=jdbc:postgresql://host:5432/feature_flags?ssl=true&sslmode=require
+MOZHNO_DB_URL=jdbc:postgresql://host:5432/feature_flags?ssl=true&sslmode=require
 ```
 
 Параметры `sslmode`:

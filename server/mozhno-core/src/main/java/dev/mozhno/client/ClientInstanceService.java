@@ -2,7 +2,6 @@ package dev.mozhno.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -11,15 +10,14 @@ import java.util.List;
 @Service
 public class ClientInstanceService {
     private static final Logger log = LoggerFactory.getLogger(ClientInstanceService.class);
-    private static final int DEFAULT_RETENTION_DAYS = 30;
 
     private final ClientInstanceRepository repository;
     private final int retentionDays;
 
     public ClientInstanceService(ClientInstanceRepository repository,
-                                 @Value("${app.client-instance.retention-days:30}") int retentionDays) {
+                                 ClientProperties clientProperties) {
         this.repository = repository;
-        this.retentionDays = retentionDays > 0 ? retentionDays : DEFAULT_RETENTION_DAYS;
+        this.retentionDays = clientProperties.getInstanceRetentionDays();
     }
 
     public Long record(Integer projectId, Integer environmentId, Integer apiKeyId,

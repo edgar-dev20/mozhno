@@ -21,16 +21,11 @@ import static dev.mozhno.client.HashUtils.sha256;
 
 @Service
 public class PasswordResetService {
-    private static final int TOKEN_TTL_HOURS = 1;
-    private static final int RESET_COOLDOWN_MINUTES = 5;
 
     private static final Map<String, String> RU_RESET_SUBJECT = Map.of("ru", "Сброс пароля Mozhno", "en", "Mozhno password reset");
     private static final Map<String, String> RU_ADMIN_RESET_SUBJECT = Map.of("ru", "Сброс пароля Mozhno", "en", "Mozhno password reset");
 
-    private final Cache<String, Instant> lastResetSent = Caffeine.newBuilder()
-        .expireAfterWrite(Duration.ofMinutes(RESET_COOLDOWN_MINUTES + 1))
-        .maximumSize(10_000)
-        .build();
+    private final Cache<String, Instant> lastResetSent;
 
     private boolean tryAcquireCooldown(String email) {
         Instant now = Instant.now();
@@ -38,7 +33,7 @@ public class PasswordResetService {
         if (previous == null) {
             return true;
         }
-        if (previous.plus(RESET_COOLDOWN_MINUTES, ChronoUnit.MINUTES).isAfter(now)) {
+        if (previous.plus(authProperties.getPasswordReset().getCooldownMinutes(), ChronoUnit.MINUTES).isAfter(now)) {
             return false;
         }
         lastResetSent.put(email, now);
@@ -52,6 +47,7 @@ public class PasswordResetService {
     private final RefreshTokenService refreshTokenService;
     private final NotificationSpi notificationSpi;
     private final DomainEventPublisher events;
+    private final AuthProperties authProperties;
     private final String baseUrl;
 
     public PasswordResetService(EmailTemplateService emailTemplateService,
@@ -61,7 +57,8 @@ public class PasswordResetService {
                                 RefreshTokenService refreshTokenService,
                                 NotificationSpi notificationSpi,
                                 DomainEventPublisher events,
-                                @org.springframework.beans.factory.annotation.Value("${app.base-url:http://localhost:8080}") String baseUrl) {
+                                AuthProperties authProperties,
+                                dev.mozhno.config.MozhnoProperties mozhnoProperties) {
         this.emailTemplateService = emailTemplateService;
         this.tokenRepository = tokenRepository;
         this.userRepository = userRepository;
@@ -69,7 +66,12 @@ public class PasswordResetService {
         this.refreshTokenService = refreshTokenService;
         this.notificationSpi = notificationSpi;
         this.events = events;
-        this.baseUrl = baseUrl;
+        this.authProperties = authProperties;
+        this.baseUrl = mozhnoProperties.getBaseUrl();
+        this.lastResetSent = Caffeine.newBuilder()
+            .expireAfterWrite(Duration.ofMinutes(authProperties.getPasswordReset().getCooldownMinutes() + 1L))
+            .maximumSize(10_000)
+            .build();
     }
 
     @Transactional
@@ -93,10 +95,10 @@ public class PasswordResetService {
         PasswordResetToken token = new PasswordResetToken();
         token.setUserId(user.getId());
         token.setTokenHash(tokenHash);
-        token.setExpiresAt(Instant.now().plus(TOKEN_TTL_HOURS, ChronoUnit.HOURS));
+        token.setExpiresAt(Instant.now().plus(authProperties.getPasswordReset().getTokenTtlHours(), ChronoUnit.HOURS));
         tokenRepository.save(token);
 
-        String resetLink = baseUrl + "/reset-password?token=" + rawToken;
+        String resetLink = baseUrl + "/reset-password#token=" + rawToken;
         String html = emailTemplateService.renderResetPasswordEmail(resetLink, effectiveLocale);
         String subject = RU_RESET_SUBJECT.getOrDefault(effectiveLocale, "Mozhno password reset");
 
@@ -125,10 +127,10 @@ public class PasswordResetService {
         PasswordResetToken token = new PasswordResetToken();
         token.setUserId(userId);
         token.setTokenHash(tokenHash);
-        token.setExpiresAt(Instant.now().plus(TOKEN_TTL_HOURS, ChronoUnit.HOURS));
+        token.setExpiresAt(Instant.now().plus(authProperties.getPasswordReset().getTokenTtlHours(), ChronoUnit.HOURS));
         tokenRepository.save(token);
 
-        String resetLink = baseUrl + "/reset-password?token=" + rawToken;
+        String resetLink = baseUrl + "/reset-password#token=" + rawToken;
         String html = emailTemplateService.renderAdminResetPasswordEmail(resetLink, locale);
         String subject = RU_ADMIN_RESET_SUBJECT.getOrDefault(locale, "Mozhno password reset");
 
@@ -164,6 +166,7 @@ public class PasswordResetService {
         user.setStatus("active");
         userRepository.save(user);
 
+        userRepository.resetFailedAttempts(user.getId());
         refreshTokenService.revokeAllForUser(user.getId());
         tokenRepository.markUsed(token.getId());
 

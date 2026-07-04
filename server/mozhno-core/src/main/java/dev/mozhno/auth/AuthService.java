@@ -88,7 +88,7 @@ public class AuthService {
         if (result == null || !result.success()) {
             log.warn("Login failed for email={} provider={}", email, provider);
             throw new InvalidCredentialsException(
-                result != null ? result.errorMessage() : "No authentication provider available");
+                result != null ? result.errorMessage() : "auth.error.no_auth_provider");
         }
 
         User user = userRepository.findById(result.userId());

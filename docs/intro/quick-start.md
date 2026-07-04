@@ -20,10 +20,10 @@ services:
     ports:
       - '8080:8080'
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/feature_flags
-      SPRING_DATASOURCE_USERNAME: flags_user
-      SPRING_DATASOURCE_PASSWORD: flags_password
-      JWT_SECRET: change-me-to-a-real-256-bit-secret
+      MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
+      MOZHNO_DB_USERNAME: flags_user
+      MOZHNO_DB_PASSWORD: flags_password
+      MOZHNO_JWT_SECRET: change-me-to-a-real-256-bit-secret
     depends_on:
       - postgres
 

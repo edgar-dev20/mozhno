@@ -32,10 +32,6 @@ import java.util.stream.Collectors;
 @io.swagger.v3.oas.annotations.tags.Tag(name = "Flags", description = "Feature flag management")
 public class FlagController {
 
-    private static final int DEFAULT_PAGE_SIZE = 50;
-    private static final int MAX_PAGE_SIZE = 200;
-    private static final int ENRICHED_MAX_PAGE_SIZE = 500;
-
     private final FlagService flagService;
     private final FlagAssembler flagAssembler;
     private final SegmentService segmentService;
@@ -46,6 +42,7 @@ public class FlagController {
     private final ContextAssembler contextAssembler;
     private final EnvironmentService environmentService;
     private final EnvironmentAssembler environmentAssembler;
+    private final FlagsProperties flagsProperties;
 
     @GetMapping
     @Operation(summary = "Get all flags for a project (paginated)")
@@ -56,7 +53,7 @@ public class FlagController {
             @RequestParam(required = false, defaultValue = "50") int size,
             @AuthenticationPrincipal UserPrincipal user) {
         page = Math.max(page, 0);
-        size = clamp(size, 1, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+        size = clamp(size, 1, flagsProperties.getDefaultPageSize(), flagsProperties.getMaxPageSize());
 
         PageResponse<Flag> pageResult = flagService.findByProjectIdPaginated(user.projectId(), includeArchived, page, size);
         List<FlagResponse> items = pageResult.getItems().stream()
@@ -90,7 +87,7 @@ public class FlagController {
             @RequestParam(required = false, defaultValue = "200") int size,
             @AuthenticationPrincipal UserPrincipal user) {
         page = Math.max(page, 0);
-        size = clamp(size, 1, DEFAULT_PAGE_SIZE, ENRICHED_MAX_PAGE_SIZE);
+        size = clamp(size, 1, flagsProperties.getDefaultPageSize(), flagsProperties.getEnrichedMaxPageSize());
 
         Integer projectId = user.projectId();
         PageResponse<FlagWithStrategy> pageResult = flagService.findByProjectIdWithAllEnvironmentStrategiesPaginated(projectId, page, size);

@@ -19,11 +19,8 @@
                     <level>level</level>
                     <version>[ignore]</version>
                 </fieldNames>
-                <decorator class="net.logstash.logback.decorate.CompositeJsonGeneratorDecorator">
-                    <decorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
-                    <decorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
-                        <valueMasker class="dev.mozhno.logging.SensitiveDataMasker"/>
-                    </decorator>
+                <decorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+                    <valueMasker class="dev.mozhno.logging.SensitiveDataMasker"/>
                 </decorator>
             </encoder>
         </appender>

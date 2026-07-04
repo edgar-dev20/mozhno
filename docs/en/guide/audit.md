@@ -57,7 +57,7 @@ Show all flag changes made by a developer in the last week — combine time, use
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `AUDIT_RETENTION_DAYS` | `365` | How long audit entries are kept |
+| `MOZHNO_AUDIT_RETENTION_DAYS` | `365` | How long audit entries are kept |
 
 Entries older than this are automatically purged once per day.
 

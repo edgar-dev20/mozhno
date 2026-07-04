@@ -38,13 +38,18 @@ public class UserRepository {
         u.setCreatedAt(rs.getTimestamp("created_at").toInstant());
         Timestamp lastActive = rs.getTimestamp("last_active_at");
         u.setLastActiveAt(lastActive != null ? lastActive.toInstant() : null);
+        u.setFailedLoginAttempts(rs.getInt("failed_login_attempts"));
+        Timestamp lockedUntil = rs.getTimestamp("locked_until");
+        u.setLockedUntil(lockedUntil != null ? lockedUntil.toInstant() : null);
         return u;
     };
+
+    private static final String USER_COLUMNS = "id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at, failed_login_attempts, locked_until";
 
     public User findByEmail(String email) {
         try {
             return jdbc.queryForObject(
-                "SELECT id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at FROM users WHERE email = ?",
+                "SELECT " + USER_COLUMNS + " FROM users WHERE email = ?",
                 ROW_MAPPER, email);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -54,7 +59,7 @@ public class UserRepository {
     public User findById(Integer id) {
         try {
             return jdbc.queryForObject(
-                "SELECT id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at FROM users WHERE id = ?",
+                "SELECT " + USER_COLUMNS + " FROM users WHERE id = ?",
                 ROW_MAPPER, id);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -63,7 +68,7 @@ public class UserRepository {
 
     public List<User> findAll() {
         return jdbc.query(
-            "SELECT id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at FROM users ORDER BY created_at DESC",
+            "SELECT " + USER_COLUMNS + " FROM users ORDER BY created_at DESC",
             ROW_MAPPER);
     }
 
@@ -113,8 +118,20 @@ public class UserRepository {
         if (ids == null || ids.isEmpty()) return Collections.emptyList();
         String placeholders = String.join(",", Collections.nCopies(ids.size(), "?"));
         return jdbc.query(
-            "SELECT id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at FROM users WHERE id IN (" + placeholders + ")",
+            "SELECT " + USER_COLUMNS + " FROM users WHERE id IN (" + placeholders + ")",
             ROW_MAPPER, ids.toArray());
+    }
+
+    public void incrementFailedAttempts(Integer id) {
+        jdbc.update("UPDATE users SET failed_login_attempts = failed_login_attempts + 1 WHERE id = ?", id);
+    }
+
+    public void resetFailedAttempts(Integer id) {
+        jdbc.update("UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?", id);
+    }
+
+    public void lockUser(Integer id, Instant until) {
+        jdbc.update("UPDATE users SET locked_until = ? WHERE id = ?", Timestamp.from(until), id);
     }
 
     /**

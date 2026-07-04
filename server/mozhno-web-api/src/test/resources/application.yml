@@ -29,12 +29,12 @@ logging:
 server:
   port: 8080
 
-jwt:
-  secret: "dGhpc2lzYXRlc3RzZWNyZXRrZXlmb3Jqd3R0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmc="
-  issuer: "mozhno-test"
-  access-token-ttl-minutes: 15
-
-app:
+mozhno:
   base-url: "http://localhost:8080"
-  rate-limit:
-    enabled: false
+  jwt:
+    secret: "dGhpc2lzYXRlc3RzZWNyZXRrZXlmb3Jqd3R0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmc="
+    issuer: "mozhno-test"
+    access-token-ttl-minutes: 15
+  security:
+    rate-limit:
+      enabled: false

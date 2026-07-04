@@ -23,4 +23,6 @@ public class User {
     private byte[] avatarData;
     private Instant createdAt;
     private Instant lastActiveAt;
+    private int failedLoginAttempts;
+    private Instant lockedUntil;
 }

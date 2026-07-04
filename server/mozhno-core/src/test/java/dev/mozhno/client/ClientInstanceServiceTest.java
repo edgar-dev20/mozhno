@@ -21,7 +21,9 @@ class ClientInstanceServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ClientInstanceService(repository, 30);
+        ClientProperties clientProperties = new ClientProperties();
+        clientProperties.setInstanceRetentionDays(30);
+        service = new ClientInstanceService(repository, clientProperties);
     }
 
     @Test

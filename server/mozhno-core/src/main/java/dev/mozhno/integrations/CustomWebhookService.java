@@ -32,14 +32,17 @@ public class CustomWebhookService {
     private final TemplateRenderer renderer;
     private final IntegrationRepository repository;
     private final WebhookLimitSpi webhookLimitSpi;
+    private final WebhookProperties webhookProperties;
 
     public CustomWebhookService(HttpClient httpClient, TemplateRenderer renderer,
                                 IntegrationRepository repository,
-                                WebhookLimitSpi webhookLimitSpi) {
+                                WebhookLimitSpi webhookLimitSpi,
+                                WebhookProperties webhookProperties) {
         this.httpClient = httpClient;
         this.renderer = renderer;
         this.repository = repository;
         this.webhookLimitSpi = webhookLimitSpi;
+        this.webhookProperties = webhookProperties;
     }
 
     public void dispatch(Integration integration, DomainEvent event) {
@@ -51,12 +54,12 @@ public class CustomWebhookService {
             }
 
             URI uri = URI.create(url);
-            if (!"https".equalsIgnoreCase(uri.getScheme())) {
-                updateStatus(integration, "URL must use HTTPS: " + url);
-                return;
-            }
-            if (!isPublicHost(uri.getHost())) {
-                updateStatus(integration, "Blocked non-public host: " + uri.getHost());
+            if (!isValidWebhookUrl(url)) {
+                if (!"https".equalsIgnoreCase(uri.getScheme())) {
+                    updateStatus(integration, "URL must use HTTPS: " + url);
+                } else {
+                    updateStatus(integration, "Blocked non-public host: " + uri.getHost());
+                }
                 return;
             }
 
@@ -72,7 +75,7 @@ public class CustomWebhookService {
 
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(uri)
-                .timeout(Duration.ofSeconds(30))
+                .timeout(Duration.ofSeconds(webhookProperties.getRequestTimeoutSeconds()))
                 .POST(bodyTemplate.isEmpty() && renderedBody.isEmpty()
                     ? HttpRequest.BodyPublishers.noBody()
                     : HttpRequest.BodyPublishers.ofString(renderedBody));
@@ -164,14 +167,40 @@ public class CustomWebhookService {
     }
 
     private static boolean isPublicHost(String host) {
-        if (host == null) return false;
+        if (host == null || host.isBlank()) return false;
         try {
             InetAddress addr = InetAddress.getByName(host);
-            if (addr.isLoopbackAddress() || addr.isLinkLocalAddress() || addr.isSiteLocalAddress()) {
+            if (addr.isLoopbackAddress()
+                || addr.isLinkLocalAddress()
+                || addr.isSiteLocalAddress()
+                || addr.isAnyLocalAddress()
+                || addr.isMulticastAddress()) {
                 return false;
+            }
+            if (addr instanceof java.net.Inet6Address) {
+                byte[] ip = addr.getAddress();
+                if (ip.length >= 16
+                    && ip[10] == (byte) 0xff
+                    && ip[11] == (byte) 0xff
+                    && ip[12] == 127) {
+                    return false;
+                }
             }
             return true;
         } catch (UnknownHostException e) {
+            return false;
+        }
+    }
+
+    public static boolean isValidWebhookUrl(String url) {
+        if (url == null || url.isBlank()) return false;
+        try {
+            URI uri = URI.create(url);
+            if (!"https".equalsIgnoreCase(uri.getScheme())) {
+                return false;
+            }
+            return isPublicHost(uri.getHost());
+        } catch (IllegalArgumentException e) {
             return false;
         }
     }

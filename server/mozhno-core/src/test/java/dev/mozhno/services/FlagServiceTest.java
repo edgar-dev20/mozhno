@@ -39,7 +39,8 @@ class FlagServiceTest {
 
     @BeforeEach
     void setUp() {
-        flagService = new FlagService(flagRepository, tagRepository, flagTagValueRepository, events, quotaSpi);
+        flagService = new FlagService(flagRepository, tagRepository, flagTagValueRepository, events, quotaSpi,
+            new FlagsProperties());
         lenient().when(quotaSpi.canCreateFlag(any())).thenReturn(new QuotaSpi.Allowed());
     }
 

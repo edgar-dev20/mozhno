@@ -1,7 +1,7 @@
 logging:
   level:
-    root: INFO
-    dev.mozhno: INFO
+    root: ${MOZHNO_LOG_LEVEL_ROOT:INFO}
+    dev.mozhno: ${MOZHNO_LOG_LEVEL_APP:INFO}
     org.springframework.security: WARN
     org.springframework.web: WARN
     org.hibernate: WARN
@@ -11,72 +11,97 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 30s
   application:
-    name: feature-flags
+    name: mozhno
   cache:
-    type: caffeine
+    type: ${MOZHNO_CACHE_TYPE:caffeine}
     caffeine:
-      spec: maximumSize=5000,expireAfterWrite=${CACHE_TTL_MINUTES:5}m
+      spec: maximumSize=${MOZHNO_CACHE_MAX_SIZE:5000},expireAfterWrite=${MOZHNO_CACHE_TTL_MINUTES:5}m
   datasource:
-    url: jdbc:postgresql://localhost:5432/feature_flags
-    username: flags_user
-    password: flags_password
+    url: ${MOZHNO_DB_URL:jdbc:postgresql://localhost:5432/feature_flags}
+    username: ${MOZHNO_DB_USERNAME:flags_user}
+    password: ${MOZHNO_DB_PASSWORD:flags_password}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:20}
-      minimum-idle: ${HIKARI_MIN_IDLE:5}
-      idle-timeout: 600000
-      max-lifetime: 1800000
-      connection-timeout: ${HIKARI_CONNECTION_TIMEOUT:10000}
-      leak-detection-threshold: ${HIKARI_LEAK_DETECTION:30000}
+      maximum-pool-size: ${MOZHNO_DB_POOL_MAX_SIZE:20}
+      minimum-idle: ${MOZHNO_DB_POOL_MIN_IDLE:5}
+      idle-timeout: ${MOZHNO_DB_POOL_IDLE_TIMEOUT:600000}
+      max-lifetime: ${MOZHNO_DB_POOL_MAX_LIFETIME:1800000}
+      connection-timeout: ${MOZHNO_DB_POOL_CONNECTION_TIMEOUT:10000}
+      leak-detection-threshold: ${MOZHNO_DB_POOL_LEAK_DETECTION:30000}
       pool-name: mozhno-pool
   flyway:
-    enabled: true
-    locations: classpath:db/migration
+    enabled: ${MOZHNO_FLYWAY_ENABLED:true}
+    locations: ${MOZHNO_FLYWAY_LOCATIONS:classpath:db/migration}
     clean-on-validation-error: false
   servlet:
     multipart:
-      max-file-size: 2MB
-      max-request-size: 2MB
+      max-file-size: ${MOZHNO_UPLOAD_MAX_FILE_SIZE:2MB}
+      max-request-size: ${MOZHNO_UPLOAD_MAX_FILE_SIZE:2MB}
   mail:
-    host: ${SMTP_HOST:localhost}
-    port: ${SMTP_PORT:587}
-    username: ${SMTP_USERNAME:}
-    password: ${SMTP_PASSWORD:}
+    host: ${MOZHNO_SMTP_HOST:localhost}
+    port: ${MOZHNO_SMTP_PORT:587}
+    username: ${MOZHNO_SMTP_USERNAME:}
+    password: ${MOZHNO_SMTP_PASSWORD:}
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
 
 server:
-  port: 8080
+  port: ${MOZHNO_SERVER_PORT:8080}
   shutdown: graceful
 
-app:
-  upload-dir: ./uploads
-  base-url: ${APP_BASE_URL:http://localhost:8080}
-  email-from: ${EMAIL_FROM:noreply@mozhno.dev}
+mozhno:
+  base-url: ${MOZHNO_BASE_URL:http://localhost:8080}
+  upload-dir: ${MOZHNO_UPLOAD_DIR:./uploads}
+  jwt:
+    # Required. No default: the app refuses to start without a valid Base64 secret (>= 32 bytes).
+    # Generate one with: openssl rand -base64 32
+    secret: ${MOZHNO_JWT_SECRET:}
+    issuer: ${MOZHNO_JWT_ISSUER:mozhno}
+    access-token-ttl-minutes: ${MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES:15}
+    refresh-token-ttl-days: ${MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS:30}
+  audit:
+    retention-days: ${MOZHNO_AUDIT_RETENTION_DAYS:365}
+  mail:
+    from: ${MOZHNO_MAIL_FROM:noreply@mozhno.dev}
   client:
-    max-metrics-per-key: ${CLIENT_MAX_METRICS_PER_KEY:1000}
-
-jwt:
-  secret: ${JWT_SECRET:ZGV2LXNlY3JldC1rZXktdGhhdC1pcy1hdC1sZWFzdC0zMi1ieXRlcy1sb25nLWZvci1kZXY=}
-  issuer: ${JWT_ISSUER:mozhno}
-  access-token-ttl-minutes: ${JWT_ACCESS_TOKEN_TTL_MINUTES:15}
-  refresh-token-ttl-days: ${JWT_REFRESH_TOKEN_TTL_DAYS:30}
-
-audit:
-  retention-days: 365
+    max-metrics-per-key: ${MOZHNO_CLIENT_MAX_METRICS_PER_KEY:1000}
+    instance-retention-days: ${MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS:30}
+  security:
+    bcrypt-strength: ${MOZHNO_SECURITY_BCRYPT_STRENGTH:12}
+    max-failed-login-attempts: ${MOZHNO_SECURITY_MAX_FAILED_LOGIN_ATTEMPTS:5}
+    lockout-duration-minutes: ${MOZHNO_SECURITY_LOCKOUT_DURATION_MINUTES:15}
+    cors:
+      allowed-origins: ${MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS:}
+  auth:
+    password-reset:
+      token-ttl-hours: ${MOZHNO_AUTH_PASSWORD_RESET_TOKEN_TTL_HOURS:1}
+      cooldown-minutes: ${MOZHNO_AUTH_PASSWORD_RESET_COOLDOWN_MINUTES:5}
+    invite:
+      token-ttl-days: ${MOZHNO_AUTH_INVITE_TOKEN_TTL_DAYS:7}
+  webhook:
+    connect-timeout-seconds: ${MOZHNO_WEBHOOK_CONNECT_TIMEOUT_SECONDS:10}
+    request-timeout-seconds: ${MOZHNO_WEBHOOK_REQUEST_TIMEOUT_SECONDS:30}
+    async:
+      core-pool-size: ${MOZHNO_WEBHOOK_ASYNC_CORE_POOL_SIZE:4}
+      max-pool-size: ${MOZHNO_WEBHOOK_ASYNC_MAX_POOL_SIZE:16}
+      queue-capacity: ${MOZHNO_WEBHOOK_ASYNC_QUEUE_CAPACITY:100}
+  flags:
+    max-tags-per-flag: ${MOZHNO_FLAGS_MAX_TAGS_PER_FLAG:10}
+    default-page-size: ${MOZHNO_FLAGS_DEFAULT_PAGE_SIZE:50}
+    max-page-size: ${MOZHNO_FLAGS_MAX_PAGE_SIZE:200}
+    enriched-max-page-size: ${MOZHNO_FLAGS_ENRICHED_MAX_PAGE_SIZE:500}
 
 management:
-
   server:
-    port: 9090
+    port: ${MOZHNO_MANAGEMENT_PORT:9090}
   tracing:
     sampling:
-      probability: 1.0
+      probability: ${MOZHNO_TRACING_SAMPLE_RATE:1.0}
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: ${MOZHNO_MANAGEMENT_ENDPOINTS:health,info,metrics,prometheus}
   endpoint:
     health:
       show-details: always
@@ -86,8 +111,9 @@ management:
 
 springdoc:
   swagger-ui:
-    path: /swagger-ui.html
+    path: ${MOZHNO_SWAGGER_UI_PATH:/swagger-ui.html}
+    enabled: ${MOZHNO_SWAGGER_ENABLED:true}
     tryItOutEnabled: true
     filter: true
   api-docs:
-    path: /v3/api-docs
+    path: ${MOZHNO_API_DOCS_PATH:/v3/api-docs}

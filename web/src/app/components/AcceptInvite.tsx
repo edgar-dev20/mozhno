@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { Link, useSearchParams } from 'react-router';
+import { Link } from 'react-router';
 import { Lock, UserRound } from '@/shared/icons';
-import { GradientButton, ErrorBox, getErrorMessage } from '@/shared';
+import { GradientButton, ErrorBox, getErrorMessage, getTokenFromHash } from '@/shared';
 import { Input } from '@/app/components/ui/input';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { api } from '@/api';
 import { useT } from '@/i18n';
 
 export function AcceptInvite() {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') || '';
+  const [token] = useState(getTokenFromHash);
   const t = useT();
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
