@@ -3,7 +3,7 @@ package dev.mozhno.spi;
 /**
  * Controls how many webhook deliveries a project is allowed to make.
  * <p>
- * Open-source edition: unlimited (Long.MAX_VALUE).
+ * Community edition: unlimited (Long.MAX_VALUE).
  * SaaS edition: quota-based, decremented on each successful dispatch.
  * </p>
  */

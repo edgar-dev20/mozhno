@@ -2,7 +2,7 @@
   <img src="logo.svg" width="380" alt="можно.">
 </p>
 
-<p align="center">Платформа управления фиче-флагами с открытым кодом.</p>
+<p align="center">Self-hosted-платформа управления фиче-флагами (open-core).</p>
 
 <p align="center">
   <a href="https://github.com/mozhno-dev/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mozhno-dev/mozhno/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI" /></a>

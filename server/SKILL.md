@@ -246,8 +246,8 @@ in `mozhno-core`'s `spi/impl` package.
 | SPI | OSS default impl |
 |-----|------------------|
 | `QuotaSpi` | `NoOpQuotaProvider` (unlimited) |
-| `FeatureGateSpi` | `OpenSourceFeatureGateProvider` |
-| `BillingSpi` | `OpenSourceBillingProvider` |
+| `FeatureGateSpi` | `CommunityFeatureGateProvider` |
+| `BillingSpi` | `CommunityBillingProvider` |
 | `WebhookLimitSpi` | `NoOpWebhookLimitProvider` |
 | `AuditSpi` | `JdbcAuditProvider` |
 | `AuditEventEnricher` | `NoOpAuditEventEnricher` |

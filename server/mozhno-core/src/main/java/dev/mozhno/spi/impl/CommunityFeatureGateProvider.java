@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import dev.mozhno.spi.FeatureGateSpi;
 
 /**
- * Default {@link FeatureGateSpi} implementation for the open-source edition
+ * Default {@link FeatureGateSpi} implementation for the Community edition
  * that enables all features unconditionally.
  *
  * <p>Every feature gate returns {@code true} regardless of the workspace or
@@ -14,7 +14,7 @@ import dev.mozhno.spi.FeatureGateSpi;
  * active subscription tier.
  */
 @Component
-public class OpenSourceFeatureGateProvider implements FeatureGateSpi {
+public class CommunityFeatureGateProvider implements FeatureGateSpi {
 
     /**
      * Checks whether a feature is enabled for the given workspace.
@@ -23,7 +23,7 @@ public class OpenSourceFeatureGateProvider implements FeatureGateSpi {
      * @param key         the feature to check (e.g. {@code SSO},
      *                    {@code ADVANCED_AUDIT}, {@code WEBHOOKS})
      * @return always {@code true}
-     * @implNote The OSS implementation enables all features unconditionally.
+     * @implNote The Community implementation enables all features unconditionally.
      *           No workspace-level or tier-based gating is applied.
      */
     @Override
