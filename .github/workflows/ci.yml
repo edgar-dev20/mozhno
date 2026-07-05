@@ -19,6 +19,7 @@ jobs:
       java_sdk: ${{ steps.filter.outputs.java_sdk }}
       web: ${{ steps.filter.outputs.web }}
       js_sdk: ${{ steps.filter.outputs.js_sdk }}
+      design_tokens: ${{ steps.filter.outputs.design_tokens }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -37,6 +38,11 @@ jobs:
             js_sdk:
               - '.github/workflows/ci.yml'
               - 'sdks/js/**'
+            design_tokens:
+              - '.github/workflows/ci.yml'
+              - 'packages/design-tokens/**'
+              - 'web/src/styles/tokens.css'
+              - 'docs/.vitepress/theme/tokens.generated.css'
 
   flyway-append-only:
     name: Flyway migrations are append-only
@@ -60,6 +66,21 @@ jobs:
             exit 1
           fi
           echo "Migrations are append-only."
+
+  design-tokens:
+    name: Design tokens are up to date
+    needs: changes
+    if: ${{ needs.changes.outputs.design_tokens == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify generated token CSS matches canonical source
+        run: node packages/design-tokens/generate.mjs --check
 
   audit-web:
     name: Audit web dependencies

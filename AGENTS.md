@@ -21,7 +21,8 @@ package-specific rules in the relevant `SKILL.md`.
 |------|------|
 | `server/` | Spring Boot 4 / JDK 25 backend (Gradle multi-module: `mozhno-spi`, `mozhno-core`, `mozhno-web-api`, `mozhno-app`) |
 | `web/` | React 19 SPA (Vite, Tailwind v4), published as `@mozhno/core-ui`; built into the server's static assets |
-| `sdks/` | `java`, `js` client SDKs + shared `design-tokens` |
+| `sdks/` | `java`, `js` client SDKs |
+| `packages/` | shared packages — `design-tokens` (canonical OKLCH token spec; generates CSS for `web` + `docs`) |
 | `docs/` | VitePress documentation site |
 
 The server serves the built web UI as static assets — one self-contained artifact.

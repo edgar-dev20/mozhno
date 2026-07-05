@@ -1,0 +1,26 @@
+{
+  "name": "@mozhno/design-tokens",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Canonical design tokens for the Mozhno platform — OKLCH colour system, shadows and overlay. Single source of truth; generates CSS for web and docs.",
+  "license": "BUSL-1.1",
+  "type": "module",
+  "exports": {
+    ".": "./design-tokens.json",
+    "./tokens.json": "./design-tokens.json"
+  },
+  "files": [
+    "design-tokens.json",
+    "generate.mjs",
+    "README.md"
+  ],
+  "scripts": {
+    "generate": "node generate.mjs",
+    "check": "node generate.mjs --check"
+  },
+  "keywords": ["design-tokens", "oklch", "css-variables", "theming", "feature-flags"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mozhno-dev/mozhno"
+  }
+}

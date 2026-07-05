@@ -1,4 +1,4 @@
-.PHONY: help dev db-up db-down server-run server-test web-dev web-test web-lint js-sdk-test js-sdk-build java-sdk-test docker-build docker-up docker-down lint clean
+.PHONY: help dev db-up db-down server-run server-test web-dev web-test web-lint js-sdk-test js-sdk-build java-sdk-test docker-build docker-up docker-down lint tokens tokens-check clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' Makefile | sort | awk 'BEGIN {FS = ":.*##"}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
@@ -46,6 +46,12 @@ docker-up: ## Start full stack via docker-compose
 
 docker-down: ## Stop full stack
 	docker compose down
+
+tokens: ## Regenerate design-token CSS (web + docs) from packages/design-tokens
+	node packages/design-tokens/generate.mjs
+
+tokens-check: ## Fail if generated design-token CSS is stale (CI guard)
+	node packages/design-tokens/generate.mjs --check
 
 lint: web-lint ## Run all linters
 

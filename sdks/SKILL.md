@@ -17,7 +17,6 @@ Client SDKs that let apps evaluate feature flags. Layout:
 |---------|------|--------------|---------|
 | Java SDK | `sdks/java` | `dev.mozhno:mozhno-client-java` (Gradle `:mozhno-client-java`) | **JDK 17+** (consumer-facing; not JDK 25) |
 | JS/TS SDK | `sdks/js` | `@mozhno/client-js` (ESM + CJS) | Browser + Node |
-| Design tokens | `sdks/design-tokens` | shared token package | — |
 
 ## Core principle (both SDKs)
 

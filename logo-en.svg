@@ -1,15 +1,16 @@
 <svg width="640" height="140" viewBox="0 0 640 140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="можно. enable without fear..">
   <defs>
     <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#1a6b60"/>
-      <stop offset="100%" stop-color="#2d9484"/>
+      <stop offset="0%" stop-color="#006e5b"/>
+      <stop offset="50%" stop-color="#00624b"/>
+      <stop offset="100%" stop-color="#004937"/>
     </linearGradient>
   </defs>
   <text x="320" y="72" text-anchor="middle" font-size="64" fill="url(#g)">
-    <tspan font-family="'Onest','Inter',Arial,sans-serif" font-weight="700" letter-spacing="0.02em">можно</tspan><tspan font-family="'JetBrains Mono','Fira Code','Consolas',monospace" font-weight="600" font-size="35" letter-spacing="0" fill="#b86840">.</tspan>
+    <tspan font-family="'Onest','Inter',Arial,sans-serif" font-weight="700" letter-spacing="0.02em">можно</tspan><tspan font-family="'JetBrains Mono','Fira Code','Consolas',monospace" font-weight="600" font-size="35" letter-spacing="0" fill="#ac7300">.</tspan>
   </text>
   <text x="320" y="108" text-anchor="middle"
         font-family="'Onest','Inter',Arial,sans-serif"
         font-size="17" font-weight="400"
-        letter-spacing="0.04em" fill="#5a6e60">enable without fear..</text>
+        letter-spacing="0.04em" fill="#465048">enable without fear..</text>
 </svg>

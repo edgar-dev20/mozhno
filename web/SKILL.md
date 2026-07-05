@@ -115,10 +115,10 @@ web/src/
     messages.ts            — translation messages
     dateLocales.ts         — date-fns locale imports
   styles/
-    theme.css              — ALL design tokens applied at runtime (compact/dense CSS, ~130 lines: :root light + .dark + @theme inline)
-    design-tokens.json     — JSON mirror of the token spec (light + dark, all scales); keep in sync with theme.css
+    tokens.css             — GENERATED colour vars (:root light + .dark) from packages/design-tokens; DO NOT edit
+    theme.css              — hand-authored scalars (font/spacing/z/motion), @theme inline mapping, @layer base, keyframes + gradient utilities
     tailwind.css           — Tailwind v4 imports + tw-animate-css
-    index.css              — entry point (imports tailwind.css + theme.css)
+    index.css              — entry point (imports tailwind.css + tokens.css + theme.css)
   stories/                  — Storybook stories: Badge, Card, GradientButton, EmptyState, StatusDot, Tokens (palettes/swatches/typography showcase), ...
   test/                     — vitest tests + setup.ts
 ```
@@ -154,7 +154,12 @@ DashboardLayout wraps all protected routes with sidebar, header (logo + stats), 
 
 ## Token Hierarchy (3 Layers)
 
-All tokens are applied from `src/styles/theme.css` at runtime; `src/styles/design-tokens.json` is a JSON mirror of the same spec (keep the two in sync).
+The colour system is generated. Its **single source of truth** is
+`packages/design-tokens/design-tokens.json`; run `make tokens` (or
+`node packages/design-tokens/generate.mjs`) to regenerate `src/styles/tokens.css`
+(the `:root`/`.dark` colour vars, imported before `theme.css`). Never edit
+`tokens.css` by hand. Scalars (typography, spacing, radius, motion), the
+`@theme inline` mapping and utilities stay hand-authored in `src/styles/theme.css`.
 
 **Layer 1 — Primitives** (raw palette, theme-dependent):
 - `--palette-{color}-{50..950}` for gray, brand, primary, success, warning, danger, info
