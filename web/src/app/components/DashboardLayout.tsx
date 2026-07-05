@@ -157,7 +157,7 @@ export function DashboardLayout() {
                     className="w-7 h-7 rounded-lg object-cover shrink-0"
                   />
                 ) : (
-                  <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-caption font-bold shadow-sm text-white ring-1 ring-chart-4/30">
+                  <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-caption font-bold shadow-sm text-primary-foreground ring-1 ring-chart-4/30">
                     {(projectName ?? '?')[0].toUpperCase()}
                   </div>
                 )}
@@ -224,7 +224,7 @@ export function DashboardLayout() {
                     {theme === 'dark' ? (
                       <Moon size={12} className="text-muted-foreground" />
                     ) : (
-                      <Sun size={12} className="text-amber-500" />
+                      <Sun size={12} className="text-warning" />
                     )}
                   </span>
                 </button>

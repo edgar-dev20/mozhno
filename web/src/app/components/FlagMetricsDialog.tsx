@@ -112,9 +112,7 @@ export function FlagMetricsDialog({
     if (open) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedEnvId(defaultEnvId ?? environments[0]?.id ?? null);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilterAppName(null);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFilterInstanceId(null);
     }
   }, [open, defaultEnvId, environments]);

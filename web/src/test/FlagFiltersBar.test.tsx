@@ -3,8 +3,8 @@ import { render, screen } from '@testing-library/react';
 import { FlagFiltersBar } from '@/app/components/flags/FlagFiltersBar';
 
 const mockTags = [
-  { id: 1, name: 'Priority', color: '#ef4444', projectId: 1 },
-  { id: 2, name: 'Team', color: '#3b82f6', projectId: 1 },
+  { id: 1, name: 'Priority', color: '#ef4444', projectId: 1, description: '', createdAt: '2024-01-01T00:00:00Z' },
+  { id: 2, name: 'Team', color: '#3b82f6', projectId: 1, description: '', createdAt: '2024-01-01T00:00:00Z' },
 ];
 
 describe('FlagFiltersBar', () => {

@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { FlagCardSkeleton } from "@/app/components/skeletons/FlagCardSkeleton";
-import { TableRowSkeleton, TableSkeleton } from "@/app/components/skeletons/TableRowSkeleton";
-import { IntegrationCardSkeleton, IntegrationCardSkeletonList } from "@/app/components/skeletons/IntegrationCardSkeleton";
-import { ApiKeyRowSkeleton, ApiKeyTableSkeleton } from "@/app/components/skeletons/ApiKeyRowSkeleton";
-import { UserRowSkeleton, UserTableSkeleton } from "@/app/components/skeletons/UserTableSkeleton";
-import { TagCardSkeleton, TagCardSkeletonList } from "@/app/components/skeletons/TagCardSkeleton";
-import { SegmentCardSkeleton, SegmentCardSkeletonList } from "@/app/components/skeletons/SegmentCardSkeleton";
+import { TableSkeleton } from "@/app/components/skeletons/TableRowSkeleton";
+import { IntegrationCardSkeletonList } from "@/app/components/skeletons/IntegrationCardSkeleton";
+import { ApiKeyTableSkeleton } from "@/app/components/skeletons/ApiKeyRowSkeleton";
+import { UserTableSkeleton } from "@/app/components/skeletons/UserTableSkeleton";
+import { TagCardSkeletonList } from "@/app/components/skeletons/TagCardSkeleton";
+import { SegmentCardSkeletonList } from "@/app/components/skeletons/SegmentCardSkeleton";
 import { SidePanelSkeleton } from "@/app/components/skeletons/SidePanelSkeleton";
 
 const meta: Meta = {

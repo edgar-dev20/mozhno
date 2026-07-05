@@ -42,7 +42,7 @@ export function OperatorSelector({
           <span
             className={`inline-flex items-center font-mono text-[10px] font-bold px-1.5 py-0.5 rounded leading-none uppercase border ${
               currentOperator === op.value
-                ? 'bg-brand text-white border-brand'
+                ? 'bg-brand text-primary-foreground border-brand'
                 : (OPERATOR_COLORS[op.value] ?? 'bg-muted text-muted-foreground border-border')
             }`}
           >

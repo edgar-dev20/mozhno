@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "storybook/test";
-import { useState } from "react";
 import { FlagCreatePanel } from "@/app/components/flags/FlagCreatePanel";
 
 const meta: Meta<typeof FlagCreatePanel> = {

@@ -60,6 +60,7 @@ const en = {
     colorBar: 'Color bar',
     clearFilter: 'Clear',
     fromLower: 'from',
+    tip: 'Tip',
   },
   auth: {
     login: 'Log in',
@@ -106,7 +107,7 @@ const en = {
     description: 'Manage feature availability across all environments',
     create: 'Create flag',
     createTitle: 'New flag',
-    createDescription: 'The flag will be created for all environments (Production and Development)',
+    createDescription: 'The flag will be created in all project environments',
     generalSettings: 'Flag settings',
     generalDescription: 'General flag settings apply to all environments',
     environmentTitle: 'Targeting for',
@@ -132,8 +133,8 @@ const en = {
     sortByName: 'By name',
     sortByDate: 'By date',
     hygieneTip:
-      'Keep the number of active flags under control — remove those that have been in production for more than two sprints. Old flags slow down CI and clutter team context.',
-    hygieneLabel: 'Code hygiene',
+      'Keep the number of active flags under control: remove those that live longer than two sprints. Old flags slow down CI and clutter team context.',
+    hygieneLabel: 'Hygiene',
     namePlaceholder: 'Flag',
     searchPlaceholder: 'Search by name, key or author...',
     created: 'Created',
@@ -259,7 +260,7 @@ const en = {
     emptyDescription: 'Create segments for audience targeting',
     emptyButton: 'Create segment',
     tipText:
-      'Warm up segments from internal testers to external beta and only then to 100%. Each step is a new rollback point without downtime.',
+      'Roll out through segments gradually: internal testers first, then external beta, and only then all users. Each step is a rollback point without downtime.',
     tipLabel: 'Strategy',
     contextCount: '{{count}} context',
     rules: 'Rules',
@@ -323,6 +324,7 @@ const en = {
   navigation: {
     management: 'Management',
     administration: 'Administration',
+    menu: 'Menu',
     flags: 'Flags',
     segments: 'Segments',
     contexts: 'Contexts',
@@ -369,9 +371,6 @@ const en = {
   settings: {
     title: 'Settings',
     description: 'Manage project, environments and security',
-    tipText:
-      'Run the security checklist quarterly: MFA, IP whitelist, audit log retention ≥ 90 days. One checkbox today saves an incident tomorrow.',
-    tipLabel: 'Checklist',
     project: 'Project',
     projectDescription: 'Project info and logo',
     projectId: 'Project ID: #{{id}}',
@@ -422,7 +421,8 @@ const en = {
     description: 'Manage user access and roles',
     createInvite: 'Invite user',
     tipText:
-      'Least privilege is the golden rule. Assign "Developer" by default, and "Admin" only after a security chat review.',
+      'Least privilege is the golden rule. Assign "Developer" by default, and "Admin" only after a separate approval.',
+    tipLabel: 'Access',
     filterAllRoles: 'All roles',
     filterAllStatuses: 'All statuses',
     loading: 'Loading users...',
@@ -477,7 +477,6 @@ const en = {
       cancel: 'Cancel',
       save: 'Save',
       invite: 'Invite',
-      createTip: 'Least privilege — assign "Developer" by default, and "Admin" only after review.',
       created: 'Created:',
       lastActive: 'Last active:',
       deleteUser: 'Delete user',
@@ -583,8 +582,8 @@ const en = {
     description: 'Context fields for flag targeting and segment rules',
     create: 'Create context',
     tipText:
-      'Context fields define audience parameters. The key is used in flag targeting rules and segment conditions.',
-    tipLabel: 'DSL',
+      'Enable strict mode for fields with a fixed set of values — rules and SDKs will only accept whitelisted values and protect against typos.',
+    tipLabel: 'Validation',
     loading: 'Loading...',
     emptyTitle: 'No contexts',
     emptyDescription: 'Add context fields for flag targeting',
@@ -637,8 +636,8 @@ const en = {
       connect: 'Error connecting integration',
     },
     tipText:
-      'For webhooks, configure the endpoint in your service, and only specify the URL and event list here — Mozhno will send a POST request when events occur.',
-    tipLabel: 'How webhooks work',
+      'For webhooks, host the handler in your own service, and here just specify the URL and event list. When those events occur, mozhno sends a POST request.',
+    tipLabel: 'Webhooks',
     enable: 'Enable webhook',
     enableHint: 'Send events when they occur',
     enableRemaining: 'Remaining sends',
@@ -758,8 +757,8 @@ const en = {
       create: 'Error creating key',
     },
     tipText:
-      "Rotate keys every 90 days and never commit them. For CI/CD use a separate key ring — compromise of one won't affect the others.",
-    tipLabel: 'Best Practice',
+      "Rotate keys every 90 days and don't keep them in code. For CI/CD, use a separate key per environment — compromise of one won't affect the others.",
+    tipLabel: 'Security',
     searchPlaceholder: 'Search by name...',
     filterAllTypes: 'All types',
     filterAllEnvironments: 'All environments',
@@ -797,8 +796,8 @@ const en = {
     filterType: 'Type',
     period: 'Period',
     tipText:
-      'Audit log lets you track changes — who toggled a flag, who changed a role. Use type and date filters for quick lookup.',
-    tipLabel: 'Tip',
+      'Filter by type, user and date to quickly find the change you need — who toggled a flag or changed a role.',
+    tipLabel: 'Filters',
     searchPlaceholder: 'Search by name, resource, action...',
     resource: {
       flag: 'Flag',
@@ -895,6 +894,19 @@ const en = {
     description: 'Connecting the SDK to your project',
     copySnippet: 'Copy',
     snippetCopied: 'Copied!',
+    serverKey: 'Server key',
+    frontendKey: 'Frontend key',
+    install: 'Install',
+    usage: 'Usage',
+    javaDesc:
+      'Server SDK for Spring Boot and Java apps. Instant flag checks — everything is kept in app memory.',
+    jsServerDesc:
+      'Node.js SDK for the backend. Great for microservice flags and workers with instant checks.',
+    jsClientDesc:
+      'Client SDK for browsers. Instant in-memory flag checks — client-side microservices and reactive UI.',
+    inCode: 'In code',
+    newFeatureCode: 'new feature',
+    showNewDashboard: 'Show new dashboard',
   },
   clientInstances: {
     title: 'Applications',

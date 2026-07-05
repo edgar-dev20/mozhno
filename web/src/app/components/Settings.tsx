@@ -4,7 +4,6 @@ import {
   Globe,
   Save,
   Plus,
-  Cog,
   Upload,
   Image,
   Hash,
@@ -18,7 +17,6 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { api, Environment } from '@/api';
-import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { PluginSlot } from '@/app/components/PluginSlot';
 import { SectionHeader, EmptyState, GradientButton, LoadingState, getErrorMessage } from '@/shared';
@@ -99,7 +97,6 @@ export function Settings() {
     if (project) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setProjectName(project.name);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setProjectDesc(project.description ?? '');
       setInitialProject((prev) => prev ?? { name: project.name, desc: project.description ?? '' });
     }
@@ -271,13 +268,6 @@ export function Settings() {
   return (
     <div className="space-y-6">
       <SectionHeader title={t('settings.title')} description={t('settings.description')} />
-
-      <TipCard
-        text={t('settings.tipText')}
-        label={t('settings.tipLabel')}
-        icon={<Cog />}
-        storageKey="settings"
-      />
 
       <div className="space-y-6">
         {/* Project Card */}

@@ -63,7 +63,7 @@ async function legacyEnrichment(): Promise<{
   contexts: ContextDefinition[];
 }> {
   const [base, segs, tg, ctx, envs] = await Promise.all([
-    api.flags.list(undefined, true),
+    api.flags.list(true),
     api.segments.list(),
     api.tags.list(),
     api.contexts.list(),
@@ -82,7 +82,7 @@ async function legacyEnrichment(): Promise<{
   }
 
   const envResults = await Promise.all(
-    envs.map((env) => api.flags.list(env.id).then((flags) => ({ envId: env.id, flags }))),
+    envs.map((env) => api.flags.listByEnvironment(env.id).then((flags) => ({ envId: env.id, flags }))),
   );
 
   for (const { envId, flags: envFlags } of envResults) {

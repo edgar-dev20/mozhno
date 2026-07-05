@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect } from "storybook/test";
 import { CardHeader } from "@/shared/components/CardHeader";
 
 const meta: Meta<typeof CardHeader> = {

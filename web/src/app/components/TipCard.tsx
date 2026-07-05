@@ -72,7 +72,7 @@ export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProp
             <button
               onClick={handleDismiss}
               aria-label={t('common.close')}
-              className="shrink-0 p-1.5 rounded-lg hover:bg-white/40 dark:hover:bg-white/5 text-muted-foreground/70 hover:text-foreground/80 transition-colors"
+              className="shrink-0 p-1.5 rounded-lg hover:bg-background/40 dark:hover:bg-background/5 text-muted-foreground/70 hover:text-foreground/80 transition-colors"
             >
               <X size={14} strokeWidth={2} />
             </button>

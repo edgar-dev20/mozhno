@@ -1,12 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, within, expect } from "storybook/test";
+import { fn } from "storybook/test";
 import { ConstraintRow } from "@/app/components/ConstraintRow";
+import type { ContextDefinition } from "@/api";
 
-const SAMPLE_CONTEXTS = [
-  { id: 1, name: "Country", type: "STRING" as const, createdAt: "", updatedAt: "" },
-  { id: 2, name: "Platform", type: "STRING" as const, createdAt: "", updatedAt: "" },
-  { id: 3, name: "Version", type: "STRING" as const, createdAt: "", updatedAt: "" },
-] as any[];
+const SAMPLE_CONTEXTS: ContextDefinition[] = [
+  { id: 1, name: "Country", key: "country", type: "STRING", projectId: 1, createdBy: null, description: "", isStrict: false, validValues: [], createdAt: "" },
+  { id: 2, name: "Platform", key: "platform", type: "STRING", projectId: 1, createdBy: null, description: "", isStrict: false, validValues: [], createdAt: "" },
+  { id: 3, name: "Version", key: "version", type: "STRING", projectId: 1, createdBy: null, description: "", isStrict: false, validValues: [], createdAt: "" },
+];
 
 const meta: Meta<typeof ConstraintRow> = {
   title: "App/ConstraintRow",

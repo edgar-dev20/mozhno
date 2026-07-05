@@ -28,7 +28,7 @@ export function OnboardingSidebar({ step }: OnboardingSidebarProps) {
         >
           <div className="flex flex-col items-center gap-3">
             <div className="w-16 h-16 rounded-2xl bg-brand flex items-center justify-center">
-              {CurrentIcon ? <CurrentIcon size={28} className="text-white" /> : null}
+              {CurrentIcon ? <CurrentIcon size={28} className="text-primary-foreground" /> : null}
             </div>
             {step === 0 && (
               <div className="text-xs text-muted-foreground">{t('onboarding.createProject')}</div>

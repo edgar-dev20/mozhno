@@ -10,5 +10,5 @@ const meta: Meta<typeof PluginSlot> = {
 export default meta;
 type Story = StoryObj<typeof PluginSlot>;
 
-export const WithFallback: Story = { args: { slotId: "flag.card.header" as any, fallback: <span className="text-xs text-muted-foreground">No plugin registered</span> } };
-export const Empty: Story = { args: { slotId: "flag.card.header" as any } };
+export const WithFallback: Story = { args: { slotId: "settings.premium", fallback: <span className="text-xs text-muted-foreground">No plugin registered</span> } };
+export const Empty: Story = { args: { slotId: "settings.premium" } };

@@ -1,57 +1,26 @@
-name: frontend-design description: Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics. license: Complete terms in LICENSE.txt
-Triggers
-Activate this skill when the user asks to:
+---
+name: mozhno-web
+description: Reference for the Mozhno web UI (React 19 SPA under /web, published as @mozhno/core-ui). Use when building or editing UI — the design-token system, Tailwind v4 semantic tokens, shared + shadcn/Radix components, CVA variants, forms (react-hook-form + zod), the TanStack Query data layer, i18n, motion presets, testing, and the plugin registry.
+license: MIT
+metadata:
+  domain: frontend
+  role: specialist
+  scope: implementation
+  triggers: Mozhno web, React 19, Tailwind v4, design tokens, shadcn, Radix, TanStack Query, feature flags UI
+---
 
-Build a web component, page, application, or interface
-Create a landing page, dashboard, or portfolio
-Style or beautify an existing web UI
-Generate HTML/CSS/JS, React, Vue, or similar frontend code
-Design a poster, card, or visual artifact for the web
-NOT For
-Backend logic — APIs, databases, server routes, authentication; use coding tools directly
-Data modeling — schema design, ORM configuration, data pipelines
-CLI or terminal UIs — this skill is for browser/web interfaces only
-Infrastructure or deployment — Docker, CI/CD, cloud configs
-Decision Rules
-If the request is purely visual/UI → follow this skill fully (design thinking + aesthetic guidelines)
-If the request mixes frontend + backend → handle frontend with this skill; handle backend separately
-If the user specifies a framework (React, Vue, Svelte) → use it; otherwise default to clean HTML/CSS/JS
-If the user specifies an aesthetic → follow their direction; otherwise commit to a bold, unexpected choice
-If the artifact is small (single button, one card) → skip the design thinking step, implement directly
-This skill guides creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
+# Mozhno Web
 
-The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
+## Design Principles
 
-Design Thinking
-Before coding, understand the context and commit to a BOLD aesthetic direction:
+Aim for a polished, cohesive, production-grade UI. This project already ships a mature design
+system — **work within it, do not reinvent it**:
 
-Purpose: What problem does this interface solve? Who uses it?
-Tone: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
-Constraints: Technical requirements (framework, performance, accessibility).
-Differentiation: What makes this UNFORGETTABLE? What's the one thing someone will remember?
-CRITICAL: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work - the key is intentionality, not intensity.
-
-Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
-
-Production-grade and functional
-Visually striking and memorable
-Cohesive with a clear aesthetic point-of-view
-Meticulously refined in every detail
-Frontend Aesthetics Guidelines
-Focus on:
-
-Typography: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
-Color & Theme: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
-Motion: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions. Use scroll-triggering and hover states that surprise.
-Spatial Composition: Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space OR controlled density.
-Backgrounds & Visual Details: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
-NEVER use generic AI-generated aesthetics like overused font families (Inter, Roboto, Arial, system fonts), cliched color schemes (particularly purple gradients on white backgrounds), predictable layouts and component patterns, and cookie-cutter design that lacks context-specific character.
-
-Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
-
-IMPORTANT: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
-
-Remember: Claude is capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
+- Respect the token system and styling rules below — **never** hardcode raw colors, fonts, or
+  ad-hoc values. Consistency with existing components beats novelty.
+- Reuse `@/shared` and `@/app/components/ui` components before writing new ones.
+- Match motion, spacing, radius, and typography to the existing tokens so new screens feel
+  native to the app.
 
 ---
 
@@ -68,7 +37,7 @@ Mozhno is an **open-core feature flag management platform**. Monorepo:
 | Layer | Technology |
 |-------|-----------|
 | Framework | React 19 |
-| Routing | react-router 7 |
+| Routing | react-router 8 |
 | Data fetching | TanStack Query 5 |
 | Styling | Tailwind CSS v4 (`@theme inline` pattern) |
 | UI primitives | Radix UI (Dialog, Select, DropdownMenu, Switch, Popover, Checkbox, Tooltip, etc.) |
@@ -146,8 +115,8 @@ web/src/
     messages.ts            — translation messages
     dateLocales.ts         — date-fns locale imports
   styles/
-    theme.css              — ALL design tokens (732 lines, single source of truth)
-    design-tokens.json     — canonical token specification (light + dark, all scales)
+    theme.css              — ALL design tokens applied at runtime (compact/dense CSS, ~130 lines: :root light + .dark + @theme inline)
+    design-tokens.json     — JSON mirror of the token spec (light + dark, all scales); keep in sync with theme.css
     tailwind.css           — Tailwind v4 imports + tw-animate-css
     index.css              — entry point (imports tailwind.css + theme.css)
   stories/                  — Storybook stories: Badge, Card, GradientButton, EmptyState, StatusDot, Tokens (palettes/swatches/typography showcase), ...
@@ -174,6 +143,8 @@ web/src/
 | `/apikeys` | ApiKeys | Yes | Yes |
 | `/applications` | ClientInstances | Yes | Yes |
 | `/settings` | Settings | Yes | Yes |
+| `/premium/*` | PremiumPageSlot (plugin-provided pages) | — | Yes |
+| `*` | NotFound catch-all | — | — |
 
 DashboardLayout wraps all protected routes with sidebar, header (logo + stats), and user menu. All page components inside DashboardLayout use lazy loading with `<LazyPage Component={...} />`.
 
@@ -183,7 +154,7 @@ DashboardLayout wraps all protected routes with sidebar, header (logo + stats), 
 
 ## Token Hierarchy (3 Layers)
 
-All tokens defined in `src/styles/theme.css`. Canonical source: `src/styles/design-tokens.json`.
+All tokens are applied from `src/styles/theme.css` at runtime; `src/styles/design-tokens.json` is a JSON mirror of the same spec (keep the two in sync).
 
 **Layer 1 — Primitives** (raw palette, theme-dependent):
 - `--palette-{color}-{50..950}` for gray, brand, primary, success, warning, danger, info
@@ -201,9 +172,9 @@ All tokens defined in `src/styles/theme.css`. Canonical source: `src/styles/desi
 **Layer 3 — Component-specific**:
 - Gradients: `--gradient-start`, `--gradient-end` (hover via `.gradient-btn-primary` CSS class using `color-mix()`)
 - Gradient variants: `--gradient-danger-start`, `--gradient-danger-end` (hover via `.gradient-btn-danger`), `--gradient-warning-start`, `--gradient-warning-end` (hover via `.gradient-btn-warning`)
-- Button gradient classes: `.gradient-btn-primary`, `.gradient-btn-danger`, `.gradient-btn-warning` — handle background + hover in CSS via `color-mix(in oklch, ..., black 10%)`
+- Button gradient classes: `.gradient-btn-primary`, `.gradient-btn-danger`, `.gradient-btn-warning` — handle background + hover in CSS via `color-mix(in oklch, ..., black N%)` (primary darkens 12%, danger/warning 10%)
 - Subtle gradients: `--gradient-subtle-start`, `--gradient-subtle-end`
-- Overlay: `--overlay-bg` (modal/sheet/alert backdrops, light: 40% black, dark: 60%)
+- Overlay: `--overlay-bg` (modal/sheet/alert backdrops, light: 35% black `oklch(0 0 0 / 0.35)`, dark: 55% `oklch(0 0 0 / 0.55)`)
 - Panel sizing: `--panel-min-width` (8rem), `--panel-max-width` (32rem)
 - Icon sizing: `--icon-sm` (0.75rem), `--icon-md` (1rem), `--icon-lg` (1.25rem)
 - Sparklines: `--sparkline-true`, `--sparkline-false`
@@ -214,8 +185,13 @@ All tokens defined in `src/styles/theme.css`. Canonical source: `src/styles/desi
 ## Typography Tokens
 
 **Font families** (in `:root`, theme-independent):
-- `--font-sans`: Inter, system-ui fallbacks
+- `--font-sans`: **Onest** (primary), then `Inter`, `ui-sans-serif`, `system-ui` fallbacks
 - `--font-mono`: JetBrains Mono, Fira Code, Consolas
+
+Both **Onest** (weights 400–800) and **JetBrains Mono** are loaded from Google Fonts in
+`web/index.html` with `subset=cyrillic,latin` — the UI is Russian-first (`<html lang="ru">`),
+so any new font must ship a Cyrillic subset. Do **not** hardcode font families in components;
+rely on `--font-sans` / `--font-mono` (exposed as Tailwind `font-sans` / `font-mono`).
 
 **Size scale** → Tailwind utilities:
 | Token | Tailwind Class | Value |
@@ -283,7 +259,7 @@ Defined in both `:root` (light, lower opacity) and `.dark` (higher opacity). Use
 - All color tokens have dark equivalents in `.dark {}` block in theme.css
 - **No manual `dark:` prefix needed** for color tokens — just use the semantic token
 - Shadow tokens automatically intensify in dark mode
-- Overlay token (`--overlay-bg`) switches from `oklch(0 0 0 / 0.4)` to `oklch(0 0 0 / 0.6)`
+- Overlay token (`--overlay-bg`) switches from `oklch(0 0 0 / 0.35)` to `oklch(0 0 0 / 0.55)`
 - Icon, spacing, radius, duration tokens are theme-independent
 
 ---
@@ -292,9 +268,16 @@ Defined in both `:root` (light, lower opacity) and `.dark` (higher opacity). Use
 
 ## CRITICAL: NO Raw Color Values
 
+> **Enforced:** an ESLint rule (`no-restricted-syntax` in `eslint.config.js`) makes raw color
+> classes a **hard error** — `npm run lint` / CI fail on them. Chromatic scales map to feedback
+> tokens (`red→destructive`, `green/emerald→success`, `amber/yellow→warning`, `teal/cyan→brand`,
+> `blue/sky→info`), grays to `muted`/`muted-foreground`/`border`, `white`/`black` to the matching
+> `*-foreground`/surface/`overlay` token. Data-driven colors (a user's chosen tag/flag color) stay
+> as inline `style={{ backgroundColor }}` — the rule only bans Tailwind color *classes*.
+
 **NEVER** use:
-- `bg-red-600`, `bg-blue-500`, `text-green-400`, `from-amber-500 to-orange-500`
-- `bg-black/50`, `bg-white/20`
+- `bg-red-600`, `bg-blue-500`, `text-green-400`, `from-amber-500 to-orange-500`, `border-l-red-400`
+- `bg-black/50`, `bg-white/20`, `text-white`, `shadow-black/10`
 - Tailwind's built-in color palette (`red-*`, `blue-*`, etc.)
 
 **ALWAYS** use semantic tokens:
@@ -490,6 +473,70 @@ const t = useT();
 - **Tests location**: `src/test/*.test.tsx` (unit/component tests)
 - **Run**: `npm run test`
 - **Coverage**: `npm run test:coverage` (thresholds: lines 22%, functions 18%, branches 15%, statements 20%)
+
+### Test templates
+
+**Component test** (`@testing-library/react` + vitest):
+```tsx
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { Badge } from '@/shared/components/Badge';
+
+describe('Badge', () => {
+  it('renders and applies the semantic variant class', () => {
+    render(<Badge variant="success">OK</Badge>);
+    expect(screen.getByText('OK').className).toContain('bg-success');
+  });
+});
+```
+
+**Pure hook test:**
+```tsx
+import { describe, it, expect } from 'vitest';
+import { renderHook, act } from '@testing-library/react';
+import { useFlagFilters } from '@/app/hooks/useFlagFilters';
+
+const { result } = renderHook(() => useFlagFilters(flags));
+act(() => result.current.setSearch('alpha'));
+expect(result.current.filtered).toHaveLength(1);
+```
+
+**Query/mutation hook** — wrap in a `QueryClientProvider` with retries off:
+```tsx
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+);
+const { result } = renderHook(() => useEnrichedFlagsQuery(), { wrapper });
+```
+
+---
+
+# No Deprecated APIs
+
+Target the versions this repo runs on: **React 19, react-router 8, TanStack Query 5,
+Tailwind v4, Radix UI, motion (framer-motion), Vite 8, TypeScript**. Do **not** introduce APIs
+deprecated or removed in these versions.
+
+- **Never call a symbol marked `@deprecated`** (check the JSDoc/TS hover) — use its documented
+  replacement. If TypeScript renders it struck-through, switch APIs.
+- React 19: use `createRoot` (not `ReactDOM.render`), function components + hooks (no legacy
+  lifecycle methods, string refs, or `defaultProps` on function components); use the `use` hook
+  / actions patterns where the codebase already does.
+- TanStack Query 5: object-form only — `useQuery({ queryKey, queryFn })`; use `gcTime` (not
+  `cacheTime`), `isPending` (not the old `isLoading` semantics), and `placeholderData` (not the
+  removed `keepPreviousData`).
+- react-router 8: use the current router/data APIs already wired in `app/routes.tsx`; don't
+  reach for removed v5-era APIs (`Switch`, `useHistory`, `Redirect`).
+- Radix / lucide-react / motion: don't use props flagged deprecated in the installed version;
+  import icons via `@/shared/icons` and animation via `@/shared/motion`.
+- Prefer the repo's own utilities over ad-hoc/older ones: `cn()`, `@/shared` components, the
+  `api` client, and `useT()` — do not reintroduce patterns those replaced.
+- Check a dependency's release notes for its installed `package.json` version before using an
+  unfamiliar API; if it's deprecated or "for removal", pick the replacement. Don't hide the
+  signal with blanket `// eslint-disable` / `@ts-ignore` — fix the call instead.
 
 ---
 

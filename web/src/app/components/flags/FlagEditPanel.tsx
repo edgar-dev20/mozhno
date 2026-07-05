@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Plus,
@@ -41,11 +41,11 @@ export function FlagEditPanel({
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<EditFlagFormValues>({
-    resolver: zodResolver(editFlagSchema),
+    resolver: zodResolver(editFlagSchema) as Resolver<EditFlagFormValues>,
     defaultValues: {
       name: flag.name,
       description: flag.description,
@@ -58,9 +58,9 @@ export function FlagEditPanel({
   const [newTagId, setNewTagId] = useState<number | null>(null);
   const [newTagVal, setNewTagVal] = useState('');
 
-  const flagType = watch('flagType');
-  const watchedName = watch('name');
-  const watchedDesc = watch('description');
+  const flagType = useWatch({ control, name: 'flagType' });
+  const watchedName = useWatch({ control, name: 'name' });
+  const watchedDesc = useWatch({ control, name: 'description' });
   const { ref: descRef, ...descReg } = register('description');
 
   useEffect(() => {
@@ -94,7 +94,7 @@ export function FlagEditPanel({
 
   return (
     <form id="flag-edit-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <FormField label={t('common.name')} maxLength={120} value={watch('name')}>
+      <FormField label={t('common.name')} maxLength={120} value={watchedName}>
         <input
           type="text"
           {...register('name')}
@@ -102,7 +102,7 @@ export function FlagEditPanel({
           placeholder={t('flags.namePlaceholderEdit')}
           className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
         />
-        {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+        {errors.name && <p className="text-xs text-destructive mt-1">{errors.name.message}</p>}
       </FormField>
 
       <FormField label={t('common.key')} hint={t('flags.keyHint')}>
@@ -114,7 +114,7 @@ export function FlagEditPanel({
         />
       </FormField>
 
-      <FormField label={t('common.description')} maxLength={160} value={watch('description')}>
+      <FormField label={t('common.description')} maxLength={160} value={watchedDesc}>
         <textarea
           {...descReg}
           maxLength={160}
@@ -174,7 +174,7 @@ export function FlagEditPanel({
               return (
                 <div
                   key={i}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium text-white shadow-sm dark:brightness-[.85] dark:saturate-[.7]"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium text-primary-foreground shadow-sm dark:brightness-[.85] dark:saturate-[.7]"
                   style={{
                     background: tg.color,
                   }}

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { detectLocale, storeLocale, loadLocale, toIntlLocale, DEFAULT_LOCALE } from '@/i18n/locale';
 
 describe('detectLocale', () => {

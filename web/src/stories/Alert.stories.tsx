@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, within, expect } from "storybook/test";
+import { within, expect } from "storybook/test";
 import { Alert, AlertTitle, AlertDescription } from "@/app/components/ui/alert";
 import { AlertCircle, Check, AlertTriangle, Info } from "@/shared/icons";
 

@@ -132,13 +132,13 @@ function ChartDemo() {
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className="size-12 rounded-xl flex items-center justify-center text-xs font-mono font-medium text-white"
+              className="size-12 rounded-xl flex items-center justify-center text-xs font-mono font-medium text-primary-foreground"
               style={{ backgroundColor: `var(--chart-${i})` }}
             >
               {i}
             </div>
           ))}
-          <div className="size-12 rounded-xl flex items-center justify-center text-xs font-mono font-medium text-white bg-sparkline-true">
+          <div className="size-12 rounded-xl flex items-center justify-center text-xs font-mono font-medium text-primary-foreground bg-sparkline-true">
             T
           </div>
           <div className="size-12 rounded-xl flex items-center justify-center text-xs font-mono font-medium bg-sparkline-false">

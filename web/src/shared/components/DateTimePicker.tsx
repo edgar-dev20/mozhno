@@ -145,7 +145,7 @@ export function DateTimePicker({
             type="button"
             onClick={handleConfirm}
             disabled={!date}
-            className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-primary-foreground rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               backgroundImage:
                 'linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end))',

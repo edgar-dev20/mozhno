@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { api, ClientInstance, FlagResponse } from '@/api';
 import { NavLink } from 'react-router';
 import { JavaIcon, JavaScriptIcon } from '@/app/components/LanguageIcons';
-import { SectionHeader, TruncatedCopyTooltip } from '@/shared';
+import { SectionHeader, TruncatedCopyTooltip, getEnvTheme } from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
@@ -119,54 +119,19 @@ export function ClientInstances() {
 
   const envName = (id: number | null) => id != null ? (environments.find((e) => e.id === id)?.name ?? '-') : '-';
   const envGradient = (id: number) => {
-    const name = envName(id);
-    if (name === 'Production')
-      return {
-        from: '#2d9484',
-        to: '#3db8a5',
-        bg: 'from-brand/10 to-brand/5',
-        bgFlat: 'bg-success/10 text-success border-success/20',
-        border: 'border-success/20',
-        dot: 'bg-success',
-        text: 'text-success',
-      };
-    if (name === 'Development')
-      return {
-        from: '#c08140',
-        to: '#d4995a',
-        bg: 'from-warning/10 to-warning/5',
-        bgFlat: 'bg-warning/10 text-warning border-warning/20',
-        border: 'border-warning/20',
-        dot: 'bg-warning',
-        text: 'text-warning',
-      };
-    if (name === 'staging')
-      return {
-        from: '#b86840', to: '#c87850',
-        bg: 'from-chart-4/10 to-chart-4/5',
-        bgFlat: 'bg-chart-4/10 text-chart-4 border-chart-4/20',
-        border: 'border-chart-4/20',
-        dot: 'bg-chart-4',
-        text: 'text-chart-4',
-      };
+    const th = getEnvTheme(id);
     return {
-      from: '#5a82a0',
-      to: '#6e94b4',
-      bg: 'from-info/10 to-info/5',
-      bgFlat: 'bg-info/10 text-info border-info/20',
-      border: 'border-info/20',
-      dot: 'bg-info',
-      text: 'text-info',
+      from: th.from,
+      to: th.to,
+      bg: th.gradient,
+      bgFlat: th.flat,
+      border: th.border,
+      dot: th.dot,
+      text: th.text,
     };
   };
 
-  const envCardStyle = (envId: number | null) => {
-    const name = envName(envId);
-    if (name === 'Production') return 'bg-success/10 border border-success/20';
-    if (name === 'Development') return 'bg-warning/10 border border-warning/20';
-    if (name === 'Staging') return 'bg-brand/10 border border-brand/20';
-    return 'bg-info/10 border border-info/20';
-  };
+  const envCardStyle = (envId: number | null) => getEnvTheme(envId).card;
 
   const getAppIcon = (appType: string, size = 14) => {
     if (appType === 'java') return <JavaIcon size={size} />;
@@ -527,7 +492,7 @@ export function ClientInstances() {
                                               >
                                                 <div className="flex items-center gap-1.5 min-w-0">
                                                   <span
-                                                    className={`shrink-0 w-1.5 h-1.5 rounded-full ${flag.enabled ? 'bg-primary shadow-sm shadow-black/10 dark:shadow-black/20' : 'bg-muted-foreground/30'}`}
+                                                    className={`shrink-0 w-1.5 h-1.5 rounded-full ${flag.enabled ? 'bg-primary shadow-sm dark:' : 'bg-muted-foreground/30'}`}
                                                   />
                                                   <span className="text-xs font-semibold text-foreground/90 truncate">
                                                     {flag.name}
@@ -552,7 +517,7 @@ export function ClientInstances() {
                                                       {flag.tags.slice(0, 2).map((tv, i) => (
                                                         <span
                                                           key={i}
-                                                          className="inline-flex items-center px-1 py-0 rounded text-xs font-medium text-white truncate max-w-[64px] dark:brightness-[.85] dark:saturate-[.7]"
+                                                          className="inline-flex items-center px-1 py-0 rounded text-xs font-medium text-primary-foreground truncate max-w-[64px] dark:brightness-[.85] dark:saturate-[.7]"
                                                           style={{ background: tv.tagColor }}
                                                         >
                                                           {tv.value}
@@ -584,7 +549,7 @@ export function ClientInstances() {
                                                     new Set([...prev, `${appName}:${envId}`]),
                                                 );
                                               }}
-                                              className="bg-secondary border border-dashed border-neutral-300 dark:border-neutral-700 rounded-lg px-2.5 py-2 hover:border-brand dark:hover:border-brand hover:bg-brand/30 dark:hover:bg-brand/5 transition-all flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-brand dark:hover:text-brand cursor-pointer"
+                                              className="bg-secondary border border-dashed border-border dark:border-border rounded-lg px-2.5 py-2 hover:border-brand dark:hover:border-brand hover:bg-brand/30 dark:hover:bg-brand/5 transition-all flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-brand dark:hover:text-brand cursor-pointer"
                                             >
                                               <span className="text-xs font-medium">
                                                 +{visible.length - max}

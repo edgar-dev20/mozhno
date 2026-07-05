@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
 import { FlagMetricsDialog } from "@/app/components/FlagMetricsDialog";
+import type { Environment } from "@/api";
 
-const MOCK_ENVS = [
-  { id: 1, name: "Production", projectId: 1, color: "#22c55e", createdAt: "", updatedAt: "" },
-  { id: 2, name: "Staging", projectId: 1, color: "#eab308", createdAt: "", updatedAt: "" },
-] as any[];
+const MOCK_ENVS: Environment[] = [
+  { id: 1, name: "Production", projectId: 1, color: "#22c55e", createdAt: "" },
+  { id: 2, name: "Staging", projectId: 1, color: "#eab308", createdAt: "" },
+];
 
 function Demo() {
   const [open, setOpen] = useState(true);

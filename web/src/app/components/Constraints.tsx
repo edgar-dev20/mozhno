@@ -8,7 +8,7 @@ import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { InlineDiffBar } from '@/app/components/InlineDiffBar';
 import type { DiffChange } from '@/shared/diffUtils';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
-import { ContextType, CONTEXT_TYPES } from '@/app/components/contextTypes';
+import { ContextType, CONTEXT_TYPES, type ContextTypeValue } from '@/app/components/contextTypes';
 import { api, ContextDefinition, SegmentResponse } from '@/api';
 import { SectionHeader, EmptyState, ColorIcon, FormField, GradientButton, ErrorBox, Badge, getErrorMessage } from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
@@ -64,7 +64,7 @@ export function Constraints() {
   const [saving, setSaving] = useState(false);
   const [formName, setFormName] = useState('');
   const [formKey, setFormKey] = useState('');
-  const [formType, setFormType] = useState(ContextType.STRING);
+  const [formType, setFormType] = useState<ContextTypeValue>(ContextType.STRING);
   const [formDesc, setFormDesc] = useState('');
   const [formIsStrict, setFormIsStrict] = useState(false);
   const [formValidValues, setFormValidValues] = useState<string[]>([]);
@@ -171,7 +171,7 @@ export function Constraints() {
     setEditing(c);
     setFormName(c.name);
     setFormKey(c.key);
-    setFormType(c.type ?? ContextType.STRING);
+    setFormType((c.type ?? ContextType.STRING) as ContextTypeValue);
     setFormDesc(c.description ?? '');
     setFormIsStrict(c.isStrict ?? false);
     setFormValidValues(c.validValues ?? []);
@@ -625,7 +625,7 @@ export function Constraints() {
                         onClick={() =>
                           setFormValidValues((prev) => prev.filter((_, i) => i !== vi))
                         }
-                        className="text-emerald-500 hover:text-red-500 transition-colors"
+                        className="text-success hover:text-destructive transition-colors"
                       >
                         <X size={11} />
                       </button>

@@ -124,7 +124,7 @@ export function SegmentIconPicker({
               onClick={(e) => { e.preventDefault(); onChange(icon); }}
               className={`p-2 rounded-lg transition-all flex items-center justify-center ${
                 isSelected
-                  ? 'text-white'
+                  ? 'text-primary-foreground'
                   : 'bg-secondary hover:bg-accent text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground/60'
               }`}
               style={
@@ -171,7 +171,7 @@ export function SegmentColorPicker({
             variant="gradient"
             size="xl"
             color={value}
-            icon={<SegmentIcon name={icon} size={20} className="text-white" />}
+            icon={<SegmentIcon name={icon} size={20} className="text-primary-foreground" />}
             shadow
             darkDim={false}
             className="transition-all"
@@ -245,10 +245,10 @@ export function SegmentColorPicker({
                   >
                     {active && (
                       <span className="absolute inset-0 flex items-center justify-center">
-                        <span className="w-2 h-2 rounded-full bg-white shadow-sm" />
+                        <span className="w-2 h-2 rounded-full bg-background shadow-sm" />
                       </span>
                     )}
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-800 text-xs font-semibold px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground border border-border text-xs font-semibold px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                       {getColorName(c)}
                     </span>
                   </button>

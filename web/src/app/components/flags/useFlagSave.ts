@@ -151,7 +151,7 @@ export function useFlagSave(deps: SaveDeps) {
             flagType,
             tags: tagsPayload.length > 0 ? tagsPayload : undefined,
           } as FlagRequest;
-          const envFlags = await api.flags.list(Object.keys(flag.environments).map(Number)[0]);
+          const envFlags = await api.flags.listByEnvironment(Object.keys(flag.environments).map(Number)[0]);
           const envFlagsArr = Array.isArray(envFlags) ? envFlags : ((envFlags as Record<string, unknown>)?.items as FlagResponse[] | undefined) ?? [];
           const match = envFlagsArr.find((f) => f.key === flag.key);
           if (match) await api.flags.update(match.id, req);
@@ -178,7 +178,7 @@ export function useFlagSave(deps: SaveDeps) {
           onSaveSuccessRef.current?.({ key, name, description, flagType, tags });
         } else if (config.mode === 'environment') {
           const { flag, envId, enabled, percentage, segmentIds, constraints } = config.data;
-          const envFlags = await api.flags.list(envId);
+          const envFlags = await api.flags.listByEnvironment(envId);
           const envFlagsArr = Array.isArray(envFlags) ? envFlags : ((envFlags as Record<string, unknown>)?.items as FlagResponse[] | undefined) ?? [];
           const envFlag = envFlagsArr.find((f) => f.key === flag.key);
           if (!envFlag) {

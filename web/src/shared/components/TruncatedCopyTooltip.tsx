@@ -29,7 +29,7 @@ export function TruncatedCopyTooltip({ value, className }: TruncatedCopyTooltipP
           onClick={handleCopy}
           className="p-0.5 rounded hover:bg-popover-foreground/10 transition-colors shrink-0"
         >
-          {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+          {copied ? <Check size={12} className="text-success" /> : <Copy size={12} />}
         </button>
       </TooltipContent>
     </Tooltip>

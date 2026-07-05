@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "storybook/test";
 import { useState } from "react";
 import { FlagEnvironmentPanel } from "@/app/components/flags/FlagEnvironmentPanel";
+import type { ConstraintGroup } from "@/app/components/flags/types";
 
 const meta: Meta<typeof FlagEnvironmentPanel> = {
   title: "App/Flags/FlagEnvironmentPanel",
@@ -15,7 +15,7 @@ type Story = StoryObj<typeof FlagEnvironmentPanel>;
 function DefaultRender() {
   const [p, sp] = useState(50);
   const [sgs, ssgs] = useState<number[]>([]);
-  const [cgs, scgs] = useState<any[]>([]);
+  const [cgs, scgs] = useState<ConstraintGroup[]>([]);
   const [en, sen] = useState(true);
   const [ag, sag] = useState<string | null>(null);
   return (
@@ -24,7 +24,7 @@ function DefaultRender() {
       envRuleSegments={sgs} onEnvRuleSegmentsChange={ssgs}
       envRuleConstraintGroups={cgs} onEnvRuleConstraintGroupsChange={scgs}
       envRuleEnabled={en} onEnvRuleEnabledChange={sen}
-      segments={[]} contexts={[] as any[]}
+      segments={[]} contexts={[]}
       activeGroupId={ag} onActiveGroupIdChange={sag}
       envName="Production"
     />

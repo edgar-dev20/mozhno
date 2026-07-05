@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect, screen } from "storybook/test";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/app/components/ui/tooltip";
 
 function TooltipDemo({ text = "Tooltip text" }: { text?: string }) {

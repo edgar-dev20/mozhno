@@ -29,12 +29,12 @@ function CodeBlock({ code, lang }: CodeBlockProps) {
       )}
       <button
         onClick={handleCopy}
-        className="absolute top-2 right-2 p-1.5 rounded-lg bg-popover/60 hover:bg-white dark:hover:bg-neutral-800 text-muted-foreground hover:text-foreground/70 dark:hover:text-neutral-200 transition-colors"
+        className="absolute top-2 right-2 p-1.5 rounded-lg bg-popover/60 hover:bg-background dark:hover:bg-muted text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground transition-colors"
       >
         {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
       </button>
-      <pre className="bg-neutral-950 dark:bg-neutral-950 border border-border rounded-xl p-5 overflow-x-auto text-sm leading-relaxed">
-        <code className="text-neutral-200 font-mono text-sm whitespace-pre">{code}</code>
+      <pre className="bg-muted dark:bg-muted border border-border rounded-xl p-5 overflow-x-auto text-sm leading-relaxed">
+        <code className="text-muted-foreground font-mono text-sm whitespace-pre">{code}</code>
       </pre>
     </div>
   );
@@ -59,14 +59,14 @@ const tabs: {
     label: 'JS SDK (Server)',
     icon: <Server size={14} />,
     keyType: 'SERVER',
-    gradient: 'from-amber-400 to-orange-500',
+    gradient: 'from-warning to-warning',
   },
   {
     id: 'js-client',
     label: 'JS SDK (Client)',
     icon: <Globe size={14} />,
     keyType: 'FRONTEND',
-    gradient: 'from-emerald-400 to-teal-500',
+    gradient: 'from-success to-brand',
   },
 ];
 
@@ -184,7 +184,7 @@ export function SdkInfo() {
     >
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-5 flex items-center justify-between hover:bg-white/20 dark:hover:bg-white/5 transition-colors cursor-pointer select-none"
+        className="w-full p-5 flex items-center justify-between hover:bg-background/20 dark:hover:bg-background/5 transition-colors cursor-pointer select-none"
       >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand/10 to-brand/10 flex items-center justify-center">
@@ -225,7 +225,7 @@ export function SdkInfo() {
                 className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-all ${
                   activeTab === tab.id
                     ? 'bg-popover shadow-sm text-foreground'
-                    : 'text-muted-foreground hover:text-foreground/70 dark:hover:text-neutral-300'
+                    : 'text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground'
                 }`}
               >
                 <span

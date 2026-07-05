@@ -75,14 +75,14 @@ export function AcceptInvite() {
 
             {done ? (
               <div className="text-center space-y-4">
-                <div className="p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl">
-                  <p className="text-sm text-green-700 dark:text-green-400">
+                <div className="p-4 bg-success dark:bg-success/10 border border-success dark:border-success/20 rounded-xl">
+                  <p className="text-sm text-success dark:text-success">
                     {t('auth.activationSuccess')}
                   </p>
                 </div>
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-white bg-primary px-6 py-3 rounded-lg hover:bg-primary/90 shadow-lg transition-all"
+                  className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-primary-foreground bg-primary px-6 py-3 rounded-lg hover:bg-primary/90 shadow-lg transition-all"
                 >
                   {t('auth.login')}
                 </Link>

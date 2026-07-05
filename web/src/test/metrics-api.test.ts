@@ -11,7 +11,7 @@ describe('Metrics API', () => {
       ok: true,
       status: 200,
       json: () => Promise.resolve([]),
-    });
+    } as unknown as Response);
 
     await api.metrics.get(1, 2);
     expect(globalThis.fetch).toHaveBeenCalledWith(
@@ -25,7 +25,7 @@ describe('Metrics API', () => {
       ok: true,
       status: 200,
       json: () => Promise.resolve([]),
-    });
+    } as unknown as Response);
 
     await api.metrics.listForProject(3);
     expect(globalThis.fetch).toHaveBeenCalledWith(
@@ -39,7 +39,7 @@ describe('Metrics API', () => {
       ok: true,
       status: 200,
       json: () => Promise.resolve([]),
-    });
+    } as unknown as Response);
 
     await api.metrics.listForProject();
     expect(globalThis.fetch).toHaveBeenCalledWith(
@@ -53,7 +53,7 @@ describe('Metrics API', () => {
       ok: false,
       status: 404,
       json: () => Promise.resolve({ error: 'not found' }),
-    });
+    } as unknown as Response);
 
     await expect(api.metrics.get(1, 2)).rejects.toBeTruthy();
   });

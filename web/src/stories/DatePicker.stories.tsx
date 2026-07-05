@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect } from "storybook/test";
-import { useState } from "react";
+import { within, expect } from "storybook/test";
+import { useState, type ComponentProps } from "react";
 import { DatePicker } from "@/shared/components/DatePicker";
 
-function DatePickerDemo(props: Record<string, any>) {
+function DatePickerDemo(props: Partial<ComponentProps<typeof DatePicker>>) {
   const [date, setDate] = useState<Date | null>(null);
   return <DatePicker value={date} onChange={(d) => setDate(d ?? null)} placeholder="Pick a date" {...props} />;
 }

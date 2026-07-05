@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Rocket, ShieldOff, X } from '@/shared/icons';
 import { FormField, GradientButton } from '@/shared';
@@ -17,11 +17,11 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     setValue,
     formState: { errors },
   } = useForm<CreateFlagFormValues>({
-    resolver: zodResolver(createFlagSchema),
+    resolver: zodResolver(createFlagSchema) as Resolver<CreateFlagFormValues>,
     defaultValues: { name: '', key: '', description: '', flagType: 'RELEASE' },
   });
 
@@ -30,7 +30,10 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
   const [newTagId, setNewTagId] = useState<number | null>(null);
   const [newTagVal, setNewTagVal] = useState('');
 
-  const flagType = watch('flagType');
+  const flagType = useWatch({ control, name: 'flagType' });
+  const nameValue = useWatch({ control, name: 'name' });
+  const keyValue = useWatch({ control, name: 'key' });
+  const descriptionValue = useWatch({ control, name: 'description' });
   const { ref: descRef, ...descReg } = register('description');
 
   const addTag = useCallback(() => {
@@ -55,13 +58,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
 
   return (
     <form id="flag-create-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <div className="p-4 bg-brand/10 border border-brand/20 rounded-lg">
-        <p className="text-xs text-brand">
-          {t('flags.createDescription')}
-        </p>
-      </div>
-
-      <FormField label={t('common.name')} maxLength={120} value={watch('name')}>
+      <FormField label={t('common.name')} maxLength={120} value={nameValue}>
         <input
           type="text"
           {...register('name')}
@@ -69,14 +66,14 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
           placeholder={t('flags.namePlaceholderEdit')}
           className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
         />
-        {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+        {errors.name && <p className="text-xs text-destructive mt-1">{errors.name.message}</p>}
       </FormField>
 
       <FormField
         label={t('common.key')}
         hint={t('flags.keyHint')}
         maxLength={100}
-        value={watch('key')}
+        value={keyValue}
       >
         <input
           type="text"
@@ -85,10 +82,10 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
           placeholder="new-checkout-flow"
           className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
         />
-        {errors.key && <p className="text-xs text-red-500 mt-1">{errors.key.message}</p>}
+        {errors.key && <p className="text-xs text-destructive mt-1">{errors.key.message}</p>}
       </FormField>
 
-      <FormField label={t('common.description')} maxLength={160} value={watch('description')}>
+      <FormField label={t('common.description')} maxLength={160} value={descriptionValue}>
         <textarea
           {...descReg}
           maxLength={160}
@@ -148,7 +145,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
               return (
                 <div
                   key={i}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium text-white shadow-sm dark:brightness-[.85] dark:saturate-[.7]"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium text-primary-foreground shadow-sm dark:brightness-[.85] dark:saturate-[.7]"
                   style={{
                     background: tg.color,
                   }}

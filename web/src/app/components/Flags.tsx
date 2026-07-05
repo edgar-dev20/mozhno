@@ -142,7 +142,11 @@ export function Flags() {
     toggleFlagMutation,
   );
 
-  const { computeGeneralDiff, computeEnvironmentDiff } = useFlagDiff(t, segments, contexts);
+  const { computeGeneralDiff, computeEnvironmentDiff } = useFlagDiff(
+    t as (key: string, params?: Record<string, string>) => string,
+    segments,
+    contexts,
+  );
 
   const handleAfterSave = useCallback(
     (saved?: { key: string; name: string; description: string; flagType: string; tags: FlagTagValue[] }) => {

@@ -83,6 +83,7 @@ describe('useFlagPanels', () => {
           strategyId: null,
           contextDefinitionId: null,
           contextValuesJson: null,
+          lastUsedAt: null,
         },
       },
     });
@@ -115,6 +116,7 @@ describe('useFlagPanels', () => {
           strategyId: null,
           contextDefinitionId: null,
           contextValuesJson: null,
+          lastUsedAt: null,
         },
       },
     });
@@ -204,6 +206,7 @@ describe('useFlagPanels', () => {
           strategyId: null,
           contextDefinitionId: null,
           contextValuesJson: null,
+          lastUsedAt: null,
         },
       },
     });

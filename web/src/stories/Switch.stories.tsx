@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect } from "storybook/test";
+import { userEvent, within, expect } from "storybook/test";
 import { Switch } from "@/app/components/ui/switch";
 import { Label } from "@/app/components/ui/label";
 
