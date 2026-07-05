@@ -57,11 +57,3 @@ export function extractDominantColor(
     return '#1a6b60';
   }
 }
-
-export function lightenForDarkMode(hexColor: string): string {
-  const r = parseInt(hexColor.slice(1, 3), 16);
-  const g = parseInt(hexColor.slice(3, 5), 16);
-  const b = parseInt(hexColor.slice(5, 7), 16);
-  const mix = (c: number) => Math.round(c + (255 - c) * 0.55);
-  return `#${mix(r).toString(16).padStart(2, '0')}${mix(g).toString(16).padStart(2, '0')}${mix(b).toString(16).padStart(2, '0')}`;
-}

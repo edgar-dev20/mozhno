@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { extractDominantColor, lightenForDarkMode } from '@/shared/extractLogoColor';
+import { extractDominantColor } from '@/shared/extractLogoColor';
 
 function createTestImage(width = 64, height = 64): HTMLImageElement {
   const img = new Image();
@@ -40,94 +40,6 @@ function canvasWithContext(ctx: CanvasRenderingContext2D | null): HTMLCanvasElem
   vi.spyOn(canvas, 'getContext').mockReturnValue(ctx);
   return canvas;
 }
-
-describe('lightenForDarkMode', () => {
-  describe('returns lighter colors for dark shades', () => {
-    it('lightens #1a6b60 (forest teal)', () => {
-      const result = lightenForDarkMode('#1a6b60');
-      expect(result).toBe('#98bcb7');
-    });
-
-    it('lightens #000000 (black) to gray', () => {
-      const result = lightenForDarkMode('#000000');
-      expect(result).toBe('#8c8c8c');
-    });
-
-    it('lightens #0000ff (blue)', () => {
-      const result = lightenForDarkMode('#0000ff');
-      expect(result).toBe('#8c8cff');
-    });
-
-    it('lightens #1a1a2e (dark navy)', () => {
-      const result = lightenForDarkMode('#1a1a2e');
-      expect(result).toBe('#9898a1');
-    });
-  });
-
-  describe('keeps light colors near white', () => {
-    it('keeps #ffffff (white) unchanged', () => {
-      const result = lightenForDarkMode('#ffffff');
-      expect(result).toBe('#ffffff');
-    });
-
-    it('keeps #f0f0f0 near white', () => {
-      const result = lightenForDarkMode('#f0f0f0');
-      expect(result).toBe('#f8f8f8');
-    });
-  });
-
-  describe('output format validation', () => {
-    it('starts with #', () => {
-      const result = lightenForDarkMode('#1a6b60');
-      expect(result.startsWith('#')).toBe(true);
-    });
-
-    it('has exactly 7 characters', () => {
-      const result = lightenForDarkMode('#1a6b60');
-      expect(result).toHaveLength(7);
-    });
-
-    it('contains only valid hex characters', () => {
-      const result = lightenForDarkMode('#1a6b60');
-      expect(result).toMatch(/^#[0-9a-f]{6}$/);
-    });
-
-    it('produces valid hex for various inputs', () => {
-      const inputs = ['#ff0000', '#00ff00', '#0000ff', '#123456', '#abcdef'];
-      for (const input of inputs) {
-        const result = lightenForDarkMode(input);
-        expect(result).toMatch(/^#[0-9a-f]{6}$/);
-        expect(result).toHaveLength(7);
-      }
-    });
-
-    it('lightened color channels never exceed ff', () => {
-      const result = lightenForDarkMode('#ff0000');
-      const r = parseInt(result.slice(1, 3), 16);
-      const g = parseInt(result.slice(3, 5), 16);
-      const b = parseInt(result.slice(5, 7), 16);
-      expect(r).toBeLessThanOrEqual(255);
-      expect(g).toBeLessThanOrEqual(255);
-      expect(b).toBeLessThanOrEqual(255);
-    });
-  });
-
-  describe('lightening is monotonic', () => {
-    it('darker input produces output not lighter than a lighter input', () => {
-      const darker = lightenForDarkMode('#333333');
-      const lighter = lightenForDarkMode('#cccccc');
-      const darkerLum =
-        parseInt(darker.slice(1, 3), 16) +
-        parseInt(darker.slice(3, 5), 16) +
-        parseInt(darker.slice(5, 7), 16);
-      const lighterLum =
-        parseInt(lighter.slice(1, 3), 16) +
-        parseInt(lighter.slice(3, 5), 16) +
-        parseInt(lighter.slice(5, 7), 16);
-      expect(darkerLum).toBeLessThanOrEqual(lighterLum);
-    });
-  });
-});
 
 describe('extractDominantColor', () => {
   afterEach(() => {

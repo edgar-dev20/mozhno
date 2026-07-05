@@ -91,7 +91,6 @@ export function Settings() {
   const [deletingProject, setDeletingProject] = useState(false);
 
   const maxEnvironments = envLimitData?.maxEnvironments;
-  const [logoKey, setLogoKey] = useState(0);
 
   useEffect(() => {
     if (project) {
@@ -156,19 +155,20 @@ export function Settings() {
       if (pendingLogoFile) {
         setUploadingLogo(true);
         await api.projects.uploadLogo(projectId, pendingLogoFile);
-        setLogoKey((k) => k + 1);
-        if (pendingLogoPreviewUrl) URL.revokeObjectURL(pendingLogoPreviewUrl);
-        setPendingLogoFile(null);
-        setPendingLogoPreviewUrl(null);
         setUploadingLogo(false);
       }
       return api.projects.update(projectId, { name: projectName, description: projectDesc });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.projects.all }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.environments.all }),
+      ]);
       setInitialProject({ name: projectName, desc: projectDesc });
       window.dispatchEvent(new Event('project-updated'));
+      if (pendingLogoPreviewUrl) URL.revokeObjectURL(pendingLogoPreviewUrl);
+      setPendingLogoFile(null);
+      setPendingLogoPreviewUrl(null);
     },
     onError: (e: unknown) => {
       toast.error(getErrorMessage(e));
@@ -353,10 +353,10 @@ export function Settings() {
                 <div className="flex items-center gap-4 p-4 bg-secondary rounded-xl border border-border">
                   {pendingLogoPreviewUrl || project?.logo ? (
                     <img
-                      key={logoKey}
+                      key={pendingLogoPreviewUrl ?? project?.logo}
                       src={
                         pendingLogoPreviewUrl ||
-                        `${api.projects.getLogoUrl(project!.id)}?v=${logoKey}`
+                        `${api.projects.getLogoUrl(project!.id)}?v=${encodeURIComponent(project!.logo!)}`
                       }
                       alt={t('settings.logoAlt')}
                       className="w-16 h-16 rounded-xl object-cover border border-border shadow-sm shrink-0"
@@ -370,7 +370,7 @@ export function Settings() {
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+                      accept="image/png,image/jpeg,image/gif,image/webp"
                       onChange={handleLogoUpload}
                       className="hidden"
                     />

@@ -153,14 +153,14 @@ class ProjectServiceTest {
         p.setName("Logo Project");
         p.setLogo("blob.png");
         when(projectRepository.findById(1)).thenReturn(p);
-        doNothing().when(projectRepository).updateLogo(eq(1), eq("blob.png"), any(byte[].class));
+        doNothing().when(projectRepository).updateLogo(eq(1), matches("blob-.+\\.png"), any(byte[].class));
         when(projectRepository.findById(1)).thenReturn(p);
 
         MockMultipartFile file = new MockMultipartFile("logo", "logo.png", "image/png", pngBytes());
 
         Project result = projectService.uploadLogo(1, file);
 
-        verify(projectRepository).updateLogo(eq(1), eq("blob.png"), any(byte[].class));
+        verify(projectRepository).updateLogo(eq(1), matches("blob-.+\\.png"), any(byte[].class));
         assertNotNull(result);
     }
 
@@ -181,14 +181,14 @@ class ProjectServiceTest {
         p.setName("NoExt Project");
         p.setLogo("blob.png");
         when(projectRepository.findById(2)).thenReturn(p);
-        doNothing().when(projectRepository).updateLogo(eq(2), eq("blob.png"), any(byte[].class));
+        doNothing().when(projectRepository).updateLogo(eq(2), matches("blob-.+\\.png"), any(byte[].class));
 
         // Filename has no extension, but the PNG magic bytes drive the stored extension.
         MockMultipartFile file = new MockMultipartFile("logo", "logofile", "image/png", pngBytes());
 
         projectService.uploadLogo(2, file);
 
-        verify(projectRepository).updateLogo(eq(2), eq("blob.png"), any(byte[].class));
+        verify(projectRepository).updateLogo(eq(2), matches("blob-.+\\.png"), any(byte[].class));
     }
 
     @Test
@@ -198,13 +198,13 @@ class ProjectServiceTest {
         p.setName("Jpeg Project");
         p.setLogo("blob.jpg");
         when(projectRepository.findById(3)).thenReturn(p);
-        doNothing().when(projectRepository).updateLogo(eq(3), eq("blob.jpg"), any(byte[].class));
+        doNothing().when(projectRepository).updateLogo(eq(3), matches("blob-.+\\.jpg"), any(byte[].class));
 
         MockMultipartFile file = new MockMultipartFile("logo", null, "image/jpeg", jpegBytes());
 
         projectService.uploadLogo(3, file);
 
-        verify(projectRepository).updateLogo(eq(3), eq("blob.jpg"), any(byte[].class));
+        verify(projectRepository).updateLogo(eq(3), matches("blob-.+\\.jpg"), any(byte[].class));
     }
 
     @Test

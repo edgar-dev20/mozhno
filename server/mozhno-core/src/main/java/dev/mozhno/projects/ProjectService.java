@@ -146,7 +146,10 @@ public class ProjectService {
         if (type == null) {
             throw new BadRequestException("Only PNG, JPEG, GIF or WEBP images are allowed");
         }
-        projectRepository.updateLogo(id, "blob" + dev.mozhno.util.MediaTypeUtils.extensionFor(type), bytes);
+        String filename = "blob-" + System.currentTimeMillis() + "-"
+            + Integer.toHexString(java.util.concurrent.ThreadLocalRandom.current().nextInt())
+            + dev.mozhno.util.MediaTypeUtils.extensionFor(type);
+        projectRepository.updateLogo(id, filename, bytes);
         Project saved = projectRepository.findById(id);
         events.publish(DomainEvent.of(saved.getId(), "project.logo_updated", "project",
             saved.getId(), saved.getName(), "Logo updated"));

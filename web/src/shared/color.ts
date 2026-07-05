@@ -119,6 +119,27 @@ export function adjustColor(hex: string, amount: number): string {
   return linearSrgbToHex(nlr, nlg, nlb);
 }
 
+/**
+ * Turns a raw accent color (e.g. a color sampled from a project logo) into a
+ * variant that stays legible as title text over the app's `--card` background.
+ *
+ * The hue is preserved, chroma is tamed so the title never looks neon, and the
+ * perceptual lightness (OKLCH L) is clamped into a readable band for the active
+ * theme: dark titles on the light surface, light titles on the dark surface.
+ */
+export function readableAccentColor(hex: string, isDark: boolean): string {
+  const oklch = hexToOklch(hex);
+  if (!oklch) return hex;
+
+  const L = isDark
+    ? Math.min(0.92, Math.max(oklch.L, 0.74))
+    : Math.max(0.3, Math.min(oklch.L, 0.55));
+  const C = Math.min(oklch.C, 0.16);
+
+  const [gl, gc, gh] = gamutMap(L, C, oklch.H);
+  return oklchToHex(gl, gc, gh);
+}
+
 export function dimColor(hex: string): string {
   const [lr, lg, lb] = hexToLinearSrgb(hex);
   const [L, C, H] = linearSrgbToOklch(lr, lg, lb);
