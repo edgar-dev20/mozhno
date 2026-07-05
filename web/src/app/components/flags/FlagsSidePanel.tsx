@@ -1,4 +1,3 @@
-import type { FlagView } from '@/app/hooks/flagTypes';
 import type { FlagTagValue, SegmentResponse, ContextDefinition, Tag as TagType } from '@/api';
 import type { ConstraintGroup } from '@/app/components/flags/types';
 import type { DiffChange } from '@/shared/diffUtils';

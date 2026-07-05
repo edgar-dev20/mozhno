@@ -218,7 +218,7 @@ export function Tags() {
                       <ColorIcon
                         size="lg"
                         color={tag.color}
-                        icon={<TagIcon size={18} className="text-white" />}
+                        icon={<TagIcon size={18} className="text-primary-foreground" />}
                         shadow
                         className="group-hover:scale-110 transition-transform"
                       />
@@ -245,7 +245,7 @@ export function Tags() {
                       {[0, 1, 2].map((i) => (
                         <div
                           key={i}
-                          className="w-5 h-5 rounded-full border-2 border-white dark:border-neutral-900"
+                          className="w-5 h-5 rounded-full border-2 border-background dark:border-border"
                           style={{
                             backgroundColor: adjustColor(tag.color, i * 15 - 15),
                             opacity: 0.6 - i * 0.15,
@@ -279,7 +279,7 @@ export function Tags() {
             </button>
             <GradientButton
               onClick={handleSave}
-              disabled={saving || !formName.trim() || (editing && !isTagDirty)}
+              disabled={saving || !formName.trim() || (!!editing && !isTagDirty)}
               loading={saving}
             >
               {editing ? t('common.saveChanges') : t('tags.panel.saveCreate')}
@@ -335,7 +335,7 @@ export function Tags() {
                   variant="gradient"
                   size="xl"
                   color={formColor}
-                  icon={<TagIcon size={20} className="text-white" />}
+                  icon={<TagIcon size={20} className="text-primary-foreground" />}
                   shadow
                   darkDim={false}
                   className="transition-all"
@@ -419,10 +419,10 @@ export function Tags() {
                         >
                           {active && (
                             <span className="absolute inset-0 flex items-center justify-center">
-                              <span className="w-2 h-2 rounded-full bg-white shadow-sm" />
+                              <span className="w-2 h-2 rounded-full bg-background shadow-sm" />
                             </span>
                           )}
-                          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-neutral-800 dark:bg-neutral-200 text-white dark:text-neutral-800 text-xs font-semibold px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground border border-border text-xs font-semibold px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                             {getColorName(c)}
                           </span>
                         </button>

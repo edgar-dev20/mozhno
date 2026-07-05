@@ -371,7 +371,7 @@ export function Segments() {
         <SegmentCardSkeletonList count={3} />
       ) : segments.length === 0 ? (
         <EmptyState
-          icon={<SegmentIcon name="Users" size={28} className="text-teal-500 dark:text-teal-400" />}
+          icon={<SegmentIcon name="Users" size={28} className="text-brand dark:text-brand" />}
           title={t('segments.emptyTitle')}
           description={t('segments.emptyDescription')}
           buttonLabel={t('segments.emptyButton')}
@@ -747,7 +747,7 @@ export function Segments() {
                                   t('segments.targetingRules.valuePlaceholder')
                                 }
                                 list={hasWhitelist ? `seg-wl-${c.id}` : undefined}
-                                className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
+                                className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-destructive dark:invalid:border-destructive"
                                 onInput={(e) => {
                                   const input = e.target as HTMLInputElement;
                                   input.setCustomValidity(
@@ -838,7 +838,7 @@ export function Segments() {
                                     e.stopPropagation();
                                     removeValue(c.id, vi);
                                   }}
-                                  className={`${inWhitelist ? 'text-emerald-500' : 'text-amber-500'} hover:text-red-500 transition-colors`}
+                                  className={`${inWhitelist ? 'text-success' : 'text-warning'} hover:text-destructive transition-colors`}
                                 >
                                   <X size={11} />
                                 </button>
@@ -859,7 +859,7 @@ export function Segments() {
                 );
               })}
               {formContexts.length === 0 && (
-                <div className="p-4 bg-input-background rounded-lg border border-dashed border-border dark:border-neutral-700 text-center">
+                <div className="p-4 bg-input-background rounded-lg border border-dashed border-border dark:border-border text-center">
                   <p className="text-xs text-muted-foreground">
                     {t('segments.targetingRules.emptyRules')}
                   </p>
@@ -872,7 +872,7 @@ export function Segments() {
             <div className="flex gap-3">
               <div className="shrink-0 mt-0.5">
                 <div className="w-5 h-5 rounded-full bg-brand dark:bg-brand flex items-center justify-center">
-                  <Settings size={12} className="text-white" />
+                  <Settings size={12} className="text-primary-foreground" />
                 </div>
               </div>
               <div>

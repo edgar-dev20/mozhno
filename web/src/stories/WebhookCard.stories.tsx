@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "storybook/test";
-import { useState } from "react";
 import { WebhookCard } from "@/app/components/integrations/WebhookCard";
+import { type Integration } from "@/api";
 
-const MOCK_ITEM = { id: 1, name: "Slack Notifier", url: "https://hooks.slack.com/...", events: ["flag.created"], enabled: true, headers: [], body: "{}", createdAt: "2026-01-01" } as any;
+const MOCK_ITEM = { id: 1, name: "Slack Notifier", url: "https://hooks.slack.com/...", events: ["flag.created"], enabled: true, headers: [], body: "{}", createdAt: "2026-01-01" } as unknown as Integration;
 
 const meta: Meta<typeof WebhookCard> = {
   title: "App/Integrations/WebhookCard",

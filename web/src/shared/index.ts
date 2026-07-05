@@ -22,6 +22,7 @@ export { Badge } from '@/shared/components/Badge';
 export { ColorIcon } from '@/shared/components/ColorIcon';
 export { Wordmark } from '@/shared/components/Wordmark';
 export { StatusIcon } from '@/shared/components/StatusIcon';
+export { getEnvTheme, type EnvTheme } from '@/shared/envTheme';
 export { SkipLink } from '@/shared/components/SkipLink';
 export { LazyPage } from '@/shared/components/LazyPage';
 export { PageLoader } from '@/shared/components/PageLoader';

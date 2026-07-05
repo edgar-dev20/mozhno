@@ -15,12 +15,12 @@ function rowClasses(hasRemoved: boolean, hasAdded: boolean, compact: boolean) {
     return `border-l-2 border-l-muted-foreground/30 ${py}`;
   }
   if (hasRemoved && hasAdded) {
-    return `border-l-2 border-l-amber-400 ${py}`;
+    return `border-l-2 border-l-warning ${py}`;
   }
   if (hasRemoved) {
-    return `border-l-2 border-l-red-400 bg-red-50/30 dark:bg-red-950/10 ${py}`;
+    return `border-l-2 border-l-destructive bg-destructive/30 dark:bg-destructive/10 ${py}`;
   }
-  return `border-l-2 border-l-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/10 ${py}`;
+  return `border-l-2 border-l-success bg-success/30 dark:bg-success/10 ${py}`;
 }
 
 function renderValue(

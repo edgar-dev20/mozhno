@@ -60,7 +60,7 @@ describe('AuthContext', () => {
     const mockLogin = vi.fn().mockResolvedValue({
       token: 'fake-token',
       refreshToken: 'fake-refresh',
-      user: { id: 1, email: 'test@test.com', role: 'admin', status: 'active' },
+      user: { id: 1, email: 'test@test.com', name: 'Test User', role: 'admin', status: 'active', avatar: null, locale: 'ru', createdAt: '2024-01-01T00:00:00Z', lastActiveAt: '2024-01-01T00:00:00Z' },
     });
     vi.spyOn(api.auth, 'login').mockImplementation(mockLogin);
 
@@ -77,7 +77,7 @@ describe('AuthContext', () => {
     vi.spyOn(api.auth, 'login').mockResolvedValue({
       token: 'fake-token',
       refreshToken: 'fake-refresh',
-      user: { id: 1, email: 'test@test.com', role: 'developer', status: 'active' },
+      user: { id: 1, email: 'test@test.com', name: 'Test User', role: 'developer', status: 'active', avatar: null, locale: 'ru', createdAt: '2024-01-01T00:00:00Z', lastActiveAt: '2024-01-01T00:00:00Z' },
     });
 
     renderAuth();
@@ -94,7 +94,7 @@ describe('AuthContext', () => {
     vi.spyOn(api.auth, 'login').mockResolvedValue({
       token: 'fake-token',
       refreshToken: 'fake-refresh',
-      user: { id: 1, email: 'test@test.com', role: 'admin', status: 'active' },
+      user: { id: 1, email: 'test@test.com', name: 'Test User', role: 'admin', status: 'active', avatar: null, locale: 'ru', createdAt: '2024-01-01T00:00:00Z', lastActiveAt: '2024-01-01T00:00:00Z' },
     });
     vi.spyOn(api.auth, 'logout').mockResolvedValue(undefined);
 
@@ -115,7 +115,7 @@ describe('AuthContext', () => {
     vi.spyOn(api.auth, 'refresh').mockResolvedValue({
       token: 'new-token',
       refreshToken: 'new-refresh',
-      user: { id: 2, email: 'refreshed@test.com', role: 'viewer', status: 'active' },
+      user: { id: 2, email: 'refreshed@test.com', name: 'Refreshed User', role: 'viewer', status: 'active', avatar: null, locale: 'ru', createdAt: '2024-01-01T00:00:00Z', lastActiveAt: '2024-01-01T00:00:00Z' },
     });
 
     setToken('expired-token');

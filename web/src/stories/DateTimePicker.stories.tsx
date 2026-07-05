@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect } from "storybook/test";
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import { DateTimePicker } from "@/shared/components/DateTimePicker";
 
-function Demo(props: Record<string, any>) {
+function Demo(props: Partial<ComponentProps<typeof DateTimePicker>>) {
   const [value, setValue] = useState("");
   return <DateTimePicker value={value} onChange={setValue} placeholder="Select date and time" {...props} />;
 }

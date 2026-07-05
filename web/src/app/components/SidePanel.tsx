@@ -65,7 +65,7 @@ function PanelContent({
           <div className="absolute inset-0 overflow-y-auto p-6">{children}</div>
           <div
             onClick={onDiffDismiss}
-            className="absolute inset-0 bg-white/60 dark:bg-black/40 backdrop-blur-[2px] cursor-pointer z-10 flex items-start justify-center pt-8"
+            className="absolute inset-0 bg-overlay backdrop-blur-[2px] cursor-pointer z-10 flex items-start justify-center pt-8"
             title="Нажмите чтобы отменить"
           />
         </div>
@@ -100,7 +100,7 @@ export function SidePanel({
     return (
       <Drawer.Root open={open} onOpenChange={onOpenChange} direction="bottom">
         <Drawer.Portal>
-          <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
+          <Drawer.Overlay className="fixed inset-0 bg-overlay backdrop-blur-sm z-40" />
           <Drawer.Content className="bg-card border-t border-border rounded-t-3xl z-50 fixed bottom-0 left-0 right-0 max-h-[90dvh] flex flex-col outline-none">
             <div className="mx-auto mt-3 h-1.5 w-10 rounded-full bg-muted-foreground/20 flex-shrink-0" />
             <PanelContent
@@ -120,7 +120,7 @@ export function SidePanel({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-gradient-to-b from-gradient-subtle-start/10 to-black/30 dark:from-black/20 dark:to-black/60 backdrop-blur-sm z-40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200" />
+        <Dialog.Overlay className="fixed inset-0 bg-overlay backdrop-blur-sm z-40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200" />
         <Dialog.Content className="fixed right-4 top-4 bottom-4 w-full max-w-xl bg-card border border-border rounded-3xl shadow-2xl z-50 flex flex-col overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:[--tw-exit-translate-x:calc(100%+1rem)] data-[state=open]:slide-in-from-right-full duration-200">
           <PanelContent
             title={title}

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect } from "storybook/test";
+import { userEvent, within, expect } from "storybook/test";
 import { TruncatedCopyTooltip } from "@/shared/components/TruncatedCopyTooltip";
 import { TooltipProvider } from "@/app/components/ui/tooltip";
 

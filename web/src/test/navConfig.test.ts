@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MANAGEMENT_ITEMS, ADMIN_ITEMS, type NavItem } from '@/app/components/navConfig';
+import { MANAGEMENT_ITEMS, ADMIN_ITEMS } from '@/app/components/navConfig';
 
 describe('MANAGEMENT_ITEMS', () => {
   it('has expected items', () => {

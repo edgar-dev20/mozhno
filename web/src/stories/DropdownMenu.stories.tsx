@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect, screen } from "storybook/test";
+import { userEvent, within, expect, screen } from "storybook/test";
 import {
   DropdownMenu,
   DropdownMenuContent,

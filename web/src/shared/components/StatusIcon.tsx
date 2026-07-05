@@ -42,12 +42,12 @@ export function StatusIcon({ variant, icon, size = 'md', className = '' }: Statu
   const v = variantStyles[variant];
 
   return (
-    <div className={`flex-shrink-0 ${s.outer} flex items-center justify-center ${className}`}>
-      <div className={`${s.inner} flex items-center justify-center text-white`}>
+    <div className={`flex-shrink-0 ${s.outer} ${v.outer} flex items-center justify-center ${className}`}>
+      <div className={`${s.inner} ${v.inner} flex items-center justify-center text-primary-foreground`}>
         {React.isValidElement(icon)
           ? React.cloneElement(icon as React.ReactElement<{ size?: number; className?: string }>, {
               size: s.iconSize,
-              className: 'text-white',
+              className: 'text-primary-foreground',
             })
           : icon}
       </div>

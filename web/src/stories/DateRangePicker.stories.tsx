@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect } from "storybook/test";
-import { useState } from "react";
+import { useState, type ComponentProps } from "react";
 import { DateRangePicker } from "@/shared/components/DateRangePicker";
 
-function Demo(props: Record<string, any>) {
+function Demo(props: Partial<ComponentProps<typeof DateRangePicker>>) {
   const [from, setFrom] = useState<Date | null>(null);
   const [to, setTo] = useState<Date | null>(null);
   return <DateRangePicker from={from} to={to} onChange={(f, t) => { setFrom(f ?? null); setTo(t ?? null); }} placeholder="Select date range" {...props} />;

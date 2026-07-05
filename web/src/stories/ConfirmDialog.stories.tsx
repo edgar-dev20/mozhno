@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { fn } from "storybook/test";
 import { ConfirmDialog } from "@/app/components/ConfirmDialog";
-import { Trash2 } from "@/shared/icons";
 import { useState } from "react";
 
 const meta: Meta<typeof ConfirmDialog> = {

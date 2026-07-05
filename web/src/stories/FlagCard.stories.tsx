@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, within, expect } from "storybook/test";
+import { fn } from "storybook/test";
 import { FlagCard } from "@/app/components/flags/FlagCard";
 import type { FlagView } from "@/app/hooks/flagTypes";
 
@@ -8,7 +8,7 @@ const MOCK_FLAG: FlagView = {
   name: "New Checkout Flow",
   description: "Enable the new checkout experience for selected users",
   flagType: "boolean",
-  tags: [{ tagId: 1, tagName: "frontend", tagValue: "" }, { tagId: 2, tagName: "checkout", tagValue: "" }],
+  tags: [{ tagId: 1, tagName: "frontend", tagColor: "", value: "" }, { tagId: 2, tagName: "checkout", tagColor: "", value: "" }],
   flagId: 1,
   environments: {
     1: { enabled: true, percentage: 50, segmentIds: [], strategyId: null, contextDefinitionId: null, contextValuesJson: null, lastUsedAt: null },

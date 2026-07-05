@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   OPERATORS_BY_TYPE,
-  DEFAULT_OPERATOR_BY_TYPE,
   OPERATOR_LABELS,
   OPERATOR_COLORS,
   getOperatorsForType,

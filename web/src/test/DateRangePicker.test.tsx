@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, act } from '@testing-library/react';
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DateRangePicker } from '@/shared/components/DateRangePicker';
 
@@ -37,7 +37,7 @@ describe('DateRangePicker', () => {
       <DateRangePicker
         from={from}
         to={to}
-        onChange={(f, t) => {
+        onChange={(f) => {
           if (f === undefined) cleared = true;
         }}
       />,

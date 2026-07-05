@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect } from "storybook/test";
+import { userEvent, within, expect } from "storybook/test";
 import { Toggle } from "@/app/components/ui/toggle";
 
 const meta: Meta<typeof Toggle> = {

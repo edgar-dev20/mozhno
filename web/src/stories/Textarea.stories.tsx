@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect } from "storybook/test";
+import { userEvent, within, expect } from "storybook/test";
 import { Textarea } from "@/app/components/ui/textarea";
 
 const meta: Meta<typeof Textarea> = {

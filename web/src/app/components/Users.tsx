@@ -255,8 +255,6 @@ export function Users() {
         return t('users.role.admin');
       case 'developer':
         return t('users.role.developer');
-      case 'editor':
-        return t('users.role.editor');
       case 'viewer':
         return t('users.role.viewer');
       default:
@@ -305,7 +303,7 @@ export function Users() {
               off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
             }
           : {
-              on: 'bg-gradient-to-r from-neutral-500/10 to-neutral-500/10 text-foreground/80 border-neutral-500/20',
+              on: 'bg-gradient-to-r from-muted/10 to-muted/10 text-foreground/80 border-border/20',
               off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
             };
     return (
@@ -377,7 +375,7 @@ export function Users() {
 
       <TipCard
         text={t('users.tipText')}
-        label="Zero Trust"
+        label={t('users.tipLabel')}
         icon={<Fingerprint />}
         storageKey="users"
       />
@@ -480,7 +478,7 @@ export function Users() {
                               src={hasAvatar ? avatarUrl : undefined}
                               alt={user.name ?? ''}
                             />
-                            <AvatarFallback className="bg-brand text-xs font-bold text-white">
+                            <AvatarFallback className="bg-brand text-xs font-bold text-primary-foreground">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
@@ -716,7 +714,7 @@ export function Users() {
                     src={editingUser.avatar ? api.users.getAvatarUrl(editingUser.id) : undefined}
                     alt={editingUser.name ?? ''}
                   />
-                  <AvatarFallback className="bg-brand text-sm font-bold text-white">
+                  <AvatarFallback className="bg-brand text-sm font-bold text-primary-foreground">
                     {(editingUser.name ?? editingUser.email).substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -814,9 +812,9 @@ export function Users() {
                     {
                       value: 'viewer',
                       colorHex: '#5a7260',
-                      borderColor: 'border-neutral-400',
-                      bgHover: 'group-hover:bg-secondary dark:group-hover:bg-neutral-500/10',
-                      bgSelected: 'bg-secondary dark:bg-neutral-500/10',
+                      borderColor: 'border-border',
+                      bgHover: 'group-hover:bg-secondary dark:group-hover:bg-muted/10',
+                      bgSelected: 'bg-secondary dark:bg-muted/10',
                       textSelected: 'text-foreground/80',
                       description: t('users.roleDescriptions.viewer'),
                     },
@@ -854,7 +852,7 @@ export function Users() {
                           variant="gradient"
                           size="sm"
                           color={colorHex}
-                          icon={<Check size={12} className="text-white" strokeWidth={3} />}
+                          icon={<Check size={12} className="text-primary-foreground" strokeWidth={3} />}
                         />
                       )}
                     </button>
@@ -907,7 +905,7 @@ export function Users() {
                         }`}
                       >
                         <div
-                          className={`w-5 h-5 rounded-full ${dotClass} shrink-0 ring-4 ${selected ? 'ring-white/50 dark:ring-black/20' : 'ring-transparent'} transition-all`}
+                          className={`w-5 h-5 rounded-full ${dotClass} shrink-0 ring-4 ${selected ? 'ring-border' : 'ring-transparent'} transition-all`}
                         />
                         <div className="flex-1 min-w-0">
                           <div
@@ -921,7 +919,7 @@ export function Users() {
                           <div
                             className={`w-5 h-5 rounded-md bg-${color} flex items-center justify-center shrink-0`}
                           >
-                            <Check size={12} className="text-white" strokeWidth={3} />
+                            <Check size={12} className="text-primary-foreground" strokeWidth={3} />
                           </div>
                         )}
                       </button>
@@ -958,7 +956,7 @@ export function Users() {
               <div className="flex gap-3">
                 <div className="shrink-0 mt-0.5">
                   <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center">
-                    <Shield size={12} className="text-white" />
+                    <Shield size={12} className="text-primary-foreground" />
                   </div>
                 </div>
                 <div>

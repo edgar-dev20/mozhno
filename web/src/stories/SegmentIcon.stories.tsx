@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "storybook/test";
 import { SegmentIcon, SegmentIconPicker } from "@/app/components/SegmentIcon";
 import { Toaster } from "@/app/components/ui/sonner";
 import { useState } from "react";

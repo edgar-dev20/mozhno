@@ -91,7 +91,8 @@ const validContextDefinition = {
 };
 
 function stripField<T extends Record<string, unknown>>(obj: T, field: keyof T): Partial<T> {
-  const { [field]: _, ...rest } = obj;
+  const rest: Partial<T> = { ...obj };
+  delete rest[field];
   return rest;
 }
 

@@ -2,7 +2,9 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ArchivedFlagsList } from '@/app/components/flags/ArchivedFlagsList';
 
-const mockTags = [{ id: 1, name: 'Priority', color: '#ef4444', projectId: 1 }];
+const mockTags = [
+  { id: 1, name: 'Priority', color: '#ef4444', projectId: 1, description: '', createdAt: '2024-01-01T00:00:00Z' },
+];
 
 const makeFlag = (overrides: Record<string, unknown> = {}) => ({
   key: 'test-flag',

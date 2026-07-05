@@ -5,7 +5,7 @@ import type { FlagView } from "@/app/hooks/flagTypes";
 
 const MOCK_FLAG: FlagView = {
   key: "new-checkout", name: "New Checkout Flow", description: "Enable the new checkout experience",
-  flagType: "boolean", tags: [{ tagId: 1, tagName: "frontend", tagValue: "" }, { tagId: 2, tagName: "checkout", tagValue: "" }],
+  flagType: "boolean", tags: [{ tagId: 1, tagName: "frontend", tagColor: "", value: "" }, { tagId: 2, tagName: "checkout", tagColor: "", value: "" }],
   flagId: 1, environments: { 1: { enabled: true, percentage: 50, segmentIds: [], strategyId: null, contextDefinitionId: null, contextValuesJson: null, lastUsedAt: null } },
   archived: false, createdAt: "2026-01-15", createdBy: "Anna", archivedBy: null, archivedAt: null,
 };

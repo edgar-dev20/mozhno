@@ -296,7 +296,7 @@ export function AppSidebar() {
 
     mql.addEventListener('change', handler);
     return () => mql.removeEventListener('change', handler);
-  }, []);
+  }, [setMobileOpen]);
 
   return (
     <>

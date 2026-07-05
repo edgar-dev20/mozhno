@@ -17,10 +17,10 @@ describe('SectionHeader', () => {
   });
 
   it('uses custom gradient class', () => {
-    render(<SectionHeader title="X" description="Y" gradientClass="from-red-500 to-blue-500" />);
+    render(<SectionHeader title="X" description="Y" gradientClass="from-destructive to-info" />);
     const h1 = screen.getByText('X');
-    expect(h1.className).toContain('from-red-500');
-    expect(h1.className).toContain('to-blue-500');
+    expect(h1.className).toContain('from-destructive');
+    expect(h1.className).toContain('to-info');
   });
 
   it('renders description as ReactNode', () => {

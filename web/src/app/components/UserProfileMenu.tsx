@@ -89,9 +89,9 @@ export function UserProfileMenu() {
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full"
           aria-label={t('common.openUserMenu')}
         >
-          <Avatar className="w-8 h-8 ring-2 ring-white dark:ring-neutral-700 shadow-sm">
+          <Avatar className="w-8 h-8 ring-2 ring-background dark:ring-border shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-brand text-xs font-bold text-white">
+            <AvatarFallback className="bg-brand text-xs font-bold text-primary-foreground">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -104,9 +104,9 @@ export function UserProfileMenu() {
 
       <DropdownMenuContent align="end" className="w-64 p-2">
         <div className="flex items-center gap-3 px-2 py-2">
-          <Avatar className="w-12 h-12 ring-2 ring-neutral-200 dark:ring-neutral-700 shadow-sm">
+          <Avatar className="w-12 h-12 ring-2 ring-border dark:ring-border shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-brand text-sm font-bold text-white">
+            <AvatarFallback className="bg-brand text-sm font-bold text-primary-foreground">
               {initials}
             </AvatarFallback>
           </Avatar>

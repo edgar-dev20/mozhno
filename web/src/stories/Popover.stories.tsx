@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect, screen } from "storybook/test";
+import { userEvent, within, expect, screen } from "storybook/test";
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
 import { Label } from "@/app/components/ui/label";
 import { Input } from "@/app/components/ui/input";

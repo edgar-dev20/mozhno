@@ -24,7 +24,7 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SidePanel } from '@/app/components/SidePanel';
 import { ApiKeyTableSkeleton } from '@/app/components/skeletons';
-import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage } from '@/shared';
+import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage, getEnvTheme } from '@/shared';
 import {
   Select,
   SelectContent,
@@ -140,24 +140,9 @@ export function ApiKeys() {
   };
 
   const envName = (id: number | null) => environments.find((e) => e.id === id)?.name ?? '—';
-  const getEnvVariant = (id: number | null) => {
-    const name = envName(id);
-    if (name === 'Production') return 'success' as const;
-    if (name === 'Development') return 'warning' as const;
-    return 'default' as const;
-  };
-  const envColor = (id: number | null) => {
-    const name = envName(id);
-    if (name === 'Production') return 'bg-success';
-    if (name === 'Development') return 'bg-yellow-500';
-    return 'bg-info';
-  };
-  const envFilterActive = (id: number | null) => {
-    const name = envName(id);
-    if (name === 'Production') return 'bg-success/10 text-success border-success/20';
-    if (name === 'Development') return 'bg-warning/10 text-warning border-warning/20';
-    return 'bg-info/10 text-info border-info/20';
-  };
+  const getEnvVariant = (id: number | null) => getEnvTheme(id).variant;
+  const envColor = (id: number | null) => getEnvTheme(id).dot;
+  const envFilterActive = (id: number | null) => getEnvTheme(id).flat;
   const getKeyTypeColor = (t: string) =>
     t === 'FRONTEND'
       ? 'text-warning dark:text-warning bg-warning/10 dark:bg-warning/10'
@@ -179,7 +164,6 @@ export function ApiKeys() {
   }, [t]);
   const timeAgo = useCallback((d: string) => {
     if (!d) return t('apiKeys.neverUsed');
-    // eslint-disable-next-line react-hooks/purity
     const diff = Date.now() - new Date(d).getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return t('users.time.justNow');
@@ -518,7 +502,7 @@ export function ApiKeys() {
           <Shield size={20} />
         </div>
         <div>
-          <h4 className="text-brand dark:text-white font-medium mb-1">
+          <h4 className="text-brand dark:text-foreground font-medium mb-1">
             {t('apiKeys.securityTitle')}
           </h4>
           <p className="text-sm text-brand dark:text-muted-foreground max-w-3xl">

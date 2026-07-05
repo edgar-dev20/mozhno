@@ -3,7 +3,6 @@ import type { DiffChange } from '@/shared/diffUtils';
 import type { FlagTagValue, SegmentResponse, ContextDefinition } from '@/api';
 import type { ConstraintGroup } from '@/app/components/flags/types';
 import type { FlagView } from '@/app/hooks/flagTypes';
-import type { EditFlagFormValues } from '@/app/components/flags/schemas';
 import {
   buildGeneralFlagDiff,
   buildEnvironmentDiff,

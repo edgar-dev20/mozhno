@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect } from "storybook/test";
 import { useState } from "react";
 import { OperatorSelector } from "@/app/components/OperatorSelector";
 import type { OperatorDef } from "@/app/components/operators";

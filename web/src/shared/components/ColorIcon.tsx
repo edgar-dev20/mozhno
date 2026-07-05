@@ -70,7 +70,7 @@ export function ColorIcon({
     <div
       className={
         `inline-flex items-center justify-center shrink-0` +
-        ` ${variant !== 'ghost' ? 'text-white' : ''}` +
+        ` ${variant !== 'ghost' ? 'text-primary-foreground' : ''}` +
         ` ${s.container}` +
         ` ${shadow && s.tailwindShadow ? s.tailwindShadow : ''}` +
         ` ${darkDim ? 'dark:brightness-[.85] dark:saturate-[.7]' : ''}` +

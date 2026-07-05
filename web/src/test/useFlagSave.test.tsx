@@ -49,6 +49,7 @@ const makeFlag = (overrides: Record<string, unknown> = {}) => ({
       strategyId: null,
       contextDefinitionId: null,
       contextValuesJson: null,
+      lastUsedAt: null,
     },
   },
   archived: false,

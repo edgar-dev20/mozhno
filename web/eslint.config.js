@@ -6,7 +6,7 @@ import prettierConfig from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import';
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'storybook-static'] },
+  { ignores: ['dist', 'node_modules', 'storybook-static', 'coverage'] },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
@@ -23,6 +23,26 @@ export default tseslint.config(
       'no-empty': ['error', { allowEmptyCatch: true }],
       'import/no-cycle': ['error', { maxDepth: Infinity }],
       'import/no-self-import': 'error',
+      // Guardrail: forbid raw color values — use semantic design tokens only
+      // (bg-primary, text-muted-foreground, text-destructive, bg-palette-*, bg-overlay).
+      // See web/SKILL.md "Styling Rules". This is a hard error: no custom colors.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            'Literal[value=/(?:bg|text|border|ring|from|via|to|fill|stroke|outline|divide|placeholder|caret|accent|decoration|ring-offset|shadow|border-t|border-r|border-b|border-l|border-x|border-y|border-s|border-e)-(?:(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950)|black|white)/]',
+          message:
+            'Raw Tailwind color detected. Use a semantic design token (bg-primary, text-muted-foreground, text-destructive, bg-palette-*, bg-overlay). See web/SKILL.md.',
+        },
+        {
+          selector:
+            'TemplateElement[value.raw=/(?:bg|text|border|ring|from|via|to|fill|stroke|outline|divide|placeholder|caret|accent|decoration|ring-offset|shadow|border-t|border-r|border-b|border-l|border-x|border-y|border-s|border-e)-(?:(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950)|black|white)/]',
+          message:
+            'Raw Tailwind color detected in template literal. Use a semantic design token. See web/SKILL.md.',
+        },
+      ],
+
+
     },
     settings: {
       'import/resolver': {
@@ -30,6 +50,15 @@ export default tseslint.config(
           alwaysTryTypes: true,
         },
       },
+    },
+  },
+  {
+    // Config/provider/data modules that intentionally mix a non-component export
+    // (router config, i18n provider + hooks, shared icon list) with component
+    // definitions — fast-refresh enforcement does not apply to these.
+    files: ['src/app/routes.tsx', 'src/i18n/index.tsx', 'src/app/components/SegmentIcon.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
     },
   },
   prettierConfig,

@@ -10,6 +10,7 @@ export type Environment = {
   id: number;
   projectId: number;
   name: string;
+  color?: string | null;
   createdAt: string;
 };
 
@@ -61,6 +62,7 @@ export type FlagRequest = {
   key: string;
   description?: string;
   flagType?: string;
+  tags?: { tagId: number; value: string }[];
 };
 
 export type FlagTagValue = {
@@ -84,7 +86,7 @@ export type FlagStrategy = {
 };
 
 export type StrategyRequest = {
-  flagId: number;
+  flagId?: number;
   environmentId: number;
   enabled?: boolean;
   percentage?: number | null;

@@ -115,7 +115,7 @@ function TokensPage() {
               <p className={`${style} ${weight} ${leading}`}>{label}</p>
             </div>
           ))}
-          {Object.entries(tokens.bodySizes).map(([key, { style, leading, label }]) => (
+          {Object.entries(tokens.bodySizes).map(([key, { style, leading }]) => (
             <div key={key}>
               <span className="text-caption text-muted-foreground">text-{key}</span>
               <p className={`${style} ${leading}`}>The quick brown fox jumps over the lazy dog.</p>

@@ -243,11 +243,11 @@ export function FlagEnvironmentPanel({
                       <Fragment key={si}>
                         {si > 0 && (
                           <div className="flex items-center gap-2 py-0.5">
-                            <div className="flex-1 h-px bg-amber-500/20" />
-                            <span className="text-[10px] font-bold text-amber-500/60 uppercase tracking-wider px-1">
+                            <div className="flex-1 h-px bg-warning/20" />
+                            <span className="text-[10px] font-bold text-warning/60 uppercase tracking-wider px-1">
                               OR
                             </span>
-                            <div className="flex-1 h-px bg-amber-500/20" />
+                            <div className="flex-1 h-px bg-warning/20" />
                           </div>
                         )}
                         <div className="bg-input-background/70 rounded-lg border border-brand/10 overflow-hidden">
@@ -353,7 +353,7 @@ export function FlagEnvironmentPanel({
             <Slider.Track className="bg-accent relative grow rounded-full h-2.5">
               <Slider.Range className="absolute bg-brand rounded-full h-full" />
             </Slider.Track>
-            <Slider.Thumb className="block w-6 h-6 bg-white border-2 border-brand rounded-full shadow-lg focus:outline-none" />
+            <Slider.Thumb className="block w-6 h-6 bg-background border-2 border-brand rounded-full shadow-lg focus:outline-none" />
           </Slider.Root>
           <p className="text-xs text-muted-foreground/80">
             {envRulePercent === 100
@@ -622,7 +622,7 @@ export function FlagEnvironmentPanel({
                                         values: g.values.filter((_, j) => j !== i),
                                       })
                                     }
-                                    className={`${inWhitelist ? 'text-emerald-500' : 'text-amber-500'} hover:text-red-500 transition-colors`}
+                                    className={`${inWhitelist ? 'text-success' : 'text-warning'} hover:text-destructive transition-colors`}
                                   >
                                     <X size={11} />
                                   </button>
@@ -789,7 +789,7 @@ export function FlagEnvironmentPanel({
                             );
                           }}
                           list={hasWhitelist ? `wl-${g.id}` : undefined}
-                          className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-red-400 dark:invalid:border-red-500"
+                          className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-destructive dark:invalid:border-destructive"
                           autoFocus
                         />
                         {hasWhitelist && (
@@ -811,7 +811,7 @@ export function FlagEnvironmentPanel({
               );
             })}
             {envRuleConstraintGroups.length === 0 && (
-              <div className="p-4 bg-input-background rounded-lg border border-dashed border-border dark:border-neutral-700 text-center">
+              <div className="p-4 bg-input-background rounded-lg border border-dashed border-border dark:border-border text-center">
                 <p className="text-xs text-muted-foreground">{t('flags.noConstraints')}</p>
               </div>
             )}
@@ -823,7 +823,7 @@ export function FlagEnvironmentPanel({
         <div className="flex gap-3">
           <div className="shrink-0 mt-0.5">
             <div className="w-5 h-5 rounded-full bg-brand flex items-center justify-center">
-              <Settings size={12} className="text-white" />
+              <Settings size={12} className="text-primary-foreground" />
             </div>
           </div>
           <div>

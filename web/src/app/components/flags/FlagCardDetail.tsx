@@ -48,7 +48,7 @@ export function FlagCardDetail({
                 return tg ? (
                   <span
                     key={i}
-                    className="inline-flex items-center px-1.5 py-1 rounded text-xs font-medium text-white shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
+                    className="inline-flex items-center px-1.5 py-1 rounded text-xs font-medium text-primary-foreground shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
                     style={{
                       background: tg.color,
                     }}

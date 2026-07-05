@@ -9,11 +9,11 @@ beforeEach(async () => {
 });
 
 describe('flagsApi', () => {
-  let requestSpy: ReturnType<typeof vi.mocked>;
+  let requestSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     const mod = await import('@/api/modules/http');
-    requestSpy = vi.mocked(mod.request);
+    requestSpy = vi.mocked(mod.request) as ReturnType<typeof vi.fn>;
     requestSpy.mockClear();
   });
 

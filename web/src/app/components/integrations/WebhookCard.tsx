@@ -63,7 +63,7 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
             <Badge
               variant="accent"
               shape="pill"
-              icon={<span className="w-1.5 h-1.5 rounded-full bg-neutral-400" />}
+              icon={<span className="w-1.5 h-1.5 rounded-full bg-muted" />}
             >
               {t('integrations.status.disconnected')}
             </Badge>

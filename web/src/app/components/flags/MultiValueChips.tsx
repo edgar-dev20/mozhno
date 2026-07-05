@@ -83,11 +83,11 @@ export function MultiValueChips({ values, onChange, autoFocus, validValues }: Mu
             <button
               type="button"
               onClick={() => removeValue(i)}
-              className={`shrink-0 p-0.5 rounded-sm transition-colors -mr-0.5 hover:text-red-500 ${
+              className={`shrink-0 p-0.5 rounded-sm transition-colors -mr-0.5 hover:text-destructive ${
                 hasWhitelist
                   ? inWhitelist
-                    ? 'text-emerald-500'
-                    : 'text-amber-500'
+                    ? 'text-success'
+                    : 'text-warning'
                   : ''
               }`}
               tabIndex={-1}

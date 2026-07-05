@@ -38,6 +38,29 @@ jobs:
               - '.github/workflows/ci.yml'
               - 'sdks/js/**'
 
+  flyway-append-only:
+    name: Flyway migrations are append-only
+    needs: changes
+    if: ${{ needs.changes.outputs.server == 'true' && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Ensure existing migrations are not modified or deleted
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch origin "$BASE_REF" --depth=1
+          CHANGED=$(git diff --name-status "origin/$BASE_REF"...HEAD -- 'server/mozhno-core/src/main/resources/db/migration/' | awk '$1 != "A" { print }')
+          if [ -n "$CHANGED" ]; then
+            echo "::error::Flyway migrations are append-only — existing V*.sql must not be modified, renamed, or deleted."
+            echo "$CHANGED"
+            exit 1
+          fi
+          echo "Migrations are append-only."
+
   audit-web:
     name: Audit web dependencies
     needs: changes

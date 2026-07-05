@@ -66,7 +66,7 @@ function RadiusShowcase() {
                 className="size-12 bg-brand flex items-center justify-center shrink-0"
                 style={{ borderRadius: item.token }}
               >
-                <span className="text-white text-xs font-mono font-medium">{item.utility.split("-")[1]}</span>
+                <span className="text-primary-foreground text-xs font-mono font-medium">{item.utility.split("-")[1]}</span>
               </div>
               <div className="flex flex-col gap-0.5 min-w-0">
                 <code className="text-xs font-mono text-foreground/80">{item.utility}</code>

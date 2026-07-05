@@ -7,13 +7,13 @@ const gradientButtonVariants = cva(
     variants: {
       variant: {
         primary:
-          'gradient-btn-primary text-white shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'gradient-btn-primary text-primary-foreground shadow-lg focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
         default:
-          'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
         danger:
-          'gradient-btn-danger text-white shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'gradient-btn-danger text-primary-foreground shadow-lg focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
         warning:
-          'gradient-btn-warning text-warning-foreground shadow-lg shadow-black/5 dark:shadow-black/20 hover:shadow-black/10 dark:hover:shadow-black/30 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
+          'gradient-btn-warning text-warning-foreground shadow-lg focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
         secondary:
           'bg-card border border-border text-foreground/80 hover:bg-accent hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',
         muted:
