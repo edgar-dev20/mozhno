@@ -6,7 +6,7 @@ import dev.mozhno.spi.AuditSpi.AuditRecord;
  * Service Provider Interface for enriching audit event details before persistence.
  * <p>
  * Called by the audit infrastructure during {@code DomainEvent → AuditRecord}
- * conversion. The default open-source implementation returns the original
+ * conversion. The default Community implementation returns the original
  * details unchanged. Licensed editions can inject a provider that computes
  * a human-readable diff (old → new values) by querying the previous resource
  * state and appending it to the details.

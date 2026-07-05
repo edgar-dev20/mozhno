@@ -5,7 +5,7 @@ import dev.mozhno.spi.AuditEventEnricher;
 import dev.mozhno.spi.AuditSpi.AuditRecord;
 
 /**
- * Default {@link AuditEventEnricher} implementation for the open-source edition
+ * Default {@link AuditEventEnricher} implementation for the Community edition
  * that returns audit details unchanged.
  *
  * <p>Licensed editions may replace this with a provider that enriches details

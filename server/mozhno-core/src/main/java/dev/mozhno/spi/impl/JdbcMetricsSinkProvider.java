@@ -10,7 +10,7 @@ import dev.mozhno.spi.MetricsSinkSpi;
  *
  * <p>This is the community-edition metrics sink. Flag evaluation events are
  * recorded synchronously in the database. API call metrics are not collected
- * in the open-source edition — the {@link #recordApiCall} method is a no-op.
+ * in the Community edition — the {@link #recordApiCall} method is a no-op.
  */
 @Component
 public class JdbcMetricsSinkProvider implements MetricsSinkSpi {
@@ -43,7 +43,7 @@ public class JdbcMetricsSinkProvider implements MetricsSinkSpi {
      * @param endpoint   the called endpoint path
      * @param statusCode the HTTP status code returned
      * @param latencyMs  the request latency in milliseconds
-     * @implNote This is a no-op in the open-source edition. API call metrics
+     * @implNote This is a no-op in the Community edition. API call metrics
      *           are only collected in licensed editions.
      */
     @Override

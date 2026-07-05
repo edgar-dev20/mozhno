@@ -2,7 +2,7 @@
   <img src="logo-en.svg" width="380" alt="можно.">
 </p>
 
-<p align="center">Open-source feature flag management platform.</p>
+<p align="center">Open-core, self-hosted feature flag management platform.</p>
 
 <p align="center">
   <a href="https://github.com/mozhno-dev/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mozhno-dev/mozhno/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI" /></a>

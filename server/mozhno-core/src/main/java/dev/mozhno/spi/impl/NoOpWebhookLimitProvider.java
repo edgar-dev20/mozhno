@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component;
 import dev.mozhno.spi.WebhookLimitSpi;
 
 /**
- * Open-source edition: no webhook delivery limits.
+ * Community edition: no webhook delivery limits.
  */
 @Component
 public class NoOpWebhookLimitProvider implements WebhookLimitSpi {

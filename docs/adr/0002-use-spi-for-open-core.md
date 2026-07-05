@@ -39,5 +39,5 @@ Spring автоматически собирает все бины, реализ
 - `AuthenticationProviderSpi` — цепочка: JWT → API Key → (SSO/LDAP в enterprise)
 - `AuthenticationFlowSpi` — логин: password → (Google/SAML в enterprise)
 - `QuotaSpi` — NoOpQuotaProvider → (Plan-based quota в enterprise)
-- `BillingSpi` — OpenSourceBillingProvider → (Stripe-based в enterprise)
+- `BillingSpi` — CommunityBillingProvider → (Stripe-based в enterprise)
 - `FeatureGateSpi` — все фичи включены → (Tier-based gating в enterprise)
