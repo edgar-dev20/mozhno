@@ -282,23 +282,29 @@ export default defineConfig({
   },
 
   transformHead: async (context: any) => {
-    const page = context.page
-    if (!page || !page.path) return []
+    const page: string = context.page
+    if (!page) return []
 
-    const path = page.path
-    const isRu = !path.startsWith('/en')
-    const title = page.title || 'можно.'
+    const isRu = !page.startsWith('en/')
+    const title = context.pageData?.title || context.title || 'можно.'
     const description = isRu
       ? 'Документация платформы управления фиче-флагами можно.'
       : 'Feature flag management platform documentation.'
+
+    let urlPath = '/' + page.replace(/\.md$/, '.html')
+    urlPath = urlPath.replace(/\/index\.html$/, '/')
+
+    const ruPath = isRu ? urlPath : urlPath.replace('/en', '')
+    const enPath = isRu ? '/en' + urlPath : urlPath
 
     return [
       ['meta', { property: 'og:title', content: title }],
       ['meta', { property: 'og:description', content: description }],
       ['meta', { property: 'og:locale', content: isRu ? 'ru_RU' : 'en_US' }],
       ['meta', { name: 'description', content: description }],
-      ['link', { rel: 'alternate', hreflang: 'ru', href: `https://docs.mozhno.dev${isRu ? path : path.replace('/en', '')}` }],
-      ['link', { rel: 'alternate', hreflang: 'en', href: `https://docs.mozhno.dev${isRu ? '/en' + path : path}` }],
+      ['link', { rel: 'canonical', href: `https://docs.mozhno.dev${urlPath}` }],
+      ['link', { rel: 'alternate', hreflang: 'ru', href: `https://docs.mozhno.dev${ruPath}` }],
+      ['link', { rel: 'alternate', hreflang: 'en', href: `https://docs.mozhno.dev${enPath}` }],
     ]
   },
 })

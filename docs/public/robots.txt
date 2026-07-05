@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mozhno-dev.github.io/mozhno/sitemap.xml
+Sitemap: https://docs.mozhno.dev/sitemap.xml
