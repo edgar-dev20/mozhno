@@ -114,6 +114,7 @@ export default defineConfig({
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
     ['meta', { name: 'theme-color', content: '#3d4f7a' }],
+    ['meta', { name: 'yandex-verification', content: 'b3a6b893315c5345' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:image', content: '/og-image.png' }],
   ],
