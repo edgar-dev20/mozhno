@@ -75,8 +75,16 @@ export function UserProfileMenu() {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+    <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
+        className="hidden"
+        onChange={handleUpload}
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
         <button
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full"
           aria-label={t('common.openUserMenu')}
@@ -115,17 +123,10 @@ export function UserProfileMenu() {
 
         <DropdownMenuSeparator />
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml"
-          className="hidden"
-          onChange={handleUpload}
-        />
         <DropdownMenuItem
           onSelect={(e) => {
             e.preventDefault();
-            fileInputRef.current?.click();
+            setTimeout(() => fileInputRef.current?.click(), 0);
           }}
           className="cursor-pointer"
           disabled={uploading}
@@ -165,5 +166,6 @@ export function UserProfileMenu() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+    </>
   );
 }
