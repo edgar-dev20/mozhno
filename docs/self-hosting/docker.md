@@ -87,7 +87,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/actuator/health | grep -q UP"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -134,9 +134,11 @@ MOZHNO_JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
 | `MOZHNO_SERVER_PORT` | `8080` | Порт HTTP-сервера |
+| `MOZHNO_MANAGEMENT_PORT` | `9090` | Порт management-эндпоинтов (actuator: health, metrics, prometheus) |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Публичный URL. Влияет на CORS и генерацию ссылок |
 | `MOZHNO_CACHE_TTL_MINUTES` | `5` | Время жизни кеша правил в минутах |
 | `MOZHNO_CLIENT_MAX_METRICS_PER_KEY` | `1000` | Максимум хранимых метрик на API-ключ |
+| `MOZHNO_CLIENT_MAX_METRICS_BATCH_SIZE` | `1000` | Максимум записей в одном запросе `/api/client/metrics` |
 
 ### JWT
 
@@ -174,16 +176,16 @@ MOZHNO_JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 
 ## Проверки здоровья (Health Checks)
 
-Контейнер **можно**<span class=brand-dot>.</span> предоставляет эндпоинт `/actuator/health` для проверки готовности:
+Контейнер **можно**<span class=brand-dot>.</span> предоставляет эндпоинт `/actuator/health` на **management-порту 9090** для проверки готовности:
 
 ```bash
-curl http://localhost:8080/actuator/health
+curl http://localhost:9090/actuator/health
 # {"status":"UP","components":{"db":{"status":"UP"},"diskSpace":{"status":"UP"}}}
 ```
 
 В `docker-compose.yml` настроен healthcheck с проверкой этого эндпоинта каждые 15 секунд. Контейнер считается готовым, когда:
 
-- Приложение запущено и слушает порт 8080
+- Приложение запущено и слушает порт 8080 (SPA + REST API) и порт 9090 (actuator)
 - Подключение к PostgreSQL установлено и проверено (`db: UP`)
 - Flyway-миграции успешно применены
 - Статические ресурсы (React SPA) доступны
@@ -391,7 +393,6 @@ flags.example.com {
 
 ## Что дальше?
 
-- [Масштабирование](/self-hosting/scaling) — горизонтальное масштабирование
-- [База данных](/self-hosting/database) — настройка PostgreSQL, бэкапы, пул соединений
 - [Масштабирование](/self-hosting/scaling) — горизонтальное масштабирование и кеширование
+- [База данных](/self-hosting/database) — настройка PostgreSQL, бэкапы, пул соединений
 - [Конфигурация](/intro/configuration) — полный список переменных окружения

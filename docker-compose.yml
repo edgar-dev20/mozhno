@@ -27,6 +27,7 @@ services:
     container_name: mozhno-server
     ports:
       - "${APP_PORT:-8080}:8080"
+      - "${MOZHNO_MANAGEMENT_PORT:-9090}:9090"
     environment:
       MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-feature_flags}
       MOZHNO_DB_USERNAME: ${POSTGRES_USER:-flags_user}
@@ -39,8 +40,15 @@ services:
       MOZHNO_SMTP_PORT: ${MOZHNO_SMTP_PORT:-587}
       MOZHNO_SMTP_USERNAME: ${MOZHNO_SMTP_USERNAME:-}
       MOZHNO_SMTP_PASSWORD: ${MOZHNO_SMTP_PASSWORD:-}
+      MOZHNO_MANAGEMENT_PORT: '9090'
     networks:
       - mozhno-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9090/actuator/health | grep -q UP"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
     depends_on:
       postgres:
         condition: service_healthy

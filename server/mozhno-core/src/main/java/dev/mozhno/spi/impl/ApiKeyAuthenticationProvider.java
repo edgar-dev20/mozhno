@@ -10,6 +10,7 @@ import dev.mozhno.spi.AuthenticationProviderSpi;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Default {@link AuthenticationProviderSpi} implementation that authenticates
@@ -26,6 +27,8 @@ import java.util.Optional;
 public class ApiKeyAuthenticationProvider implements AuthenticationProviderSpi {
 
     private final ApiKeyService apiKeyService;
+    private final ConcurrentHashMap<Integer, Long> lastUsedCache = new ConcurrentHashMap<>();
+    private static final long LAST_USED_DEBOUNCE_SECONDS = 60;
 
     public ApiKeyAuthenticationProvider(ApiKeyService apiKeyService) {
         this.apiKeyService = apiKeyService;
@@ -83,7 +86,12 @@ public class ApiKeyAuthenticationProvider implements AuthenticationProviderSpi {
         if (apiKey == null) {
             return Optional.empty();
         }
-        apiKeyService.updateLastUsed(apiKey.getId());
+        long now = System.currentTimeMillis() / 1000;
+        Long last = lastUsedCache.get(apiKey.getId());
+        if (last == null || now - last >= LAST_USED_DEBOUNCE_SECONDS) {
+            lastUsedCache.put(apiKey.getId(), now);
+            apiKeyService.updateLastUsed(apiKey.getId());
+        }
         ApiKeyAuthentication auth = new ApiKeyAuthentication(
             apiKey.getApiKey(),
             apiKey.getProjectId(),

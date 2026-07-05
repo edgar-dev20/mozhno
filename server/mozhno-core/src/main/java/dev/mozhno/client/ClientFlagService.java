@@ -13,8 +13,10 @@ import dev.mozhno.flags.FlagWithStrategy;
 import dev.mozhno.flags.strategy.FlagStrategy;
 import dev.mozhno.flags.strategy.FlagStrategyRepository;
 import dev.mozhno.metrics.FlagMetricRepository;
+import dev.mozhno.metrics.AsyncFlagMetricRecorder;
 import dev.mozhno.segments.SegmentContextRepository;
 import dev.mozhno.segments.SegmentContextRepository.SegmentContextWithName;
+import dev.mozhno.exception.BadRequestException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,16 +40,22 @@ public class ClientFlagService {
     private final SegmentContextRepository segmentContextRepository;
     private final ContextDefinitionRepository contextDefinitionRepository;
     private final FlagMetricRepository flagMetricRepository;
+    private final AsyncFlagMetricRecorder asyncMetricRecorder;
+    private final ClientProperties clientProperties;
 
     public ClientFlagService(FlagRepository flagRepository, FlagStrategyRepository flagStrategyRepository,
                              SegmentContextRepository segmentContextRepository,
                              ContextDefinitionRepository contextDefinitionRepository,
-                             FlagMetricRepository flagMetricRepository) {
+                             FlagMetricRepository flagMetricRepository,
+                             AsyncFlagMetricRecorder asyncMetricRecorder,
+                             ClientProperties clientProperties) {
         this.flagRepository = flagRepository;
         this.flagStrategyRepository = flagStrategyRepository;
         this.segmentContextRepository = segmentContextRepository;
         this.contextDefinitionRepository = contextDefinitionRepository;
         this.flagMetricRepository = flagMetricRepository;
+        this.asyncMetricRecorder = asyncMetricRecorder;
+        this.clientProperties = clientProperties;
     }
 
     @Cacheable(value = CacheNames.CLIENT_FLAGS, key = "#projectId + ':' + #environmentId")
@@ -206,7 +214,7 @@ public class ClientFlagService {
                 continue;
             }
             boolean enabled = evaluator.evaluateFlag(fws.flag(), fws.strategy(), context, segmentContextsMap, contextDefMap);
-            flagMetricRepository.recordEvaluation(projectId, fws.flag().getId(), environmentId, enabled, clientInstanceId);
+            asyncMetricRecorder.recordEvaluation(projectId, fws.flag().getId(), environmentId, enabled, clientInstanceId);
 
             if (enabled) {
                 results.add(new ClientEvaluateResponse.ToggleResult(
@@ -221,6 +229,10 @@ public class ClientFlagService {
 
     public void recordMetrics(Integer projectId, Integer environmentId, ClientMetricsRequest request, Long clientInstanceId) {
         if (request.getEvaluations() == null) return;
+        if (request.getEvaluations().size() > clientProperties.getMaxMetricsBatchSize()) {
+            throw new BadRequestException(
+                "Metrics batch size exceeds limit: " + clientProperties.getMaxMetricsBatchSize());
+        }
         Set<String> keys = request.getEvaluations().keySet();
         List<Flag> foundFlags = flagRepository.findByProjectIdAndKeys(projectId, keys);
         Map<String, Flag> flagByKey = new LinkedHashMap<>();
