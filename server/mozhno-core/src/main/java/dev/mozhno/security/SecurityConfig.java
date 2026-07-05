@@ -85,16 +85,6 @@ public class SecurityConfig {
 
     @Bean
     @Order(0)
-    public SecurityFilterChain actuatorFilterChain(HttpSecurity http) throws Exception {
-        http
-            .securityMatcher("/actuator/**")
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-            .csrf(AbstractHttpConfigurer::disable);
-        return http.build();
-    }
-
-    @Bean
-    @Order(1)
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -120,6 +110,7 @@ public class SecurityConfig {
                 })
             )
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/client/features").hasRole("SERVER")
                 .requestMatchers(HttpMethod.POST, "/api/client/evaluate").hasRole("CLIENT")
                 .requestMatchers(HttpMethod.POST, "/api/client/metrics").hasRole("CLIENT")

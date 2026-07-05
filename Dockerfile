@@ -53,8 +53,10 @@ COPY --from=java-builder /src/server/mozhno-app/build/libs/mozhno.jar /app/mozhn
 USER mozhno
 EXPOSE 8080
 
+EXPOSE 9090
+
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-    CMD wget -q -O - http://localhost:8080/actuator/health || exit 1
+    CMD wget -q -O - http://localhost:9090/actuator/health || exit 1
 
 ENTRYPOINT ["java", \
     "-XX:+UseZGC", \

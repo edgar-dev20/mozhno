@@ -20,6 +20,10 @@ public class ClientProperties {
     @Positive
     private int maxMetricsPerKey = 1000;
 
+    /** Maximum number of evaluation entries accepted in a single metrics batch request. */
+    @Positive
+    private int maxMetricsBatchSize = 1000;
+
     /** Retention period for inactive SDK client instances, in days. */
     @Positive
     private int instanceRetentionDays = 30;

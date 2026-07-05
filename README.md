@@ -142,6 +142,9 @@ const on = client.isEnabled('new-checkout', { userId: '42' });
 | `MOZHNO_DB_PASSWORD` | `flags_password` | Пароль БД |
 | `MOZHNO_JWT_SECRET` | *(обязательно сменить)* | HMAC-SHA256 ключ (минимум 256 бит) |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Публичный URL сервера |
+| `MOZHNO_CLIENT_MAX_METRICS_BATCH_SIZE` | `1000` | Максимальный размер батча метрик от SDK |
+| `MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Срок хранения данных о клиентских инстансах |
+| `MOZHNO_MANAGEMENT_PORT` | `9090` | Порт для actuator-эндпоинтов (health, metrics, prometheus) |
 | `MOZHNO_SERVER_PORT` | `8080` | HTTP-порт |
 
 ---

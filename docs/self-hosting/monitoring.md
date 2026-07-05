@@ -2,6 +2,8 @@
 
 **можно**<span class=brand-dot>.</span> предоставляет endpoints для проверки здоровья, метрики Prometheus и распределённую трассировку через Spring Boot Actuator и Micrometer.
 
+> Actuator-эндпоинты слушают отдельный **management-порт `9090`** (`MOZHNO_MANAGEMENT_PORT`), а не основной порт приложения `8080`. Пробросьте порт `9090` и используйте его во всех проверках здоровья и scrape-конфигах.
+
 ## Health Check
 
 ### Endpoint
@@ -30,7 +32,7 @@ GET /actuator/health
 
 ```yaml
 healthcheck:
-  test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q UP"]
+  test: ["CMD-SHELL", "wget -qO- http://localhost:9090/actuator/health | grep -q UP"]
   interval: 15s
   timeout: 5s
   retries: 3
@@ -61,7 +63,7 @@ scrape_configs:
   - job_name: 'mozhno'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['mozhno:8080']
+      - targets: ['mozhno:9090']
 ```
 
 ### Key метрики для мониторинга
@@ -121,5 +123,3 @@ scrape_configs:
 
 - [Docker](/self-hosting/docker) — healthcheck и переменные окружения
 - [Масштабирование](/self-hosting/scaling) — горизонтальное масштабирование
-- [Масштабирование](/self-hosting/scaling) — горизонтальное масштабирование
-- [Метрики](/guide/metrics) — метрики использования флагов
