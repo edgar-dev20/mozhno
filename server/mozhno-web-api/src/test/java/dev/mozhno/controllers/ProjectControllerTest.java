@@ -146,7 +146,8 @@ class ProjectControllerTest extends BaseIntegrationTest {
         p.setName("Logo Project");
         Project saved = projectRepository.save(p);
 
-        MockMultipartFile file = new MockMultipartFile("file", "logo.png", "image/png", "fake-image".getBytes());
+        MockMultipartFile file = new MockMultipartFile("file", "logo.png", "image/png",
+                new byte[]{(byte) 0x89, 'P', 'N', 'G', 13, 10, 26, 10, 0, 0, 0, 0});
 
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{id}/logo", saved.getId())
                 .file(file)

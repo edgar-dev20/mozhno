@@ -169,20 +169,12 @@ public class CustomWebhookService {
     private static boolean isPublicHost(String host) {
         if (host == null || host.isBlank()) return false;
         try {
-            InetAddress addr = InetAddress.getByName(host);
-            if (addr.isLoopbackAddress()
-                || addr.isLinkLocalAddress()
-                || addr.isSiteLocalAddress()
-                || addr.isAnyLocalAddress()
-                || addr.isMulticastAddress()) {
-                return false;
-            }
-            if (addr instanceof java.net.Inet6Address) {
-                byte[] ip = addr.getAddress();
-                if (ip.length >= 16
-                    && ip[10] == (byte) 0xff
-                    && ip[11] == (byte) 0xff
-                    && ip[12] == 127) {
+            InetAddress[] addresses = InetAddress.getAllByName(host);
+            if (addresses.length == 0) return false;
+            // Every resolved address must be public. This blocks hosts with mixed
+            // public/private A/AAAA records used to smuggle a private target.
+            for (InetAddress addr : addresses) {
+                if (!isPublicAddress(addr)) {
                     return false;
                 }
             }
@@ -192,6 +184,37 @@ public class CustomWebhookService {
         }
     }
 
+    private static boolean isPublicAddress(InetAddress addr) {
+        if (addr.isLoopbackAddress()
+            || addr.isLinkLocalAddress()
+            || addr.isSiteLocalAddress()
+            || addr.isAnyLocalAddress()
+            || addr.isMulticastAddress()) {
+            return false;
+        }
+        if (addr instanceof java.net.Inet6Address) {
+            byte[] ip = addr.getAddress();
+            if (ip.length >= 16
+                && ip[10] == (byte) 0xff
+                && ip[11] == (byte) 0xff
+                && ip[12] == 127) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Validates that a webhook URL uses HTTPS and resolves only to public addresses.
+     *
+     * <p><b>Residual risk:</b> this is a check-time validation. The JDK
+     * {@link java.net.http.HttpClient} re-resolves DNS at send time, so a
+     * DNS-rebinding attacker could still swap in a private IP between validation
+     * and connection. Full IP pinning is not applied because it conflicts with
+     * HTTPS certificate hostname verification (webhooks are HTTPS-only). Redirects
+     * cannot bypass the scheme/host check because the client uses
+     * {@code HttpClient.Redirect.NEVER}.
+     */
     public static boolean isValidWebhookUrl(String url) {
         if (url == null || url.isBlank()) return false;
         try {

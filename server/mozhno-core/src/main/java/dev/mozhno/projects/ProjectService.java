@@ -136,13 +136,17 @@ public class ProjectService {
         if (p == null) {
             throw new NotFoundException("Project", id);
         }
+        byte[] bytes;
         try {
-            byte[] bytes = file.getBytes();
-            String ext = dev.mozhno.util.FileUtils.getExtension(file.getOriginalFilename());
-            projectRepository.updateLogo(id, "blob" + ext, bytes);
+            bytes = file.getBytes();
         } catch (IOException e) {
             throw new BadRequestException("Failed to read logo file: " + e.getMessage());
         }
+        org.springframework.http.MediaType type = dev.mozhno.util.MediaTypeUtils.detectRasterImageType(bytes);
+        if (type == null) {
+            throw new BadRequestException("Only PNG, JPEG, GIF or WEBP images are allowed");
+        }
+        projectRepository.updateLogo(id, "blob" + dev.mozhno.util.MediaTypeUtils.extensionFor(type), bytes);
         Project saved = projectRepository.findById(id);
         events.publish(DomainEvent.of(saved.getId(), "project.logo_updated", "project",
             saved.getId(), saved.getName(), "Logo updated"));

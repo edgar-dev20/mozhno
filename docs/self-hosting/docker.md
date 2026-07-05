@@ -367,6 +367,22 @@ ports:
 MOZHNO_BASE_URL: https://flags.example.com
 ```
 
+### Forwarded-заголовки и реальный IP клиента
+
+Сервер определяет IP клиента (для rate-limit) через forwarded-заголовки. По умолчанию
+`MOZHNO_FORWARD_HEADERS_STRATEGY=native`: `X-Forwarded-For` учитывается **только** если
+запрос пришёл от доверенного прокси из приватных диапазонов (Tomcat RemoteIpValve). Так
+прямой атакующий не подделает свой IP заголовком.
+
+Если ваш обратный прокси работает на публичном IP, укажите его диапазон явно:
+
+```yaml
+SERVER_TOMCAT_REMOTEIP_INTERNAL_PROXIES: '203\.0\.113\.\d{1,3}'
+```
+
+Если прокси нет и клиенты ходят напрямую — поставьте `MOZHNO_FORWARD_HEADERS_STRATEGY=none`,
+чтобы заголовки `X-Forwarded-*` полностью игнорировались.
+
 ### Caddy (автоматический TLS)
 
 ```

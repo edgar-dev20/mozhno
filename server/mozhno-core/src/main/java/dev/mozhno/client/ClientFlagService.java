@@ -58,6 +58,10 @@ public class ClientFlagService {
         this.clientProperties = clientProperties;
     }
 
+    // NOTE: the strategy last-used timestamp (touchLastUsedAt) is refreshed inside this
+    // @Cacheable method, so it only updates on a cache miss (i.e. at most once per
+    // cache TTL per project/environment). This is intentional: last-used is an
+    // approximate "recently active" heuristic, not an exact per-request counter.
     @Cacheable(value = CacheNames.CLIENT_FLAGS, key = "#projectId + ':' + #environmentId")
     public List<ClientFlagResponse> getFlagsForProject(Integer projectId, Integer environmentId) {
         List<FlagWithStrategy> flags = flagRepository.findByProjectIdWithStrategyForEnvironment(projectId, environmentId);
