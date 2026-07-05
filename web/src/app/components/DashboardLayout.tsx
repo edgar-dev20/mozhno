@@ -20,7 +20,8 @@ import {
   markOnboardingComplete,
   resetOnboardingComplete,
 } from '@/shared/onboardingUtils';
-import { extractDominantColor, lightenForDarkMode } from '@/shared/extractLogoColor';
+import { extractDominantColor } from '@/shared/extractLogoColor';
+import { readableAccentColor } from '@/shared/color';
 import { SkipLink } from '@/shared/components/SkipLink';
 import { AppSidebar, AppSidebarProvider, useAppSidebar } from '@/app/components/AppSidebar';
 
@@ -39,7 +40,6 @@ export function DashboardLayout() {
   const { toggleMobile } = useAppSidebar();
   const [accentColor, setAccentColor] = useState('#1a6b60');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [logoVersion, setLogoVersion] = useState(0);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   const { data: project, isLoading: projectLoading } = useProjectQuery();
@@ -74,7 +74,7 @@ export function DashboardLayout() {
 
   const isDark = theme === 'dark';
   const displayColor = useMemo(
-    () => (isDark ? lightenForDarkMode(accentColor) : accentColor),
+    () => readableAccentColor(accentColor, isDark),
     [accentColor, isDark],
   );
 
@@ -83,7 +83,6 @@ export function DashboardLayout() {
   useEffect(() => {
     const handler = () => {
       invalidateProjects();
-      setLogoVersion((v) => v + 1);
     };
     window.addEventListener('project-updated', handler);
     return () => window.removeEventListener('project-updated', handler);
@@ -150,8 +149,8 @@ export function DashboardLayout() {
                 </button>
                 {projectLogo && projectId ? (
                   <img
-                    key={logoVersion}
-                    src={`${api.projects.getLogoUrl(projectId)}?v=${logoVersion}`}
+                    key={projectLogo}
+                    src={`${api.projects.getLogoUrl(projectId)}?v=${encodeURIComponent(projectLogo)}`}
                     alt={projectName ?? ''}
                     onLoad={handleLogoLoad}
                     className="w-7 h-7 rounded-lg object-cover shrink-0"
