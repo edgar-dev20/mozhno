@@ -184,7 +184,6 @@ MOZHNO_CLIENT_MAX_METRICS_PER_KEY=1000
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `MOZHNO_UPLOAD_DIR` | `./uploads` | Директория для загружаемых файлов (лого, аватары) |
 | `MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Срок хранения неактивных экземпляров SDK |
 | `MOZHNO_DB_POOL_LEAK_DETECTION` | `30000` | Порог детекции утечек соединений (мс) |
 | `MOZHNO_CACHE_TYPE` | `caffeine` | Spring-тип кеша. `caffeine` — in-memory (Community). Для Redis добавьте `spring-boot-starter-data-redis` и смените на `redis` |

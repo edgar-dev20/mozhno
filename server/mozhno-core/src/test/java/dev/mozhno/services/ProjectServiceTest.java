@@ -156,7 +156,7 @@ class ProjectServiceTest {
         doNothing().when(projectRepository).updateLogo(eq(1), eq("blob.png"), any(byte[].class));
         when(projectRepository.findById(1)).thenReturn(p);
 
-        MockMultipartFile file = new MockMultipartFile("logo", "logo.png", "image/png", "fake-image".getBytes());
+        MockMultipartFile file = new MockMultipartFile("logo", "logo.png", "image/png", pngBytes());
 
         Project result = projectService.uploadLogo(1, file);
 
@@ -168,42 +168,65 @@ class ProjectServiceTest {
     void uploadLogo_projectNotFound_shouldThrow() {
         when(projectRepository.findById(999)).thenReturn(null);
 
-        MockMultipartFile file = new MockMultipartFile("logo", "logo.png", "image/png", "fake-image".getBytes());
+        MockMultipartFile file = new MockMultipartFile("logo", "logo.png", "image/png", pngBytes());
 
         RuntimeException ex = assertThrows(RuntimeException.class, () -> projectService.uploadLogo(999, file));
         assertTrue(ex.getMessage().contains("Project not found"));
     }
 
     @Test
-    void uploadLogo_noExtension_shouldStoreEmptyExt() throws IOException {
+    void uploadLogo_derivesExtensionFromContent_notFilename() throws IOException {
         Project p = new Project();
         p.setId(2);
         p.setName("NoExt Project");
-        p.setLogo("blob");
+        p.setLogo("blob.png");
         when(projectRepository.findById(2)).thenReturn(p);
-        doNothing().when(projectRepository).updateLogo(eq(2), eq("blob"), any(byte[].class));
+        doNothing().when(projectRepository).updateLogo(eq(2), eq("blob.png"), any(byte[].class));
 
-        MockMultipartFile file = new MockMultipartFile("logo", "logofile", "image/png", "data".getBytes());
+        // Filename has no extension, but the PNG magic bytes drive the stored extension.
+        MockMultipartFile file = new MockMultipartFile("logo", "logofile", "image/png", pngBytes());
 
         projectService.uploadLogo(2, file);
 
-        verify(projectRepository).updateLogo(eq(2), eq("blob"), any(byte[].class));
+        verify(projectRepository).updateLogo(eq(2), eq("blob.png"), any(byte[].class));
     }
 
     @Test
-    void uploadLogo_nullFilename_shouldHandle() throws IOException {
+    void uploadLogo_jpegContent_storesJpgExtension() throws IOException {
         Project p = new Project();
         p.setId(3);
-        p.setName("NullFile Project");
-        p.setLogo("blob");
+        p.setName("Jpeg Project");
+        p.setLogo("blob.jpg");
         when(projectRepository.findById(3)).thenReturn(p);
-        doNothing().when(projectRepository).updateLogo(eq(3), eq("blob"), any(byte[].class));
+        doNothing().when(projectRepository).updateLogo(eq(3), eq("blob.jpg"), any(byte[].class));
 
-        MockMultipartFile file = new MockMultipartFile("logo", null, "image/png", "data".getBytes());
+        MockMultipartFile file = new MockMultipartFile("logo", null, "image/jpeg", jpegBytes());
 
         projectService.uploadLogo(3, file);
 
-        verify(projectRepository).updateLogo(eq(3), eq("blob"), any(byte[].class));
+        verify(projectRepository).updateLogo(eq(3), eq("blob.jpg"), any(byte[].class));
+    }
+
+    @Test
+    void uploadLogo_nonImageOrSvg_shouldReject() {
+        Project p = new Project();
+        p.setId(4);
+        p.setName("Bad Upload");
+        when(projectRepository.findById(4)).thenReturn(p);
+
+        MockMultipartFile svg = new MockMultipartFile("logo", "logo.svg", "image/svg+xml",
+            "<svg xmlns=\"http://www.w3.org/2000/svg\"><script>alert(1)</script></svg>".getBytes());
+
+        assertThrows(dev.mozhno.exception.BadRequestException.class, () -> projectService.uploadLogo(4, svg));
+        verify(projectRepository, never()).updateLogo(eq(4), any(), any(byte[].class));
+    }
+
+    private static byte[] pngBytes() {
+        return new byte[]{(byte) 0x89, 'P', 'N', 'G', 13, 10, 26, 10, 0, 0, 0, 0};
+    }
+
+    private static byte[] jpegBytes() {
+        return new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0, 16, 'J', 'F'};
     }
 
     @Test

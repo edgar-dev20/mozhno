@@ -9,17 +9,17 @@ public final class HttpUtils {
     private HttpUtils() {
     }
 
+    /**
+     * Returns the client IP address of the request.
+     *
+     * <p>Relies on the servlet container's forwarded-headers handling
+     * ({@code server.forward-headers-strategy=native} → Tomcat RemoteIpValve),
+     * which rewrites {@code remoteAddr} to the real client IP only when the TCP
+     * peer is a trusted proxy. This avoids trusting a client-supplied
+     * {@code X-Forwarded-For} header directly, which would let attackers spoof
+     * their IP and bypass IP-based rate limiting.
+     */
     public static String getClientIp(HttpServletRequest request) {
-        String forwardedFor = request.getHeader("X-Forwarded-For");
-        if (forwardedFor != null && !forwardedFor.isBlank()) {
-            String[] parts = forwardedFor.split(",");
-            for (String part : parts) {
-                String trimmed = part.trim();
-                if (!trimmed.isEmpty()) {
-                    return trimmed;
-                }
-            }
-        }
         return request.getRemoteAddr();
     }
 

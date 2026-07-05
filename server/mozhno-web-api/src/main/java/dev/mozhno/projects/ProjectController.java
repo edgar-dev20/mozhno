@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,6 +22,12 @@ import java.util.List;
  * REST controller for managing projects.
  * A project is the top-level organizational unit that owns flags,
  * environments, segments, and other configuration resources.
+ *
+ * <p><b>Project scoping:</b> the active project is carried in the JWT
+ * {@code project_id} claim (chosen at login or via {@code /auth/select-project}).
+ * Resource controllers (flags, segments, contexts, API keys, audit, …) scope all
+ * data by {@code user.projectId()}. This controller also lists project metadata
+ * so the UI can offer a project switcher.
  *
  * @see ProjectService
  */
@@ -104,9 +109,6 @@ public class ProjectController {
         if (data == null) {
             return ResponseEntity.notFound().build();
         }
-        MediaType contentType = MediaTypeUtils.detectImageType(data);
-        return ResponseEntity.ok()
-                .contentType(contentType)
-                .body(data);
+        return MediaTypeUtils.imageResponse(data);
     }
 }

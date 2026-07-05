@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -91,9 +90,6 @@ public class UsersController {
         if (!user.userId().equals(id) && !user.isAdmin()) {
             throw new org.springframework.security.access.AccessDeniedException("Cannot update another user's avatar");
         }
-        if (!MediaTypeUtils.isImageContentType(file.getContentType())) {
-            throw new org.springframework.security.access.AccessDeniedException("Only image files are allowed");
-        }
         return userService.uploadAvatar(id, file);
     }
 
@@ -105,10 +101,7 @@ public class UsersController {
         if (data == null) {
             return ResponseEntity.notFound().build();
         }
-        MediaType contentType = MediaTypeUtils.detectImageType(data);
-        return ResponseEntity.ok()
-                .contentType(contentType)
-                .body(data);
+        return MediaTypeUtils.imageResponse(data);
     }
 
     @PostMapping("/{id}/send-reset-link")

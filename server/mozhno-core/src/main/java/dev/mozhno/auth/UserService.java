@@ -159,14 +159,18 @@ public class UserService {
         if (user == null) {
             throw new NotFoundException("User", id);
         }
+        byte[] bytes;
         try {
-            byte[] bytes = file.getBytes();
-            userRepository.updateAvatarData(id, bytes);
+            bytes = file.getBytes();
         } catch (IOException e) {
             throw new dev.mozhno.exception.BadRequestException("Failed to read avatar file: " + e.getMessage());
         }
-        String ext = dev.mozhno.util.FileUtils.getExtension(file.getOriginalFilename());
-        user.setAvatar("blob" + ext);
+        org.springframework.http.MediaType type = dev.mozhno.util.MediaTypeUtils.detectRasterImageType(bytes);
+        if (type == null) {
+            throw new dev.mozhno.exception.BadRequestException("Only PNG, JPEG, GIF or WEBP images are allowed");
+        }
+        userRepository.updateAvatarData(id, bytes);
+        user.setAvatar("blob" + dev.mozhno.util.MediaTypeUtils.extensionFor(type));
         User saved = userRepository.save(user);
         events.publish(DomainEvent.of(null, "user.avatar_updated", "user",
             saved.getId(), saved.getEmail(), "Avatar updated"));
