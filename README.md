@@ -34,9 +34,11 @@
 ---
 ### Дизайн-бук (Storybook)
 
-Run: cd web && npm run storybook
+```bash
+cd web && npm run storybook   # http://localhost:6006
+```
 
-Запустите Storybook на http://localhost:6006 чтобы увидеть все UI-компоненты в изолированном каталоге с документацией.
+Storybook показывает все UI-компоненты в изолированном каталоге с документацией.
 
 ### Скриншоты
 
@@ -70,7 +72,7 @@ services:
       MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
       MOZHNO_DB_USERNAME: flags_user
       MOZHNO_DB_PASSWORD: flags_password
-      MOZHNO_JWT_SECRET: change-me-to-a-real-256-bit-secret
+      MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET}
     depends_on:
       - postgres
 
@@ -79,10 +81,15 @@ volumes:
 ```
 
 ```bash
+# Сгенерируйте JWT-секрет (Base64, ≥32 байта) — без него сервер не стартует
+export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)
+
 docker compose up -d
 ```
 
 Открой [`http://localhost:8080`](http://localhost:8080) — веб-панель уже встроена в сервер.
+
+> Полный compose с healthcheck и pgAdmin — [`docker-compose.yml`](docker-compose.yml).
 
 ---
 
@@ -142,12 +149,14 @@ const on = client.isEnabled('new-checkout', { userId: '42' });
 | `MOZHNO_DB_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | JDBC URL базы данных |
 | `MOZHNO_DB_USERNAME` | `flags_user` | Пользователь БД |
 | `MOZHNO_DB_PASSWORD` | `flags_password` | Пароль БД |
-| `MOZHNO_JWT_SECRET` | *(обязательно сменить)* | HMAC-SHA256 ключ (минимум 256 бит) |
+| `MOZHNO_JWT_SECRET` | *(обязательно сменить)* | Base64-ключ, ≥32 байта. Сгенерировать: `openssl rand -base64 32` |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Публичный URL сервера |
 | `MOZHNO_CLIENT_MAX_METRICS_BATCH_SIZE` | `1000` | Максимальный размер батча метрик от SDK |
 | `MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Срок хранения данных о клиентских инстансах |
 | `MOZHNO_MANAGEMENT_PORT` | `9090` | Порт для actuator-эндпоинтов (health, metrics, prometheus) |
 | `MOZHNO_SERVER_PORT` | `8080` | HTTP-порт |
+
+Полный список переменных (rate-limit, webhooks, cache, SMTP и т.д.) — см. [`.env.example`](.env.example).
 
 ---
 
@@ -160,6 +169,20 @@ Swagger UI — [`http://localhost:8080/swagger-ui.html`](http://localhost:8080/s
 ### Разработка
 
 **Требования:** JDK 25 (сервер), JDK 17+ (SDK), Node.js 24, PostgreSQL 15+.
+
+Быстрее всего — через `make` (корневой `Makefile`):
+
+```bash
+make dev           # Postgres + подсказки по запуску server/web
+make server-run    # сборка web-статики + запуск сервера (dev-профиль)
+make web-dev       # web UI с HMR
+make server-test   # тесты сервера
+make web-test      # тесты web
+make js-sdk-test   # тесты JS SDK
+make java-sdk-test # тесты Java SDK
+```
+
+Либо вручную:
 
 ```bash
 docker compose up -d postgres
@@ -176,6 +199,16 @@ cd server && ./gradlew :mozhno-client-java:check   # Тесты Java SDK
 
 ---
 
+### Участие
+
+Вклад приветствуется — начните с [`CONTRIBUTING.md`](CONTRIBUTING.md). Пожалуйста,
+соблюдайте [Кодекс поведения](CODE_OF_CONDUCT.md). Об уязвимостях сообщайте по
+[политике безопасности](SECURITY.md). История изменений — в [`CHANGELOG.md`](CHANGELOG.md).
+
+---
+
 ### Лицензия
 
 [Business Source License 1.1](LICENSE) · © 2026 Edgar Gilmanov
+
+[Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Changelog](CHANGELOG.md)

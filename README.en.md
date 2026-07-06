@@ -33,6 +33,24 @@
 
 ---
 
+### Design Book (Storybook)
+
+```bash
+cd web && npm run storybook   # http://localhost:6006
+```
+
+Storybook shows every UI component in an isolated catalog with documentation.
+
+### Screenshots
+
+| Flags | Flag detail | Settings |
+|---|---|---|
+| ![Flags](web/storybook-static/screenshots/flags.svg) | ![Flag](web/storybook-static/screenshots/flag-detail.svg) | ![Settings](web/storybook-static/screenshots/settings.svg) |
+
+> Run the project locally (`make dev`) to see the interface.
+
+---
+
 ### Quick Start
 
 ```yaml
@@ -55,7 +73,7 @@ services:
       MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
       MOZHNO_DB_USERNAME: flags_user
       MOZHNO_DB_PASSWORD: flags_password
-      MOZHNO_JWT_SECRET: change-me-to-a-real-256-bit-secret
+      MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET}
     depends_on:
       - postgres
 
@@ -64,10 +82,15 @@ volumes:
 ```
 
 ```bash
+# Generate a JWT secret (Base64, >=32 bytes) — the server won't start without it
+export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)
+
 docker compose up -d
 ```
 
 Open [`http://localhost:8080`](http://localhost:8080) — the web dashboard is served from the same application.
+
+> Full compose with healthchecks and pgAdmin — [`docker-compose.yml`](docker-compose.yml).
 
 ---
 
@@ -127,9 +150,14 @@ const on = client.isEnabled('new-checkout', { userId: '42' });
 | `MOZHNO_DB_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | PostgreSQL JDBC URL |
 | `MOZHNO_DB_USERNAME` | `flags_user` | Database user |
 | `MOZHNO_DB_PASSWORD` | `flags_password` | Database password |
-| `MOZHNO_JWT_SECRET` | *(must change)* | HMAC-SHA256 signing key (≥256 bits) |
+| `MOZHNO_JWT_SECRET` | *(must change)* | Base64 signing key, ≥32 bytes. Generate: `openssl rand -base64 32` |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Public base URL |
+| `MOZHNO_CLIENT_MAX_METRICS_BATCH_SIZE` | `1000` | Max metrics batch size accepted from SDKs |
+| `MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Retention for client instance data |
+| `MOZHNO_MANAGEMENT_PORT` | `9090` | Actuator port (health, metrics, prometheus) |
 | `MOZHNO_SERVER_PORT` | `8080` | HTTP listen port |
+
+Full list of variables (rate limiting, webhooks, cache, SMTP, etc.) — see [`.env.example`](.env.example).
 
 ---
 
@@ -142,6 +170,20 @@ Swagger UI — [`http://localhost:8080/swagger-ui.html`](http://localhost:8080/s
 ### Development
 
 **Requirements:** JDK 25 (server), JDK 17+ (SDK), Node.js 24, PostgreSQL 15+.
+
+The fastest way is via `make` (root `Makefile`):
+
+```bash
+make dev           # Postgres + hints to start server/web
+make server-run    # build web static assets + run the server (dev profile)
+make web-dev       # web UI with HMR
+make server-test   # server tests
+make web-test      # web tests
+make js-sdk-test   # JS SDK tests
+make java-sdk-test # Java SDK tests
+```
+
+Or manually:
 
 ```bash
 docker compose up -d postgres
@@ -158,6 +200,16 @@ cd server && ./gradlew :mozhno-client-java:check   # Java SDK tests
 
 ---
 
+### Contributing
+
+Contributions are welcome — start with [`CONTRIBUTING.md`](CONTRIBUTING.md). Please follow
+the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities per the
+[security policy](SECURITY.md). Release history is in [`CHANGELOG.md`](CHANGELOG.md).
+
+---
+
 ### License
 
 [Business Source License 1.1](LICENSE) · © 2026 Edgar Gilmanov
+
+[Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Changelog](CHANGELOG.md)
