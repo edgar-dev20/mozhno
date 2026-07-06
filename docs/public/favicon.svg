@@ -5,9 +5,6 @@
       <stop offset="100%" stop-color="#2d9484"/>
     </linearGradient>
   </defs>
-  <text x="32" y="52" text-anchor="middle"
-        font-family="'Onest','Inter',Arial,sans-serif"
-        font-weight="700" font-size="56" fill="url(#g)">
-    <tspan letter-spacing="0.02em">м</tspan><tspan font-family="'JetBrains Mono','Fira Code','Consolas',monospace" font-weight="600" font-size="30" fill="#CD7F32">.</tspan>
-  </text>
+  <path fill="url(#g)" d="M13.54 52L5.70 52L5.70 22.49L15.05 22.49L23.11 35.26L31.12 22.49L40.30 22.49L40.30 52L32.52 52L32.52 32.90L24.18 46.01L21.94 46.01L13.54 32.85"/>
+  <path fill="#CD7F32" d="M52.38 52.30Q51.12 52.30 50.39 51.56Q49.65 50.83 49.65 49.60Q49.65 48.34 50.39 47.59Q51.12 46.84 52.38 46.84Q53.64 46.84 54.38 47.59Q55.11 48.34 55.11 49.60Q55.11 50.83 54.38 51.56Q53.64 52.30 52.38 52.30"/>
 </svg>
