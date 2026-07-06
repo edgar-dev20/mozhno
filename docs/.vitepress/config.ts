@@ -113,6 +113,10 @@ export default defineConfig({
 
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    ['link', { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/onest-cyrillic-400-normal.woff2', crossorigin: '' }],
+    ['link', { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/onest-latin-400-normal.woff2', crossorigin: '' }],
+    ['link', { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/onest-cyrillic-700-normal.woff2', crossorigin: '' }],
+    ['link', { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/jetbrains-mono-latin-600-normal.woff2', crossorigin: '' }],
     ['meta', { name: 'theme-color', content: '#3d4f7a' }],
     ['meta', { name: 'yandex-verification', content: 'b3a6b893315c5345' }],
     ['meta', { property: 'og:type', content: 'website' }],
