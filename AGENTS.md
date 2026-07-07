@@ -10,6 +10,7 @@ package, open that package's `SKILL.md` for the real conventions and patterns.**
 |---------------------|-----------------|
 | `server/` (Java backend) | [`server/SKILL.md`](server/SKILL.md) — `mozhno-server` skill |
 | `web/` (React UI) | [`web/SKILL.md`](web/SKILL.md) — `mozhno-web` skill |
+| **Building or reworking any UI** | [`web/DESIGN-THINKING.md`](web/DESIGN-THINKING.md) — tool-agnostic design process (brief → constrain → states → critique → see). Follow it before writing JSX. |
 | `sdks/java`, `sdks/js` | [`sdks/SKILL.md`](sdks/SKILL.md) — `mozhno-sdks` skill |
 
 Keep this file as an index — do **not** duplicate package details here (avoids drift). Put
@@ -36,6 +37,7 @@ The server serves the built web UI as static assets — one self-contained artif
 | `make server-run` | Build web static assets, then run the server (dev profile) |
 | `make server-test` | `./gradlew check jacocoTestReport` |
 | `make web-dev` / `make web-test` / `make web-lint` | Web dev server / tests / lint |
+| `cd web && npm run storybook` / `npm run test-storybook` | Storybook component workbench (port 6006) / run story tests |
 | `make js-sdk-test` / `make js-sdk-build` | JS SDK tests / build |
 | `make java-sdk-test` | `./gradlew :mozhno-client-java:check` |
 | `make docker-up` / `make docker-down` | Full stack via docker-compose |
@@ -55,6 +57,15 @@ The server serves the built web UI as static assets — one self-contained artif
   existing one.
 - **Web styling uses semantic design tokens only** — no raw Tailwind color values (e.g.
   `bg-red-600`, `text-white`, `bg-black/50`). Enforced as an ESLint error. (See `web/SKILL.md`.)
+- **UI work follows a design process, not just codegen:** before building or reworking any screen,
+  follow [`web/DESIGN-THINKING.md`](web/DESIGN-THINKING.md) — brief first, cover all states
+  (empty/loading/error/overflow), self-critique against WCAG 2.2 AA + UX heuristics, and review the
+  *rendered* result (Storybook/screenshot), not just the code. This applies to every agent/tool.
+- **Storybook is the component workbench (mandatory).** Every shared/reusable web component and
+  design token has a story under `web/src/**/*.stories.tsx`. When you **add or change** such a
+  component, you **must add or update its story** — cover the key states and both themes — and keep
+  `cd web && npm run test-storybook` green. Never ship a new/changed reusable component without its
+  story. (See `web/SKILL.md`.)
 - **Open-core boundary:** the core (`server/` + `web/`) is source-available under BSL 1.1.
   Keep premium/paid logic OUT of the core — extend via the server SPI (`mozhno-spi` +
   `spi/impl` OSS defaults) and the web plugin registry (`PluginSlot` / `pluginRegistry`).
@@ -70,7 +81,9 @@ Verify only the area(s) you touched, then confirm green before declaring done:
 
 - **Server:** `make server-test` (or `./gradlew check`). Docker must be running (Testcontainers).
 - **Web:** `make web-test` + `make web-lint`; if you touched UI strings, `en.ts` and `ru.ts`
-  must both be updated (i18n stays in sync — enforced by a key-parity test).
+  must both be updated (i18n stays in sync — enforced by a key-parity test). For any new or changed
+  shared/reusable component or token, **add or update its Storybook story** and run
+  `cd web && npm run test-storybook` (green).
 - **JS SDK:** `make js-sdk-test`. **Java SDK:** `make java-sdk-test`.
 - No `@Deprecated`/`@deprecated` calls introduced; no secrets committed.
 - Do not commit unless explicitly asked.

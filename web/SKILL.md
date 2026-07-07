@@ -11,6 +11,11 @@ metadata:
 
 # Mozhno Web
 
+> **Building or reworking UI?** This file is the *material* (tokens, components, styling rules).
+> For *how to think* — the brief-first design process, state coverage, WCAG/UX self-critique, and
+> the visual feedback loop — read [`DESIGN-THINKING.md`](./DESIGN-THINKING.md) first. It is
+> tool-agnostic and applies to every agent/tool.
+
 ## Design Principles
 
 Aim for a polished, cohesive, production-grade UI. This project already ships a mature design
@@ -519,6 +524,43 @@ const { result } = renderHook(() => useEnrichedFlagsQuery(), { wrapper });
 
 ---
 
+# Storybook (MANDATORY)
+
+Storybook is this project's **component workbench and visual source of truth** — 80+ stories cover
+`@/shared`, the `@/app/components/ui` primitives, design tokens (Colors, Typography, Radius,
+Shadows, Tokens), and key feature components. Config: `.storybook/main.ts`
+(addons: **docs, a11y, themes, vitest**). Stories glob: `src/**/*.stories.@(js|jsx|ts|tsx)`
+(kept in `src/stories/`).
+
+**The rule:** when you **add** a shared/reusable component (or token) or **change** one's
+props/variants/appearance, you **must add or update its `*.stories.tsx`** in the same change. A new
+reusable component without a story is incomplete.
+
+- Cover the meaningful **states/variants** (e.g. each CVA `variant`/`size`, and the empty/loading/
+  error/disabled/overflow states that apply) — mirror the states checklist in `DESIGN-THINKING.md`.
+- Verify **both themes** (the `themes` addon toggles `.dark`) and a clean **a11y** panel (the a11y
+  addon flags contrast/roles/labels).
+- Keep story tests green: `npm run test-storybook` (runs stories in a real browser via the vitest
+  addon + Playwright). This runs in CI-style verification, so a broken/absent story fails you.
+
+```tsx
+// Badge.stories.tsx — minimal shape
+import type { Meta, StoryObj } from '@storybook/react';
+import { Badge } from '@/shared/components/Badge';
+
+const meta = { title: 'Shared/Badge', component: Badge } satisfies Meta<typeof Badge>;
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Success: Story = { args: { variant: 'success', children: 'OK' } };
+export const AllVariants: Story = { render: () => (/* every variant × style for visual review */) };
+```
+
+> Exceptions (no story required): one-off page compositions wired only from already-storied
+> primitives, and pure non-visual utilities. When unsure, add the story.
+
+---
+
 # No Deprecated APIs
 
 Target the versions this repo runs on: **React 19, react-router 8, TanStack Query 5,
@@ -555,6 +597,7 @@ deprecated or removed in these versions.
 | `npm run build:static` | Build to `../server/mozhno-app/src/main/resources/static` |
 | `npm run storybook` | Storybook dev server (port 6006) |
 | `npm run build-storybook` | Static Storybook build |
+| `npm run test-storybook` | Run story tests (vitest browser + a11y) — **required to pass** |
 | `npm run test` | vitest run |
 | `npm run test:watch` | vitest in watch mode |
 | `npm run test:coverage` | vitest with coverage |
