@@ -1,5 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { MANAGEMENT_ITEMS, ADMIN_ITEMS } from '@/app/components/navConfig';
+import {
+  OVERVIEW_ITEMS,
+  MANAGEMENT_ITEMS,
+  TEAM_ITEMS,
+  SETTINGS_ITEMS,
+} from '@/app/components/navConfig';
+
+describe('OVERVIEW_ITEMS', () => {
+  it('contains the root overview route', () => {
+    const paths = OVERVIEW_ITEMS.map((i) => i.path);
+    expect(paths).toContain('/');
+  });
+
+  it('root item matches exactly', () => {
+    const root = OVERVIEW_ITEMS.find((i) => i.path === '/');
+    expect(root?.exact).toBe(true);
+  });
+
+  it('is not admin-only', () => {
+    OVERVIEW_ITEMS.forEach((item) => {
+      expect(item.adminOnly).toBeFalsy();
+    });
+  });
+});
 
 describe('MANAGEMENT_ITEMS', () => {
   it('has expected items', () => {
@@ -10,36 +33,47 @@ describe('MANAGEMENT_ITEMS', () => {
     expect(paths).toContain('/tags');
   });
 
-  it('all items have path, labelKey, and icon', () => {
+  it('all items have path, labelKey, and icon and are not admin-only', () => {
     MANAGEMENT_ITEMS.forEach((item) => {
       expect(item.path).toBeTruthy();
       expect(item.labelKey).toBeTruthy();
       expect(item.icon).toBeTruthy();
+      expect(item.adminOnly).toBeFalsy();
     });
   });
 });
 
-describe('ADMIN_ITEMS', () => {
+describe('TEAM_ITEMS', () => {
   it('has expected items', () => {
-    const paths = ADMIN_ITEMS.map((i) => i.path);
+    const paths = TEAM_ITEMS.map((i) => i.path);
     expect(paths).toContain('/users');
-    expect(paths).toContain('/integrations');
-    expect(paths).toContain('/settings');
     expect(paths).toContain('/audit');
-    expect(paths).toContain('/apikeys');
-    expect(paths).toContain('/applications');
   });
 
-  it('all items have path, labelKey, and icon', () => {
-    ADMIN_ITEMS.forEach((item) => {
+  it('all items are admin-only with path, labelKey, and icon', () => {
+    TEAM_ITEMS.forEach((item) => {
       expect(item.path).toBeTruthy();
       expect(item.labelKey).toBeTruthy();
       expect(item.icon).toBeTruthy();
+      expect(item.adminOnly).toBe(true);
     });
   });
+});
 
-  it('all items have adminOnly: true', () => {
-    ADMIN_ITEMS.forEach((item) => {
+describe('SETTINGS_ITEMS', () => {
+  it('has expected items', () => {
+    const paths = SETTINGS_ITEMS.map((i) => i.path);
+    expect(paths).toContain('/apikeys');
+    expect(paths).toContain('/integrations');
+    expect(paths).toContain('/applications');
+    expect(paths).toContain('/settings');
+  });
+
+  it('all items are admin-only with path, labelKey, and icon', () => {
+    SETTINGS_ITEMS.forEach((item) => {
+      expect(item.path).toBeTruthy();
+      expect(item.labelKey).toBeTruthy();
+      expect(item.icon).toBeTruthy();
       expect(item.adminOnly).toBe(true);
     });
   });

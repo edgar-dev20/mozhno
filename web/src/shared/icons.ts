@@ -1,6 +1,7 @@
 export {
   Activity,
   BarChart3,
+  Home,
   PieChart,
   Sparkles,
 } from 'lucide-react';

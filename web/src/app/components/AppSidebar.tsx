@@ -8,7 +8,7 @@ import { GradientButton } from '@/shared/components/GradientButton';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/app/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
 import { PanelLeftIcon } from 'lucide-react';
-import { MANAGEMENT_ITEMS, ADMIN_ITEMS } from '@/app/components/navConfig';
+import { OVERVIEW_ITEMS, MANAGEMENT_ITEMS, TEAM_ITEMS, SETTINGS_ITEMS } from '@/app/components/navConfig';
 import type { NavItem } from '@/app/components/navConfig';
 import { PluginSlot } from '@/app/components/PluginSlot';
 
@@ -153,11 +153,12 @@ function NavLinkItem({
   const { pathname } = useLocation();
   const t = useT();
   const Icon = item.icon;
-  const isActive = pathname.startsWith(item.path);
+  const isActive = item.exact ? pathname === item.path : pathname.startsWith(item.path);
 
   const link = (
     <NavLink
       to={item.path}
+      end={item.exact}
       onClick={onClick}
       className={({ isActive: active }) =>
         `flex items-center gap-3 rounded-lg transition-all duration-200 text-body-sm font-medium w-full text-left px-3 py-2.5 ${
@@ -214,8 +215,18 @@ function SidebarContent({
 
       <div className="flex-1 flex flex-col min-h-0">
         <div className="flex flex-col gap-1 overflow-y-auto py-3 px-3">
+          {OVERVIEW_ITEMS.map((item) => (
+            <NavLinkItem
+              key={item.path}
+              item={item}
+              collapsed={collapsed && !mobile}
+              onClick={onNavigate}
+            />
+          ))}
+
+          {collapsed && !mobile ? null : <Hairline className="my-3" />}
           <div
-            className={`${collapsed && !mobile ? 'sr-only' : 'px-3 mb-1.5 mt-1 text-overline font-semibold text-muted-foreground uppercase tracking-wider'}`}
+            className={`${collapsed && !mobile ? 'sr-only' : 'px-3 mb-1.5 text-overline font-semibold text-muted-foreground uppercase tracking-wider'}`}
           >
             {t('navigation.management')}
           </div>
@@ -234,9 +245,24 @@ function SidebarContent({
               <div
                 className={`${collapsed && !mobile ? 'sr-only' : 'px-3 mb-1.5 text-overline font-semibold text-muted-foreground uppercase tracking-wider'}`}
               >
-                {t('navigation.administration')}
+                {t('navigation.team')}
               </div>
-              {ADMIN_ITEMS.map((item) => (
+              {TEAM_ITEMS.map((item) => (
+                <NavLinkItem
+                  key={item.path}
+                  item={item}
+                  collapsed={collapsed && !mobile}
+                  onClick={onNavigate}
+                />
+              ))}
+
+              {collapsed && !mobile ? null : <Hairline className="my-3" />}
+              <div
+                className={`${collapsed && !mobile ? 'sr-only' : 'px-3 mb-1.5 text-overline font-semibold text-muted-foreground uppercase tracking-wider'}`}
+              >
+                {t('navigation.settingsGroup')}
+              </div>
+              {SETTINGS_ITEMS.map((item) => (
                 <NavLinkItem
                   key={item.path}
                   item={item}

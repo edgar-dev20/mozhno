@@ -49,4 +49,7 @@ export const queryKeys = {
     filtered: (projectId: number | null, dateFrom: string, dateTo: string) =>
       ['audit', projectId, dateFrom, dateTo] as const,
   },
+  overview: {
+    all: ['overview'] as const,
+  },
 } as const;

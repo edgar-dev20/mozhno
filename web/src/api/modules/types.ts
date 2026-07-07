@@ -299,3 +299,40 @@ export type EnrichedFlagResponse = {
     lastUsedAt: string | null;
   }[];
 };
+
+export type OverviewTotals = {
+  totalFlags: number;
+  archivedFlags: number;
+  staleFlags: number;
+  activeKillswitches: number;
+  rolloutsInProgress: number;
+};
+
+export type OverviewEnvironmentStat = {
+  environmentId: number;
+  environmentName: string;
+  totalFlags: number;
+  enabledCount: number;
+  rolloutCount: number;
+  staleCount: number;
+  evalTrue48h: number;
+  evalFalse48h: number;
+  connectedApps: number;
+  lastSeenAt: string | null;
+  sdkSilent: boolean;
+};
+
+export type OverviewOnboarding = {
+  hasFlags: boolean;
+  hasEnvironments: boolean;
+  hasApiKey: boolean;
+  hasConnectedSdk: boolean;
+  hasTeam: boolean;
+};
+
+export type OverviewResponse = {
+  totals: OverviewTotals;
+  environments: OverviewEnvironmentStat[];
+  onboarding: OverviewOnboarding;
+  recentActivity: AuditEvent[];
+};

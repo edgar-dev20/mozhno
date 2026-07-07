@@ -20,6 +20,7 @@ import { clientInstancesApi } from '@/api/modules/clientInstances';
 import { auditApi } from '@/api/modules/audit';
 import { integrationsApi } from '@/api/modules/integrations';
 import { settingsApi } from '@/api/modules/settings';
+import { overviewApi } from '@/api/modules/overview';
 
 export const api = {
   auth: authApi,
@@ -37,6 +38,7 @@ export const api = {
   audit: auditApi,
   integrations: integrationsApi,
   settings: settingsApi,
+  overview: overviewApi,
 };
 
 export type {
@@ -68,4 +70,8 @@ export type {
   ClientInstance,
   EnrichedFlagResponse,
   DashboardResponse,
+  OverviewResponse,
+  OverviewTotals,
+  OverviewEnvironmentStat,
+  OverviewOnboarding,
 } from '@/api/modules/types';

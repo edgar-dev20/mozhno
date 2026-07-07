@@ -8,4 +8,5 @@ export { useEnrichedFlagsQuery } from './useEnrichedFlagsQuery';
 export type { EnrichedFlagsData } from './useEnrichedFlagsQuery';
 export { useMetricsSparklineQuery } from './useMetricsSparklineQuery';
 export type { SparklineData } from './useMetricsSparklineQuery';
+export { useOverviewQuery } from './useOverviewQuery';
 export { useInvalidateQueries } from './useInvalidateQueries';

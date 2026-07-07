@@ -111,3 +111,8 @@ credentials/
 
 ### Vitest coverage ###
 coverage/
+
+# Scratch design mockups (not shipped)
+nav-overview-mockup.html
+env-cards-variants.html
+env-cards-variant-b.html

@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
+import { useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { Plus, Zap, Archive } from '@/shared/icons';
@@ -253,11 +253,23 @@ export function Flags() {
     computeEnvironmentDiff, showDiff, save, flattenConstraintGroups,
   ]);
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const createHandledRef = useRef(false);
 
   useEffect(() => {
     if (!panelOpen) setActiveGroupId(null);
   }, [panelOpen, setActiveGroupId]);
+
+  useEffect(() => {
+    if (createHandledRef.current) return;
+    if (searchParams.get('new') === '1') {
+      createHandledRef.current = true;
+      openCreate();
+      const next = new URLSearchParams(searchParams);
+      next.delete('new');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams, openCreate]);
 
   useEffect(() => {
     const targetKey = searchParams.get('open');

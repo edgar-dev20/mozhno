@@ -9,6 +9,7 @@ import {
   Activity,
   Key,
   Monitor,
+  Home,
 } from '@/shared/icons';
 
 export interface NavItem {
@@ -16,7 +17,13 @@ export interface NavItem {
   labelKey: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   adminOnly?: boolean;
+  /** Match only on exact pathname equality instead of prefix (used for the root route). */
+  exact?: boolean;
 }
+
+export const OVERVIEW_ITEMS: NavItem[] = [
+  { path: '/', labelKey: 'navigation.overview', icon: Home, exact: true },
+];
 
 export const MANAGEMENT_ITEMS: NavItem[] = [
   { path: '/flags', labelKey: 'navigation.flags', icon: Flag },
@@ -25,11 +32,14 @@ export const MANAGEMENT_ITEMS: NavItem[] = [
   { path: '/tags', labelKey: 'navigation.tags', icon: Tag },
 ];
 
-export const ADMIN_ITEMS: NavItem[] = [
+export const TEAM_ITEMS: NavItem[] = [
   { path: '/users', labelKey: 'navigation.users', icon: UserCog, adminOnly: true },
-  { path: '/integrations', labelKey: 'navigation.integrations', icon: Webhook, adminOnly: true },
-  { path: '/settings', labelKey: 'navigation.settings', icon: Settings, adminOnly: true },
   { path: '/audit', labelKey: 'navigation.audit', icon: Activity, adminOnly: true },
+];
+
+export const SETTINGS_ITEMS: NavItem[] = [
   { path: '/apikeys', labelKey: 'navigation.apiKeys', icon: Key, adminOnly: true },
+  { path: '/integrations', labelKey: 'navigation.integrations', icon: Webhook, adminOnly: true },
   { path: '/applications', labelKey: 'navigation.applications', icon: Monitor, adminOnly: true },
+  { path: '/settings', labelKey: 'navigation.settings', icon: Settings, adminOnly: true },
 ];

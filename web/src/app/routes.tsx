@@ -11,6 +11,9 @@ import { LazyPage } from '@/shared/components/LazyPage';
 import { PremiumPageSlot } from '@/app/components/PremiumPageSlot';
 
 const Flags = lazy(() => import('@/app/components/Flags').then((m) => ({ default: m.Flags })));
+const Overview = lazy(() =>
+  import('@/app/components/Overview').then((m) => ({ default: m.Overview })),
+);
 const Segments = lazy(() =>
   import('@/app/components/Segments').then((m) => ({ default: m.Segments })),
 );
@@ -73,7 +76,7 @@ export const router = createBrowserRouter([
             path: '/',
             Component: DashboardLayout,
             children: [
-              { index: true, element: <Navigate to="/flags" replace /> },
+              { index: true, element: <LazyPage Component={Overview} /> },
               { path: 'flags', element: <LazyPage Component={Flags} /> },
               { path: 'segments', element: <LazyPage Component={Segments} /> },
               { path: 'contexts', element: <LazyPage Component={Constraints} /> },

@@ -16,18 +16,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { api, ClientInstance, FlagResponse } from '@/api';
 import { NavLink } from 'react-router';
 import { JavaIcon, JavaScriptIcon } from '@/app/components/LanguageIcons';
-import { SectionHeader, TruncatedCopyTooltip, getEnvTheme } from '@/shared';
+import { SectionHeader, TruncatedCopyTooltip, getEnvTheme, formatCompactCount } from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
 import { useT } from '@/i18n';
-
-function formatCount(n: number): string {
-  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
-  return String(n);
-}
 
 const ACTIVE_MS = 5 * 60 * 1000;
 const RECENT_MS = 60 * 60 * 1000;
@@ -533,7 +527,7 @@ export function ClientInstances() {
                                                       className="text-muted-foreground"
                                                     />
                                                     <span className="text-xs text-muted-foreground/70">
-                                                      {formatCount(metricTotal)}
+                                                      {formatCompactCount(metricTotal)}
                                                     </span>
                                                   </div>
                                                 )}
