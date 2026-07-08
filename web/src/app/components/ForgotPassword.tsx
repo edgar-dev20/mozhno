@@ -43,7 +43,7 @@ export function ForgotPassword() {
             </div>
 
             <div className="text-center mb-10">
-              <p className="text-base font-medium text-muted-foreground">
+              <p className="text-body font-medium text-muted-foreground">
                 {t('auth.loginTagline')}
               </p>
             </div>
@@ -57,13 +57,13 @@ export function ForgotPassword() {
             {sent ? (
               <div className="text-center space-y-4">
                 <div className="p-4 bg-success dark:bg-success/10 border border-success dark:border-success/20 rounded-xl">
-                  <p className="text-sm text-success dark:text-success">
+                  <p className="text-body-sm text-success dark:text-success">
                     {t('auth.forgotPasswordSent')}
                   </p>
                 </div>
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="inline-flex items-center gap-1.5 text-body-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ArrowLeft size={16} />
                   {t('auth.backToLogin')}
@@ -72,7 +72,7 @@ export function ForgotPassword() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground/80" htmlFor="email">
+                  <label className="text-body-sm font-medium text-foreground/80" htmlFor="email">
                     {t('auth.email')}
                   </label>
                   <div className="relative">
@@ -104,7 +104,7 @@ export function ForgotPassword() {
                 <div className="text-center">
                   <Link
                     to="/login"
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-body-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {t('auth.backToLogin')}
                   </Link>

@@ -33,10 +33,10 @@ export class ErrorBoundary extends React.Component<
             <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-destructive/10 flex items-center justify-center">
               <AlertTriangle size={28} className="text-destructive" />
             </div>
-            <h2 className="text-lg font-semibold text-foreground mb-2">
+            <h2 className="text-h2 font-semibold text-foreground mb-2">
               {t('errors.somethingWentWrong')}
             </h2>
-            <p className="text-sm text-muted-foreground mb-6">
+            <p className="text-body-sm text-muted-foreground mb-6">
               {this.state.error?.message ?? t('errors.unknownError')}
             </p>
             <GradientButton onClick={() => window.location.reload()}>

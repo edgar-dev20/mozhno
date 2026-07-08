@@ -33,7 +33,7 @@ export function InlineDiffBar({ changes }: InlineDiffBarProps) {
         >
           <div className="border-t border-border bg-secondary/30 dark:bg-secondary/10">
             <div className="px-6 pt-4 pb-1 flex items-center gap-2">
-              <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+              <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
                 {t('common.reviewChanges')}
               </span>
               <span className="text-[11px] font-medium text-muted-foreground/50 tabular-nums">

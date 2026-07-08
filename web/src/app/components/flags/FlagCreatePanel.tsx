@@ -64,9 +64,9 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
           {...register('name')}
           maxLength={120}
           placeholder={t('flags.namePlaceholderEdit')}
-          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
         />
-        {errors.name && <p className="text-xs text-destructive mt-1">{errors.name.message}</p>}
+        {errors.name && <p className="text-caption text-destructive mt-1">{errors.name.message}</p>}
       </FormField>
 
       <FormField
@@ -80,9 +80,9 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
           {...register('key')}
           maxLength={100}
           placeholder="new-checkout-flow"
-          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
+          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
         />
-        {errors.key && <p className="text-xs text-destructive mt-1">{errors.key.message}</p>}
+        {errors.key && <p className="text-caption text-destructive mt-1">{errors.key.message}</p>}
       </FormField>
 
       <FormField label={t('common.description')} maxLength={160} value={descriptionValue}>
@@ -103,17 +103,17 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
             el.style.height = 'auto';
             el.style.height = Math.max(el.scrollHeight, 80) + 'px';
           }}
-          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden"
+          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden"
         />
       </FormField>
 
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground/80">{t('flags.flagType')}</label>
+        <label className="text-body-sm font-medium text-foreground/80">{t('flags.flagType')}</label>
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => setValue('flagType', 'RELEASE')}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-sm font-semibold transition-all ${flagType === 'RELEASE' ? 'border-info bg-info/10 text-info shadow-sm' : 'border-border text-muted-foreground hover:border-info/20'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-body-sm font-semibold transition-all ${flagType === 'RELEASE' ? 'border-info bg-info/10 text-info shadow-sm' : 'border-border text-muted-foreground hover:border-info/20'}`}
           >
             <Rocket
               size={18}
@@ -124,7 +124,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
           <button
             type="button"
             onClick={() => setValue('flagType', 'KILLSWITCH')}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-sm font-semibold transition-all ${flagType === 'KILLSWITCH' ? 'border-chart-4 bg-chart-4/10 text-chart-4 shadow-sm' : 'border-border text-muted-foreground hover:border-chart-4/20'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-body-sm font-semibold transition-all ${flagType === 'KILLSWITCH' ? 'border-chart-4 bg-chart-4/10 text-chart-4 shadow-sm' : 'border-border text-muted-foreground hover:border-chart-4/20'}`}
           >
             <ShieldOff
               size={18}
@@ -136,7 +136,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground/80">{t('flags.tagsLabel')}</label>
+        <label className="text-body-sm font-medium text-foreground/80">{t('flags.tagsLabel')}</label>
         {formTags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {formTags.map((tv, i) => {
@@ -145,7 +145,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
               return (
                 <div
                   key={i}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium text-primary-foreground shadow-sm dark:brightness-[.85] dark:saturate-[.7]"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-body-sm font-medium text-primary-foreground shadow-sm dark:brightness-[.85] dark:saturate-[.7]"
                   style={{
                     background: tg.color,
                   }}
@@ -169,7 +169,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
             onClick={() => setAddingTag(true)}
             disabled={formTags.length >= 10}
             title={formTags.length >= 10 ? t('flags.maxTagsReached') : undefined}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium text-brand hover:bg-brand/10 rounded-lg border border-dashed border-brand/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-body-sm font-medium text-brand hover:bg-brand/10 rounded-lg border border-dashed border-brand/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={14} />
             {t('flags.addTag')}
@@ -177,7 +177,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
         ) : (
           <div className="space-y-3 p-3 bg-secondary rounded-lg border border-border">
             <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">
+              <label className="text-caption font-medium text-muted-foreground">
                 {t('flags.selectTagType')}
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -186,7 +186,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
                     type="button"
                     key={tg.id}
                     onClick={() => setNewTagId(tg.id)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border ${newTagId === tg.id ? 'shadow-sm' : 'hover:shadow-sm border-border'}`}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm font-medium border ${newTagId === tg.id ? 'shadow-sm' : 'hover:shadow-sm border-border'}`}
                     style={newTagId === tg.id ? { borderColor: tg.color, borderWidth: '2px' } : {}}
                   >
                     <div
@@ -218,7 +218,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
                     placeholder={t('flags.enterTagValue')}
                     maxLength={255}
                     autoFocus
-                    className="flex-1 bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                    className="flex-1 bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                   />
                   <GradientButton
                     type="button"
@@ -229,7 +229,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
                     {t('common.add')}
                   </GradientButton>
                 </div>
-                <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right">
+                <div className="text-caption font-normal text-muted-foreground/50 tabular-nums text-right">
                   {newTagVal.length}/255
                 </div>
               </div>
@@ -241,7 +241,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
                 setNewTagId(null);
                 setNewTagVal('');
               }}
-              className="w-full px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent rounded-lg"
+              className="w-full px-3 py-2 text-body-sm font-medium text-muted-foreground hover:bg-accent rounded-lg"
             >
               {t('common.cancel')}
             </button>

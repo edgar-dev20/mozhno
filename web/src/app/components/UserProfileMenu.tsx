@@ -86,12 +86,12 @@ export function UserProfileMenu() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
         <button
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full"
+          className="flex items-center gap-2 text-body-sm text-muted-foreground hover:text-foreground transition-colors p-1 rounded-full"
           aria-label={t('common.openUserMenu')}
         >
           <Avatar className="w-8 h-8 ring-2 ring-background dark:ring-border shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-brand text-xs font-bold text-primary-foreground">
+            <AvatarFallback className="bg-brand text-caption font-bold text-primary-foreground">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -106,15 +106,15 @@ export function UserProfileMenu() {
         <div className="flex items-center gap-3 px-2 py-2">
           <Avatar className="w-12 h-12 ring-2 ring-border dark:ring-border shadow-sm">
             <AvatarImage src={hasAvatar ? avatarUrl : undefined} alt={user?.name ?? ''} />
-            <AvatarFallback className="bg-brand text-sm font-bold text-primary-foreground">
+            <AvatarFallback className="bg-brand text-body-sm font-bold text-primary-foreground">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <div className="text-sm font-semibold text-foreground truncate">
+            <div className="text-body-sm font-semibold text-foreground truncate">
               {user?.name ?? user?.email ?? '—'}
             </div>
-            <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
+            <div className="text-caption text-muted-foreground truncate">{user?.email}</div>
             <Badge variant={getRoleVariant(user?.role ?? 'viewer')} size="sm">
               {getRoleLabel(user?.role ?? 'viewer')}
             </Badge>

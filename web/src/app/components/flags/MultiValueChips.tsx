@@ -71,7 +71,7 @@ export function MultiValueChips({ values, onChange, autoFocus, validValues }: Mu
           <span
             key={i}
             data-shake={shakeId === i ? '' : undefined}
-            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium border animate-in fade-in zoom-in-95 duration-150 data-[shake]:animate-[shake_400ms_ease-in-out] ${
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-caption font-medium border animate-in fade-in zoom-in-95 duration-150 data-[shake]:animate-[shake_400ms_ease-in-out] ${
               hasWhitelist
                 ? inWhitelist
                   ? 'bg-success/10 text-success border-success/20'
@@ -106,11 +106,11 @@ export function MultiValueChips({ values, onChange, autoFocus, validValues }: Mu
           placeholder={
             values.length === 0 ? t('flags.chipEmptyPlaceholder') : t('flags.chipPlaceholder')
           }
-          className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-xs placeholder:text-muted-foreground/60 py-1"
+          className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-caption placeholder:text-muted-foreground/60 py-1"
         />
       </div>
       {values.length > 0 && (
-        <p className="text-xs text-muted-foreground/60 leading-none">
+        <p className="text-caption text-muted-foreground/60 leading-none">
           {t('flags.chipHint', { n: String(values.length) })}
         </p>
       )}

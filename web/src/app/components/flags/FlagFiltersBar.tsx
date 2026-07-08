@@ -56,7 +56,7 @@ export function FlagFiltersBar({
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => onFlagTypeFilterChange(null)}
-            className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               !flagTypeFilter
                 ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -66,7 +66,7 @@ export function FlagFiltersBar({
           </button>
           <button
             onClick={() => onFlagTypeFilterChange(flagTypeFilter === 'RELEASE' ? null : 'RELEASE')}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               flagTypeFilter === 'RELEASE'
                 ? 'bg-info/10 text-info border-info/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -79,7 +79,7 @@ export function FlagFiltersBar({
             onClick={() =>
               onFlagTypeFilterChange(flagTypeFilter === 'KILLSWITCH' ? null : 'KILLSWITCH')
             }
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               flagTypeFilter === 'KILLSWITCH'
                 ? 'bg-chart-4/10 text-chart-4 border-chart-4/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -92,7 +92,7 @@ export function FlagFiltersBar({
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-xs font-medium text-muted-foreground">{t('flags.created')}</span>
+        <span className="text-caption font-medium text-muted-foreground">{t('flags.created')}</span>
         <Suspense
           fallback={<div className="min-w-[260px] h-9 bg-muted rounded-lg animate-pulse" />}
         >
@@ -112,13 +112,13 @@ export function FlagFiltersBar({
         <span className="text-foreground/20 dark:text-foreground/70 mx-1">|</span>
         <button
           onClick={() => onSortByChange('name')}
-          className={`inline-flex items-center text-xs px-3 py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'name' ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+          className={`inline-flex items-center text-caption px-3 py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'name' ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
         >
           {t('flags.sortByName')}
         </button>
         <button
           onClick={() => onSortByChange('createdAt')}
-          className={`inline-flex items-center text-xs px-3 py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'createdAt' ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+          className={`inline-flex items-center text-caption px-3 py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'createdAt' ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
         >
           {t('flags.sortByDate')}
         </button>
@@ -127,13 +127,13 @@ export function FlagFiltersBar({
       {tags.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-muted-foreground">{t('flags.tagType')}</span>
+            <span className="text-body-sm font-medium text-muted-foreground">{t('flags.tagType')}</span>
             <button
               onClick={() => {
                 onTagTypeFilterChange(null);
                 onTagValueFilterChange(null);
               }}
-              className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${!selectedTagTypeFilter ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+              className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${!selectedTagTypeFilter ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
             >
               {t('common.all')}
             </button>
@@ -146,7 +146,7 @@ export function FlagFiltersBar({
                     onTagTypeFilterChange(active ? null : tg.id);
                     onTagValueFilterChange(null);
                   }}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? 'text-primary-foreground dark:brightness-[.85] dark:saturate-[.7]' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? 'text-primary-foreground dark:brightness-[.85] dark:saturate-[.7]' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
                   style={
                     active
                       ? { backgroundColor: tg.color, borderColor: adjustColor(tg.color, 20) }
@@ -160,12 +160,12 @@ export function FlagFiltersBar({
           </div>
           {selectedTagTypeFilter && (
             <div className="flex items-center gap-2 pl-4 border-l-2 border-border">
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="text-body-sm font-medium text-muted-foreground">
                 {t('flags.tagValue')}
               </span>
               <button
                 onClick={() => onTagValueFilterChange(null)}
-                className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${!selectedTagValueFilter ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+                className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${!selectedTagValueFilter ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
               >
                 {t('common.all')}
               </button>
@@ -176,7 +176,7 @@ export function FlagFiltersBar({
                   <button
                     key={v}
                     onClick={() => onTagValueFilterChange(active ? null : v)}
-                    className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? 'text-primary-foreground dark:brightness-[.85] dark:saturate-[.7]' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+                    className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? 'text-primary-foreground dark:brightness-[.85] dark:saturate-[.7]' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
                     style={
                       active
                         ? {

@@ -86,7 +86,7 @@ export function ConstraintRow({
       {isActive && (
         <div className="bg-accent dark:bg-brand/3 border border-t-0 border-brand/30 dark:border-brand/30 rounded-b-lg px-3.5 py-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+            <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
               {t('flags.detailCard.context')}
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -97,7 +97,7 @@ export function ConstraintRow({
                     e.stopPropagation();
                     handleContextChange(ctx.id);
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                  className={`px-3 py-1.5 rounded-lg text-caption font-medium transition-all border ${
                     hasContext && contextDefId === ctx.id
                       ? 'bg-brand/10 text-brand border-brand/20'
                       : 'bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border-border'
@@ -111,7 +111,7 @@ export function ConstraintRow({
 
           {hasContext && (
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+              <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
                 {t('flags.detailCard.operator')}
               </label>
               <OperatorSelector
@@ -125,7 +125,7 @@ export function ConstraintRow({
 
           {hasContext && (
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+              <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
                 {isMulti ? t('flags.detailCard.values') : t('flags.detailCard.value')}
               </label>
               {children(ctxDef?.type ?? ContextType.STRING)}
@@ -134,7 +134,7 @@ export function ConstraintRow({
 
           {hasContext && (
             <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+              <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
                 {t('flags.detailCard.preview')}
               </label>
               <div className="px-2.5 py-1.5 bg-brand/5 rounded-lg border border-brand/10">
@@ -149,7 +149,7 @@ export function ConstraintRow({
 
           {!hasContext && (
             <div className="p-4 bg-warning/10 rounded-xl border border-warning/20 text-center">
-              <p className="text-xs text-warning">{t('flags.detailCard.selectContext')}</p>
+              <p className="text-caption text-warning">{t('flags.detailCard.selectContext')}</p>
             </div>
           )}
 
@@ -159,7 +159,7 @@ export function ConstraintRow({
                 e.stopPropagation();
                 onRemove();
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-caption font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
             >
               <Trash2 size={14} />
               {t('flags.detailCard.removeCondition')}
@@ -169,7 +169,7 @@ export function ConstraintRow({
                 e.stopPropagation();
                 onToggle();
               }}
-              className="inline-flex items-center px-4 py-2 text-xs font-semibold text-primary-foreground rounded-lg transition-colors"
+              className="inline-flex items-center px-4 py-2 text-caption font-semibold text-primary-foreground rounded-lg transition-colors"
               style={{
                 backgroundImage:
                   'linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end))',

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, createContext, useContext } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { NavLink, useLocation } from 'react-router';
 import { useT, type MessageKey } from '@/i18n';
 import { useAuth } from '@/app/auth/useAuth';
@@ -28,88 +28,18 @@ export function useAppSidebar() {
   return useContext(SidebarCtx);
 }
 
-const STYLE_LOCK_ID = '__sidebar-transition-lock';
-
-function injectLockStyle() {
-  if (document.getElementById(STYLE_LOCK_ID)) return;
-  const style = document.createElement('style');
-  style.id = STYLE_LOCK_ID;
-  style.textContent =
-    'html, body, #main-content, #main-content * { overflow-x: hidden !important; }';
-  document.head.appendChild(style);
-}
-
-function removeLockStyle() {
-  const el = document.getElementById(STYLE_LOCK_ID);
-  el?.remove();
-}
-
 export function AppSidebarProvider({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsedState] = useState(() => {
     if (typeof document === 'undefined') return false;
     return document.cookie.includes(`${SIDEBAR_COOKIE}=true`);
   });
   const [mobileOpen, setMobileOpen] = useState(false);
-  const fallbackTimerRef = useRef<number>(0);
-  const transitionEndBoundRef = useRef<boolean>(false);
-
-  const lockOverflow = useCallback(() => {
-    injectLockStyle();
-    transitionEndBoundRef.current = false;
-  }, []);
-
-  const unlockOverflow = useCallback(() => {
-    removeLockStyle();
-    clearTimeout(fallbackTimerRef.current);
-  }, []);
-
-  const scheduleUnlock = useCallback(() => {
-    clearTimeout(fallbackTimerRef.current);
-
-    const aside = document.querySelector('aside[aria-label="Sidebar"]');
-    if (!aside) {
-      fallbackTimerRef.current = window.setTimeout(unlockOverflow, 500);
-      return;
-    }
-
-    const onEnd = (e: Event) => {
-      if ((e as TransitionEvent).propertyName !== 'width' || transitionEndBoundRef.current) return;
-      transitionEndBoundRef.current = true;
-      aside.removeEventListener('transitionend', onEnd);
-      unlockOverflow();
-    };
-
-    aside.addEventListener('transitionend', onEnd);
-    fallbackTimerRef.current = window.setTimeout(() => {
-      aside.removeEventListener('transitionend', onEnd);
-      unlockOverflow();
-    }, 500);
-  }, [unlockOverflow]);
 
   const toggleMobile = useCallback(() => setMobileOpen((o) => !o), []);
 
-  const flushCollapse = useCallback(
-    (v: boolean) => {
-      lockOverflow();
-      setCollapsedState(v);
-      document.cookie = `${SIDEBAR_COOKIE}=${v}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
-      scheduleUnlock();
-    },
-    [lockOverflow, scheduleUnlock],
-  );
-
-  const setCollapsed = useCallback(
-    (v: boolean) => {
-      flushCollapse(v);
-    },
-    [flushCollapse],
-  );
-
-  useEffect(() => {
-    return () => {
-      clearTimeout(fallbackTimerRef.current);
-      removeLockStyle();
-    };
+  const setCollapsed = useCallback((v: boolean) => {
+    setCollapsedState(v);
+    document.cookie = `${SIDEBAR_COOKIE}=${v}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
   }, []);
 
   useEffect(() => {
@@ -120,19 +50,17 @@ export function AppSidebarProvider({ children }: { children: React.ReactNode }) 
         if (window.innerWidth < MOBILE_BP) {
           setMobileOpen((o) => !o);
         } else {
-          lockOverflow();
           setCollapsedState((c) => {
             const next = !c;
             document.cookie = `${SIDEBAR_COOKIE}=${next}; path=/; max-age=${60 * 60 * 24 * 365}`;
             return next;
           });
-          scheduleUnlock();
         }
       }
     };
     document.addEventListener('keydown', handler, { capture: true });
     return () => document.removeEventListener('keydown', handler, { capture: true });
-  }, [lockOverflow, scheduleUnlock]);
+  }, []);
 
   return (
     <SidebarCtx.Provider value={{ collapsed, setCollapsed, toggleMobile, mobileOpen, setMobileOpen }}>
@@ -274,13 +202,6 @@ function SidebarContent({
             </>
           )}
         </div>
-
-        <button
-          className="flex-1 min-h-[0.5rem] cursor-pointer border-0 bg-transparent"
-          onClick={() => setCollapsed(!collapsed)}
-          aria-label={t('common.collapse')}
-          type="button"
-        />
       </div>
 
       {!mobile && (

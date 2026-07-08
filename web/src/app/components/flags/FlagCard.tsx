@@ -32,10 +32,11 @@ export function FlagCard(props: FlagCardProps) {
       className={`group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden ${flag.archived ? 'opacity-50 grayscale-[0.3]' : ''}`}
       id={`flag-card-${flag.key}`}
     >
-      <div className="flex items-start gap-2 sm:gap-4 px-3 sm:px-4 py-2 sm:py-3 cursor-pointer" onClick={onToggleExpand}>
+      <div className="flex items-start gap-2 sm:gap-4 px-3 sm:px-4 py-2 sm:py-3">
         <FlagCardHeader
           flag={flag}
           expanded={expanded}
+          onToggleExpand={onToggleExpand}
           environments={props.environments}
           tags={props.tags}
           onToggleFlag={props.onToggleFlag}
@@ -45,6 +46,9 @@ export function FlagCard(props: FlagCardProps) {
       <AnimatePresence initial={false}>
         {expanded && (
           <motion.div
+            id={`flag-card-detail-${flag.key}`}
+            role="region"
+            aria-labelledby={`flag-card-header-${flag.key}`}
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}

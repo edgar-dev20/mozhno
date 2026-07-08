@@ -225,12 +225,22 @@ rely on `--font-sans` / `--font-mono` (exposed as Tailwind `font-sans` / `font-m
 
 ## Radius Tokens
 
+The radius scale is defined in `theme.css` under `@theme inline` (`--radius-sm/md/lg/xl`
+derived from `--radius`). Because they live in `@theme`, Tailwind v4 **generates the
+`rounded-*` utilities from them** — so the plain utility **is** the token.
+
 | Token | Tailwind Utility | Value |
 |-------|-----------------|-------|
-| `--radius-sm` | `rounded-[--radius-sm]` | 0.375rem (6px) |
-| `--radius-md` | `rounded-[--radius-md]` | 0.5rem (8px) |
-| `--radius-lg` | `rounded-[--radius-lg]` | 0.625rem (10px) |
-| `--radius-xl` | `rounded-[--radius-xl]` | 0.875rem (14px) |
+| `--radius-sm` | `rounded-sm` | 0.375rem (6px) |
+| `--radius-md` | `rounded-md` | 0.5rem (8px) |
+| `--radius-lg` | `rounded-lg` | 0.625rem (10px) |
+| `--radius-xl` | `rounded-xl` | 0.875rem (14px) |
+
+> **Use the plain utilities** (`rounded-md`, `rounded-lg`, …). Do **NOT** write
+> `rounded-[--radius-lg]` — in Tailwind v4 the bracket form is an *arbitrary value*
+> (`border-radius: --radius-lg`), which is invalid CSS and renders **square corners**.
+> `rounded-full` stays available for circles/pills. `rounded-2xl`/`rounded-3xl` fall back
+> to Tailwind's defaults (1rem / 1.5rem) — fine for large surfaces like dialogs.
 
 ## Shadow Tokens
 
@@ -302,6 +312,24 @@ Defined in both `:root` (light, lower opacity) and `.dark` (higher opacity). Use
 **Palette access** (when you need a specific shade):
 - `bg-palette-brand-500`, `text-palette-danger-700`
 - Tailwind: `bg-palette-success-100`, `border-palette-gray-200`
+
+## Text Size Tokens (hard ESLint error)
+
+> Raw text-size utilities (`text-xs/sm/base/lg/xl/2xl/3xl`) are a **hard ESLint error**
+> in feature code — same severity as raw colors (`no-restricted-syntax` in
+> `eslint.config.js`). Unlike radius, these are **not** in `@theme`, so they resolve to
+> Tailwind's raw defaults, not the design tokens.
+>
+> - **Use typography tokens:** `text-display`, `text-h1`, `text-h2`, `text-h3`,
+>   `text-body`, `text-body-sm`, `text-caption`, `text-overline`. These are generated
+>   from `@theme` (`--text-*`) and set **font-size only** — pair with a `leading-*`
+>   utility (`leading-body`, `leading-caption`, …) where a specific line-height matters.
+> - **Radius is different:** plain `rounded-sm/md/lg/xl` already *are* the tokens (see
+>   "Radius Tokens"), so they are allowed — never use the `rounded-[--radius-*]` bracket
+>   form.
+> - **Exempt** (only the raw-color ban applies): `src/shared/components/**` and
+>   `src/app/components/ui/**` author the design system, and `src/stories/**` +
+>   `src/test/**` + `*.stories.tsx` showcase/verify it.
 
 ## Component Variants
 

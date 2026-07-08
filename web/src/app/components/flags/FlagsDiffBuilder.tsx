@@ -19,7 +19,7 @@ export function makeTagNode(tv: FlagTagValue): ReactNode {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-primary-foreground shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
+        className="inline-flex items-center px-1.5 py-0.5 rounded text-caption font-medium text-primary-foreground shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
         style={{
           background: tv.tagColor,
         }}
@@ -65,7 +65,7 @@ export function renderConstraintGroupNode(
       ? (ctx?.type === ContextType.TIME ? g.values.map(formatTimeConstraintValue) : g.values).join(', ')
       : '\u2205';
   return (
-    <span className="inline-flex items-center gap-1.5 text-xs flex-wrap">
+    <span className="inline-flex items-center gap-1.5 text-caption flex-wrap">
       <span className="font-semibold text-foreground/80">{attr}</span>
       <OperatorBadge operator={g.operator} contextType={ctx?.type} />
       <code className="font-mono text-foreground/80 break-all">{vals}</code>

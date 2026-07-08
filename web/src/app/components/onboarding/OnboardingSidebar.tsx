@@ -31,12 +31,12 @@ export function OnboardingSidebar({ step }: OnboardingSidebarProps) {
               {CurrentIcon ? <CurrentIcon size={28} className="text-primary-foreground" /> : null}
             </div>
             {step === 0 && (
-              <div className="text-xs text-muted-foreground">{t('onboarding.createProject')}</div>
+              <div className="text-caption text-muted-foreground">{t('onboarding.createProject')}</div>
             )}
             {step === 1 && (
               <>
-                <div className="text-sm font-medium text-primary">RELEASE</div>
-                <div className="text-xs text-muted-foreground font-mono">my-feature</div>
+                <div className="text-body-sm font-medium text-primary">RELEASE</div>
+                <div className="text-caption text-muted-foreground font-mono">my-feature</div>
               </>
             )}
           </div>

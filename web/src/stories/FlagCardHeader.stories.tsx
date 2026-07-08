@@ -22,13 +22,13 @@ export default meta;
 type Story = StoryObj<typeof FlagCardHeader>;
 
 export const Collapsed: Story = {
-  args: { flag: MOCK_FLAG, expanded: false, environments: MOCK_ENVS, tags: [], onToggleFlag: fn() },
+  args: { flag: MOCK_FLAG, expanded: false, environments: MOCK_ENVS, tags: [], onToggleExpand: fn(), onToggleFlag: fn() },
 };
 
 export const Expanded: Story = {
-  args: { flag: MOCK_FLAG, expanded: true, environments: MOCK_ENVS, tags: [], onToggleFlag: fn() },
+  args: { flag: MOCK_FLAG, expanded: true, environments: MOCK_ENVS, tags: [], onToggleExpand: fn(), onToggleFlag: fn() },
 };
 
 export const Archived: Story = {
-  args: { flag: { ...MOCK_FLAG, archived: true }, expanded: false, environments: MOCK_ENVS, tags: [], onToggleFlag: fn() },
+  args: { flag: { ...MOCK_FLAG, archived: true }, expanded: false, environments: MOCK_ENVS, tags: [], onToggleExpand: fn(), onToggleFlag: fn() },
 };

@@ -42,8 +42,8 @@ export class PageErrorBoundary extends Component<PageErrorBoundaryProps, PageErr
               <AlertTriangle size={22} className="text-destructive" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">{t('errors.pageError')}</p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-md">
+              <p className="text-body-sm font-semibold text-foreground">{t('errors.pageError')}</p>
+              <p className="text-caption text-muted-foreground mt-1 max-w-md">
                 {this.state.error?.message ?? t('errors.unknownError')}
               </p>
             </div>

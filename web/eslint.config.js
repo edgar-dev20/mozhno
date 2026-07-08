@@ -40,6 +40,16 @@ export default tseslint.config(
           message:
             'Raw Tailwind color detected in template literal. Use a semantic design token. See web/SKILL.md.',
         },
+        {
+          selector: 'Literal[value=/\\btext-(?:xs|sm|base|lg|xl|2xl|3xl)\\b/]',
+          message:
+            'Raw text size detected. Use a typography token (text-display, text-h1, text-h2, text-h3, text-body, text-body-sm, text-caption, text-overline). See web/SKILL.md.',
+        },
+        {
+          selector: 'TemplateElement[value.raw=/\\btext-(?:xs|sm|base|lg|xl|2xl|3xl)\\b/]',
+          message:
+            'Raw text size detected in template literal. Use a typography token. See web/SKILL.md.',
+        },
       ],
 
 
@@ -59,6 +69,35 @@ export default tseslint.config(
     files: ['src/app/routes.tsx', 'src/i18n/index.tsx', 'src/app/components/SegmentIcon.tsx'],
     rules: {
       'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
+    // These files AUTHOR the design system (shared components, shadcn/Radix
+    // primitives) or showcase/verify it (stories, tests). They legitimately use
+    // primitive size/radius utilities, so only the raw-color ban applies here.
+    files: [
+      'src/shared/components/**/*.{ts,tsx}',
+      'src/app/components/ui/**/*.{ts,tsx}',
+      'src/stories/**/*.{ts,tsx}',
+      'src/test/**/*.{ts,tsx}',
+      '**/*.stories.{ts,tsx}',
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            'Literal[value=/(?:bg|text|border|ring|from|via|to|fill|stroke|outline|divide|placeholder|caret|accent|decoration|ring-offset|shadow|border-t|border-r|border-b|border-l|border-x|border-y|border-s|border-e)-(?:(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950)|black|white)/]',
+          message:
+            'Raw Tailwind color detected. Use a semantic design token. See web/SKILL.md.',
+        },
+        {
+          selector:
+            'TemplateElement[value.raw=/(?:bg|text|border|ring|from|via|to|fill|stroke|outline|divide|placeholder|caret|accent|decoration|ring-offset|shadow|border-t|border-r|border-b|border-l|border-x|border-y|border-s|border-e)-(?:(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-(?:50|100|200|300|400|500|600|700|800|900|950)|black|white)/]',
+          message:
+            'Raw Tailwind color detected in template literal. Use a semantic design token. See web/SKILL.md.',
+        },
+      ],
     },
   },
   prettierConfig,

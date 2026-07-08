@@ -36,7 +36,7 @@ function buildRule(
   const pctClass = muted ? 'opacity-40' : '';
 
   parts.push(
-    <span key="pct" className={`font-bold text-xs text-brand ${pctClass}`}>
+    <span key="pct" className={`font-bold text-caption text-brand ${pctClass}`}>
       {isFull ? '100%' : `${pct}%`}
     </span>,
   );
@@ -45,14 +45,14 @@ function buildRule(
     parts.push(
       <span
         key="all"
-        className={`text-xs ${muted ? 'text-muted-foreground/40' : 'text-muted-foreground'}`}
+        className={`text-caption ${muted ? 'text-muted-foreground/40' : 'text-muted-foreground'}`}
       >
         {t('environment.all')}
       </span>,
     );
   } else if (activeSegs.length > 0) {
     parts.push(
-      <span key="sdot" className={`text-xs text-muted-foreground/60 ${muted ? 'opacity-30' : ''}`}>
+      <span key="sdot" className={`text-caption text-muted-foreground/60 ${muted ? 'opacity-30' : ''}`}>
         ·
       </span>,
     );
@@ -72,7 +72,7 @@ function buildRule(
           style={{ color: muted ? '#d4d4d8' : seg.color, opacity: muted ? 0.5 : 1 }}
         >
           <SegmentIcon name={seg.icon} size={10} />
-          <span className="text-xs">{seg.name}</span>
+          <span className="text-caption">{seg.name}</span>
         </span>,
       );
     });
@@ -89,7 +89,7 @@ function buildRule(
               +{overflow}
             </span>
           </TooltipTrigger>
-          <TooltipContent className="text-xs bg-popover text-foreground/90 border border-border shadow-lg rounded-xl px-3 py-2">
+          <TooltipContent className="text-caption bg-popover text-foreground/90 border border-border shadow-lg rounded-xl px-3 py-2">
             {restNames}
           </TooltipContent>
         </Tooltip>,
@@ -147,7 +147,7 @@ export function FlagCardEnvironmentColumn({
   return (
     <div className="flex-1 bg-secondary/40 rounded-xl px-4 pt-3 pb-2 ring-1 ring-border shadow-sm transition-all flex flex-col">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        <span className="text-caption font-medium text-muted-foreground uppercase tracking-wide">
           {env.name}
         </span>
         <div className="flex items-center gap-1">
@@ -170,7 +170,7 @@ export function FlagCardEnvironmentColumn({
       </div>
       {es ? (
         <>
-          <div className="text-xs leading-relaxed mb-2">{rule}</div>
+          <div className="text-caption leading-relaxed mb-2">{rule}</div>
           <div className="relative group flex-1 min-h-0 rounded-md overflow-hidden">
             {sparkBuckets.length > 0 ? (
               <>
@@ -187,7 +187,7 @@ export function FlagCardEnvironmentColumn({
           </div>
         </>
       ) : (
-        <span className="text-xs text-muted-foreground/50 italic">
+        <span className="text-caption text-muted-foreground/50 italic">
           {t('environment.noStrategy')}
         </span>
       )}

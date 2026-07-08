@@ -67,7 +67,7 @@ export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProp
                   {displayLabel}
                 </Badge>
               </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
+              <p className="text-body-sm text-muted-foreground leading-relaxed">{text}</p>
             </div>
             <button
               onClick={handleDismiss}

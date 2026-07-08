@@ -30,7 +30,7 @@ export function OperatorSelector({
             e.stopPropagation();
             onSelect(op.value);
           }}
-          className={`px-3 py-2.5 rounded-lg text-xs font-medium text-left transition-all flex flex-col items-center gap-1.5 border ${
+          className={`px-3 py-2.5 rounded-lg text-caption font-medium text-left transition-all flex flex-col items-center gap-1.5 border ${
             currentOperator === op.value
               ? 'bg-brand/10 text-brand border-brand/20'
               : 'bg-secondary/60 text-foreground/70 hover:bg-secondary hover:text-foreground border-border'

@@ -68,8 +68,8 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
             <Archive size={16} className="text-brand" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-brand">{t('flags.archivedFlagsTitle')}</h3>
-            <p className="text-xs text-brand">{t('flags.archivedFlagsDesc')}</p>
+            <h3 className="text-body-sm font-semibold text-brand">{t('flags.archivedFlagsTitle')}</h3>
+            <p className="text-caption text-brand">{t('flags.archivedFlagsDesc')}</p>
           </div>
         </div>
       </div>
@@ -87,13 +87,13 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
                 <div className="flex items-center gap-2.5">
                   <span className="font-medium text-foreground/80 truncate">{flag.name}</span>
                   <span
-                    className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-xs font-semibold border shrink-0 leading-none ${getFlagTypeColor(flag.flagType)}`}
+                    className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-caption font-semibold border shrink-0 leading-none ${getFlagTypeColor(flag.flagType)}`}
                   >
                     {getTypeIcon(flag.flagType)}
                     {getFlagTypeLabel(flag.flagType)}
                   </span>
                 </div>
-                <div className="text-xs font-mono text-muted-foreground mt-0.5">{flag.key}</div>
+                <div className="text-caption font-mono text-muted-foreground mt-0.5">{flag.key}</div>
                 {flag.tags.length > 0 && (
                   <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                     {flag.tags.map((tv, i) => {
@@ -101,7 +101,7 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
                       return tg ? (
                         <span
                           key={i}
-                          className="inline-flex items-center px-2 py-1 rounded text-xs font-medium text-primary-foreground shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
+                          className="inline-flex items-center px-2 py-1 rounded text-caption font-medium text-primary-foreground shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
                           style={{
                             background: tg.color,
                           }}
@@ -112,7 +112,7 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
                     })}
                   </div>
                 )}
-                <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground/70">
+                <div className="flex items-center gap-2 mt-1 text-caption text-muted-foreground/70">
                   <span className="flex items-center gap-1">
                     <User size={10} />
                     {flag.createdBy ?? '-'}
@@ -125,7 +125,7 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
                   )}
                 </div>
                 {flag.archivedBy && (
-                  <div className="flex items-center gap-2 mt-1 text-xs text-brand">
+                  <div className="flex items-center gap-2 mt-1 text-caption text-brand">
                     <span className="flex items-center gap-1">
                       <Archive size={10} />
                       {flag.archivedBy}
@@ -142,7 +142,7 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
               <div className="flex items-center gap-1.5 ml-4 shrink-0">
                 <button
                   onClick={() => onUnarchive(flag)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-brand hover:bg-brand/10 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-brand hover:bg-brand/10 rounded-lg transition-colors"
                 >
                   <ArchiveRestore size={13} />
                   {t('flags.restore')}

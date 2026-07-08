@@ -57,7 +57,7 @@ export function ResetPassword() {
             </div>
 
             <div className="text-center mb-10">
-              <p className="text-base font-medium text-muted-foreground">
+              <p className="text-body font-medium text-muted-foreground">
                 {t('auth.loginTagline')}
               </p>
             </div>
@@ -71,13 +71,13 @@ export function ResetPassword() {
             {done ? (
               <div className="text-center space-y-4">
                 <div className="p-4 bg-success dark:bg-success/10 border border-success dark:border-success/20 rounded-xl">
-                  <p className="text-sm text-success dark:text-success">
+                  <p className="text-body-sm text-success dark:text-success">
                     {t('auth.passwordChanged')}
                   </p>
                 </div>
                 <Link
                   to="/login"
-                  className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-primary-foreground bg-primary px-6 py-3 rounded-lg hover:bg-primary/90 shadow-lg transition-all"
+                  className="inline-flex items-center justify-center gap-2 text-body-sm font-semibold text-primary-foreground bg-primary px-6 py-3 rounded-lg hover:bg-primary/90 shadow-lg transition-all"
                 >
                   {t('auth.login')}
                 </Link>
@@ -85,7 +85,7 @@ export function ResetPassword() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground/80" htmlFor="password">
+                  <label className="text-body-sm font-medium text-foreground/80" htmlFor="password">
                     {t('auth.newPassword')}
                   </label>
                   <div className="relative">
@@ -106,7 +106,7 @@ export function ResetPassword() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground/80" htmlFor="confirm">
+                  <label className="text-body-sm font-medium text-foreground/80" htmlFor="confirm">
                     {t('auth.confirmPassword')}
                   </label>
                   <div className="relative">

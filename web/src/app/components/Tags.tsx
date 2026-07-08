@@ -224,19 +224,19 @@ export function Tags() {
                       />
                       <div className="min-w-0">
                         <h3 className="font-semibold text-foreground truncate">{tag.name}</h3>
-                        <p className="text-xs text-muted-foreground/70 font-mono mt-0.5">
+                        <p className="text-caption text-muted-foreground/70 font-mono mt-0.5">
                           {getColorName(tag.color)}
                         </p>
                       </div>
                     </div>
                   </div>
                   {tag.description && (
-                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                    <p className="text-body-sm text-muted-foreground leading-relaxed line-clamp-2">
                       {tag.description}
                     </p>
                   )}
                   {!tag.description && (
-                    <p className="text-xs text-muted-foreground/70 italic leading-relaxed">
+                    <p className="text-caption text-muted-foreground/70 italic leading-relaxed">
                       {t('tags.card.noDescription')}
                     </p>
                   )}
@@ -253,7 +253,7 @@ export function Tags() {
                         />
                       ))}
                     </div>
-                    <span className="text-xs text-muted-foreground/70 font-medium">
+                    <span className="text-caption text-muted-foreground/70 font-medium">
                       {getColorName(tag.color)}
                     </span>
                   </div>
@@ -273,7 +273,7 @@ export function Tags() {
           <>
             <button
               onClick={() => setPanelOpen(false)}
-              className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+              className="inline-flex items-center px-5 py-2.5 text-body-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
             >
               {t('tags.panel.cancel')}
             </button>
@@ -303,7 +303,7 @@ export function Tags() {
               maxLength={120}
               placeholder={t('tags.form.name.placeholder')}
               autoFocus={!editing}
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
             />
           </FormField>
 
@@ -319,12 +319,12 @@ export function Tags() {
               maxLength={160}
               placeholder={t('tags.form.description.placeholder')}
               rows={3}
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
             />
           </FormField>
 
           <div className="space-y-3">
-            <label className="text-sm font-medium text-foreground/80 flex items-center gap-1.5">
+            <label className="text-body-sm font-medium text-foreground/80 flex items-center gap-1.5">
               <Palette size={14} className="text-brand" />
               {t('tags.form.color.label')}
             </label>
@@ -341,17 +341,17 @@ export function Tags() {
                   className="transition-all"
                 />
                 <div className="space-y-1 min-w-0">
-                  <div className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                  <div className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
                     {t('tags.form.color.preview')}
                   </div>
                   {formName.trim() ? (
                     <div className="font-semibold text-foreground truncate">{formName}</div>
                   ) : (
-                    <div className="text-sm text-muted-foreground italic truncate">
+                    <div className="text-body-sm text-muted-foreground italic truncate">
                       {t('tags.form.color.noName')}
                     </div>
                   )}
-                  <div className="text-xs text-muted-foreground/70 font-mono flex items-center gap-1">
+                  <div className="text-caption text-muted-foreground/70 font-mono flex items-center gap-1">
                     <Hash size={10} />
                     {formColor}
                   </div>
@@ -360,7 +360,7 @@ export function Tags() {
 
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-body-sm">
                     #
                   </span>
                   <input
@@ -372,9 +372,9 @@ export function Tags() {
                     }}
                     placeholder={t('tags.form.color.hexPlaceholder')}
                     maxLength={7}
-                    className="w-full bg-card border border-border rounded-xl pl-8 pr-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                    className="w-full bg-card border border-border rounded-xl pl-8 pr-4 py-2.5 text-body-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-normal text-muted-foreground/50 tabular-nums">
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-caption font-normal text-muted-foreground/50 tabular-nums">
                     {customHex.length}/7
                   </span>
                 </div>
@@ -393,7 +393,7 @@ export function Tags() {
               {COLOR_PALETTES.map(([key, colors]) => (
                 <div key={key}>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                    <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
                       {t(key)}
                     </span>
                     <div className="h-px flex-1 bg-accent" />
@@ -422,7 +422,7 @@ export function Tags() {
                               <span className="w-2 h-2 rounded-full bg-background shadow-sm" />
                             </span>
                           )}
-                          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground border border-border text-xs font-semibold px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground border border-border text-caption font-semibold px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                             {getColorName(c)}
                           </span>
                         </button>
@@ -433,7 +433,7 @@ export function Tags() {
               ))}
             </div>
 
-            <p className="text-xs text-muted-foreground/70 flex items-center gap-1">
+            <p className="text-caption text-muted-foreground/70 flex items-center gap-1">
               <Sparkles size={12} className="text-warning" />
               {t('tags.form.color.hint')}
             </p>
@@ -444,7 +444,7 @@ export function Tags() {
               <button
                 type="button"
                 onClick={() => setDeleteId(editing.id)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-body-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
               >
                 <Trash2 size={16} />
                 {t('tags.delete.button')}

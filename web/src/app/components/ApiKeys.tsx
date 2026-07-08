@@ -203,7 +203,7 @@ export function ApiKeys() {
     return (
       <button
         onClick={() => setTypeFilter(active ? null : type)}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
       >
         <Icon size={12} />
         {getKeyTypeLabel(type)}
@@ -216,7 +216,7 @@ export function ApiKeys() {
     return (
       <button
         onClick={() => setEnvFilter(active ? null : env.id)}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
           active
             ? envFilterActive(env.id)
             : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -253,7 +253,7 @@ export function ApiKeys() {
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setTypeFilter(null)}
-            className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               !typeFilter
                 ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -267,7 +267,7 @@ export function ApiKeys() {
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setEnvFilter(null)}
-            className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               envFilter === null
                 ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -320,7 +320,7 @@ export function ApiKeys() {
                           <TypeIcon size={16} />
                         </div>
                         <div className="flex items-center gap-2 flex-wrap min-w-0">
-                          <span className="font-semibold text-sm text-foreground truncate transition-all">
+                          <span className="font-semibold text-body-sm text-foreground truncate transition-all">
                             {k.name}
                           </span>
                           <Badge
@@ -338,7 +338,7 @@ export function ApiKeys() {
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         {!expanded && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
+                          <span className="text-caption text-muted-foreground flex items-center gap-1 shrink-0">
                             <Clock size={10} />
                             {formatDate(k.createdAt)}
                           </span>
@@ -370,7 +370,7 @@ export function ApiKeys() {
                             <div className="p-4 pb-3">
                               <div className="bg-warning/10 border border-warning/20 rounded-xl p-4">
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-xs font-semibold text-warning uppercase tracking-wider">
+                                  <span className="text-caption font-semibold text-warning uppercase tracking-wider">
                                     {t('apiKeys.secretKey')}
                                   </span>
                                   <div className="flex items-center gap-1">
@@ -379,7 +379,7 @@ export function ApiKeys() {
                                         e.stopPropagation();
                                         setShowKey(showKey === k.id ? null : k.id);
                                       }}
-                                      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-xl text-warning bg-warning/10 hover:bg-warning/10 transition-colors"
+                                      className="flex items-center gap-1.5 px-2.5 py-1 text-caption font-medium rounded-xl text-warning bg-warning/10 hover:bg-warning/10 transition-colors"
                                     >
                                       {showKey === k.id ? (
                                         <>
@@ -400,7 +400,7 @@ export function ApiKeys() {
                                         copyKey(k.id, k.apiKey);
                                       }}
                                       disabled={copiedKeyId === k.id}
-                                      className={`flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-xl transition-colors ${
+                                      className={`flex items-center gap-1 px-2.5 py-1 text-caption font-medium rounded-xl transition-colors ${
                                         copiedKeyId === k.id
                                           ? 'text-success bg-success/10 cursor-default'
                                           : 'text-warning bg-warning/10 hover:bg-warning/10'
@@ -418,7 +418,7 @@ export function ApiKeys() {
                                   </div>
                                 </div>
                                 <div className="bg-input-background border border-warning/20 rounded-lg px-4 py-3">
-                                  <span className="text-sm font-mono font-medium text-foreground/90 break-all select-all">
+                                  <span className="text-body-sm font-mono font-medium text-foreground/90 break-all select-all">
                                     {showKey === k.id
                                       ? k.apiKey
                                       : '••••••••••••••••••••••••••••••••••••••••••••••••••'}
@@ -428,10 +428,10 @@ export function ApiKeys() {
                             </div>
                             <div className="grid grid-cols-3 divide-x divide-border border-t border-border">
                               <div className="px-4 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('common.type')}
                                 </span>
-                                <span className="text-xs font-medium text-foreground/80 flex items-center gap-1.5">
+                                <span className="text-caption font-medium text-foreground/80 flex items-center gap-1.5">
                                   <TypeIcon
                                     size={11}
                                     className={
@@ -442,19 +442,19 @@ export function ApiKeys() {
                                 </span>
                               </div>
                               <div className="px-4 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('apiKeys.created')}
                                 </span>
-                                <span className="text-xs text-foreground/80 flex items-center gap-1.5">
+                                <span className="text-caption text-foreground/80 flex items-center gap-1.5">
                                   <Clock size={11} className="text-muted-foreground shrink-0" />
                                   {formatDateTime(k.createdAt)}
                                 </span>
                               </div>
                               <div className="px-4 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('apiKeys.lastUsed')}
                                 </span>
-                                <span className="text-xs text-foreground/80">
+                                <span className="text-caption text-foreground/80">
                                   {timeAgo(k.lastUsedAt)}
                                 </span>
                               </div>
@@ -465,7 +465,7 @@ export function ApiKeys() {
                                   e.stopPropagation();
                                   setDeleteId(k.id);
                                 }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-all"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-all"
                               >
                                 <Trash2 size={12} />
                                 {t('common.delete')}
@@ -505,7 +505,7 @@ export function ApiKeys() {
           <h4 className="text-brand dark:text-foreground font-medium mb-1">
             {t('apiKeys.securityTitle')}
           </h4>
-          <p className="text-sm text-brand dark:text-muted-foreground max-w-3xl">
+          <p className="text-body-sm text-brand dark:text-muted-foreground max-w-3xl">
             {t('apiKeys.securityDesc')}
           </p>
         </div>
@@ -520,7 +520,7 @@ export function ApiKeys() {
           <>
             <button
               onClick={() => setPanelOpen(false)}
-              className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+              className="inline-flex items-center px-5 py-2.5 text-body-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
             >
               {t('common.cancel')}
             </button>
@@ -534,13 +534,13 @@ export function ApiKeys() {
           {error && <ErrorBox>{error}</ErrorBox>}
 
           <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
-            <p className="text-xs text-warning">{t('apiKeys.panelWarning')}</p>
+            <p className="text-caption text-warning">{t('apiKeys.panelWarning')}</p>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+            <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
               <span>{t('common.name')}</span>
-              <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+              <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
                 {formName.length}/120
               </span>
             </label>
@@ -550,19 +550,19 @@ export function ApiKeys() {
               onChange={(e) => setFormName(e.target.value)}
               maxLength={120}
               placeholder={t('apiKeys.formNamePlaceholder')}
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80">
+            <label className="text-body-sm font-medium text-foreground/80">
               {t('apiKeys.formEnvLabel')}
             </label>
             <Select
               value={String(formEnvId ?? '')}
               onValueChange={(v) => setFormEnvId(v ? Number(v) : null)}
             >
-              <SelectTrigger className="w-full bg-input-background border-input rounded-lg px-4 py-2.5 h-auto text-sm">
+              <SelectTrigger className="w-full bg-input-background border-input rounded-lg px-4 py-2.5 h-auto text-body-sm">
                 <SelectValue placeholder={t('apiKeys.formEnvPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -579,7 +579,7 @@ export function ApiKeys() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-foreground/80">
+            <label className="text-body-sm font-medium text-foreground/80">
               {t('apiKeys.formKeyTypeLabel')}
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -638,11 +638,11 @@ export function ApiKeys() {
                       />
                       <div className="flex-1 min-w-0">
                         <div
-                          className={`text-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}
+                          className={`text-body-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}
                         >
                           {label}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{description}</div>
+                        <div className="text-caption text-muted-foreground mt-0.5">{description}</div>
                       </div>
                     </button>
                   );

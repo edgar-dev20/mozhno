@@ -161,11 +161,11 @@ export function DashboardLayout() {
                   </div>
                 )}
                 <span
-                  className="text-h2 font-semibold bg-clip-text text-transparent truncate"
-                  style={{
-                    backgroundImage: `linear-gradient(to right, ${displayColor}, ${displayColor}cc)`,
-                  }}
-                >
+                  className="inline-block size-1.5 rounded-full shrink-0"
+                  style={{ backgroundColor: displayColor }}
+                  aria-hidden="true"
+                />
+                <span className="text-h2 font-semibold text-foreground truncate">
                   {projectName ?? '—'}
                 </span>
                 <canvas ref={canvasRef} className="hidden" />
@@ -173,9 +173,13 @@ export function DashboardLayout() {
                 <div className="hidden sm:flex items-center gap-0.5">
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent">
-                        <Flag size={12} />
-                        <span className="tabular-nums font-mono text-body-sm">{stats.flags}</span>
+                      <span
+                        role="status"
+                        aria-label={`${stats.flags} ${t('navigation.flags')}`}
+                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
+                      >
+                        <Flag size={12} aria-hidden="true" />
+                        <span className="tabular-nums font-mono text-body-sm" aria-hidden="true">{stats.flags}</span>
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="text-caption">
@@ -184,9 +188,13 @@ export function DashboardLayout() {
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent">
-                        <UserCog size={12} />
-                        <span className="tabular-nums font-mono text-body-sm">{stats.users}</span>
+                      <span
+                        role="status"
+                        aria-label={`${stats.users} ${t('navigation.users')}`}
+                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
+                      >
+                        <UserCog size={12} aria-hidden="true" />
+                        <span className="tabular-nums font-mono text-body-sm" aria-hidden="true">{stats.users}</span>
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="text-caption">
@@ -195,11 +203,13 @@ export function DashboardLayout() {
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent">
-                        <GitBranch size={12} />
-                        <span className="tabular-nums font-mono text-body-sm">
-                          {stats.segments}
-                        </span>
+                      <span
+                        role="status"
+                        aria-label={`${stats.segments} ${t('navigation.segments')}`}
+                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
+                      >
+                        <GitBranch size={12} aria-hidden="true" />
+                        <span className="tabular-nums font-mono text-body-sm" aria-hidden="true">{stats.segments}</span>
                       </span>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="text-caption">

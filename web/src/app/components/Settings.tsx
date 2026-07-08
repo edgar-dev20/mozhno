@@ -283,27 +283,27 @@ export function Settings() {
                 <Building2 size={20} className="text-info" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-foreground">{t('settings.project')}</h2>
-                <p className="text-sm text-muted-foreground">{t('settings.projectDescription')}</p>
+                <h2 className="text-h2 font-semibold text-foreground">{t('settings.project')}</h2>
+                <p className="text-body-sm text-muted-foreground">{t('settings.projectDescription')}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 divide-x divide-border bg-secondary rounded-xl mb-5">
               <div className="px-4 py-2.5">
-                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-0.5">
+                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-0.5">
                   ID
                 </span>
-                <span className="text-xs text-foreground/80 flex items-center gap-1.5">
+                <span className="text-caption text-foreground/80 flex items-center gap-1.5">
                   <Hash size={11} className="text-muted-foreground shrink-0" />
                   {project?.id}
                 </span>
               </div>
               {project?.createdAt && (
                 <div className="px-4 py-2.5">
-                  <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-0.5">
+                  <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-0.5">
                     {t('apiKeys.created')}
                   </span>
-                  <span className="text-xs text-foreground/80 flex items-center gap-1.5">
+                  <span className="text-caption text-foreground/80 flex items-center gap-1.5">
                     <Clock size={11} className="text-muted-foreground shrink-0" />
                     {formatDate(project.createdAt, intlLocale)}
                   </span>
@@ -313,9 +313,9 @@ export function Settings() {
 
             <div className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+                <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
                   <span>{t('settings.projectName')}</span>
-                  <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                  <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
                     {projectName.length}/120
                   </span>
                 </label>
@@ -325,14 +325,14 @@ export function Settings() {
                   onChange={(e) => setProjectName(e.target.value)}
                   maxLength={120}
                   placeholder={t('settings.projectNamePlaceholder')}
-                  className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                  className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+                <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
                   <span>{t('settings.descriptionField')}</span>
-                  <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                  <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
                     {projectDesc.length}/160
                   </span>
                 </label>
@@ -342,12 +342,12 @@ export function Settings() {
                   maxLength={160}
                   rows={2}
                   placeholder={t('settings.descriptionPlaceholder')}
-                  className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
+                  className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-foreground/80">
+                <label className="text-body-sm font-medium text-foreground/80">
                   {t('settings.logo')}
                 </label>
                 <div className="flex items-center gap-4 p-4 bg-secondary rounded-xl border border-border">
@@ -377,7 +377,7 @@ export function Settings() {
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadingLogo}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground/80 bg-card border border-border rounded-xl hover:bg-secondary hover:border-border transition-all disabled:opacity-50 active:scale-95"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-body-sm font-medium text-foreground/80 bg-card border border-border rounded-xl hover:bg-secondary hover:border-border transition-all disabled:opacity-50 active:scale-95"
                     >
                       <Upload size={14} />
                       {pendingLogoFile
@@ -386,7 +386,7 @@ export function Settings() {
                           ? t('settings.logoReplace')
                           : t('settings.logoUpload')}
                     </button>
-                    <p className="text-xs text-muted-foreground/80 mt-1.5">
+                    <p className="text-caption text-muted-foreground/80 mt-1.5">
                       {t('settings.logoHint')}
                     </p>
                   </div>
@@ -420,10 +420,10 @@ export function Settings() {
                 <Globe size={20} className="text-brand" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-foreground">
+                <h2 className="text-h2 font-semibold text-foreground">
                   {t('settings.environments')}
                 </h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-body-sm text-muted-foreground">
                   {t('settings.environmentsDescription')}
                 </p>
               </div>
@@ -431,7 +431,7 @@ export function Settings() {
 
             <div className="space-y-4">
               {maxEnvironments != null && environments.length >= maxEnvironments ? (
-                <div className="p-3 bg-warning/10 border border-warning/20 rounded-xl text-sm text-warning">
+                <div className="p-3 bg-warning/10 border border-warning/20 rounded-xl text-body-sm text-warning">
                   {t('settings.envLimitReached', {
                     count: String(maxEnvironments),
                     max: String(maxEnvironments),
@@ -439,9 +439,9 @@ export function Settings() {
                 </div>
               ) : (
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+                  <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
                     <span>{t('settings.addEnvPlaceholder')}</span>
-                    <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                    <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
                       {newEnvName.length}/120
                     </span>
                   </label>
@@ -453,7 +453,7 @@ export function Settings() {
                       maxLength={120}
                       onKeyDown={(e) => e.key === 'Enter' && addEnv()}
                       placeholder={t('settings.addEnvPlaceholder')}
-                      className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                      className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                     />
                     <GradientButton
                       onClick={addEnv}
@@ -470,14 +470,14 @@ export function Settings() {
 
               {maxEnvironments != null && (
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-medium text-muted-foreground">
+                  <span className="text-caption font-medium text-muted-foreground">
                     {t('settings.envCount', {
                       count: String(environments.length),
                       max: String(maxEnvironments),
                     })}
                   </span>
                   <div className="h-3 w-px bg-border" />
-                  <span className="text-xs text-muted-foreground">{t('settings.envHint')}</span>
+                  <span className="text-caption text-muted-foreground">{t('settings.envHint')}</span>
                 </div>
               )}
 
@@ -505,13 +505,13 @@ export function Settings() {
                                 <Globe size={16} className="text-brand" />
                               </div>
                               <div className="min-w-0">
-                                <div className="text-sm font-semibold text-foreground truncate">
+                                <div className="text-body-sm font-semibold text-foreground truncate">
                                   {env.name}
                                 </div>
                               </div>
                             </div>
                             <div className="flex items-center gap-3 shrink-0">
-                              <span className="text-xs text-muted-foreground hidden sm:inline">
+                              <span className="text-caption text-muted-foreground hidden sm:inline">
                                 {formatDate(env.createdAt, intlLocale)}
                               </span>
                               {isExpanded ? (
@@ -540,18 +540,18 @@ export function Settings() {
                                 <div className="px-4 pb-3 space-y-3">
                                   <div className="grid grid-cols-2 divide-x divide-border border-t border-border pt-3">
                                     <div className="px-4 py-2">
-                                      <div className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                                      <div className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
                                         ID
                                       </div>
-                                      <div className="text-xs text-foreground/80 mt-0.5">
+                                      <div className="text-caption text-foreground/80 mt-0.5">
                                         {env.id}
                                       </div>
                                     </div>
                                     <div className="px-4 py-2">
-                                      <div className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                                      <div className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
                                         {t('settings.envCreated')}
                                       </div>
-                                      <div className="text-xs text-foreground/80 mt-0.5">
+                                      <div className="text-caption text-foreground/80 mt-0.5">
                                         {formatFullDate(env.createdAt, intlLocale)}
                                       </div>
                                     </div>
@@ -559,7 +559,7 @@ export function Settings() {
 
                                   {isEditing ? (
                                     <div className="space-y-1.5">
-                                      <label className="text-xs font-medium text-muted-foreground flex items-center justify-between">
+                                      <label className="text-caption font-medium text-muted-foreground flex items-center justify-between">
                                         <span>{t('settings.editEnvName')}</span>
                                         <span className="text-[10px] font-normal text-muted-foreground/50 tabular-nums">
                                           {editEnvName.length}/120
@@ -576,7 +576,7 @@ export function Settings() {
                                             if (e.key === 'Escape') cancelEditEnv();
                                           }}
                                           autoFocus
-                                          className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
+                                          className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-3 py-1.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
                                         />
                                         <GradientButton
                                           onClick={saveEditEnv}
@@ -592,7 +592,7 @@ export function Settings() {
                                         </GradientButton>
                                         <button
                                           onClick={cancelEditEnv}
-                                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:bg-accent transition-colors"
+                                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:bg-accent transition-colors"
                                         >
                                           {t('common.cancel')}
                                         </button>
@@ -605,7 +605,7 @@ export function Settings() {
                                           e.stopPropagation();
                                           startEditEnv(env);
                                         }}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-brand dark:hover:text-brand hover:border-brand dark:hover:border-brand/30 hover:bg-brand dark:hover:bg-brand/10 transition-all"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-brand dark:hover:text-brand hover:border-brand dark:hover:border-brand/30 hover:bg-brand dark:hover:bg-brand/10 transition-all"
                                       >
                                         <SettingsIcon size={12} />
                                         {t('common.edit')}
@@ -615,7 +615,7 @@ export function Settings() {
                                           e.stopPropagation();
                                           setDeleteEnvId(env.id);
                                         }}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-colors"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-colors"
                                       >
                                         <Trash2 size={12} />
                                         {t('common.delete')}
@@ -655,10 +655,10 @@ export function Settings() {
                 <AlertTriangle size={20} className="text-destructive" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-foreground">
+                <h2 className="text-h2 font-semibold text-foreground">
                   {t('settings.dangerZone')}
                 </h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-body-sm text-muted-foreground">
                   {t('settings.dangerZoneDescription')}
                 </p>
               </div>
@@ -667,10 +667,10 @@ export function Settings() {
             <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="font-medium text-foreground text-sm">
+                  <div className="font-medium text-foreground text-body-sm">
                     {t('settings.deleteProject')}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-lg">
+                  <p className="text-caption text-muted-foreground mt-1 max-w-lg">
                     {t('settings.deleteProjectWarning')}
                   </p>
                 </div>

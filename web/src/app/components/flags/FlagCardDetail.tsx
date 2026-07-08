@@ -1,5 +1,5 @@
 import { Settings, Clock, User } from '@/shared/icons';
-import { formatDate } from '@/shared';
+import { formatDate, readableColorForBg } from '@/shared';
 import { useT } from '@/i18n';
 import { FlagCardEnvironmentColumn } from '@/app/components/flags/FlagCardEnvironmentColumn';
 import type { FlagView } from '@/app/hooks/flagTypes';
@@ -34,10 +34,10 @@ export function FlagCardDetail({
       <div className="flex-[1] min-w-0 flex flex-col">
         <div className="flex-1 min-h-0">
           <div className="mt-0.5">
-            <span className="text-xs font-mono text-muted-foreground">{flag.key}</span>
+            <span className="text-caption font-mono text-muted-foreground">{flag.key}</span>
           </div>
           {flag.description && (
-            <div className="text-xs text-foreground/60 dark:text-muted-foreground/60 mt-0.5 mb-1 line-clamp-3 break-words">
+            <div className="text-caption text-foreground/60 dark:text-muted-foreground/60 mt-0.5 mb-1 line-clamp-3 break-words">
               {flag.description}
             </div>
           )}
@@ -48,9 +48,10 @@ export function FlagCardDetail({
                 return tg ? (
                   <span
                     key={i}
-                    className="inline-flex items-center px-1.5 py-1 rounded text-xs font-medium text-primary-foreground shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
+                    className="inline-flex items-center px-1.5 py-1 rounded text-caption font-medium shadow-sm leading-none dark:brightness-[.85] dark:saturate-[.7]"
                     style={{
                       background: tg.color,
+                      color: readableColorForBg(tg.color),
                     }}
                   >
                     {tv.value}
@@ -60,7 +61,7 @@ export function FlagCardDetail({
             </div>
           )}
         </div>
-        <div className="flex flex-col gap-1 text-xs text-muted-foreground/70 mt-auto pt-2 shrink-0">
+        <div className="flex flex-col gap-1 text-caption text-muted-foreground/70 mt-auto pt-2 shrink-0">
           {flag.createdBy && (
             <span className="flex items-center gap-1">
               <User size={10} />
@@ -80,7 +81,7 @@ export function FlagCardDetail({
               e.stopPropagation();
               onOpenGeneral(flag);
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand dark:hover:text-brand hover:border-brand/20 dark:hover:border-brand/30 hover:bg-brand/5 dark:hover:bg-brand/10 transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand dark:hover:text-brand hover:border-brand/20 dark:hover:border-brand/30 hover:bg-brand/5 dark:hover:bg-brand/10 transition-all"
           >
             <Settings size={12} />
             {t('common.edit')}

@@ -100,9 +100,9 @@ export function FlagEditPanel({
           {...register('name')}
           maxLength={120}
           placeholder={t('flags.namePlaceholderEdit')}
-          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
         />
-        {errors.name && <p className="text-xs text-destructive mt-1">{errors.name.message}</p>}
+        {errors.name && <p className="text-caption text-destructive mt-1">{errors.name.message}</p>}
       </FormField>
 
       <FormField label={t('common.key')} hint={t('flags.keyHint')}>
@@ -110,7 +110,7 @@ export function FlagEditPanel({
           type="text"
           value={flag.key}
           disabled
-          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground disabled:opacity-50 font-mono"
+          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground disabled:opacity-50 font-mono"
         />
       </FormField>
 
@@ -132,17 +132,17 @@ export function FlagEditPanel({
             el.style.height = 'auto';
             el.style.height = Math.max(el.scrollHeight, 80) + 'px';
           }}
-          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden"
+          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden"
         />
       </FormField>
 
       <div className="space-y-1.5">
-        <label className="text-sm font-medium text-foreground/80">{t('flags.flagType')}</label>
+        <label className="text-body-sm font-medium text-foreground/80">{t('flags.flagType')}</label>
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => setValue('flagType', 'RELEASE')}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-sm font-semibold transition-all ${flagType === 'RELEASE' ? 'border-info bg-info/10 text-info shadow-sm' : 'border-border text-muted-foreground hover:border-info/20'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-body-sm font-semibold transition-all ${flagType === 'RELEASE' ? 'border-info bg-info/10 text-info shadow-sm' : 'border-border text-muted-foreground hover:border-info/20'}`}
           >
             <Rocket
               size={18}
@@ -153,7 +153,7 @@ export function FlagEditPanel({
           <button
             type="button"
             onClick={() => setValue('flagType', 'KILLSWITCH')}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-sm font-semibold transition-all ${flagType === 'KILLSWITCH' ? 'border-chart-4 bg-chart-4/10 text-chart-4 shadow-sm' : 'border-border text-muted-foreground hover:border-chart-4/20'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-body-sm font-semibold transition-all ${flagType === 'KILLSWITCH' ? 'border-chart-4 bg-chart-4/10 text-chart-4 shadow-sm' : 'border-border text-muted-foreground hover:border-chart-4/20'}`}
           >
             <ShieldOff
               size={18}
@@ -165,7 +165,7 @@ export function FlagEditPanel({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground/80">{t('flags.tagsLabel')}</label>
+        <label className="text-body-sm font-medium text-foreground/80">{t('flags.tagsLabel')}</label>
         {formTags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {formTags.map((tv, i) => {
@@ -174,7 +174,7 @@ export function FlagEditPanel({
               return (
                 <div
                   key={i}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-sm font-medium text-primary-foreground shadow-sm dark:brightness-[.85] dark:saturate-[.7]"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-body-sm font-medium text-primary-foreground shadow-sm dark:brightness-[.85] dark:saturate-[.7]"
                   style={{
                     background: tg.color,
                   }}
@@ -198,7 +198,7 @@ export function FlagEditPanel({
             onClick={() => setAddingTag(true)}
             disabled={formTags.length >= 10}
             title={formTags.length >= 10 ? t('flags.maxTagsReached') : undefined}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-sm font-medium text-brand hover:bg-brand/10 rounded-lg border border-dashed border-brand/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-body-sm font-medium text-brand hover:bg-brand/10 rounded-lg border border-dashed border-brand/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={14} />
             {t('flags.addTag')}
@@ -206,7 +206,7 @@ export function FlagEditPanel({
         ) : (
           <div className="space-y-3 p-3 bg-secondary rounded-lg border border-border">
             <div className="space-y-2">
-              <label className="text-xs font-medium text-muted-foreground">
+              <label className="text-caption font-medium text-muted-foreground">
                 {t('flags.selectTagType')}
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -215,7 +215,7 @@ export function FlagEditPanel({
                     type="button"
                     key={tg.id}
                     onClick={() => setNewTagId(tg.id)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border ${newTagId === tg.id ? 'shadow-sm' : 'hover:shadow-sm border-border'}`}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm font-medium border ${newTagId === tg.id ? 'shadow-sm' : 'hover:shadow-sm border-border'}`}
                     style={newTagId === tg.id ? { borderColor: tg.color, borderWidth: '2px' } : {}}
                   >
                     <div
@@ -247,7 +247,7 @@ export function FlagEditPanel({
                     placeholder={t('flags.enterTagValue')}
                     maxLength={255}
                     autoFocus
-                    className="flex-1 bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+                    className="flex-1 bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                   />
                   <GradientButton
                     type="button"
@@ -258,7 +258,7 @@ export function FlagEditPanel({
                     {t('common.add')}
                   </GradientButton>
                 </div>
-                <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right">
+                <div className="text-caption font-normal text-muted-foreground/50 tabular-nums text-right">
                   {newTagVal.length}/255
                 </div>
               </div>
@@ -270,7 +270,7 @@ export function FlagEditPanel({
                 setNewTagId(null);
                 setNewTagVal('');
               }}
-              className="w-full px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent rounded-lg"
+              className="w-full px-3 py-2 text-body-sm font-medium text-muted-foreground hover:bg-accent rounded-lg"
             >
               {t('common.cancel')}
             </button>
@@ -279,7 +279,7 @@ export function FlagEditPanel({
       </div>
 
       <div className="pt-4 border-t border-border space-y-2.5">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-caption text-muted-foreground">
           <User size={12} className="text-muted-foreground" />
           <span>
             {t('flags.createdBy')}{' '}
@@ -288,7 +288,7 @@ export function FlagEditPanel({
             </span>
           </span>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-caption text-muted-foreground">
           <Clock size={12} className="text-muted-foreground" />
           <span>
             {t('flags.createdAt')}{' '}
@@ -299,14 +299,14 @@ export function FlagEditPanel({
         </div>
         {flag.archivedBy && (
           <>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-caption text-muted-foreground">
               <Archive size={12} className="text-primary" />
               <span>
                 {t('flags.archivedBy')}{' '}
                 <span className="font-medium text-foreground/80">{flag.archivedBy}</span>
               </span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-caption text-muted-foreground">
               <Clock size={12} className="text-primary" />
               <span>
                 {t('flags.archivedAt')}{' '}
@@ -324,7 +324,7 @@ export function FlagEditPanel({
           <button
             type="button"
             onClick={onUnarchive}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-brand hover:bg-brand/10 rounded-lg border border-brand/20"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-body-sm font-medium text-brand hover:bg-brand/10 rounded-lg border border-brand/20"
           >
             <ArchiveRestore size={16} />
             {t('flags.unarchiveFlag')}
@@ -333,7 +333,7 @@ export function FlagEditPanel({
           <button
             type="button"
             onClick={onArchive}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-brand hover:bg-brand/10 rounded-lg border border-brand/20"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-body-sm font-medium text-brand hover:bg-brand/10 rounded-lg border border-brand/20"
           >
             <Archive size={16} />
             {t('flags.archiveFlag')}
@@ -342,7 +342,7 @@ export function FlagEditPanel({
         <button
           type="button"
           onClick={onDelete}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-body-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20"
         >
           <Trash2 size={16} />
           {t('flags.deleteFromAllEnvs')}

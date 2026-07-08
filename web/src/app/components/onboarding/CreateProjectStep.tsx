@@ -40,9 +40,9 @@ export function CreateProjectStep({
           onChange={(e) => setProjectName(e.target.value)}
           maxLength={120}
           placeholder={t('onboarding.projectNamePlaceholder')}
-          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
         />
-        <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+        <div className="text-caption font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
           {projectName.length}/120
         </div>
       </div>
@@ -53,9 +53,9 @@ export function CreateProjectStep({
           maxLength={500}
           rows={2}
           placeholder={t('onboarding.projectDescPlaceholder')}
-          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
+          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
         />
-        <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+        <div className="text-caption font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
           {projectDesc.length}/500
         </div>
       </div>
@@ -77,14 +77,14 @@ export function CreateProjectStep({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground bg-secondary border border-border rounded-lg transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-2 text-caption font-medium text-muted-foreground hover:text-foreground bg-secondary border border-border rounded-lg transition-colors"
         >
           <Upload size={12} />
           {pendingLogoFile ? pendingLogoFile.name : t('onboarding.uploadLogo')}
         </button>
       </div>
-      <p className="text-xs text-muted-foreground">{t('onboarding.logoHint')}</p>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      <p className="text-caption text-muted-foreground">{t('onboarding.logoHint')}</p>
+      {error && <p className="text-caption text-destructive">{error}</p>}
       <GradientButton onClick={onCreate} disabled={creating} loading={creating} className="w-full">
         {t('onboarding.createProject')}
       </GradientButton>

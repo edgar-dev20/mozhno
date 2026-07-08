@@ -188,7 +188,7 @@ export function Integrations() {
                 onClick={() => {
                   setDeleteId(form.editing!.id);
                 }}
-                className="px-5 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all mr-auto"
+                className="px-5 py-2.5 text-body-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all mr-auto"
               >
                 <Trash2 size={16} className="inline mr-1.5" />
                 {t('common.delete')}
@@ -196,7 +196,7 @@ export function Integrations() {
             )}
             <button
               onClick={() => setPanelOpen(false)}
-              className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+              className="inline-flex items-center px-5 py-2.5 text-body-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
             >
               {t('common.cancel')}
             </button>

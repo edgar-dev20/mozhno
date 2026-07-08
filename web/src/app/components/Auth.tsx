@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { Mail, Lock } from '@/shared/icons';
 import { GradientButton, ErrorBox, getErrorMessage } from '@/shared';
 import { Input } from '@/app/components/ui/input';
+import { Checkbox } from '@/app/components/ui/checkbox';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { useAuth } from '@/app/auth/useAuth';
 import { useT } from '@/i18n';
@@ -43,7 +44,7 @@ export function Auth() {
             </div>
 
             <div className="text-center mb-10">
-              <p className="text-base font-medium text-muted-foreground">
+              <p className="text-body font-medium text-muted-foreground">
                 {t('auth.loginTagline')}
               </p>
             </div>
@@ -56,7 +57,7 @@ export function Auth() {
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80" htmlFor="email">
+                <label className="text-body-sm font-medium text-foreground/80" htmlFor="email">
                   {t('auth.email')}
                 </label>
                 <div className="relative">
@@ -77,7 +78,7 @@ export function Auth() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80" htmlFor="password">
+                <label className="text-body-sm font-medium text-foreground/80" htmlFor="password">
                   {t('auth.password')}
                 </label>
                 <div className="relative">
@@ -98,19 +99,17 @@ export function Auth() {
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center">
-                  <input
+                <div className="flex items-center gap-2">
+                  <Checkbox
                     id="remember"
-                    type="checkbox"
                     checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-border dark:text-muted-foreground/70 bg-input-background accent-gradient-start"
+                    onCheckedChange={(v) => setRememberMe(v === true)}
                   />
-                  <label htmlFor="remember" className="ml-2 block text-sm text-muted-foreground">
+                  <label htmlFor="remember" className="block text-body-sm text-muted-foreground">
                     {t('auth.rememberMe')}
                   </label>
                 </div>
-                <div className="text-sm">
+                <div className="text-body-sm">
                   <Link
                     to="/forgot-password"
                     className="text-muted-foreground hover:text-foreground transition-colors"
@@ -124,7 +123,7 @@ export function Auth() {
                 type="submit"
                 loading={loading}
                 size="lg"
-                className="w-full mt-6 py-3 hover:scale-[1.02] hover:shadow-xl"
+                className="w-full mt-6 py-3 hover:shadow-xl"
               >
                 {t('auth.login')}
               </GradientButton>

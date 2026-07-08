@@ -155,13 +155,13 @@ export function FlagEnvironmentPanel({
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h4 className="text-sm font-medium text-foreground">
+          <h4 className="text-body-sm font-medium text-foreground">
             {t('flags.environmentTitle')}
             {envName ? ` ${envName}` : ''}
           </h4>
         </div>
         <div className="flex items-center gap-2.5 shrink-0">
-          <span className="text-xs font-medium text-muted-foreground/80">
+          <span className="text-caption font-medium text-muted-foreground/80">
             {envRuleEnabled ? t('common.enabled') : t('flags.off')}
           </span>
           <span key={`env-glow-${glowKey}`} className={glowKey > 0 ? 'animate-flag-on' : ''}>
@@ -179,17 +179,17 @@ export function FlagEnvironmentPanel({
           <div className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               {envRulePercent === 0 ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-full bg-muted text-muted-foreground/80">
+                <span className="inline-flex items-center gap-1.5 text-caption font-semibold px-2 py-1 rounded-full bg-muted text-muted-foreground/80">
                   <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
                   {t('flags.summaryFlagOff')}
                 </span>
               ) : envRuleEnabled ? (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-full bg-success/10 text-success">
+                <span className="inline-flex items-center gap-1.5 text-caption font-semibold px-2 py-1 rounded-full bg-success/10 text-success">
                   <span className="w-1.5 h-1.5 rounded-full bg-success" />
                   {t('flags.summaryActive')}
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-full bg-muted text-muted-foreground/80">
+                <span className="inline-flex items-center gap-1.5 text-caption font-semibold px-2 py-1 rounded-full bg-muted text-muted-foreground/80">
                   <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
                   {t('flags.summaryManuallyDisabled')}
                 </span>
@@ -202,17 +202,17 @@ export function FlagEnvironmentPanel({
               </div>
               <div>
                 {envRulePercent === 0 ? (
-                  <span className="text-sm font-semibold text-muted-foreground">
+                  <span className="text-body-sm font-semibold text-muted-foreground">
                     {t('flags.flagOff')}
                   </span>
                 ) : envRulePercent === 100 && !hasSegments && !hasConstraints ? (
-                  <span className="text-sm font-semibold text-foreground/80">
+                  <span className="text-body-sm font-semibold text-foreground/80">
                     {t('flags.summaryFullTraffic')}
                   </span>
                 ) : (
                   <>
-                    <span className="text-2xl font-bold text-brand">{envRulePercent}%</span>
-                    <span className="text-sm text-muted-foreground ml-1.5">
+                    <span className="text-h1 font-bold text-brand">{envRulePercent}%</span>
+                    <span className="text-body-sm text-muted-foreground ml-1.5">
                       {hasSegments
                         ? `${t('flags.summaryFromSegments')} ${selectedSegs.map((s) => s.name).join(', ')}`
                         : t('flags.of') + ' ' + t('flags.allUsers')}
@@ -224,7 +224,7 @@ export function FlagEnvironmentPanel({
 
             {sourceGroups.size > 0 && (
               <div className="space-y-3">
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                <div className="flex items-center gap-1.5 text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
                   <Filter size={10} />
                   {t('flags.summaryUnderConditions')}
                 </div>
@@ -260,7 +260,7 @@ export function FlagEnvironmentPanel({
                                 darkDim={false}
                               />
                             )}
-                            <span className="text-xs font-semibold text-brand">
+                            <span className="text-caption font-semibold text-brand">
                               {source === 'custom' ? t('flags.customSource') : source}
                             </span>
                           </div>
@@ -307,7 +307,7 @@ export function FlagEnvironmentPanel({
             )}
 
             {!hasSegments && !hasConstraints && envRulePercent !== 100 && envRulePercent !== 0 && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
+              <div className="flex items-center gap-2 text-caption text-muted-foreground/80">
                 <Filter size={12} />
                 {t('flags.noConditionsGlobal')}
               </div>
@@ -337,11 +337,11 @@ export function FlagEnvironmentPanel({
       <div className="p-5 bg-secondary/50 rounded-xl border border-border space-y-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-foreground/80 flex items-center gap-2">
+            <label className="text-body-sm font-medium text-foreground/80 flex items-center gap-2">
               <Percent size={14} className="text-brand" />
               {t('flags.rolloutPercentage')}
             </label>
-            <span className="text-lg font-bold text-brand">{envRulePercent}%</span>
+            <span className="text-h2 font-bold text-brand">{envRulePercent}%</span>
           </div>
           <Slider.Root
             value={[envRulePercent]}
@@ -355,7 +355,7 @@ export function FlagEnvironmentPanel({
             </Slider.Track>
             <Slider.Thumb className="block w-6 h-6 bg-background border-2 border-brand rounded-full shadow-lg focus:outline-none" />
           </Slider.Root>
-          <p className="text-xs text-muted-foreground/80">
+          <p className="text-caption text-muted-foreground/80">
             {envRulePercent === 100
               ? t('flags.fullRollout')
               : envRulePercent === 0
@@ -367,7 +367,7 @@ export function FlagEnvironmentPanel({
         <div className="pt-4 border-t border-border">
           <div className="flex items-center gap-2 mb-3">
             <Users size={16} className="text-brand" />
-            <label className="text-sm font-medium text-foreground/80">
+            <label className="text-body-sm font-medium text-foreground/80">
               {t('flags.targetSegments')}
             </label>
           </div>
@@ -402,9 +402,9 @@ export function FlagEnvironmentPanel({
                       className="mt-0.5"
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold text-foreground/90">{seg.name}</div>
+                      <div className="text-body-sm font-semibold text-foreground/90">{seg.name}</div>
                       {seg.description && (
-                        <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                        <div className="text-caption text-muted-foreground mt-0.5 line-clamp-1">
                           {seg.description}
                         </div>
                       )}
@@ -488,7 +488,7 @@ export function FlagEnvironmentPanel({
             })}
           </div>
           {envRuleSegments.length === 0 && (
-            <p className="text-xs text-muted-foreground/80 mt-2 ml-1">
+            <p className="text-caption text-muted-foreground/80 mt-2 ml-1">
               {t('flags.noSegmentsSelected')}
             </p>
           )}
@@ -498,16 +498,16 @@ export function FlagEnvironmentPanel({
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Settings size={16} className="text-brand" />
-              <label className="text-sm font-medium text-foreground/80">
+              <label className="text-body-sm font-medium text-foreground/80">
                 {t('flags.additionalConditions')}
               </label>
-              <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">
+              <span className="inline-flex items-center text-caption px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">
                 {t('flags.configurable')}
               </span>
             </div>
             <button
               onClick={addGroup}
-              className="text-xs text-brand hover:text-brand/70 flex items-center gap-1 font-medium"
+              className="text-caption text-brand hover:text-brand/70 flex items-center gap-1 font-medium"
             >
               <Plus size={12} />
               {t('common.add')}
@@ -609,7 +609,7 @@ export function FlagEnvironmentPanel({
                                 return (
                                 <span
                                   key={i}
-                                  className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md border ${
+                                  className={`inline-flex items-center gap-1 px-2 py-1 text-caption font-mono rounded-md border ${
                                     inWhitelist
                                       ? 'bg-success/10 text-success border-success/20'
                                       : 'bg-warning/10 text-warning border-warning/30'
@@ -634,7 +634,7 @@ export function FlagEnvironmentPanel({
                               {validVals
                                 .filter((v) => !g.values.includes(v))
                                 .map((v) => {
-                                  const covered = renderCoveredChip(v, 'px-3 py-1.5 rounded-lg text-xs font-medium bg-muted/30 text-muted-foreground/50 border border-border/40 cursor-not-allowed');
+                                  const covered = renderCoveredChip(v, 'px-3 py-1.5 rounded-lg text-caption font-medium bg-muted/30 text-muted-foreground/50 border border-border/40 cursor-not-allowed');
                                   if (covered) return covered;
                                   return (
                                     <button
@@ -642,7 +642,7 @@ export function FlagEnvironmentPanel({
                                       onClick={() =>
                                         updateGroup({ values: [...g.values, v] })
                                       }
-                                      className="px-3 py-1.5 rounded-lg text-xs font-medium bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border border-border transition-all"
+                                      className="px-3 py-1.5 rounded-lg text-caption font-medium bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border border-border transition-all"
                                     >
                                       + {v}
                                     </button>
@@ -676,7 +676,7 @@ export function FlagEnvironmentPanel({
                                   {validVals
                                     .filter((v) => !g.values.includes(v))
                                     .map((v) => {
-                                      const covered = renderCoveredChip(v, 'px-2 py-0.5 text-xs border border-muted rounded-md text-muted-foreground/50 cursor-not-allowed');
+                                      const covered = renderCoveredChip(v, 'px-2 py-0.5 text-caption border border-muted rounded-md text-muted-foreground/50 cursor-not-allowed');
                                       if (covered) return covered;
                                       return (
                                         <button
@@ -686,7 +686,7 @@ export function FlagEnvironmentPanel({
                                               values: [...g.values, v],
                                             })
                                           }
-                                          className="px-2 py-0.5 text-xs border border-brand/20 rounded-md text-brand hover:bg-brand/10 transition-colors"
+                                          className="px-2 py-0.5 text-caption border border-brand/20 rounded-md text-brand hover:bg-brand/10 transition-colors"
                                         >
                                           + {v}
                                         </button>
@@ -730,7 +730,7 @@ export function FlagEnvironmentPanel({
                           <div className="flex flex-wrap gap-1.5">
                             {validVals.map((v) => {
                               const isSelected = g.values.includes(v);
-                              const covered = !isSelected ? renderCoveredChip(v, 'px-3 py-1.5 rounded-lg text-xs font-medium bg-muted/30 text-muted-foreground/50 border border-border/40 cursor-not-allowed') : null;
+                              const covered = !isSelected ? renderCoveredChip(v, 'px-3 py-1.5 rounded-lg text-caption font-medium bg-muted/30 text-muted-foreground/50 border border-border/40 cursor-not-allowed') : null;
                               if (covered) return covered;
                               return (
                                 <button
@@ -742,7 +742,7 @@ export function FlagEnvironmentPanel({
                                       updateGroup({ values: [v] });
                                     }
                                   }}
-                                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                                  className={`px-3 py-1.5 rounded-lg text-caption font-medium transition-all border ${
                                     isSelected
                                       ? 'bg-brand/10 text-brand border-brand/20'
                                       : 'bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border-border'
@@ -789,7 +789,7 @@ export function FlagEnvironmentPanel({
                             );
                           }}
                           list={hasWhitelist ? `wl-${g.id}` : undefined}
-                          className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-destructive dark:invalid:border-destructive"
+                          className="w-full bg-secondary border border-border rounded-lg px-3 py-2.5 text-body-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-destructive dark:invalid:border-destructive"
                           autoFocus
                         />
                         {hasWhitelist && (
@@ -812,7 +812,7 @@ export function FlagEnvironmentPanel({
             })}
             {envRuleConstraintGroups.length === 0 && (
               <div className="p-4 bg-input-background rounded-lg border border-dashed border-border dark:border-border text-center">
-                <p className="text-xs text-muted-foreground">{t('flags.noConstraints')}</p>
+                <p className="text-caption text-muted-foreground">{t('flags.noConstraints')}</p>
               </div>
             )}
           </div>
@@ -827,10 +827,10 @@ export function FlagEnvironmentPanel({
             </div>
           </div>
           <div>
-            <h5 className="text-xs font-semibold text-brand dark:text-brand-light mb-1">
+            <h5 className="text-caption font-semibold text-brand dark:text-brand-light mb-1">
               {t('flags.howTargetingWorks')}
             </h5>
-            <p className="text-xs text-brand/80 dark:text-brand-light/80">
+            <p className="text-caption text-brand/80 dark:text-brand-light/80">
               {t('flags.howTargetingWorksDesc')}
             </p>
           </div>

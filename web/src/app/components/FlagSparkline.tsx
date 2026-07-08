@@ -34,7 +34,7 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
   if (data.length === 0) {
     return (
       <div
-        className="flex items-center justify-center text-xs text-muted-foreground/40"
+        className="flex items-center justify-center text-caption text-muted-foreground/40"
         style={{ height }}
       >
         —

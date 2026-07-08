@@ -291,12 +291,12 @@ export function AuditLog() {
       <div className="bg-card rounded-2xl p-4 shadow-md space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider mr-1">
+            <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider mr-1">
               {t('audit.filterType')}
             </span>
             <button
               onClick={() => setFilterType(null)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+              className={`px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                 !filterType
                   ? 'bg-brand/10 text-brand border-brand/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -310,7 +310,7 @@ export function AuditLog() {
                 <button
                   key={type}
                   onClick={() => setFilterType(active ? null : type)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                     active
                       ? getResourceColor(type) + ' border-current/20'
                       : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -325,7 +325,7 @@ export function AuditLog() {
         </div>
 
         <div className="flex items-center gap-3 pt-2 border-t border-border">
-          <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+          <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
             {t('audit.period')}
           </span>
           <Suspense fallback={<div className="h-9 w-48 bg-muted rounded-lg animate-pulse" />}>
@@ -377,30 +377,30 @@ export function AuditLog() {
                         {getResourceIcon(event.resourceType)}
                       </div>
                       <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-sm text-foreground truncate transition-all">
+                        <span className="font-semibold text-body-sm text-foreground truncate transition-all">
                           {event.userName ?? event.userEmail}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-caption text-muted-foreground">
                           {getActionLabel(event.action)}
                         </span>
-                        <span className="font-semibold text-sm text-foreground/90 truncate">
+                        <span className="font-semibold text-body-sm text-foreground/90 truncate">
                           {event.resourceName}
                         </span>
                         <span
-                          className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-xs font-semibold border shrink-0 leading-none ${getResourceColor(event.resourceType)}`}
+                          className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-caption font-semibold border shrink-0 leading-none ${getResourceColor(event.resourceType)}`}
                         >
                           {getResourceIcon(event.resourceType, 10)}
                           {getResourceLabel(event.resourceType)}
                         </span>
                         {event.details && (
-                          <span className="text-xs text-muted-foreground/70 truncate max-w-[200px]">
+                          <span className="text-caption text-muted-foreground/70 truncate max-w-[200px]">
                             — {event.details}
                           </span>
                         )}
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         {!expanded && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
+                          <span className="text-caption text-muted-foreground flex items-center gap-1 shrink-0">
                             <Clock size={10} />
                             {formatDateTime(event.createdAt)}
                           </span>
@@ -431,83 +431,83 @@ export function AuditLog() {
                           <div className="border-t border-border">
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
                               <div className="px-3 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('audit.expanded.id')}
                                 </span>
-                                <span className="text-xs font-mono text-foreground/80">
+                                <span className="text-caption font-mono text-foreground/80">
                                   #{event.id}
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('audit.expanded.user')}
                                 </span>
-                                <span className="text-xs font-medium text-foreground/80 truncate block">
+                                <span className="text-caption font-medium text-foreground/80 truncate block">
                                   {event.userName ?? event.userEmail}
                                 </span>
-                                <span className="text-xs text-muted-foreground/70 truncate block">
+                                <span className="text-caption text-muted-foreground/70 truncate block">
                                   {event.userEmail}
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('audit.expanded.action')}
                                 </span>
-                                <span className="text-xs font-medium text-foreground/80">
+                                <span className="text-caption font-medium text-foreground/80">
                                   {getActionLabel(event.action)}
                                 </span>
-                                <span className="text-xs font-mono text-muted-foreground/70 block mt-0.5">
+                                <span className="text-caption font-mono text-muted-foreground/70 block mt-0.5">
                                   {event.action}
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('audit.expanded.resource')}
                                 </span>
-                                <span className="text-xs font-semibold text-foreground/80 truncate block">
+                                <span className="text-caption font-semibold text-foreground/80 truncate block">
                                   {event.resourceName}
                                 </span>
                                 <div className="flex items-center gap-1.5 mt-0.5">
                                   <span
-                                    className={`inline-flex items-center px-1.5 py-0 rounded text-xs font-semibold border ${getResourceColor(event.resourceType)}`}
+                                    className={`inline-flex items-center px-1.5 py-0 rounded text-caption font-semibold border ${getResourceColor(event.resourceType)}`}
                                   >
                                     {getResourceLabel(event.resourceType)}
                                   </span>
                                   {event.resourceId && (
-                                    <span className="text-xs font-mono text-muted-foreground">
+                                    <span className="text-caption font-mono text-muted-foreground">
                                       ID:{event.resourceId}
                                     </span>
                                   )}
                                 </div>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('audit.expanded.date')}
                                 </span>
-                                <span className="text-xs text-foreground/80 block">
+                                <span className="text-caption text-foreground/80 block">
                                   {formatDateOnly(event.createdAt)}
                                 </span>
-                                <span className="text-xs text-muted-foreground/70 block mt-0.5">
+                                <span className="text-caption text-muted-foreground/70 block mt-0.5">
                                   {formatTimeOnly(event.createdAt)}
                                 </span>
                               </div>
                             </div>
                             {event.details && (
                               <div className="px-4 py-2.5 border-t border-border">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('audit.expanded.details')}
                                 </span>
-                                <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
+                                <p className="text-caption text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
                                   {event.details}
                                 </p>
                               </div>
                             )}
                             {event.ipAddress && (
                               <div className="px-4 py-2 border-t border-border">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('audit.expanded.ip')}
                                 </span>
-                                <span className="text-xs font-mono text-foreground/80 flex items-center gap-1.5">
+                                <span className="text-caption font-mono text-foreground/80 flex items-center gap-1.5">
                                   <Monitor size={11} className="text-muted-foreground shrink-0" />
                                   {event.ipAddress}
                                 </span>
@@ -526,7 +526,7 @@ export function AuditLog() {
                 <button
                   onClick={handleLoadMore}
                   disabled={loadingMore}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-muted-foreground bg-card border border-border rounded-xl hover:border-brand hover:text-brand transition-all shadow-sm disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-body-sm font-medium text-muted-foreground bg-card border border-border rounded-xl hover:border-brand hover:text-brand transition-all shadow-sm disabled:opacity-50"
                 >
                   {loadingMore ? (
                     <>

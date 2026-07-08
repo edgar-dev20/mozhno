@@ -201,13 +201,13 @@ export function ClientInstances() {
               placeholder={t('clientInstances.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-sm bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring text-foreground/80 placeholder:text-muted-foreground"
+              className="w-full pl-9 pr-3 py-2 text-body-sm bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring text-foreground/80 placeholder:text-muted-foreground"
             />
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               onClick={() => setLangFilter('all')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+              className={`px-3 py-1.5 text-caption font-semibold rounded-lg transition-all ${
                 langFilter === 'all'
                   ? 'bg-brand/10 text-brand border border-brand/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border border-transparent'
@@ -217,7 +217,7 @@ export function ClientInstances() {
             </button>
             <button
               onClick={() => setLangFilter('java')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                 langFilter === 'java'
                   ? 'bg-warning/10 text-warning border-warning/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -228,7 +228,7 @@ export function ClientInstances() {
             </button>
             <button
               onClick={() => setLangFilter('js')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                 langFilter === 'js'
                   ? 'bg-warning/10 text-warning border-warning/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -246,7 +246,7 @@ export function ClientInstances() {
               <button
                 key={e.id}
                 onClick={() => handleEnvFilter(e.id)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+                className={`px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                   envFilter === e.id
                     ? g.bgFlat
                     : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -270,10 +270,10 @@ export function ClientInstances() {
                 <Activity size={24} className="text-brand" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground/80">
+                <p className="text-body-sm font-semibold text-foreground/80">
                   {t('clientInstances.emptyTitle')}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
+                <p className="text-caption text-muted-foreground mt-1 max-w-xs mx-auto">
                   {t('clientInstances.emptyDescription')}
                 </p>
               </div>
@@ -314,13 +314,13 @@ export function ClientInstances() {
                         {getAppIcon(appType, 16)}
                       </div>
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        <span className="font-semibold text-sm text-foreground truncate transition-all">
+                        <span className="font-semibold text-body-sm text-foreground truncate transition-all">
                           {appName}
                         </span>
                         {keyTypes.map((kt) => (
                           <span
                             key={kt}
-                            className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-xs font-semibold border shrink-0 leading-none ${
+                            className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-caption font-semibold border shrink-0 leading-none ${
                               kt === 'FRONTEND'
                                 ? 'text-warning bg-warning/10 border-warning/20'
                                 : 'text-brand bg-brand/10 border-brand/20'
@@ -346,23 +346,23 @@ export function ClientInstances() {
                               );
                             })}
                             {environmentIds.length > 3 && (
-                              <span className="text-xs font-semibold text-muted-foreground">
+                              <span className="text-caption font-semibold text-muted-foreground">
                                 +{environmentIds.length - 3}
                               </span>
                             )}
                           </div>
                           {activeCount > 0 ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary/80 px-2 py-0.5 rounded-lg border border-primary/20">
+                            <span className="inline-flex items-center gap-1 text-caption font-medium bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary/80 px-2 py-0.5 rounded-lg border border-primary/20">
                               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                               {activeCount} / {instanceCount}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground bg-accent px-2 py-0.5 rounded-lg">
+                            <span className="inline-flex items-center gap-1 text-caption font-medium text-muted-foreground bg-accent px-2 py-0.5 rounded-lg">
                               <Box size={11} />
                               {instanceCount}
                             </span>
                           )}
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <span className="text-caption text-muted-foreground flex items-center gap-1">
                             <Clock size={10} />
                             {timeAgo(lastSeenAt)}
                           </span>
@@ -394,10 +394,10 @@ export function ClientInstances() {
                         <div className="border-t border-border px-4 py-2.5">
                           <div className="mb-2.5">
                             <div className="flex items-center gap-2 mb-1.5">
-                              <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                              <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
                                 {t('clientInstances.instances')}
                               </span>
-                              <span className="text-xs text-muted-foreground">{instanceCount}</span>
+                              <span className="text-caption text-muted-foreground">{instanceCount}</span>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                               {groupInstances.map((inst) => {
@@ -410,19 +410,19 @@ export function ClientInstances() {
                                     <div className="flex items-center justify-between gap-2">
                                       <TruncatedCopyTooltip
                                         value={inst.instanceId}
-                                        className={`font-mono text-xs min-w-0 ${staleness === 'stale' ? 'text-foreground/50' : 'text-foreground/80'}`}
+                                        className={`font-mono text-caption min-w-0 ${staleness === 'stale' ? 'text-foreground/50' : 'text-foreground/80'}`}
                                       />
                                       {staleness === 'active' && (
                                         <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
                                       )}
                                     </div>
                                     <div className="flex items-center justify-between gap-2">
-                                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                      <span className="text-caption text-muted-foreground flex items-center gap-1">
                                         <Clock size={10} />
                                         {timeAgo(inst.lastSeenAt)}
                                       </span>
                                       {inst.sdkVersion && (
-                                        <span className="text-xs text-muted-foreground font-mono">
+                                        <span className="text-caption text-muted-foreground font-mono">
                                           v{inst.sdkVersion}
                                         </span>
                                       )}
@@ -441,14 +441,14 @@ export function ClientInstances() {
                               <div key={envId} className="border-t border-border pt-2.5 mt-1">
                                 <div className="flex items-center gap-2 mb-1.5">
                                   <span className={`w-1.5 h-1.5 rounded-full ${eg.dot}`}></span>
-                                  <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                                  <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
                                     {t('clientInstances.flags')}
                                   </span>
-                                  <span className="text-xs text-muted-foreground">
+                                  <span className="text-caption text-muted-foreground">
                                     {envName(envId)}
                                   </span>
                                   {flags && (
-                                    <span className="text-xs text-muted-foreground">
+                                    <span className="text-caption text-muted-foreground">
                                       {flags.filter((f) => !f.archived).length}
                                     </span>
                                   )}
@@ -458,7 +458,7 @@ export function ClientInstances() {
                                     <div className="w-4 h-4 border-2 border-border border-t-brand rounded-full animate-spin" />
                                   </div>
                                 ) : flags.filter((f) => !f.archived).length === 0 ? (
-                                  <p className="text-xs text-muted-foreground py-2">
+                                  <p className="text-caption text-muted-foreground py-2">
                                     {t('clientInstances.noFlagsInEnv')}
                                   </p>
                                 ) : (
@@ -488,7 +488,7 @@ export function ClientInstances() {
                                                   <span
                                                     className={`shrink-0 w-1.5 h-1.5 rounded-full ${flag.enabled ? 'bg-primary shadow-sm dark:' : 'bg-muted-foreground/30'}`}
                                                   />
-                                                  <span className="text-xs font-semibold text-foreground/90 truncate">
+                                                  <span className="text-caption font-semibold text-foreground/90 truncate">
                                                     {flag.name}
                                                   </span>
                                                 </div>
@@ -499,11 +499,11 @@ export function ClientInstances() {
                                                   />
                                                   {flag.percentage != null &&
                                                     flag.percentage < 100 && (
-                                                      <span className="shrink-0 text-xs text-brand font-medium">
+                                                      <span className="shrink-0 text-caption text-brand font-medium">
                                                         {flag.percentage}%
                                                       </span>
                                                     )}
-                                                  <code className="text-xs font-mono text-muted-foreground/70 truncate">
+                                                  <code className="text-caption font-mono text-muted-foreground/70 truncate">
                                                     {flag.key}
                                                   </code>
                                                   {flag.tags.length > 0 && (
@@ -511,7 +511,7 @@ export function ClientInstances() {
                                                       {flag.tags.slice(0, 2).map((tv, i) => (
                                                         <span
                                                           key={i}
-                                                          className="inline-flex items-center px-1 py-0 rounded text-xs font-medium text-primary-foreground truncate max-w-[64px] dark:brightness-[.85] dark:saturate-[.7]"
+                                                          className="inline-flex items-center px-1 py-0 rounded text-caption font-medium text-primary-foreground truncate max-w-[64px] dark:brightness-[.85] dark:saturate-[.7]"
                                                           style={{ background: tv.tagColor }}
                                                         >
                                                           {tv.value}
@@ -526,7 +526,7 @@ export function ClientInstances() {
                                                       size={9}
                                                       className="text-muted-foreground"
                                                     />
-                                                    <span className="text-xs text-muted-foreground/70">
+                                                    <span className="text-caption text-muted-foreground/70">
                                                       {formatCompactCount(metricTotal)}
                                                     </span>
                                                   </div>
@@ -545,10 +545,10 @@ export function ClientInstances() {
                                               }}
                                               className="bg-secondary border border-dashed border-border dark:border-border rounded-lg px-2.5 py-2 hover:border-brand dark:hover:border-brand hover:bg-brand/30 dark:hover:bg-brand/5 transition-all flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-brand dark:hover:text-brand cursor-pointer"
                                             >
-                                              <span className="text-xs font-medium">
+                                              <span className="text-caption font-medium">
                                                 +{visible.length - max}
                                               </span>
-                                              <span className="text-xs">{t('common.showAll')}</span>
+                                              <span className="text-caption">{t('common.showAll')}</span>
                                             </button>
                                           )}
                                         </>

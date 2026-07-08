@@ -156,3 +156,9 @@ export function dimColor(hex: string): string {
   const [nlr, nlg, nlb] = oklchToLinearSrgb(fl, fc, fh);
   return linearSrgbToHex(nlr, nlg, nlb);
 }
+
+export function readableColorForBg(hex: string): string {
+  const oklch = hexToOklch(hex);
+  if (!oklch) return '#ffffff';
+  return oklch.L > 0.65 ? '#171717' : '#ffffff';
+}

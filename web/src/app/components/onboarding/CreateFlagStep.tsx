@@ -31,9 +31,9 @@ export function CreateFlagStep({
           onChange={(e) => setFlagName(e.target.value)}
           maxLength={120}
           placeholder={t('onboarding.flagNamePlaceholder')}
-          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
         />
-        <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+        <div className="text-caption font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
           {flagName.length}/120
         </div>
       </div>
@@ -44,13 +44,13 @@ export function CreateFlagStep({
           onChange={(e) => setFlagKey(e.target.value)}
           maxLength={100}
           placeholder={t('onboarding.flagKeyPlaceholder')}
-          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
+          className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
         />
-        <div className="text-xs font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+        <div className="text-caption font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
           {flagKey.length}/100
         </div>
       </div>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && <p className="text-caption text-destructive">{error}</p>}
       <GradientButton
         onClick={onCreate}
         disabled={creating}

@@ -48,11 +48,11 @@ export function ConfirmDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className={wide ? 'sm:max-w-3xl' : 'sm:max-w-md'}>
         <AlertDialogHeader className="gap-1.5 p-0 pb-5">
-          <AlertDialogTitle className="text-lg font-semibold text-foreground leading-tight">
+          <AlertDialogTitle className="text-h2 font-semibold text-foreground leading-tight">
             {title}
           </AlertDialogTitle>
           {description && (
-            <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
+            <AlertDialogDescription className="text-body-sm text-muted-foreground leading-relaxed">
               {description}
             </AlertDialogDescription>
           )}
@@ -61,13 +61,13 @@ export function ConfirmDialog({
         {children && <div className="pb-6 min-w-0 overflow-hidden">{children}</div>}
 
         <AlertDialogFooter className="py-4 border-t border-border bg-secondary/50 gap-3 flex-row justify-end">
-          <AlertDialogCancel className="px-4 py-2.5 text-sm font-medium text-foreground/80 bg-card border border-border rounded-lg hover:bg-accent transition-colors">
+          <AlertDialogCancel className="px-4 py-2.5 text-body-sm font-medium text-foreground/80 bg-card border border-border rounded-lg hover:bg-accent transition-colors">
             {t(cancelLabel as MessageKey)}
           </AlertDialogCancel>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`inline-flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-all px-4 py-2.5 disabled:opacity-50 disabled:pointer-events-none ${variantButtonClasses[variant]}`}
+            className={`inline-flex items-center justify-center gap-2 rounded-lg text-body-sm font-semibold transition-all px-4 py-2.5 disabled:opacity-50 disabled:pointer-events-none ${variantButtonClasses[variant]}`}
           >
             {loading ? (
               <>

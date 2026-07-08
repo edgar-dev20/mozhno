@@ -39,8 +39,8 @@ function renderValue(
       <span
         className={
           compact
-            ? 'text-xs text-muted-foreground/60 line-through'
-            : 'text-xs text-muted-foreground/60 line-through'
+            ? 'text-caption text-muted-foreground/60 line-through'
+            : 'text-caption text-muted-foreground/60 line-through'
         }
       >
         {String(value)}
@@ -51,8 +51,8 @@ function renderValue(
     <span
       className={
         compact
-          ? 'text-xs font-medium text-foreground/90'
-          : 'text-xs font-medium text-foreground/90'
+          ? 'text-caption font-medium text-foreground/90'
+          : 'text-caption font-medium text-foreground/90'
       }
     >
       {String(value)}
@@ -82,8 +82,8 @@ function DiffRow({
       <div
         className={
           compact
-            ? 'text-xs font-medium text-muted-foreground/70 mb-0.5'
-            : 'text-xs font-medium text-muted-foreground/70 mb-0.5'
+            ? 'text-caption font-medium text-muted-foreground/70 mb-0.5'
+            : 'text-caption font-medium text-muted-foreground/70 mb-0.5'
         }
       >
         {change.label}
@@ -95,7 +95,7 @@ function DiffRow({
           </span>
         )}
         {hasRemoved && hasAdded && (
-          <span className="text-foreground/30 shrink-0 text-sm pt-0.5">→</span>
+          <span className="text-foreground/30 shrink-0 text-body-sm pt-0.5">→</span>
         )}
         {hasAdded && (
           <span className="min-w-0 flex-1 break-words">
@@ -111,7 +111,7 @@ export function DiffView({ changes }: DiffViewProps) {
   const t = useT();
   if (changes.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground text-center py-4">{t('common.noChanges')}</p>
+      <p className="text-body-sm text-muted-foreground text-center py-4">{t('common.noChanges')}</p>
     );
   }
 
@@ -129,7 +129,7 @@ export function DiffView({ changes }: DiffViewProps) {
       {Array.from(groups.entries()).map(([group, items]) => (
         <div key={group ?? '__default'} className="space-y-2">
           {group && (
-            <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-caption font-medium text-muted-foreground">
               {group} · {items.length}
             </span>
           )}

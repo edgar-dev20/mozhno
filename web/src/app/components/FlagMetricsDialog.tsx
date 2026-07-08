@@ -292,10 +292,10 @@ export function FlagMetricsDialog({
                   <BarChart3 size={18} className="text-brand" />
                 </div>
               </div>
-              <span className="text-sm font-semibold text-foreground truncate">{flagName}</span>
+              <span className="text-body-sm font-semibold text-foreground truncate">{flagName}</span>
               <span className="text-muted-foreground/30 shrink-0">·</span>
               {defaultEnvId ? (
-                <span className="text-xs font-medium text-muted-foreground truncate">
+                <span className="text-caption font-medium text-muted-foreground truncate">
                   {selectedEnvName}
                 </span>
               ) : (
@@ -303,7 +303,7 @@ export function FlagMetricsDialog({
                   value={selectedEnvId?.toString() ?? ''}
                   onValueChange={(v) => setSelectedEnvId(v ? parseInt(v) : null)}
                 >
-                  <SelectTrigger className="h-7 text-xs gap-1 border-0 bg-transparent hover:bg-secondary/50 px-2 w-auto min-w-0">
+                  <SelectTrigger className="h-7 text-caption gap-1 border-0 bg-transparent hover:bg-secondary/50 px-2 w-auto min-w-0">
                     <SelectValue placeholder={t('flags.metrics.selectEnv')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -333,11 +333,11 @@ export function FlagMetricsDialog({
                   className="flex-1 flex flex-col items-center justify-center py-2.5 px-1"
                 >
                   <span
-                    className={`text-base font-medium leading-none tracking-tight ${totalEvaluations > 0 ? 'text-foreground/85' : 'text-muted-foreground/40'}`}
+                    className={`text-body font-medium leading-none tracking-tight ${totalEvaluations > 0 ? 'text-foreground/85' : 'text-muted-foreground/40'}`}
                   >
                     {s.value}
                   </span>
-                  <span className="text-xs text-muted-foreground/45 uppercase tracking-widest mt-1 leading-none">
+                  <span className="text-caption text-muted-foreground/45 uppercase tracking-widest mt-1 leading-none">
                     {s.label}
                   </span>
                 </div>
@@ -347,10 +347,10 @@ export function FlagMetricsDialog({
             {/* Chart card */}
             <div className="flex-shrink-0 mx-5 mt-4 h-[280px] min-h-[280px] flex flex-col rounded-xl shadow-md bg-card ring-1 ring-border p-4">
               <div className="flex-shrink-0 flex flex-col gap-2 mb-3">
-                <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                <span className="text-caption font-semibold text-muted-foreground/60 uppercase tracking-wider">
                   {t('flags.metrics.chartTitle')}
                 </span>
-                <div className="flex items-center gap-4 text-xs">
+                <div className="flex items-center gap-4 text-caption">
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-sm bg-sparkline-true" />
                     <span className="text-muted-foreground/60">
@@ -428,14 +428,14 @@ export function FlagMetricsDialog({
                 {!chartReady && !hasEverLoaded ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
                     <div className="animate-spin rounded-full h-8 w-8 border-[3px] border-sparkline-true/30 border-t-sparkline-true" />
-                    <span className="text-xs text-muted-foreground/40">{t('common.loading')}</span>
+                    <span className="text-caption text-muted-foreground/40">{t('common.loading')}</span>
                   </div>
                 ) : totalTrue === 0 && totalFalse === 0 ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 bg-card">
                     <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-muted">
                       <BarChart3 size={28} className="text-muted-foreground/30" />
                     </div>
-                    <span className="text-sm text-muted-foreground/40">
+                    <span className="text-body-sm text-muted-foreground/40">
                       {t('flags.metrics.noData')}
                     </span>
                   </div>
@@ -445,7 +445,7 @@ export function FlagMetricsDialog({
 
             {/* Filter breadcrumb */}
             {(filterAppName || filterInstanceId) && (
-              <div className="flex-shrink-0 mx-5 mt-3 flex items-center gap-1.5 text-xs">
+              <div className="flex-shrink-0 mx-5 mt-3 flex items-center gap-1.5 text-caption">
                 <span className="text-muted-foreground/40">Showing:</span>
                 <button
                   onClick={clearFilters}
@@ -488,11 +488,11 @@ export function FlagMetricsDialog({
             <div className="flex-shrink-0 mx-5 mt-4 mb-5">
               <div className="flex items-center gap-2 mb-3">
                 <Server size={13} className="text-muted-foreground/40" />
-                <span className="text-xs font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                <span className="text-caption font-semibold text-muted-foreground/60 uppercase tracking-wider">
                   Все приложения
                 </span>
                 {instances.length > 0 && (
-                  <span className="text-xs text-muted-foreground/30">
+                  <span className="text-caption text-muted-foreground/30">
                     {instanceGroups.length} приложений · {instances.length} экземпляров
                   </span>
                 )}
@@ -508,7 +508,7 @@ export function FlagMetricsDialog({
                 <div className="rounded-xl bg-muted px-4 py-8 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <Server size={24} className="text-muted-foreground/25" />
-                    <p className="text-xs text-muted-foreground/50">
+                    <p className="text-caption text-muted-foreground/50">
                       {t('clientInstances.emptyDescription')}
                     </p>
                   </div>
@@ -601,17 +601,17 @@ export function FlagMetricsDialog({
                                     </div>
                                     <div className="flex items-center gap-2 shrink-0">
                                       {envName && (
-                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium bg-secondary/60 text-muted-foreground/60 shrink-0">
+                                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-caption font-medium bg-secondary/60 text-muted-foreground/60 shrink-0">
                                           <span className={`w-1 h-1 rounded-full ${envColor}`} />
                                           {envName}
                                         </span>
                                       )}
                                       {inst.sdkVersion && (
-                                        <span className="text-muted-foreground/35 font-mono text-xs shrink-0">
+                                        <span className="text-muted-foreground/35 font-mono text-caption shrink-0">
                                           v{inst.sdkVersion}
                                         </span>
                                       )}
-                                      <span className="text-muted-foreground/30 text-xs w-14 text-right tabular-nums shrink-0">
+                                      <span className="text-muted-foreground/30 text-caption w-14 text-right tabular-nums shrink-0">
                                         {timeAgo(inst.lastSeenAt)}
                                       </span>
                                     </div>

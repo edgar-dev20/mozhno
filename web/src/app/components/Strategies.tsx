@@ -52,7 +52,7 @@ export function Strategies() {
                 <Icon size={22} className={s.color} />
               </div>
               <h3 className="font-semibold text-foreground">{t(s.nameKey)}</h3>
-              <p className="text-sm text-muted-foreground/80 mt-1">{t(s.descKey)}</p>
+              <p className="text-body-sm text-muted-foreground/80 mt-1">{t(s.descKey)}</p>
             </Card>
           );
         })}

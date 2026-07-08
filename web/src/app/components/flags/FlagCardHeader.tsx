@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Switch } from '@/app/components/ui/switch';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useT } from '@/i18n';
+import { readableColorForBg } from '@/shared/color';
 import type { FlagView } from '@/app/hooks/flagTypes';
 import type { Tag as TagType } from '@/api';
 
@@ -49,6 +51,7 @@ const getIconColor = (t: string) =>
 interface FlagCardHeaderProps {
   flag: FlagView;
   expanded: boolean;
+  onToggleExpand: () => void;
   environments: { id: number; name: string }[];
   tags: TagType[];
   onToggleFlag: (flag: FlagView, envId: number) => void;
@@ -57,10 +60,12 @@ interface FlagCardHeaderProps {
 export function FlagCardHeader({
   flag,
   expanded,
+  onToggleExpand,
   environments,
   tags,
   onToggleFlag,
 }: FlagCardHeaderProps) {
+  const t = useT();
   const [glowKeys, setGlowKeys] = useState<Record<number, number>>({});
 
   const handleToggle = useCallback(
@@ -76,7 +81,14 @@ export function FlagCardHeader({
 
   return (
     <>
-      <div className="flex-1 min-w-0 flex items-center gap-3">
+      <button
+        type="button"
+        id={`flag-card-header-${flag.key}`}
+        aria-expanded={expanded}
+        aria-controls={`flag-card-detail-${flag.key}`}
+        onClick={onToggleExpand}
+        className="flex-1 min-w-0 flex items-center gap-3 text-left rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      >
         <div className={`p-1.5 rounded-lg shrink-0 ${getIconColor(flag.flagType)}`}>
           {getTypeIcon(flag.flagType, 16)}
         </div>
@@ -85,8 +97,8 @@ export function FlagCardHeader({
             {flag.name}
           </span>
           {flag.archived && (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-muted text-muted-foreground/70 border border-border/50 shrink-0">
-              Archived
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-caption font-medium bg-muted text-muted-foreground/70 border border-border/50 shrink-0">
+              {t('audit.action.archived')}
             </span>
           )}
           {!expanded &&
@@ -96,54 +108,52 @@ export function FlagCardHeader({
               return tg ? (
                 <span
                   key={i}
-                  className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium text-primary-foreground leading-none dark:brightness-[.85] dark:saturate-[.7]"
-                  style={{ background: tg.color }}
+                  className="inline-flex items-center px-1.5 py-0.5 rounded text-caption font-medium leading-none dark:brightness-[.85] dark:saturate-[.7]"
+                  style={{ background: tg.color, color: readableColorForBg(tg.color) }}
                 >
                   {tv.value}
                 </span>
               ) : null;
             })}
           {!expanded && flag.tags.length > 5 && (
-            <span className="text-xs text-muted-foreground">+{flag.tags.length - 5}</span>
+            <span className="text-caption text-muted-foreground">+{flag.tags.length - 5}</span>
           )}
         </div>
-      </div>
+      </button>
       <div className="flex items-center gap-3 shrink-0">
         {!expanded &&
           environments.map((env) => {
             const es = flag.environments[env.id];
             return (
               <div key={env.id} className="flex items-center gap-1.5">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <span className="text-caption font-medium text-muted-foreground uppercase tracking-wide">
                   {env.name}
                 </span>
                 {es && (
                   <span
                     key={`glow-${env.id}-${glowKeys[env.id] ?? 0}`}
-                    onClick={(e) => e.stopPropagation()}
                     className={(glowKeys[env.id] ?? 0) > 0 ? 'animate-flag-on' : ''}
                   >
                     <Switch
                       checked={es.enabled}
                       onCheckedChange={() => handleToggle(env.id)}
-                      className="data-[state=checked]:bg-brand scale-75 origin-right"
+                      aria-label={`${flag.name} — ${env.name}`}
+                      className="data-[state=checked]:bg-brand"
                     />
                   </span>
                 )}
               </div>
             );
           })}
-        {expanded ? (
-          <ChevronUp
-            size={16}
-            className="text-muted-foreground group-hover:text-brand transition-colors"
-          />
-        ) : (
-          <ChevronDown
-            size={16}
-            className="text-muted-foreground group-hover:text-brand transition-colors"
-          />
-        )}
+        <button
+          type="button"
+          onClick={onToggleExpand}
+          aria-hidden="true"
+          tabIndex={-1}
+          className="inline-flex items-center justify-center text-muted-foreground group-hover:text-brand transition-colors"
+        >
+          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
       </div>
     </>
   );

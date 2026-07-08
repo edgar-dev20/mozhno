@@ -41,7 +41,7 @@ export function OnboardingStepper({
             {currentStep > 0 && (
               <button
                 onClick={onBack}
-                className="inline-flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1 px-3 py-2 text-body-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ChevronLeft size={16} />
                 {t('onboarding.back')}
@@ -50,7 +50,7 @@ export function OnboardingStepper({
             {currentStep === 1 && (
               <button
                 onClick={onSkip}
-                className="inline-flex items-center gap-1 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1 px-4 py-2 text-body-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 {t('onboarding.skip')}
               </button>

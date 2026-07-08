@@ -247,7 +247,7 @@ export function Segments() {
                         .join(', ')
                     : r.contextValues || '—';
                 return (
-                  <div key={i} className="flex items-center gap-1.5 text-xs">
+                  <div key={i} className="flex items-center gap-1.5 text-caption">
                     <span className="font-semibold text-foreground/80">
                       {ctx?.name ??
                         t('segments.unknownField', { id: String(r.contextDefinitionId) })}
@@ -402,7 +402,7 @@ export function Segments() {
                     />
                   </div>
                   <h3
-                    className="text-lg font-semibold text-foreground mb-1.5 cursor-pointer hover:text-foreground/60 dark:hover:text-muted-foreground/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background rounded"
+                    className="text-h2 font-semibold text-foreground mb-1.5 cursor-pointer hover:text-foreground/60 dark:hover:text-muted-foreground/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background rounded"
                     onClick={() => openEdit(s)}
                     role="button"
                     tabIndex={0}
@@ -415,11 +415,11 @@ export function Segments() {
                   >
                     {s.name}
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-6 line-clamp-2 h-10">
+                  <p className="text-body-sm text-muted-foreground mb-6 line-clamp-2 h-10">
                     {s.description}
                   </p>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-sm">
+                    <div className="flex items-center gap-2 text-body-sm">
                       <Users size={16} className="text-muted-foreground/70" />
                       <span className="text-foreground/60 dark:text-muted-foreground/60">
                         {t('segments.contextCount', { count: String((s.context ?? []).length) })}
@@ -427,7 +427,7 @@ export function Segments() {
                     </div>
                     {s.context && s.context.length > 0 && (
                       <div className="bg-secondary rounded-lg p-3 border border-border flex flex-col gap-2">
-                        <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                        <div className="flex items-center gap-2 text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
                           <Filter size={12} />
                           {t('segments.rules')}
                         </div>
@@ -483,7 +483,7 @@ export function Segments() {
             <>
               <button
                 onClick={() => setDiffChanges([])}
-                className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+                className="inline-flex items-center px-5 py-2.5 text-body-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
               >
                 {t('segments.panel.cancel')}
               </button>
@@ -498,7 +498,7 @@ export function Segments() {
             <>
               <button
                 onClick={() => setPanelOpen(false)}
-                className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+                className="inline-flex items-center px-5 py-2.5 text-body-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
               >
                 {t('segments.panel.cancel')}
               </button>
@@ -527,7 +527,7 @@ export function Segments() {
               onChange={(e) => updateName(e.target.value)}
               maxLength={120}
               placeholder={t('segments.form.namePlaceholder')}
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
             />
           </FormField>
           <FormField label={t('common.description')} maxLength={160} value={formDesc}>
@@ -548,7 +548,7 @@ export function Segments() {
                 el.style.height = 'auto';
                 el.style.height = Math.max(el.scrollHeight, 64) + 'px';
               }}
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden"
             />
           </FormField>
 
@@ -566,10 +566,10 @@ export function Segments() {
                   shadow
                 />
                 <div className="text-left">
-                  <div className="text-sm font-medium text-foreground/80">
+                  <div className="text-body-sm font-medium text-foreground/80">
                     {t('segments.customize.title')}
                   </div>
-                  <div className="text-xs text-muted-foreground/70">
+                  <div className="text-caption text-muted-foreground/70">
                     {t('segments.customize.subtitle')}
                   </div>
                 </div>
@@ -583,13 +583,13 @@ export function Segments() {
             {showCustomize && (
               <div className="mt-3 space-y-4 px-2">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                  <label className="text-caption font-medium text-muted-foreground mb-2 block">
                     {t('common.icon')}
                   </label>
                   <SegmentIconPicker value={formIcon} onChange={updateIcon} color={formColor} />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-2 block">
+                  <label className="text-caption font-medium text-muted-foreground mb-2 block">
                     {t('common.color')}
                   </label>
                   <SegmentColorPicker value={formColor} onChange={updateColor} icon={formIcon} />
@@ -602,7 +602,7 @@ export function Segments() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Settings size={16} className="text-brand dark:text-brand" />
-                <label className="text-sm font-medium text-foreground/80">
+                <label className="text-body-sm font-medium text-foreground/80">
                   {t('segments.targetingRules.title')}
                 </label>
                 <Badge variant="primary" size="sm">
@@ -611,7 +611,7 @@ export function Segments() {
               </div>
               <button
                 onClick={addContext}
-                className="text-xs text-brand dark:text-brand hover:text-brand flex items-center gap-1 font-medium"
+                className="text-caption text-brand dark:text-brand hover:text-brand flex items-center gap-1 font-medium"
               >
                 <Plus size={12} />
                 {t('segments.targetingRules.add')}
@@ -717,7 +717,7 @@ export function Segments() {
                                         if (getInlineValidationError(contextType, v)) return;
                                         addValue(c.id, v);
                                       }}
-                                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                                      className={`px-3 py-1.5 rounded-lg text-caption font-medium transition-all border ${
                                         !isMultiOp && isSelected
                                           ? 'bg-brand/10 text-brand border-brand/20'
                                           : 'bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border-border'
@@ -728,7 +728,7 @@ export function Segments() {
                                   );
                                 })}
                                 {validVals.length === 0 && (
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-caption text-muted-foreground">
                                     {t('segments.targetingRules.valuePlaceholder')}
                                   </p>
                                 )}
@@ -747,7 +747,7 @@ export function Segments() {
                                   t('segments.targetingRules.valuePlaceholder')
                                 }
                                 list={hasWhitelist ? `seg-wl-${c.id}` : undefined}
-                                className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-destructive dark:invalid:border-destructive"
+                                className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-caption placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all invalid:border-destructive dark:invalid:border-destructive"
                                 onInput={(e) => {
                                   const input = e.target as HTMLInputElement;
                                   input.setCustomValidity(
@@ -786,7 +786,7 @@ export function Segments() {
                                       <button
                                         key={v}
                                         onClick={() => addValue(c.id, v)}
-                                        className="px-2 py-0.5 text-xs border border-brand/20 rounded-md text-brand hover:bg-brand/10 transition-colors"
+                                        className="px-2 py-0.5 text-caption border border-brand/20 rounded-md text-brand hover:bg-brand/10 transition-colors"
                                       >
                                         + {v}
                                       </button>
@@ -826,7 +826,7 @@ export function Segments() {
                               return (
                               <span
                                 key={vi}
-                                className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-mono rounded-md border break-all leading-none ${
+                                className={`inline-flex items-center gap-1 px-2 py-1 text-caption font-mono rounded-md border break-all leading-none ${
                                   inWhitelist
                                     ? 'bg-success/10 text-success border-success/20'
                                     : 'bg-warning/10 text-warning border-warning/30'
@@ -845,7 +845,7 @@ export function Segments() {
                               </span>
                               );
                             })}
-                            <span className="text-xs text-muted-foreground self-center ml-1">
+                            <span className="text-caption text-muted-foreground self-center ml-1">
                               {t('segments.targetingRules.valueCount', {
                                 count: String(parsedValues.length),
                               })}
@@ -860,7 +860,7 @@ export function Segments() {
               })}
               {formContexts.length === 0 && (
                 <div className="p-4 bg-input-background rounded-lg border border-dashed border-border dark:border-border text-center">
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-caption text-muted-foreground">
                     {t('segments.targetingRules.emptyRules')}
                   </p>
                 </div>
@@ -876,10 +876,10 @@ export function Segments() {
                 </div>
               </div>
               <div>
-                <h5 className="text-xs font-semibold text-foreground mb-1">
+                <h5 className="text-caption font-semibold text-foreground mb-1">
                   {t('segments.infoBox.title')}
                 </h5>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-caption text-muted-foreground">
                   {t('segments.infoBox.description')}
                 </p>
               </div>
@@ -891,7 +891,7 @@ export function Segments() {
               <button
                 type="button"
                 onClick={() => setDeleteId(editing.id)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-body-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
               >
                 <Trash2 size={16} />
                 {t('segments.deleteButton')}

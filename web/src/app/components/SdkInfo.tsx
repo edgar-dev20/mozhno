@@ -23,7 +23,7 @@ function CodeBlock({ code, lang }: CodeBlockProps) {
   return (
     <div className="relative group">
       {lang && (
-        <span className="absolute top-2 right-12 text-xs font-mono text-muted-foreground/70 uppercase tracking-wider">
+        <span className="absolute top-2 right-12 text-caption font-mono text-muted-foreground/70 uppercase tracking-wider">
           {lang}
         </span>
       )}
@@ -33,8 +33,8 @@ function CodeBlock({ code, lang }: CodeBlockProps) {
       >
         {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
       </button>
-      <pre className="bg-muted dark:bg-muted border border-border rounded-xl p-5 overflow-x-auto text-sm leading-relaxed">
-        <code className="text-muted-foreground font-mono text-sm whitespace-pre">{code}</code>
+      <pre className="bg-muted dark:bg-muted border border-border rounded-xl p-5 overflow-x-auto text-body-sm leading-relaxed">
+        <code className="text-muted-foreground font-mono text-body-sm whitespace-pre">{code}</code>
       </pre>
     </div>
   );
@@ -175,7 +175,7 @@ export function SdkInfo() {
 
   return (
     <div
-      className="rounded-2xl border backdrop-blur-xl overflow-hidden"
+              className="rounded-2xl border backdrop-blur-xl overflow-hidden"
       style={{
         background: 'linear-gradient(135deg, rgba(99,102,241,0.03), rgba(6,182,212,0.03))',
         borderColor: 'rgba(99,102,241,0.15)',
@@ -192,12 +192,12 @@ export function SdkInfo() {
           </div>
           <div className="text-left">
             <h3 className="font-semibold text-foreground/90">{t('sdkInfo.title')}</h3>
-            <p className="text-xs text-muted-foreground">{t('sdkInfo.description')}</p>
+            <p className="text-caption text-muted-foreground">{t('sdkInfo.description')}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           {!expanded && (
-            <span className="text-xs text-muted-foreground/70 hidden sm:inline">
+            <span className="text-caption text-muted-foreground/70 hidden sm:inline">
               {active.label}
             </span>
           )}
@@ -222,7 +222,7 @@ export function SdkInfo() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-all ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 text-body-sm font-medium rounded-lg transition-all ${
                   activeTab === tab.id
                     ? 'bg-popover shadow-sm text-foreground'
                     : 'text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground'
@@ -244,11 +244,11 @@ export function SdkInfo() {
 
           <div className="space-y-4">
             <div className="flex items-start justify-between gap-4">
-              <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
+              <p className="text-body-sm text-muted-foreground leading-relaxed max-w-2xl">
                 {content[activeTab].desc}
               </p>
               <span
-                className={`shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg border ${
+                className={`shrink-0 inline-flex items-center gap-1 text-caption font-semibold px-2.5 py-1 rounded-lg border ${
                   active.keyType === 'SERVER'
                     ? 'text-brand bg-brand/10 border-brand/20'
                     : 'text-success bg-success/10 border-success/20'
@@ -268,7 +268,7 @@ export function SdkInfo() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
-                <p className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                <p className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
                   {t('sdkInfo.install')}
                 </p>
                 <CodeBlock
@@ -277,7 +277,7 @@ export function SdkInfo() {
                 />
               </div>
               <div>
-                <p className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                <p className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
                   {t('sdkInfo.usage')}
                 </p>
                 <CodeBlock code={content[activeTab].usage} lang={content[activeTab].usageLang} />

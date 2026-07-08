@@ -109,10 +109,10 @@ export function OnboardingWizard({
                     transition={{ duration: 0.2 }}
                     className="flex-1 flex flex-col"
                   >
-                    <h2 className="text-xl font-semibold text-foreground mb-2">
+                    <h2 className="text-h2 font-semibold text-foreground mb-2">
                       {t(STEPS[step].title)}
                     </h2>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                    <p className="text-body-sm text-muted-foreground leading-relaxed mb-6">
                       {t(STEPS[step].description)}
                     </p>
 

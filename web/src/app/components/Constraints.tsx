@@ -20,7 +20,7 @@ import { Switch } from '@/app/components/ui/switch';
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
   [ContextType.STRING]: <Type size={13} />,
-  [ContextType.NUMBER]: <span className="text-sm font-semibold">123</span>,
+  [ContextType.NUMBER]: <span className="text-body-sm font-semibold">123</span>,
   [ContextType.TIME]: <Clock size={13} />,
   [ContextType.SEMVER]: <Settings2 size={13} />,
 };
@@ -335,19 +335,19 @@ export function Constraints() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="font-semibold text-sm text-foreground truncate">
+                          <span className="font-semibold text-body-sm text-foreground truncate">
                             {c.name}
                           </span>
-                          <code className="text-xs font-mono text-muted-foreground shrink-0">
+                          <code className="text-caption font-mono text-muted-foreground shrink-0">
                             {c.key}
                           </code>
                         </div>
                         {c.description && (
-                          <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed line-clamp-2">
+                          <p className="text-caption text-muted-foreground mt-1.5 leading-relaxed line-clamp-2">
                             {c.description}
                           </p>
                         )}
-                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground flex-wrap">
+                        <div className="flex items-center gap-2 mt-2 text-caption text-muted-foreground flex-wrap">
                           {c.createdAt && (
                             <span className="flex items-center gap-1">
                               <Clock size={10} />
@@ -366,7 +366,7 @@ export function Constraints() {
                             {usage.map((s) => (
                               <span
                                 key={s.id}
-                                className="inline-flex items-center gap-1 text-xs font-medium px-1.5 py-1 rounded-md leading-none"
+                                className="inline-flex items-center gap-1 text-caption font-medium px-1.5 py-1 rounded-md leading-none"
                                 style={{ color: s.color, backgroundColor: s.color + '14' }}
                               >
                                 <SegmentIcon name={s.icon} size={10} />
@@ -430,7 +430,7 @@ export function Constraints() {
               onChange={(e) => setFormName(e.target.value)}
               maxLength={120}
               placeholder="User ID"
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
             />
           </FormField>
           <FormField
@@ -439,14 +439,14 @@ export function Constraints() {
               editing ? (
                 <>
                   {t('constraints.keyHintEditPrefix')}
-                  <code className="text-xs font-mono text-brand bg-brand/10 px-1 py-0.5 rounded">
+                  <code className="text-caption font-mono text-brand bg-brand/10 px-1 py-0.5 rounded">
                     context['{formKey}']
                   </code>
                 </>
               ) : (
                 <>
                   {t('constraints.keyHintCreatePrefix')}
-                  <code className="text-xs font-mono text-brand bg-brand/10 px-1 py-0.5 rounded">
+                  <code className="text-caption font-mono text-brand bg-brand/10 px-1 py-0.5 rounded">
                     context['user_id']
                   </code>
                 </>
@@ -465,12 +465,12 @@ export function Constraints() {
               maxLength={100}
               placeholder="user_id"
               disabled={!!editing}
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-secondary/50"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-secondary/50"
             />
-            {keyError && <p className="text-xs text-destructive mt-1">{keyError}</p>}
+            {keyError && <p className="text-caption text-destructive mt-1">{keyError}</p>}
           </FormField>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground/80">{t('common.type')}</label>
+            <label className="text-body-sm font-medium text-foreground/80">{t('common.type')}</label>
             <div className="grid grid-cols-4 gap-1.5">
               {CONTEXT_TYPES.map((tp) => (
                 <button
@@ -479,7 +479,7 @@ export function Constraints() {
                     if (!editing) setFormType(tp);
                   }}
                   disabled={!!editing && formType !== tp}
-                  className={`flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg border text-xs font-medium transition-all duration-150 ${formType === tp ? 'border-current/30' : editing ? 'border-border text-muted-foreground/40 cursor-not-allowed' : 'border-border text-muted-foreground hover:border-border hover:text-foreground/60 dark:hover:text-muted-foreground/60'}`}
+                  className={`flex flex-col items-center justify-center gap-1 px-2 py-2.5 rounded-lg border text-caption font-medium transition-all duration-150 ${formType === tp ? 'border-current/30' : editing ? 'border-border text-muted-foreground/40 cursor-not-allowed' : 'border-border text-muted-foreground hover:border-border hover:text-foreground/60 dark:hover:text-muted-foreground/60'}`}
                   style={
                     formType === tp
                       ? { color: TYPE_COLORS[tp], backgroundColor: TYPE_COLORS[tp] + '12' }
@@ -493,7 +493,7 @@ export function Constraints() {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-caption text-muted-foreground leading-relaxed">
               {t('constraints.typeHelpText')}
             </p>
           </div>
@@ -515,17 +515,17 @@ export function Constraints() {
                 el.style.height = Math.max(el.scrollHeight, 72) + 'px';
               }}
               placeholder={t('constraints.placeholderDescription')}
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden leading-relaxed"
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none overflow-hidden leading-relaxed"
             />
           </FormField>
 
           <div className="pt-5 border-t border-border space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <label className="text-sm font-medium text-foreground/80">
+                <label className="text-body-sm font-medium text-foreground/80">
                   {t('constraints.strictModeLabel')}
                 </label>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-caption text-muted-foreground mt-0.5">
                   {t('constraints.strictModeHint')}
                 </p>
               </div>
@@ -537,10 +537,10 @@ export function Constraints() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground/80">
+              <label className="text-body-sm font-medium text-foreground/80">
                 {t('constraints.validValuesLabel')}
               </label>
-              <p className="text-xs text-muted-foreground mb-2">
+              <p className="text-caption text-muted-foreground mb-2">
                 {t('constraints.validValuesHint')}
               </p>
               <div className="flex items-start gap-1.5 mb-3">
@@ -561,7 +561,7 @@ export function Constraints() {
                         setValueInput('');
                       }
                     }}
-                    className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-xs placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
+                    className="w-full bg-secondary border border-border rounded-md px-2.5 py-2 text-caption placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
                   />
                 </div>
                 <button
@@ -573,7 +573,7 @@ export function Constraints() {
                     }
                     setValueInput('');
                   }}
-                  className="shrink-0 px-3 py-2 text-xs font-medium text-brand hover:bg-brand/10 rounded-md border border-brand/20 transition-all"
+                  className="shrink-0 px-3 py-2 text-caption font-medium text-brand hover:bg-brand/10 rounded-md border border-brand/20 transition-all"
                 >
                   <Plus size={14} />
                 </button>
@@ -618,7 +618,7 @@ export function Constraints() {
                   {formValidValues.map((v, vi) => (
                     <span
                       key={vi}
-                      className="inline-flex items-center gap-1 px-2 py-1 text-xs font-mono bg-success/10 text-success border border-success/20 rounded-md break-all leading-none"
+                      className="inline-flex items-center gap-1 px-2 py-1 text-caption font-mono bg-success/10 text-success border border-success/20 rounded-md break-all leading-none"
                     >
                       {v}
                       <button
@@ -631,7 +631,7 @@ export function Constraints() {
                       </button>
                     </span>
                   ))}
-                  <span className="text-xs text-muted-foreground self-center ml-1">
+                  <span className="text-caption text-muted-foreground self-center ml-1">
                     {formValidValues.length} value{formValidValues.length !== 1 ? 's' : ''}
                   </span>
                 </div>
@@ -642,7 +642,7 @@ export function Constraints() {
 
         {editingUsage && editingUsage.length > 0 && (
           <div className="pt-4 mt-4 border-t border-border">
-            <label className="text-sm font-medium text-foreground/80">
+            <label className="text-body-sm font-medium text-foreground/80">
               {t('constraints.relatedSegmentsLabel')}
             </label>
             <div className="mt-3 flex flex-col gap-2">
@@ -660,11 +660,11 @@ export function Constraints() {
                     darkDim={false}
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold" style={{ color: s.color }}>
+                    <div className="text-body-sm font-semibold" style={{ color: s.color }}>
                       {s.name}
                     </div>
                     {s.description && (
-                      <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                      <div className="text-caption text-muted-foreground mt-0.5 line-clamp-1">
                         {s.description}
                       </div>
                     )}
@@ -675,7 +675,7 @@ export function Constraints() {
                 </div>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+            <p className="text-caption text-muted-foreground mt-3 leading-relaxed">
               {t('constraints.cannotDeleteHelp')}
             </p>
           </div>
@@ -686,7 +686,7 @@ export function Constraints() {
             {canDelete ? (
               <button
                 onClick={() => setDeleteId(editing.id)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-body-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20"
               >
                 <Trash2 size={16} />
                 {t('constraints.deleteButton')}
@@ -694,7 +694,7 @@ export function Constraints() {
             ) : (
               <button
                 disabled
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-muted-foreground/60 dark:text-muted-foreground/60 rounded-lg border border-border cursor-not-allowed"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-body-sm font-medium text-muted-foreground/60 dark:text-muted-foreground/60 rounded-lg border border-border cursor-not-allowed"
               >
                 <Trash2 size={16} />
                 {t('constraints.deleteButton')}

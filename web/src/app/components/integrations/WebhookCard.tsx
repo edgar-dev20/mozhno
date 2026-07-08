@@ -43,7 +43,7 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
             </div>
             <div className="min-w-0">
               <h3 className="font-semibold text-foreground truncate">{item.name}</h3>
-              <p className="text-xs text-muted-foreground/70 font-mono mt-0.5 truncate">
+              <p className="text-caption text-muted-foreground/70 font-mono mt-0.5 truncate">
                 {cfg.url || t('integrations.urlNotSet')}
               </p>
             </div>
@@ -78,7 +78,7 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
               {t('integrations.status.error')}
             </Badge>
           )}
-          <span className="text-xs text-muted-foreground/70">
+          <span className="text-caption text-muted-foreground/70">
             {evts.length > 0
               ? t('integrations.eventCount', { count: String(evts.length) })
               : t('integrations.noEvents')}

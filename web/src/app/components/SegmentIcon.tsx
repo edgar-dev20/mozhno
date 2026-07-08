@@ -177,16 +177,16 @@ export function SegmentColorPicker({
             className="transition-all"
           />
           <div className="space-y-1 min-w-0">
-            <div className="text-xs font-semibold text-muted-foreground/80 uppercase tracking-wider">
+            <div className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
               {t('tags.form.color.preview')}
             </div>
-            <div className="font-mono text-sm text-foreground/80">{value}</div>
+            <div className="font-mono text-body-sm text-foreground/80">{value}</div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-sm">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground font-mono text-body-sm">
               #
             </span>
             <input
@@ -198,9 +198,9 @@ export function SegmentColorPicker({
               }}
               placeholder={t('tags.form.color.hexPlaceholder')}
               maxLength={7}
-              className="w-full bg-card border border-border rounded-lg pl-8 pr-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:ring-border transition-all placeholder:text-muted-foreground"
+              className="w-full bg-card border border-border rounded-lg pl-8 pr-4 py-2.5 text-body-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:ring-border transition-all placeholder:text-muted-foreground"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-normal text-muted-foreground/50 tabular-nums">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-caption font-normal text-muted-foreground/50 tabular-nums">
               {customHex.length}/7
             </span>
           </div>
@@ -219,7 +219,7 @@ export function SegmentColorPicker({
         {COLOR_CATEGORIES.map((cat) => (
           <div key={cat.label}>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+              <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
                 {t(cat.label as MessageKey)}
               </span>
               <div className="h-px flex-1 bg-accent" />
@@ -248,7 +248,7 @@ export function SegmentColorPicker({
                         <span className="w-2 h-2 rounded-full bg-background shadow-sm" />
                       </span>
                     )}
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground border border-border text-xs font-semibold px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground border border-border text-caption font-semibold px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                       {getColorName(c)}
                     </span>
                   </button>
@@ -259,7 +259,7 @@ export function SegmentColorPicker({
         ))}
       </div>
 
-      <p className="text-xs text-muted-foreground/70 flex items-center gap-1">
+      <p className="text-caption text-muted-foreground/70 flex items-center gap-1">
         <LucideIcons.Sparkles size={12} className="text-warning" />
         {t('tags.form.color.hint')}
       </p>

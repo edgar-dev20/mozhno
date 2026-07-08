@@ -46,7 +46,7 @@ export function WebhookBodyEditor({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-foreground/80 flex items-center gap-1.5 justify-between">
+        <label className="text-body-sm font-medium text-foreground/80 flex items-center gap-1.5 justify-between">
           <span className="flex items-center gap-1.5">
             <FileText size={14} className="text-muted-foreground" />
             {t('integrations.body')}
@@ -60,14 +60,14 @@ export function WebhookBodyEditor({
               </span>
             )}
           </span>
-          <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+          <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
             {body.length}/10000
           </span>
         </label>
         <button
           type="button"
           onClick={onToggleTemplateHelp}
-          className="text-xs text-brand hover:text-brand font-medium flex items-center gap-1 transition-colors"
+          className="text-caption text-brand hover:text-brand font-medium flex items-center gap-1 transition-colors"
         >
           {showTemplateHelp ? <Code2 size={12} /> : <Braces size={12} />}
           {showTemplateHelp ? t('integrations.hideVariables') : t('integrations.showVariables')}
@@ -82,7 +82,7 @@ export function WebhookBodyEditor({
                 key={v.key}
                 type="button"
                 onClick={() => onCopyTemplateVar(v.key)}
-                className="w-full flex items-center justify-between text-left text-xs px-2 py-1.5 rounded-lg hover:bg-brand/10 transition-colors group"
+                className="w-full flex items-center justify-between text-left text-caption px-2 py-1.5 rounded-lg hover:bg-brand/10 transition-colors group"
               >
                 <code className="text-brand font-mono">{`{{${v.key}}}`}</code>
                 <span className="text-muted-foreground flex items-center gap-1.5">
@@ -107,11 +107,11 @@ export function WebhookBodyEditor({
         maxLength={10000}
         placeholder={t('integrations.bodyPlaceholder')}
         rows={7}
-        className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-y whitespace-pre overflow-x-auto ${
+        className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-body-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-y whitespace-pre overflow-x-auto ${
           jsonContentType && jsonValid === false ? 'border-warning/30' : 'border-border'
         }`}
       />
-      <p className="text-xs text-muted-foreground/70">{t('integrations.bodyHint')}</p>
+      <p className="text-caption text-muted-foreground/70">{t('integrations.bodyHint')}</p>
     </div>
   );
 }

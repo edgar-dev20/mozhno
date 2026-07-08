@@ -310,7 +310,7 @@ export function Users() {
       <button
         onClick={() => setRoleFilter(active ? null : role)}
         aria-pressed={active}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
       >
         {icon}
         {label}
@@ -342,7 +342,7 @@ export function Users() {
       <button
         onClick={() => setStatusFilter(active ? null : status)}
         aria-pressed={active}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
       >
         <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
         {label}
@@ -386,7 +386,7 @@ export function Users() {
           <button
             onClick={() => setRoleFilter(null)}
             aria-pressed={!roleFilter}
-            className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               !roleFilter
                 ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -402,7 +402,7 @@ export function Users() {
           <button
             onClick={() => setStatusFilter(null)}
             aria-pressed={!statusFilter}
-            className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               !statusFilter
                 ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -478,16 +478,16 @@ export function Users() {
                               src={hasAvatar ? avatarUrl : undefined}
                               alt={user.name ?? ''}
                             />
-                            <AvatarFallback className="bg-brand text-xs font-bold text-primary-foreground">
+                            <AvatarFallback className="bg-brand text-caption font-bold text-primary-foreground">
                               {initials}
                             </AvatarFallback>
                           </Avatar>
                           <div className="min-w-0">
-                            <span className="font-semibold text-sm text-foreground truncate transition-all">
+                            <span className="font-semibold text-body-sm text-foreground truncate transition-all">
                               {user.name ?? user.email}
                             </span>
                             {user.name && (
-                              <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
+                              <div className="text-caption text-muted-foreground truncate flex items-center gap-1">
                                 <Mail size={10} />
                                 {user.email}
                               </div>
@@ -503,7 +503,7 @@ export function Users() {
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                         {!expanded && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1 shrink-0">
+                          <span className="text-caption text-muted-foreground flex items-center gap-1 shrink-0">
                             <Clock size={10} />
                             {timeAgo(user.lastActiveAt)}
                           </span>
@@ -534,19 +534,19 @@ export function Users() {
                           <div className="border-t border-border">
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-border">
                               <div className="px-3 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   Email
                                 </span>
-                                <span className="text-xs text-foreground/80 flex items-center gap-1.5 truncate">
+                                <span className="text-caption text-foreground/80 flex items-center gap-1.5 truncate">
                                   <Mail size={11} className="text-muted-foreground shrink-0" />
                                   {user.email}
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('users.card.role')}
                                 </span>
-                                <span className="text-xs font-medium flex items-center gap-1.5">
+                                <span className="text-caption font-medium flex items-center gap-1.5">
                                   {getRoleIcon(user.role, 11, 'text-muted-foreground shrink-0')}
                                   <Badge variant={getRoleVariant(user.role)} size="sm">
                                     {getRoleLabel(user.role)}
@@ -554,7 +554,7 @@ export function Users() {
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('users.card.status')}
                                 </span>
                                 <Badge variant={getStatusVariant(user.status)} size="sm">
@@ -562,19 +562,19 @@ export function Users() {
                                 </Badge>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('users.card.created')}
                                 </span>
-                                <span className="text-xs text-foreground/80 flex items-center gap-1.5">
+                                <span className="text-caption text-foreground/80 flex items-center gap-1.5">
                                   <Clock size={11} className="text-muted-foreground shrink-0" />
                                   {formatDate(user.createdAt)}
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
                                   {t('users.card.lastActive')}
                                 </span>
-                                <span className="text-xs text-foreground/80">
+                                <span className="text-caption text-foreground/80">
                                   {formatDateTime(user.lastActiveAt)}
                                 </span>
                               </div>
@@ -585,7 +585,7 @@ export function Users() {
                                   e.stopPropagation();
                                   handleOpenEdit(user);
                                 }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-brand hover:border-brand/20 hover:bg-brand/5 transition-all"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-brand hover:border-brand/20 hover:bg-brand/5 transition-all"
                               >
                                 <Edit2 size={12} />
                                 {t('users.card.edit')}
@@ -595,7 +595,7 @@ export function Users() {
                                   e.stopPropagation();
                                   setDeleteId(user.id);
                                 }}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-all"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-all"
                               >
                                 <Trash2 size={12} />
                                 {t('users.card.delete')}
@@ -634,18 +634,18 @@ export function Users() {
           diffOpen ? (
             <div className="border-t border-border bg-secondary/30 dark:bg-secondary/10">
               <div className="px-6 pt-4 pb-1">
-                <span className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
                   {t('common.reviewChanges')}
                 </span>
               </div>
               <div className="px-6 pb-4 space-y-2.5">
                 {initialFormData && formData.role !== initialFormData.role && (
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-medium text-muted-foreground w-12 shrink-0">{t('users.card.role')}</span>
+                    <span className="text-caption font-medium text-muted-foreground w-12 shrink-0">{t('users.card.role')}</span>
                     <Badge variant={getRoleVariant(initialFormData.role)} size="sm">
                       {getRoleLabel(initialFormData.role)}
                     </Badge>
-                    <span className="text-sm text-muted-foreground">→</span>
+                    <span className="text-body-sm text-muted-foreground">→</span>
                     <Badge variant={getRoleVariant(formData.role)} size="sm">
                       {getRoleLabel(formData.role)}
                     </Badge>
@@ -653,11 +653,11 @@ export function Users() {
                 )}
                 {initialFormData && formData.status !== initialFormData.status && (
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-medium text-muted-foreground w-12 shrink-0">{t('users.card.status')}</span>
+                    <span className="text-caption font-medium text-muted-foreground w-12 shrink-0">{t('users.card.status')}</span>
                     <Badge variant={getStatusVariant(initialFormData.status)} size="sm">
                       {getStatusLabel(initialFormData.status)}
                     </Badge>
-                    <span className="text-sm text-muted-foreground">→</span>
+                    <span className="text-body-sm text-muted-foreground">→</span>
                     <Badge variant={getStatusVariant(formData.status)} size="sm">
                       {getStatusLabel(formData.status)}
                     </Badge>
@@ -677,7 +677,7 @@ export function Users() {
             <>
               <button
                 onClick={() => setDiffOpen(false)}
-                className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+                className="inline-flex items-center px-5 py-2.5 text-body-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
               >
                 {t('common.cancel')}
               </button>
@@ -689,7 +689,7 @@ export function Users() {
             <>
               <button
                 onClick={() => setIsPanelOpen(false)}
-                className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+                className="inline-flex items-center px-5 py-2.5 text-body-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
               >
                 {t('common.cancel')}
               </button>
@@ -714,15 +714,15 @@ export function Users() {
                     src={editingUser.avatar ? api.users.getAvatarUrl(editingUser.id) : undefined}
                     alt={editingUser.name ?? ''}
                   />
-                  <AvatarFallback className="bg-brand text-sm font-bold text-primary-foreground">
+                  <AvatarFallback className="bg-brand text-body-sm font-bold text-primary-foreground">
                     {(editingUser.name ?? editingUser.email).substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold text-foreground truncate">
+                  <div className="text-body-sm font-semibold text-foreground truncate">
                     {editingUser.name ?? editingUser.email}
                   </div>
-                  <div className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+                  <div className="text-caption text-muted-foreground flex items-center gap-1 truncate">
                     <Mail size={11} />
                     {editingUser.email}
                   </div>
@@ -731,9 +731,9 @@ export function Users() {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+              <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
                 <span>{t('users.form.nameLabel')}</span>
-                <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
                   {formData.name.length}/120
                 </span>
               </label>
@@ -743,14 +743,14 @@ export function Users() {
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 maxLength={120}
                 placeholder={t('users.form.namePlaceholder')}
-                className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+                className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground/80 flex items-center justify-between">
+              <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
                 <span>Email</span>
-                <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+                <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
                   {formData.email.length}/254
                 </span>
               </label>
@@ -760,7 +760,7 @@ export function Users() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 maxLength={254}
                 placeholder="email@company.com"
-                className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+                className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
               />
             </div>
 
@@ -769,7 +769,7 @@ export function Users() {
                 <button
                   type="button"
                   onClick={() => setResetPasswordOpen(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-foreground/80 bg-secondary border border-border rounded-lg hover:bg-accent hover:text-foreground transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-body-sm font-medium text-foreground/80 bg-secondary border border-border rounded-lg hover:bg-accent hover:text-foreground transition-all"
                 >
                   <Mail size={14} />
                   {t('users.form.sendResetLink')}
@@ -780,10 +780,10 @@ export function Users() {
             <div className="pt-4 border-t border-border space-y-3">
               <div className="flex items-center gap-2">
                 <Shield size={16} className="text-brand" />
-                <label className="text-sm font-medium text-foreground/80">
+                <label className="text-body-sm font-medium text-foreground/80">
                   {t('users.form.roleLabel')}
                 </label>
-                <span className="inline-flex items-center text-xs px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">
+                <span className="inline-flex items-center text-caption px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">
                   {t('users.form.roleSelect')}
                 </span>
               </div>
@@ -841,11 +841,11 @@ export function Users() {
                       />
                       <div className="flex-1 min-w-0">
                         <div
-                          className={`text-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}
+                          className={`text-body-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}
                         >
                           {getRoleLabel(value)}
                         </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{description}</div>
+                        <div className="text-caption text-muted-foreground mt-0.5">{description}</div>
                       </div>
                       {selected && (
                         <ColorIcon
@@ -865,7 +865,7 @@ export function Users() {
               <div className="pt-4 border-t border-border space-y-3">
                 <div className="flex items-center gap-2">
                   <Activity size={16} className="text-brand" />
-                  <label className="text-sm font-medium text-foreground/80">
+                  <label className="text-body-sm font-medium text-foreground/80">
                     {t('users.form.statusLabel')}
                   </label>
                 </div>
@@ -909,11 +909,11 @@ export function Users() {
                         />
                         <div className="flex-1 min-w-0">
                           <div
-                            className={`text-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}
+                            className={`text-body-sm font-semibold ${selected ? textSelected : 'text-foreground/80'}`}
                           >
                             {label}
                           </div>
-                          <div className="text-xs text-muted-foreground mt-0.5">{description}</div>
+                          <div className="text-caption text-muted-foreground mt-0.5">{description}</div>
                         </div>
                         {selected && (
                           <div
@@ -931,7 +931,7 @@ export function Users() {
 
             {editingUser && (
               <div className="pt-4 border-t border-border space-y-2.5">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-caption text-muted-foreground">
                   <User size={12} className="text-muted-foreground" />
                   <span>
                     {t('users.panel.created')}{' '}
@@ -940,7 +940,7 @@ export function Users() {
                     </span>
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-caption text-muted-foreground">
                   <Clock size={12} className="text-muted-foreground" />
                   <span>
                     {t('users.panel.lastActive')}{' '}
@@ -960,8 +960,8 @@ export function Users() {
                   </div>
                 </div>
                 <div>
-                  <h5 className="text-xs font-semibold text-brand mb-1">{t('users.help.title')}</h5>
-                  <p className="text-xs text-foreground/70">
+                  <h5 className="text-caption font-semibold text-brand mb-1">{t('users.help.title')}</h5>
+                  <p className="text-caption text-foreground/70">
                     {t('users.help.admin')}
                     <br />
                     {t('users.help.developer')}
@@ -979,7 +979,7 @@ export function Users() {
                   onClick={() => {
                     setDeleteId(editingUser.id);
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-body-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20 transition-all"
                 >
                   <Trash2 size={16} />
                   {t('users.panel.deleteUser')}
