@@ -705,6 +705,7 @@ export function Settings() {
           name: environments.find((e) => e.id === deleteEnvId)?.name ?? '',
         })}
         confirmLabel={t('common.delete')}
+        confirmPhrase={environments.find((e) => e.id === deleteEnvId)?.name}
         onConfirm={removeEnv}
         loading={deletingEnv}
       />
@@ -717,6 +718,7 @@ export function Settings() {
         title={t('settings.deleteProjectConfirm')}
         description={t('settings.deleteProjectDescription', { name: project?.name ?? '' })}
         confirmLabel={t('settings.deleteProjectBtn')}
+        confirmPhrase={project?.name}
         onConfirm={deleteProject}
         loading={deletingProject}
       />

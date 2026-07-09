@@ -8,6 +8,11 @@ const ru = {
     delete: 'Удалить',
     edit: 'Редактировать',
     create: 'Создать',
+    confirmDelete: {
+      irreversible: 'Это действие нельзя отменить.',
+      promptBefore: 'Введите',
+      promptAfter: 'для подтверждения',
+    },
     search: 'Поиск...',
     retry: 'Попробовать снова',
     reload: 'Перезагрузить страницу',

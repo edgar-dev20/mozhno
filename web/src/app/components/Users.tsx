@@ -1002,6 +1002,10 @@ export function Users() {
             '',
         })}
         confirmLabel={t('common.delete')}
+        confirmPhrase={
+          users.find((u) => u.id === deleteId)?.name ??
+          users.find((u) => u.id === deleteId)?.email
+        }
         onConfirm={handleDelete}
         loading={deleting}
       />

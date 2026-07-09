@@ -224,6 +224,7 @@ export function Integrations() {
           name: items.find((i) => i.id === deleteId)?.name ?? '',
         })}
         confirmLabel={t('common.delete')}
+        confirmPhrase={items.find((i) => i.id === deleteId)?.name}
         onConfirm={handleDelete}
         loading={deleting}
       />

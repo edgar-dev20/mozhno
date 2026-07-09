@@ -464,6 +464,7 @@ export function Tags() {
           name: tags.find((tag) => tag.id === deleteId)?.name ?? '',
         })}
         confirmLabel={t('common.delete')}
+        confirmPhrase={tags.find((tag) => tag.id === deleteId)?.name}
         onConfirm={handleDelete}
         loading={deleting}
       />

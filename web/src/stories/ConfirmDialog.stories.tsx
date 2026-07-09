@@ -20,33 +20,71 @@ type Story = StoryObj<typeof ConfirmDialog>;
 
 export const Destructive: Story = {
   args: {
-    title: "Delete flag",
+    title: "Удалить фича-флаг?",
     description:
-      'Are you sure you want to delete "new-checkout"? This action cannot be undone.',
+      "Флаг «checkout-v2» и все связанные правила будут удалены без возможности восстановления.",
     variant: "destructive",
-    confirmLabel: "Delete",
+    confirmLabel: "Удалить",
+    confirmPhrase: "checkout-v2",
+    onConfirm: fn(),
+  },
+};
+
+export const DestructiveNoPhrase: Story = {
+  args: {
+    title: "Удалить элемент?",
+    description: "Это действие затронет связанные данные.",
+    variant: "destructive",
+    confirmLabel: "Удалить",
     onConfirm: fn(),
   },
 };
 
 export const Default: Story = {
   args: {
-    title: "Save changes",
+    title: "Архивировать флаг?",
     description:
-      "You have unsaved changes. Do you want to save them before leaving?",
+      "Флаг «checkout-v2» переместится в архив. Вы сможете восстановить его позже.",
     variant: "default",
-    confirmLabel: "Save",
+    confirmLabel: "Архивировать",
+    onConfirm: fn(),
+  },
+};
+
+export const Warning: Story = {
+  args: {
+    title: "Сбросить пароль?",
+    description:
+      "Пользователю придёт письмо со ссылкой для сброса пароля. Текущая сессия завершится.",
+    variant: "warning",
+    confirmLabel: "Сбросить пароль",
     onConfirm: fn(),
   },
 };
 
 export const Loading: Story = {
   args: {
-    title: "Deleting...",
-    description: "Please wait while we delete the flag.",
+    title: "Удаление…",
+    description: "Пожалуйста, подождите, идёт удаление флага.",
     variant: "destructive",
-    confirmLabel: "Delete",
+    confirmLabel: "Удалить",
+    confirmPhrase: "checkout-v2",
     loading: true,
     onConfirm: fn(),
+  },
+};
+
+export const WithRichContent: Story = {
+  args: {
+    title: "Подтвердите изменения",
+    description: "Проверьте детали перед применением.",
+    variant: "default",
+    confirmLabel: "Применить",
+    onConfirm: fn(),
+    children: (
+      <div className="rounded-lg border border-border bg-secondary/50 p-4 text-body-sm text-muted-foreground">
+        Здесь может быть произвольный контент — сводка, диф или предпросмотр.
+      </div>
+    ),
   },
 };

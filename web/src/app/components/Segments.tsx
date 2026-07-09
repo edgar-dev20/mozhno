@@ -911,6 +911,7 @@ export function Segments() {
           name: segments.find((s) => s.id === deleteId)?.name ?? '',
         })}
         confirmLabel={t('common.delete')}
+        confirmPhrase={segments.find((s) => s.id === deleteId)?.name}
         onConfirm={doDelete}
         loading={deleting}
       />

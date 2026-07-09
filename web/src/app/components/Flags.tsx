@@ -436,6 +436,7 @@ export function Flags() {
         title={t('flags.deleteConfirm')}
         description={`${t('flags.namePlaceholder')} \u00AB${deleteTarget?.name ?? ''}\u00BB ${t('flags.deleteDescription')}`}
         confirmLabel={t('common.delete')}
+        confirmPhrase={deleteTarget?.name}
         onConfirm={doDelete}
         loading={deleting}
       />

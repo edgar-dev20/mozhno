@@ -714,6 +714,7 @@ export function Constraints() {
           name: contexts.find((c) => c.id === deleteId)?.name ?? '',
         })}
         confirmLabel={t('common.delete')}
+        confirmPhrase={contexts.find((c) => c.id === deleteId)?.name}
         onConfirm={handleDelete}
         loading={deleting}
       />

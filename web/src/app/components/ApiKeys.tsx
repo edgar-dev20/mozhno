@@ -663,6 +663,7 @@ export function ApiKeys() {
           name: keys.find((k) => k.id === deleteId)?.name ?? '',
         })}
         confirmLabel={t('common.delete')}
+        confirmPhrase={keys.find((k) => k.id === deleteId)?.name}
         onConfirm={handleDelete}
         loading={deleting}
       />

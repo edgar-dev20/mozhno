@@ -10,6 +10,11 @@ const en = {
     delete: 'Delete',
     edit: 'Edit',
     create: 'Create',
+    confirmDelete: {
+      irreversible: 'This action cannot be undone.',
+      promptBefore: 'Type',
+      promptAfter: 'to confirm',
+    },
     search: 'Search...',
     retry: 'Try again',
     reload: 'Reload page',
