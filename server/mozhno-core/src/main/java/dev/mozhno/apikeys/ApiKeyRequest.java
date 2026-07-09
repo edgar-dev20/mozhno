@@ -1,6 +1,7 @@
 package dev.mozhno.apikeys;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -16,7 +17,8 @@ public class ApiKeyRequest {
     @Schema(description = "Human-readable name for the API key", example = "My Application")
     private String name;
 
-    @Schema(description = "Environment ID to restrict this key to (null for all environments)", example = "1", nullable = true)
+    @NotNull
+    @Schema(description = "Environment ID this key is restricted to", example = "1")
     private Integer environmentId;
 
     @Size(max = 1000)

@@ -185,7 +185,7 @@ export type ApiKey = {
 };
 export type ApiKeyRequest = {
   name: string;
-  environmentId?: number;
+  environmentId: number;
   description?: string;
   keyType?: string;
 };

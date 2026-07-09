@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import dev.mozhno.BaseIntegrationTest;
+import dev.mozhno.apikeys.ApiKey;
 import dev.mozhno.environments.Environment;
 import dev.mozhno.projects.Project;
 
@@ -127,5 +128,25 @@ class EnvironmentControllerTest extends BaseIntegrationTest {
         mockMvc.perform(delete("/api/v1/environments/{id}", saved.getId())
                 .header("Authorization", auth()))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deleteEnvironment_withLinkedApiKeys_shouldReturn400() throws Exception {
+        Environment env = new Environment();
+        env.setName("withKeys");
+        env.setProjectId(projectId);
+        Environment saved = environmentRepository.save(env);
+
+        ApiKey k = new ApiKey();
+        k.setProjectId(projectId);
+        k.setEnvironmentId(saved.getId());
+        k.setName("My Key");
+        k.setApiKey("linked-key-" + System.currentTimeMillis());
+        apiKeyRepository.save(k);
+
+        mockMvc.perform(delete("/api/v1/environments/{id}", saved.getId())
+                .header("Authorization", auth()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value(org.hamcrest.Matchers.containsString("API key(s) are scoped")));
     }
 }

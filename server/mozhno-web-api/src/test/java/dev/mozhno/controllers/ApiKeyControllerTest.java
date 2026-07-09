@@ -83,6 +83,15 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
     }
 
     @Test
+    void createApiKey_withoutEnvironmentId_shouldReturn400() throws Exception {
+        mockMvc.perform(post("/api/v1/api-keys")
+                        .header("Authorization", auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"No Env\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void getApiKey_shouldReturnApiKey() throws Exception {
         ApiKey k = new ApiKey();
         k.setProjectId(projectId);

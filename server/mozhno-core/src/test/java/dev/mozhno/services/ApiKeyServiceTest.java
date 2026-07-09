@@ -7,6 +7,7 @@ import dev.mozhno.BaseIntegrationTest;
 import dev.mozhno.apikeys.ApiKey;
 import dev.mozhno.apikeys.ApiKeyRequest;
 import dev.mozhno.apikeys.ApiKeyService;
+import dev.mozhno.environments.Environment;
 import dev.mozhno.projects.Project;
 
 import java.util.List;
@@ -20,17 +21,23 @@ class ApiKeyServiceTest extends BaseIntegrationTest {
     private ApiKeyService apiKeyService;
 
     private Integer projectId;
+    private Integer environmentId;
 
     @BeforeEach
     void setUp() {
         Project p = new Project();
         p.setName("Test Project");
         projectId = projectRepository.save(p).getId();
+
+        Environment env = new Environment();
+        env.setName("dev");
+        env.setProjectId(projectId);
+        environmentId = environmentRepository.save(env).getId();
     }
 
     @Test
     void create_shouldGenerateApiKey() {
-        ApiKeyRequest request = new ApiKeyRequest("My Service", null, "Test description", null);
+        ApiKeyRequest request = new ApiKeyRequest("My Service", environmentId, "Test description", null);
         ApiKey result = apiKeyService.create(projectId, request);
 
         assertThat(result.getId()).isNotNull();
@@ -41,8 +48,8 @@ class ApiKeyServiceTest extends BaseIntegrationTest {
 
     @Test
     void findByProjectId_shouldReturnCreatedKeys() {
-        apiKeyService.create(projectId, new ApiKeyRequest("Svc A", null, null, null));
-        apiKeyService.create(projectId, new ApiKeyRequest("Svc B", null, null, null));
+        apiKeyService.create(projectId, new ApiKeyRequest("Svc A", environmentId, null, null));
+        apiKeyService.create(projectId, new ApiKeyRequest("Svc B", environmentId, null, null));
 
         List<ApiKey> keys = apiKeyService.findByProjectId(projectId);
         assertThat(keys).hasSize(2);
@@ -50,7 +57,7 @@ class ApiKeyServiceTest extends BaseIntegrationTest {
 
     @Test
     void findByApiKey_shouldFindByToken() {
-        ApiKey created = apiKeyService.create(projectId, new ApiKeyRequest("Svc", null, null, null));
+        ApiKey created = apiKeyService.create(projectId, new ApiKeyRequest("Svc", environmentId, null, null));
 
         ApiKey found = apiKeyService.findByApiKey(created.getApiKey());
         assertThat(found).isNotNull();
@@ -59,7 +66,7 @@ class ApiKeyServiceTest extends BaseIntegrationTest {
 
     @Test
     void delete_shouldRemoveKey() {
-        ApiKey created = apiKeyService.create(projectId, new ApiKeyRequest("To Delete", null, null, null));
+        ApiKey created = apiKeyService.create(projectId, new ApiKeyRequest("To Delete", environmentId, null, null));
         apiKeyService.delete(created.getId(), projectId);
 
         assertThatThrownBy(() -> apiKeyService.findById(created.getId(), null))

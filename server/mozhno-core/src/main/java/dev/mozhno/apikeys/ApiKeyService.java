@@ -83,11 +83,13 @@ public class ApiKeyService {
     public ApiKey create(Integer projectId, ApiKeyRequest request) {
         dev.mozhno.util.QuotaValidator.check(quotaSpi.canCreateApiKey(projectId));
 
-        if (request.getEnvironmentId() != null) {
-            var env = environmentRepository.findByIdAndProjectId(request.getEnvironmentId(), projectId);
-            if (env == null) {
-                throw new BadRequestException("Environment does not belong to project");
-            }
+        if (request.getEnvironmentId() == null) {
+            throw new BadRequestException("environmentId is required");
+        }
+
+        var env = environmentRepository.findByIdAndProjectId(request.getEnvironmentId(), projectId);
+        if (env == null) {
+            throw new BadRequestException("Environment does not belong to project");
         }
 
         ApiKey k = new ApiKey();
@@ -107,6 +109,16 @@ public class ApiKeyService {
     public ApiKey update(Integer id, ApiKeyRequest request, Integer projectId) {
         ApiKey k = apiKeyRepository.findByIdAndProjectId(id, projectId);
         if (k == null) throw new NotFoundException("ApiKey", id);
+
+        if (request.getEnvironmentId() == null) {
+            throw new BadRequestException("environmentId is required");
+        }
+
+        var env = environmentRepository.findByIdAndProjectId(request.getEnvironmentId(), projectId);
+        if (env == null) {
+            throw new BadRequestException("Environment does not belong to project");
+        }
+
         k.setName(request.getName());
         k.setEnvironmentId(request.getEnvironmentId());
         k.setDescription(request.getDescription());

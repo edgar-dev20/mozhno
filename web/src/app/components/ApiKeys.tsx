@@ -65,8 +65,10 @@ export function ApiKeys() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [formName, setFormName] = useState('');
-  const [formEnvId, setFormEnvId] = useState<number | null>(environments[0]?.id ?? null);
+  const [formEnvId, setFormEnvId] = useState<number | null>(null);
+  const [formEnvError, setFormEnvError] = useState('');
   const [formKeyType, setFormKeyType] = useState('SERVER');
+  const [formNameError, setFormNameError] = useState('');
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.apiKeys.delete(id),
@@ -89,7 +91,7 @@ export function ApiKeys() {
     mutationFn: () =>
       api.apiKeys.create({
         name: formName,
-        environmentId: formEnvId ?? undefined,
+        environmentId: formEnvId!,
         keyType: formKeyType,
       }),
     onSuccess: () => {
@@ -116,13 +118,29 @@ export function ApiKeys() {
   const openCreate = () => {
     setError('');
     setFormName('');
-    setFormEnvId(environments[0]?.id ?? null);
+    setFormEnvId(null);
+    setFormEnvError('');
+    setFormNameError('');
     setFormKeyType('SERVER');
     setPanelOpen(true);
   };
 
   const handleCreate = () => {
-    if (!projectId || !formName) return;
+    if (!projectId) return;
+    let hasError = false;
+    if (!formName.trim()) {
+      setFormNameError(t('common.required'));
+      hasError = true;
+    } else {
+      setFormNameError('');
+    }
+    if (!formEnvId) {
+      setFormEnvError(t('apiKeys.formEnvRequired'));
+      hasError = true;
+    } else {
+      setFormEnvError('');
+    }
+    if (hasError) return;
     setSaving(true);
     createMutation.mutate();
   };
@@ -524,7 +542,7 @@ export function ApiKeys() {
             >
               {t('common.cancel')}
             </button>
-            <GradientButton onClick={handleCreate} disabled={saving || !formName} loading={saving}>
+            <GradientButton onClick={handleCreate} disabled={saving || !formName || !formEnvId} loading={saving}>
               {t('common.saveChanges')}
             </GradientButton>
           </>
@@ -547,22 +565,25 @@ export function ApiKeys() {
             <input
               type="text"
               value={formName}
-              onChange={(e) => setFormName(e.target.value)}
+              onChange={(e) => { setFormName(e.target.value); setFormNameError(''); }}
               maxLength={120}
               placeholder={t('apiKeys.formNamePlaceholder')}
-              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+              className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground ${formNameError ? 'border-destructive' : 'border-border'}`}
             />
+            {formNameError && (
+              <p className="text-caption text-destructive">{formNameError}</p>
+            )}
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-body-sm font-medium text-foreground/80">
+            <label className={`text-body-sm font-medium ${formEnvError ? 'text-destructive' : 'text-foreground/80'}`}>
               {t('apiKeys.formEnvLabel')}
             </label>
             <Select
               value={String(formEnvId ?? '')}
-              onValueChange={(v) => setFormEnvId(v ? Number(v) : null)}
+              onValueChange={(v) => { setFormEnvId(v ? Number(v) : null); setFormEnvError(''); }}
             >
-              <SelectTrigger className="w-full bg-input-background border-input rounded-lg px-4 py-2.5 h-auto text-body-sm">
+              <SelectTrigger className={`w-full bg-input-background rounded-lg px-4 py-2.5 h-auto text-body-sm ${formEnvError ? 'border-destructive' : 'border-input'}`}>
                 <SelectValue placeholder={t('apiKeys.formEnvPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -576,6 +597,9 @@ export function ApiKeys() {
                 ))}
               </SelectContent>
             </Select>
+            {formEnvError && (
+              <p className="text-caption text-destructive">{formEnvError}</p>
+            )}
           </div>
 
           <div className="space-y-1.5">

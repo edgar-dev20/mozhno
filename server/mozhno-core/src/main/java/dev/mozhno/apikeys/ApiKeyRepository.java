@@ -148,5 +148,18 @@ public class ApiKeyRepository {
         return count != null ? count : 0;
     }
 
+    /**
+     * Counts API keys linked to a specific environment.
+     *
+     * @param environmentId the environment ID
+     * @param projectId     the project ID
+     * @return the API key count
+     */
+    public int countByEnvironmentId(Integer environmentId, Integer projectId) {
+        Integer count = jdbc.queryForObject(
+            "SELECT COUNT(*) FROM api_keys WHERE environment_id = ? AND project_id = ?",
+            Integer.class, environmentId, projectId);
+        return count != null ? count : 0;
+    }
 
 }

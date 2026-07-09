@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import dev.mozhno.apikeys.ApiKeyRepository;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.environments.Environment;
 import dev.mozhno.environments.EnvironmentRepository;
@@ -28,11 +29,14 @@ class EnvironmentServiceTest {
     @Mock
     private QuotaSpi quotaSpi;
 
+    @Mock
+    private ApiKeyRepository apiKeyRepository;
+
     private EnvironmentService environmentService;
 
     @BeforeEach
     void setUp() {
-        environmentService = new EnvironmentService(environmentRepository, events, quotaSpi);
+        environmentService = new EnvironmentService(environmentRepository, events, quotaSpi, apiKeyRepository);
     }
 
     @Test
@@ -119,9 +123,40 @@ class EnvironmentServiceTest {
     @Test
     void delete_shouldCallRepository() {
         Environment env = new Environment();
+        env.setId(1);
+        env.setName("test");
+        env.setProjectId(1);
         when(environmentRepository.findById(1)).thenReturn(env);
+        when(apiKeyRepository.countByEnvironmentId(1, null)).thenReturn(0);
         when(environmentRepository.deleteById(anyInt(), any())).thenReturn(1);
         environmentService.delete(1, null);
         verify(environmentRepository).deleteById(eq(1), any());
+    }
+
+    @Test
+    void delete_withLinkedApiKeys_shouldThrowException() {
+        Environment env = new Environment();
+        env.setId(1);
+        env.setName("production");
+        env.setProjectId(1);
+        when(environmentRepository.findById(1)).thenReturn(env);
+        when(apiKeyRepository.countByEnvironmentId(1, null)).thenReturn(3);
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> environmentService.delete(1, null));
+        assertTrue(ex.getMessage().contains("API key(s) are scoped"));
+        verify(environmentRepository, never()).deleteById(anyInt(), any());
+    }
+
+    @Test
+    void delete_withNoLinkedApiKeys_shouldSucceed() {
+        Environment env = new Environment();
+        env.setId(2);
+        env.setName("staging");
+        env.setProjectId(1);
+        when(environmentRepository.findByIdAndProjectId(2, 1)).thenReturn(env);
+        when(apiKeyRepository.countByEnvironmentId(2, 1)).thenReturn(0);
+        when(environmentRepository.deleteById(2, 1)).thenReturn(1);
+        environmentService.delete(2, 1);
+        verify(environmentRepository).deleteById(2, 1);
     }
 }

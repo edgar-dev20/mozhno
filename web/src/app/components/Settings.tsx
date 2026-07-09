@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Zap,
   AlertTriangle,
+  Key,
 } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -47,6 +48,23 @@ export function Settings() {
   const projectId = project?.id ?? null;
 
   const { data: environments = [] } = useEnvironmentsQuery();
+
+  const { data: apiKeys = [] } = useQuery({
+    queryKey: queryKeys.apiKeys.byProject(projectId),
+    queryFn: () => api.apiKeys.list(),
+    enabled: !!projectId,
+    staleTime: 30_000,
+  });
+
+  const apiKeysByEnv = useMemo(() => {
+    const map: Record<number, number> = {};
+    for (const k of apiKeys) {
+      if (k.environmentId != null) {
+        map[k.environmentId] = (map[k.environmentId] || 0) + 1;
+      }
+    }
+    return map;
+  }, [apiKeys]);
 
   useQuery({
     queryKey: queryKeys.settings.byProject(projectId),
@@ -517,6 +535,12 @@ export function Settings() {
                                 {env.description}
                               </div>
                             )}
+                            {(apiKeysByEnv[env.id] || 0) > 0 && (
+                              <div className="text-caption font-medium text-muted-foreground/70 flex items-center gap-1">
+                                <Key size={11} className="shrink-0" />
+                                {t('settings.envApiKeyCount', { count: String(apiKeysByEnv[env.id] || 0) })}
+                              </div>
+                            )}
                             <div className="mt-auto pt-0.5">
                               {approval ? (
                                 <Badge variant="warning" style="subtle" size="sm" icon={<ShieldCheck size={11} />}>
@@ -600,15 +624,25 @@ export function Settings() {
         description={t('settings.editEnvDescription')}
         footer={
           <>
-            <button
-              onClick={() => {
-                if (editingEnv) setDeleteEnvId(editingEnv.id);
-              }}
-              className="mr-auto inline-flex items-center gap-1.5 px-3 py-2.5 text-body-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
-            >
-              <Trash2 size={16} />
-              {t('common.delete')}
-            </button>
+            {(() => {
+              const linkedKeys = editingEnv ? (apiKeysByEnv[editingEnv.id] || 0) : 0;
+              return (
+                <button
+                  onClick={() => {
+                    if (editingEnv) setDeleteEnvId(editingEnv.id);
+                  }}
+                  disabled={linkedKeys > 0}
+                  className={`mr-auto inline-flex items-center gap-1.5 px-3 py-2.5 text-body-sm font-medium rounded-lg transition-colors ${
+                    linkedKeys > 0
+                      ? 'text-muted-foreground/30 cursor-not-allowed'
+                      : 'text-destructive hover:bg-destructive/10'
+                  }`}
+                >
+                  <Trash2 size={16} />
+                  {t('common.delete')}
+                </button>
+              );
+            })()}
             <button
               onClick={closeEnvPanel}
               className="inline-flex items-center px-5 py-2.5 text-body-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
@@ -690,6 +724,22 @@ export function Settings() {
               previewPlaceholder={t('settings.editEnvName')}
             />
           </div>
+
+          {editingEnv && (apiKeysByEnv[editingEnv.id] || 0) > 0 && (
+            <div className="p-4 bg-warning/10 border border-warning/20 rounded-xl">
+              <div className="flex items-start gap-3">
+                <Key size={18} className="text-warning shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-body-sm font-semibold text-warning">
+                    {t('settings.envApiKeyCount', { count: String(apiKeysByEnv[editingEnv.id] || 0) })}
+                  </p>
+                  <p className="text-caption text-warning mt-1">
+                    {t('settings.deleteEnvBlocked')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </SidePanel>
 

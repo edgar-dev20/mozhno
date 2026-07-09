@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
+import dev.mozhno.apikeys.ApiKeyRepository;
 import dev.mozhno.exception.NotFoundException;
 import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.spi.QuotaSpi;
@@ -16,12 +17,14 @@ public class EnvironmentService {
     private final EnvironmentRepository environmentRepository;
     private final DomainEventPublisher events;
     private final QuotaSpi quotaSpi;
+    private final ApiKeyRepository apiKeyRepository;
 
     public EnvironmentService(EnvironmentRepository environmentRepository, DomainEventPublisher events,
-                               QuotaSpi quotaSpi) {
+                               QuotaSpi quotaSpi, ApiKeyRepository apiKeyRepository) {
         this.environmentRepository = environmentRepository;
         this.events = events;
         this.quotaSpi = quotaSpi;
+        this.apiKeyRepository = apiKeyRepository;
     }
 
     @Transactional(readOnly = true)
@@ -92,6 +95,15 @@ public class EnvironmentService {
             env = environmentRepository.findById(id);
         }
         if (env == null) throw new NotFoundException("Environment", id);
+
+        int linkedKeys = apiKeyRepository.countByEnvironmentId(id, projectId);
+        if (linkedKeys > 0) {
+            throw new BadRequestException(
+                "Cannot delete environment \"" + env.getName() + "\": " + linkedKeys +
+                " API key(s) are scoped to it. Deleting the environment would break client access. " +
+                "Delete or reassign those keys first.");
+        }
+
         int deleted = environmentRepository.deleteById(id, projectId);
         if (deleted == 0) throw new NotFoundException("Environment", id);
         events.publish(DomainEvent.of(projectId, "environment.deleted", "environment",

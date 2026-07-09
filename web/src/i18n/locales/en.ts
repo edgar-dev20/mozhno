@@ -26,6 +26,7 @@ const en = {
     add: 'Add',
     name: 'Name',
     description: 'Description',
+    required: 'This field is required',
     key: 'Key',
     type: 'Type',
     color: 'Color',
@@ -506,6 +507,8 @@ const en = {
     errorMaxEnv: 'Maximum environments: {{max}}',
     errorDeleteEnv: 'Error deleting environment',
     errorDeleteProject: 'Error deleting project',
+    envApiKeyCount: '{{count}} API key(s) linked',
+    deleteEnvBlocked: 'API keys are scoped to this environment. Deleting it would break client access. Remove or reassign linked keys first.',
     loading: 'Loading settings...',
   },
   users: {
@@ -868,13 +871,14 @@ const en = {
     allConnections: 'All connections',
     panelDescription: 'New key for SDK project access',
     panelWarning:
-      'After creation the key will be shown only once. Copy it immediately — the key cannot be recovered.',
+      'Keep this key secure — it grants access to your project data. You can view or copy it later from the keys list.',
     formNamePlaceholder: 'Production Server Key',
     formEnvLabel: 'Environment',
     formEnvPlaceholder: 'Select environment',
     formKeyTypeLabel: 'Key type',
     formServerDesc: 'Full data access',
     formFrontendDesc: 'Safe for client',
+    formEnvRequired: 'Select an environment',
   },
   audit: {
     title: 'Audit log',
