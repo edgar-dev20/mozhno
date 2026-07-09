@@ -18,6 +18,10 @@ public class Environment {
     private String name;
     /** Optional description. */
     private String description;
+    /** Optional color hex code for display (e.g. "#2d9484"). */
+    private String color;
+    /** Whether enabling a flag strategy in this environment requires confirmation. */
+    private boolean requireActivationApproval;
     /** Project this environment belongs to. */
     private Integer projectId;
     /** When the environment was created. */

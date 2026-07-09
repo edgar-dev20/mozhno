@@ -12,6 +12,8 @@ public class EnvironmentAssembler {
             .id(env.getId())
             .name(env.getName())
             .description(env.getDescription())
+            .color(env.getColor())
+            .requireActivationApproval(env.isRequireActivationApproval())
             .projectId(env.getProjectId())
             .createdAt(env.getCreatedAt())
             .build();

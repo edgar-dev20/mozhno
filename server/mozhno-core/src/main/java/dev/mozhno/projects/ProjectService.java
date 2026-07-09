@@ -73,8 +73,8 @@ public class ProjectService {
         p.setName(request.getName());
         p.setDescription(request.getDescription());
         Project saved = projectRepository.save(p);
-        environmentService.create(saved.getId(), "Production");
-        environmentService.create(saved.getId(), "Development");
+        environmentService.create(saved.getId(), "Production", null, null, false);
+        environmentService.create(saved.getId(), "Development", null, null, false);
         ContextDefinitionRequest ctxRequest = new ContextDefinitionRequest();
         ctxRequest.setProjectId(saved.getId());
         ctxRequest.setName("userId");

@@ -8,10 +8,10 @@ import {
   Image,
   Hash,
   Clock,
-  ChevronDown,
-  ChevronUp,
   Trash2,
   Settings as SettingsIcon,
+  ShieldCheck,
+  Zap,
   AlertTriangle,
 } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
@@ -19,7 +19,9 @@ import { toast } from 'sonner';
 import { api, Environment } from '@/api';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { PluginSlot } from '@/app/components/PluginSlot';
-import { SectionHeader, EmptyState, GradientButton, LoadingState, getErrorMessage } from '@/shared';
+import { SectionHeader, EmptyState, GradientButton, LoadingState, ColorPicker, Badge, getEnvColor, getErrorMessage } from '@/shared';
+import { SidePanel } from '@/app/components/SidePanel';
+import { Switch } from '@/app/components/ui/switch';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
@@ -33,10 +35,6 @@ function formatDate(iso: string, locale: string): string {
     month: 'long',
     year: 'numeric',
   });
-}
-
-function formatFullDate(iso: string, locale: string): string {
-  return new Date(iso).toLocaleString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 export function Settings() {
@@ -72,10 +70,12 @@ export function Settings() {
   const [initialProject, setInitialProject] = useState<{ name: string; desc: string } | null>(null);
   const [savingProject, setSavingProject] = useState(false);
 
-  const [expandedEnvIds, setExpandedEnvIds] = useState<Set<number>>(new Set());
-  const [editingEnvId, setEditingEnvId] = useState<number | null>(null);
-  const [editEnvName, setEditEnvName] = useState('');
-  const [initialEditEnvName, setInitialEditEnvName] = useState('');
+  const [envPanelOpen, setEnvPanelOpen] = useState(false);
+  const [editingEnv, setEditingEnv] = useState<Environment | null>(null);
+  const [envFormName, setEnvFormName] = useState('');
+  const [envFormDesc, setEnvFormDesc] = useState('');
+  const [envFormColor, setEnvFormColor] = useState('#2d9484');
+  const [envFormApproval, setEnvFormApproval] = useState(false);
   const [savingEnvEdit, setSavingEnvEdit] = useState(false);
   const [newEnvName, setNewEnvName] = useState('');
   const [savingEnv, setSavingEnv] = useState(false);
@@ -107,35 +107,36 @@ export function Settings() {
     };
   }, [pendingLogoPreviewUrl]);
 
-  const toggleExpandEnv = (id: number) => {
-    setExpandedEnvIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
+  const openEnvPanel = (env: Environment) => {
+    setEditingEnv(env);
+    setEnvFormName(env.name);
+    setEnvFormDesc(env.description ?? '');
+    setEnvFormColor(getEnvColor(env));
+    setEnvFormApproval(env.requireActivationApproval ?? false);
+    setEnvPanelOpen(true);
   };
 
-  const startEditEnv = (env: Environment) => {
-    setEditingEnvId(env.id);
-    setEditEnvName(env.name);
-    setInitialEditEnvName(env.name);
-  };
-
-  const cancelEditEnv = () => {
-    setEditingEnvId(null);
-    setEditEnvName('');
-    setInitialEditEnvName('');
+  const closeEnvPanel = () => {
+    setEnvPanelOpen(false);
+    setEditingEnv(null);
+    setEnvFormName('');
+    setEnvFormDesc('');
+    setEnvFormColor('#2d9484');
+    setEnvFormApproval(false);
   };
 
   const saveEditEnvMutation = useMutation({
-    mutationFn: () => api.environments.update(editingEnvId!, editEnvName.trim()),
+    mutationFn: () =>
+      api.environments.update(editingEnv!.id, {
+        name: envFormName.trim(),
+        description: envFormDesc.trim() || null,
+        color: envFormColor,
+        requireActivationApproval: envFormApproval,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
       queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
-      setEditingEnvId(null);
-      setEditEnvName('');
-      setInitialEditEnvName('');
+      closeEnvPanel();
     },
     onError: (e: unknown) => {
       toast.error(getErrorMessage(e));
@@ -143,8 +144,8 @@ export function Settings() {
     onSettled: () => setSavingEnvEdit(false),
   });
 
-  const saveEditEnv = () => {
-    if (!projectId || !editingEnvId || !editEnvName.trim()) return;
+  const handleSaveEnv = () => {
+    if (!projectId || !editingEnv || !envFormName.trim()) return;
     setSavingEnvEdit(true);
     saveEditEnvMutation.mutate();
   };
@@ -197,7 +198,7 @@ export function Settings() {
   };
 
   const addEnvMutation = useMutation({
-    mutationFn: () => api.environments.create(newEnvName.trim()),
+    mutationFn: () => api.environments.create({ name: newEnvName.trim() }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
       queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
@@ -224,14 +225,8 @@ export function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
       queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
-      setExpandedEnvIds((prev) => {
-        const next = new Set(prev);
-        next.delete(deleteEnvId!);
-        return next;
-      });
-      if (editingEnvId === deleteEnvId) {
-        setEditingEnvId(null);
-        setEditEnvName('');
+      if (editingEnv?.id === deleteEnvId) {
+        closeEnvPanel();
       }
       setDeleteEnvId(null);
     },
@@ -469,163 +464,71 @@ export function Settings() {
               )}
 
               {maxEnvironments != null && (
-                <div className="flex items-center gap-3">
-                  <span className="text-caption font-medium text-muted-foreground">
-                    {t('settings.envCount', {
-                      count: String(environments.length),
-                      max: String(maxEnvironments),
-                    })}
-                  </span>
-                  <div className="h-3 w-px bg-border" />
-                  <span className="text-caption text-muted-foreground">{t('settings.envHint')}</span>
-                </div>
+                <span className="text-caption font-medium text-muted-foreground">
+                  {t('settings.envCount', {
+                    count: String(environments.length),
+                    max: String(maxEnvironments),
+                  })}
+                </span>
               )}
 
               {environments.length > 0 ? (
-                <div className="space-y-2">
+                <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(240px,1fr))]">
                   <AnimatePresence mode="popLayout">
                     {environments.map((env, idx) => {
-                      const isExpanded = expandedEnvIds.has(env.id);
-                      const isEditing = editingEnvId === env.id;
+                      const color = getEnvColor(env);
+                      const approval = env.requireActivationApproval ?? false;
                       return (
                         <motion.div
                           key={env.id}
+                          layout
                           initial={{ opacity: 0, y: 12 }}
                           animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, x: -20 }}
+                          exit={{ opacity: 0, scale: 0.96 }}
                           transition={{ duration: 0.2, delay: idx * 0.03 }}
-                          className="group bg-secondary/40 ring-1 ring-border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
+                          className="group bg-card ring-1 ring-border rounded-xl shadow-sm hover:shadow-md hover:ring-border/80 transition-all duration-200 overflow-hidden flex flex-col"
                         >
-                          <div
-                            className="flex items-center justify-between px-4 py-3 cursor-pointer"
-                            onClick={() => toggleExpandEnv(env.id)}
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <div className="p-2 rounded-lg bg-muted border border-border shrink-0">
-                                <Globe size={16} className="text-brand" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="text-body-sm font-semibold text-foreground truncate">
+                          <span aria-hidden className="h-1.5 w-full shrink-0" style={{ backgroundColor: color }} />
+                          <div className="p-3.5 flex flex-col gap-2 flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span
+                                  aria-hidden
+                                  className={`w-2 h-2 rounded-full shrink-0 ${approval ? 'bg-warning' : 'bg-muted-foreground'}`}
+                                />
+                                <span className="text-body-sm font-semibold text-foreground truncate">
                                   {env.name}
-                                </div>
+                                </span>
                               </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openEnvPanel(env);
+                                }}
+                                aria-label={t('settings.editEnvTitle', { name: env.name })}
+                                title={t('common.edit')}
+                                className="-mr-1 p-1.5 rounded-lg text-muted-foreground hover:text-brand hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 shrink-0"
+                              >
+                                <SettingsIcon size={16} />
+                              </button>
                             </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <span className="text-caption text-muted-foreground hidden sm:inline">
-                                {formatDate(env.createdAt, intlLocale)}
-                              </span>
-                              {isExpanded ? (
-                                <ChevronUp
-                                  size={16}
-                                  className="text-muted-foreground group-hover:text-brand transition-colors"
-                                />
+                            {env.description && (
+                              <div className="text-caption text-muted-foreground line-clamp-2">
+                                {env.description}
+                              </div>
+                            )}
+                            <div className="mt-auto pt-0.5">
+                              {approval ? (
+                                <Badge variant="warning" style="subtle" size="sm" icon={<ShieldCheck size={11} />}>
+                                  {t('settings.envApprovalBadgeOn')}
+                                </Badge>
                               ) : (
-                                <ChevronDown
-                                  size={16}
-                                  className="text-muted-foreground group-hover:text-brand transition-colors"
-                                />
+                                <Badge variant="default" style="subtle" size="sm" icon={<Zap size={11} />}>
+                                  {t('settings.envApprovalBadgeOff')}
+                                </Badge>
                               )}
                             </div>
                           </div>
-
-                          <AnimatePresence initial={false}>
-                            {isExpanded && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="overflow-hidden"
-                              >
-                                <div className="px-4 pb-3 space-y-3">
-                                  <div className="grid grid-cols-2 divide-x divide-border border-t border-border pt-3">
-                                    <div className="px-4 py-2">
-                                      <div className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
-                                        ID
-                                      </div>
-                                      <div className="text-caption text-foreground/80 mt-0.5">
-                                        {env.id}
-                                      </div>
-                                    </div>
-                                    <div className="px-4 py-2">
-                                      <div className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
-                                        {t('settings.envCreated')}
-                                      </div>
-                                      <div className="text-caption text-foreground/80 mt-0.5">
-                                        {formatFullDate(env.createdAt, intlLocale)}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {isEditing ? (
-                                    <div className="space-y-1.5">
-                                      <label className="text-caption font-medium text-muted-foreground flex items-center justify-between">
-                                        <span>{t('settings.editEnvName')}</span>
-                                        <span className="text-[10px] font-normal text-muted-foreground/50 tabular-nums">
-                                          {editEnvName.length}/120
-                                        </span>
-                                      </label>
-                                      <div className="flex items-center gap-2">
-                                        <input
-                                          type="text"
-                                          value={editEnvName}
-                                          onChange={(e) => setEditEnvName(e.target.value)}
-                                          maxLength={120}
-                                          onKeyDown={(e) => {
-                                            if (e.key === 'Enter') saveEditEnv();
-                                            if (e.key === 'Escape') cancelEditEnv();
-                                          }}
-                                          autoFocus
-                                          className="flex-1 bg-input-background border border-border text-foreground rounded-lg px-3 py-1.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all"
-                                        />
-                                        <GradientButton
-                                          onClick={saveEditEnv}
-                                          disabled={
-                                            savingEnvEdit ||
-                                            !editEnvName.trim() ||
-                                            editEnvName.trim() === initialEditEnvName
-                                          }
-                                          loading={savingEnvEdit}
-                                          size="sm"
-                                        >
-                                          {t('common.saveChanges')}
-                                        </GradientButton>
-                                        <button
-                                          onClick={cancelEditEnv}
-                                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:bg-accent transition-colors"
-                                        >
-                                          {t('common.cancel')}
-                                        </button>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-2 border-t border-border pt-3">
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          startEditEnv(env);
-                                        }}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-brand dark:hover:text-brand hover:border-brand dark:hover:border-brand/30 hover:bg-brand dark:hover:bg-brand/10 transition-all"
-                                      >
-                                        <SettingsIcon size={12} />
-                                        {t('common.edit')}
-                                      </button>
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setDeleteEnvId(env.id);
-                                        }}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-xl hover:text-destructive hover:border-destructive/20 hover:bg-destructive/10 transition-colors"
-                                      >
-                                        <Trash2 size={12} />
-                                        {t('common.delete')}
-                                      </button>
-                                    </div>
-                                  )}
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
                         </motion.div>
                       );
                     })}
@@ -687,6 +590,108 @@ export function Settings() {
           </div>
         </motion.div>
       </div>
+
+      <SidePanel
+        open={envPanelOpen}
+        onOpenChange={(open) => {
+          if (!open) closeEnvPanel();
+        }}
+        title={t('settings.editEnvTitle', { name: editingEnv?.name ?? '' })}
+        description={t('settings.editEnvDescription')}
+        footer={
+          <>
+            <button
+              onClick={() => {
+                if (editingEnv) setDeleteEnvId(editingEnv.id);
+              }}
+              className="mr-auto inline-flex items-center gap-1.5 px-3 py-2.5 text-body-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+            >
+              <Trash2 size={16} />
+              {t('common.delete')}
+            </button>
+            <button
+              onClick={closeEnvPanel}
+              className="inline-flex items-center px-5 py-2.5 text-body-sm font-medium text-foreground/80 hover:bg-accent rounded-lg transition-colors"
+            >
+              {t('common.cancel')}
+            </button>
+            <GradientButton
+              onClick={handleSaveEnv}
+              disabled={savingEnvEdit || !envFormName.trim()}
+              loading={savingEnvEdit}
+            >
+              {t('common.saveChanges')}
+            </GradientButton>
+          </>
+        }
+      >
+        <div className="space-y-6">
+          <div className="space-y-1.5">
+            <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
+              <span>{t('settings.editEnvName')}</span>
+              <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
+                {envFormName.length}/120
+              </span>
+            </label>
+            <input
+              type="text"
+              value={envFormName}
+              onChange={(e) => setEnvFormName(e.target.value)}
+              maxLength={120}
+              placeholder={t('settings.addEnvPlaceholder')}
+              autoFocus
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
+              <span>{t('settings.envDescription')}</span>
+              <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
+                {envFormDesc.length}/160
+              </span>
+            </label>
+            <textarea
+              value={envFormDesc}
+              onChange={(e) => setEnvFormDesc(e.target.value)}
+              maxLength={160}
+              rows={2}
+              placeholder={t('settings.envDescriptionPlaceholder')}
+              className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
+            />
+          </div>
+
+          <div className="flex items-start justify-between gap-4 p-4 bg-secondary rounded-2xl border border-border">
+            <div className="min-w-0">
+              <div className="text-body-sm font-medium text-foreground/80 flex items-center gap-1.5">
+                <ShieldCheck size={14} className="text-warning" />
+                {t('settings.envApproval')}
+              </div>
+              <p className="text-caption text-muted-foreground mt-1">
+                {t('settings.envApprovalHint')}
+              </p>
+            </div>
+            <Switch
+              checked={envFormApproval}
+              onCheckedChange={setEnvFormApproval}
+              className="data-[state=checked]:bg-brand mt-0.5 shrink-0"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-body-sm font-medium text-foreground/80 flex items-center gap-1.5">
+              {t('settings.envColor')}
+            </label>
+            <ColorPicker
+              value={envFormColor}
+              onChange={setEnvFormColor}
+              icon={<Globe size={20} className="text-primary-foreground" />}
+              previewName={envFormName}
+              previewPlaceholder={t('settings.editEnvName')}
+            />
+          </div>
+        </div>
+      </SidePanel>
 
       <PluginSlot slotId="settings.premium" />
 

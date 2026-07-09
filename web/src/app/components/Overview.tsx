@@ -16,7 +16,7 @@ import {
   GradientButton,
   ErrorBox,
   InfoTip,
-  getEnvTheme,
+  getEnvColor,
   timeAgo,
   formatCompactCount,
 } from '@/shared';
@@ -78,9 +78,13 @@ export function Overview() {
 
   const flags = useMemo(() => enriched?.flags ?? [], [enriched?.flags]);
   const envRefs = useMemo(
-    () => environments.map((e) => ({ id: e.id, name: e.name })),
+    () => environments.map((e) => ({ id: e.id, name: e.name, color: getEnvColor(e) })),
     [environments],
   );
+  const envColorFor = useMemo(() => {
+    const map = new Map(environments.map((e) => [e.id, getEnvColor(e)]));
+    return (id: number) => map.get(id) ?? getEnvColor(id);
+  }, [environments]);
   const driftRows = useMemo(() => computeDrift(flags, envRefs), [flags, envRefs]);
 
   if (isLoading || !overview) {
@@ -112,7 +116,7 @@ export function Overview() {
 
       <Section index={1} className="space-y-4">
         <SubHeading title={t('overview.environments.title')} hint={t('overview.environments.subtitle')} />
-        <EnvironmentsGrid t={t} environments={overview.environments} />
+        <EnvironmentsGrid t={t} environments={overview.environments} colorFor={envColorFor} />
       </Section>
 
       <Section index={2} className="space-y-4">
@@ -255,9 +259,11 @@ function OverviewKpis({ t, totals }: { t: TFn; totals: OverviewResponse['totals'
 function EnvironmentsGrid({
   t,
   environments,
+  colorFor,
 }: {
   t: TFn;
   environments: OverviewEnvironmentStat[];
+  colorFor: (id: number) => string;
 }) {
   if (environments.length === 0) {
     return (
@@ -269,7 +275,7 @@ function EnvironmentsGrid({
   return (
     <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
       {environments.map((env, i) => (
-        <EnvironmentStatCard key={env.environmentId} t={t} env={env} index={i} />
+        <EnvironmentStatCard key={env.environmentId} t={t} env={env} index={i} color={colorFor(env.environmentId)} />
       ))}
     </div>
   );
@@ -282,13 +288,14 @@ function EnvironmentStatCard({
   t,
   env,
   index,
+  color,
 }: {
   t: TFn;
   env: OverviewEnvironmentStat;
   index: number;
+  color: string;
 }) {
   const reduce = useReducedMotion();
-  const theme = getEnvTheme(env.environmentId);
   const enabledPct = env.totalFlags > 0 ? Math.round((env.enabledCount / env.totalFlags) * 100) : 0;
   const totalEval = env.evalTrue48h + env.evalFalse48h;
   const ringOffset = RING_C * (1 - enabledPct / 100);
@@ -300,9 +307,9 @@ function EnvironmentStatCard({
           <span
             className="w-6 h-6 rounded-lg grid place-items-center text-caption font-bold border"
             style={{
-              backgroundColor: `${theme.from}1f`,
-              borderColor: `${theme.from}33`,
-              color: theme.from,
+              backgroundColor: `${color}1f`,
+              borderColor: `${color}33`,
+              color: color,
             }}
           >
             {env.environmentName.charAt(0).toUpperCase()}
@@ -324,7 +331,7 @@ function EnvironmentStatCard({
                 cy="48"
                 r={RING_R}
                 fill="none"
-                stroke={theme.from}
+                stroke={color}
                 strokeWidth="9"
                 strokeLinecap="round"
                 strokeDasharray={RING_C}
@@ -403,7 +410,7 @@ function DriftTable({
 }: {
   t: TFn;
   rows: DriftRow[];
-  envRefs: { id: number; name: string }[];
+  envRefs: { id: number; name: string; color: string }[];
 }) {
   const shown = rows.slice(0, DRIFT_LIMIT);
   const navigate = useNavigate();
@@ -423,7 +430,7 @@ function DriftTable({
                   {t('overview.drift.flag')}
                 </th>
                 {envRefs.map((env) => {
-                  const c = getEnvTheme(env.id).from;
+                  const c = env.color;
                   return (
                     <th key={env.id} className="text-left px-3 py-3">
                       <span

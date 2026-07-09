@@ -16,7 +16,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { api, ClientInstance, FlagResponse } from '@/api';
 import { NavLink } from 'react-router';
 import { JavaIcon, JavaScriptIcon } from '@/app/components/LanguageIcons';
-import { SectionHeader, TruncatedCopyTooltip, getEnvTheme, formatCompactCount } from '@/shared';
+import { SectionHeader, TruncatedCopyTooltip, getEnvColor, envColorStyles, formatCompactCount } from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
@@ -112,20 +112,10 @@ export function ClientInstances() {
   };
 
   const envName = (id: number | null) => id != null ? (environments.find((e) => e.id === id)?.name ?? '-') : '-';
-  const envGradient = (id: number) => {
-    const th = getEnvTheme(id);
-    return {
-      from: th.from,
-      to: th.to,
-      bg: th.gradient,
-      bgFlat: th.flat,
-      border: th.border,
-      dot: th.dot,
-      text: th.text,
-    };
+  const envColorHex = (id: number | null) => {
+    const env = id != null ? environments.find((e) => e.id === id) : undefined;
+    return getEnvColor(env ?? id);
   };
-
-  const envCardStyle = (envId: number | null) => getEnvTheme(envId).card;
 
   const getAppIcon = (appType: string, size = 14) => {
     if (appType === 'java') return <JavaIcon size={size} />;
@@ -241,18 +231,18 @@ export function ClientInstances() {
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           {environments.map((e) => {
-            const g = envGradient(e.id);
+            const styles = envColorStyles(getEnvColor(e));
+            const active = envFilter === e.id;
             return (
               <button
                 key={e.id}
                 onClick={() => handleEnvFilter(e.id)}
                 className={`px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
-                  envFilter === e.id
-                    ? g.bgFlat
-                    : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
+                  active ? '' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
                 }`}
+                style={active ? styles.soft : undefined}
               >
-                <span className={`inline-block w-1.5 h-1.5 rounded-full mr-1.5 ${g.dot}`}></span>
+                <span className="inline-block w-1.5 h-1.5 rounded-full mr-1.5" style={styles.dot}></span>
                 {e.name}
               </button>
             );
@@ -337,11 +327,11 @@ export function ClientInstances() {
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
                             {environmentIds.slice(0, 3).map((envId) => {
-                              const eg = envGradient(envId);
                               return (
                                 <span
                                   key={envId}
-                                  className={`w-1.5 h-1.5 rounded-full ${eg.dot}`}
+                                  className="w-1.5 h-1.5 rounded-full"
+                                  style={{ backgroundColor: envColorHex(envId) }}
                                 />
                               );
                             })}
@@ -405,7 +395,8 @@ export function ClientInstances() {
                                 return (
                                   <div
                                     key={inst.id}
-                                    className={`rounded-lg px-3 py-2.5 flex flex-col gap-1.5 ${staleness === 'stale' ? 'bg-secondary/60 border border-border/40' : envCardStyle(inst.environmentId)}`}
+                                    className={`rounded-lg px-3 py-2.5 flex flex-col gap-1.5 border ${staleness === 'stale' ? 'bg-secondary/60 border-border/40' : ''}`}
+                                    style={staleness === 'stale' ? undefined : envColorStyles(envColorHex(inst.environmentId)).card}
                                   >
                                     <div className="flex items-center justify-between gap-2">
                                       <TruncatedCopyTooltip
@@ -434,13 +425,12 @@ export function ClientInstances() {
                           </div>
 
                           {environmentIds.map((envId) => {
-                            const eg = envGradient(envId);
                             const rawFlags = flagCache[envId];
                             const flags = Array.isArray(rawFlags) ? rawFlags : undefined;
                             return (
                               <div key={envId} className="border-t border-border pt-2.5 mt-1">
                                 <div className="flex items-center gap-2 mb-1.5">
-                                  <span className={`w-1.5 h-1.5 rounded-full ${eg.dot}`}></span>
+                                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: envColorHex(envId) }}></span>
                                   <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
                                     {t('clientInstances.flags')}
                                   </span>

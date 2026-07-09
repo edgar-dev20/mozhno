@@ -1,5 +1,5 @@
 import * as Slider from '@radix-ui/react-slider';
-import { Fragment, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Switch } from '@/app/components/ui/switch';
 import { Plus, Percent, Users, Settings, Filter, X } from '@/shared/icons';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
@@ -16,6 +16,7 @@ import {
   getInlineValidationError,
 } from '@/app/components/operators';
 import { OperatorBadge } from '@/app/components/OperatorBadge';
+import { ReachRules, type ReachSource, type ReachCondition } from '@/app/components/flags/ReachRules';
 import { ConstraintRow } from '@/app/components/ConstraintRow';
 import { Operator } from '@/app/components/operatorsMeta';
 import { DateTimePicker } from '@/shared/components/DateTimePicker';
@@ -137,19 +138,39 @@ export function FlagEnvironmentPanel({
     return filtered.length > 3 ? `[${display}, +${filtered.length - 3}]` : `[${display}]`;
   };
 
-  const sourceGroups = new Map<string, SummaryLine[]>();
-  for (const line of lines) {
-    if (!sourceGroups.has(line.source)) sourceGroups.set(line.source, []);
-    sourceGroups.get(line.source)!.push(line);
+  const toConditions = (sourceLines: SummaryLine[]): ReachCondition[] =>
+    sourceLines.map((line) => ({
+      field: line.field,
+      operator: line.operator,
+      contextType: line.contextType,
+      values: line.values.filter((v) => v.trim() !== ''),
+    }));
+
+  // Every selected segment is a reach source (even without its own conditions),
+  // plus a "custom" source when the env rule has additional conditions. Custom
+  // is listed first, then segments in selection order. ReachRules collapses
+  // conditions that share the same field + operator.
+  const reachSources: ReachSource[] = [];
+  const customLines = lines.filter((l) => l.source === 'custom');
+  if (customLines.length > 0) {
+    reachSources.push({
+      key: 'custom',
+      kind: 'custom',
+      name: t('flags.customSource'),
+      conditions: toConditions(customLines),
+    });
   }
-
-  const sourceOrder = new Map<string, number>();
-  sourceOrder.set('custom', 0);
-  selectedSegs.forEach((s, i) => sourceOrder.set(s.name, i + 1));
-
-  const sortedSources = Array.from(sourceGroups.keys()).sort(
-    (a, b) => (sourceOrder.get(a) ?? 99) - (sourceOrder.get(b) ?? 99),
-  );
+  for (const seg of selectedSegs) {
+    reachSources.push({
+      key: `seg-${seg.id}`,
+      kind: 'segment',
+      name: seg.name,
+      color: seg.color,
+      icon: seg.icon,
+      conditions: toConditions(lines.filter((l) => l.source === seg.name)),
+    });
+  }
+  const conditionSourceCount = reachSources.filter((s) => s.conditions.length > 0).length;
 
   return (
     <div className="space-y-5">
@@ -222,87 +243,13 @@ export function FlagEnvironmentPanel({
               </div>
             </div>
 
-            {sourceGroups.size > 0 && (
+            {reachSources.length > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center gap-1.5 text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
                   <Filter size={10} />
                   {t('flags.summaryUnderConditions')}
                 </div>
-                <div className="space-y-2">
-                  {sortedSources.map((source, si) => {
-                    const sourceLines = sourceGroups.get(source)!;
-                    const isSegment = source !== 'custom';
-                    const seg = isSegment ? selectedSegs.find((s) => s.name === source) : null;
-                    const groupByKey = new Map<string, SummaryLine[]>();
-                    for (const line of sourceLines) {
-                      const key = line.field + '|' + line.operator;
-                      if (!groupByKey.has(key)) groupByKey.set(key, []);
-                      groupByKey.get(key)!.push(line);
-                    }
-                    return (
-                      <Fragment key={si}>
-                        {si > 0 && (
-                          <div className="flex items-center gap-2 py-0.5">
-                            <div className="flex-1 h-px bg-warning/20" />
-                            <span className="text-[10px] font-bold text-warning/60 uppercase tracking-wider px-1">
-                              OR
-                            </span>
-                            <div className="flex-1 h-px bg-warning/20" />
-                          </div>
-                        )}
-                        <div className="bg-input-background/70 rounded-lg border border-brand/10 overflow-hidden">
-                          <div className="px-3 py-2 bg-brand/5 border-b border-brand/10 flex items-center gap-2">
-                            {seg && (
-                              <ColorIcon
-                                size="xs"
-                                color={seg.color ?? '#6b7280'}
-                                icon={<SegmentIcon name={seg.icon ?? 'Users'} size={9} />}
-                                darkDim={false}
-                              />
-                            )}
-                            <span className="text-caption font-semibold text-brand">
-                              {source === 'custom' ? t('flags.customSource') : source}
-                            </span>
-                          </div>
-                          <div className="px-3 py-2 space-y-1.5">
-                            {Array.from(groupByKey.entries()).map(([_key, keyLines], fi) => {
-                              const line = keyLines[0];
-                              const isTimeType = line.contextType === ContextType.TIME;
-                              const allValues = keyLines.flatMap((l) => l.values).filter((v) => v.trim() !== '');
-                              const displayValues = isTimeType
-                                ? allValues.map((v) => formatTimeConstraintValue(v))
-                                : allValues;
-                              return (
-                                <div key={fi} className="space-y-1.5">
-                                  {fi > 0 && (
-                                    <div className="flex items-center gap-2">
-                                      <div className="flex-1 h-px bg-brand/15" />
-                                      <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider px-1">
-                                        AND
-                                      </span>
-                                      <div className="flex-1 h-px bg-brand/15" />
-                                    </div>
-                                  )}
-                                  <div className="flex items-center gap-1.5 text-[11px]">
-                                    <span className="font-semibold text-foreground/80">{line.field}</span>
-                                    <OperatorBadge operator={line.operator} contextType={line.contextType} />
-                                    <span className="break-all min-w-0 text-foreground/80">
-                                      {displayValues.length === 1
-                                        ? displayValues[0]
-                                        : displayValues.length <= 3
-                                          ? `[${displayValues.join(', ')}]`
-                                          : `[${displayValues.slice(0, 3).join(', ')}, +${displayValues.length - 3}]`}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </Fragment>
-                    );
-                  })}
-                </div>
+                <ReachRules sources={reachSources} />
               </div>
             )}
 
@@ -323,10 +270,10 @@ export function FlagEnvironmentPanel({
                   )}
                 </span>
               )}
-              {sourceGroups.size > 0 && (
+              {conditionSourceCount > 0 && (
                 <span>
                   {t('flags.summaryStatsConditions')}:{' '}
-                  <strong className="text-foreground/80">{sourceGroups.size}</strong>
+                  <strong className="text-foreground/80">{conditionSourceCount}</strong>
                 </span>
               )}
             </div>

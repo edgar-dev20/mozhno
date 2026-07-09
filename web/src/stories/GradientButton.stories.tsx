@@ -37,6 +37,10 @@ export const Danger: Story = {
   },
 };
 
+export const Warning: Story = {
+  args: { variant: "warning", children: "Warning" },
+};
+
 export const Secondary: Story = {
   args: { variant: "secondary", children: "Secondary" },
 };

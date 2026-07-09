@@ -23,6 +23,9 @@ export const environmentSchema = z.object({
   id: z.number(),
   projectId: z.number(),
   name: z.string(),
+  description: z.string().nullish(),
+  color: z.string().nullish(),
+  requireActivationApproval: z.boolean().optional(),
   createdAt: z.string(),
 });
 

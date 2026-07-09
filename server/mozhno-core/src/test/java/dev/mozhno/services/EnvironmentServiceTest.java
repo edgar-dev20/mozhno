@@ -72,13 +72,28 @@ class EnvironmentServiceTest {
             Environment e = new Environment();
             e.setId(1);
             e.setName(inv.getArgument(0, Environment.class).getName());
+            e.setColor(inv.getArgument(0, Environment.class).getColor());
+            e.setDescription(inv.getArgument(0, Environment.class).getDescription());
+            e.setRequireActivationApproval(inv.getArgument(0, Environment.class).isRequireActivationApproval());
             e.setProjectId(inv.getArgument(0, Environment.class).getProjectId());
             return e;
         });
 
-        Environment result = environmentService.create(1, "production");
+        Environment result = environmentService.create(1, "production", "Prod env", "#2D9484", true);
         assertNotNull(result);
         assertEquals("production", result.getName());
+        assertEquals("#2d9484", result.getColor());
+        assertEquals("Prod env", result.getDescription());
+        assertTrue(result.isRequireActivationApproval());
+    }
+
+    @Test
+    void create_shouldRejectInvalidColor() {
+        when(quotaSpi.canCreateEnvironment(1)).thenReturn(new QuotaSpi.Allowed());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+            () -> environmentService.create(1, "production", null, "not-a-color", false));
+        assertTrue(ex.getMessage().contains("hex"));
     }
 
     @Test
@@ -89,7 +104,7 @@ class EnvironmentServiceTest {
         when(environmentRepository.findById(1)).thenReturn(existing);
         when(environmentRepository.save(any(Environment.class))).thenReturn(existing);
 
-        Environment result = environmentService.update(1, "new-name", null);
+        Environment result = environmentService.update(1, "new-name", null, null, false, null);
         assertEquals("new-name", result.getName());
     }
 
@@ -97,7 +112,7 @@ class EnvironmentServiceTest {
     void update_shouldThrowExceptionWhenNotFound() {
         when(environmentRepository.findById(999)).thenReturn(null);
 
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> environmentService.update(999, "name", null));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> environmentService.update(999, "name", null, null, false, null));
         assertTrue(ex.getMessage().contains("Environment not found"));
     }
 

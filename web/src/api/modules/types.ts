@@ -10,8 +10,17 @@ export type Environment = {
   id: number;
   projectId: number;
   name: string;
+  description?: string | null;
   color?: string | null;
+  requireActivationApproval?: boolean;
   createdAt: string;
+};
+
+export type EnvironmentRequest = {
+  name: string;
+  description?: string | null;
+  color?: string | null;
+  requireActivationApproval?: boolean;
 };
 
 export type ContextDefinition = {

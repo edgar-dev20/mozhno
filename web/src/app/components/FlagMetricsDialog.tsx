@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/app/components/ui/select';
 import { api, Environment, FlagMetric, ClientInstance } from '@/api';
-import { timeAgo, Card, CardHeader, Hairline, StatusDot, TruncatedCopyTooltip, getErrorMessage } from '@/shared';
+import { timeAgo, Card, CardHeader, Hairline, StatusDot, TruncatedCopyTooltip, getErrorMessage, getEnvColor } from '@/shared';
 import { motion, AnimatePresence } from 'motion/react';
 import { useT } from '@/i18n';
 import { toast } from 'sonner';
@@ -565,19 +565,7 @@ export function FlagMetricsDialog({
                                 const staleness = getStaleness(inst.lastSeenAt);
                                 const env = environments.find((e) => e.id === inst.environmentId);
                                 const envName = env?.name ?? '';
-                                const envColor = (() => {
-                                  if (env?.color) {
-                                    return `bg-[${env.color}]`;
-                                  }
-                                  const n = envName.toLowerCase();
-                                  if (n.includes('prod') || n.includes('production'))
-                                    return 'bg-success';
-                                  if (n.includes('dev') || n.includes('development'))
-                                    return 'bg-warning';
-                                  if (n.includes('stag') || n.includes('staging'))
-                                    return 'bg-brand';
-                                  return 'bg-info';
-                                })();
+                                const envColor = getEnvColor(env ?? inst.environmentId);
 
                                 return (
                                   <button
@@ -602,8 +590,8 @@ export function FlagMetricsDialog({
                                     <div className="flex items-center gap-2 shrink-0">
                                       {envName && (
                                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-caption font-medium bg-secondary/60 text-muted-foreground/60 shrink-0">
-                                          <span className={`w-1 h-1 rounded-full ${envColor}`} />
-                                          {envName}
+                                        <span className="w-1 h-1 rounded-full" style={{ backgroundColor: envColor }} />
+                                        {envName}
                                         </span>
                                       )}
                                       {inst.sdkVersion && (

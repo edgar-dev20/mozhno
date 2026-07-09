@@ -68,9 +68,23 @@ class EnvironmentControllerTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/v1/environments")
                         .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"development\"}"))
+                        .content("{\"name\": \"development\", \"color\": \"#3db8a5\", \"description\": \"Dev env\", \"requireActivationApproval\": true}"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("development"));
+                .andExpect(jsonPath("$.name").value("development"))
+                .andExpect(jsonPath("$.color").value("#3db8a5"))
+                .andExpect(jsonPath("$.description").value("Dev env"))
+                .andExpect(jsonPath("$.requireActivationApproval").value(true));
+    }
+
+    @Test
+    void createEnvironment_withoutColor_shouldReturnNullColor() throws Exception {
+        mockMvc.perform(post("/api/v1/environments")
+                        .header("Authorization", auth())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"qa\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("qa"))
+                .andExpect(jsonPath("$.color").value(org.hamcrest.Matchers.nullValue()));
     }
 
     @Test
@@ -96,9 +110,11 @@ class EnvironmentControllerTest extends BaseIntegrationTest {
         mockMvc.perform(put("/api/v1/environments/{id}", saved.getId())
                         .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"updated\"}"))
+                        .content("{\"name\": \"updated\", \"color\": \"#c08140\", \"requireActivationApproval\": true}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("updated"));
+                .andExpect(jsonPath("$.name").value("updated"))
+                .andExpect(jsonPath("$.color").value("#c08140"))
+                .andExpect(jsonPath("$.requireActivationApproval").value(true));
     }
 
     @Test

@@ -32,10 +32,11 @@ public class EnvironmentController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create an environment")
     @PreAuthorize("hasRole('ADMIN')")
-    public EnvironmentResponse create(@RequestBody Map<String, String> body,
+    public EnvironmentResponse create(@RequestBody Map<String, Object> body,
                                       @AuthenticationPrincipal UserPrincipal user) {
-        String name = requireName(body);
-        Environment env = environmentService.create(user.projectId(), name);
+        Environment env = environmentService.create(user.projectId(), requireName(body),
+            asString(body.get("description")), asString(body.get("color")),
+            asBoolean(body.get("requireActivationApproval")));
         return environmentAssembler.toResponse(env);
     }
 
@@ -66,18 +67,27 @@ public class EnvironmentController {
     @Operation(summary = "Update an environment")
     @PreAuthorize("hasRole('ADMIN')")
     public EnvironmentResponse update(@PathVariable Integer id,
-                                      @RequestBody Map<String, String> body,
+                                      @RequestBody Map<String, Object> body,
                                       @AuthenticationPrincipal UserPrincipal user) {
-        String name = requireName(body);
-        Environment env = environmentService.update(id, name, user.projectId());
+        Environment env = environmentService.update(id, requireName(body),
+            asString(body.get("description")), asString(body.get("color")),
+            asBoolean(body.get("requireActivationApproval")), user.projectId());
         return environmentAssembler.toResponse(env);
     }
 
-    private static String requireName(Map<String, String> body) {
-        String name = body.get("name");
+    private static String requireName(Map<String, Object> body) {
+        String name = asString(body.get("name"));
         if (name == null || name.isBlank()) {
             throw new BadRequestException("Environment name is required");
         }
         return name;
+    }
+
+    private static String asString(Object value) {
+        return value == null ? null : value.toString();
+    }
+
+    private static boolean asBoolean(Object value) {
+        return Boolean.TRUE.equals(value) || "true".equals(value);
     }
 }

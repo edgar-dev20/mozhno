@@ -42,7 +42,8 @@ public class EnvironmentService {
     }
 
     @Transactional
-    public Environment update(Integer id, String name, Integer projectId) {
+    public Environment update(Integer id, String name, String description, String color,
+                              boolean requireActivationApproval, Integer projectId) {
         Environment env;
         if (projectId != null) {
             env = environmentRepository.findByIdAndProjectId(id, projectId);
@@ -51,6 +52,9 @@ public class EnvironmentService {
         }
         if (env == null) throw new NotFoundException("Environment", id);
         env.setName(name);
+        env.setDescription(description);
+        env.setColor(normalizeColor(color));
+        env.setRequireActivationApproval(requireActivationApproval);
         Environment saved = environmentRepository.save(env);
         events.publish(DomainEvent.of(saved.getProjectId(), "environment.updated", "environment",
             saved.getId(), saved.getName(), "Environment renamed to " + name));
@@ -58,7 +62,8 @@ public class EnvironmentService {
     }
 
     @Transactional
-    public Environment create(Integer projectId, String name) {
+    public Environment create(Integer projectId, String name, String description, String color,
+                              boolean requireActivationApproval) {
         if (name == null || name.isBlank()) {
             throw new BadRequestException("Environment name is required");
         }
@@ -69,6 +74,9 @@ public class EnvironmentService {
         Environment env = new Environment();
         env.setProjectId(projectId);
         env.setName(name);
+        env.setDescription(description);
+        env.setColor(normalizeColor(color));
+        env.setRequireActivationApproval(requireActivationApproval);
         Environment saved = environmentRepository.save(env);
         events.publish(DomainEvent.of(saved.getProjectId(), "environment.created", "environment",
             saved.getId(), saved.getName(), "Environment created"));
@@ -88,5 +96,16 @@ public class EnvironmentService {
         if (deleted == 0) throw new NotFoundException("Environment", id);
         events.publish(DomainEvent.of(projectId, "environment.deleted", "environment",
             id, env.getName(), "Environment deleted"));
+    }
+
+    private static String normalizeColor(String color) {
+        if (color == null || color.isBlank()) {
+            return null;
+        }
+        String trimmed = color.trim();
+        if (!trimmed.matches("^#[0-9a-fA-F]{6}$")) {
+            throw new BadRequestException("Color must be a valid hex code (e.g. #2d9484)");
+        }
+        return trimmed.toLowerCase();
     }
 }

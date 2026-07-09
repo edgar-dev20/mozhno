@@ -1,14 +1,16 @@
-import { useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { Plus, Zap, Archive } from '@/shared/icons';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
+import { ActivationConfirmDetails } from '@/app/components/flags/ActivationConfirmDetails';
 const FlagMetricsDialog = lazy(() =>
   import('@/app/components/FlagMetricsDialog').then((m) => ({ default: m.FlagMetricsDialog })),
 );
 import { SectionHeader, GradientButton, getErrorMessage } from '@/shared';
 import type { FlagTagValue } from '@/api';
+import type { FlagView } from '@/app/hooks/flagTypes';
 import { useT } from '@/i18n';
 
 import {
@@ -287,6 +289,30 @@ export function Flags() {
     [setMetricsDialogOpen, setMetricsTarget],
   );
 
+  const [pendingToggle, setPendingToggle] = useState<{ flag: FlagView; envId: number } | null>(null);
+
+  const handleToggleFlag = useCallback(
+    (flag: FlagView, envId: number) => {
+      const es = flag.environments[envId];
+      if (es && !es.enabled) {
+        const env = environments.find((e) => e.id === envId);
+        if (env?.requireActivationApproval) {
+          setPendingToggle({ flag, envId });
+          return;
+        }
+      }
+      doToggleFlag(flag, envId);
+    },
+    [environments, doToggleFlag],
+  );
+
+  const pendingEnv = pendingToggle
+    ? environments.find((e) => e.id === pendingToggle.envId)
+    : undefined;
+  const pendingEs = pendingToggle
+    ? pendingToggle.flag.environments[pendingToggle.envId]
+    : undefined;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -332,7 +358,7 @@ export function Flags() {
         }}
         onOpenGeneral={openGeneral}
         onOpenEnvironment={openEnvironment}
-        onToggleFlag={doToggleFlag}
+        onToggleFlag={handleToggleFlag}
         onMetricsClick={handleMetricsClick}
         onCreateClick={openCreate}
         environments={environments}
@@ -424,6 +450,35 @@ export function Flags() {
         onConfirm={doArchive}
         loading={archiving}
       />
+
+      <ConfirmDialog
+        open={!!pendingToggle}
+        onOpenChange={(open) => { if (!open) setPendingToggle(null); }}
+        title={t('flags.activateConfirm', {
+          flag: pendingToggle?.flag.name ?? '',
+          env: pendingEnv?.name ?? '',
+        })}
+        description={t('flags.activateDescription')}
+        confirmLabel={t('flags.activateConfirmBtn')}
+        variant="default"
+        onConfirm={() => {
+          if (!pendingToggle) return;
+          const { flag, envId } = pendingToggle;
+          setPendingToggle(null);
+          doToggleFlag(flag, envId);
+        }}
+      >
+        {pendingEs && (
+          <ActivationConfirmDetails
+            percentage={pendingEs.percentage}
+            segmentIds={pendingEs.segmentIds ?? []}
+            contextDefinitionId={pendingEs.contextDefinitionId}
+            contextValuesJson={pendingEs.contextValuesJson}
+            segments={segments}
+            contexts={contexts}
+          />
+        )}
+      </ConfirmDialog>
     </div>
   );
 }

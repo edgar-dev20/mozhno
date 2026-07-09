@@ -113,6 +113,7 @@ credentials/
 coverage/
 
 # Scratch design mockups (not shipped)
+design-mockups/
 nav-overview-mockup.html
 env-cards-variants.html
 env-cards-variant-b.html

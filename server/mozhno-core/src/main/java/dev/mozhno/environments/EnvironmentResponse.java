@@ -13,6 +13,10 @@ public record EnvironmentResponse(
     String name,
     @Schema(description = "Optional description", nullable = true)
     String description,
+    @Schema(description = "Optional color hex code", example = "#2d9484", nullable = true)
+    String color,
+    @Schema(description = "Whether enabling a flag strategy in this environment requires confirmation")
+    boolean requireActivationApproval,
     @Schema(description = "Project ID")
     Integer projectId,
     @Schema(description = "When the environment was created")

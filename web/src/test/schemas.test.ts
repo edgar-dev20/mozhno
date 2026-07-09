@@ -32,6 +32,7 @@ const validEnvironment = {
   id: 1,
   projectId: 10,
   name: 'production',
+  color: '#2d9484',
   createdAt: '2025-01-01T00:00:00Z',
 };
 

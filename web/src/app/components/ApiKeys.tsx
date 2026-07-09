@@ -24,7 +24,7 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SidePanel } from '@/app/components/SidePanel';
 import { ApiKeyTableSkeleton } from '@/app/components/skeletons';
-import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage, getEnvTheme } from '@/shared';
+import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, getErrorMessage, getEnvColor, envColorStyles } from '@/shared';
 import {
   Select,
   SelectContent,
@@ -140,9 +140,10 @@ export function ApiKeys() {
   };
 
   const envName = (id: number | null) => environments.find((e) => e.id === id)?.name ?? '—';
-  const getEnvVariant = (id: number | null) => getEnvTheme(id).variant;
-  const envColor = (id: number | null) => getEnvTheme(id).dot;
-  const envFilterActive = (id: number | null) => getEnvTheme(id).flat;
+  const envColorHex = (id: number | null) => {
+    const env = id != null ? environments.find((e) => e.id === id) : undefined;
+    return getEnvColor(env ?? id);
+  };
   const getKeyTypeColor = (t: string) =>
     t === 'FRONTEND'
       ? 'text-warning dark:text-warning bg-warning/10 dark:bg-warning/10'
@@ -213,16 +214,16 @@ export function ApiKeys() {
 
   const renderEnvFilterBtn = (env: Environment) => {
     const active = envFilter === env.id;
+    const styles = envColorStyles(getEnvColor(env));
     return (
       <button
         onClick={() => setEnvFilter(active ? null : env.id)}
         className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
-          active
-            ? envFilterActive(env.id)
-            : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
+          active ? '' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
         }`}
+        style={active ? styles.soft : undefined}
       >
-        <span className={`w-1.5 h-1.5 rounded-full ${envColor(env.id)}`} />
+        <span className="w-1.5 h-1.5 rounded-full" style={styles.dot} />
         {env.name}
       </button>
     );
@@ -323,17 +324,16 @@ export function ApiKeys() {
                           <span className="font-semibold text-body-sm text-foreground truncate transition-all">
                             {k.name}
                           </span>
-                          <Badge
-                            variant={getEnvVariant(k.environmentId)}
-                            size="sm"
-                            icon={
-                              <span
-                                className={`w-1.5 h-1.5 rounded-full ${envColor(k.environmentId)}`}
-                              />
-                            }
+                          <span
+                            className="inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-caption font-medium"
+                            style={envColorStyles(envColorHex(k.environmentId)).soft}
                           >
+                            <span
+                              className="w-1.5 h-1.5 rounded-full"
+                              style={{ backgroundColor: envColorHex(k.environmentId) }}
+                            />
                             {envName(k.environmentId)}
-                          </Badge>
+                          </span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
@@ -569,7 +569,7 @@ export function ApiKeys() {
                 {environments.map((e) => (
                   <SelectItem key={e.id} value={String(e.id)}>
                     <span className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${envColor(e.id)}`} />
+                      <span className="w-2 h-2 rounded-full" style={{ backgroundColor: getEnvColor(e) }} />
                       {e.name}
                     </span>
                   </SelectItem>

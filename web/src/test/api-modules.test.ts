@@ -119,14 +119,14 @@ describe('environmentsApi', () => {
     expect(requestSpy).toHaveBeenCalledWith('/environments');
   });
   it('create', async () => {
-    await environmentsApi.create('prod');
+    await environmentsApi.create({ name: 'prod' });
     expect(requestSpy).toHaveBeenCalledWith('/environments', {
       method: 'POST',
       body: JSON.stringify({ name: 'prod' }),
     });
   });
   it('update', async () => {
-    await environmentsApi.update(1, 'staging');
+    await environmentsApi.update(1, { name: 'staging' });
     expect(requestSpy).toHaveBeenCalledWith('/environments/1', {
       method: 'PUT',
       body: JSON.stringify({ name: 'staging' }),

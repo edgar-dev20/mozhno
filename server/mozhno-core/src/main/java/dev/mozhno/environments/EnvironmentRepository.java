@@ -25,6 +25,8 @@ public class EnvironmentRepository {
         e.setId(rs.getInt("id"));
         e.setName(rs.getString("name"));
         e.setDescription(rs.getString("description"));
+        e.setColor(rs.getString("color"));
+        e.setRequireActivationApproval(rs.getBoolean("require_activation_approval"));
         e.setProjectId(rs.getInt("project_id"));
         e.setCreatedAt(rs.getTimestamp("created_at").toInstant());
         return e;
@@ -37,7 +39,7 @@ public class EnvironmentRepository {
      * @return list of environments
      */
     public List<Environment> findByProjectId(Integer projectId) {
-        return jdbc.query("SELECT id, name, description, project_id, created_at FROM environments WHERE project_id = ? ORDER BY id", ROW_MAPPER, projectId);
+        return jdbc.query("SELECT id, name, description, color, require_activation_approval, project_id, created_at FROM environments WHERE project_id = ? ORDER BY id", ROW_MAPPER, projectId);
     }
 
     /**
@@ -48,7 +50,7 @@ public class EnvironmentRepository {
      */
     public Environment findById(Integer id) {
         try {
-            return jdbc.queryForObject("SELECT id, name, description, project_id, created_at FROM environments WHERE id = ?", ROW_MAPPER, id);
+            return jdbc.queryForObject("SELECT id, name, description, color, require_activation_approval, project_id, created_at FROM environments WHERE id = ?", ROW_MAPPER, id);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }
@@ -56,7 +58,7 @@ public class EnvironmentRepository {
 
     public Environment findByIdAndProjectId(Integer id, Integer projectId) {
         try {
-            return jdbc.queryForObject("SELECT id, name, description, project_id, created_at FROM environments WHERE id = ? AND project_id = ?", ROW_MAPPER, id, projectId);
+            return jdbc.queryForObject("SELECT id, name, description, color, require_activation_approval, project_id, created_at FROM environments WHERE id = ? AND project_id = ?", ROW_MAPPER, id, projectId);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
         }
@@ -76,7 +78,7 @@ public class EnvironmentRepository {
                 "INSERT INTO environments (name, description, project_id, created_at) " +
                 "SELECT ?, NULL, ?, NOW() " +
                 "WHERE (SELECT COUNT(*) FROM environments WHERE project_id = ?) < ? " +
-                "RETURNING id, name, description, project_id, created_at",
+                "RETURNING id, name, description, color, require_activation_approval, project_id, created_at",
                 ROW_MAPPER, name, projectId, projectId, maxLimit);
         } catch (org.springframework.dao.EmptyResultDataAccessException e) {
             return null;
@@ -95,19 +97,21 @@ public class EnvironmentRepository {
             GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
             jdbc.update(con -> {
                 PreparedStatement ps = con.prepareStatement(
-                    "INSERT INTO environments (name, description, project_id, created_at) VALUES (?, ?, ?, ?)",
+                    "INSERT INTO environments (name, description, color, require_activation_approval, project_id, created_at) VALUES (?, ?, ?, ?, ?, ?)",
                     new String[]{"id"});
                 ps.setString(1, env.getName());
                 ps.setString(2, env.getDescription());
-                ps.setInt(3, env.getProjectId());
-                ps.setTimestamp(4, Timestamp.from(createTime));
+                ps.setString(3, env.getColor());
+                ps.setBoolean(4, env.isRequireActivationApproval());
+                ps.setInt(5, env.getProjectId());
+                ps.setTimestamp(6, Timestamp.from(createTime));
                 return ps;
             }, keyHolder);
             env.setId(keyHolder.getKey().intValue());
             env.setCreatedAt(createTime);
         } else {
-            jdbc.update("UPDATE environments SET name = ?, description = ? WHERE id = ? AND project_id = ?",
-                env.getName(), env.getDescription(), env.getId(), env.getProjectId());
+            jdbc.update("UPDATE environments SET name = ?, description = ?, color = ?, require_activation_approval = ? WHERE id = ? AND project_id = ?",
+                env.getName(), env.getDescription(), env.getColor(), env.isRequireActivationApproval(), env.getId(), env.getProjectId());
         }
         return env;
     }

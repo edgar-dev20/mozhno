@@ -95,8 +95,8 @@ class ProjectServiceTest {
         assertNotNull(result);
         assertEquals("New Project", result.getName());
         verify(projectRepository).save(any(Project.class));
-        verify(environmentService).create(1, "Production");
-        verify(environmentService).create(1, "Development");
+        verify(environmentService).create(1, "Production", null, null, false);
+        verify(environmentService).create(1, "Development", null, null, false);
         verify(contextService).createDefinition(any(ContextDefinitionRequest.class), isNull());
     }
 

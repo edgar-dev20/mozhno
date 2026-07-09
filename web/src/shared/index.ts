@@ -23,7 +23,14 @@ export { Badge } from '@/shared/components/Badge';
 export { ColorIcon } from '@/shared/components/ColorIcon';
 export { Wordmark } from '@/shared/components/Wordmark';
 export { StatusIcon } from '@/shared/components/StatusIcon';
-export { getEnvTheme, type EnvTheme } from '@/shared/envTheme';
+export {
+  getEnvColor,
+  envColorStyles,
+  ENV_FALLBACK_COLORS,
+  type EnvColorStyles,
+} from '@/shared/envTheme';
+export { ColorPicker } from '@/shared/components/ColorPicker';
+export { COLOR_PALETTES, getColorName } from '@/shared/colorPalette';
 export { SkipLink } from '@/shared/components/SkipLink';
 export { LazyPage } from '@/shared/components/LazyPage';
 export { PageLoader } from '@/shared/components/PageLoader';
