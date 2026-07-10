@@ -205,6 +205,7 @@ export function FlagMetricsDialog({
   const totalTrue = displayMetrics.reduce((sum, m) => sum + m.evaluationTrueCount, 0);
   const totalFalse = displayMetrics.reduce((sum, m) => sum + m.evaluationFalseCount, 0);
   const totalEvaluations = totalTrue + totalFalse;
+  const hasTrue = totalTrue > 0;
 
   const trueRate =
     totalEvaluations > 0 ? `${((totalTrue / totalEvaluations) * 100).toFixed(1)}%` : '—';
@@ -415,6 +416,7 @@ export function FlagMetricsDialog({
                       stackId="a"
                       fill="var(--sparkline-false)"
                       name="false"
+                      radius={hasTrue ? undefined : [3, 3, 0, 0]}
                     />
                     <Bar
                       dataKey="trueCount"

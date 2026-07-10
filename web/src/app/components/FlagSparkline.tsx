@@ -30,6 +30,7 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
 
   const displayData = useMemo(() => aggregateHourPairs(data), [data]);
   const maxVal = Math.max(1, ...displayData.map((d) => d.trueCount + d.falseCount));
+  const hasTrue = displayData.some((d) => d.trueCount > 0);
 
   if (data.length === 0) {
     return (
@@ -73,17 +74,37 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
             return (
               <g key={i}>
                 {falseH > 0.5 && (
-                  <motion.rect
-                    initial={{ scaleY: 0 }}
-                    animate={{ scaleY: 1 }}
-                    transition={{ delay: i * 0.02, duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ originY: 1 }}
-                    x={x}
-                    y={yFalse}
-                    width={barWidth}
-                    height={Math.max(0.5, falseH)}
-                    fill="var(--sparkline-false)"
-                  />
+                  hasTrue ? (
+                    <motion.rect
+                      initial={{ scaleY: 0 }}
+                      animate={{ scaleY: 1 }}
+                      transition={{ delay: i * 0.02, duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                      style={{ originY: 1 }}
+                      x={x}
+                      y={yFalse}
+                      width={barWidth}
+                      height={Math.max(0.5, falseH)}
+                      fill="var(--sparkline-false)"
+                    />
+                  ) : (() => {
+                    const r = Math.min(2, barWidth * 0.35);
+                    const ty = yFalse;
+                    const th = Math.max(0.5, falseH);
+                    const bx = x;
+                    const bw = barWidth;
+                    const d = `M${bx},${ty + r} Q${bx},${ty} ${bx + r},${ty} L${bx + bw - r},${ty} Q${bx + bw},${ty} ${bx + bw},${ty + r} L${bx + bw},${ty + th} L${bx},${ty + th} Z`;
+                    return (
+                      <motion.path
+                        key={`f-` + i}
+                        initial={{ scaleY: 0 }}
+                        animate={{ scaleY: 1 }}
+                        transition={{ delay: i * 0.02, duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                        style={{ originY: 1 }}
+                        d={d}
+                        fill="var(--sparkline-false)"
+                      />
+                    );
+                  })()
                 )}
                 {trueH > 0.5 && (() => {
                   const r = Math.min(2, barWidth * 0.35);
