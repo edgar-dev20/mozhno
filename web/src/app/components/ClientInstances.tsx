@@ -384,7 +384,7 @@ export function ClientInstances() {
                         <div className="border-t border-border px-4 py-2.5">
                           <div className="mb-2.5">
                             <div className="flex items-center gap-2 mb-1.5">
-                              <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                              <span className="text-caption font-semibold text-muted-foreground/70">
                                 {t('clientInstances.instances')}
                               </span>
                               <span className="text-caption text-muted-foreground">{instanceCount}</span>
@@ -431,7 +431,7 @@ export function ClientInstances() {
                               <div key={envId} className="border-t border-border pt-2.5 mt-1">
                                 <div className="flex items-center gap-2 mb-1.5">
                                   <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: envColorHex(envId) }}></span>
-                                  <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                                  <span className="text-caption font-semibold text-muted-foreground/70">
                                     {t('clientInstances.flags')}
                                   </span>
                                   <span className="text-caption text-muted-foreground">

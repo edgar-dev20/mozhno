@@ -534,7 +534,7 @@ export function Users() {
                           <div className="border-t border-border">
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 divide-x divide-border">
                               <div className="px-3 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   Email
                                 </span>
                                 <span className="text-caption text-foreground/80 flex items-center gap-1.5 truncate">
@@ -543,7 +543,7 @@ export function Users() {
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('users.card.role')}
                                 </span>
                                 <span className="text-caption font-medium flex items-center gap-1.5">
@@ -554,7 +554,7 @@ export function Users() {
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('users.card.status')}
                                 </span>
                                 <Badge variant={getStatusVariant(user.status)} size="sm">
@@ -562,7 +562,7 @@ export function Users() {
                                 </Badge>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('users.card.created')}
                                 </span>
                                 <span className="text-caption text-foreground/80 flex items-center gap-1.5">
@@ -571,7 +571,7 @@ export function Users() {
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('users.card.lastActive')}
                                 </span>
                                 <span className="text-caption text-foreground/80">
@@ -634,7 +634,7 @@ export function Users() {
           diffOpen ? (
             <div className="border-t border-border bg-secondary/30 dark:bg-secondary/10">
               <div className="px-6 pt-4 pb-1">
-                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
+                <span className="text-caption font-semibold text-muted-foreground/70">
                   {t('common.reviewChanges')}
                 </span>
               </div>

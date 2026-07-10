@@ -1,3 +1,4 @@
+import { useMemo, memo } from 'react';
 import { Settings, Clock, User } from '@/shared/icons';
 import { formatDate, readableColorForBg } from '@/shared';
 import { useT } from '@/i18n';
@@ -17,7 +18,7 @@ interface FlagCardDetailProps {
   onMetricsClick: (flagId: number, flagName: string, envId: number) => void;
 }
 
-export function FlagCardDetail({
+export const FlagCardDetail = memo(function FlagCardDetail({
   flag,
   environments,
   segments,
@@ -29,6 +30,11 @@ export function FlagCardDetail({
   onMetricsClick,
 }: FlagCardDetailProps) {
   const t = useT();
+  const tagMap = useMemo(() => {
+    const map = new Map<number, TagType>();
+    for (const tg of tags) map.set(tg.id, tg);
+    return map;
+  }, [tags]);
   return (
     <div className="flex gap-4 px-4 pb-3 border-t border-border pt-3">
       <div className="flex-[1] min-w-0 flex flex-col">
@@ -44,7 +50,7 @@ export function FlagCardDetail({
           {flag.tags.length > 0 && (
             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
               {flag.tags.map((tv, i) => {
-                const tg = tags.find((t) => t.id === tv.tagId);
+                const tg = tagMap.get(tv.tagId);
                 return tg ? (
                   <span
                     key={i}
@@ -109,4 +115,4 @@ export function FlagCardDetail({
       </div>
     </div>
   );
-}
+});

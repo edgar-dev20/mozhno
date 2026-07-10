@@ -426,7 +426,7 @@ function DriftTable({
           <table className="w-full">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-left px-4 py-3 text-overline font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="text-left px-4 py-3 text-overline font-semibold text-muted-foreground">
                   {t('overview.drift.flag')}
                 </th>
                 {envRefs.map((env) => {
@@ -442,7 +442,7 @@ function DriftTable({
                     </th>
                   );
                 })}
-                <th className="text-left px-3 py-3 text-overline font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="text-left px-3 py-3 text-overline font-semibold text-muted-foreground">
                   {t('overview.drift.status')}
                 </th>
               </tr>

@@ -306,6 +306,13 @@ export function Flags() {
     [environments, doToggleFlag],
   );
 
+  const handleToggleExpand = useCallback((key: string) => {
+    const next = new Set(expandedKeys);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    setExpandedKeys(next);
+  }, [expandedKeys, setExpandedKeys]);
+
   const pendingEnv = pendingToggle
     ? environments.find((e) => e.id === pendingToggle.envId)
     : undefined;
@@ -347,15 +354,7 @@ export function Flags() {
         empty={!loading && filtered.length === 0}
         visibleFlags={visibleFlags}
         expandedKeys={expandedKeys}
-        onToggleExpand={(key) => {
-          const next = new Set(expandedKeys);
-          if (expandedKeys.has(key)) {
-            next.delete(key);
-          } else {
-            next.add(key);
-          }
-          setExpandedKeys(next);
-        }}
+        onToggleExpand={handleToggleExpand}
         onOpenGeneral={openGeneral}
         onOpenEnvironment={openEnvironment}
         onToggleFlag={handleToggleFlag}

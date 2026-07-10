@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useRef, useEffect, useState, useMemo, memo } from 'react';
 import { aggregateHourPairs } from '@/shared/sparklineAggregation';
 import { motion } from 'motion/react';
 
@@ -12,7 +12,7 @@ interface FlagSparklineProps {
   height?: number;
 }
 
-export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
+export const FlagSparkline = memo(function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(100);
 
@@ -39,8 +39,8 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
         style={{ height }}
       >
         —
-      </div>
-    );
+    </div>
+  );
   }
 
   const paddingX = 3;
@@ -141,7 +141,7 @@ export function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
       </motion.div>
     </div>
   );
-}
+});
 
 export function SparklinePlaceholder({ height = 56 }: { height?: number }) {
   const colCount = 24;

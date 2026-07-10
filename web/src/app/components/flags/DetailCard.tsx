@@ -99,7 +99,7 @@ export function DetailCard({
 
           <div className="flex-1 overflow-y-auto p-5 space-y-5">
             <div className="space-y-2">
-              <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+              <label className="text-caption font-semibold text-muted-foreground/80">
                 {t('flags.detailCard.context')}
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -121,7 +121,7 @@ export function DetailCard({
 
             {hasContext && (
               <div className="space-y-2">
-                <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                <label className="text-caption font-semibold text-muted-foreground/80">
                   {t('flags.detailCard.operator')}
                 </label>
                 <OperatorSelector
@@ -135,7 +135,7 @@ export function DetailCard({
 
             {hasContext && (
               <div className="space-y-2">
-                <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                <label className="text-caption font-semibold text-muted-foreground/80">
                   {isMulti ? t('flags.detailCard.values') : t('flags.detailCard.value')}
                 </label>
                 {isMulti ? (
@@ -191,7 +191,7 @@ export function DetailCard({
 
             {hasContext && (
               <div className="space-y-2">
-                <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                <label className="text-caption font-semibold text-muted-foreground/80">
                   {t('flags.detailCard.preview')}
                 </label>
                 <div className="p-2.5 bg-brand/5 rounded-lg border border-brand/10">

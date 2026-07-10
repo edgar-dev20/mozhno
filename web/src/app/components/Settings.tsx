@@ -303,7 +303,7 @@ export function Settings() {
 
             <div className="grid grid-cols-2 divide-x divide-border bg-secondary rounded-xl mb-5">
               <div className="px-4 py-2.5">
-                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-0.5">
+                <span className="text-caption font-semibold text-muted-foreground/70 block mb-0.5">
                   ID
                 </span>
                 <span className="text-caption text-foreground/80 flex items-center gap-1.5">
@@ -313,7 +313,7 @@ export function Settings() {
               </div>
               {project?.createdAt && (
                 <div className="px-4 py-2.5">
-                  <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-0.5">
+                  <span className="text-caption font-semibold text-muted-foreground/70 block mb-0.5">
                     {t('apiKeys.created')}
                   </span>
                   <span className="text-caption text-foreground/80 flex items-center gap-1.5">

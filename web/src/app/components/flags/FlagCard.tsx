@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FlagCardHeader } from '@/app/components/flags/FlagCardHeader';
 import { FlagCardDetail } from '@/app/components/flags/FlagCardDetail';
@@ -7,7 +8,7 @@ import type { SegmentResponse, Tag as TagType } from '@/api';
 export interface FlagCardProps {
   flag: FlagView;
   expanded: boolean;
-  onToggleExpand: () => void;
+  onToggleExpand: (key: string) => void;
   onOpenGeneral: (flag: FlagView) => void;
   onOpenEnvironment: (flag: FlagView, envId: number) => void;
   onToggleFlag: (flag: FlagView, envId: number) => void;
@@ -18,8 +19,10 @@ export interface FlagCardProps {
   sparklineData: Map<string, { trueCount: number; falseCount: number; timeBucket: string }[]>;
 }
 
-export function FlagCard(props: FlagCardProps) {
+export const FlagCard = memo(function FlagCard(props: FlagCardProps) {
   const { flag, expanded, onToggleExpand } = props;
+
+  const handleToggleExpand = useCallback(() => onToggleExpand(flag.key), [onToggleExpand, flag.key]);
 
   return (
     <motion.div
@@ -32,11 +35,11 @@ export function FlagCard(props: FlagCardProps) {
       className={`group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden ${flag.archived ? 'opacity-50 grayscale-[0.3]' : ''}`}
       id={`flag-card-${flag.key}`}
     >
-      <div className="flex items-start gap-2 sm:gap-4 px-3 sm:px-4 py-2 sm:py-3">
+      <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-4 py-2 sm:py-3">
         <FlagCardHeader
           flag={flag}
           expanded={expanded}
-          onToggleExpand={onToggleExpand}
+          onToggleExpand={handleToggleExpand}
           environments={props.environments}
           tags={props.tags}
           onToggleFlag={props.onToggleFlag}
@@ -71,4 +74,4 @@ export function FlagCard(props: FlagCardProps) {
       </AnimatePresence>
     </motion.div>
   );
-}
+});

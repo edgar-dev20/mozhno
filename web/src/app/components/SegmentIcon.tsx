@@ -177,7 +177,7 @@ export function SegmentColorPicker({
             className="transition-all"
           />
           <div className="space-y-1 min-w-0">
-            <div className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+            <div className="text-caption font-semibold text-muted-foreground/80">
               {t('tags.form.color.preview')}
             </div>
             <div className="font-mono text-body-sm text-foreground/80">{value}</div>
@@ -219,7 +219,7 @@ export function SegmentColorPicker({
         {COLOR_CATEGORIES.map((cat) => (
           <div key={cat.label}>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
+              <span className="text-caption font-semibold text-muted-foreground/70">
                 {t(cat.label as MessageKey)}
               </span>
               <div className="h-px flex-1 bg-accent" />

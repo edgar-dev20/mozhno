@@ -86,7 +86,7 @@ export function ConstraintRow({
       {isActive && (
         <div className="bg-accent dark:bg-brand/3 border border-t-0 border-brand/30 dark:border-brand/30 rounded-b-lg px-3.5 py-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="space-y-2">
-            <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+            <label className="text-caption font-semibold text-muted-foreground/80">
               {t('flags.detailCard.context')}
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -111,7 +111,7 @@ export function ConstraintRow({
 
           {hasContext && (
             <div className="space-y-2">
-              <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+              <label className="text-caption font-semibold text-muted-foreground/80">
                 {t('flags.detailCard.operator')}
               </label>
               <OperatorSelector
@@ -125,7 +125,7 @@ export function ConstraintRow({
 
           {hasContext && (
             <div className="space-y-2">
-              <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+              <label className="text-caption font-semibold text-muted-foreground/80">
                 {isMulti ? t('flags.detailCard.values') : t('flags.detailCard.value')}
               </label>
               {children(ctxDef?.type ?? ContextType.STRING)}
@@ -134,7 +134,7 @@ export function ConstraintRow({
 
           {hasContext && (
             <div className="space-y-2">
-              <label className="text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+              <label className="text-caption font-semibold text-muted-foreground/80">
                 {t('flags.detailCard.preview')}
               </label>
               <div className="px-2.5 py-1.5 bg-brand/5 rounded-lg border border-brand/10">

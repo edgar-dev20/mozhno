@@ -446,7 +446,7 @@ export function ApiKeys() {
                             </div>
                             <div className="grid grid-cols-3 divide-x divide-border border-t border-border">
                               <div className="px-4 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('common.type')}
                                 </span>
                                 <span className="text-caption font-medium text-foreground/80 flex items-center gap-1.5">
@@ -460,7 +460,7 @@ export function ApiKeys() {
                                 </span>
                               </div>
                               <div className="px-4 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('apiKeys.created')}
                                 </span>
                                 <span className="text-caption text-foreground/80 flex items-center gap-1.5">
@@ -469,7 +469,7 @@ export function ApiKeys() {
                                 </span>
                               </div>
                               <div className="px-4 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('apiKeys.lastUsed')}
                                 </span>
                                 <span className="text-caption text-foreground/80">

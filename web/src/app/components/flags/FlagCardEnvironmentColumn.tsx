@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { Settings } from '@/shared/icons';
 import { Switch } from '@/app/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
@@ -123,7 +123,7 @@ function buildRule(
   return <span className="inline-flex items-center flex-wrap gap-x-0.5">{parts}</span>;
 }
 
-export function FlagCardEnvironmentColumn({
+export const FlagCardEnvironmentColumn = memo(function FlagCardEnvironmentColumn({
   env,
   flag,
   segments,
@@ -135,7 +135,7 @@ export function FlagCardEnvironmentColumn({
   const t = useT();
   const es = flag.environments[env.id];
   const muted = !es || !es.enabled;
-  const rule = buildRule(es, segments, muted, t);
+  const rule = useMemo(() => buildRule(es, segments, muted, t), [es, segments, muted, t]);
 
   const [glowKey, setGlowKey] = useState(0);
 
@@ -147,7 +147,7 @@ export function FlagCardEnvironmentColumn({
   return (
     <div className="flex-1 bg-secondary/40 rounded-xl px-4 pt-3 pb-2 ring-1 ring-border shadow-sm transition-all flex flex-col">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-caption font-medium text-muted-foreground uppercase tracking-wide">
+        <span className="text-caption font-medium text-muted-foreground">
           {env.name}
         </span>
         <div className="flex items-center gap-1">
@@ -193,4 +193,4 @@ export function FlagCardEnvironmentColumn({
       )}
     </div>
   );
-}
+});

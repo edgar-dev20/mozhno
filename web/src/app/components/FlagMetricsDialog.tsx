@@ -338,7 +338,7 @@ export function FlagMetricsDialog({
                   >
                     {s.value}
                   </span>
-                  <span className="text-caption text-muted-foreground/45 uppercase tracking-widest mt-1 leading-none">
+                  <span className="text-caption text-muted-foreground/45 mt-1 leading-none">
                     {s.label}
                   </span>
                 </div>
@@ -348,7 +348,7 @@ export function FlagMetricsDialog({
             {/* Chart card */}
             <div className="flex-shrink-0 mx-5 mt-4 h-[280px] min-h-[280px] flex flex-col rounded-xl shadow-md bg-card ring-1 ring-border p-4">
               <div className="flex-shrink-0 flex flex-col gap-2 mb-3">
-                <span className="text-caption font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                <span className="text-caption font-semibold text-muted-foreground/60">
                   {t('flags.metrics.chartTitle')}
                 </span>
                 <div className="flex items-center gap-4 text-caption">
@@ -490,7 +490,7 @@ export function FlagMetricsDialog({
             <div className="flex-shrink-0 mx-5 mt-4 mb-5">
               <div className="flex items-center gap-2 mb-3">
                 <Server size={13} className="text-muted-foreground/40" />
-                <span className="text-caption font-semibold text-muted-foreground/60 uppercase tracking-wider">
+                <span className="text-caption font-semibold text-muted-foreground/60">
                   Все приложения
                 </span>
                 {instances.length > 0 && (

@@ -427,7 +427,7 @@ export function Segments() {
                     </div>
                     {s.context && s.context.length > 0 && (
                       <div className="bg-secondary rounded-lg p-3 border border-border flex flex-col gap-2">
-                        <div className="flex items-center gap-2 text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                        <div className="flex items-center gap-2 text-caption font-semibold text-muted-foreground/80">
                           <Filter size={12} />
                           {t('segments.rules')}
                         </div>

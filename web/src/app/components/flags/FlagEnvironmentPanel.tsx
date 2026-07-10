@@ -245,7 +245,7 @@ export function FlagEnvironmentPanel({
 
             {reachSources.length > 0 && (
               <div className="space-y-3">
-                <div className="flex items-center gap-1.5 text-caption font-semibold text-muted-foreground/80 uppercase tracking-wider">
+                <div className="flex items-center gap-1.5 text-caption font-semibold text-muted-foreground/80">
                   <Filter size={10} />
                   {t('flags.summaryUnderConditions')}
                 </div>

@@ -291,7 +291,7 @@ export function AuditLog() {
       <div className="bg-card rounded-2xl p-4 shadow-md space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider mr-1">
+            <span className="text-caption font-semibold text-muted-foreground/70 mr-1">
               {t('audit.filterType')}
             </span>
             <button
@@ -325,7 +325,7 @@ export function AuditLog() {
         </div>
 
         <div className="flex items-center gap-3 pt-2 border-t border-border">
-          <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
+          <span className="text-caption font-semibold text-muted-foreground/70">
             {t('audit.period')}
           </span>
           <Suspense fallback={<div className="h-9 w-48 bg-muted rounded-lg animate-pulse" />}>
@@ -431,7 +431,7 @@ export function AuditLog() {
                           <div className="border-t border-border">
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
                               <div className="px-3 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('audit.expanded.id')}
                                 </span>
                                 <span className="text-caption font-mono text-foreground/80">
@@ -439,7 +439,7 @@ export function AuditLog() {
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('audit.expanded.user')}
                                 </span>
                                 <span className="text-caption font-medium text-foreground/80 truncate block">
@@ -450,7 +450,7 @@ export function AuditLog() {
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('audit.expanded.action')}
                                 </span>
                                 <span className="text-caption font-medium text-foreground/80">
@@ -461,7 +461,7 @@ export function AuditLog() {
                                 </span>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('audit.expanded.resource')}
                                 </span>
                                 <span className="text-caption font-semibold text-foreground/80 truncate block">
@@ -481,7 +481,7 @@ export function AuditLog() {
                                 </div>
                               </div>
                               <div className="px-3 py-2.5">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('audit.expanded.date')}
                                 </span>
                                 <span className="text-caption text-foreground/80 block">
@@ -494,7 +494,7 @@ export function AuditLog() {
                             </div>
                             {event.details && (
                               <div className="px-4 py-2.5 border-t border-border">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('audit.expanded.details')}
                                 </span>
                                 <p className="text-caption text-muted-foreground leading-relaxed whitespace-pre-wrap break-words">
@@ -504,7 +504,7 @@ export function AuditLog() {
                             )}
                             {event.ipAddress && (
                               <div className="px-4 py-2 border-t border-border">
-                                <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider block mb-1">
+                                <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('audit.expanded.ip')}
                                 </span>
                                 <span className="text-caption font-mono text-foreground/80 flex items-center gap-1.5">

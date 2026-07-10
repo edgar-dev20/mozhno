@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { Switch } from '@/app/components/ui/switch';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useT } from '@/i18n';
@@ -57,7 +57,7 @@ interface FlagCardHeaderProps {
   onToggleFlag: (flag: FlagView, envId: number) => void;
 }
 
-export function FlagCardHeader({
+export const FlagCardHeader = memo(function FlagCardHeader({
   flag,
   expanded,
   onToggleExpand,
@@ -67,6 +67,12 @@ export function FlagCardHeader({
 }: FlagCardHeaderProps) {
   const t = useT();
   const [glowKeys, setGlowKeys] = useState<Record<number, number>>({});
+
+  const tagMap = useMemo(() => {
+    const map = new Map<number, TagType>();
+    for (const tg of tags) map.set(tg.id, tg);
+    return map;
+  }, [tags]);
 
   const handleToggle = useCallback(
     (envId: number) => {
@@ -104,7 +110,7 @@ export function FlagCardHeader({
           {!expanded &&
             flag.tags.length > 0 &&
             flag.tags.slice(0, 5).map((tv, i) => {
-              const tg = tags.find((t) => t.id === tv.tagId);
+              const tg = tagMap.get(tv.tagId);
               return tg ? (
                 <span
                   key={i}
@@ -126,7 +132,7 @@ export function FlagCardHeader({
             const es = flag.environments[env.id];
             return (
               <div key={env.id} className="flex items-center gap-1.5">
-                <span className="text-caption font-medium text-muted-foreground uppercase tracking-wide">
+                <span className="text-caption font-medium text-muted-foreground">
                   {env.name}
                 </span>
                 {es && (
@@ -157,4 +163,4 @@ export function FlagCardHeader({
       </div>
     </>
   );
-}
+});

@@ -13,7 +13,6 @@ interface FlagsListProps {
   visibleFlags: FlagView[];
   expandedKeys: Set<string>;
   onToggleExpand: (key: string) => void;
-  onOpenGeneral: (flag: FlagView) => void;
   onOpenEnvironment: (flag: FlagView, envId: number) => void;
   onToggleFlag: (flag: FlagView, envId: number) => void;
   onMetricsClick: (flagId: number, flagName: string, envId: number) => void;
@@ -79,7 +78,7 @@ export function FlagsList({
           key={flag.key}
           flag={flag}
           expanded={expandedKeys.has(flag.key)}
-          onToggleExpand={() => onToggleExpand(flag.key)}
+          onToggleExpand={onToggleExpand}
           onOpenGeneral={onOpenGeneral}
           onOpenEnvironment={onOpenEnvironment}
           onToggleFlag={onToggleFlag}

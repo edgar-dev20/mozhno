@@ -268,7 +268,7 @@ export function SdkInfo() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
-                <p className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                <p className="text-caption font-semibold text-muted-foreground/70 mb-2">
                   {t('sdkInfo.install')}
                 </p>
                 <CodeBlock
@@ -277,7 +277,7 @@ export function SdkInfo() {
                 />
               </div>
               <div>
-                <p className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider mb-2">
+                <p className="text-caption font-semibold text-muted-foreground/70 mb-2">
                   {t('sdkInfo.usage')}
                 </p>
                 <CodeBlock code={content[activeTab].usage} lang={content[activeTab].usageLang} />
