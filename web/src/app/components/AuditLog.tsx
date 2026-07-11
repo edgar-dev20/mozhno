@@ -272,7 +272,7 @@ export function AuditLog() {
   }, [events, filterType, searchQuery]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <SectionHeader title={t('audit.title')} description={t('audit.description')} />
 
       <TipCard
@@ -288,15 +288,15 @@ export function AuditLog() {
         placeholder={t('audit.searchPlaceholder')}
       />
 
-      <div className="bg-card rounded-2xl p-4 shadow-md space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-caption font-semibold text-muted-foreground/70 mr-1">
-              {t('audit.filterType')}
-            </span>
+      <div className="bg-card rounded-2xl p-3 sm:p-4 shadow-md space-y-3 sm:space-y-4">
+        <div className="flex flex-col gap-2">
+          <span className="text-caption font-semibold text-muted-foreground/70">
+            {t('audit.filterType')}
+          </span>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
             <button
               onClick={() => setFilterType(null)}
-              className={`px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+              className={`shrink-0 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                 !filterType
                   ? 'bg-brand/10 text-brand border-brand/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -310,7 +310,7 @@ export function AuditLog() {
                 <button
                   key={type}
                   onClick={() => setFilterType(active ? null : type)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+                  className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                     active
                       ? getResourceColor(type) + ' border-current/20'
                       : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -368,37 +368,50 @@ export function AuditLog() {
                     id={`audit-card-${event.id}`}
                   >
                     <div
-                      className="flex gap-4 px-4 py-3 cursor-pointer"
+                      className="flex flex-col sm:flex-row gap-2 sm:gap-4 px-3 sm:px-4 py-2.5 sm:py-3 cursor-pointer"
                       onClick={() => toggleExpand(event.id)}
                     >
-                      <div
-                        className={`p-2 rounded-lg border shrink-0 ${getResourceColor(event.resourceType)}`}
-                      >
-                        {getResourceIcon(event.resourceType)}
-                      </div>
-                      <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-body-sm text-foreground truncate transition-all">
-                          {event.userName ?? event.userEmail}
-                        </span>
-                        <span className="text-caption text-muted-foreground">
-                          {getActionLabel(event.action)}
-                        </span>
-                        <span className="font-semibold text-body-sm text-foreground/90 truncate">
-                          {event.resourceName}
-                        </span>
-                        <span
-                          className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-caption font-semibold border shrink-0 leading-none ${getResourceColor(event.resourceType)}`}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={`p-2 rounded-lg border shrink-0 ${getResourceColor(event.resourceType)}`}
                         >
-                          {getResourceIcon(event.resourceType, 10)}
-                          {getResourceLabel(event.resourceType)}
-                        </span>
-                        {event.details && (
-                          <span className="text-caption text-muted-foreground/70 truncate max-w-[200px]">
-                            — {event.details}
+                          {getResourceIcon(event.resourceType)}
+                        </div>
+                        <div className="min-w-0 flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-body-sm text-foreground truncate">
+                            {event.userName ?? event.userEmail}
                           </span>
+                          <span className="text-caption text-muted-foreground shrink-0">
+                            {getActionLabel(event.action)}
+                          </span>
+                          <span className="font-semibold text-body-sm text-foreground/90 truncate">
+                            {event.resourceName}
+                          </span>
+                          <span
+                            className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-caption font-semibold border shrink-0 leading-none ${getResourceColor(event.resourceType)}`}
+                          >
+                            {getResourceIcon(event.resourceType, 10)}
+                            {getResourceLabel(event.resourceType)}
+                          </span>
+                          {event.details && (
+                            <span className="text-caption text-muted-foreground/70 truncate max-w-[160px]">
+                              — {event.details}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between sm:hidden">
+                        <span className="text-caption text-muted-foreground flex items-center gap-1">
+                          <Clock size={10} />
+                          {formatDateTime(event.createdAt)}
+                        </span>
+                        {expanded ? (
+                          <ChevronUp size={16} className="text-muted-foreground" />
+                        ) : (
+                          <ChevronDown size={16} className="text-muted-foreground" />
                         )}
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
+                      <div className="hidden sm:flex items-center gap-3 shrink-0">
                         {!expanded && (
                           <span className="text-caption text-muted-foreground flex items-center gap-1 shrink-0">
                             <Clock size={10} />

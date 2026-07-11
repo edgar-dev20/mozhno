@@ -5,9 +5,9 @@ import { useAuth } from '@/app/auth/useAuth';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { Hairline } from '@/shared/components/Hairline';
 import { GradientButton } from '@/shared/components/GradientButton';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/app/components/ui/sheet';
+import { Sheet, SheetContent } from '@/app/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
-import { PanelLeftIcon } from 'lucide-react';
+import { PanelLeftIcon, X } from 'lucide-react';
 import { OVERVIEW_ITEMS, MANAGEMENT_ITEMS, TEAM_ITEMS, SETTINGS_ITEMS } from '@/app/components/navConfig';
 import type { NavItem } from '@/app/components/navConfig';
 import { PluginSlot } from '@/app/components/PluginSlot';
@@ -122,7 +122,8 @@ function SidebarContent({
   mobile?: boolean;
   onNavigate?: () => void;
 }) {
-  const { collapsed, setCollapsed } = useContext(SidebarCtx);
+  const { collapsed, setCollapsed, toggleMobile } = useContext(SidebarCtx);
+  const navigate = mobile ? (onNavigate ?? toggleMobile) : undefined;
   const t = useT();
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
@@ -148,7 +149,7 @@ function SidebarContent({
               key={item.path}
               item={item}
               collapsed={collapsed && !mobile}
-              onClick={onNavigate}
+              onClick={navigate}
             />
           ))}
 
@@ -163,7 +164,7 @@ function SidebarContent({
               key={item.path}
               item={item}
               collapsed={collapsed && !mobile}
-              onClick={onNavigate}
+              onClick={navigate}
             />
           ))}
 
@@ -180,7 +181,7 @@ function SidebarContent({
                   key={item.path}
                   item={item}
                   collapsed={collapsed && !mobile}
-                  onClick={onNavigate}
+                  onClick={navigate}
                 />
               ))}
 
@@ -195,7 +196,7 @@ function SidebarContent({
                   key={item.path}
                   item={item}
                   collapsed={collapsed && !mobile}
-                  onClick={onNavigate}
+                  onClick={navigate}
                 />
               ))}
               <PluginSlot slotId="sidebar.admin" />
@@ -231,6 +232,9 @@ function SidebarContent({
 
 export function AppSidebar() {
   const { collapsed, mobileOpen, toggleMobile, setMobileOpen } = useContext(SidebarCtx);
+  const t = useT();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_BP - 1}px)`);
@@ -247,12 +251,73 @@ export function AppSidebar() {
 
   return (
     <>
-      <MobileSheet
-        open={mobileOpen}
-        onOpenChange={(v) => {
-          if (!v) toggleMobile();
-        }}
-      />
+      <Sheet open={mobileOpen} onOpenChange={(open) => { if (!open) toggleMobile(); }}>
+        <SheetContent side="left" className="w-[78vw] max-w-64 p-0 gap-0 rounded-r-2xl bg-card [&>button]:hidden">
+          <div className="flex items-center justify-between h-14 px-5 border-b border-border shrink-0">
+            <Wordmark text="можно" size="md" />
+            <button
+              onClick={toggleMobile}
+              className="p-1.5 -mr-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              aria-label="Close menu"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex flex-col gap-1 overflow-y-auto py-3 px-3">
+              {OVERVIEW_ITEMS.map((item) => (
+                <NavLinkItem
+                  key={item.path}
+                  item={item}
+                  collapsed={false}
+                  onClick={toggleMobile}
+                />
+              ))}
+              <Hairline className="my-3" />
+              <div className="px-3 mb-1.5 text-overline font-semibold text-muted-foreground uppercase tracking-wider">
+                {t('navigation.management')}
+              </div>
+              {MANAGEMENT_ITEMS.map((item) => (
+                <NavLinkItem
+                  key={item.path}
+                  item={item}
+                  collapsed={false}
+                  onClick={toggleMobile}
+                />
+              ))}
+              {isAdmin && (
+                <>
+                  <Hairline className="my-3" />
+                  <div className="px-3 mb-1.5 text-overline font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t('navigation.team')}
+                  </div>
+                  {TEAM_ITEMS.map((item) => (
+                    <NavLinkItem
+                      key={item.path}
+                      item={item}
+                      collapsed={false}
+                      onClick={toggleMobile}
+                    />
+                  ))}
+                  <Hairline className="my-3" />
+                  <div className="px-3 mb-1.5 text-overline font-semibold text-muted-foreground uppercase tracking-wider">
+                    {t('navigation.settingsGroup')}
+                  </div>
+                  {SETTINGS_ITEMS.map((item) => (
+                    <NavLinkItem
+                      key={item.path}
+                      item={item}
+                      collapsed={false}
+                      onClick={toggleMobile}
+                    />
+                  ))}
+                  <PluginSlot slotId="sidebar.admin" />
+                </>
+              )}
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <aside
         className={`hidden md:flex flex-col bg-card border-r border-border shadow-sm transition-[width] duration-300 overflow-hidden min-w-0 ${
@@ -263,25 +328,5 @@ export function AppSidebar() {
         <SidebarContent />
       </aside>
     </>
-  );
-}
-
-function MobileSheet({ open }: { open: boolean; onOpenChange: (v: boolean) => void }) {
-  const { toggleMobile } = useContext(SidebarCtx);
-
-  return (
-    <Sheet
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) toggleMobile();
-      }}
-    >
-      <SheetContent side="left" className="w-64 p-0 bg-card">
-        <SheetHeader className="sr-only">
-          <SheetTitle>Navigation</SheetTitle>
-        </SheetHeader>
-        <SidebarContent mobile onNavigate={toggleMobile} />
-      </SheetContent>
-    </Sheet>
   );
 }

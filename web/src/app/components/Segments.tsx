@@ -44,6 +44,7 @@ import {
   ErrorBox,
   Badge,
   getErrorMessage,
+  Fab,
 } from '@/shared';
 import { SegmentCardSkeletonList } from '@/app/components/skeletons';
 import { useT } from '@/i18n';
@@ -352,12 +353,14 @@ export function Segments() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('segments.title')} description={t('segments.description')} />
-        <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
-          {t('segments.create')}
-        </GradientButton>
+        <div className="hidden sm:block">
+          <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
+            {t('segments.create')}
+          </GradientButton>
+        </div>
       </div>
 
       <TipCard
@@ -915,6 +918,7 @@ export function Segments() {
         onConfirm={doDelete}
         loading={deleting}
       />
+      <Fab onClick={openCreate} label={t('segments.create')} />
     </div>
   );
 }

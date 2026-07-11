@@ -42,7 +42,7 @@ export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProp
           className="relative overflow-hidden rounded-xl border border-border bg-card shadow-sm"
         >
           <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-gradient-start to-gradient-end" />
-          <div className="p-4 pl-6 flex items-start gap-3">
+          <div className="p-3 sm:p-4 pl-5 sm:pl-6 flex items-start gap-3">
             {showIcon && (
               <div className="shrink-0 rounded-xl overflow-hidden">
                 {imageSrc ? (

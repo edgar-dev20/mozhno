@@ -7,6 +7,7 @@ import { AcceptInvite } from '@/app/components/AcceptInvite';
 import { DashboardLayout } from '@/app/components/DashboardLayout';
 import { ProtectedRoute } from '@/app/components/ProtectedRoute';
 import { AuthProvider } from '@/app/auth/AuthContext';
+import { AppSidebarProvider } from '@/app/components/AppSidebar';
 import { LazyPage } from '@/shared/components/LazyPage';
 import { PremiumPageSlot } from '@/app/components/PremiumPageSlot';
 
@@ -74,7 +75,7 @@ export const router = createBrowserRouter([
         children: [
           {
             path: '/',
-            Component: DashboardLayout,
+            element: <AppSidebarProvider><DashboardLayout /></AppSidebarProvider>,
             children: [
               { index: true, element: <LazyPage Component={Overview} /> },
               { path: 'flags', element: <LazyPage Component={Flags} /> },

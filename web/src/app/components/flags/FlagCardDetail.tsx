@@ -36,8 +36,8 @@ export const FlagCardDetail = memo(function FlagCardDetail({
     return map;
   }, [tags]);
   return (
-    <div className="flex gap-4 px-4 pb-3 border-t border-border pt-3">
-      <div className="flex-[1] min-w-0 flex flex-col">
+    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 px-3 sm:px-4 pb-3 border-t border-border pt-3">
+      <div className="sm:flex-[1] min-w-0 flex flex-col">
         <div className="flex-1 min-h-0">
           <div className="mt-0.5">
             <span className="text-caption font-mono text-muted-foreground">{flag.key}</span>
@@ -95,7 +95,7 @@ export const FlagCardDetail = memo(function FlagCardDetail({
         </div>
       </div>
 
-      <div className="flex gap-2 flex-[2] min-w-0">
+      <div className="flex flex-col sm:flex-row gap-2 sm:flex-[2] sm:min-w-0 pb-1 sm:pb-0">
         {environments.map((env) => {
           const sparkKey = `${flag.flagId}-${env.id}`;
           const sparkBuckets = sparklineData.get(sparkKey) ?? [];

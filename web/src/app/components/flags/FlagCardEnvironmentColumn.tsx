@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, memo } from 'react';
-import { Settings } from '@/shared/icons';
+import { Settings, BarChart3 } from '@/shared/icons';
 import { Switch } from '@/app/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
@@ -145,7 +145,7 @@ export const FlagCardEnvironmentColumn = memo(function FlagCardEnvironmentColumn
   }, [es, flag, env.id, onToggleFlag]);
 
   return (
-    <div className="flex-1 bg-secondary/40 rounded-xl px-4 pt-3 pb-2 ring-1 ring-border shadow-sm transition-all flex flex-col">
+    <div className="w-full sm:flex-1 sm:min-w-0 bg-secondary/40 rounded-xl px-3 sm:px-4 pt-3 pb-2 ring-1 ring-border shadow-sm transition-all flex flex-col">
       <div className="flex items-center justify-between mb-2">
         <span className="text-caption font-medium text-muted-foreground">
           {env.name}
@@ -171,19 +171,26 @@ export const FlagCardEnvironmentColumn = memo(function FlagCardEnvironmentColumn
       {es ? (
         <>
           <div className="text-caption leading-relaxed mb-2">{rule}</div>
-          <div className="relative group flex-1 min-h-0 rounded-md overflow-hidden">
+          <div className="relative group flex-1 min-h-0 rounded-md overflow-hidden hidden sm:block">
             {sparkBuckets.length > 0 ? (
-              <>
-                <button
-                  onClick={() => onMetricsClick(flag.flagId, flag.name, env.id)}
-                  className="w-full h-full cursor-pointer rounded-md transition-all hover:bg-sparkline-true/[0.08] dark:hover:bg-sparkline-true/[0.10]"
-                >
-                  <FlagSparkline data={sparkBuckets} height={56} />
-                </button>
-              </>
+              <button
+                onClick={() => onMetricsClick(flag.flagId, flag.name, env.id)}
+                className="w-full h-full cursor-pointer rounded-md transition-all hover:bg-sparkline-true/[0.08] dark:hover:bg-sparkline-true/[0.10]"
+              >
+                <FlagSparkline data={sparkBuckets} height={56} />
+              </button>
             ) : (
               <SparklinePlaceholder height={56} />
             )}
+          </div>
+          <div className="sm:hidden mt-auto pt-1">
+            <button
+              onClick={() => onMetricsClick(flag.flagId, flag.name, env.id)}
+              className="inline-flex items-center px-2 py-1.5 text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand hover:border-brand/20 hover:bg-brand/5 transition-all"
+              aria-label={t('flags.metrics.chartTitle')}
+            >
+              <BarChart3 size={13} />
+            </button>
           </div>
         </>
       ) : (

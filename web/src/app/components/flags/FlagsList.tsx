@@ -13,6 +13,7 @@ interface FlagsListProps {
   visibleFlags: FlagView[];
   expandedKeys: Set<string>;
   onToggleExpand: (key: string) => void;
+  onOpenGeneral: (flag: FlagView) => void;
   onOpenEnvironment: (flag: FlagView, envId: number) => void;
   onToggleFlag: (flag: FlagView, envId: number) => void;
   onMetricsClick: (flagId: number, flagName: string, envId: number) => void;

@@ -19,6 +19,7 @@ import {
   getEnvColor,
   timeAgo,
   formatCompactCount,
+  Fab,
 } from '@/shared';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
@@ -64,6 +65,7 @@ function Section({
 
 export function Overview() {
   const t = useT();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const role = user?.role;
   const canWrite = role === 'admin' || role === 'developer';
@@ -103,8 +105,8 @@ export function Overview() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-h1 font-heading font-bold tracking-tight">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-h2 sm:text-h1 font-heading font-bold tracking-tight">
           {t('overview.greeting', { name: greetingName })}
         </h1>
         {(canWrite || isAdmin) && <HeaderActions t={t} canWrite={canWrite} isAdmin={isAdmin} />}
@@ -138,6 +140,7 @@ export function Overview() {
           </div>
         )}
       </Section>
+      <Fab onClick={() => navigate('/flags?new=1')} label={t('overview.quickActions.createFlag')} />
     </div>
   );
 }
@@ -145,11 +148,13 @@ export function Overview() {
 function HeaderActions({ t, canWrite, isAdmin }: { t: TFn; canWrite: boolean; isAdmin: boolean }) {
   const navigate = useNavigate();
   return (
-    <div className="flex items-center gap-2 shrink-0">
+    <div className="flex items-center gap-2 shrink-0 flex-wrap">
       {canWrite && (
-        <GradientButton icon={<Plus size={16} />} onClick={() => navigate('/flags?new=1')}>
-          {t('overview.quickActions.createFlag')}
-        </GradientButton>
+        <div className="hidden sm:block">
+          <GradientButton icon={<Plus size={16} />} onClick={() => navigate('/flags?new=1')}>
+            {t('overview.quickActions.createFlag')}
+          </GradientButton>
+        </div>
       )}
       {isAdmin && (
         <DropdownMenu>
@@ -273,7 +278,7 @@ function EnvironmentsGrid({
     );
   }
   return (
-    <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(280px,1fr))]">
+    <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr))]">
       {environments.map((env, i) => (
         <EnvironmentStatCard key={env.environmentId} t={t} env={env} index={i} color={colorFor(env.environmentId)} />
       ))}
@@ -688,12 +693,12 @@ function OnboardingChecklist({
 
 function OverviewSkeleton() {
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Skeleton className="h-8 w-56" />
         <Skeleton className="h-9 w-32 rounded-lg" />
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
         {Array.from({ length: 4 }).map((_, i) => (
           <Card key={i} padded>
             <Skeleton className="h-3 w-24" />

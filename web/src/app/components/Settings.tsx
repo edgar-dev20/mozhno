@@ -279,7 +279,7 @@ export function Settings() {
   if (loading) return <LoadingState text={t('settings.loading')} />;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <SectionHeader title={t('settings.title')} description={t('settings.description')} />
 
       <div className="space-y-6">
@@ -290,7 +290,7 @@ export function Settings() {
           transition={{ duration: 0.2 }}
           className="bg-card border border-border rounded-xl shadow-md overflow-hidden"
         >
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="p-2.5 rounded-xl bg-muted border border-border">
                 <Building2 size={20} className="text-info" />
@@ -301,7 +301,7 @@ export function Settings() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 divide-x divide-border bg-secondary rounded-xl mb-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border bg-secondary rounded-xl mb-5">
               <div className="px-4 py-2.5">
                 <span className="text-caption font-semibold text-muted-foreground/70 block mb-0.5">
                   ID
@@ -412,6 +412,7 @@ export function Settings() {
                   disabled={savingProject || !isProjectDirty}
                   loading={savingProject}
                   icon={<Save size={16} />}
+                  className="min-h-[44px] sm:min-h-0 sm:h-9"
                 >
                   {t('common.saveChanges')}
                 </GradientButton>
@@ -427,7 +428,7 @@ export function Settings() {
           transition={{ duration: 0.2, delay: 0.1 }}
           className="bg-card border border-border rounded-xl shadow-md overflow-hidden"
         >
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="p-2.5 rounded-xl bg-muted border border-border">
                 <Globe size={20} className="text-brand" />
@@ -576,7 +577,7 @@ export function Settings() {
           transition={{ duration: 0.2, delay: 0.3 }}
           className="bg-card border border-destructive/20 rounded-xl shadow-md overflow-hidden"
         >
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="flex items-center gap-3 mb-5">
               <div className="p-2.5 rounded-xl bg-gradient-to-br from-destructive/10 to-destructive/10 border border-destructive/20">
                 <AlertTriangle size={20} className="text-destructive" />
@@ -592,7 +593,7 @@ export function Settings() {
             </div>
 
             <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20">
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                 <div>
                   <div className="font-medium text-foreground text-body-sm">
                     {t('settings.deleteProject')}

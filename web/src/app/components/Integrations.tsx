@@ -7,7 +7,7 @@ import { api, type Integration } from '@/api';
 import { SidePanel } from '@/app/components/SidePanel';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
-import { SectionHeader, EmptyState, GradientButton, getErrorMessage } from '@/shared';
+import { SectionHeader, EmptyState, GradientButton, getErrorMessage, Fab } from '@/shared';
 import { IntegrationCardSkeletonList } from '@/app/components/skeletons';
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -125,15 +125,17 @@ export function Integrations() {
   const canSave = form.isDirty && !form.urlError && !saving;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader
           title={t('integrations.title')}
           description={t('integrations.description')}
         />
-        <GradientButton onClick={openCreateAndReset} icon={<Plus size={18} />}>
-          {t('integrations.connect')}
-        </GradientButton>
+        <div className="hidden sm:block">
+          <GradientButton onClick={openCreateAndReset} icon={<Plus size={18} />}>
+            {t('integrations.connect')}
+          </GradientButton>
+        </div>
       </div>
 
       <TipCard
@@ -228,6 +230,7 @@ export function Integrations() {
         onConfirm={handleDelete}
         loading={deleting}
       />
+      <Fab onClick={openCreateAndReset} label={t('integrations.create')} />
     </div>
   );
 }

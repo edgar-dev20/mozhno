@@ -8,7 +8,7 @@ import { ActivationConfirmDetails } from '@/app/components/flags/ActivationConfi
 const FlagMetricsDialog = lazy(() =>
   import('@/app/components/FlagMetricsDialog').then((m) => ({ default: m.FlagMetricsDialog })),
 );
-import { SectionHeader, GradientButton, getErrorMessage } from '@/shared';
+import { SectionHeader, GradientButton, getErrorMessage, Fab } from '@/shared';
 import type { FlagTagValue } from '@/api';
 import type { FlagView } from '@/app/hooks/flagTypes';
 import { useT } from '@/i18n';
@@ -321,12 +321,14 @@ export function Flags() {
     : undefined;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('flags.title')} description={t('flags.description')} />
-        <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
-          {t('flags.create')}
-        </GradientButton>
+        <div className="hidden sm:block">
+          <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
+            {t('flags.create')}
+          </GradientButton>
+        </div>
       </div>
 
       <FlagFiltersBar
@@ -479,6 +481,8 @@ export function Flags() {
           />
         )}
       </ConfirmDialog>
+
+      <Fab onClick={openCreate} label={t('flags.create')} />
     </div>
   );
 }

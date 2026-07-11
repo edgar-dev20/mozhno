@@ -35,7 +35,7 @@ export const FlagCard = memo(function FlagCard(props: FlagCardProps) {
       className={`group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden ${flag.archived ? 'opacity-50 grayscale-[0.3]' : ''}`}
       id={`flag-card-${flag.key}`}
     >
-      <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-4 py-2 sm:py-3">
+      <div className="flex items-center gap-1.5 sm:gap-4 px-2 sm:px-4 py-2 sm:py-3">
         <FlagCardHeader
           flag={flag}
           expanded={expanded}

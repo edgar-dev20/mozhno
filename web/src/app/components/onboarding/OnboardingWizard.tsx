@@ -98,7 +98,7 @@ export function OnboardingWizard({
             <div className="flex">
               <OnboardingSidebar step={step} />
 
-              <div className="flex-1 p-8 flex flex-col relative overflow-hidden">
+              <div className="flex-1 p-6 sm:p-8 flex flex-col relative overflow-hidden">
                 <div className="absolute top-[-120px] right-[-80px] w-[350px] h-[350px] bg-gradient-to-br from-gradient-start/6 to-gradient-end/3 dark:from-gradient-start/4 dark:to-gradient-end/2 rounded-full blur-3xl md:hidden" />
                 <AnimatePresence mode="wait">
                   <motion.div

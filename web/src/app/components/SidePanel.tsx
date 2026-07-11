@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Drawer } from 'vaul';
 import { X } from '@/shared/icons';
+import { useIsMobile } from '@/shared/hooks/useIsMobile';
 
 interface SidePanelProps {
   open: boolean;
@@ -12,22 +13,6 @@ interface SidePanelProps {
   footer?: React.ReactNode;
   diffSlot?: React.ReactNode;
   onDiffDismiss?: () => void;
-}
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia('(max-width: 639px)').matches;
-  });
-
-  useEffect(() => {
-    const mql = window.matchMedia('(max-width: 639px)');
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
-  }, []);
-
-  return isMobile;
 }
 
 function PanelContent({
@@ -42,7 +27,7 @@ function PanelContent({
 
   return (
     <>
-      <div className="flex-shrink-0 px-6 py-4 border-b border-border flex items-center justify-between">
+      <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-border flex items-center justify-between">
         <div>
           <Dialog.Title className="text-h2 font-heading text-foreground tracking-tight">
             {title}
@@ -62,7 +47,7 @@ function PanelContent({
 
       {hasDiff ? (
         <div className="flex-1 relative overflow-hidden">
-          <div className="absolute inset-0 overflow-y-auto p-6">{children}</div>
+          <div className="absolute inset-0 overflow-y-auto p-4 sm:p-6">{children}</div>
           <div
             onClick={onDiffDismiss}
             className="absolute inset-0 bg-overlay backdrop-blur-[2px] cursor-pointer z-10 flex items-start justify-center pt-8"
@@ -70,13 +55,13 @@ function PanelContent({
           />
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto p-6">{children}</div>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>
       )}
 
       {diffSlot}
 
       {footer && (
-        <div className="flex-shrink-0 px-6 py-5 border-t border-border bg-gradient-to-t from-secondary/50 to-transparent flex justify-end gap-3">
+        <div className="flex-shrink-0 px-4 sm:px-6 py-5 border-t border-border bg-gradient-to-t from-secondary/50 to-transparent flex justify-end gap-3">
           {footer}
         </div>
       )}
@@ -94,7 +79,7 @@ export function SidePanel({
   diffSlot,
   onDiffDismiss,
 }: SidePanelProps) {
-  const isMobile = useIsMobile();
+  const isMobile = useIsMobile(640);
 
   if (isMobile) {
     return (

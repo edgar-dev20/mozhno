@@ -30,7 +30,7 @@ const BUILTIN = [
 export function Strategies() {
   const t = useT();
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <SectionHeader title={t('strategies.title')} description={t('strategies.description')} />
       <TipCard
         text={t('strategies.hygieneTip')}

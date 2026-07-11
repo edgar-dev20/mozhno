@@ -31,6 +31,8 @@ export {
 } from '@/shared/envTheme';
 export { ColorPicker } from '@/shared/components/ColorPicker';
 export { COLOR_PALETTES, getColorName } from '@/shared/colorPalette';
+export { useIsMobile } from '@/shared/hooks/useIsMobile';
+export { Fab } from '@/shared/components/Fab';
 export { SkipLink } from '@/shared/components/SkipLink';
 export { LazyPage } from '@/shared/components/LazyPage';
 export { PageLoader } from '@/shared/components/PageLoader';

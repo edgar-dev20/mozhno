@@ -24,7 +24,7 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SidePanel } from '@/app/components/SidePanel';
 import { ApiKeyTableSkeleton } from '@/app/components/skeletons';
-import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, getErrorMessage, getEnvColor, envColorStyles } from '@/shared';
+import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, getErrorMessage, getEnvColor, envColorStyles, Fab } from '@/shared';
 import {
   Select,
   SelectContent,
@@ -222,7 +222,7 @@ export function ApiKeys() {
     return (
       <button
         onClick={() => setTypeFilter(active ? null : type)}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
       >
         <Icon size={12} />
         {getKeyTypeLabel(type)}
@@ -236,7 +236,7 @@ export function ApiKeys() {
     return (
       <button
         onClick={() => setEnvFilter(active ? null : env.id)}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+        className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
           active ? '' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
         }`}
         style={active ? styles.soft : undefined}
@@ -248,12 +248,14 @@ export function ApiKeys() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('apiKeys.title')} description={t('apiKeys.description')} />
-        <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
-          {t('apiKeys.create')}
-        </GradientButton>
+        <div className="hidden sm:block">
+          <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
+            {t('apiKeys.create')}
+          </GradientButton>
+        </div>
       </div>
 
       <TipCard
@@ -272,7 +274,7 @@ export function ApiKeys() {
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setTypeFilter(null)}
-            className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               !typeFilter
                 ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -286,7 +288,7 @@ export function ApiKeys() {
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             onClick={() => setEnvFilter(null)}
-            className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               envFilter === null
                 ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -444,7 +446,7 @@ export function ApiKeys() {
                                 </div>
                               </div>
                             </div>
-                            <div className="grid grid-cols-3 divide-x divide-border border-t border-border">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border border-t border-border">
                               <div className="px-4 py-2.5">
                                 <span className="text-caption font-semibold text-muted-foreground/70 block mb-1">
                                   {t('common.type')}
@@ -515,7 +517,7 @@ export function ApiKeys() {
         )}
       </div>
 
-      <div className="bg-brand/10 border border-brand/20 dark:border-brand/20 rounded-xl p-6 flex items-start gap-4">
+      <div className="bg-brand/10 border border-brand/20 dark:border-brand/20 rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
         <div className="bg-brand/10 dark:bg-brand/20 p-2 rounded-lg text-brand dark:text-brand shrink-0">
           <Shield size={20} />
         </div>
@@ -691,6 +693,7 @@ export function ApiKeys() {
         onConfirm={handleDelete}
         loading={deleting}
       />
+      <Fab onClick={openCreate} label={t('apiKeys.create')} />
     </div>
   );
 }

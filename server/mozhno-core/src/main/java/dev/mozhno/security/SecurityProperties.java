@@ -61,7 +61,7 @@ public class SecurityProperties {
         /** Content-Security-Policy directives. */
         @NotNull
         private String contentSecurityPolicy =
-            "default-src 'self'; script-src 'self' 'unsafe-inline'; "
+            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
             + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             + "img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com; "
             + "connect-src 'self'";

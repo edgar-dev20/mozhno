@@ -10,7 +10,7 @@ import type { DiffChange } from '@/shared/diffUtils';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
 import { ContextType, CONTEXT_TYPES, type ContextTypeValue } from '@/app/components/contextTypes';
 import { api, ContextDefinition, SegmentResponse } from '@/api';
-import { SectionHeader, EmptyState, ColorIcon, FormField, GradientButton, ErrorBox, Badge, getErrorMessage } from '@/shared';
+import { SectionHeader, EmptyState, ColorIcon, FormField, GradientButton, ErrorBox, Badge, getErrorMessage, Fab } from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useContextsQuery, useSegmentsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -273,12 +273,14 @@ export function Constraints() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('constraints.title')} description={t('constraints.description')} />
-        <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
-          {t('constraints.create')}
-        </GradientButton>
+        <div className="hidden sm:block">
+          <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
+            {t('constraints.create')}
+          </GradientButton>
+        </div>
       </div>
 
       <TipCard
@@ -718,6 +720,7 @@ export function Constraints() {
         onConfirm={handleDelete}
         loading={deleting}
       />
+      <Fab onClick={openCreate} label={t('constraints.create')} />
     </div>
   );
 }

@@ -173,7 +173,7 @@ export function ClientInstances() {
       : t('clientInstances.descriptionEmpty');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <SectionHeader title={t('clientInstances.title')} description={sectionDescription} />
         <div className="hidden sm:block">{/* spacer */}</div>
@@ -181,7 +181,7 @@ export function ClientInstances() {
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="relative flex-1 max-w-xs">
+          <div className="relative flex-1 sm:max-w-xs">
             <Search
               size={14}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -197,7 +197,7 @@ export function ClientInstances() {
           <div className="flex items-center gap-1.5 flex-wrap">
             <button
               onClick={() => setLangFilter('all')}
-              className={`px-3 py-1.5 text-caption font-semibold rounded-lg transition-all ${
+              className={`px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all ${
                 langFilter === 'all'
                   ? 'bg-brand/10 text-brand border border-brand/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border border-transparent'
@@ -207,7 +207,7 @@ export function ClientInstances() {
             </button>
             <button
               onClick={() => setLangFilter('java')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                 langFilter === 'java'
                   ? 'bg-warning/10 text-warning border-warning/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -218,7 +218,7 @@ export function ClientInstances() {
             </button>
             <button
               onClick={() => setLangFilter('js')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                 langFilter === 'js'
                   ? 'bg-warning/10 text-warning border-warning/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -237,7 +237,7 @@ export function ClientInstances() {
               <button
                 key={e.id}
                 onClick={() => handleEnvFilter(e.id)}
-                className={`px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+                className={`px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                   active ? '' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
                 }`}
                 style={active ? styles.soft : undefined}

@@ -38,7 +38,7 @@ export function Auth() {
 
       <div className="w-full max-w-md relative z-10">
         <div className="bg-card backdrop-blur-2xl rounded-2xl shadow-xl border border-border transition-colors">
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             <div className="flex justify-center mb-4">
               <Wordmark text={t('common.appName')} size="xl" />
             </div>
@@ -98,7 +98,7 @@ export function Auth() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="remember"

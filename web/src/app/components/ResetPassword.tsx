@@ -51,7 +51,7 @@ export function ResetPassword() {
 
       <div className="w-full max-w-md relative z-10">
         <div className="bg-card/80 backdrop-blur-2xl rounded-2xl shadow-2xl border border-border transition-colors animate-[fadeIn_0.5s_ease-out]">
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             <div className="flex justify-center mb-4">
               <Wordmark text={t('common.appName')} size="xl" />
             </div>

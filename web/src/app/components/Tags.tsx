@@ -17,6 +17,7 @@ import {
   GradientButton,
   ErrorBox,
   getErrorMessage,
+  Fab,
 } from '@/shared';
 import { useProjectQuery, useTagsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -164,12 +165,14 @@ export function Tags() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('tags.title')} description={t('tags.description')} />
-        <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
-          {t('tags.create')}
-        </GradientButton>
+        <div className="hidden sm:block">
+          <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
+            {t('tags.create')}
+          </GradientButton>
+        </div>
       </div>
 
       <TipCard
@@ -468,6 +471,7 @@ export function Tags() {
         onConfirm={handleDelete}
         loading={deleting}
       />
+      <Fab onClick={openCreate} label={t('tags.create')} />
     </div>
   );
 }

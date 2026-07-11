@@ -10,7 +10,7 @@ export function SectionHeader({ title, description, gradientClass }: SectionHead
   const gradient = gradientClass ?? 'from-gradient-start to-gradient-end';
 
   return (
-    <div className="mb-8">
+    <div className="mb-5 sm:mb-8">
       <h1 className="font-bold tracking-tight">
         <span className={`bg-gradient-to-r ${gradient} bg-clip-text text-transparent`}>
           {title}

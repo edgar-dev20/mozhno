@@ -126,39 +126,41 @@ export const FlagCardHeader = memo(function FlagCardHeader({
           )}
         </div>
       </button>
-      <div className="flex items-center gap-3 shrink-0">
-        {!expanded &&
-          environments.map((env) => {
-            const es = flag.environments[env.id];
-            return (
-              <div key={env.id} className="flex items-center gap-1.5">
-                <span className="text-caption font-medium text-muted-foreground">
-                  {env.name}
-                </span>
-                {es && (
-                  <span
-                    key={`glow-${env.id}-${glowKeys[env.id] ?? 0}`}
-                    className={(glowKeys[env.id] ?? 0) > 0 ? 'animate-flag-on' : ''}
-                  >
-                    <Switch
-                      checked={es.enabled}
-                      onCheckedChange={() => handleToggle(env.id)}
-                      aria-label={`${flag.name} — ${env.name}`}
-                      className="data-[state=checked]:bg-brand"
-                    />
+      <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div className="hidden sm:flex items-center gap-1.5 sm:gap-3">
+          {!expanded &&
+            environments.map((env) => {
+              const es = flag.environments[env.id];
+              return (
+                <div key={env.id} className="flex items-center gap-1 sm:gap-1.5">
+                  <span className="hidden sm:inline text-caption font-medium text-muted-foreground">
+                    {env.name}
                   </span>
-                )}
-              </div>
-            );
-          })}
+                  {es && (
+                    <span
+                      key={`glow-${env.id}-${glowKeys[env.id] ?? 0}`}
+                      className={(glowKeys[env.id] ?? 0) > 0 ? 'animate-flag-on' : ''}
+                    >
+                      <Switch
+                        checked={es.enabled}
+                        onCheckedChange={() => handleToggle(env.id)}
+                        aria-label={`${flag.name} — ${env.name}`}
+                        className="data-[state=checked]:bg-brand"
+                      />
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+        </div>
         <button
           type="button"
           onClick={onToggleExpand}
           aria-hidden="true"
           tabIndex={-1}
-          className="inline-flex items-center justify-center text-muted-foreground group-hover:text-brand transition-colors"
+          className="inline-flex items-center justify-center p-1.5 sm:p-0 -mr-1 sm:mr-0 rounded-lg text-muted-foreground group-hover:text-brand hover:bg-accent sm:hover:bg-transparent transition-colors"
         >
-          {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          {expanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
         </button>
       </div>
     </>

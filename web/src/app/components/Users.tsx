@@ -23,7 +23,7 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { UserTableSkeleton } from '@/app/components/skeletons';
 import { api, UserDto } from '@/api';
-import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage } from '@/shared';
+import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage, Fab } from '@/shared';
 import { useT, useLocale, t } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
@@ -310,7 +310,7 @@ export function Users() {
       <button
         onClick={() => setRoleFilter(active ? null : role)}
         aria-pressed={active}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
       >
         {icon}
         {label}
@@ -342,7 +342,7 @@ export function Users() {
       <button
         onClick={() => setStatusFilter(active ? null : status)}
         aria-pressed={active}
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? style.on : style.off}`}
       >
         <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
         {label}
@@ -365,12 +365,14 @@ export function Users() {
   const showAllUsers = () => setDisplayLimit(filtered.length);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('users.title')} description={t('users.description')} />
-        <GradientButton onClick={handleOpenCreate} icon={<Plus size={18} />}>
-          {t('users.createInvite')}
-        </GradientButton>
+        <div className="hidden sm:block">
+          <GradientButton onClick={handleOpenCreate} icon={<Plus size={18} />}>
+            {t('users.createInvite')}
+          </GradientButton>
+        </div>
       </div>
 
       <TipCard
@@ -386,7 +388,7 @@ export function Users() {
           <button
             onClick={() => setRoleFilter(null)}
             aria-pressed={!roleFilter}
-            className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               !roleFilter
                 ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -402,7 +404,7 @@ export function Users() {
           <button
             onClick={() => setStatusFilter(null)}
             aria-pressed={!statusFilter}
-            className={`inline-flex items-center px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+            className={`inline-flex items-center px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
               !statusFilter
                 ? 'bg-brand/10 text-brand border-brand/20'
                 : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
@@ -1024,6 +1026,7 @@ export function Users() {
         onConfirm={handleResetPassword}
         loading={resettingPassword}
       />
+      <Fab onClick={handleOpenCreate} label={t('users.createInvite')} />
     </div>
   );
 }
