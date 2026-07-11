@@ -1,9 +1,9 @@
 <template>
   <Layout>
     <template #nav-bar-title-before>
-      <span class="brand-wrap">
+      <a class="brand-wrap" href="https://mozhno.dev" title="можно.dev">
         <span class="brand-name">можно</span><span class="brand-dot">.</span>
-      </span>
+      </a>
       <span class="brand-badge">docs</span>
     </template>
   </Layout>
@@ -135,6 +135,8 @@ watch(() => route.path, () => {
 .brand-wrap {
   display: inline-flex;
   align-items: baseline;
+  text-decoration: none;
+  color: inherit;
 }
 .brand-name {
   font-weight: 700;
