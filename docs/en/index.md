@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "можно"
   text: Feature Flag Management Platform
-  tagline: Ship features without deployment. Roll out changes gradually, segment your audience — all from a single dashboard.
+  tagline: Ship features without deployment. Gradual rollouts, audience segments, full audit trails — from a single dashboard.
 
   actions:
     - theme: brand
