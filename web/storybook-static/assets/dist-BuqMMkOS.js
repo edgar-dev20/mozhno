@@ -1,0 +1,1 @@
+import{c as e,i as t}from"./preload-helper-B45gAKPr.js";import{V as n}from"./iframe-CdpC400m.js";var r,i,a=t((()=>{r=e(n(),1),i=globalThis?.document?r.useLayoutEffect:()=>{}}));export{i as n,a as t};

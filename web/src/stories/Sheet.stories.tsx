@@ -1,9 +1,22 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { userEvent, within, expect, screen } from "storybook/test";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/app/components/ui/sheet";
-import { useState } from "react";
+import type { Meta, StoryObj } from '@storybook/react';
+import { userEvent, within, expect, screen } from 'storybook/test';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/app/components/ui/sheet';
+import { useState } from 'react';
 
-function SheetDemo({ side = "right", title = "Sheet Title" }: { side?: "left" | "right" | "top" | "bottom"; title?: string }) {
+function SheetDemo({
+  side = 'right',
+  title = 'Sheet Title',
+}: {
+  side?: 'left' | 'right' | 'top' | 'bottom';
+  title?: string;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -18,21 +31,21 @@ function SheetDemo({ side = "right", title = "Sheet Title" }: { side?: "left" | 
   );
 }
 
-const meta: Meta = {
-  title: "UI/Sheet",
+const meta: Meta<typeof Sheet> = {
+  title: 'UI/Sheet',
   component: Sheet,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof Sheet>;
 
 export const Right: Story = {
   render: () => <SheetDemo side="right" title="Right Sheet" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "Open Sheet" }));
-    await expect(screen.getByText("Right Sheet")).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Open Sheet' }));
+    await expect(screen.getByText('Right Sheet')).toBeVisible();
   },
 };
 

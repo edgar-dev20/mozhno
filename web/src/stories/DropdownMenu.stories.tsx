@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { userEvent, within, expect, screen } from "storybook/test";
+import type { Meta, StoryObj } from '@storybook/react';
+import { userEvent, within, expect, screen } from 'storybook/test';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,8 +7,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/app/components/ui/dropdown-menu";
-import { User, Settings, LogOut, Plus } from "@/shared/icons";
+} from '@/app/components/ui/dropdown-menu';
+import { User, Settings, LogOut, Plus } from '@/shared/icons';
 
 function DropdownDemo() {
   return (
@@ -19,31 +19,39 @@ function DropdownDemo() {
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem><User size={14} /> Profile</DropdownMenuItem>
-        <DropdownMenuItem><Settings size={14} /> Settings</DropdownMenuItem>
-        <DropdownMenuItem><Plus size={14} /> New Project</DropdownMenuItem>
+        <DropdownMenuItem>
+          <User size={14} /> Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Settings size={14} /> Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Plus size={14} /> New Project
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive"><LogOut size={14} /> Logout</DropdownMenuItem>
+        <DropdownMenuItem className="text-destructive">
+          <LogOut size={14} /> Logout
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-const meta: Meta = {
-  title: "UI/DropdownMenu",
+const meta: Meta<typeof DropdownMenu> = {
+  title: 'UI/DropdownMenu',
   component: DropdownMenu,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof DropdownMenu>;
 
 export const Default: Story = {
   render: () => <DropdownDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "Open Menu" }));
-    await expect(screen.getByText("My Account")).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Open Menu' }));
+    await expect(screen.getByText('My Account')).toBeVisible();
   },
 };
 

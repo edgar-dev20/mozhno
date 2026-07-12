@@ -1,7 +1,12 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/app/components/ui/tooltip";
+import type { Meta, StoryObj } from '@storybook/react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/app/components/ui/tooltip';
 
-function TooltipDemo({ text = "Tooltip text" }: { text?: string }) {
+function TooltipDemo({ text = 'Tooltip text' }: { text?: string }) {
   return (
     <TooltipProvider>
       <Tooltip>
@@ -14,14 +19,14 @@ function TooltipDemo({ text = "Tooltip text" }: { text?: string }) {
   );
 }
 
-const meta: Meta = {
-  title: "UI/Tooltip",
+const meta: Meta<typeof Tooltip> = {
+  title: 'UI/Tooltip',
   component: Tooltip,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof Tooltip>;
 
 export const Default: Story = {
   render: () => <TooltipDemo />,

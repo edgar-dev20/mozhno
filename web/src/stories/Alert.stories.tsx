@@ -1,16 +1,16 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { within, expect } from "storybook/test";
-import { Alert, AlertTitle, AlertDescription } from "@/app/components/ui/alert";
-import { AlertCircle, Check, AlertTriangle, Info } from "@/shared/icons";
+import type { Meta, StoryObj } from '@storybook/react';
+import { within, expect } from 'storybook/test';
+import { Alert, AlertTitle, AlertDescription } from '@/app/components/ui/alert';
+import { AlertCircle, Check, AlertTriangle, Info } from '@/shared/icons';
 
-const meta: Meta = {
-  title: "UI/Alert",
+const meta: Meta<typeof Alert> = {
+  title: 'UI/Alert',
   component: Alert,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof Alert>;
 
 export const Default: Story = {
   render: () => (
@@ -22,7 +22,7 @@ export const Default: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole("alert")).toBeInTheDocument();
+    await expect(canvas.getByRole('alert')).toBeInTheDocument();
   },
 };
 
@@ -38,10 +38,7 @@ export const Destructive: Story = {
 
 export const Success: Story = {
   render: () => (
-    <Alert
-      className="text-success [&>svg]:text-success"
-      variant="default"
-    >
+    <Alert className="text-success [&>svg]:text-success" variant="default">
       <Check size={16} />
       <AlertTitle>Success!</AlertTitle>
       <AlertDescription>Your changes have been saved successfully.</AlertDescription>
@@ -51,10 +48,7 @@ export const Success: Story = {
 
 export const Warning: Story = {
   render: () => (
-    <Alert
-      className="text-warning [&>svg]:text-warning"
-      variant="default"
-    >
+    <Alert className="text-warning [&>svg]:text-warning" variant="default">
       <AlertTriangle size={16} />
       <AlertTitle>Warning</AlertTitle>
       <AlertDescription>This action will affect all environments.</AlertDescription>

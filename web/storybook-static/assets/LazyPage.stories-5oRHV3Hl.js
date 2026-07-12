@@ -1,0 +1,5 @@
+import{c as e,i as t}from"./preload-helper-B45gAKPr.js";import{V as n}from"./iframe-CdpC400m.js";import{t as r}from"./jsx-runtime-BBQGix-2.js";import{n as i,r as a}from"./shared-Cf9mHzGo.js";var o,s,c,l,u,d;t((()=>{a(),o=e(n(),1),s=r(),c=(0,o.lazy)(()=>Promise.resolve({default:()=>(0,s.jsxs)(`div`,{className:`p-8 text-center`,children:[(0,s.jsx)(`h2`,{className:`text-h2 font-heading mb-2`,children:`Loaded!`}),(0,s.jsx)(`p`,{className:`text-body text-muted-foreground`,children:`This content was lazy-loaded with Suspense`})]})})),l={title:`Shared/LazyPage`,component:i,tags:[`autodocs`],parameters:{layout:`fullscreen`}},u={args:{Component:c}},u.parameters={...u.parameters,docs:{...u.parameters?.docs,source:{originalSource:`{
+  args: {
+    Component: DummyComponent
+  }
+}`,...u.parameters?.docs?.source}}},d=[`Default`]}))();export{u as Default,d as __namedExportsOrder,l as default};

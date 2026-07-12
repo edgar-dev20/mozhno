@@ -1,10 +1,14 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { EmptyFlagsIllustration, EmptyKeysIllustration, EmptySegmentsIllustration } from "@/shared/components/illustrations";
+import type { Meta, StoryObj } from '@storybook/react';
+import {
+  EmptyFlagsIllustration,
+  EmptyKeysIllustration,
+  EmptySegmentsIllustration,
+} from '@/shared/components/illustrations';
 
 const meta: Meta = {
-  title: "Shared/Illustrations",
-  tags: ["autodocs"],
-  parameters: { layout: "centered" },
+  title: 'Shared/Illustrations',
+  tags: ['autodocs'],
+  parameters: { layout: 'centered' },
 };
 
 export default meta;

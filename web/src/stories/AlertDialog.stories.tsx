@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn, userEvent, within, expect, screen } from "storybook/test";
-import { useState } from "react";
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn, userEvent, within, expect, screen } from 'storybook/test';
+import { useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,11 +11,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/app/components/ui/alert-dialog";
+} from '@/app/components/ui/alert-dialog';
 
 function AlertDialogDemo({
-  title = "Are you sure?",
-  description = "This action cannot be undone.",
+  title = 'Are you sure?',
+  description = 'This action cannot be undone.',
 }: {
   title?: string;
   description?: string;
@@ -38,21 +38,21 @@ function AlertDialogDemo({
   );
 }
 
-const meta: Meta = {
-  title: "UI/AlertDialog",
+const meta: Meta<typeof AlertDialog> = {
+  title: 'UI/AlertDialog',
   component: AlertDialog,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof AlertDialog>;
 
 export const Destructive: Story = {
   render: () => <AlertDialogDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "Delete Item" }));
-    await expect(screen.getByText("Are you sure?")).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Delete Item' }));
+    await expect(screen.getByText('Are you sure?')).toBeVisible();
   },
 };
 

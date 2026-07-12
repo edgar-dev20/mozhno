@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { ColorIcon } from "@/shared/components/ColorIcon";
-import { Tag } from "@/shared/icons";
+import type { Meta, StoryObj } from '@storybook/react';
+import { ColorIcon } from '@/shared/components/ColorIcon';
+import { Tag } from '@/shared/icons';
 
 const meta: Meta<typeof ColorIcon> = {
-  title: "Shared/ColorIcon",
+  title: 'Shared/ColorIcon',
   component: ColorIcon,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;

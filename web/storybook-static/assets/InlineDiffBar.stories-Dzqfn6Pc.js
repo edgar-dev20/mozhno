@@ -1,0 +1,13 @@
+import{c as e,i as t}from"./preload-helper-B45gAKPr.js";import{V as n}from"./iframe-CdpC400m.js";import{t as r}from"./jsx-runtime-BBQGix-2.js";import{i,t as a}from"./i18n-CNx_J3e1.js";import{n as o,r as s,t as c}from"./react-XGT-EfdR.js";import{n as l,t as u}from"./DiffView-BUDldGju.js";function d({changes:e}){let t=i(),n=(0,f.useRef)(null);return(0,f.useEffect)(()=>{n.current&&e.length>0&&n.current.scrollIntoView({behavior:`smooth`,block:`nearest`})},[e.length]),(0,p.jsx)(s,{mode:`wait`,children:e.length>0&&(0,p.jsx)(o.div,{ref:n,initial:{scaleY:0},animate:{scaleY:1},exit:{scaleY:0},transition:{duration:.25,ease:[.16,1,.3,1]},style:{transformOrigin:`top`},className:`will-change-transform`,children:(0,p.jsxs)(`div`,{className:`border-t border-border bg-secondary/30 dark:bg-secondary/10`,children:[(0,p.jsxs)(`div`,{className:`px-6 pt-4 pb-1 flex items-center gap-2`,children:[(0,p.jsx)(`span`,{className:`text-caption font-semibold text-muted-foreground/70`,children:t(`common.reviewChanges`)}),(0,p.jsx)(`span`,{className:`text-[11px] font-medium text-muted-foreground/50 tabular-nums`,children:e.length})]}),(0,p.jsx)(`div`,{className:`px-6 pb-4`,children:(0,p.jsx)(u,{changes:e})})]})},`diff-bar`)})}var f,p,m=t((()=>{f=e(n(),1),c(),l(),a(),p=r(),d.__docgenInfo={description:``,methods:[],displayName:`InlineDiffBar`,props:{changes:{required:!0,tsType:{name:`Array`,elements:[{name:`DiffChange`}],raw:`DiffChange[]`},description:``}}}})),h,g,_,v,y,b;t((()=>{m(),h=[{field:`name`,label:`Name`,before:`old-flag`,after:`new-flag`,group:`General`},{field:`desc`,label:`Description`,before:`Old text`,after:`Updated description`,group:`General`},{field:`pct`,label:`Percentage`,before:`50%`,after:`75%`,group:`Strategy`}],g={title:`App/InlineDiffBar`,component:d,tags:[`autodocs`]},_={args:{changes:h}},v={args:{changes:[h[0]]}},y={args:{changes:[]}},_.parameters={..._.parameters,docs:{..._.parameters?.docs,source:{originalSource:`{
+  args: {
+    changes: CHANGES
+  }
+}`,..._.parameters?.docs?.source}}},v.parameters={...v.parameters,docs:{...v.parameters?.docs,source:{originalSource:`{
+  args: {
+    changes: [CHANGES[0]]
+  }
+}`,...v.parameters?.docs?.source}}},y.parameters={...y.parameters,docs:{...y.parameters?.docs,source:{originalSource:`{
+  args: {
+    changes: []
+  }
+}`,...y.parameters?.docs?.source}}},b=[`WithChanges`,`SingleChange`,`Empty`]}))();export{y as Empty,v as SingleChange,_ as WithChanges,b as __namedExportsOrder,g as default};

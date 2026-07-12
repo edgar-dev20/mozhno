@@ -1,19 +1,22 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from '@storybook/react';
 
 const RADII: { name: string; cssVar: string; computed: string }[] = [
-  { name: "sm", cssVar: "var(--radius-sm)", computed: "calc(var(--radius) - 0.25rem) = 0.375rem" },
-  { name: "md", cssVar: "var(--radius-md)", computed: "calc(var(--radius) - 0.125rem) = 0.5rem" },
-  { name: "lg", cssVar: "var(--radius-lg)", computed: "var(--radius) = 0.625rem" },
-  { name: "xl", cssVar: "var(--radius-xl)", computed: "calc(var(--radius) + 0.25rem) = 0.875rem" },
+  { name: 'sm', cssVar: 'var(--radius-sm)', computed: 'calc(var(--radius) - 0.25rem) = 0.375rem' },
+  { name: 'md', cssVar: 'var(--radius-md)', computed: 'calc(var(--radius) - 0.125rem) = 0.5rem' },
+  { name: 'lg', cssVar: 'var(--radius-lg)', computed: 'var(--radius) = 0.625rem' },
+  { name: 'xl', cssVar: 'var(--radius-xl)', computed: 'calc(var(--radius) + 0.25rem) = 0.875rem' },
 ];
 
 function RadiusShowcase() {
   return (
     <div className="p-8 space-y-12 max-w-3xl">
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/40 mb-6">Radius Scale</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/40 mb-6">
+          Radius Scale
+        </h2>
         <p className="text-body-sm text-muted-foreground mb-4">
-          Base token: <code className="font-mono text-xs bg-muted px-1 py-0.5 rounded">--radius: 0.625rem</code>
+          Base token:{' '}
+          <code className="font-mono text-xs bg-muted px-1 py-0.5 rounded">--radius: 0.625rem</code>
         </p>
         <div className="flex flex-wrap gap-6 items-end">
           {RADII.map((r) => (
@@ -33,7 +36,9 @@ function RadiusShowcase() {
       </section>
 
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/40 mb-6">Applied to Cards</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/40 mb-6">
+          Applied to Cards
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {RADII.map((r) => (
             <div
@@ -42,31 +47,48 @@ function RadiusShowcase() {
               style={{ borderRadius: r.cssVar }}
             >
               <div className="text-sm font-medium text-foreground mb-1">Radius {r.name}</div>
-              <div className="text-xs text-muted-foreground/50 font-mono">
-                {r.computed}
-              </div>
+              <div className="text-xs text-muted-foreground/50 font-mono">{r.computed}</div>
             </div>
           ))}
         </div>
       </section>
 
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/40 mb-6">Tailwind Utility Mapping</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/40 mb-6">
+          Tailwind Utility Mapping
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {(
             [
-              { utility: "rounded-sm", token: "var(--radius-sm)", example: "Button, Badge" },
-              { utility: "rounded-md", token: "var(--radius-md)", example: "Skeleton, small cards" },
-              { utility: "rounded-lg", token: "var(--radius-lg)", example: "Input, Select, Toggle" },
-              { utility: "rounded-xl", token: "var(--radius-xl)", example: "Card, Calendar day, Panel" },
+              { utility: 'rounded-sm', token: 'var(--radius-sm)', example: 'Button, Badge' },
+              {
+                utility: 'rounded-md',
+                token: 'var(--radius-md)',
+                example: 'Skeleton, small cards',
+              },
+              {
+                utility: 'rounded-lg',
+                token: 'var(--radius-lg)',
+                example: 'Input, Select, Toggle',
+              },
+              {
+                utility: 'rounded-xl',
+                token: 'var(--radius-xl)',
+                example: 'Card, Calendar day, Panel',
+              },
             ] as const
           ).map((item) => (
-            <div key={item.utility} className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border">
+            <div
+              key={item.utility}
+              className="flex items-center gap-4 p-4 rounded-xl bg-card border border-border"
+            >
               <div
                 className="size-12 bg-brand flex items-center justify-center shrink-0"
                 style={{ borderRadius: item.token }}
               >
-                <span className="text-primary-foreground text-xs font-mono font-medium">{item.utility.split("-")[1]}</span>
+                <span className="text-primary-foreground text-xs font-mono font-medium">
+                  {item.utility.split('-')[1]}
+                </span>
               </div>
               <div className="flex flex-col gap-0.5 min-w-0">
                 <code className="text-xs font-mono text-foreground/80">{item.utility}</code>
@@ -81,14 +103,15 @@ function RadiusShowcase() {
 }
 
 const meta: Meta = {
-  title: "Design System/Radius",
+  title: 'Design System/Radius',
   component: RadiusShowcase,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
   parameters: {
-    layout: "padded",
+    layout: 'padded',
     docs: {
       description: {
-        component: "Border-radius tokens defined via `@theme inline` in `theme.css`. Base `--radius: 0.625rem` with computed `--radius-sm/md/lg/xl` variables. All shadcn/ui components use Tailwind's `rounded-*` utilities which resolve to these CSS variables.",
+        component:
+          "Border-radius tokens defined via `@theme inline` in `theme.css`. Base `--radius: 0.625rem` with computed `--radius-sm/md/lg/xl` variables. All shadcn/ui components use Tailwind's `rounded-*` utilities which resolve to these CSS variables.",
       },
     },
   },

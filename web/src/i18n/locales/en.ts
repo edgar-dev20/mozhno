@@ -411,6 +411,12 @@ const en = {
       on: 'ON',
       off: 'OFF',
       showAll: 'Show all ({{count}})',
+      gaugeDrift: 'Flags in drift',
+      gaugeRollout: 'Rollouts active',
+      gaugeSynced: 'Synced',
+      attention: 'Requiring attention',
+      chipDrift: 'Drift',
+      chipRollout: 'Rollout',
     },
     activity: {
       title: 'Recent activity',

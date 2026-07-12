@@ -1,0 +1,5 @@
+import{i as e}from"./preload-helper-B45gAKPr.js";import{t}from"./jsx-runtime-BBQGix-2.js";import{a as n,i as r,n as i,r as a,t as o}from"./tooltip-BZCLYzA8.js";function s({text:e=`Tooltip text`}){return(0,c.jsx)(a,{children:(0,c.jsxs)(o,{children:[(0,c.jsx)(r,{className:`inline-flex items-center px-4 py-2 rounded-lg bg-secondary text-secondary-foreground text-sm font-medium`,children:`Hover me`}),(0,c.jsx)(i,{children:e})]})})}var c,l,u,d,f;e((()=>{n(),c=t(),l={title:`UI/Tooltip`,component:o,tags:[`autodocs`]},u={render:()=>(0,c.jsx)(s,{})},d={render:()=>(0,c.jsx)(s,{text:`A much longer tooltip with detailed explanation.`})},u.parameters={...u.parameters,docs:{...u.parameters?.docs,source:{originalSource:`{
+  render: () => <TooltipDemo />
+}`,...u.parameters?.docs?.source}}},d.parameters={...d.parameters,docs:{...d.parameters?.docs,source:{originalSource:`{
+  render: () => <TooltipDemo text="A much longer tooltip with detailed explanation." />
+}`,...d.parameters?.docs?.source}}},f=[`Default`,`LongText`]}))();export{u as Default,d as LongText,f as __namedExportsOrder,l as default};

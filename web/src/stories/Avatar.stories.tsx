@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { within, expect } from "storybook/test";
-import { Avatar, AvatarFallback, AvatarImage } from "@/app/components/ui/avatar";
+import type { Meta, StoryObj } from '@storybook/react';
+import { within, expect } from 'storybook/test';
+import { Avatar, AvatarFallback, AvatarImage } from '@/app/components/ui/avatar';
 
 const meta: Meta<typeof Avatar> = {
-  title: "UI/Avatar",
+  title: 'UI/Avatar',
   component: Avatar,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
@@ -19,7 +19,7 @@ export const WithFallback: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText("JD")).toBeInTheDocument();
+    await expect(canvas.getByText('JD')).toBeInTheDocument();
   },
 };
 

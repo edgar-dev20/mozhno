@@ -1,11 +1,11 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "storybook/test";
-import { WebhookHeadersEditor } from "@/app/components/integrations/WebhookHeadersEditor";
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn } from 'storybook/test';
+import { WebhookHeadersEditor } from '@/app/components/integrations/WebhookHeadersEditor';
 
 const meta: Meta<typeof WebhookHeadersEditor> = {
-  title: "App/Integrations/WebhookHeadersEditor",
+  title: 'App/Integrations/WebhookHeadersEditor',
   component: WebhookHeadersEditor,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
@@ -18,8 +18,8 @@ export const Empty: Story = {
 export const WithHeaders: Story = {
   args: {
     headers: [
-      { id: 1, key: "Content-Type", value: "application/json" },
-      { id: 2, key: "Authorization", value: "Bearer token" },
+      { id: 1, key: 'Content-Type', value: 'application/json' },
+      { id: 2, key: 'Authorization', value: 'Bearer token' },
     ],
     onAdd: fn(),
     onRemove: fn(),

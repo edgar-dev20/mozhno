@@ -1,9 +1,16 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { userEvent, within, expect, screen } from "storybook/test";
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/app/components/ui/dialog";
+import type { Meta, StoryObj } from '@storybook/react';
+import { userEvent, within, expect, screen } from 'storybook/test';
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/app/components/ui/dialog';
 
-function DialogDemo({ title = "Dialog Title" }: { title?: string }) {
+function DialogDemo({ title = 'Dialog Title' }: { title?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -18,21 +25,21 @@ function DialogDemo({ title = "Dialog Title" }: { title?: string }) {
   );
 }
 
-const meta: Meta = {
-  title: "UI/Dialog",
+const meta: Meta<typeof Dialog> = {
+  title: 'UI/Dialog',
   component: Dialog,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof Dialog>;
 
 export const Default: Story = {
   render: () => <DialogDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "Open Dialog" }));
-    await expect(screen.getByText("Dialog Title")).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Open Dialog' }));
+    await expect(screen.getByText('Dialog Title')).toBeVisible();
   },
 };
 

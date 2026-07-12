@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { userEvent, within, expect, screen } from "storybook/test";
-import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
-import { Label } from "@/app/components/ui/label";
-import { Input } from "@/app/components/ui/input";
+import type { Meta, StoryObj } from '@storybook/react';
+import { userEvent, within, expect, screen } from 'storybook/test';
+import { Popover, PopoverContent, PopoverTrigger } from '@/app/components/ui/popover';
+import { Label } from '@/app/components/ui/label';
+import { Input } from '@/app/components/ui/input';
 
 function PopoverDemo() {
   return (
@@ -24,21 +24,21 @@ function PopoverDemo() {
   );
 }
 
-const meta: Meta = {
-  title: "UI/Popover",
+const meta: Meta<typeof Popover> = {
+  title: 'UI/Popover',
   component: Popover,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof Popover>;
 
 export const Default: Story = {
   render: () => <PopoverDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("button", { name: "Open Popover" }));
-    await expect(screen.getByText("Dimensions")).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'Open Popover' }));
+    await expect(screen.getByText('Dimensions')).toBeVisible();
   },
 };
 

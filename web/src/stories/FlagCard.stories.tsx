@@ -1,37 +1,59 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { fn } from "storybook/test";
-import { FlagCard } from "@/app/components/flags/FlagCard";
-import type { FlagView } from "@/app/hooks/flagTypes";
+import type { Meta, StoryObj } from '@storybook/react';
+import { fn, userEvent, within, expect } from 'storybook/test';
+import { FlagCard } from '@/app/components/flags/FlagCard';
+import type { FlagView } from '@/app/hooks/flagTypes';
 
 const MOCK_FLAG: FlagView = {
-  key: "new-checkout",
-  name: "New Checkout Flow",
-  description: "Enable the new checkout experience for selected users",
-  flagType: "boolean",
-  tags: [{ tagId: 1, tagName: "frontend", tagColor: "", value: "" }, { tagId: 2, tagName: "checkout", tagColor: "", value: "" }],
+  key: 'new-checkout',
+  name: 'New Checkout Flow',
+  description: 'Enable the new checkout experience for selected users',
+  flagType: 'boolean',
+  tags: [
+    { tagId: 1, tagName: 'frontend', tagColor: '', value: '' },
+    { tagId: 2, tagName: 'checkout', tagColor: '', value: '' },
+  ],
   flagId: 1,
   environments: {
-    1: { enabled: true, percentage: 50, segmentIds: [], strategyId: null, contextDefinitionId: null, contextValuesJson: null, lastUsedAt: null },
-    2: { enabled: false, percentage: 0, segmentIds: [], strategyId: null, contextDefinitionId: null, contextValuesJson: null, lastUsedAt: null },
+    1: {
+      enabled: true,
+      percentage: 50,
+      segmentIds: [],
+      strategyId: null,
+      contextDefinitionId: null,
+      contextValuesJson: null,
+      lastUsedAt: null,
+    },
+    2: {
+      enabled: false,
+      percentage: 0,
+      segmentIds: [],
+      strategyId: null,
+      contextDefinitionId: null,
+      contextValuesJson: null,
+      lastUsedAt: null,
+    },
   },
   archived: false,
-  createdAt: "2026-01-15T10:30:00Z",
-  createdBy: "Anna Lee",
+  createdAt: '2026-01-15T10:30:00Z',
+  createdBy: 'Anna Lee',
   archivedBy: null,
   archivedAt: null,
 };
 
 const MOCK_ENVIRONMENTS = [
-  { id: 1, name: "Production" },
-  { id: 2, name: "Staging" },
+  { id: 1, name: 'Production' },
+  { id: 2, name: 'Staging' },
 ];
 
-const MOCK_SPARKLINE = new Map<string, { trueCount: number; falseCount: number; timeBucket: string }[]>();
+const MOCK_SPARKLINE = new Map<
+  string,
+  { trueCount: number; falseCount: number; timeBucket: string }[]
+>();
 
 const meta: Meta<typeof FlagCard> = {
-  title: "App/FlagCard",
+  title: 'App/Flags/FlagCard',
   component: FlagCard,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
@@ -51,6 +73,13 @@ export const ActiveFlag: Story = {
     tags: [],
     sparklineData: MOCK_SPARKLINE,
   },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+    const toggleBtn = canvas.getByRole('button', { name: /new-checkout/i });
+    await expect(toggleBtn).toBeInTheDocument();
+    await userEvent.click(toggleBtn);
+    await expect(args.onToggleExpand).toHaveBeenCalledWith('new-checkout');
+  },
 };
 
 export const Expanded: Story = {
@@ -66,6 +95,11 @@ export const Expanded: Story = {
     segments: [],
     tags: [],
     sparklineData: MOCK_SPARKLINE,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const detail = canvas.getByRole('region');
+    await expect(detail).toBeInTheDocument();
   },
 };
 

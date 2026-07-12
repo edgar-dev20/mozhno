@@ -1,0 +1,1 @@
+import{i as e}from"./preload-helper-B45gAKPr.js";import{a as t,h as n,r}from"./calendar-Bwmd8YW5.js";var i,a=e((()=>{r(),i={en:n,ru:t}}));export{a as n,i as t};

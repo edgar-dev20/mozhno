@@ -22,10 +22,30 @@ function TokensPage() {
       palette: ['gray', 'brand', 'primary', 'success', 'warning', 'danger', 'info'],
     },
     headingSizes: {
-      display: { style: 'text-display', weight: 'font-display', leading: 'leading-display', label: 'Display Heading' },
-      h1: { style: 'text-h1', weight: 'font-heading', leading: 'leading-heading', label: 'Heading H1' },
-      h2: { style: 'text-h2', weight: 'font-heading', leading: 'leading-heading', label: 'Heading H2' },
-      h3: { style: 'text-h3', weight: 'font-heading', leading: 'leading-heading', label: 'Heading H3' },
+      display: {
+        style: 'text-display',
+        weight: 'font-display',
+        leading: 'leading-display',
+        label: 'Display Heading',
+      },
+      h1: {
+        style: 'text-h1',
+        weight: 'font-heading',
+        leading: 'leading-heading',
+        label: 'Heading H1',
+      },
+      h2: {
+        style: 'text-h2',
+        weight: 'font-heading',
+        leading: 'leading-heading',
+        label: 'Heading H2',
+      },
+      h3: {
+        style: 'text-h3',
+        weight: 'font-heading',
+        leading: 'leading-heading',
+        label: 'Heading H3',
+      },
     } as Record<string, { style: string; weight: string; leading: string; label: string }>,
     bodySizes: {
       body: { style: 'text-body', leading: 'leading-body', label: 'Body' },
@@ -50,7 +70,13 @@ function TokensPage() {
       },
     },
     motion: {
-      duration: { instant: '0ms', fast: '150ms', normal: '200ms', slow: '300ms', deliberate: '500ms' },
+      duration: {
+        instant: '0ms',
+        fast: '150ms',
+        normal: '200ms',
+        slow: '300ms',
+        deliberate: '500ms',
+      },
       easing: ['default', 'in', 'out', 'in-out', 'spring'],
     },
     iconSize: { sm: '0.75rem', md: '1rem', lg: '1.25rem' },
@@ -127,10 +153,18 @@ function TokensPage() {
       <section>
         <h2 className="text-h2 font-heading leading-heading mb-6">Font Weights</h2>
         <div className="flex gap-8 text-body">
-          <div><span className="text-caption text-muted-foreground block">display - 750</span></div>
-          <div><span className="text-caption text-muted-foreground block">heading - 700</span></div>
-          <div><span className="text-caption text-muted-foreground block">medium - 500</span></div>
-          <div><span className="text-caption text-muted-foreground block">normal - 400</span></div>
+          <div>
+            <span className="text-caption text-muted-foreground block">display - 750</span>
+          </div>
+          <div>
+            <span className="text-caption text-muted-foreground block">heading - 700</span>
+          </div>
+          <div>
+            <span className="text-caption text-muted-foreground block">medium - 500</span>
+          </div>
+          <div>
+            <span className="text-caption text-muted-foreground block">normal - 400</span>
+          </div>
         </div>
       </section>
 
@@ -169,8 +203,13 @@ function TokensPage() {
         <div className="space-y-1">
           {Object.entries(tokens.zIndex.layers).map(([name, value]) => (
             <div key={name} className="flex items-center gap-3">
-              <span className="text-caption tabular-nums-feature w-24 text-muted-foreground">{value}</span>
-              <div className="h-1 bg-primary rounded-full" style={{ width: `${(Number(value) / 90) * 100}%` }} />
+              <span className="text-caption tabular-nums-feature w-24 text-muted-foreground">
+                {value}
+              </span>
+              <div
+                className="h-1 bg-primary rounded-full"
+                style={{ width: `${(Number(value) / 90) * 100}%` }}
+              />
               <span className="text-body-sm">--z-{name}</span>
             </div>
           ))}
@@ -196,7 +235,9 @@ function TokensPage() {
         <div className="space-y-1">
           {tokens.motion.easing.map((e) => (
             <div key={e} className="flex items-center gap-2">
-              <span className="text-caption tabular-nums-feature w-24 text-muted-foreground">--ease-{e}</span>
+              <span className="text-caption tabular-nums-feature w-24 text-muted-foreground">
+                --ease-{e}
+              </span>
             </div>
           ))}
         </div>
@@ -207,10 +248,7 @@ function TokensPage() {
         <div className="flex gap-6 items-end">
           {Object.entries(tokens.iconSize).map(([name, value]) => (
             <div key={name} className="text-center">
-              <div
-                className="bg-primary rounded"
-                style={{ width: value, height: value }}
-              />
+              <div className="bg-primary rounded" style={{ width: value, height: value }} />
               <span className="text-caption text-muted-foreground mt-1 block">--icon-{name}</span>
               <span className="text-caption text-muted-foreground block">{value}</span>
             </div>

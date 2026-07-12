@@ -3,8 +3,9 @@ import { StatusIcon } from '@/shared/components/StatusIcon';
 import { Info as InfoIcon, Trash2, Check, AlertTriangle, Zap } from '@/shared/icons';
 
 const meta: Meta<typeof StatusIcon> = {
-  title: 'Components/StatusIcon',
+  title: 'Shared/StatusIcon',
   component: StatusIcon,
+  tags: ['autodocs'],
   parameters: { layout: 'centered' },
 };
 

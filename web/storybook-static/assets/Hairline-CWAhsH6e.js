@@ -1,0 +1,1 @@
+import{i as e}from"./preload-helper-B45gAKPr.js";import{t}from"./jsx-runtime-BBQGix-2.js";function n({className:e}){return(0,r.jsx)(`div`,{className:`border-t border-border/20 ${e??``}`})}var r,i=e((()=>{r=t(),n.__docgenInfo={description:``,methods:[],displayName:`Hairline`,props:{className:{required:!1,tsType:{name:`string`},description:``}}}}));export{i as n,n as t};

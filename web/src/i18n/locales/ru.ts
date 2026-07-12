@@ -410,6 +410,12 @@ const ru = {
       on: 'ON',
       off: 'OFF',
       showAll: 'Показать все ({{count}})',
+      gaugeDrift: 'Флага в дрифте',
+      gaugeRollout: 'Раскаток',
+      gaugeSynced: 'Синхронно',
+      attention: 'Требуют внимания',
+      chipDrift: 'Дрифт',
+      chipRollout: 'Раскатка',
     },
     activity: {
       title: 'Последняя активность',

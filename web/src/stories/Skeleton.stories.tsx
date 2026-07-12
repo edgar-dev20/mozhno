@@ -1,22 +1,22 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { within, expect } from "storybook/test";
-import { Skeleton } from "@/app/components/ui/skeleton";
+import type { Meta, StoryObj } from '@storybook/react';
+import { within, expect } from 'storybook/test';
+import { Skeleton } from '@/app/components/ui/skeleton';
 
 const meta: Meta<typeof Skeleton> = {
-  title: "UI/Skeleton",
+  title: 'UI/Skeleton',
   component: Skeleton,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
 type Story = StoryObj<typeof Skeleton>;
 
 export const TextLine: Story = {
-  args: { className: "h-4 w-64" },
+  args: { className: 'h-4 w-64' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const el = canvas.getByText("", { selector: ".animate-pulse" });
-    await expect(el).toHaveClass("animate-pulse");
+    const el = canvas.getByText('', { selector: '.animate-pulse' });
+    await expect(el).toHaveClass('animate-pulse');
   },
 };
 
@@ -46,7 +46,10 @@ export const List: Story = {
   render: () => (
     <div className="space-y-3 max-w-sm">
       {[1, 2, 3, 4, 5].map((i) => (
-        <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border">
+        <div
+          key={i}
+          className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border"
+        >
           <Skeleton className="size-8 rounded-full shrink-0" />
           <div className="flex-1 space-y-1.5">
             <Skeleton className="h-3 w-2/3" />

@@ -1,26 +1,42 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { userEvent, within, expect, screen } from "storybook/test";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
+import type { Meta, StoryObj } from '@storybook/react';
+import { userEvent, within, expect, screen } from 'storybook/test';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/app/components/ui/select';
 
 const meta: Meta<typeof Select> = {
-  title: "UI/Select",
+  title: 'UI/Select',
   component: Select,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
 type Story = StoryObj<typeof Select>;
 
-const OPTIONS = ["Option A", "Option B", "Option C", "Option D"];
+const OPTIONS = ['Option A', 'Option B', 'Option C', 'Option D'];
 
-function SelectDemo({ placeholder = "Select...", disabled = false }: { placeholder?: string; disabled?: boolean }) {
+function SelectDemo({
+  placeholder = 'Select...',
+  disabled = false,
+}: {
+  placeholder?: string;
+  disabled?: boolean;
+}) {
   return (
     <Select disabled={disabled}>
       <SelectTrigger className="w-[200px]">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
-        {OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+        {OPTIONS.map((o) => (
+          <SelectItem key={o} value={o}>
+            {o}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );
@@ -32,8 +48,16 @@ export const Disabled: Story = { render: () => <SelectDemo disabled /> };
 export const WithDefaultValue: Story = {
   render: () => (
     <Select defaultValue="Option B">
-      <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
-      <SelectContent>{OPTIONS.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+      <SelectTrigger className="w-[200px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {OPTIONS.map((o) => (
+          <SelectItem key={o} value={o}>
+            {o}
+          </SelectItem>
+        ))}
+      </SelectContent>
     </Select>
   ),
 };
@@ -42,7 +66,7 @@ export const OpenSelect: Story = {
   render: () => <SelectDemo placeholder="Open me" />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByRole("combobox"));
-    await expect(screen.getByText("Option A")).toBeVisible();
+    await userEvent.click(canvas.getByRole('combobox'));
+    await expect(screen.getByText('Option A')).toBeVisible();
   },
 };

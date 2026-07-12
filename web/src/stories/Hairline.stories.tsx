@@ -1,10 +1,10 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { Hairline } from "@/shared/components/Hairline";
+import type { Meta, StoryObj } from '@storybook/react';
+import { Hairline } from '@/shared/components/Hairline';
 
 const meta: Meta<typeof Hairline> = {
-  title: "Shared/Hairline",
+  title: 'Shared/Hairline',
   component: Hairline,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;

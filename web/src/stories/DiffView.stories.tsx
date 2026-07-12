@@ -3,8 +3,9 @@ import { DiffView } from '@/app/components/DiffView';
 import type { DiffChange } from '@/shared/diffUtils';
 
 const meta: Meta<typeof DiffView> = {
-  title: 'Components/DiffView',
+  title: 'App/DiffView',
   component: DiffView,
+  tags: ['autodocs'],
   parameters: { layout: 'padded' },
 };
 

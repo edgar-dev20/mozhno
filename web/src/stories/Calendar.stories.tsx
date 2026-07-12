@@ -1,21 +1,21 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { userEvent, within } from "storybook/test";
-import { Calendar } from "@/app/components/ui/calendar";
-import { useState } from "react";
+import type { Meta, StoryObj } from '@storybook/react';
+import { userEvent, within } from 'storybook/test';
+import { Calendar } from '@/app/components/ui/calendar';
+import { useState } from 'react';
 
 function CalendarDemo({ defaultValue }: { defaultValue?: Date }) {
   const [date, setDate] = useState<Date | undefined>(defaultValue);
   return <Calendar mode="single" selected={date} onSelect={setDate} />;
 }
 
-const meta: Meta = {
-  title: "UI/Calendar",
+const meta: Meta<typeof Calendar> = {
+  title: 'UI/Calendar',
   component: Calendar,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
-type Story = StoryObj;
+type Story = StoryObj<typeof Calendar>;
 
 export const Default: Story = { render: () => <CalendarDemo /> };
 
@@ -27,8 +27,10 @@ export const SelectDate: Story = {
   render: () => <CalendarDemo />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const dayCells = canvas.getAllByRole("gridcell");
-    const target = dayCells.find((b) => !b.hasAttribute("data-selected") && !b.hasAttribute("disabled"));
+    const dayCells = canvas.getAllByRole('gridcell');
+    const target = dayCells.find(
+      (b) => !b.hasAttribute('data-selected') && !b.hasAttribute('disabled'),
+    );
     if (target) {
       await userEvent.click(target);
     }

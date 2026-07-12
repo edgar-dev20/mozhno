@@ -1,23 +1,23 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { within, expect } from "storybook/test";
-import { Label } from "@/app/components/ui/label";
-import { Input } from "@/app/components/ui/input";
-import { Checkbox } from "@/app/components/ui/checkbox";
+import type { Meta, StoryObj } from '@storybook/react';
+import { within, expect } from 'storybook/test';
+import { Label } from '@/app/components/ui/label';
+import { Input } from '@/app/components/ui/input';
+import { Checkbox } from '@/app/components/ui/checkbox';
 
 const meta: Meta<typeof Label> = {
-  title: "UI/Label",
+  title: 'UI/Label',
   component: Label,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
 type Story = StoryObj<typeof Label>;
 
 export const Default: Story = {
-  args: { children: "Email address" },
+  args: { children: 'Email address' },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText("Email address")).toBeInTheDocument();
+    await expect(canvas.getByText('Email address')).toBeInTheDocument();
   },
 };
 

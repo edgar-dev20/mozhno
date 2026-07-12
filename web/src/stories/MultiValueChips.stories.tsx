@@ -1,11 +1,12 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { MultiValueChips } from "@/app/components/flags/MultiValueChips";
-import { useState } from "react";
+import type { Meta, StoryObj } from '@storybook/react';
+import { userEvent, within, expect } from 'storybook/test';
+import { MultiValueChips } from '@/app/components/flags/MultiValueChips';
+import { useState } from 'react';
 
 const meta: Meta<typeof MultiValueChips> = {
-  title: "App/Flags/MultiValueChips",
+  title: 'App/Flags/MultiValueChips',
   component: MultiValueChips,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
@@ -17,15 +18,32 @@ function EmptyRender() {
 }
 
 function WithValuesRender() {
-  const [v, s] = useState<string[]>(["US", "CA", "UK"]);
+  const [v, s] = useState<string[]>(['US', 'CA', 'UK']);
   return <MultiValueChips values={v} onChange={s} />;
 }
 
 function WithValidValuesRender() {
-  const [v, s] = useState<string[]>(["US"]);
-  return <MultiValueChips values={v} onChange={s} validValues={["US", "CA", "UK", "DE", "FR"]} />;
+  const [v, s] = useState<string[]>(['US']);
+  return <MultiValueChips values={v} onChange={s} validValues={['US', 'CA', 'UK', 'DE', 'FR']} />;
 }
 
-export const Empty: Story = { render: EmptyRender };
-export const WithValues: Story = { render: WithValuesRender };
+export const Empty: Story = {
+  render: EmptyRender,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByRole('textbox');
+    await expect(input).toBeInTheDocument();
+    await userEvent.type(input, 'FR');
+    await userEvent.keyboard('{Enter}');
+  },
+};
+export const WithValues: Story = {
+  render: WithValuesRender,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByText('US')).toBeInTheDocument();
+    await expect(canvas.getByText('CA')).toBeInTheDocument();
+    await expect(canvas.getByText('UK')).toBeInTheDocument();
+  },
+};
 export const WithValidValues: Story = { render: WithValidValuesRender };

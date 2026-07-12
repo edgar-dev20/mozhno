@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react";
-import { within, expect } from "storybook/test";
-import { FlagSparkline, SparklinePlaceholder } from "@/app/components/FlagSparkline";
+import type { Meta, StoryObj } from '@storybook/react';
+import { within, expect } from 'storybook/test';
+import { FlagSparkline, SparklinePlaceholder } from '@/app/components/FlagSparkline';
 
 interface SparklineBucket {
   trueCount: number;
@@ -20,9 +20,9 @@ const FLAT_DATA: SparklineBucket[] = Array.from({ length: 24 }, () => ({
 const EMPTY_DATA: SparklineBucket[] = [];
 
 const meta: Meta<typeof FlagSparkline> = {
-  title: "Charts/FlagSparkline",
+  title: 'App/Flags/FlagSparkline',
   component: FlagSparkline,
-  tags: ["autodocs"],
+  tags: ['autodocs'],
 };
 
 export default meta;
@@ -32,7 +32,7 @@ export const WithData: Story = {
   args: { data: SAMPLE_DATA },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByRole("img", { name: "Sparkline chart" })).toBeInTheDocument();
+    await expect(canvas.getByRole('img', { name: 'Sparkline chart' })).toBeInTheDocument();
   },
 };
 
@@ -48,7 +48,7 @@ export const Empty: Story = {
   args: { data: EMPTY_DATA },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText("—")).toBeInTheDocument();
+    await expect(canvas.getByText('—')).toBeInTheDocument();
   },
 };
 
@@ -56,11 +56,15 @@ export const Placeholder: Story = {
   render: () => (
     <div className="space-y-6 max-w-lg">
       <div className="p-4 rounded-xl bg-card border border-border">
-        <span className="text-xs text-muted-foreground/50 uppercase tracking-wider">Placeholder (loading)</span>
+        <span className="text-xs text-muted-foreground/50 uppercase tracking-wider">
+          Placeholder (loading)
+        </span>
         <SparklinePlaceholder height={56} />
       </div>
       <div className="p-4 rounded-xl bg-card border border-border">
-        <span className="text-xs text-muted-foreground/50 uppercase tracking-wider">Placeholder (tall)</span>
+        <span className="text-xs text-muted-foreground/50 uppercase tracking-wider">
+          Placeholder (tall)
+        </span>
         <SparklinePlaceholder height={120} />
       </div>
     </div>
