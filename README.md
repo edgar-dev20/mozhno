@@ -42,22 +42,17 @@ Storybook показывает все UI-компоненты в изолиро�
 
 ### Скриншоты
 
-<table>
-  <tr>
-    <td align="center" width="33%">
-      <img src="web/storybook-static/screenshots/flags.png" width="100%" alt="Панель управления флагами" /><br />
-      <sub><b>Панель управления флагами</b></sub>
-    </td>
-    <td align="center" width="33%">
-      <img src="web/storybook-static/screenshots/activation.png" width="100%" alt="Активация флага для окружения" /><br />
-      <sub><b>Активация флага</b></sub>
-    </td>
-    <td align="center" width="33%">
-      <img src="web/storybook-static/screenshots/overview.png" width="100%" alt="Обзорный дашборд" /><br />
-      <sub><b>Обзорный дашборд</b></sub>
-    </td>
-  </tr>
-</table>
+<p align="center"><b>Дашборд флагов</b></p>
+<p align="center"><img src="web/storybook-static/screenshots/flags.png" width="85%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Дашборд флагов" /></p>
+<p align="center">Все флаги на одном экране. Переключайте фичи в продакшене и разработке одной кнопкой — без деплоя, без ожидания, без риска для пользователей.</p>
+
+<p align="center"><b>Панель активации</b></p>
+<p align="center"><img src="web/storybook-static/screenshots/activation.png" width="50%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Панель активации" /></p>
+<p align="center">Настройте процент раскатки — 30% пользователей, VIP-сегмент, только РФ. Всё в одном окне: слайдер, выбор сегментов, условия. Никаких конфигов.</p>
+
+<p align="center"><b>Обзорный дашборд</b></p>
+<p align="center"><img src="web/storybook-static/screenshots/overview.png" width="85%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Обзорный дашборд" /></p>
+<p align="center">Главный экран после входа. Ключевые метрики проекта в одном месте: статус флагов по окружениям, дрифт между средами, лента активности и чеклист онбординга для новых проектов.</p>
 
 > Запустите проект локально (`make dev`) чтобы увидеть интерфейс.
 
@@ -169,7 +164,12 @@ const on = client.isEnabled('new-checkout', { userId: '42' });
 | `MOZHNO_MANAGEMENT_PORT` | `9090` | Порт для actuator-эндпоинтов (health, metrics, prometheus) |
 | `MOZHNO_SERVER_PORT` | `8080` | HTTP-порт |
 
+<details>
+<summary>Все переменные окружения</summary>
+
 Полный список переменных (rate-limit, webhooks, cache, SMTP и т.д.) — см. [`.env.example`](.env.example).
+
+</details>
 
 ---
 
@@ -195,7 +195,8 @@ make js-sdk-test   # тесты JS SDK
 make java-sdk-test # тесты Java SDK
 ```
 
-Либо вручную:
+<details>
+<summary>Запуск вручную</summary>
 
 ```bash
 docker compose up -d postgres
@@ -209,6 +210,8 @@ cd web && npm test             # Тесты веб-интерфейса
 cd sdks/js && npm test         # Тесты JS SDK
 cd server && ./gradlew :mozhno-client-java:check   # Тесты Java SDK
 ```
+
+</details>
 
 ---
 

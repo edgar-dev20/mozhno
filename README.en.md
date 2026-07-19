@@ -43,22 +43,17 @@ Storybook shows every UI component in an isolated catalog with documentation.
 
 ### Screenshots
 
-<table>
-  <tr>
-    <td align="center" width="33%">
-      <img src="web/storybook-static/screenshots/flags.png" width="100%" alt="Flag dashboard" /><br />
-      <sub><b>Flag dashboard</b></sub>
-    </td>
-    <td align="center" width="33%">
-      <img src="web/storybook-static/screenshots/activation.png" width="100%" alt="Flag activation per environment" /><br />
-      <sub><b>Flag activation</b></sub>
-    </td>
-    <td align="center" width="33%">
-      <img src="web/storybook-static/screenshots/overview.png" width="100%" alt="Overview dashboard" /><br />
-      <sub><b>Overview dashboard</b></sub>
-    </td>
-  </tr>
-</table>
+<p align="center"><b>Flag dashboard</b></p>
+<p align="center"><img src="web/storybook-static/screenshots/flags.png" width="85%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Flag dashboard" /></p>
+<p align="center">All flags on one screen. Toggle features in production and development with a single click — no deploy, no waiting, no risk to users.</p>
+
+<p align="center"><b>Activation panel</b></p>
+<p align="center"><img src="web/storybook-static/screenshots/activation.png" width="50%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Activation panel" /></p>
+<p align="center">Set your rollout percentage — 30% of users, VIP segment, Russia only. All in one window: slider, segment picker, conditions. Zero config files.</p>
+
+<p align="center"><b>Overview dashboard</b></p>
+<p align="center"><img src="web/storybook-static/screenshots/overview.png" width="85%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Overview dashboard" /></p>
+<p align="center">The first screen after login. Key project metrics in one place: flag status across environments, cross-environment drift, activity feed, and an onboarding checklist for new projects.</p>
 
 > Run the project locally (`make dev`) to see the interface.
 
@@ -170,7 +165,12 @@ const on = client.isEnabled('new-checkout', { userId: '42' });
 | `MOZHNO_MANAGEMENT_PORT` | `9090` | Actuator port (health, metrics, prometheus) |
 | `MOZHNO_SERVER_PORT` | `8080` | HTTP listen port |
 
+<details>
+<summary>All environment variables</summary>
+
 Full list of variables (rate limiting, webhooks, cache, SMTP, etc.) — see [`.env.example`](.env.example).
+
+</details>
 
 ---
 
@@ -196,7 +196,8 @@ make js-sdk-test   # JS SDK tests
 make java-sdk-test # Java SDK tests
 ```
 
-Or manually:
+<details>
+<summary>Manual setup</summary>
 
 ```bash
 docker compose up -d postgres
@@ -210,6 +211,8 @@ cd web && npm test             # Web UI tests
 cd sdks/js && npm test         # JS SDK tests
 cd server && ./gradlew :mozhno-client-java:check   # Java SDK tests
 ```
+
+</details>
 
 ---
 
