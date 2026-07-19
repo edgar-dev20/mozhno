@@ -42,16 +42,39 @@ Storybook показывает все UI-компоненты в изолиро�
 
 ### Скриншоты
 
+<p align="center">
+  <span style="display:inline-block;border-radius:10px;overflow:hidden;box-shadow:1px 1px 0 rgba(0,0,0,0.15),4px 8px 6px -2px rgba(0,0,0,0.12),12px 24px 14px -6px rgba(0,0,0,0.06);width:85%;background:#1c1c1e">
+  <span style="display:block;background:#2c2c2e;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left">
+    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ff5f57;vertical-align:middle"></span>
+    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fdbc40;margin-left:8px;vertical-align:middle"></span>
+    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#32c840;margin-left:8px;vertical-align:middle"></span>
+  </span>
+  <img src="web/storybook-static/screenshots/flags.png" width="100%" style="display:block" alt="Дашборд флагов" />
+  </span>
+</p>
 <p align="center"><b>Дашборд флагов</b></p>
-<p align="center"><img src="web/storybook-static/screenshots/flags.png" width="85%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Дашборд флагов" /></p>
 <p align="center">Все флаги на одном экране. Переключайте фичи в продакшене и разработке одной кнопкой — без деплоя, без ожидания, без риска для пользователей.</p>
 
+<p align="center">
+  <span style="display:inline-block;border-radius:10px;overflow:hidden;box-shadow:1px 1px 0 rgba(0,0,0,0.15),4px 8px 6px -2px rgba(0,0,0,0.12),12px 24px 14px -6px rgba(0,0,0,0.06);width:50%;background:#1c1c1e">
+    <span style="display:block;background:#2c2c2e;padding:6px 16px;border-bottom:1px solid rgba(255,255,255,0.04)"></span>
+  <img src="web/storybook-static/screenshots/activation.png" width="100%" style="display:block" alt="Панель активации" />
+  </span>
+</p>
 <p align="center"><b>Панель активации</b></p>
-<p align="center"><img src="web/storybook-static/screenshots/activation.png" width="50%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Панель активации" /></p>
 <p align="center">Настройте процент раскатки — 30% пользователей, VIP-сегмент, только РФ. Всё в одном окне: слайдер, выбор сегментов, условия. Никаких конфигов.</p>
 
+<p align="center">
+  <span style="display:inline-block;border-radius:10px;overflow:hidden;box-shadow:1px 1px 0 rgba(0,0,0,0.15),4px 8px 6px -2px rgba(0,0,0,0.12),12px 24px 14px -6px rgba(0,0,0,0.06);width:85%;background:#1c1c1e">
+  <span style="display:block;background:#2c2c2e;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left">
+    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ff5f57;vertical-align:middle"></span>
+    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fdbc40;margin-left:8px;vertical-align:middle"></span>
+    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#32c840;margin-left:8px;vertical-align:middle"></span>
+  </span>
+  <img src="web/storybook-static/screenshots/overview.png" width="100%" style="display:block" alt="Обзорный дашборд" />
+  </span>
+</p>
 <p align="center"><b>Обзорный дашборд</b></p>
-<p align="center"><img src="web/storybook-static/screenshots/overview.png" width="85%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Обзорный дашборд" /></p>
 <p align="center">Главный экран после входа. Ключевые метрики проекта в одном месте: статус флагов по окружениям, дрифт между средами, лента активности и чеклист онбординга для новых проектов.</p>
 
 > Запустите проект локально (`make dev`) чтобы увидеть интерфейс.

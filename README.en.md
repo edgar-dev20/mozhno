@@ -43,16 +43,39 @@ Storybook shows every UI component in an isolated catalog with documentation.
 
 ### Screenshots
 
+<p align="center">
+  <span style="display:inline-block;border-radius:10px;overflow:hidden;box-shadow:1px 1px 0 rgba(0,0,0,0.15),4px 8px 6px -2px rgba(0,0,0,0.12),12px 24px 14px -6px rgba(0,0,0,0.06);width:85%;background:#1c1c1e">
+    <span style="display:block;background:#2c2c2e;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left">
+      <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ff5f57;vertical-align:middle"></span>
+      <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fdbc40;margin-left:8px;vertical-align:middle"></span>
+      <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#32c840;margin-left:8px;vertical-align:middle"></span>
+    </span>
+    <img src="web/storybook-static/screenshots/flags.png" width="100%" style="display:block" alt="Flag dashboard" />
+  </span>
+</p>
 <p align="center"><b>Flag dashboard</b></p>
-<p align="center"><img src="web/storybook-static/screenshots/flags.png" width="85%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Flag dashboard" /></p>
 <p align="center">All flags on one screen. Toggle features in production and development with a single click — no deploy, no waiting, no risk to users.</p>
 
+<p align="center">
+  <span style="display:inline-block;border-radius:10px;overflow:hidden;box-shadow:1px 1px 0 rgba(0,0,0,0.15),4px 8px 6px -2px rgba(0,0,0,0.12),12px 24px 14px -6px rgba(0,0,0,0.06);width:50%;background:#1c1c1e">
+    <span style="display:block;background:#2c2c2e;padding:6px 16px;border-bottom:1px solid rgba(255,255,255,0.04)"></span>
+  <img src="web/storybook-static/screenshots/activation.png" width="100%" style="display:block" alt="Activation panel" />
+  </span>
+</p>
 <p align="center"><b>Activation panel</b></p>
-<p align="center"><img src="web/storybook-static/screenshots/activation.png" width="50%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Activation panel" /></p>
 <p align="center">Set your rollout percentage — 30% of users, VIP segment, Russia only. All in one window: slider, segment picker, conditions. Zero config files.</p>
 
+<p align="center">
+  <span style="display:inline-block;border-radius:10px;overflow:hidden;box-shadow:1px 1px 0 rgba(0,0,0,0.15),4px 8px 6px -2px rgba(0,0,0,0.12),12px 24px 14px -6px rgba(0,0,0,0.06);width:85%;background:#1c1c1e">
+    <span style="display:block;background:#2c2c2e;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left">
+      <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ff5f57;vertical-align:middle"></span>
+      <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fdbc40;margin-left:8px;vertical-align:middle"></span>
+      <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#32c840;margin-left:8px;vertical-align:middle"></span>
+    </span>
+    <img src="web/storybook-static/screenshots/overview.png" width="100%" style="display:block" alt="Overview dashboard" />
+  </span>
+</p>
 <p align="center"><b>Overview dashboard</b></p>
-<p align="center"><img src="web/storybook-static/screenshots/overview.png" width="85%" style="border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1)" alt="Overview dashboard" /></p>
 <p align="center">The first screen after login. Key project metrics in one place: flag status across environments, cross-environment drift, activity feed, and an onboarding checklist for new projects.</p>
 
 > Run the project locally (`make dev`) to see the interface.
