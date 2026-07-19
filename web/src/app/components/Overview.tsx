@@ -248,7 +248,7 @@ function OverviewKpis({ t, totals }: { t: TFn; totals: OverviewResponse['totals'
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       {items.map((it) => {
         const isClickable = !!it.nav && it.value > 0;
         return (
@@ -267,13 +267,11 @@ function OverviewKpis({ t, totals }: { t: TFn; totals: OverviewResponse['totals'
                   {it.value}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 shrink-0 min-w-0">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="text-caption text-muted-foreground">{it.label}</span>
-                  <InfoTip text={it.tip} size={11} />
-                </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-caption text-muted-foreground">{it.label}</span>
+                <InfoTip text={it.tip} size={11} />
                 {it.sub && (
-                  <span className="text-caption text-muted-foreground/60 shrink-0">· {it.sub}</span>
+                  <span className="text-caption text-muted-foreground/60">· {it.sub}</span>
                 )}
               </div>
             </div>
@@ -613,50 +611,67 @@ function DriftFlagRow({
           handleNavigate();
         }
       }}
-      className="table table-fixed w-full rounded-xl bg-card shadow-md overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-px transition-all duration-[--duration-fast] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="rounded-xl bg-card shadow-md overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-px transition-all duration-[--duration-fast] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       style={{ borderLeft: `3px solid ${isDrift ? 'var(--warning)' : 'var(--brand)'}` }}
     >
-      <div className="table-row-group">
-        <div className="table-row">
-          {/* Flag identity */}
-          <div className="table-cell align-middle py-2 pl-4" style={{ width: 155 }}>
-            <div className="text-body-sm font-semibold leading-tight truncate">{row.name}</div>
-            <div className="text-caption text-muted-foreground/55 font-mono mt-px truncate">{row.flagKey}</div>
-          </div>
-
-          {/* Environment blocks */}
-          {row.cells.map((cell) => {
-            const env = envRefs.find((e) => e.id === cell.environmentId);
-            const stateText =
-              cell.state === 'rollout' ? `${cell.percentage}%` : cell.state === 'on' ? t('overview.drift.on') : t('overview.drift.off');
-            const stateColor =
-              cell.state === 'on' ? 'text-success' : cell.state === 'off' ? 'text-muted-foreground/50' : 'text-brand';
-            return (
-              <div key={cell.environmentId} className="table-cell align-middle text-center py-2">
-                <div className="inline-flex items-center gap-2 min-w-0">
-                  <span
-                    className="size-2 rounded-full shrink-0"
-                    style={{ backgroundColor: dotColor(cell.state), opacity: cell.state === 'off' ? 0.35 : 1 }}
-                  />
-                  <span className="text-caption font-medium text-muted-foreground truncate">{env?.name ?? '?'}</span>
-                  <span className={`text-caption font-semibold shrink-0 ${stateColor}`}>{stateText}</span>
+      {/* Desktop: table layout */}
+      <div className="hidden sm:block">
+        <div className="table table-fixed w-full">
+          <div className="table-row">
+            <div className="table-cell align-middle py-2 pl-4" style={{ width: 155 }}>
+              <div className="text-body-sm font-semibold leading-tight truncate">{row.name}</div>
+              <div className="text-caption text-muted-foreground/55 font-mono mt-px truncate">{row.flagKey}</div>
+            </div>
+            {row.cells.map((cell) => {
+              const env = envRefs.find((e) => e.id === cell.environmentId);
+              const stateText =
+                cell.state === 'rollout' ? `${cell.percentage}%` : cell.state === 'on' ? t('overview.drift.on') : t('overview.drift.off');
+              const stateColor =
+                cell.state === 'on' ? 'text-success' : cell.state === 'off' ? 'text-muted-foreground/50' : 'text-brand';
+              return (
+                <div key={cell.environmentId} className="table-cell align-middle text-center py-2">
+                  <div className="inline-flex items-center gap-2 min-w-0">
+                    <span
+                      className="size-2 rounded-full shrink-0"
+                      style={{ backgroundColor: dotColor(cell.state), opacity: cell.state === 'off' ? 0.35 : 1 }}
+                    />
+                    <span className="text-caption font-medium text-muted-foreground truncate">{env?.name ?? '?'}</span>
+                    <span className={`text-caption font-semibold shrink-0 ${stateColor}`}>{stateText}</span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-
-          {/* Status chip */}
-          <div className="table-cell align-middle py-2 pr-4">
-            <span
-              className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-caption font-bold ${
-                isDrift
-                  ? 'text-warning bg-warning/10 border border-warning/20'
-                  : 'text-brand bg-brand/10 border border-brand/20'
-              }`}
-            >
-              {isDrift ? t('overview.drift.chipDrift') : t('overview.drift.chipRollout')}
-            </span>
+              );
+            })}
+            <div className="table-cell align-middle py-2 pr-4">
+              <span
+                className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-caption font-bold ${
+                  isDrift
+                    ? 'text-warning bg-warning/10 border border-warning/20'
+                    : 'text-brand bg-brand/10 border border-brand/20'
+                }`}
+              >
+                {isDrift ? t('overview.drift.chipDrift') : t('overview.drift.chipRollout')}
+              </span>
+            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Mobile: compact */}
+      <div className="flex items-center justify-between gap-3 py-2.5 pl-4 pr-3 sm:hidden">
+        <div className="min-w-0 flex-1">
+          <div className="text-body-sm font-semibold leading-tight truncate">{row.name}</div>
+          <div className="text-caption text-muted-foreground/55 font-mono mt-px truncate">{row.flagKey}</div>
+        </div>
+        <div className="shrink-0">
+          <span
+            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-caption font-bold ${
+              isDrift
+                ? 'text-warning bg-warning/10 border border-warning/20'
+                : 'text-brand bg-brand/10 border border-brand/20'
+            }`}
+          >
+            {isDrift ? t('overview.drift.chipDrift') : t('overview.drift.chipRollout')}
+          </span>
         </div>
       </div>
     </div>
