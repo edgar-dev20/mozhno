@@ -613,7 +613,7 @@ function DriftFlagRow({
           handleNavigate();
         }
       }}
-      className="table table-fixed w-full rounded-xl bg-card overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-px transition-all duration-[--duration-fast] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      className="table table-fixed w-full rounded-xl bg-card shadow-md overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-px transition-all duration-[--duration-fast] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       style={{ borderLeft: `3px solid ${isDrift ? 'var(--warning)' : 'var(--brand)'}` }}
     >
       <div className="table-row-group">
@@ -654,7 +654,6 @@ function DriftFlagRow({
                   : 'text-brand bg-brand/10 border border-brand/20'
               }`}
             >
-              <span className={`size-1 rounded-full ${isDrift ? 'bg-warning' : 'bg-brand'}`} />
               {isDrift ? t('overview.drift.chipDrift') : t('overview.drift.chipRollout')}
             </span>
           </div>
