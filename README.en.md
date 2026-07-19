@@ -15,7 +15,7 @@
 
 ---
 
-**Mozhno** is a feature flag server for teams of any size. Toggle features in production without deployment, roll out gradually, segment your audience — all from a single dashboard.
+**можно.** — a feature flag server for teams of any size. Toggle features in production without deployment, roll out gradually, segment your audience — all from a single dashboard.
 
 ---
 
@@ -23,13 +23,13 @@
 
 | Category | Description |
 |----------|-------------|
-| **Flags** | RELEASE & KILLSWITCH, percentage rollouts, attribute-based rules |
+| **Flags** | RELEASE and KILLSWITCH, percentage rollouts, attribute-based rules |
 | **Contexts** | Evaluate flags against arbitrary user or request attributes |
 | **Segments** | Reusable user groups with shared targeting rules |
-| **Strategies** | Per-environment configuration: constraints, segments, percentage rollout |
+| **Strategies** | Per-environment config: rules, segments, percentage rollout |
 | **API Keys** | Per-environment keys with granular permissions |
-| **Audit Log** | Full change history for every flag and configuration |
-| **SDKs** | Native Java & JavaScript clients — evaluate flags locally, zero network calls |
+| **Audit** | Full change history for every flag and configuration |
+| **SDKs** | Native clients for Java and JavaScript — evaluate flags locally, zero network calls |
 
 ---
 
@@ -43,9 +43,9 @@ Storybook shows every UI component in an isolated catalog with documentation.
 
 ### Screenshots
 
-| Flags | Flag detail | Settings |
-|---|---|---|
-| ![Flags](web/storybook-static/screenshots/flags.svg) | ![Flag](web/storybook-static/screenshots/flag-detail.svg) | ![Settings](web/storybook-static/screenshots/settings.svg) |
+| Flag dashboard                                      | Flag activation per environment                        | Overview dashboard                                         |
+|-----------------------------------------------------|--------------------------------------------------------|------------------------------------------------------------|
+| ![Flags](web/storybook-static/screenshots/flags.png) | ![Flag](web/storybook-static/screenshots/activation.png) | ![Settings](web/storybook-static/screenshots/overview.png) |
 
 > Run the project locally (`make dev`) to see the interface.
 
@@ -82,13 +82,13 @@ volumes:
 ```
 
 ```bash
-# Generate a JWT secret (Base64, >=32 bytes) — the server won't start without it
+# Generate a JWT secret (Base64, ≥32 bytes) — the server won't start without it
 export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)
 
 docker compose up -d
 ```
 
-Open [`http://localhost:8080`](http://localhost:8080) — the web dashboard is served from the same application.
+Open [`http://localhost:8080`](http://localhost:8080) — the web dashboard is already built into the server.
 
 > Full compose with healthchecks and pgAdmin — [`docker-compose.yml`](docker-compose.yml).
 
@@ -103,9 +103,9 @@ Open [`http://localhost:8080`](http://localhost:8080) — the web dashboard is s
 | `mozhno-web-api` | REST controllers, Spring Security 6, JWT, OpenAPI |
 | `mozhno-app` | Entry point, static resources, DB migrations (Flyway) |
 
-Server — Spring Boot 4.0 / JDK 25. Web UI — React 19 SPA (Vite, Tailwind CSS 4, Radix UI). Java SDK compiles against JDK 17+ for broad compatibility. SDKs fetch flag rules once and evaluate locally.
+Server — Spring Boot 4.0 / JDK 25. Web UI — React 19 SPA (Vite, Tailwind CSS 4, Radix UI). SDKs fetch flag rules once and evaluate locally.
 
-**Access model:** the active project is carried in the JWT (`project_id` claim), selected at login or via `/auth/select-project`. All resources (flags, segments, contexts, API keys, audit, …) are scoped to that project; mutation rights depend on the role (ADMIN/DEVELOPER/VIEWER).
+**Access model:** the active project is carried in the JWT (`project_id` claim), selected at login or via `/auth/select-project`. All resources (flags, segments, contexts, API keys, audit, etc.) are scoped to that project; mutation rights depend on the role (ADMIN/DEVELOPER/VIEWER).
 
 ---
 
@@ -151,9 +151,9 @@ const on = client.isEnabled('new-checkout', { userId: '42' });
 | `MOZHNO_DB_USERNAME` | `flags_user` | Database user |
 | `MOZHNO_DB_PASSWORD` | `flags_password` | Database password |
 | `MOZHNO_JWT_SECRET` | *(must change)* | Base64 signing key, ≥32 bytes. Generate: `openssl rand -base64 32` |
-| `MOZHNO_BASE_URL` | `http://localhost:8080` | Public base URL |
+| `MOZHNO_BASE_URL` | `http://localhost:8080` | Public server URL |
 | `MOZHNO_CLIENT_MAX_METRICS_BATCH_SIZE` | `1000` | Max metrics batch size accepted from SDKs |
-| `MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Retention for client instance data |
+| `MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Client instance data retention |
 | `MOZHNO_MANAGEMENT_PORT` | `9090` | Actuator port (health, metrics, prometheus) |
 | `MOZHNO_SERVER_PORT` | `8080` | HTTP listen port |
 

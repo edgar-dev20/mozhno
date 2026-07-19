@@ -42,9 +42,9 @@ Storybook показывает все UI-компоненты в изолиро�
 
 ### Скриншоты
 
-| Flags | Flag detail | Settings |
-|---|---|---|
-| ![Flags](web/storybook-static/screenshots/flags.svg) | ![Flag](web/storybook-static/screenshots/flag-detail.svg) | ![Settings](web/storybook-static/screenshots/settings.svg) |
+| Панель управления флагами                            | Активация флага для окружения                            | Обзорный дашборд                                           |
+|------------------------------------------------------|----------------------------------------------------------|------------------------------------------------------------|
+| ![Flags](web/storybook-static/screenshots/flags.png) | ![Flag](web/storybook-static/screenshots/activation.png) | ![Settings](web/storybook-static/screenshots/overview.png) |
 
 > Запустите проект локально (`make dev`) чтобы увидеть интерфейс.
 
