@@ -42,9 +42,22 @@ Storybook показывает все UI-компоненты в изолиро�
 
 ### Скриншоты
 
-| Панель управления флагами                            | Активация флага для окружения                            | Обзорный дашборд                                           |
-|------------------------------------------------------|----------------------------------------------------------|------------------------------------------------------------|
-| ![Flags](web/storybook-static/screenshots/flags.png) | ![Flag](web/storybook-static/screenshots/activation.png) | ![Settings](web/storybook-static/screenshots/overview.png) |
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="web/storybook-static/screenshots/flags.png" width="100%" alt="Панель управления флагами" /><br />
+      <sub><b>Панель управления флагами</b></sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="web/storybook-static/screenshots/activation.png" width="100%" alt="Активация флага для окружения" /><br />
+      <sub><b>Активация флага</b></sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="web/storybook-static/screenshots/overview.png" width="100%" alt="Обзорный дашборд" /><br />
+      <sub><b>Обзорный дашборд</b></sub>
+    </td>
+  </tr>
+</table>
 
 > Запустите проект локально (`make dev`) чтобы увидеть интерфейс.
 

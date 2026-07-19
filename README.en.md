@@ -43,9 +43,22 @@ Storybook shows every UI component in an isolated catalog with documentation.
 
 ### Screenshots
 
-| Flag dashboard                                      | Flag activation per environment                        | Overview dashboard                                         |
-|-----------------------------------------------------|--------------------------------------------------------|------------------------------------------------------------|
-| ![Flags](web/storybook-static/screenshots/flags.png) | ![Flag](web/storybook-static/screenshots/activation.png) | ![Settings](web/storybook-static/screenshots/overview.png) |
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <img src="web/storybook-static/screenshots/flags.png" width="100%" alt="Flag dashboard" /><br />
+      <sub><b>Flag dashboard</b></sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="web/storybook-static/screenshots/activation.png" width="100%" alt="Flag activation per environment" /><br />
+      <sub><b>Flag activation</b></sub>
+    </td>
+    <td align="center" width="33%">
+      <img src="web/storybook-static/screenshots/overview.png" width="100%" alt="Overview dashboard" /><br />
+      <sub><b>Overview dashboard</b></sub>
+    </td>
+  </tr>
+</table>
 
 > Run the project locally (`make dev`) to see the interface.
 
