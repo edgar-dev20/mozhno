@@ -42,38 +42,38 @@ Storybook показывает все UI-компоненты в изолиро�
 
 ### Скриншоты
 
-<p align="center">
-  <span style="display:inline-block;border-radius:10px;overflow:hidden;box-shadow:1px 1px 0 rgba(0,0,0,0.15),4px 8px 6px -2px rgba(0,0,0,0.12),12px 24px 14px -6px rgba(0,0,0,0.06);width:85%;background:#1c1c1e">
-  <span style="display:block;background:#2c2c2e;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left">
-    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ff5f57;vertical-align:middle"></span>
-    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fdbc40;margin-left:8px;vertical-align:middle"></span>
-    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#32c840;margin-left:8px;vertical-align:middle"></span>
-  </span>
-  <img src="web/storybook-static/screenshots/flags.png" width="100%" style="display:block" alt="Дашборд флагов" />
-  </span>
-</p>
+<table align="center" width="85%" cellpadding="0" cellspacing="0" style="border-radius:10px;overflow:hidden"><tr>
+<td bgcolor="#2c2c2e" style="padding:8px 16px;border-radius:10px 10px 0 0">
+  <font color="#ff5f57" size="4">●</font>
+  <font color="#fdbc40" size="4">●</font>
+  <font color="#32c840" size="4">●</font>
+</td></tr><tr>
+<td><img src="web/storybook-static/screenshots/flags.png" width="100%" alt="Дашборд флагов" /></td>
+</tr></table>
+
 <p align="center"><b>Дашборд флагов</b></p>
 <p align="center">Все флаги на одном экране. Переключайте фичи в продакшене и разработке одной кнопкой — без деплоя, без ожидания, без риска для пользователей.</p>
+<br />
 
-<p align="center">
-  <span style="display:inline-block;border-radius:10px;overflow:hidden;box-shadow:1px 1px 0 rgba(0,0,0,0.15),4px 8px 6px -2px rgba(0,0,0,0.12),12px 24px 14px -6px rgba(0,0,0,0.06);width:50%;background:#1c1c1e">
-    <span style="display:block;background:#2c2c2e;padding:6px 16px;border-bottom:1px solid rgba(255,255,255,0.04)"></span>
-  <img src="web/storybook-static/screenshots/activation.png" width="100%" style="display:block" alt="Панель активации" />
-  </span>
-</p>
+<table align="center" width="50%" cellpadding="0" cellspacing="0" style="border-radius:10px;overflow:hidden"><tr>
+<td bgcolor="#2c2c2e" height="22" style="padding:4px 16px;border-radius:10px 10px 0 0">&nbsp;</td>
+</tr><tr>
+<td><img src="web/storybook-static/screenshots/activation.png" width="100%" alt="Панель активации" /></td>
+</tr></table>
+
 <p align="center"><b>Панель активации</b></p>
 <p align="center">Настройте процент раскатки — 30% пользователей, VIP-сегмент, только РФ. Всё в одном окне: слайдер, выбор сегментов, условия. Никаких конфигов.</p>
+<br />
 
-<p align="center">
-  <span style="display:inline-block;border-radius:10px;overflow:hidden;box-shadow:1px 1px 0 rgba(0,0,0,0.15),4px 8px 6px -2px rgba(0,0,0,0.12),12px 24px 14px -6px rgba(0,0,0,0.06);width:85%;background:#1c1c1e">
-  <span style="display:block;background:#2c2c2e;padding:8px 16px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left">
-    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#ff5f57;vertical-align:middle"></span>
-    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#fdbc40;margin-left:8px;vertical-align:middle"></span>
-    <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#32c840;margin-left:8px;vertical-align:middle"></span>
-  </span>
-  <img src="web/storybook-static/screenshots/overview.png" width="100%" style="display:block" alt="Обзорный дашборд" />
-  </span>
-</p>
+<table align="center" width="85%" cellpadding="0" cellspacing="0" style="border-radius:10px;overflow:hidden"><tr>
+<td bgcolor="#2c2c2e" style="padding:8px 16px;border-radius:10px 10px 0 0">
+  <font color="#ff5f57" size="4">●</font>
+  <font color="#fdbc40" size="4">●</font>
+  <font color="#32c840" size="4">●</font>
+</td></tr><tr>
+<td><img src="web/storybook-static/screenshots/overview.png" width="100%" alt="Обзорный дашборд" /></td>
+</tr></table>
+
 <p align="center"><b>Обзорный дашборд</b></p>
 <p align="center">Главный экран после входа. Ключевые метрики проекта в одном месте: статус флагов по окружениям, дрифт между средами, лента активности и чеклист онбординга для новых проектов.</p>
 
