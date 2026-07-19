@@ -388,6 +388,7 @@ const en = {
       sdkSilent: 'This environment has connected apps, but none reported in over an hour.',
       driftDrift: 'The flag is configured differently across environments.',
       driftRollout: 'The flag is mid-rollout in at least one environment.',
+      driftSynced: 'The flag has the same state in every environment.',
     },
     environments: {
       title: 'Environments',

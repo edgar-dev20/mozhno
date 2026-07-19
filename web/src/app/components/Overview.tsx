@@ -470,6 +470,7 @@ function DriftDashboard({
         <GaugeCard
           value={driftCount}
           label={t('overview.drift.gaugeDrift')}
+          hint={t('overview.hints.driftDrift')}
           color="var(--warning)"
           arcDash={arcLen}
           arcOffset={arc(driftCount / totalActive)}
@@ -477,6 +478,7 @@ function DriftDashboard({
         <GaugeCard
           value={rolloutCount}
           label={t('overview.drift.gaugeRollout')}
+          hint={t('overview.hints.driftRollout')}
           color="var(--brand)"
           arcDash={arcLen}
           arcOffset={arc(rolloutCount / totalActive)}
@@ -484,6 +486,7 @@ function DriftDashboard({
         <GaugeCard
           value={syncedCount}
           label={t('overview.drift.gaugeSynced')}
+          hint={t('overview.hints.driftSynced')}
           color="var(--success)"
           arcDash={arcLen}
           arcOffset={arc(syncedCount / totalActive)}
@@ -524,12 +527,14 @@ function DriftDashboard({
 function GaugeCard({
   value,
   label,
+  hint,
   color,
   arcDash,
   arcOffset,
 }: {
   value: number;
   label: string;
+  hint: string;
   color: string;
   arcDash: number;
   arcOffset: number;
@@ -567,7 +572,10 @@ function GaugeCard({
           />
         </svg>
       </div>
-      <p className="mt-0 text-caption font-medium text-muted-foreground">{label}</p>
+      <div className="flex items-center gap-1 mt-0">
+        <span className="text-caption text-muted-foreground">{label}</span>
+        <InfoTip text={hint} size={10} />
+      </div>
     </div>
   );
 }
