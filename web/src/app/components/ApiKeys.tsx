@@ -525,7 +525,7 @@ export function ApiKeys() {
           <h4 className="text-brand dark:text-foreground font-medium mb-1">
             {t('apiKeys.securityTitle')}
           </h4>
-          <p className="text-body-sm text-brand dark:text-muted-foreground max-w-3xl">
+          <p className="text-body-sm text-brand dark:text-muted-foreground leading-relaxed">
             {t('apiKeys.securityDesc')}
           </p>
         </div>
