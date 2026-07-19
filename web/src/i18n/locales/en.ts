@@ -391,7 +391,7 @@ const en = {
     },
     environments: {
       title: 'Environments',
-      subtitle: 'each environment on its own — no default "main" one',
+      subtitle: 'Where your flags live',
       evaluations: 'Evaluations · 48h',
       rollouts: 'Rollouts',
       stale: 'Stale',
@@ -402,7 +402,7 @@ const en = {
     },
     drift: {
       title: 'Cross-environment drift',
-      subtitle: 'a flag differs across environments',
+      subtitle: 'Flags that have diverged',
       empty: 'All flags are in sync across environments',
       flag: 'Flag',
       status: 'Status',

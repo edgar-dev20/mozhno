@@ -12,6 +12,9 @@ export default meta;
 type Story = StoryObj<typeof Card>;
 
 export const Default: Story = { args: { variant: 'default' } };
+export const Clickable: Story = {
+  args: { variant: 'default', onClick: () => {}, children: <div className="p-6">Hover over me — I have depth</div> },
+};
 export const Elevated: Story = { args: { variant: 'elevated' } };
 export const Panel: Story = { args: { variant: 'panel' } };
 export const Padded: Story = { args: { padded: true } };

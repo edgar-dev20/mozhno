@@ -502,6 +502,27 @@ const t = useT();
 // t('navigation.flags'), t('flags.create.title'), etc.
 ```
 
+**Russian grammatical cases (падежи):**
+
+Russian resource nouns change form depending on grammatical context. Mozhno provides a utility
+for this via `@/shared/russianCases`:
+
+- **`getCase(key, form)`** — returns the noun for a given resource key and case:
+  - `nom` — именительный: `getCase('flag', 'nom')` → `'флаг'` (labels, filter chips)
+  - `gen` — родительный: `getCase('flag', 'gen')` → `'флага'` (possession, count)
+  - `pre` — предложный: `getCase('flag', 'pre')` → `'флаге'` (location)
+
+- **`russianPlural(n, one, few, many)`** — selects the correct plural form for a number:
+  ```ts
+  russianPlural(1, 'флаг', 'флага', 'флагов')  // → 'флаг'
+  russianPlural(3, 'флаг', 'флага', 'флагов')  // → 'флага'
+  russianPlural(7, 'флаг', 'флага', 'флагов')  // → 'флагов'
+  ```
+
+**Rule:** when adding a new resource type to the audit system, register its three case forms
+in `web/src/shared/russianCases.ts`. The i18n keys (`audit.resource.*`) store only nominative
+— use `getCase()` for sentences.
+
 ---
 
 # Testing

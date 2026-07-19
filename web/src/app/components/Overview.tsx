@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { motion, useReducedMotion } from 'motion/react';
-import { useT, type MessageKey } from '@/i18n';
+import { useT, useLocale, type MessageKey } from '@/i18n';
 import { useAuth } from '@/app/auth/useAuth';
 import {
   useProjectQuery,
@@ -11,8 +11,6 @@ import {
 } from '@/app/hooks/queries';
 import {
   Card,
-  CardHeader,
-  Badge,
   GradientButton,
   ErrorBox,
   InfoTip,
@@ -20,6 +18,10 @@ import {
   timeAgo,
   formatCompactCount,
   Fab,
+  getCase,
+  getGender,
+  getActionParticiple,
+  russianPlural,
 } from '@/shared';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
@@ -88,6 +90,7 @@ export function Overview() {
     return (id: number) => map.get(id) ?? getEnvColor(id);
   }, [environments]);
   const driftRows = useMemo(() => computeDrift(flags, envRefs), [flags, envRefs]);
+  const totalActive = useMemo(() => flags.filter((f) => !f.archived).length, [flags]);
 
   if (isLoading || !overview) {
     return <OverviewSkeleton />;
@@ -117,13 +120,15 @@ export function Overview() {
       </Section>
 
       <Section index={1} className="space-y-4">
-        <SubHeading title={t('overview.environments.title')} hint={t('overview.environments.subtitle')} />
+        <h2 className="text-h3 font-heading font-semibold tracking-tight">{t('overview.environments.title')}</h2>
+        <p className="text-caption text-muted-foreground/80 -mt-2">{t('overview.environments.subtitle')}</p>
         <EnvironmentsGrid t={t} environments={overview.environments} colorFor={envColorFor} />
       </Section>
 
       <Section index={2} className="space-y-4">
-        <SubHeading title={t('overview.drift.title')} hint={t('overview.drift.subtitle')} />
-        <DriftTable t={t} rows={driftRows} envRefs={envRefs} />
+        <h2 className="text-h3 font-heading font-semibold tracking-tight">{t('overview.drift.title')}</h2>
+        <p className="text-caption text-muted-foreground/80 -mt-2">{t('overview.drift.subtitle')}</p>
+        <DriftDashboard t={t} rows={driftRows} envRefs={envRefs} totalActive={totalActive} />
       </Section>
 
       <Section index={3}>
@@ -183,15 +188,6 @@ function HeaderActions({ t, canWrite, isAdmin }: { t: TFn; canWrite: boolean; is
   );
 }
 
-function SubHeading({ title, hint }: { title: string; hint: string }) {
-  return (
-    <div className="flex items-baseline gap-2.5">
-      <h2 className="text-h3 font-heading font-semibold tracking-tight">{title}</h2>
-      <span className="text-caption text-muted-foreground/80">{hint}</span>
-    </div>
-  );
-}
-
 type KpiTone = 'neutral' | 'warning' | 'destructive' | 'brand';
 
 function toneClass(tone: KpiTone, value: number): string {
@@ -202,13 +198,43 @@ function toneClass(tone: KpiTone, value: number): string {
 }
 
 function OverviewKpis({ t, totals }: { t: TFn; totals: OverviewResponse['totals'] }) {
+  const navigate = useNavigate();
+
+  const dotFor = (tone: KpiTone): string => {
+    if (tone === 'warning') return 'bg-warning';
+    if (tone === 'destructive') return 'bg-destructive';
+    if (tone === 'brand') return 'bg-brand';
+    return 'bg-muted-foreground/30';
+  };
+
   const items: {
     label: string;
     value: number;
     tone: KpiTone;
     tip: string;
     sub?: string;
+    nav?: string;
   }[] = [
+    {
+      label: t('overview.kpi.stale'),
+      value: totals.staleFlags,
+      tone: 'warning',
+      tip: t('overview.hints.stale'),
+      nav: '/flags?stale=1',
+    },
+    {
+      label: t('overview.kpi.killswitches'),
+      value: totals.activeKillswitches,
+      tone: 'destructive',
+      tip: t('overview.hints.killswitches'),
+      nav: '/flags?flagType=KILLSWITCH',
+    },
+    {
+      label: t('overview.kpi.rollouts'),
+      value: totals.rolloutsInProgress,
+      tone: 'brand',
+      tip: t('overview.hints.rollouts'),
+    },
     {
       label: t('overview.kpi.totalFlags'),
       value: totals.totalFlags,
@@ -219,44 +245,41 @@ function OverviewKpis({ t, totals }: { t: TFn; totals: OverviewResponse['totals'
           ? t('overview.kpi.archived', { count: String(totals.archivedFlags) })
           : undefined,
     },
-    {
-      label: t('overview.kpi.stale'),
-      value: totals.staleFlags,
-      tone: 'warning',
-      tip: t('overview.hints.stale'),
-    },
-    {
-      label: t('overview.kpi.killswitches'),
-      value: totals.activeKillswitches,
-      tone: 'destructive',
-      tip: t('overview.hints.killswitches'),
-    },
-    {
-      label: t('overview.kpi.rollouts'),
-      value: totals.rolloutsInProgress,
-      tone: 'brand',
-      tip: t('overview.hints.rollouts'),
-    },
   ];
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {items.map((it) => (
-        <Card key={it.label} padded>
-          <div className="flex items-center gap-2 text-caption font-medium text-muted-foreground">
-            {it.label}
-            <InfoTip text={it.tip} className="ml-auto" />
-          </div>
-          <div className="mt-2 flex items-baseline gap-1.5">
-            <span
-              className={`text-h2 font-heading font-bold tracking-tight tabular-nums ${toneClass(it.tone, it.value)}`}
-            >
-              {it.value}
-            </span>
-            {it.sub && <span className="text-caption text-muted-foreground/80">{it.sub}</span>}
-          </div>
-        </Card>
-      ))}
+      {items.map((it) => {
+        const isClickable = !!it.nav && it.value > 0;
+        return (
+          <Card
+            key={it.label}
+            padded
+            onClick={isClickable ? () => navigate(it.nav!) : undefined}
+            className={isClickable ? 'group' : ''}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className={`size-2.5 rounded-full shrink-0 ${dotFor(it.tone)}`} aria-hidden="true" />
+                <span
+                  className={`text-h2 font-heading font-bold tabular-nums ${toneClass(it.tone, it.value)} ${isClickable ? 'group-hover:underline underline-offset-4' : ''}`}
+                >
+                  {it.value}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0 min-w-0">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-caption text-muted-foreground">{it.label}</span>
+                  <InfoTip text={it.tip} size={11} />
+                </div>
+                {it.sub && (
+                  <span className="text-caption text-muted-foreground/60 shrink-0">· {it.sub}</span>
+                )}
+              </div>
+            </div>
+          </Card>
+        );
+      })}
     </div>
   );
 }
@@ -408,163 +431,281 @@ function EnvironmentStatCard({
   );
 }
 
-function DriftTable({
+function DriftDashboard({
   t,
   rows,
   envRefs,
+  totalActive,
 }: {
   t: TFn;
   rows: DriftRow[];
   envRefs: { id: number; name: string; color: string }[];
+  totalActive: number;
 }) {
-  const shown = rows.slice(0, DRIFT_LIMIT);
   const navigate = useNavigate();
+  const shown = rows.slice(0, DRIFT_LIMIT);
 
-  return (
-    <Card>
-      {rows.length === 0 ? (
-        <div className="py-10 text-center text-body-sm text-muted-foreground">
-          {t('overview.drift.empty')}
-        </div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left px-4 py-3 text-overline font-semibold text-muted-foreground">
-                  {t('overview.drift.flag')}
-                </th>
-                {envRefs.map((env) => {
-                  const c = env.color;
-                  return (
-                    <th key={env.id} className="text-left px-3 py-3">
-                      <span
-                        className="inline-flex items-center rounded-full border px-2 py-0.5 text-caption font-semibold"
-                        style={{ backgroundColor: `${c}1f`, borderColor: `${c}33`, color: c }}
-                      >
-                        {env.name}
-                      </span>
-                    </th>
-                  );
-                })}
-                <th className="text-left px-3 py-3 text-overline font-semibold text-muted-foreground">
-                  {t('overview.drift.status')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map((row) => (
-                <tr
-                  key={row.flagId}
-                  className="border-b border-border/60 last:border-0 hover:bg-muted/40 transition-colors"
-                >
-                  <td className="px-4 py-3">
-                    <div className="font-medium text-body-sm">{row.name}</div>
-                    <div className="text-caption font-mono text-muted-foreground/70">
-                      {row.flagKey}
-                    </div>
-                  </td>
-                  {row.cells.map((cell) => (
-                    <td key={cell.environmentId} className="px-3 py-3">
-                      <DriftCellBadge t={t} cell={cell} />
-                    </td>
-                  ))}
-                  <td className="px-3 py-3">
-                    <DriftStatusLabel t={t} status={row.status} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {rows.length > DRIFT_LIMIT && (
-            <div className="px-4 py-3 border-t border-border">
-              <button
-                type="button"
-                onClick={() => navigate('/flags')}
-                className="text-caption font-medium text-brand hover:underline"
-              >
-                {t('overview.drift.showAll', { count: String(rows.length) })}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-    </Card>
-  );
-}
+  const driftCount = rows.filter((r) => r.status === 'drift').length;
+  const rolloutCount = rows.filter((r) => r.status === 'rollout').length;
+  const syncedCount = totalActive - rows.length;
 
-function DriftCellBadge({ t, cell }: { t: TFn; cell: DriftRow['cells'][number] }) {
-  if (cell.state === 'rollout') {
+  if (rows.length === 0) {
     return (
-      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-caption font-bold text-brand bg-brand/10 border border-brand/20 tabular-nums">
-        {cell.percentage}%
-      </span>
+      <Card padded className="py-12 text-center">
+        <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-success/10">
+          <Check size={22} className="text-success" />
+        </div>
+        <p className="text-body font-semibold text-foreground">{t('overview.drift.empty')}</p>
+      </Card>
     );
   }
-  if (cell.state === 'on') {
-    return (
-      <Badge variant="success" style="subtle" shape="pill" size="sm">
-        {t('overview.drift.on')}
-      </Badge>
-    );
-  }
-  return (
-    <Badge variant="default" style="subtle" shape="pill" size="sm">
-      {t('overview.drift.off')}
-    </Badge>
-  );
-}
 
-function DriftStatusLabel({ t, status }: { t: TFn; status: DriftRow['status'] }) {
-  const cls = status === 'rollout' ? 'text-brand' : 'text-warning';
-  const label =
-    status === 'rollout' ? t('overview.drift.statusRollout') : t('overview.drift.statusDrift');
-  const hint =
-    status === 'rollout' ? t('overview.hints.driftRollout') : t('overview.hints.driftDrift');
+  const arcLen = 87.96;
+  const arc = (fraction: number) => Math.round(arcLen * (1 - fraction));
+
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span
-          className={`inline-flex items-center gap-1.5 text-caption font-semibold cursor-help ${cls}`}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-current" />
-          {label}
+    <div>
+      {/* Gauge instruments */}
+      <div className="grid grid-cols-3 gap-2.5 mb-6">
+        <GaugeCard
+          value={driftCount}
+          label={t('overview.drift.gaugeDrift')}
+          color="var(--warning)"
+          arcDash={arcLen}
+          arcOffset={arc(driftCount / totalActive)}
+        />
+        <GaugeCard
+          value={rolloutCount}
+          label={t('overview.drift.gaugeRollout')}
+          color="var(--brand)"
+          arcDash={arcLen}
+          arcOffset={arc(rolloutCount / totalActive)}
+        />
+        <GaugeCard
+          value={syncedCount}
+          label={t('overview.drift.gaugeSynced')}
+          color="var(--success)"
+          arcDash={arcLen}
+          arcOffset={arc(syncedCount / totalActive)}
+        />
+      </div>
+
+      {/* List header */}
+      <div className="flex items-baseline justify-between mb-2.5">
+        <span className="text-body font-semibold text-muted-foreground">
+          {t('overview.drift.attention')}
         </span>
-      </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-[220px] leading-snug">
-        {hint}
-      </TooltipContent>
-    </Tooltip>
+        {rows.length > DRIFT_LIMIT && (
+          <button
+            type="button"
+            onClick={() => navigate('/flags')}
+            className="text-body-sm font-medium text-brand hover:underline"
+          >
+            {t('overview.drift.showAll', { count: String(rows.length) })}
+          </button>
+        )}
+      </div>
+
+      {/* Flag rows */}
+      <div className="flex flex-col gap-1.5">
+        {shown.map((row) => (
+          <DriftFlagRow
+            key={row.flagId}
+            t={t}
+            row={row}
+            envRefs={envRefs}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GaugeCard({
+  value,
+  label,
+  color,
+  arcDash,
+  arcOffset,
+}: {
+  value: number;
+  label: string;
+  color: string;
+  arcDash: number;
+  arcOffset: number;
+}) {
+  return (
+    <div className="flex flex-col items-center rounded-xl bg-card px-3 pt-3 pb-2.5 text-center shadow-sm">
+      <div className="relative grid place-items-center">
+        <div
+          className="text-[18px] font-bold tracking-[-0.02em] leading-none tabular-nums"
+          style={{ gridArea: '1/1', zIndex: 1,   translate: '0 14px', color }}
+        >
+          {value}
+        </div>
+        <svg
+          width="72"
+          height="44"
+          viewBox="0 0 72 40"
+          style={{ gridArea: '1/1' }}
+        >
+          <path
+            d="M 8 34 A 28 28 0 0 1 64 34"
+            fill="none"
+            stroke="var(--muted)"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 8 34 A 28 28 0 0 1 64 34"
+            fill="none"
+            stroke={color}
+            strokeWidth="6"
+            strokeLinecap="round"
+            strokeDasharray={`${arcDash} ${arcDash}`}
+            strokeDashoffset={arcOffset}
+          />
+        </svg>
+      </div>
+      <p className="mt-0 text-caption font-medium text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+function DriftFlagRow({
+  t,
+  row,
+  envRefs,
+}: {
+  t: TFn;
+  row: DriftRow;
+  envRefs: { id: number; name: string; color: string }[];
+}) {
+  const navigate = useNavigate();
+  const isDrift = row.status === 'drift';
+
+  const dotColor = (state: string) => {
+    if (state === 'on') return 'var(--success)';
+    if (state === 'rollout') return 'var(--brand)';
+    return 'var(--muted-foreground)';
+  };
+
+  const handleNavigate = () => {
+    navigate(`/flags?open=${row.flagKey}`);
+  };
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={handleNavigate}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleNavigate();
+        }
+      }}
+      className="table table-fixed w-full rounded-xl bg-card overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-px transition-all duration-[--duration-fast] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+      style={{ borderLeft: `3px solid ${isDrift ? 'var(--warning)' : 'var(--brand)'}` }}
+    >
+      <div className="table-row-group">
+        <div className="table-row">
+          {/* Flag identity */}
+          <div className="table-cell align-middle py-2 pl-4" style={{ width: 155 }}>
+            <div className="text-body-sm font-semibold leading-tight truncate">{row.name}</div>
+            <div className="text-caption text-muted-foreground/55 font-mono mt-px truncate">{row.flagKey}</div>
+          </div>
+
+          {/* Environment blocks */}
+          {row.cells.map((cell) => {
+            const env = envRefs.find((e) => e.id === cell.environmentId);
+            const stateText =
+              cell.state === 'rollout' ? `${cell.percentage}%` : cell.state === 'on' ? t('overview.drift.on') : t('overview.drift.off');
+            const stateColor =
+              cell.state === 'on' ? 'text-success' : cell.state === 'off' ? 'text-muted-foreground/50' : 'text-brand';
+            return (
+              <div key={cell.environmentId} className="table-cell align-middle text-center py-2">
+                <div className="inline-flex items-center gap-2 min-w-0">
+                  <span
+                    className="size-2 rounded-full shrink-0"
+                    style={{ backgroundColor: dotColor(cell.state), opacity: cell.state === 'off' ? 0.35 : 1 }}
+                  />
+                  <span className="text-caption font-medium text-muted-foreground truncate">{env?.name ?? '?'}</span>
+                  <span className={`text-caption font-semibold shrink-0 ${stateColor}`}>{stateText}</span>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Status chip */}
+          <div className="table-cell align-middle py-2 pr-4">
+            <span
+              className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-caption font-bold ${
+                isDrift
+                  ? 'text-warning bg-warning/10 border border-warning/20'
+                  : 'text-brand bg-brand/10 border border-brand/20'
+              }`}
+            >
+              <span className={`size-1 rounded-full ${isDrift ? 'bg-warning' : 'bg-brand'}`} />
+              {isDrift ? t('overview.drift.chipDrift') : t('overview.drift.chipRollout')}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
 function ActivityFeed({ t, events }: { t: TFn; events: AuditEvent[] }) {
   const navigate = useNavigate();
+  const { locale } = useLocale();
+  const isRu = locale === 'ru';
+
+  const actionTone = (action: string): string => {
+    const suffix = action.split('.').pop() ?? action;
+    if (suffix === 'created' || suffix === 'unarchived') return 'bg-success';
+    if (suffix === 'deleted' || suffix === 'purged') return 'bg-destructive';
+    if (suffix === 'archived') return 'bg-warning';
+    return 'bg-brand';
+  };
+
+  const sentenceText = (e: AuditEvent) => {
+    if (isRu) {
+      const gender = getGender(e.resourceType);
+      const action = getActionParticiple(e.action, gender);
+      const resource = getCase(e.resourceType, 'nom');
+      return `${action.charAt(0).toUpperCase() + action.slice(1)} ${resource.toLowerCase()}`;
+    }
+    return `${getActionLabel(t, e.action)} ${getResourceLabel(t, e.resourceType)}`;
+  };
+
   return (
-    <Card className="h-full">
-      <CardHeader
-        title={t('overview.activity.title')}
-        meta={
-          <button
-            type="button"
-            onClick={() => navigate('/audit')}
-            className="text-caption font-medium text-brand hover:underline focus-visible:outline-none focus-visible:underline"
-          >
-            {t('overview.activity.seeAll')}
-          </button>
-        }
-      />
-      <div className="px-2 pb-2">
-        {events.length === 0 ? (
-          <div className="py-10 text-center text-body-sm text-muted-foreground">
-            {t('overview.activity.empty')}
-          </div>
-        ) : (
-          events.map((e) => (
-            <div
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between">
+        <h2 className="text-h3 font-heading font-semibold tracking-tight">{t('overview.activity.title')}</h2>
+        <button
+          type="button"
+          onClick={() => navigate('/audit')}
+          className="text-caption font-medium text-brand hover:underline focus-visible:outline-none focus-visible:underline"
+        >
+          {t('overview.activity.seeAll')}
+        </button>
+      </div>
+
+      {events.length === 0 ? (
+        <div className="py-12 text-center text-body-sm text-muted-foreground bg-secondary rounded-xl">
+          {t('overview.activity.empty')}
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          {events.map((e) => (
+            <button
               key={e.id}
-              className="flex items-start gap-3 px-2 py-2 rounded-lg hover:bg-muted/50 transition-colors"
+              type="button"
+              onClick={() => navigate(`/audit?open=${e.id}`)}
+              className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl bg-card shadow-sm hover:shadow-md hover:-translate-y-px transition-all duration-[--duration-fast] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 text-left"
             >
+              <span className={`size-1.5 rounded-full shrink-0 ${actionTone(e.action)}`} aria-hidden="true" />
               <Avatar className="w-7 h-7 shrink-0">
                 {e.userId ? (
                   <AvatarImage src={api.users.getAvatarUrl(e.userId)} alt={e.userName ?? ''} />
@@ -576,27 +717,24 @@ function ActivityFeed({ t, events }: { t: TFn; events: AuditEvent[] }) {
                   {initials(e.userName)}
                 </AvatarFallback>
               </Avatar>
-              <div className="min-w-0 flex-1 text-body-sm">
-                <div className="truncate">
-                  <span className="font-semibold">{e.userName || 'system'}</span>{' '}
+              <div className="min-w-0 flex-1">
+                <div className="text-body-sm truncate">
                   <span className="text-muted-foreground">
-                    {getActionLabel(t, e.action)} · {getResourceLabel(t, e.resourceType)}
+                    {sentenceText(e)}
+                    {e.resourceName && (
+                      <span className="font-medium text-foreground"> «{e.resourceName}»</span>
+                    )}
                   </span>
                 </div>
-                {e.resourceName && (
-                  <div className="text-caption font-medium text-muted-foreground/80 mt-0.5 truncate">
-                    {e.resourceName}
-                  </div>
-                )}
               </div>
-              <span className="shrink-0 whitespace-nowrap text-caption text-muted-foreground/70 mt-0.5">
+              <span className="shrink-0 text-caption text-muted-foreground/60 tabular-nums">
                 {timeAgo(e.createdAt)}
               </span>
-            </div>
-          ))
-        )}
-      </div>
-    </Card>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -641,53 +779,75 @@ function OnboardingChecklist({
   t: TFn;
   onboarding: OverviewResponse['onboarding'];
 }) {
-  const reduce = useReducedMotion();
-  const items: { key: keyof OverviewResponse['onboarding']; labelKey: MessageKey }[] = [
-    { key: 'hasFlags', labelKey: 'overview.onboarding.hasFlags' },
-    { key: 'hasEnvironments', labelKey: 'overview.onboarding.hasEnvironments' },
-    { key: 'hasApiKey', labelKey: 'overview.onboarding.hasApiKey' },
-    { key: 'hasConnectedSdk', labelKey: 'overview.onboarding.hasConnectedSdk' },
-    { key: 'hasTeam', labelKey: 'overview.onboarding.hasTeam' },
+  const navigate = useNavigate();
+  const items: {
+    key: keyof OverviewResponse['onboarding'];
+    labelKey: MessageKey;
+    nav?: string;
+  }[] = [
+    { key: 'hasFlags', labelKey: 'overview.onboarding.hasFlags', nav: '/flags?new=1' },
+    { key: 'hasEnvironments', labelKey: 'overview.onboarding.hasEnvironments', nav: '/settings' },
+    { key: 'hasApiKey', labelKey: 'overview.onboarding.hasApiKey', nav: '/apikeys' },
+    { key: 'hasConnectedSdk', labelKey: 'overview.onboarding.hasConnectedSdk', nav: '/applications' },
+    { key: 'hasTeam', labelKey: 'overview.onboarding.hasTeam', nav: '/users' },
   ];
   const done = items.filter((i) => onboarding[i.key]).length;
-  const pct = Math.round((done / items.length) * 100);
+  const remaining = items.length - done;
+  const subtitle =
+    remaining > 0
+      ? `Остался ${remaining} ${russianPlural(remaining, 'шаг', 'шага', 'шагов')}`
+      : '';
 
   return (
-    <Card className="h-full">
-      <CardHeader
-        title={t('overview.onboarding.title')}
-        meta={t('overview.onboarding.progress', { done: String(done), total: String(items.length) })}
-      />
-      <div className="px-4">
-        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-          <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-gradient-start to-gradient-end"
-            initial={{ width: reduce ? `${pct}%` : 0 }}
-            animate={{ width: `${pct}%` }}
-            transition={{ duration: reduce ? 0 : 0.5, delay: reduce ? 0 : 0.15, ease: EASE }}
-          />
-        </div>
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between">
+        <h2 className="text-h3 font-heading font-semibold tracking-tight">{t('overview.onboarding.title')}</h2>
+        <span className="text-caption text-muted-foreground">
+          {done}/{items.length}
+        </span>
       </div>
-      <div className="p-2">
+      {subtitle && <p className="text-caption text-muted-foreground/80 -mt-1">{subtitle}</p>}
+
+      <div className="space-y-0.5">
         {items.map((item) => {
           const isDone = onboarding[item.key];
-          return (
-            <div key={item.key} className="flex items-center gap-2.5 px-2 py-2 text-body-sm">
+          const canAct = !isDone && !!item.nav;
+
+          const content = (
+            <div
+              className={`flex items-center gap-2.5 px-2 py-2 rounded-lg text-body-sm ${canAct ? 'cursor-pointer hover:bg-muted/50 transition-colors' : ''} ${isDone ? 'text-muted-foreground/70' : 'text-foreground'}`}
+            >
               <span
-                className={`w-[18px] h-[18px] rounded-md border shrink-0 grid place-items-center transition-colors ${
-                  isDone ? 'bg-success border-success' : 'border-border'
+                className={`size-[18px] rounded-full border shrink-0 grid place-items-center transition-colors ${
+                  isDone ? 'bg-success border-success' : 'border-muted-foreground/30'
                 }`}
               >
-                {isDone && <Check size={12} className="text-success-foreground" />}
+                {isDone && <Check size={11} className="text-success-foreground" />}
               </span>
-              <span className={isDone ? 'text-muted-foreground line-through' : 'text-foreground'}>
-                {t(item.labelKey)}
-              </span>
+              <span className="flex-1">{t(item.labelKey)}</span>
+              {canAct && (
+                <Plus size={14} className="text-muted-foreground/40 shrink-0" />
+              )}
             </div>
           );
+
+          if (canAct) {
+            return (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => navigate(item.nav!)}
+                className="w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 rounded-lg"
+              >
+                {content}
+              </button>
+            );
+          }
+
+          return <div key={item.key}>{content}</div>;
         })}
       </div>
-    </Card>
+    </div>
   );
 }
 

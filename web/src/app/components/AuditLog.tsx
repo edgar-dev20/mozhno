@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, lazy, Suspense } from 'react';
+import { useSearchParams } from 'react-router';
 import {
   Filter,
   Clock,
@@ -48,7 +49,21 @@ export function AuditLog() {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [hasMore, setHasMore] = useState(true);
+
+  const [searchParams] = useSearchParams();
+  const openParam = searchParams.get('open');
+  const openId = openParam ? Number(openParam) : null;
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
+  const scrolledRef = useRef<number | null>(null);
+
+  const effectiveExpanded = useMemo(() => {
+    if (openId != null && !isNaN(openId)) {
+      const s = new Set(expandedIds);
+      s.add(openId);
+      return s;
+    }
+    return expandedIds;
+  }, [expandedIds, openId]);
 
   const toggleExpand = (id: number) => {
     setExpandedIds((prev) => {
@@ -81,6 +96,17 @@ export function AuditLog() {
       });
     }
   }, [projectId, dateFrom, dateTo, refetchEvents]);
+
+  useEffect(() => {
+    if (!openParam || events.length === 0) return;
+    const id = Number(openParam);
+    if (isNaN(id) || !events.some((e) => e.id === id)) return;
+    if (scrolledRef.current === id) return;
+    scrolledRef.current = id;
+    requestAnimationFrame(() => {
+      document.getElementById(`audit-card-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }, [openParam, events]);
 
   const loadEvents = useCallback(
     async (page: number, append: boolean) => {
@@ -356,7 +382,7 @@ export function AuditLog() {
           <>
             <AnimatePresence mode="popLayout">
               {displayedEvents.map((event, idx) => {
-                const expanded = expandedIds.has(event.id);
+                const expanded = effectiveExpanded.has(event.id);
                 return (
                   <motion.div
                     key={event.id}

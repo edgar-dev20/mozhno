@@ -4,9 +4,9 @@ import { cva, type VariantProps } from 'class-variance-authority';
 const cardVariants = cva('', {
   variants: {
     variant: {
-      default: 'bg-card rounded-xl shadow-sm border border-border',
-      elevated: 'bg-card rounded-xl shadow-md border border-border',
-      panel: 'bg-card rounded-xl shadow-lg border border-border',
+      default: 'bg-card rounded-xl shadow-md',
+      elevated: 'bg-card rounded-xl shadow-md',
+      panel: 'bg-card rounded-xl shadow-lg',
       selectable: 'rounded-xl transition-all overflow-hidden',
     },
   },
@@ -56,6 +56,13 @@ export const Card = React.forwardRef<HTMLDivElement | HTMLButtonElement, CardPro
     if (dimmed) classes += ' scale-[0.98] grayscale opacity-60';
     if (padded) classes += ' px-4 py-3.5';
     if (className) classes += ` ${className}`;
+
+    if (onClick) {
+      classes += ' cursor-pointer transition-shadow transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50';
+      if (variant !== 'selectable') {
+        classes += ' hover:shadow-lg hover:-translate-y-px';
+      }
+    }
 
     if (tag === 'button') {
       return (

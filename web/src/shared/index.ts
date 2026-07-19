@@ -45,3 +45,4 @@ export {
   getFlagTypeLabel,
   formatCompactCount,
 } from '@/shared/format';
+export { getCase, getGender, getActionParticiple, russianPlural } from '@/shared/russianCases';

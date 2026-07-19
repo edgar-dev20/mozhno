@@ -84,6 +84,7 @@ export function Flags() {
     dateTo,
     setDateTo,
     uniqueTagValues,
+    setStaleFilter,
   } = useFlagFilters(flags, enrichedData?.totalItems);
 
   const {
@@ -280,6 +281,19 @@ export function Flags() {
       document.getElementById(`flag-card-${targetKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [flags, searchParams, expandedKeys, setExpandedKeys]);
+
+  useEffect(() => {
+    if (searchParams.get('stale') === '1') {
+      setStaleFilter(true);
+    }
+  }, [searchParams, setStaleFilter]);
+
+  useEffect(() => {
+    const ft = searchParams.get('flagType');
+    if (ft === 'KILLSWITCH') {
+      setFlagTypeFilter('KILLSWITCH');
+    }
+  }, [searchParams, setFlagTypeFilter]);
 
   const handleMetricsClick = useCallback(
     (flagId: number, flagName: string, envId: number) => {

@@ -71,7 +71,10 @@ The server serves the built web UI as static assets — one self-contained artif
   `spi/impl` OSS defaults) and the web plugin registry (`PluginSlot` / `pluginRegistry`).
   Details: "Open-Core SPI" in `server/SKILL.md`, "PluginRegistry API" in `web/SKILL.md`.
 - **i18n:** user-facing web strings live in `web/src/i18n/locales/{en,ru}.ts` and must stay in
-  sync across both locales.
+  sync across both locales. Russian grammatical cases (падежи) for resource nouns are handled by
+  `@/shared/russianCases` — use `getCase(key, form)` for sentences and `russianPlural(n, one, few, many)`
+  for number agreement. When adding a new resource type, register its nom/gen/pre forms in
+  `russianCases.ts`. i18n keys store nominative only.
 - **No deprecated APIs:** write against the versions this repo pins (see each `SKILL.md`); never
   introduce methods/classes marked `@Deprecated`/`@deprecated` — use the documented replacement.
 

@@ -9,7 +9,10 @@ interface FilterCriteria {
   dateFrom: string;
   dateTo: string;
   sortBy: 'name' | 'createdAt';
+  staleFilter: boolean;
 }
+
+const STALE_MS = 30 * 24 * 60 * 60 * 1000;
 
 function applyFilters(flags: FlagView[], criteria: FilterCriteria, archived: boolean): FlagView[] {
   let result = flags.filter((f) => (f.archived ?? false) === archived);
@@ -22,7 +25,20 @@ function applyFilters(flags: FlagView[], criteria: FilterCriteria, archived: boo
     dateFrom,
     dateTo,
     sortBy,
+    staleFilter,
   } = criteria;
+
+  if (staleFilter) {
+    const now = Date.now();
+    result = result.filter((f) => {
+      const envs = Object.values(f.environments);
+      if (envs.length === 0) return true;
+      return envs.every((e) => {
+        if (!e.lastUsedAt) return true;
+        return now - new Date(e.lastUsedAt).getTime() > STALE_MS;
+      });
+    });
+  }
 
   if (selectedTagTypeFilter) {
     result = result.filter((f) =>
@@ -75,6 +91,7 @@ export function useFlagFilters(flags: FlagView[], totalItems?: number) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [displayLimit, setDisplayLimit] = useState(10);
+  const [staleFilter, setStaleFilter] = useState(false);
 
   const criteria: FilterCriteria = useMemo(
     () => ({
@@ -85,6 +102,7 @@ export function useFlagFilters(flags: FlagView[], totalItems?: number) {
       dateFrom,
       dateTo,
       sortBy,
+      staleFilter,
     }),
     [
       selectedTagTypeFilter,
@@ -94,6 +112,7 @@ export function useFlagFilters(flags: FlagView[], totalItems?: number) {
       dateFrom,
       dateTo,
       sortBy,
+      staleFilter,
     ],
   );
 
@@ -144,5 +163,6 @@ export function useFlagFilters(flags: FlagView[], totalItems?: number) {
     setDateTo,
     uniqueTagValues,
     totalItems,
+    setStaleFilter,
   };
 }
