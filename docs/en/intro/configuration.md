@@ -2,7 +2,7 @@
 
 **можно**<span class=brand-dot>.</span> is configured entirely through `MOZHNO_*` environment variables. All settings have sensible defaults so you only need to set what differs from the standard setup.
 
-> **Config model:** the application reads configuration **only** from `MOZHNO_*` environment variables. Most have safe defaults; required ones (no default) cause a fail-fast startup error. A full template is in [`.env.example`](https://github.com/mozhno-dev/mozhno/blob/main/.env.example). The `dev` profile (`SPRING_PROFILES_ACTIVE=dev`) is for local development from source only.
+> **Config model:** the application reads configuration **only** from `MOZHNO_*` environment variables. All have safe defaults — the server starts without any configuration. A full template is in [`.env.example`](https://github.com/mozhno-dev/mozhno/blob/main/.env.example). The `dev` profile (`SPRING_PROFILES_ACTIVE=dev`) is for local development from source only.
 
 ## How to set variables
 
@@ -11,7 +11,7 @@
 ```yaml
 services:
   mozhno:
-    image: ghcr.io/mozhno-dev/mozhno:latest
+    image: mozhno/mozhno:latest
     environment:
       MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET}   # from .env or host environment
       MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
@@ -26,7 +26,7 @@ docker run -p 8080:8080 \
   -e MOZHNO_JWT_SECRET=$(openssl rand -base64 32) \
   -e MOZHNO_DB_URL=jdbc:postgresql://db:5432/feature_flags \
   -e MOZHNO_DB_PASSWORD=secret \
-  ghcr.io/mozhno-dev/mozhno:latest
+  mozhno/mozhno:latest
 ```
 
 **`.env` file** (picked up by Docker Compose automatically):
@@ -45,19 +45,14 @@ export MOZHNO_DB_PASSWORD=secret
 java -jar mozhno.jar
 ```
 
-## Required Variables
+## Core Variables
 
-These must be set for the server to start:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `MOZHNO_JWT_SECRET` | — (**required**) | Secret key for signing JWTs. The app refuses to start without it. Must be at least 256 bits (32 bytes), Base64-encoded. Generate with `openssl rand -base64 32`. Changing this invalidates all existing tokens. |
-
-## Server Variables
+These are the most commonly configured environment variables:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MOZHNO_SERVER_PORT` | `8080` | Port the embedded Tomcat server listens on |
+| `MOZHNO_JWT_SECRET` | — (optional for dev) | Secret key for signing JWTs. Minimum 256 bits (32 bytes), Base64-encoded. If not set, a random key is generated at startup — tokens will be invalidated on restart. Set explicitly for production. |
+| `MOZHNO_SERVER_PORT` | `8080` | HTTP listen port |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Publicly reachable URL of the server. Used for generating links in emails, webhook payloads, and OAuth redirects. Must include protocol (http/https) and no trailing slash. |
 
 ## Database Variables
@@ -75,7 +70,7 @@ These must be set for the server to start:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MOZHNO_JWT_SECRET` | — | HMAC-SHA256 secret for signing access and refresh tokens |
+| `MOZHNO_JWT_SECRET` | — (optional for dev) | HMAC-SHA256 secret for signing access and refresh tokens. Auto-generated on startup if not set — set explicitly in production so tokens survive restarts |
 | `MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES` | `15` | Access token lifetime in minutes |
 | `MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS` | `30` | Refresh token lifetime in days |
 
@@ -116,7 +111,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
 
   mozhno:
-    image: ghcr.io/mozhno-dev/mozhno:latest
+    image: mozhno/mozhno:latest
     ports:
       - '8080:8080'
     environment:

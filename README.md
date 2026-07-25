@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/mozhno-dev/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mozhno-dev/mozhno/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-BSL_1.1-lightgrey?style=flat-square" alt="BSL 1.1" /></a>
-  <a href="https://github.com/mozhno-dev/mozhno/pkgs/container/mozhno"><img src="https://img.shields.io/badge/Docker-ghcr.io-blue?style=flat-square&logo=docker" alt="Docker" /></a>
+  <a href="https://hub.docker.com/r/mozhno/mozhno"><img src="https://img.shields.io/badge/Docker-mozhno/mozhno-blue?style=flat-square&logo=docker" alt="Docker" /></a>
   <a href="https://github.com/mozhno-dev/mozhno/stargazers"><img src="https://img.shields.io/github/stars/mozhno-dev/mozhno?style=flat-square&logo=github&color=fedc32" alt="Stars" /></a>
 </p>
 
@@ -96,7 +96,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   mozhno:
-    image: ghcr.io/mozhno-dev/mozhno:latest
+    image: mozhno/mozhno:latest
     ports:
       - '8080:8080'
     environment:
@@ -112,7 +112,8 @@ volumes:
 ```
 
 ```bash
-# Сгенерируйте JWT-секрет (Base64, ≥32 байта) — без него сервер не стартует
+# Сгенерируйте JWT-секрет для продакшена (Base64, ≥32 байта).
+# Для dev — можно пропустить: сервер сгенерирует случайный ключ.
 export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)
 
 docker compose up -d
@@ -180,7 +181,7 @@ const on = client.isEnabled('new-checkout', { userId: '42' });
 | `MOZHNO_DB_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | JDBC URL базы данных |
 | `MOZHNO_DB_USERNAME` | `flags_user` | Пользователь БД |
 | `MOZHNO_DB_PASSWORD` | `flags_password` | Пароль БД |
-| `MOZHNO_JWT_SECRET` | *(обязательно сменить)* | Base64-ключ, ≥32 байта. Сгенерировать: `openssl rand -base64 32` |
+| `MOZHNO_JWT_SECRET` | *(рекомендуется для прода)* | Base64-ключ, ≥32 байта. Для dev опционален — генерируется случайный ключ. Сгенерировать: `openssl rand -base64 32` |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Публичный URL сервера |
 | `MOZHNO_CLIENT_MAX_METRICS_BATCH_SIZE` | `1000` | Максимальный размер батча метрик от SDK |
 | `MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Срок хранения данных о клиентских инстансах |

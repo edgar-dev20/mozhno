@@ -180,7 +180,7 @@ Enterprise-модули поставляются в виде дополните�
 
 ```yaml
 mozhno:
-  image: ghcr.io/mozhno-dev/mozhno:latest
+  image: mozhno/mozhno:latest
   volumes:
     - ./mozhno-enterprise.jar:/opt/mozhno/lib/mozhno-enterprise.jar
   environment:

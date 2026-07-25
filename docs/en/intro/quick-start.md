@@ -16,14 +16,13 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   mozhno:
-    image: ghcr.io/mozhno-dev/mozhno:latest
+    image: mozhno/mozhno:latest
     ports:
       - '8080:8080'
     environment:
       MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
       MOZHNO_DB_USERNAME: flags_user
       MOZHNO_DB_PASSWORD: flags_password
-      MOZHNO_JWT_SECRET: change-me-to-a-real-256-bit-secret
     depends_on:
       - postgres
 

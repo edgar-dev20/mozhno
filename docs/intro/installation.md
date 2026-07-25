@@ -13,10 +13,10 @@
 
 ## Docker (рекомендованный способ)
 
-Готовый образ публикуется в GitHub Container Registry:
+Готовый образ публикуется на Docker Hub:
 
 ```
-ghcr.io/mozhno-dev/mozhno:latest
+mozhno/mozhno:latest
 ```
 
 ### Docker Compose
@@ -40,14 +40,13 @@ services:
       retries: 5
 
   mozhno:
-    image: ghcr.io/mozhno-dev/mozhno:latest
+    image: mozhno/mozhno:latest
     ports:
       - '8080:8080'
     environment:
       MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
       MOZHNO_DB_USERNAME: flags_user
       MOZHNO_DB_PASSWORD: flags_password
-      MOZHNO_JWT_SECRET: change-me-to-a-real-256-bit-secret
       MOZHNO_BASE_URL: http://localhost:8080
     depends_on:
       postgres:

@@ -23,7 +23,7 @@ services:
       retries: 5
 
   mozhno:
-    image: ghcr.io/mozhno-dev/mozhno:latest
+    image: mozhno/mozhno:latest
     container_name: mozhno-server
     ports:
       - "${APP_PORT:-8080}:8080"

@@ -2,7 +2,7 @@
 
 Все настройки **можно**<span class=brand-dot>.</span> задаются через переменные окружения с единым префиксом `MOZHNO_*`. Ниже — полный список с описаниями и значениями по умолчанию.
 
-> **Модель конфигурации:** приложение читает настройки **только** из переменных окружения `MOZHNO_*`. У большинства есть безопасные значения по умолчанию; обязательные (без дефолта) приводят к отказу старта с понятной ошибкой. Полный шаблон — в файле [`.env.example`](https://github.com/mozhno-dev/mozhno/blob/main/.env.example) в корне репозитория. Профиль `dev` (через `SPRING_PROFILES_ACTIVE=dev`) предназначен только для локальной разработки из исходников.
+> **Модель конфигурации:** приложение читает настройки **только** из переменных окружения `MOZHNO_*`. Все имеют безопасные значения по умолчанию — сервер стартует без какой-либо конфигурации. Полный шаблон — в файле [`.env.example`](https://github.com/mozhno-dev/mozhno/blob/main/.env.example) в корне репозитория. Профиль `dev` (через `SPRING_PROFILES_ACTIVE=dev`) предназначен только для локальной разработки из исходников.
 
 ## Как задавать переменные
 
@@ -11,7 +11,7 @@
 ```yaml
 services:
   mozhno:
-    image: ghcr.io/mozhno-dev/mozhno:latest
+    image: mozhno/mozhno:latest
     environment:
       MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET}   # из .env или окружения хоста
       MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
@@ -26,7 +26,7 @@ docker run -p 8080:8080 \
   -e MOZHNO_JWT_SECRET=$(openssl rand -base64 32) \
   -e MOZHNO_DB_URL=jdbc:postgresql://db:5432/feature_flags \
   -e MOZHNO_DB_PASSWORD=secret \
-  ghcr.io/mozhno-dev/mozhno:latest
+  mozhno/mozhno:latest
 ```
 
 **Файл `.env`** (Docker Compose подхватывает автоматически):
@@ -51,7 +51,7 @@ java -jar mozhno.jar
 |------------|-------------|----------|
 | `MOZHNO_SERVER_PORT` | `8080` | Порт, на котором слушает HTTP-сервер |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Публичный URL сервера. Используется для генерации ссылок и CORS |
-| `MOZHNO_JWT_SECRET` | — (**обязательна**) | Секретный ключ для подписи JWT-токенов. Без неё приложение не стартует. Минимум 256 бит (Base64). Профиль `dev` подставляет небезопасный ключ для локального запуска |
+| `MOZHNO_JWT_SECRET` | — (опционально для dev) | Секретный ключ для подписи JWT-токенов. Минимум 256 бит (Base64). Если не задан — генерируется случайный ключ на время сессии (при рестарте все токены инвалидируются). Для продакшена задайте явно |
 | `MOZHNO_CACHE_TTL_MINUTES` | `5` | TTL кеша Caffeine в минутах. При multi-node уменьшите до `1` или `0`. Подробнее — [Масштабирование](/self-hosting/scaling#нюанс-multi-node) |
 | `MOZHNO_CLIENT_MAX_METRICS_PER_KEY` | `1000` | Максимальное количество хранимых метрик на API-ключ |
 
@@ -82,7 +82,7 @@ java -jar mozhno.jar
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `MOZHNO_JWT_SECRET` | — (**обязательна**) | Секретный ключ подписи JWT. Без неё приложение не стартует |
+| `MOZHNO_JWT_SECRET` | — (опционально для dev) | Секретный ключ подписи JWT. Если не задан — генерируется случайный ключ (все токены сбрасываются при рестарте) |
 | `MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES` | `15` | Время жизни access-токена в минутах |
 | `MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS` | `30` | Время жизни refresh-токена в днях |
 
@@ -98,7 +98,7 @@ Refresh-токены используют **семейную ротацию** (f
 ## Пример `.env`-файла
 
 ```bash
-# Обязательные
+# JWT secret (опционально для dev — без него генерируется случайный ключ)
 MOZHNO_JWT_SECRET=your-256-bit-secret-change-me-in-production
 
 # База данных

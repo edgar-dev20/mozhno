@@ -4,10 +4,10 @@
 
 ## Образ
 
-Официальный образ публикуется в GitHub Container Registry:
+Официальный образ публикуется на Docker Hub:
 
 ```
-ghcr.io/mozhno-dev/mozhno:latest
+mozhno/mozhno:latest
 ```
 
 Образ собирается по трёхэтапному Dockerfile:
@@ -51,7 +51,7 @@ services:
           cpus: '0.25'
 
   mozhno:
-    image: ghcr.io/mozhno-dev/mozhno:latest
+    image: mozhno/mozhno:latest
     restart: unless-stopped
     ports:
       - '${MOZHNO_SERVER_PORT:-8080}:8080'
@@ -113,6 +113,8 @@ networks:
 Запуск:
 
 ```bash
+# JWT-секрет опционален для dev — без него генерируется случайный ключ
+# Для продакшена задайте явно:
 MOZHNO_JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 ```
 
@@ -144,7 +146,7 @@ MOZHNO_JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `MOZHNO_JWT_SECRET` | — (обязательно) | Секретный ключ подписи JWT. Минимум 256 бит |
+| `MOZHNO_JWT_SECRET` | — (опционально для dev) | Секретный ключ подписи JWT. Минимум 256 бит. Если не задан — генерируется случайный ключ (все токены инвалидируются при рестарте) |
 | `MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES` | `15` | Время жизни access-токена в минутах |
 | `MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS` | `30` | Время жизни refresh-токена в днях |
 
@@ -254,7 +256,7 @@ tmpfs:
 
 ### Секреты
 
-Никогда не задавайте `MOZHNO_JWT_SECRET` и пароли базы данных напрямую в `docker-compose.yml`. Используйте:
+Для продакшена не задавайте `MOZHNO_JWT_SECRET` и пароли базы данных напрямую в `docker-compose.yml`. Используйте:
 
 - Переменные окружения хоста (`${MOZHNO_JWT_SECRET}`)
 - Docker Secrets (в Swarm-режиме)
@@ -271,8 +273,8 @@ openssl rand -base64 32
 Перед развёртыванием проверьте образ сканером:
 
 ```bash
-docker scout quickview ghcr.io/mozhno-dev/mozhno:latest
-trivy image ghcr.io/mozhno-dev/mozhno:latest
+docker scout quickview mozhno/mozhno:latest
+trivy image mozhno/mozhno:latest
 ```
 
 ## Сборка образа локально
@@ -286,7 +288,7 @@ make docker-build
 Или вручную:
 
 ```bash
-docker build -t ghcr.io/mozhno-dev/mozhno:latest .
+docker build -t mozhno/mozhno:latest .
 ```
 
 Dockerfile использует многоэтапную сборку (multi-stage build), поэтому итоговый образ не содержит Node.js, npm-зависимости или JDK — только JRE и артефакты.
@@ -297,9 +299,9 @@ Flyway-миграции запускаются автоматически при
 
 ## Где брать образ
 
-- **GitHub Container Registry:** `ghcr.io/mozhno-dev/mozhno:latest`
-- **Теги версий:** `ghcr.io/mozhno-dev/mozhno:v1.0.0`
-- **Digest (для неизменяемости):** `ghcr.io/mozhno-dev/mozhno@sha256:...`
+- **Docker Hub:** `mozhno/mozhno:latest`
+- **Теги версий:** `mozhno/mozhno:v1.0.0`
+- **Digest (для неизменяемости):** `mozhno/mozhno@sha256:...`
 
 Рекомендуется фиксировать конкретную версию или digest для продакшен-окружения, чтобы избежать неожиданных изменений.
 
@@ -309,7 +311,7 @@ Flyway-миграции запускаются автоматически при
 
 ```bash
 # 1. Обновить тег образа в docker-compose.yml
-#    image: ghcr.io/mozhno-dev/mozhno:v1.1.0
+#    image: mozhno/mozhno:v1.1.0
 
 # 2. Загрузить новый образ и перезапустить
 docker compose pull mozhno
@@ -403,7 +405,7 @@ flags.example.com {
 | 6 | Поставить TLS через Nginx/Caddy/Traefik | См. секцию выше |
 | 7 | Увеличить пул соединений | `MOZHNO_DB_POOL_MAX_SIZE=30` |
 | 8 | Настроить SMTP для писем | `MOZHNO_SMTP_HOST`, `MOZHNO_SMTP_PORT`, `MOZHNO_SMTP_USERNAME`, `MOZHNO_SMTP_PASSWORD` |
-| 9 | Фиксировать версию образа | `image: ghcr.io/mozhno-dev/mozhno:v1.0.0` |
+| 9 | Фиксировать версию образа | `image: mozhno/mozhno:v1.0.0` |
 | 10 | Настроить бэкап PostgreSQL | `pg_dump` или WAL-архивация, см. [База данных](/self-hosting/database) |
 | 11 | Настроить мониторинг | Prometheus, алерты — см. [Мониторинг](/self-hosting/monitoring) |
 

@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/mozhno-dev/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mozhno-dev/mozhno/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-BSL_1.1-lightgrey?style=flat-square" alt="BSL 1.1" /></a>
-  <a href="https://github.com/mozhno-dev/mozhno/pkgs/container/mozhno"><img src="https://img.shields.io/badge/Docker-ghcr.io-blue?style=flat-square&logo=docker" alt="Docker" /></a>
+  <a href="https://hub.docker.com/r/mozhno/mozhno"><img src="https://img.shields.io/badge/Docker-mozhno/mozhno-blue?style=flat-square&logo=docker" alt="Docker" /></a>
   <a href="https://github.com/mozhno-dev/mozhno/stargazers"><img src="https://img.shields.io/github/stars/mozhno-dev/mozhno?style=flat-square&logo=github&color=fedc32" alt="Stars" /></a>
 </p>
 
@@ -97,7 +97,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   mozhno:
-    image: ghcr.io/mozhno-dev/mozhno:latest
+    image: mozhno/mozhno:latest
     ports:
       - '8080:8080'
     environment:
@@ -113,7 +113,8 @@ volumes:
 ```
 
 ```bash
-# Generate a JWT secret (Base64, ≥32 bytes) — the server won't start without it
+# Generate a JWT secret for production (Base64, ≥32 bytes).
+# For dev you can skip this — the server auto-generates a random key.
 export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)
 
 docker compose up -d
@@ -181,7 +182,7 @@ const on = client.isEnabled('new-checkout', { userId: '42' });
 | `MOZHNO_DB_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | PostgreSQL JDBC URL |
 | `MOZHNO_DB_USERNAME` | `flags_user` | Database user |
 | `MOZHNO_DB_PASSWORD` | `flags_password` | Database password |
-| `MOZHNO_JWT_SECRET` | *(must change)* | Base64 signing key, ≥32 bytes. Generate: `openssl rand -base64 32` |
+| `MOZHNO_JWT_SECRET` | *(recommended for production)* | Base64 signing key, ≥32 bytes. Optional for dev — auto-generated random key. Generate: `openssl rand -base64 32` |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Public server URL |
 | `MOZHNO_CLIENT_MAX_METRICS_BATCH_SIZE` | `1000` | Max metrics batch size accepted from SDKs |
 | `MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Client instance data retention |

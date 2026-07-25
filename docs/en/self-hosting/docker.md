@@ -46,7 +46,7 @@ services:
       - mozhno-net
 
   mozhno:
-    image: ghcr.io/mozhno-dev/mozhno:latest
+    image: mozhno/mozhno:latest
     container_name: mozhno-server
     restart: unless-stopped
     ports:
@@ -117,7 +117,7 @@ networks:
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `MOZHNO_JWT_SECRET` | Yes | — | HMAC-SHA256 signing secret. Minimum 32 bytes. |
+| `MOZHNO_JWT_SECRET` | No | — (optional for dev) | HMAC-SHA256 signing secret. Minimum 32 bytes. Auto-generated if not set — tokens are invalidated on restart. Set explicitly in production. |
 | `MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES` | No | `15` | Access token lifetime in minutes |
 | `MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS` | No | `30` | Refresh token lifetime in days |
 
@@ -253,7 +253,7 @@ The resulting image contains only the JRE and the pre-built static resources emb
 
 ```bash
 # 1. Update the image tag in docker-compose.yml
-#    image: ghcr.io/mozhno-dev/mozhno:v1.1.0
+#    image: mozhno/mozhno:v1.1.0
 
 # 2. Pull the new image and restart
 docker compose pull mozhno
@@ -331,6 +331,6 @@ flags.example.com {
 | 6 | Set up TLS via Nginx/Caddy/Traefik | See section above |
 | 7 | Increase connection pool | `MOZHNO_DB_POOL_MAX_SIZE=30` |
 | 8 | Configure SMTP for emails | `MOZHNO_SMTP_HOST`, `MOZHNO_SMTP_PORT`, `MOZHNO_SMTP_USERNAME`, `MOZHNO_SMTP_PASSWORD` |
-| 9 | Pin the image version | `image: ghcr.io/mozhno-dev/mozhno:v1.0.0` |
+| 9 | Pin the image version | `image: mozhno/mozhno:v1.0.0` |
 | 10 | Set up PostgreSQL backups | `pg_dump` or WAL archiving, see [Database](/en/self-hosting/database) |
 | 11 | Set up monitoring | Prometheus, alerts — see [Monitoring](/en/self-hosting/monitoring) |
