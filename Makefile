@@ -1,4 +1,4 @@
-.PHONY: help dev db-up db-down server-run server-test web-dev web-test web-lint js-sdk-test js-sdk-build java-sdk-test docker-build docker-up docker-down lint tokens tokens-check clean
+.PHONY: help dev db-up db-down server-run server-test web-dev web-test web-lint docker-build docker-up docker-down lint tokens tokens-check clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*##' Makefile | sort | awk 'BEGIN {FS = ":.*##"}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
@@ -29,15 +29,6 @@ web-test: ## Run web UI tests
 web-lint: ## Lint web UI
 	cd web && npm run lint
 
-js-sdk-test: ## Run JS SDK tests
-	cd sdks/js && npm ci && npm test
-
-js-sdk-build: ## Build JS SDK
-	cd sdks/js && npm ci && npm run build
-
-java-sdk-test: ## Run Java SDK tests
-	cd server && ./gradlew :mozhno-client-java:check
-
 docker-build: ## Build Docker image locally
 	docker build -t mozhno:local .
 
@@ -66,4 +57,4 @@ docs-preview: ## Preview built docs site
 
 clean: ## Clean build artifacts
 	cd server && ./gradlew clean
-	rm -rf web/dist sdks/js/dist
+	rm -rf web/dist

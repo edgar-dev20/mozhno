@@ -15,14 +15,14 @@ repos:
     rev: v3.1.0
     hooks:
       - id: prettier
-        files: '^(web|sdks/js)/.*\.(ts|tsx|js|jsx|css|json)$'
+        files: '^web/.*\.(ts|tsx|js|jsx|css|json)$'
         types_or: [text]
 
   - repo: https://github.com/pre-commit/mirrors-eslint
     rev: v9.0.0
     hooks:
       - id: eslint
-        files: '^(web|sdks/js)/.*\.(ts|tsx)$'
+        files: '^web/.*\.(ts|tsx)$'
         args: ['--fix']
         additional_dependencies:
           - eslint@^9.0.0

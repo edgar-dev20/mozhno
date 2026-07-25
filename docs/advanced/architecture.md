@@ -111,7 +111,6 @@ RUN npx vite build --outDir /static --emptyOutDir --config vite.config.js
 FROM eclipse-temurin:25-jdk-alpine AS java-builder
 WORKDIR /src
 COPY server/ ./server/
-COPY sdks/java/ ./sdks/java/
 COPY --from=web-builder /static ./server/mozhno-app/src/main/resources/static
 WORKDIR /src/server
 RUN ./gradlew --no-daemon :mozhno-app:bootJar -x javadoc

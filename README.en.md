@@ -223,8 +223,6 @@ cd web && npm ci && npm run dev
 ```bash
 cd server && ./gradlew check   # Server tests
 cd web && npm test             # Web UI tests
-cd sdks/js && npm test         # JS SDK tests
-cd server && ./gradlew :mozhno-client-java:check   # Java SDK tests
 ```
 
 </details>

@@ -29,20 +29,11 @@ npm test                           # Vitest тесты
 
 ### JS SDK
 
-```bash
-cd sdks/js
-npm ci
-npm run build
-npm test
-```
+[Отдельный репозиторий →](https://github.com/mozhno-dev/mozhno-js-sdk)
 
 ### Java SDK
 
-```bash
-cd server
-./gradlew :mozhno-client-java:build
-./gradlew :mozhno-client-java:test
-```
+[Отдельный репозиторий →](https://github.com/mozhno-dev/mozhno-java-sdk)
 
 ## Branching
 
@@ -76,7 +67,7 @@ cd server
 2. Установите pre-commit хуки: `pre-commit install`
 3. Создайте ветку от `main`: `git checkout -b feature/my-feature`
 4. Внесите изменения, добавьте тесты
-5. Убедитесь, что тесты и линтеры проходят: `./gradlew check` (server) или `npm test && npm run lint` (web/sdk)
+5. Убедитесь, что тесты и линтеры проходят: `./gradlew check` (server) или `npm test && npm run lint` (web)
 6. Следуйте стилю кода в существующих файлах (4 пробела в Java, 2 пробела в TS/TSX)
 7. Коммиты в формате Conventional Commits
 8. Создайте PR в `main`
