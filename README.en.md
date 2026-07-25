@@ -141,37 +141,16 @@ Server — Spring Boot 4.0 / JDK 25. Web UI — React 19 SPA (Vite, Tailwind CSS
 
 ---
 
+---
+
 ### SDKs
 
-**Java**
-```java
-var config = MozhnoConfig.builder()
-    .appName("my-app")
-    .instanceId("instance-1")
-    .mozhnoUrl("https://flags.example.com")
-    .apiKey("env-abc123")
-    .build();
+SDKs live in separate repositories:
 
-var client = new DefaultMozhnoClient(config);
-client.start();
+- **[Java SDK](https://github.com/mozhno-dev/mozhno-java-sdk)** — `dev.mozhno:mozhno-client-java`, JDK 17+
+- **[JavaScript/TypeScript SDK](https://github.com/mozhno-dev/mozhno-js-sdk)** — `@mozhno/client-js`, browser + Node.js
 
-var ctx = MozhnoContext.builder().userId("42").build();
-boolean on = client.isEnabled("new-checkout", ctx);
-```
-
-**JavaScript / TypeScript**
-```typescript
-import { MozhnoClient } from '@mozhno/client-js';
-
-const client = new MozhnoClient({
-  url: 'https://flags.example.com',
-  apiKey: 'env-abc123',
-  appName: 'my-app',
-});
-await client.start();
-
-const on = client.isEnabled('new-checkout', { userId: '42' });
-```
+See each repo for installation and docs.
 
 ---
 
@@ -216,8 +195,20 @@ make server-run    # build web static assets + run the server (dev profile)
 make web-dev       # web UI with HMR
 make server-test   # server tests
 make web-test      # web tests
-make js-sdk-test   # JS SDK tests
-make java-sdk-test # Java SDK tests
+```
+
+<details>
+<summary>Manual setup</summary>
+
+```bash
+docker compose up -d postgres
+cd server && ./gradlew :mozhno-app:bootRun
+cd web && npm ci && npm run dev
+```
+
+```bash
+cd server && ./gradlew check   # Server tests
+cd web && npm test             # Web tests
 ```
 
 <details>

@@ -10,8 +10,8 @@ package, open that package's `SKILL.md` for the real conventions and patterns.**
 |---------------------|-----------------|
 | `server/` (Java backend) | [`server/SKILL.md`](server/SKILL.md) — `mozhno-server` skill |
 | `web/` (React UI) | [`web/SKILL.md`](web/SKILL.md) — `mozhno-web` skill |
-| **Building or reworking any UI** | [`web/DESIGN-THINKING.md`](web/DESIGN-THINKING.md) — tool-agnostic design process (brief → constrain → states → critique → see). Follow it before writing JSX. |
-| `sdks/java`, `sdks/js` | [`sdks/SKILL.md`](sdks/SKILL.md) — `mozhno-sdks` skill |
+| Java SDK | [`mozhno-java-sdk`](https://github.com/mozhno-dev/mozhno-java-sdk) (separate repo) |
+| JS/TS SDK | [`mozhno-js-sdk`](https://github.com/mozhno-dev/mozhno-js-sdk) (separate repo) |
 
 Keep this file as an index — do **not** duplicate package details here (avoids drift). Put
 package-specific rules in the relevant `SKILL.md`.
@@ -22,7 +22,6 @@ package-specific rules in the relevant `SKILL.md`.
 |------|------|
 | `server/` | Spring Boot 4 / JDK 25 backend (Gradle multi-module: `mozhno-spi`, `mozhno-core`, `mozhno-web-api`, `mozhno-app`) |
 | `web/` | React 19 SPA (Vite, Tailwind v4), published as `@mozhno/core-ui`; built into the server's static assets |
-| `sdks/` | `java`, `js` client SDKs |
 | `packages/` | shared packages — `design-tokens` (canonical OKLCH token spec; generates CSS for `web` + `docs`) |
 | `docs/` | VitePress documentation site |
 
@@ -38,8 +37,6 @@ The server serves the built web UI as static assets — one self-contained artif
 | `make server-test` | `./gradlew check jacocoTestReport` |
 | `make web-dev` / `make web-test` / `make web-lint` | Web dev server / tests / lint |
 | `cd web && npm run storybook` / `npm run test-storybook` | Storybook component workbench (port 6006) / run story tests |
-| `make js-sdk-test` / `make js-sdk-build` | JS SDK tests / build |
-| `make java-sdk-test` | `./gradlew :mozhno-client-java:check` |
 | `make docker-up` / `make docker-down` | Full stack via docker-compose |
 
 **Requirements:** JDK 25 (server), JDK 17+ (SDK), Node.js 24, PostgreSQL 15+.
@@ -87,7 +84,7 @@ Verify only the area(s) you touched, then confirm green before declaring done:
   must both be updated (i18n stays in sync — enforced by a key-parity test). For any new or changed
   shared/reusable component or token, **add or update its Storybook story** and run
   `cd web && npm run test-storybook` (green).
-- **JS SDK:** `make js-sdk-test`. **Java SDK:** `make java-sdk-test`.
+- **JS SDK:** tests in `mozhno-js-sdk` repo. **Java SDK:** tests in `mozhno-java-sdk` repo.
 - No `@Deprecated`/`@deprecated` calls introduced; no secrets committed.
 - Do not commit unless explicitly asked.
 

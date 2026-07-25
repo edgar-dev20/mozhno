@@ -46,7 +46,6 @@ strictly `spi ← core ← web-api ← app`.
 | `mozhno-core` | `server/mozhno-core` | Domain logic: entities, JDBC repositories, `@Service` classes, events, security, exceptions, OSS SPI impls, Flyway migrations. |
 | `mozhno-web-api` | `server/mozhno-web-api` | REST layer: `@RestController`s, request/response DTOs, **assemblers**, `GlobalExceptionHandler`. |
 | `mozhno-app` | `server/mozhno-app` | Spring Boot entry point (`Server.java`), `application.yml`, logging config, embedded web static assets, metrics config. |
-| `mozhno-client-java` | `sdks/java` (aliased) | Java SDK, built from the same Gradle build. |
 
 **`mozhno-core` domain packages:** `apikeys, audit, auth, client, common, config, contexts,
 environments, events, exception, flags` (+ `flags/strategy`)`, integrations, logging, mail,

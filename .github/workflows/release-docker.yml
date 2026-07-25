@@ -48,25 +48,9 @@ jobs:
         working-directory: web
         run: npm ci && npm test
 
-  test-js-sdk:
-    name: Test JS SDK
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: sdks/js/package-lock.json
-
-      - name: Install and test
-        working-directory: sdks/js
-        run: npm ci && npm test
-
   publish-docker:
     name: Publish Docker image
-    needs: [test-server, test-web, test-js-sdk]
+    needs: [test-server, test-web]
     runs-on: ubuntu-latest
     permissions:
       contents: write

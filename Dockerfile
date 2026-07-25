@@ -26,8 +26,6 @@ COPY server/mozhno-core/ ./server/mozhno-core/
 COPY server/mozhno-web-api/ ./server/mozhno-web-api/
 COPY server/mozhno-app/ ./server/mozhno-app/
 
-COPY sdks/java/ ./sdks/java/
-
 COPY --from=web-builder /static ./server/mozhno-app/src/main/resources/static
 
 WORKDIR /src/server

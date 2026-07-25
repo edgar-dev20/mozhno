@@ -140,37 +140,16 @@ docker compose up -d
 
 ---
 
+---
+
 ### SDK
 
-**Java**
-```java
-var config = MozhnoConfig.builder()
-    .appName("my-app")
-    .instanceId("instance-1")
-    .mozhnoUrl("https://flags.example.com")
-    .apiKey("env-abc123")
-    .build();
+SDK живут в отдельных репозиториях:
 
-var client = new DefaultMozhnoClient(config);
-client.start();
+- **[Java SDK](https://github.com/mozhno-dev/mozhno-java-sdk)** — `dev.mozhno:mozhno-client-java`, JDK 17+
+- **[JavaScript/TypeScript SDK](https://github.com/mozhno-dev/mozhno-js-sdk)** — `@mozhno/client-js`, browser + Node.js
 
-var ctx = MozhnoContext.builder().userId("42").build();
-boolean on = client.isEnabled("new-checkout", ctx);
-```
-
-**JavaScript / TypeScript**
-```typescript
-import { MozhnoClient } from '@mozhno/client-js';
-
-const client = new MozhnoClient({
-  url: 'https://flags.example.com',
-  apiKey: 'env-abc123',
-  appName: 'my-app',
-});
-await client.start();
-
-const on = client.isEnabled('new-checkout', { userId: '42' });
-```
+Установка и документация — в соответствующих репозиториях.
 
 ---
 
@@ -215,8 +194,6 @@ make server-run    # сборка web-статики + запуск сервер
 make web-dev       # web UI с HMR
 make server-test   # тесты сервера
 make web-test      # тесты web
-make js-sdk-test   # тесты JS SDK
-make java-sdk-test # тесты Java SDK
 ```
 
 <details>
@@ -231,8 +208,6 @@ cd web && npm ci && npm run dev
 ```bash
 cd server && ./gradlew check   # Тесты сервера
 cd web && npm test             # Тесты веб-интерфейса
-cd sdks/js && npm test         # Тесты JS SDK
-cd server && ./gradlew :mozhno-client-java:check   # Тесты Java SDK
 ```
 
 </details>

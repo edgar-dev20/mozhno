@@ -16,9 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       server: ${{ steps.filter.outputs.server }}
-      java_sdk: ${{ steps.filter.outputs.java_sdk }}
       web: ${{ steps.filter.outputs.web }}
-      js_sdk: ${{ steps.filter.outputs.js_sdk }}
       design_tokens: ${{ steps.filter.outputs.design_tokens }}
     steps:
       - uses: actions/checkout@v4
@@ -29,15 +27,9 @@ jobs:
             server:
               - '.github/workflows/ci.yml'
               - 'server/**'
-            java_sdk:
-              - '.github/workflows/ci.yml'
-              - 'sdks/java/**'
             web:
               - '.github/workflows/ci.yml'
               - 'web/**'
-            js_sdk:
-              - '.github/workflows/ci.yml'
-              - 'sdks/js/**'
             design_tokens:
               - '.github/workflows/ci.yml'
               - 'packages/design-tokens/**'
@@ -104,28 +96,6 @@ jobs:
         working-directory: web
         run: npm audit --audit-level=high
 
-  audit-js-sdk:
-    name: Audit JS SDK dependencies
-    needs: changes
-    if: ${{ needs.changes.outputs.js_sdk == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: sdks/js/package-lock.json
-
-      - name: Install dependencies
-        working-directory: sdks/js
-        run: npm ci
-
-      - name: Audit dependencies
-        working-directory: sdks/js
-        run: npm audit --audit-level=high
-
   lint-web:
     name: Lint web UI
     needs: changes
@@ -148,32 +118,10 @@ jobs:
         working-directory: web
         run: npm run lint
 
-  lint-js-sdk:
-    name: Lint JS SDK
-    needs: changes
-    if: ${{ needs.changes.outputs.js_sdk == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: sdks/js/package-lock.json
-
-      - name: Install dependencies
-        working-directory: sdks/js
-        run: npm ci
-
-      - name: Lint
-        working-directory: sdks/js
-        run: npm run lint
-
   test-server:
     name: Test server (Java ${{ matrix.java }})
     needs: changes
-    if: ${{ needs.changes.outputs.server == 'true' || needs.changes.outputs.java_sdk == 'true' }}
+    if: ${{ needs.changes.outputs.server == 'true' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -226,32 +174,10 @@ jobs:
         working-directory: web
         run: npm run test:coverage
 
-  test-js-sdk:
-    name: Test JS SDK (Node.js)
-    needs: changes
-    if: ${{ needs.changes.outputs.js_sdk == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: sdks/js/package-lock.json
-
-      - name: Install dependencies
-        working-directory: sdks/js
-        run: npm ci
-
-      - name: Run tests with coverage
-        working-directory: sdks/js
-        run: npm run test:coverage
-
   codeql:
     name: CodeQL Analysis
     needs: changes
-    if: ${{ needs.changes.outputs.server == 'true' || needs.changes.outputs.java_sdk == 'true' || needs.changes.outputs.web == 'true' || needs.changes.outputs.js_sdk == 'true' }}
+    if: ${{ needs.changes.outputs.server == 'true' || needs.changes.outputs.web == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       security-events: write
