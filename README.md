@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/mozhno-dev/mozhno/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mozhno-dev/mozhno/ci.yml?branch=main&label=CI&logo=github&style=flat-square" alt="CI" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-BSL_1.1-lightgrey?style=flat-square" alt="BSL 1.1" /></a>
-  <a href="https://hub.docker.com/r/mozhno/mozhno"><img src="https://img.shields.io/badge/Docker-mozhno/mozhno-blue?style=flat-square&logo=docker" alt="Docker" /></a>
+  <a href="https://hub.docker.com/r/mozhnodev/mozhno"><img src="https://img.shields.io/badge/Docker-mozhnodev/mozhno-blue?style=flat-square&logo=docker" alt="Docker" /></a>
   <a href="https://github.com/mozhno-dev/mozhno/stargazers"><img src="https://img.shields.io/github/stars/mozhno-dev/mozhno?style=flat-square&logo=github&color=fedc32" alt="Stars" /></a>
 </p>
 
@@ -96,7 +96,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   mozhno:
-    image: mozhno/mozhno:latest
+    image: mozhnodev/mozhno:latest
     ports:
       - '8080:8080'
     environment:

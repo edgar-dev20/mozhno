@@ -46,7 +46,7 @@ services:
       - mozhno-net
 
   mozhno:
-    image: mozhno/mozhno:latest
+    image: mozhnodev/mozhno:latest
     container_name: mozhno-server
     restart: unless-stopped
     ports:
@@ -253,7 +253,7 @@ The resulting image contains only the JRE and the pre-built static resources emb
 
 ```bash
 # 1. Update the image tag in docker-compose.yml
-#    image: mozhno/mozhno:v1.1.0
+#    image: mozhnodev/mozhno:v1.1.0
 
 # 2. Pull the new image and restart
 docker compose pull mozhno
@@ -331,6 +331,6 @@ flags.example.com {
 | 6 | Set up TLS via Nginx/Caddy/Traefik | See section above |
 | 7 | Increase connection pool | `MOZHNO_DB_POOL_MAX_SIZE=30` |
 | 8 | Configure SMTP for emails | `MOZHNO_SMTP_HOST`, `MOZHNO_SMTP_PORT`, `MOZHNO_SMTP_USERNAME`, `MOZHNO_SMTP_PASSWORD` |
-| 9 | Pin the image version | `image: mozhno/mozhno:v1.0.0` |
+| 9 | Pin the image version | `image: mozhnodev/mozhno:v1.0.0` |
 | 10 | Set up PostgreSQL backups | `pg_dump` or WAL archiving, see [Database](/en/self-hosting/database) |
 | 11 | Set up monitoring | Prometheus, alerts — see [Monitoring](/en/self-hosting/monitoring) |

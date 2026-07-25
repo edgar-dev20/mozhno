@@ -7,7 +7,7 @@
 Официальный образ публикуется на Docker Hub:
 
 ```
-mozhno/mozhno:latest
+mozhnodev/mozhno:latest
 ```
 
 Образ собирается по трёхэтапному Dockerfile:
@@ -51,7 +51,7 @@ services:
           cpus: '0.25'
 
   mozhno:
-    image: mozhno/mozhno:latest
+    image: mozhnodev/mozhno:latest
     restart: unless-stopped
     ports:
       - '${MOZHNO_SERVER_PORT:-8080}:8080'
@@ -273,8 +273,8 @@ openssl rand -base64 32
 Перед развёртыванием проверьте образ сканером:
 
 ```bash
-docker scout quickview mozhno/mozhno:latest
-trivy image mozhno/mozhno:latest
+docker scout quickview mozhnodev/mozhno:latest
+trivy image mozhnodev/mozhno:latest
 ```
 
 ## Сборка образа локально
@@ -288,7 +288,7 @@ make docker-build
 Или вручную:
 
 ```bash
-docker build -t mozhno/mozhno:latest .
+docker build -t mozhnodev/mozhno:latest .
 ```
 
 Dockerfile использует многоэтапную сборку (multi-stage build), поэтому итоговый образ не содержит Node.js, npm-зависимости или JDK — только JRE и артефакты.
@@ -299,9 +299,9 @@ Flyway-миграции запускаются автоматически при
 
 ## Где брать образ
 
-- **Docker Hub:** `mozhno/mozhno:latest`
-- **Теги версий:** `mozhno/mozhno:v1.0.0`
-- **Digest (для неизменяемости):** `mozhno/mozhno@sha256:...`
+- **Docker Hub:** `mozhnodev/mozhno:latest`
+- **Теги версий:** `mozhnodev/mozhno:v1.0.0`
+- **Digest (для неизменяемости):** `mozhnodev/mozhno@sha256:...`
 
 Рекомендуется фиксировать конкретную версию или digest для продакшен-окружения, чтобы избежать неожиданных изменений.
 
@@ -311,7 +311,7 @@ Flyway-миграции запускаются автоматически при
 
 ```bash
 # 1. Обновить тег образа в docker-compose.yml
-#    image: mozhno/mozhno:v1.1.0
+#    image: mozhnodev/mozhno:v1.1.0
 
 # 2. Загрузить новый образ и перезапустить
 docker compose pull mozhno
@@ -405,7 +405,7 @@ flags.example.com {
 | 6 | Поставить TLS через Nginx/Caddy/Traefik | См. секцию выше |
 | 7 | Увеличить пул соединений | `MOZHNO_DB_POOL_MAX_SIZE=30` |
 | 8 | Настроить SMTP для писем | `MOZHNO_SMTP_HOST`, `MOZHNO_SMTP_PORT`, `MOZHNO_SMTP_USERNAME`, `MOZHNO_SMTP_PASSWORD` |
-| 9 | Фиксировать версию образа | `image: mozhno/mozhno:v1.0.0` |
+| 9 | Фиксировать версию образа | `image: mozhnodev/mozhno:v1.0.0` |
 | 10 | Настроить бэкап PostgreSQL | `pg_dump` или WAL-архивация, см. [База данных](/self-hosting/database) |
 | 11 | Настроить мониторинг | Prometheus, алерты — см. [Мониторинг](/self-hosting/monitoring) |
 

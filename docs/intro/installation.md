@@ -16,7 +16,7 @@
 Готовый образ публикуется на Docker Hub:
 
 ```
-mozhno/mozhno:latest
+mozhnodev/mozhno:latest
 ```
 
 ### Docker Compose
@@ -40,7 +40,7 @@ services:
       retries: 5
 
   mozhno:
-    image: mozhno/mozhno:latest
+    image: mozhnodev/mozhno:latest
     ports:
       - '8080:8080'
     environment:

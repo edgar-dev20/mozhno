@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: mozhno/mozhno
+  IMAGE_NAME: mozhnodev/mozhno
 
 jobs:
   test-server:

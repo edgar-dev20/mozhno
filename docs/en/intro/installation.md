@@ -16,7 +16,7 @@ This guide covers all installation methods for **можно**<span class=brand-d
 The fastest way to get running is with the official Docker image.
 
 ```bash
-docker pull mozhno/mozhno:latest
+docker pull mozhnodev/mozhno:latest
 ```
 
 ### With Docker Compose
@@ -40,7 +40,7 @@ services:
       retries: 5
 
   mozhno:
-    image: mozhno/mozhno:latest
+    image: mozhnodev/mozhno:latest
     ports:
       - '8080:8080'
     environment:

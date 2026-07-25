@@ -11,7 +11,7 @@
 ```yaml
 services:
   mozhno:
-    image: mozhno/mozhno:latest
+    image: mozhnodev/mozhno:latest
     environment:
       MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET}   # from .env or host environment
       MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
@@ -26,7 +26,7 @@ docker run -p 8080:8080 \
   -e MOZHNO_JWT_SECRET=$(openssl rand -base64 32) \
   -e MOZHNO_DB_URL=jdbc:postgresql://db:5432/feature_flags \
   -e MOZHNO_DB_PASSWORD=secret \
-  mozhno/mozhno:latest
+  mozhnodev/mozhno:latest
 ```
 
 **`.env` file** (picked up by Docker Compose automatically):
@@ -111,7 +111,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
 
   mozhno:
-    image: mozhno/mozhno:latest
+    image: mozhnodev/mozhno:latest
     ports:
       - '8080:8080'
     environment:
