@@ -69,7 +69,7 @@ jobs:
     needs: [test-server, test-web, test-js-sdk]
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
       attestations: write
       id-token: write
