@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, vi, beforeEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
-import { axe } from 'vitest-axe';
+import { checkA11y } from '@/test/a11y-helpers';
 import { FlagMetricsDialog } from '@/app/components/FlagMetricsDialog';
 import { api } from '@/api';
 
@@ -37,7 +37,6 @@ describe('FlagMetricsDialog a11y', () => {
     await waitFor(() => {
       expect(document.querySelector('[role="dialog"]')).toBeTruthy();
     });
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 });

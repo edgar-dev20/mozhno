@@ -1,3 +1,9 @@
 export { EmptyFlagsIllustration } from './EmptyFlags';
 export { EmptySegmentsIllustration } from './EmptySegments';
 export { EmptyKeysIllustration } from './EmptyKeys';
+export { EmptyTagsIllustration } from './EmptyTags';
+export { EmptyConstraintsIllustration } from './EmptyConstraints';
+export { EmptyAuditLogIllustration } from './EmptyAuditLog';
+export { EmptyUsersIllustration } from './EmptyUsers';
+export { EmptySettingsIllustration } from './EmptySettings';
+export { EmptyIntegrationsIllustration } from './EmptyIntegrations';

@@ -24,6 +24,7 @@ import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { UserTableSkeleton } from '@/app/components/skeletons';
 import { api, UserDto } from '@/api';
 import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage, Fab } from '@/shared';
+import { EmptyUsersIllustration } from '@/shared/components/illustrations';
 import { useT, useLocale, t } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
@@ -430,7 +431,7 @@ export function Users() {
           <UserTableSkeleton count={4} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Shield size={24} className="text-brand" />}
+            illustration={<EmptyUsersIllustration />}
             title={t('users.emptyTitle')}
             description={
               filter || roleFilter || statusFilter

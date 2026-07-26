@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { axe } from 'vitest-axe';
+import { checkA11y } from '@/test/a11y-helpers';
 import { SidePanel } from '@/app/components/SidePanel';
 
 describe('SidePanel', () => {
@@ -15,8 +15,7 @@ describe('SidePanel', () => {
         <p>Content</p>
       </SidePanel>,
     );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 
   it('has no accessibility violations without description', async () => {
@@ -25,8 +24,7 @@ describe('SidePanel', () => {
         <p>Content</p>
       </SidePanel>,
     );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 
   it('renders title', () => {

@@ -21,6 +21,7 @@ import { api, Environment } from '@/api';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { PluginSlot } from '@/app/components/PluginSlot';
 import { SectionHeader, EmptyState, GradientButton, LoadingState, ColorPicker, Badge, getEnvColor, getErrorMessage } from '@/shared';
+import { EmptySettingsIllustration } from '@/shared/components/illustrations';
 import { SidePanel } from '@/app/components/SidePanel';
 import { Switch } from '@/app/components/ui/switch';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
@@ -561,7 +562,7 @@ export function Settings() {
                 </div>
               ) : (
                 <EmptyState
-                  icon={<Globe size={28} className="text-brand" />}
+                  illustration={<EmptySettingsIllustration />}
                   title={t('settings.noEnvs')}
                   description={t('settings.noEnvsDescription')}
                 />

@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, vi, beforeEach } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
-import { axe } from 'vitest-axe';
+import { checkA11y } from '@/test/a11y-helpers';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 
 describe('ConfirmDialog a11y', () => {
@@ -26,8 +26,7 @@ describe('ConfirmDialog a11y', () => {
     await waitFor(() => {
       expect(document.querySelector('[role="alertdialog"]')).toBeTruthy();
     });
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 
   it('has no accessibility violations in default mode', async () => {
@@ -45,7 +44,6 @@ describe('ConfirmDialog a11y', () => {
     await waitFor(() => {
       expect(document.querySelector('[role="alertdialog"]')).toBeTruthy();
     });
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 });

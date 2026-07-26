@@ -19,6 +19,7 @@ import {
   getErrorMessage,
   Fab,
 } from '@/shared';
+import { EmptyTagsIllustration } from '@/shared/components/illustrations';
 import { useProjectQuery, useTagsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
@@ -186,7 +187,7 @@ export function Tags() {
         <TagCardSkeletonList count={6} />
       ) : tags.length === 0 ? (
         <EmptyState
-          icon={<TagIcon size={28} className="text-info" />}
+          illustration={<EmptyTagsIllustration />}
           title={t('tags.emptyTitle')}
           description={t('tags.emptyDescription')}
           buttonLabel={t('tags.create')}

@@ -1,13 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
-import { axe } from 'vitest-axe';
+import { checkA11y } from '@/test/a11y-helpers';
 import { SkipLink } from '@/shared/components/SkipLink';
 
 describe('SkipLink', () => {
   it('has no accessibility violations', async () => {
     const { container } = render(<SkipLink />);
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 
   it('links to main-content', () => {

@@ -24,6 +24,7 @@ import { toast } from 'sonner';
 import { api, AuditEvent } from '@/api';
 import { TipCard } from '@/app/components/TipCard';
 import { SectionHeader, EmptyState, SearchInput, getErrorMessage } from '@/shared';
+import { EmptyAuditLogIllustration } from '@/shared/components/illustrations';
 
 const DateRangePicker = lazy(() =>
   import('@/shared/components/DateRangePicker').then((m) => ({ default: m.DateRangePicker })),
@@ -370,7 +371,7 @@ export function AuditLog() {
           <TableSkeleton rows={5} cols={5} />
         ) : displayedEvents.length === 0 ? (
           <EmptyState
-            icon={<Activity size={24} className="text-brand" />}
+            illustration={<EmptyAuditLogIllustration />}
             title={t('audit.emptyTitle')}
             description={
               filterType || dateFrom || dateTo || searchQuery

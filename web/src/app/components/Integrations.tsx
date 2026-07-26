@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useT } from '@/i18n';
-import { Plus, Webhook, Trash2, Bell } from '@/shared/icons';
+import { Plus, Trash2, Bell } from '@/shared/icons';
 import { AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { api, type Integration } from '@/api';
@@ -8,6 +8,7 @@ import { SidePanel } from '@/app/components/SidePanel';
 import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SectionHeader, EmptyState, GradientButton, getErrorMessage, Fab } from '@/shared';
+import { EmptyIntegrationsIllustration } from '@/shared/components/illustrations';
 import { IntegrationCardSkeletonList } from '@/app/components/skeletons';
 import { useProjectQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -149,7 +150,7 @@ export function Integrations() {
         <IntegrationCardSkeletonList count={3} />
       ) : isError ? (
         <EmptyState
-          icon={<Webhook size={28} className="text-destructive" />}
+          illustration={<EmptyIntegrationsIllustration />}
           title={t('integrations.loadError')}
           description={getErrorMessage(error)}
           buttonLabel={t('common.retry')}
@@ -157,7 +158,7 @@ export function Integrations() {
         />
       ) : items.length === 0 ? (
         <EmptyState
-          icon={<Webhook size={28} className="text-info" />}
+          illustration={<EmptyIntegrationsIllustration />}
           title={t('integrations.emptyTitle')}
           description={t('integrations.emptyDescription')}
           buttonLabel={t('integrations.connect')}

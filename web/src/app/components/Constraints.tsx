@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Trash2, Box, Braces, Clock, User, Type, Settings2, X, Upload } from '@/shared/icons';
+import { Plus, Trash2, Braces, Clock, User, Type, Settings2, X, Upload } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 import { SidePanel } from '@/app/components/SidePanel';
@@ -11,6 +11,7 @@ import { SegmentIcon } from '@/app/components/SegmentIcon';
 import { ContextType, CONTEXT_TYPES, type ContextTypeValue } from '@/app/components/contextTypes';
 import { api, ContextDefinition, SegmentResponse } from '@/api';
 import { SectionHeader, EmptyState, ColorIcon, FormField, GradientButton, ErrorBox, Badge, getErrorMessage, Fab } from '@/shared';
+import { EmptyConstraintsIllustration } from '@/shared/components/illustrations';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useContextsQuery, useSegmentsQuery } from '@/app/hooks/queries';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -294,7 +295,7 @@ export function Constraints() {
         <TableSkeleton rows={4} cols={4} />
       ) : contexts.length === 0 ? (
         <EmptyState
-          icon={<Box size={28} className="text-info dark:text-info" />}
+          illustration={<EmptyConstraintsIllustration />}
           title={t('constraints.emptyTitle')}
           description={t('constraints.emptyDescription')}
           buttonLabel={t('constraints.create')}

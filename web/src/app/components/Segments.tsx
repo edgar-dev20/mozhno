@@ -46,6 +46,7 @@ import {
   getErrorMessage,
   Fab,
 } from '@/shared';
+import { EmptySegmentsIllustration } from '@/shared/components/illustrations';
 import { SegmentCardSkeletonList } from '@/app/components/skeletons';
 import { useT } from '@/i18n';
 
@@ -374,7 +375,7 @@ export function Segments() {
         <SegmentCardSkeletonList count={3} />
       ) : segments.length === 0 ? (
         <EmptyState
-          icon={<SegmentIcon name="Users" size={28} className="text-brand dark:text-brand" />}
+          illustration={<EmptySegmentsIllustration />}
           title={t('segments.emptyTitle')}
           description={t('segments.emptyDescription')}
           buttonLabel={t('segments.emptyButton')}

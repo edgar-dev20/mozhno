@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
-import { axe } from 'vitest-axe';
+import { checkA11y } from '@/test/a11y-helpers';
 import { SearchInput } from '@/shared/components/SearchInput';
 
 describe('SearchInput a11y', () => {
@@ -14,13 +14,11 @@ describe('SearchInput a11y', () => {
     const { container } = render(
       <SearchInput value="" onChange={onChange} placeholder="Search..." />,
     );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 
   it('has no accessibility violations with value', async () => {
     const { container } = render(<SearchInput value="test" onChange={onChange} />);
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 });

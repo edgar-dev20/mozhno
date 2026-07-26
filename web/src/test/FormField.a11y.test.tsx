@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, vi, beforeEach } from 'vitest';
 import { render } from '@testing-library/react';
-import { axe } from 'vitest-axe';
+import { checkA11y } from '@/test/a11y-helpers';
 import { FormField } from '@/shared/components/FormField';
 
 describe('FormField a11y', () => {
@@ -14,8 +14,7 @@ describe('FormField a11y', () => {
         <input type="text" placeholder="Enter name" />
       </FormField>,
     );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 
   it('has no accessibility violations with hint', async () => {
@@ -24,8 +23,7 @@ describe('FormField a11y', () => {
         <input type="email" placeholder="Enter email" />
       </FormField>,
     );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 
   it('has no accessibility violations with character counter', async () => {
@@ -34,7 +32,6 @@ describe('FormField a11y', () => {
         <textarea placeholder="Tell us about yourself" />
       </FormField>,
     );
-    const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    await checkA11y(container);
   });
 });

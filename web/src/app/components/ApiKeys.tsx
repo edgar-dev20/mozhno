@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { useT } from '@/i18n';
 import { loadLocale, toIntlLocale } from '@/i18n/locale';
 import {
-  Key,
   Copy,
   Check,
   Eye,
@@ -25,6 +24,7 @@ import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { SidePanel } from '@/app/components/SidePanel';
 import { ApiKeyTableSkeleton } from '@/app/components/skeletons';
 import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, getErrorMessage, getEnvColor, envColorStyles, Fab } from '@/shared';
+import { EmptyKeysIllustration } from '@/shared/components/illustrations';
 import {
   Select,
   SelectContent,
@@ -305,7 +305,7 @@ export function ApiKeys() {
           <ApiKeyTableSkeleton count={3} />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Key size={24} className="text-brand" />}
+            illustration={<EmptyKeysIllustration />}
             title={t('apiKeys.emptyTitle')}
             description={
               searchQuery || typeFilter || envFilter !== null

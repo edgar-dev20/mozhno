@@ -1,8 +1,8 @@
 import type { FlagView } from '@/app/hooks/flagTypes';
 import type { SegmentResponse, Tag as TagType } from '@/api';
-import { Rocket } from '@/shared/icons';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { GradientButton } from '@/shared/components/GradientButton';
+import { EmptyFlagsIllustration } from '@/shared/components/illustrations';
 import { FlagCardSkeletonList } from '@/app/components/skeletons';
 import { FlagCard } from '@/app/components/flags/FlagCard';
 import { useT } from '@/i18n';
@@ -62,7 +62,7 @@ export function FlagsList({
     return (
       <div className="space-y-3">
         <EmptyState
-          icon={<Rocket size={28} className="text-brand" />}
+          illustration={<EmptyFlagsIllustration />}
           title={t('flags.noFlags')}
           description={t('flags.noFlagsDescription')}
           buttonLabel={t('flags.create')}
