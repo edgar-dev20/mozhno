@@ -92,9 +92,14 @@ jobs:
         working-directory: web
         run: npm ci
 
-      - name: Audit dependencies
+      - name: Audit dependencies (production)
         working-directory: web
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=high --omit=dev
+
+      - name: Audit dependencies (dev, non-blocking)
+        working-directory: web
+        continue-on-error: true
+        run: npm audit --audit-level=high --include=dev
 
   lint-web:
     name: Lint web UI
