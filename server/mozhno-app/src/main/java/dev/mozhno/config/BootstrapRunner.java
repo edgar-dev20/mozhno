@@ -8,12 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
  * Seeds a default admin user and default project on first launch,
- * using credentials from environment variables.
+ * using credentials from Spring environment / configuration properties.
  *
  * <p>Set {@code MOZHNO_INIT_EMAIL} and {@code MOZHNO_INIT_PASSWORD}. If both are set
  * and the database has no users, a bootstrap admin is created.
@@ -29,13 +30,16 @@ public class BootstrapRunner implements ApplicationRunner {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final PasswordEncoder passwordEncoder;
+    private final Environment environment;
 
     public BootstrapRunner(UserRepository userRepository,
                            ProjectRepository projectRepository,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           Environment environment) {
         this.userRepository = userRepository;
         this.projectRepository = projectRepository;
         this.passwordEncoder = passwordEncoder;
+        this.environment = environment;
     }
 
     @Override
@@ -48,8 +52,8 @@ public class BootstrapRunner implements ApplicationRunner {
         if (userRepository.count() > 0) {
             return;
         }
-        String email = System.getenv("MOZHNO_INIT_EMAIL");
-        String password = System.getenv("MOZHNO_INIT_PASSWORD");
+        String email = environment.getProperty("MOZHNO_INIT_EMAIL");
+        String password = environment.getProperty("MOZHNO_INIT_PASSWORD");
         if (email == null || email.isBlank() || password == null || password.isBlank()) {
             log.warn("No bootstrap admin created: set MOZHNO_INIT_EMAIL and MOZHNO_INIT_PASSWORD to seed initial user");
             return;
@@ -60,6 +64,7 @@ public class BootstrapRunner implements ApplicationRunner {
         admin.setName(email.contains("@") ? email.substring(0, email.indexOf('@')) : email);
         admin.setRole("admin");
         admin.setStatus("active");
+        admin.setLocale("en");
         userRepository.save(admin);
         log.warn(
             "Bootstrapped initial admin user: {}. Change the password immediately after first login!",
