@@ -23,6 +23,9 @@ public class ProjectSettingsService {
      * @return the project settings
      */
     public ProjectSettings getOrCreate(Integer projectId) {
+        if (projectId == null) {
+            throw new IllegalArgumentException("projectId must not be null");
+        }
         ProjectSettings settings = repository.findByProjectId(projectId);
         if (settings == null) {
             settings = new ProjectSettings();
@@ -42,6 +45,9 @@ public class ProjectSettingsService {
      * @return the updated project settings
      */
     public ProjectSettings update(Integer projectId, ProjectSettingsUpdateRequest request) {
+        if (projectId == null) {
+            throw new IllegalArgumentException("projectId must not be null");
+        }
         ProjectSettings settings = getOrCreate(projectId);
         settings.setRequireMfa(request.isRequireMfa());
         settings.setSessionTimeoutHours(request.getSessionTimeoutHours());

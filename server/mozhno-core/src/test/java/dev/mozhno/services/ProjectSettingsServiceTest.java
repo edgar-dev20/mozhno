@@ -11,6 +11,7 @@ import dev.mozhno.settings.ProjectSettingsService;
 import dev.mozhno.settings.ProjectSettingsUpdateRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ProjectSettingsServiceTest extends BaseIntegrationTest {
 
@@ -74,5 +75,23 @@ class ProjectSettingsServiceTest extends BaseIntegrationTest {
         ProjectSettings updated = projectSettingsService.update(projectId, req);
         assertThat(updated.isRequireMfa()).isFalse();
         assertThat(updated.getSessionTimeoutHours()).isEqualTo(72);
+    }
+
+    @Test
+    void getOrCreate_nullProjectId_shouldThrow() {
+        assertThatThrownBy(() -> projectSettingsService.getOrCreate(null))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("projectId must not be null");
+    }
+
+    @Test
+    void update_nullProjectId_shouldThrow() {
+        ProjectSettingsUpdateRequest req = new ProjectSettingsUpdateRequest();
+        req.setRequireMfa(false);
+        req.setSessionTimeoutHours(24);
+
+        assertThatThrownBy(() -> projectSettingsService.update(null, req))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("projectId must not be null");
     }
 }
