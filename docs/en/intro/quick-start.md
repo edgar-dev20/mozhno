@@ -23,6 +23,9 @@ services:
       MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/feature_flags
       MOZHNO_DB_USERNAME: flags_user
       MOZHNO_DB_PASSWORD: flags_password
+      MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET:-}
+      MOZHNO_INIT_EMAIL: ${MOZHNO_INIT_EMAIL:-admin@admin.com}
+      MOZHNO_INIT_PASSWORD: ${MOZHNO_INIT_PASSWORD:-admin}
     depends_on:
       - postgres
 
@@ -40,15 +43,15 @@ docker compose up -d
 
 Navigate to [`http://localhost:8080`](http://localhost:8080).
 
-## Step 4: Create the administrator and project
+## Step 4: Log in
 
-On first run, the onboarding wizard will open:
+On first launch, the server bootstraps an admin user and a default project from the `MOZHNO_INIT_EMAIL` and `MOZHNO_INIT_PASSWORD` environment variables. Defaults are `admin@admin.com` / `admin`.
 
-1. **Create the administrator** — enter an email and password. This is the first account with the ADMIN role.
-2. **Create a project** — enter name, description, and optionally a logo.
-3. **Create the first flag** — enter a key (e.g., `new-checkout`) and a name.
+1. Open [`http://localhost:8080`](http://localhost:8080)
+2. Log in with the credentials from `MOZHNO_INIT_EMAIL` / `MOZHNO_INIT_PASSWORD`
+3. **Change the password immediately** — go to «Users» → «Edit»
 
-Once the wizard is complete, you'll be taken to the dashboard.
+You will land in the dashboard with a ready-to-use "Default Project".
 
 ## Step 5: Get your API key
 

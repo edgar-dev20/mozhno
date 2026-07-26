@@ -69,6 +69,9 @@ services:
       MOZHNO_DB_POOL_MIN_IDLE: "5"
       MOZHNO_CACHE_TTL_MINUTES: "5"
 
+      MOZHNO_INIT_EMAIL: ${MOZHNO_INIT_EMAIL:-}
+      MOZHNO_INIT_PASSWORD: ${MOZHNO_INIT_PASSWORD:-}
+
       JAVA_TOOL_OPTIONS: >
         -XX:+UseZGC
         -XX:MaxRAMPercentage=75.0
@@ -148,6 +151,21 @@ JVM defaults:
 | `MOZHNO_CACHE_TTL_MINUTES` | No | `5` | In-memory cache TTL in minutes |
 | `MOZHNO_CLIENT_MAX_METRICS_PER_KEY` | No | `1000` | Max stored metrics per client key |
 | `MOZHNO_BASE_URL` | No | `http://localhost:8080` | Public base URL of the server |
+
+### Bootstrap (First Launch)
+
+On first launch with an empty database, the server bootstraps:
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `MOZHNO_INIT_EMAIL` | No | — | Email of the admin user created on first launch. If not set, no admin is created. |
+| `MOZHNO_INIT_PASSWORD` | No | — | Password for the initial admin user. |
+
+- **An admin user** — when both variables are set and no users exist in the DB
+- **A default project** named «Default Project» — when no projects exist in the DB
+
+If the variables are not set, the server starts with no users. Login will be impossible.
+Set them in `.env` or `environment` for your first launch.
 
 ## Health Checks
 
@@ -323,6 +341,7 @@ flags.example.com {
 
 | # | Action | Command / Variable |
 |---|--------|-------------------|
+| 0 | Create admin (first launch) | `MOZHNO_INIT_EMAIL`, `MOZHNO_INIT_PASSWORD` → change password after login |
 | 1 | Generate JWT secret | `openssl rand -base64 32` → `MOZHNO_JWT_SECRET` |
 | 2 | Strong database password | `MOZHNO_DB_PASSWORD` |
 | 3 | Set public domain | `MOZHNO_BASE_URL=https://flags.example.com` |

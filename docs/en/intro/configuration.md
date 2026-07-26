@@ -97,6 +97,22 @@ These are the most commonly configured environment variables:
 | `MOZHNO_CACHE_TTL_MINUTES` | `5` | Cache TTL in minutes |
 | `MOZHNO_CLIENT_MAX_METRICS_PER_KEY` | `1000` | Maximum stored metrics entries per client API key |
 
+## Bootstrap (First Launch)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MOZHNO_INIT_EMAIL` | — (not set — no admin created) | Email of the admin user created on first launch (when the DB has no users) |
+| `MOZHNO_INIT_PASSWORD` | — | Password for the initial admin user |
+
+On first launch with an empty database, the server bootstraps:
+- **An admin user** — when both `MOZHNO_INIT_EMAIL` and `MOZHNO_INIT_PASSWORD` are set, and no users exist yet
+- **A default project** named «Default Project» — when no projects exist yet
+
+If the variables are not set, the server starts with no users — login will be impossible.
+Set them or create the admin manually via a direct DB INSERT.
+
+The bootstrap admin is **not re-created** on subsequent starts — if users already exist in the DB, bootstrap is skipped.
+
 ## Docker Compose Example
 
 A minimal Docker Compose configuration with all essential variables:
@@ -126,6 +142,8 @@ services:
       MOZHNO_DB_POOL_MAX_SIZE: '20'
       MOZHNO_DB_POOL_MIN_IDLE: '5'
       MOZHNO_CACHE_TTL_MINUTES: '5'
+      MOZHNO_INIT_EMAIL: ${MOZHNO_INIT_EMAIL:-admin@admin.com}
+      MOZHNO_INIT_PASSWORD: ${MOZHNO_INIT_PASSWORD:-admin}
 ```
 
 ## Production Checklist
@@ -136,6 +154,7 @@ services:
 4. **Use environment-specific secrets** — never reuse `MOZHNO_JWT_SECRET` across staging and production.
 5. **Enable PostgreSQL SSL** — append `?ssl=true&sslmode=require` to the JDBC URL in production.
 6. **Set `MOZHNO_SERVER_PORT`** if running behind a reverse proxy on a non-standard port.
+7. **Change the admin password** — after first login with bootstrap credentials (`MOZHNO_INIT_EMAIL` / `MOZHNO_INIT_PASSWORD`), change the password immediately. Never use `admin@admin.com` / `admin` in production.
 
 ## SMTP (Email)
 

@@ -76,6 +76,9 @@ services:
       MOZHNO_JWT_REFRESH_TOKEN_TTL_DAYS: '30'
       MOZHNO_JWT_ISSUER: 'mozhno'
 
+      MOZHNO_INIT_EMAIL: ${MOZHNO_INIT_EMAIL:-}
+      MOZHNO_INIT_PASSWORD: ${MOZHNO_INIT_PASSWORD:-}
+
       JAVA_TOOL_OPTIONS: >
         -XX:+UseZGC
         -XX:MaxRAMPercentage=75.0
@@ -175,6 +178,21 @@ MOZHNO_JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
 | `MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS` | `""` | Разрешённые origin для CORS |
 | `MOZHNO_JWT_ISSUER` | `mozhno` | Издатель JWT-токенов |
 | `MOZHNO_AUDIT_RETENTION_DAYS` | `365` | Срок хранения записей аудита |
+
+### Инициализация (первый запуск)
+
+При первом запуске с пустой базой данных сервер автоматически создаёт:
+
+| Переменная | По умолчанию | Описание |
+|------------|-------------|----------|
+| `MOZHNO_INIT_EMAIL` | — | Email администратора. Если не задана — администратор не создаётся |
+| `MOZHNO_INIT_PASSWORD` | — | Пароль администратора |
+
+- **Администратора** — если заданы обе переменные и в БД нет пользователей
+- **Проект** «Default Project» — если в БД нет проектов
+
+Если переменные не заданы — сервер стартует без пользователей. Войти будет невозможно.
+Для первого входа задайте их в `.env` или `environment`.
 
 ## Проверки здоровья (Health Checks)
 
@@ -397,6 +415,7 @@ flags.example.com {
 
 | # | Действие | Команда / переменная |
 |---|----------|---------------------|
+| 0 | Создать администратора (первый запуск) | `MOZHNO_INIT_EMAIL`, `MOZHNO_INIT_PASSWORD` → после входа сменить пароль |
 | 1 | Сгенерировать JWT-секрет | `openssl rand -base64 32` → `MOZHNO_JWT_SECRET` |
 | 2 | Сложный пароль БД | `MOZHNO_DB_PASSWORD` |
 | 3 | Указать реальный домен | `MOZHNO_BASE_URL=https://flags.example.com` |
