@@ -165,14 +165,26 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
 }
 
 export async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${getToken()}` },
-    body: formData,
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw createAppError(body.error || body.message || `HTTP ${res.status}`, res.status, body);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT);
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${getToken()}` },
+      body: formData,
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw createAppError(body.error || body.message || `HTTP ${res.status}`, res.status, body);
+    }
+    return res.json() as Promise<T>;
+  } catch (err: unknown) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new AppError('Request timed out', 'TIMEOUT');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
   }
-  return res.json() as Promise<T>;
 }

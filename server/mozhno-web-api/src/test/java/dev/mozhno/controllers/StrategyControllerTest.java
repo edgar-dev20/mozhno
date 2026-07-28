@@ -48,6 +48,8 @@ class StrategyControllerTest extends BaseIntegrationTest {
         Project saved = projectRepository.save(p);
         projectId = saved.getId();
 
+        jdbcTemplate.update("UPDATE users SET project_id = ? WHERE email = ?", projectId, "strategy-test@test.com");
+
         String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"strategy-test@test.com\",\"password\":\"secret\",\"projectId\":" + projectId + "}"))

@@ -18,6 +18,8 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -108,6 +110,31 @@ public class GlobalExceptionHandler {
         body.put("code", "METHOD_NOT_ALLOWED");
         putTraceId(body);
         return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(body);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
+        long maxSizeMb = ex.getMaxUploadSize() / (1024 * 1024);
+        String message = maxSizeMb > 0
+            ? "File size exceeds the maximum allowed size of " + maxSizeMb + " MB"
+            : "File size exceeds the maximum allowed size";
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("error", message);
+        body.put("code", "UPLOAD_SIZE_EXCEEDED");
+        putTraceId(body);
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(body);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<Map<String, Object>> handleMultipart(MultipartException ex) {
+        if (ex.getCause() instanceof MaxUploadSizeExceededException cause) {
+            return handleMaxUploadSize(cause);
+        }
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("error", "Failed to process uploaded file");
+        body.put("code", "UPLOAD_SIZE_EXCEEDED");
+        putTraceId(body);
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(body);
     }
 
     @ExceptionHandler(RuntimeException.class)

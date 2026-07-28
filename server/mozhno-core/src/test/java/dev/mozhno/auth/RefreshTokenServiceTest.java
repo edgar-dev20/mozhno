@@ -38,6 +38,7 @@ class RefreshTokenServiceTest {
         user.setEmail("test@example.com");
         user.setRole("admin");
         user.setStatus("active");
+        user.setProjectId(1);
         return user;
     }
 

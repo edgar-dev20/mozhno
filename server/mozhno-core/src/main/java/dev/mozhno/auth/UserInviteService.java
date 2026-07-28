@@ -5,9 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
+import dev.mozhno.environments.Environment;
+import dev.mozhno.environments.EnvironmentRepository;
 import dev.mozhno.exception.ConflictException;
 import dev.mozhno.exception.QuotaExceededException;
 import dev.mozhno.mail.EmailTemplateService;
+import dev.mozhno.projects.Project;
+import dev.mozhno.projects.ProjectRepository;
 import dev.mozhno.spi.NotificationSpi;
 import dev.mozhno.spi.QuotaSpi;
 
@@ -31,6 +35,8 @@ public class UserInviteService {
     private final DomainEventPublisher events;
     private final QuotaSpi quotaSpi;
     private final AuthProperties authProperties;
+    private final ProjectRepository projectRepository;
+    private final EnvironmentRepository environmentRepository;
     private final String baseUrl;
 
     public UserInviteService(EmailTemplateService emailTemplateService,
@@ -41,6 +47,8 @@ public class UserInviteService {
                              DomainEventPublisher events,
                              QuotaSpi quotaSpi,
                              AuthProperties authProperties,
+                             ProjectRepository projectRepository,
+                             EnvironmentRepository environmentRepository,
                              dev.mozhno.config.MozhnoProperties mozhnoProperties) {
         this.emailTemplateService = emailTemplateService;
         this.tokenRepository = tokenRepository;
@@ -50,6 +58,8 @@ public class UserInviteService {
         this.events = events;
         this.quotaSpi = quotaSpi;
         this.authProperties = authProperties;
+        this.projectRepository = projectRepository;
+        this.environmentRepository = environmentRepository;
         this.baseUrl = mozhnoProperties.getBaseUrl();
     }
 
@@ -114,12 +124,18 @@ public class UserInviteService {
             user.setRole(token.getRole());
             user.setStatus("active");
             user.setLocale(token.getLocale() != null ? token.getLocale() : "ru");
+            Project project = createDefaultProject();
+            user.setProjectId(project.getId());
             userRepository.save(user);
         } else if ("invited".equals(user.getStatus())) {
             user.setPasswordHash(passwordEncoder.encode(password));
             user.setName(name != null ? name : user.getName());
             user.setRole(token.getRole());
             user.setStatus("active");
+            if (user.getProjectId() == null) {
+                Project project = createDefaultProject();
+                user.setProjectId(project.getId());
+            }
             userRepository.save(user);
         } else {
             throw new ConflictException("User " + token.getEmail() + " cannot accept invite (status: " + user.getStatus() + ")");
@@ -133,6 +149,36 @@ public class UserInviteService {
         return new UserDto(user.getId(), user.getEmail(), user.getName(),
             user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(),
             user.getCreatedAt(), user.getLastActiveAt());
+    }
+
+    private Project createDefaultProject() {
+        Project project = new Project();
+        project.setName("My Project");
+        project.setDescription("");
+        Project saved = projectRepository.save(project);
+
+        Environment prod = new Environment();
+        prod.setName("Production");
+        prod.setProjectId(saved.getId());
+        prod.setDescription("Live environment");
+        prod.setColor("#2d9484");
+        environmentRepository.save(prod);
+
+        Environment staging = new Environment();
+        staging.setName("Staging");
+        staging.setProjectId(saved.getId());
+        staging.setDescription("Pre-production testing");
+        staging.setColor("#e67e22");
+        environmentRepository.save(staging);
+
+        Environment dev = new Environment();
+        dev.setName("Development");
+        dev.setProjectId(saved.getId());
+        dev.setDescription("Local and shared development");
+        dev.setColor("#3498db");
+        environmentRepository.save(dev);
+
+        return saved;
     }
 
     public static class InvalidInviteTokenException extends RuntimeException {

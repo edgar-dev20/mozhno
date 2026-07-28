@@ -9,6 +9,7 @@ interface OnboardingStepperProps {
   onBack: () => void;
   onSkip: () => void;
   onFinish: () => void;
+  onSkipStepZero: () => void;
 }
 
 export function OnboardingStepper({
@@ -18,6 +19,7 @@ export function OnboardingStepper({
   onBack,
   onSkip,
   onFinish,
+  onSkipStepZero,
 }: OnboardingStepperProps) {
   const t = useT();
 
@@ -38,6 +40,14 @@ export function OnboardingStepper({
           <GradientButton onClick={onFinish}>{t('onboarding.finish')}</GradientButton>
         ) : (
           <>
+            {currentStep === 0 && (
+              <button
+                onClick={onSkipStepZero}
+                className="inline-flex items-center gap-1 px-4 py-2 text-body-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {t('onboarding.skip')}
+              </button>
+            )}
             {currentStep > 0 && (
               <button
                 onClick={onBack}

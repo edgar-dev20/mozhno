@@ -47,7 +47,7 @@ export function DashboardLayout() {
   const projectName = project?.name ?? null;
   const projectLogo = project?.logo ?? null;
 
-  const { data: enriched } = useEnrichedFlagsQuery(projectId);
+  const { data: enriched, isLoading: enrichedLoading } = useEnrichedFlagsQuery(projectId);
   const flags = useMemo(() => enriched?.flags ?? [], [enriched?.flags]);
   const segments = useMemo(() => enriched?.segments ?? [], [enriched?.segments]);
 
@@ -94,9 +94,13 @@ export function DashboardLayout() {
     queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
     queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
     queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
-    queryClient.refetchQueries({ queryKey: queryKeys.flags.enriched, type: 'active' });
-    queryClient.refetchQueries({ queryKey: queryKeys.environments.all, type: 'active' });
-    queryClient.refetchQueries({ queryKey: queryKeys.contexts.all, type: 'active' });
+  }, [queryClient]);
+
+  const handleDismissTemporary = useCallback(() => {
+    setShowOnboarding(false);
+    queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+    queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
+    queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
   }, [queryClient]);
 
   const handleProjectCreated = useCallback(() => {
@@ -112,10 +116,14 @@ export function DashboardLayout() {
       return;
     }
     if (isOnboardingComplete()) return;
-    if (flags != null && flags.length === 0) {
+    if (enrichedLoading) return;
+    if (enriched == null) return;
+    if (enriched.flags != null && enriched.flags.length === 0) {
+      setShowOnboarding(true);
+    } else if (enriched.flags != null && enriched.flags.length > 0) {
       setShowOnboarding(false);
     }
-  }, [user, projectLoading, projectId, flags]);
+  }, [user, projectLoading, projectId, enriched, enrichedLoading]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -300,8 +308,10 @@ export function DashboardLayout() {
           {showOnboarding && (
             <OnboardingWizard
               open={showOnboarding}
-              startStep={projectId === null ? 0 : 1}
+              existingProjectId={projectId}
+              existingProjectName={projectName}
               onDismiss={handleDismiss}
+              onDismissTemporary={handleDismissTemporary}
               onProjectCreated={handleProjectCreated}
             />
           )}

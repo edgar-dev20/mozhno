@@ -92,7 +92,7 @@ public class RefreshTokenService {
      * @throws TokenReuseException if the token is unknown, expired, revoked, or reused
      */
     @Transactional
-    public TokenPair refresh(String rawRefreshToken, Integer projectId) {
+    public TokenPair refresh(String rawRefreshToken) {
         String hash = sha256(rawRefreshToken);
         RefreshToken existing = refreshTokenRepository.findByHashForUpdate(hash);
 
@@ -139,13 +139,8 @@ public class RefreshTokenService {
         newToken.setRevoked(false);
         refreshTokenRepository.save(newToken);
 
-        String accessToken = jwtService.generateAccessToken(user, projectId);
+        String accessToken = jwtService.generateAccessToken(user, user.getProjectId());
         return new TokenPair(accessToken, newRaw);
-    }
-
-    @Transactional
-    public TokenPair refresh(String rawRefreshToken) {
-        return refresh(rawRefreshToken, null);
     }
 
     /**

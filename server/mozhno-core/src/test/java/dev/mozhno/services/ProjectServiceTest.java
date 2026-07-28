@@ -222,11 +222,27 @@ class ProjectServiceTest {
     }
 
     private static byte[] pngBytes() {
-        return new byte[]{(byte) 0x89, 'P', 'N', 'G', 13, 10, 26, 10, 0, 0, 0, 0};
+        try {
+            var img = new java.awt.image.BufferedImage(1, 1, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            img.setRGB(0, 0, 0xFF0000);
+            var out = new java.io.ByteArrayOutputStream();
+            javax.imageio.ImageIO.write(img, "PNG", out);
+            return out.toByteArray();
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static byte[] jpegBytes() {
-        return new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0, 0, 16, 'J', 'F'};
+        try {
+            var img = new java.awt.image.BufferedImage(1, 1, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            img.setRGB(0, 0, 0x00FF00);
+            var out = new java.io.ByteArrayOutputStream();
+            javax.imageio.ImageIO.write(img, "JPEG", out);
+            return out.toByteArray();
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test

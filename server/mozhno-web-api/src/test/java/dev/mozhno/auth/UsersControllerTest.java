@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import dev.mozhno.BaseIntegrationTest;
+import dev.mozhno.projects.Project;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -26,6 +27,7 @@ class UsersControllerTest extends BaseIntegrationTest {
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
     private String authToken;
+    private Integer testProjectId;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -35,9 +37,13 @@ class UsersControllerTest extends BaseIntegrationTest {
                 .build();
         objectMapper = new ObjectMapper();
 
+        Project p = new Project();
+        p.setName("Test Project");
+        testProjectId = projectRepository.save(p).getId();
+
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
-            "users-admin@test.com", passwordEncoder.encode("secret"), "admin", "active");
+            "INSERT INTO users (email, password_hash, role, status, project_id) VALUES (?, ?, ?, ?, ?)",
+            "users-admin@test.com", passwordEncoder.encode("secret"), "admin", "active", testProjectId);
 
         String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -74,8 +80,8 @@ class UsersControllerTest extends BaseIntegrationTest {
     @Test
     void createUser_shouldReturnErrorWhenEmailExists() throws Exception {
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
-            "dup@test.com", passwordEncoder.encode("pass1"), "developer", "active");
+            "INSERT INTO users (email, password_hash, role, status, project_id) VALUES (?, ?, ?, ?, ?)",
+            "dup@test.com", passwordEncoder.encode("pass1"), "developer", "active", testProjectId);
 
         mockMvc.perform(post("/api/v1/users")
                 .header("Authorization", auth())
@@ -156,8 +162,8 @@ class UsersControllerTest extends BaseIntegrationTest {
     @Test
     void invite_shouldReturn400ForDuplicateEmail() throws Exception {
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
-            "existing@test.com", passwordEncoder.encode("pass"), "developer", "active");
+            "INSERT INTO users (email, password_hash, role, status, project_id) VALUES (?, ?, ?, ?, ?)",
+            "existing@test.com", passwordEncoder.encode("pass"), "developer", "active", testProjectId);
 
         mockMvc.perform(post("/api/v1/users/invite")
                 .header("Authorization", auth())
@@ -178,8 +184,8 @@ class UsersControllerTest extends BaseIntegrationTest {
     @Test
     void invite_shouldReturn400ForNonAdmin() throws Exception {
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
-            "viewer-user@test.com", passwordEncoder.encode("viewpass"), "viewer", "active");
+            "INSERT INTO users (email, password_hash, role, status, project_id) VALUES (?, ?, ?, ?, ?)",
+            "viewer-user@test.com", passwordEncoder.encode("viewpass"), "viewer", "active", testProjectId);
 
         String viewerLoginResp = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -222,8 +228,8 @@ class UsersControllerTest extends BaseIntegrationTest {
     @Test
     void sendResetLink_shouldReturn403ForNonAdmin() throws Exception {
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
-            "viewer2@test.com", passwordEncoder.encode("viewpass"), "viewer", "active");
+            "INSERT INTO users (email, password_hash, role, status, project_id) VALUES (?, ?, ?, ?, ?)",
+            "viewer2@test.com", passwordEncoder.encode("viewpass"), "viewer", "active", testProjectId);
 
         String viewerLoginResp = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)

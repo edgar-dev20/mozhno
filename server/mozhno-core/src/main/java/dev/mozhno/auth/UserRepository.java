@@ -41,10 +41,12 @@ public class UserRepository {
         u.setFailedLoginAttempts(rs.getInt("failed_login_attempts"));
         Timestamp lockedUntil = rs.getTimestamp("locked_until");
         u.setLockedUntil(lockedUntil != null ? lockedUntil.toInstant() : null);
+        Integer projectId = rs.getObject("project_id", Integer.class);
+        if (!rs.wasNull()) u.setProjectId(projectId);
         return u;
     };
 
-    private static final String USER_COLUMNS = "id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at, failed_login_attempts, locked_until";
+    private static final String USER_COLUMNS = "id, email, password_hash, name, role, status, avatar, locale, created_at, last_active_at, failed_login_attempts, locked_until, project_id";
 
     public User findByEmail(String email) {
         try {
@@ -87,13 +89,13 @@ public class UserRepository {
     public User save(User user) {
         if (user.getId() == null) {
             jdbc.update(
-                "INSERT INTO users (email, password_hash, name, role, status, avatar, locale) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                user.getEmail(), user.getPasswordHash(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale());
+                "INSERT INTO users (email, password_hash, name, role, status, avatar, locale, project_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                user.getEmail(), user.getPasswordHash(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(), user.getProjectId());
             return findByEmail(user.getEmail());
         } else {
             jdbc.update(
-                "UPDATE users SET email = ?, password_hash = ?, name = ?, role = ?, status = ?, avatar = ?, locale = ? WHERE id = ?",
-                user.getEmail(), user.getPasswordHash(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(), user.getId());
+                "UPDATE users SET email = ?, password_hash = ?, name = ?, role = ?, status = ?, avatar = ?, locale = ?, project_id = ? WHERE id = ?",
+                user.getEmail(), user.getPasswordHash(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(), user.getProjectId(), user.getId());
             return findById(user.getId());
         }
     }

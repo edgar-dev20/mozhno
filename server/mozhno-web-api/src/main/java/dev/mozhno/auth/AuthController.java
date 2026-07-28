@@ -1,6 +1,5 @@
 package dev.mozhno.auth;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,6 @@ public class AuthController {
     private final AuthService authService;
     private final PasswordResetService passwordResetService;
     private final UserInviteService userInviteService;
-    private final JwtService jwtService;
 
     @PostMapping("/login")
     @Timed(value = "auth.login", description = "Login request timing")
@@ -46,18 +44,8 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public LoginResponse refresh(HttpServletRequest servletRequest, @Valid @RequestBody RefreshTokenRequest request) {
-        Integer projectId = extractProjectIdFromBearer(servletRequest);
-        return authService.refresh(request.refreshToken(), projectId);
-    }
-
-    private Integer extractProjectIdFromBearer(HttpServletRequest request) {
-        String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
-            return jwtService.extractProjectIdLenient(token);
-        }
-        return null;
+    public LoginResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return authService.refresh(request.refreshToken());
     }
 
     @PostMapping("/logout")

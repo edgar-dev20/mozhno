@@ -2,9 +2,14 @@ package dev.mozhno.auth;
 
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
+import dev.mozhno.environments.Environment;
+import dev.mozhno.environments.EnvironmentRepository;
 import dev.mozhno.mail.EmailTemplateService;
+import dev.mozhno.projects.Project;
+import dev.mozhno.projects.ProjectRepository;
 import dev.mozhno.spi.NotificationSpi;
 import dev.mozhno.spi.QuotaSpi;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -46,6 +51,12 @@ class UserInviteServiceTest {
     @Mock
     private QuotaSpi quotaSpi;
 
+    @Mock
+    private ProjectRepository projectRepository;
+
+    @Mock
+    private EnvironmentRepository environmentRepository;
+
     @org.mockito.Spy
     private AuthProperties authProperties = new AuthProperties();
 
@@ -54,6 +65,16 @@ class UserInviteServiceTest {
 
     @InjectMocks
     private UserInviteService userInviteService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(projectRepository.save(any(Project.class))).thenAnswer(inv -> {
+            Project p = inv.getArgument(0);
+            p.setId(1);
+            return p;
+        });
+        lenient().when(environmentRepository.save(any(Environment.class))).thenAnswer(inv -> inv.getArgument(0));
+    }
 
     private InviteUserRequest createRequest(String email, String role) {
         return new InviteUserRequest(email, role, null, null);

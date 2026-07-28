@@ -20,6 +20,7 @@ import java.util.List;
  */
 @Service
 public class ProjectService {
+    private static final long MAX_LOGO_PIXELS = 1024L * 1024L;
     private final ProjectRepository projectRepository;
     private final DomainEventPublisher events;
     private final EnvironmentService environmentService;
@@ -144,7 +145,24 @@ public class ProjectService {
         }
         org.springframework.http.MediaType type = dev.mozhno.util.MediaTypeUtils.detectRasterImageType(bytes);
         if (type == null) {
-            throw new BadRequestException("Only PNG, JPEG, GIF or WEBP images are allowed");
+            throw new BadRequestException("UNSUPPORTED_IMAGE_FORMAT",
+                "Only PNG, JPEG, GIF or WEBP images are allowed");
+        }
+        int[] dims;
+        try {
+            dims = dev.mozhno.util.MediaTypeUtils.readDimensions(bytes);
+        } catch (java.io.IOException e) {
+            throw new BadRequestException("IMAGE_READ_ERROR",
+                "Failed to read image");
+        }
+        if (dims == null) {
+            throw new BadRequestException("IMAGE_READ_ERROR",
+                "Failed to read image");
+        }
+        long pixels = (long) dims[0] * (long) dims[1];
+        if (pixels > MAX_LOGO_PIXELS) {
+            throw new BadRequestException("IMAGE_TOO_LARGE",
+                dims[0] + "x" + dims[1] + " px. Max: 1024x1024 px");
         }
         String filename = "blob-" + System.currentTimeMillis() + "-"
             + Integer.toHexString(java.util.concurrent.ThreadLocalRandom.current().nextInt())

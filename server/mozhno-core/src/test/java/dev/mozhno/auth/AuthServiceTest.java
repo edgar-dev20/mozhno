@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import dev.mozhno.spi.AuthenticationFlowSpi;
 import dev.mozhno.exception.InvalidCredentialsException;
-import dev.mozhno.projects.ProjectRepository;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,15 +33,12 @@ class AuthServiceTest {
     @Mock
     private AuthenticationFlowSpi authFlow;
 
-    @Mock
-    private ProjectRepository projectRepository;
-
     private AuthService authService;
 
     @BeforeEach
     void setUp() {
         List<AuthenticationFlowSpi> flows = List.of(authFlow);
-        authService = new AuthService(flows, jwtService, refreshTokenService, userRepository, projectRepository);
+        authService = new AuthService(flows, jwtService, refreshTokenService, userRepository);
     }
 
     private void mockLoginSuccess(String email, String password, User user) {
@@ -64,6 +60,7 @@ class AuthServiceTest {
         user.setEmail("user@example.com");
         user.setRole("admin");
         user.setStatus("active");
+        user.setProjectId(1);
 
         RefreshTokenService.TokenPair tokens = new RefreshTokenService.TokenPair("access.token", "refresh.token");
 
@@ -130,6 +127,7 @@ class AuthServiceTest {
         user.setEmail("remember@example.com");
         user.setRole("developer");
         user.setStatus("active");
+        user.setProjectId(1);
 
         RefreshTokenService.TokenPair tokens = new RefreshTokenService.TokenPair("acc.tok", "ref.tok");
 
@@ -154,7 +152,7 @@ class AuthServiceTest {
 
         RefreshTokenService.TokenPair newTokens = new RefreshTokenService.TokenPair("new.acc", "new.ref");
 
-        when(refreshTokenService.refresh(eq("valid.old.token"), any())).thenReturn(newTokens);
+        when(refreshTokenService.refresh(eq("valid.old.token"))).thenReturn(newTokens);
         when(jwtService.parseToken("new.acc")).thenReturn(
             new JwtToken(3, "refresh@example.com", "Refresh User", "developer", "active", null));
         when(userRepository.findByEmail("refresh@example.com")).thenReturn(user);
@@ -169,7 +167,7 @@ class AuthServiceTest {
 
     @Test
     void refresh_shouldPropagateTokenReuseException() {
-        when(refreshTokenService.refresh(eq("stolen.token"), any())).thenThrow(
+        when(refreshTokenService.refresh(eq("stolen.token"))).thenThrow(
             new RefreshTokenService.TokenReuseException("Reuse detected"));
 
         assertThrows(RefreshTokenService.TokenReuseException.class,

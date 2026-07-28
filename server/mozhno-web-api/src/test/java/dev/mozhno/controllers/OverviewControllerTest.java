@@ -58,6 +58,7 @@ class OverviewControllerTest extends BaseIntegrationTest {
         jdbcTemplate.update(
             "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
             email, passwordEncoder.encode("secret"), role, "active");
+        jdbcTemplate.update("UPDATE users SET project_id = ? WHERE email = ?", projectId, email);
         String res = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"" + email + "\",\"password\":\"secret\",\"projectId\":" + projectId + "}"))

@@ -26,6 +26,7 @@ public class UserService {
 
     private static final String DEFAULT_STATUS = "active";
     private static final String DEFAULT_LOCALE = "ru";
+    private static final long MAX_AVATAR_PIXELS = 1024L * 1024L;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final DomainEventPublisher events;
@@ -75,7 +76,7 @@ public class UserService {
      * @throws RuntimeException if email exists or quota is exceeded
      */
     @Transactional
-    public UserDto create(UserCreateRequest request) {
+    public UserDto create(UserCreateRequest request, Integer projectId) {
         if (userRepository.existsByEmail(request.email())) {
             throw new ConflictException("User with email " + request.email() + " already exists");
         }
@@ -94,6 +95,7 @@ public class UserService {
         user.setRole(request.role());
         user.setStatus(DEFAULT_STATUS);
         user.setLocale(request.locale() != null ? request.locale() : DEFAULT_LOCALE);
+        user.setProjectId(projectId);
         User saved = userRepository.save(user);
         events.publish(DomainEvent.of(null, "user.created", "user",
             saved.getId(), saved.getEmail(), "Role: " + saved.getRole()));
@@ -167,7 +169,28 @@ public class UserService {
         }
         org.springframework.http.MediaType type = dev.mozhno.util.MediaTypeUtils.detectRasterImageType(bytes);
         if (type == null) {
-            throw new dev.mozhno.exception.BadRequestException("Only PNG, JPEG, GIF or WEBP images are allowed");
+            throw new dev.mozhno.exception.BadRequestException(
+                "UNSUPPORTED_IMAGE_FORMAT",
+                "Only PNG, JPEG, GIF or WEBP images are allowed");
+        }
+        int[] dims;
+        try {
+            dims = dev.mozhno.util.MediaTypeUtils.readDimensions(bytes);
+        } catch (IOException e) {
+            throw new dev.mozhno.exception.BadRequestException(
+                "IMAGE_READ_ERROR",
+                "Failed to read image");
+        }
+        if (dims == null) {
+            throw new dev.mozhno.exception.BadRequestException(
+                "IMAGE_READ_ERROR",
+                "Failed to read image");
+        }
+        long pixels = (long) dims[0] * (long) dims[1];
+        if (pixels > MAX_AVATAR_PIXELS) {
+            throw new dev.mozhno.exception.BadRequestException(
+                "IMAGE_TOO_LARGE",
+                dims[0] + "x" + dims[1] + " px. Max: 1024x1024 px");
         }
         userRepository.updateAvatarData(id, bytes);
         user.setAvatar("blob" + dev.mozhno.util.MediaTypeUtils.extensionFor(type));

@@ -11,8 +11,10 @@ import { useCreateFlag } from './useCreateFlag';
 
 interface OnboardingWizardProps {
   open: boolean;
-  startStep: number;
+  existingProjectId: number | null;
+  existingProjectName: string | null;
   onDismiss: () => void;
+  onDismissTemporary: () => void;
   onProjectCreated: () => void;
 }
 
@@ -29,12 +31,14 @@ const STEPS = [
 
 export function OnboardingWizard({
   open,
-  startStep,
+  existingProjectId,
+  existingProjectName,
   onDismiss,
+  onDismissTemporary,
   onProjectCreated,
 }: OnboardingWizardProps) {
   const t = useT();
-  const [step, setStep] = useState(startStep);
+  const [step, setStep] = useState(0);
   const {
     projectName,
     setProjectName,
@@ -48,7 +52,7 @@ export function OnboardingWizard({
     handleLogoUpload,
     handleCreateProject,
     resetProject,
-  } = useCreateProject();
+  } = useCreateProject({ existingProjectId, existingProjectName });
   const {
     flagName,
     setFlagName,
@@ -129,6 +133,7 @@ export function OnboardingWizard({
                         fileInputRef={fileInputRef}
                         onLogoUpload={handleLogoUpload}
                         onCreate={onCreateProject}
+                        existingProjectId={existingProjectId}
                       />
                     )}
 
@@ -155,6 +160,7 @@ export function OnboardingWizard({
                   onBack={handleBack}
                   onSkip={onDismiss}
                   onFinish={onDismiss}
+                  onSkipStepZero={onDismissTemporary}
                 />
               </div>
             </div>

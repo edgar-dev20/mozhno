@@ -38,6 +38,11 @@ class ProjectControllerTest extends BaseIntegrationTest {
             "INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)",
             "project-test@test.com", passwordEncoder.encode("secret"), "admin", "active");
 
+        Project p = new Project();
+        p.setName("Test Project");
+        Integer projectId = projectRepository.save(p).getId();
+        jdbcTemplate.update("UPDATE users SET project_id = ? WHERE email = ?", projectId, "project-test@test.com");
+
         String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"project-test@test.com\",\"password\":\"secret\"}"))
@@ -147,7 +152,7 @@ class ProjectControllerTest extends BaseIntegrationTest {
         Project saved = projectRepository.save(p);
 
         MockMultipartFile file = new MockMultipartFile("file", "logo.png", "image/png",
-                new byte[]{(byte) 0x89, 'P', 'N', 'G', 13, 10, 26, 10, 0, 0, 0, 0});
+                pngBytes());
 
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{id}/logo", saved.getId())
                 .file(file)
@@ -165,5 +170,17 @@ class ProjectControllerTest extends BaseIntegrationTest {
         mockMvc.perform(get("/api/v1/projects/{id}/logo", saved.getId())
                 .header("Authorization", auth()))
                 .andExpect(status().isNotFound());
+    }
+
+    private static byte[] pngBytes() {
+        try {
+            var img = new java.awt.image.BufferedImage(1, 1, java.awt.image.BufferedImage.TYPE_INT_RGB);
+            img.setRGB(0, 0, 0xFF0000);
+            var out = new java.io.ByteArrayOutputStream();
+            javax.imageio.ImageIO.write(img, "PNG", out);
+            return out.toByteArray();
+        } catch (java.io.IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -85,7 +85,7 @@ describe('getErrorMessage', () => {
 
   it('falls back to raw message for unknown code', () => {
     const msg = getErrorMessage(new AppError('raw msg', 'UNKNOWN'));
-    expect(msg).toBe('Произошла непредвиденная ошибка.');
+    expect(msg).toBe('raw msg');
   });
 
   it('returns Error.message for plain Error', () => {

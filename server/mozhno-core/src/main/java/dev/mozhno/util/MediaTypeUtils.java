@@ -3,6 +3,14 @@ package dev.mozhno.util;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Iterator;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+
 public final class MediaTypeUtils {
 
     private MediaTypeUtils() {
@@ -78,5 +86,91 @@ public final class MediaTypeUtils {
             .header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; sandbox")
             .header("Cache-Control", "private, max-age=300")
             .body(data);
+    }
+
+    /**
+     * Reads the dimensions (width, height) of an image from its bytes.
+     * Parses headers directly for PNG, JPEG, GIF to avoid buffering;
+     * falls back to {@link ImageReader} (metadata disabled) for WebP.
+     *
+     * @param data the image bytes
+     * @return an array of {@code [width, height]}, or {@code null} if the
+     *         format is not supported by any registered reader
+     * @throws IOException if an I/O error occurs during header parsing
+     */
+    public static int[] readDimensions(byte[] data) throws IOException {
+        if (data == null || data.length < 4) return null;
+
+        if (data[0] == (byte) 0x89 && data.length >= 24) {
+            return new int[]{
+                readIntBE(data, 16),
+                readIntBE(data, 20)
+            };
+        }
+
+        if (data[0] == (byte) 0xFF && data[1] == (byte) 0xD8) {
+            int len = data.length;
+            for (int i = 2; i < len - 8; i++) {
+                if ((data[i] & 0xFF) != 0xFF) continue;
+                int marker = data[i + 1] & 0xFF;
+                if (marker == 0x00 || marker == 0xFF) continue;
+                if (marker == 0xC0 || marker == 0xC2) {
+                    return new int[]{
+                        readShortBE(data, i + 7),
+                        readShortBE(data, i + 5)
+                    };
+                }
+                if (marker == 0xD8 || marker == 0xD9 || (marker >= 0xD0 && marker <= 0xD7) || marker == 0x01) {
+                    i++;
+                    continue;
+                }
+                int segLen = readShortBE(data, i + 2);
+                i += segLen + 1;
+            }
+            return null;
+        }
+
+        if (data[0] == 'G' && data[1] == 'I' && data[2] == 'F' && data.length >= 10) {
+            return new int[]{
+                readShortLE(data, 6),
+                readShortLE(data, 8)
+            };
+        }
+
+        if (data.length >= 12
+            && data[0] == 'R' && data[1] == 'I' && data[2] == 'F' && data[3] == 'F'
+            && data[8] == 'W' && data[9] == 'E' && data[10] == 'B' && data[11] == 'P') {
+            try (ImageInputStream iis = ImageIO.createImageInputStream(new ByteArrayInputStream(data))) {
+                if (iis == null) return null;
+                Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+                if (!readers.hasNext()) return null;
+                ImageReader reader = readers.next();
+                try {
+                    reader.setInput(iis, false, true);
+                    return new int[]{reader.getWidth(0), reader.getHeight(0)};
+                } finally {
+                    reader.dispose();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static int readIntBE(byte[] data, int offset) {
+        return ((data[offset] & 0xFF) << 24)
+            | ((data[offset + 1] & 0xFF) << 16)
+            | ((data[offset + 2] & 0xFF) << 8)
+            | (data[offset + 3] & 0xFF);
+    }
+
+    private static int readShortBE(byte[] data, int offset) {
+        return ((data[offset] & 0xFF) << 8)
+            | (data[offset + 1] & 0xFF);
+    }
+
+    private static int readShortLE(byte[] data, int offset) {
+        return (data[offset] & 0xFF)
+            | ((data[offset + 1] & 0xFF) << 8);
     }
 }

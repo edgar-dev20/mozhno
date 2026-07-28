@@ -15,6 +15,7 @@ import dev.mozhno.auth.JwtProperties;
 import dev.mozhno.auth.JwtService;
 import dev.mozhno.auth.JwtToken;
 import dev.mozhno.auth.User;
+import dev.mozhno.projects.Project;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -44,9 +45,12 @@ class AuthControllerTest extends BaseIntegrationTest {
     }
 
     private void insertUser(String email, String password, String role) {
+        Project p = new Project();
+        p.setName("Test");
+        Integer projectId = projectRepository.save(p).getId();
         jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, role) VALUES (?, ?, ?)",
-            email, passwordEncoder.encode(password), role);
+            "INSERT INTO users (email, password_hash, role, project_id) VALUES (?, ?, ?, ?)",
+            email, passwordEncoder.encode(password), role, projectId);
     }
 
     @Test
@@ -282,9 +286,6 @@ class AuthControllerTest extends BaseIntegrationTest {
 
     @Test
     void refresh_shouldPreserveProjectIdFromExpiredJwt() throws Exception {
-        jdbcTemplate.update("INSERT INTO projects (name) VALUES (?)", "Test Project");
-        int projectId = jdbcTemplate.queryForObject("SELECT id FROM projects WHERE name = ?", Integer.class, "Test Project");
-
         insertUser("refresh-pid@test.com", "secret123", "admin");
 
         String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
@@ -307,7 +308,8 @@ class AuthControllerTest extends BaseIntegrationTest {
         user.setRole("admin");
         user.setStatus("active");
 
-        String expiredJwt = expiredJwtService.generateAccessToken(user, projectId);
+        Integer userProjectId = jdbcTemplate.queryForObject("SELECT project_id FROM users WHERE email = ?", Integer.class, "refresh-pid@test.com");
+        String expiredJwt = expiredJwtService.generateAccessToken(user, null);
 
         String refreshResponse = mockMvc.perform(post("/api/v1/auth/refresh")
                 .header("Authorization", "Bearer " + expiredJwt)
@@ -320,6 +322,6 @@ class AuthControllerTest extends BaseIntegrationTest {
 
         String newToken = objectMapper.readTree(refreshResponse).get("token").asText();
         JwtToken parsed = jwtService.parseToken(newToken);
-        assertEquals(projectId, parsed.getProjectId());
+        assertEquals(userProjectId, parsed.getProjectId());
     }
 }

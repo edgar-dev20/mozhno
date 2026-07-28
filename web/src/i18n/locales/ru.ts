@@ -448,12 +448,19 @@ const ru = {
     unexpected: 'Произошла непредвиденная ошибка.',
     rateLimited: 'Слишком много запросов. Пожалуйста, подождите.',
     notFoundInEnvironment: 'Флаг не найден в окружении. Попробуйте обновить страницу.',
+    selectProject: 'Проект не выбран. Пожалуйста, выберите проект.',
     auth: {
       invalidCredentials: 'Неверный email или пароль',
       emailPasswordRequired: 'Email и пароль обязательны',
       accountSuspended: 'Аккаунт заблокирован',
       accountLocked: 'Аккаунт временно заблокирован из-за слишком многих неудачных попыток. Попробуйте позже.',
       noAuthProvider: 'Нет доступного провайдера аутентификации',
+    },
+    upload: {
+      fileTooLarge: 'Файл слишком большой. Максимальный размер: {{max}} МБ.',
+      unsupportedFormat: 'Поддерживаются только PNG, JPEG, GIF или WEBP.',
+      readError: 'Не удалось прочитать изображение. Возможно, файл повреждён.',
+      imageTooLarge: 'Изображение слишком большое ({{details}}).',
     },
   },
   validation: {
@@ -975,8 +982,10 @@ const ru = {
     projectNamePlaceholder: 'Название проекта',
     projectDescPlaceholder: 'Описание (необязательно)',
     createProject: 'Создать проект',
+    saveAndContinue: 'Сохранить и продолжить',
     projectValidationError: 'Введите название проекта',
     projectCreateError: 'Ошибка при создании проекта',
+    logoUploadError: 'Ошибка загрузки логотипа',
     uploadLogo: 'Загрузить логотип',
     logoHint: 'PNG, JPG или SVG. Рекомендуемый размер 256×256.',
     step1: {

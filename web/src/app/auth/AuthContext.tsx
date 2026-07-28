@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   getToken,
   setToken,
@@ -10,7 +11,6 @@ import {
   api,
   UserDto,
 } from '@/api';
-import { resetOnboardingComplete } from '@/shared/onboardingUtils';
 
 interface AuthState {
   user: UserDto | null;
@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return !!t;
   });
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setOnAuthExpired(() => {
@@ -76,10 +77,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(() => {
     api.auth.logout().catch(() => {});
+    queryClient.clear();
     clearAuth();
-    resetOnboardingComplete();
     setUser(null);
-  }, []);
+  }, [queryClient]);
 
   const updateUser = useCallback((updated: UserDto) => {
     setUser(updated);

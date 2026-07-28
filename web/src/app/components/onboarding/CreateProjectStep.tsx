@@ -15,6 +15,7 @@ interface CreateProjectStepProps {
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   onLogoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onCreate: () => void;
+  existingProjectId: number | null;
 }
 
 export function CreateProjectStep({
@@ -29,8 +30,10 @@ export function CreateProjectStep({
   fileInputRef,
   onLogoUpload,
   onCreate,
+  existingProjectId,
 }: CreateProjectStepProps) {
   const t = useT();
+  const isEditing = existingProjectId != null;
   return (
     <div className="space-y-3 flex-1">
       <div>
@@ -86,7 +89,7 @@ export function CreateProjectStep({
       <p className="text-caption text-muted-foreground">{t('onboarding.logoHint')}</p>
       {error && <p className="text-caption text-destructive">{error}</p>}
       <GradientButton onClick={onCreate} disabled={creating} loading={creating} className="w-full">
-        {t('onboarding.createProject')}
+        {isEditing ? t('onboarding.saveAndContinue') : t('onboarding.createProject')}
       </GradientButton>
     </div>
   );

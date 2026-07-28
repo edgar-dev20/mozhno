@@ -44,6 +44,8 @@ class ApiKeyControllerTest extends BaseIntegrationTest {
         p.setName("Test Project");
         projectId = projectRepository.save(p).getId();
 
+        jdbcTemplate.update("UPDATE users SET project_id = ? WHERE email = ?", projectId, "apikey-test@test.com");
+
         String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"apikey-test@test.com\",\"password\":\"secret\",\"projectId\":" + projectId + "}"))

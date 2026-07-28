@@ -449,12 +449,19 @@ const en = {
     unexpected: 'An unexpected error occurred.',
     rateLimited: 'Too many requests. Please wait and try again.',
     notFoundInEnvironment: 'Flag not found in environment. Try refreshing the page.',
+    selectProject: 'No project selected. Please select a project.',
     auth: {
       invalidCredentials: 'Invalid email or password',
       emailPasswordRequired: 'Email and password are required',
       accountSuspended: 'Account is suspended',
       accountLocked: 'Account is temporarily locked due to too many failed attempts. Try again later.',
       noAuthProvider: 'No authentication provider available',
+    },
+    upload: {
+      fileTooLarge: 'File is too large. Maximum size: {{max}} MB.',
+      unsupportedFormat: 'Only PNG, JPEG, GIF or WEBP images are allowed.',
+      readError: 'Failed to read image. The file may be corrupted.',
+      imageTooLarge: 'Image is too large ({{details}}).',
     },
   },
   validation: {
@@ -967,8 +974,10 @@ const en = {
     projectNamePlaceholder: 'Project name',
     projectDescPlaceholder: 'Description (optional)',
     createProject: 'Create project',
+    saveAndContinue: 'Save and continue',
     projectValidationError: 'Please enter a project name',
     projectCreateError: 'Error creating project',
+    logoUploadError: 'Error uploading logo',
     uploadLogo: 'Upload logo',
     logoHint: 'PNG, JPG or SVG. Recommended 256×256.',
     step1: {

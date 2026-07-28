@@ -39,6 +39,12 @@ export function UserProfileMenu() {
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    const maxBytes = 2 * 1024 * 1024;
+    if (file.size > maxBytes) {
+      toast.error(t('errors.upload.fileTooLarge', { max: '2' }));
+      e.target.value = '';
+      return;
+    }
     setUploading(true);
     api.users
       .uploadAvatar(user.id, file)

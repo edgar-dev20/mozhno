@@ -51,7 +51,7 @@ public class UsersController {
     @PreAuthorize("hasRole('ADMIN')")
     public UserDto create(@Valid @RequestBody UserCreateRequest request,
                            @AuthenticationPrincipal UserPrincipal user) {
-        return userService.create(request);
+        return userService.create(request, user.projectId());
     }
 
     @PostMapping("/invite")

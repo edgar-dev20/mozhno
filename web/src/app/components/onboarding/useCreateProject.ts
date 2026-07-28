@@ -21,10 +21,16 @@ interface UseCreateProjectReturn {
   resetProject: () => void;
 }
 
-export function useCreateProject(): UseCreateProjectReturn {
+interface UseCreateProjectOptions {
+  existingProjectId: number | null;
+  existingProjectName: string | null;
+}
+
+export function useCreateProject(options: UseCreateProjectOptions = { existingProjectId: null, existingProjectName: null }): UseCreateProjectReturn {
+  const { existingProjectId, existingProjectName } = options;
   const t = useT();
   const queryClient = useQueryClient();
-  const [projectName, setProjectName] = useState('');
+  const [projectName, setProjectName] = useState(existingProjectName ?? '');
   const [projectDesc, setProjectDesc] = useState('');
   const [creatingProject, setCreatingProject] = useState(false);
   const [projectError, setProjectError] = useState('');
@@ -44,6 +50,11 @@ export function useCreateProject(): UseCreateProjectReturn {
   const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.warning(t('errors.upload.fileTooLarge', { max: '2' }));
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
     if (logoPreviewUrlRef.current) {
       URL.revokeObjectURL(logoPreviewUrlRef.current);
     }
@@ -52,7 +63,7 @@ export function useCreateProject(): UseCreateProjectReturn {
     setPendingLogoFile(file);
     setPendingLogoPreviewUrl(url);
     if (fileInputRef.current) fileInputRef.current.value = '';
-  }, []);
+  }, [t]);
 
   const handleCreateProject = useCallback(
     async (onProjectCreated: () => void, onComplete: () => void) => {
@@ -63,16 +74,37 @@ export function useCreateProject(): UseCreateProjectReturn {
       setCreatingProject(true);
       setProjectError('');
       try {
-        const project = await api.projects.create({
-          name: projectName.trim(),
-          description: projectDesc.trim() || undefined,
-        });
-        if (pendingLogoFile) {
-          try {
-            await api.projects.uploadLogo(project.id, pendingLogoFile);
-          } catch {
-            toast.warning(t('onboarding.projectCreateError'));
+        if (existingProjectId != null) {
+          if (projectName.trim() !== (existingProjectName ?? '')) {
+            await api.projects.update(existingProjectId, {
+              name: projectName.trim(),
+              description: projectDesc.trim() || undefined,
+            });
           }
+          if (pendingLogoFile) {
+            try {
+              await api.projects.uploadLogo(existingProjectId, pendingLogoFile);
+            } catch {
+              toast.warning(t('onboarding.logoUploadError'));
+            }
+          }
+        } else {
+          const project = await api.projects.create({
+            name: projectName.trim(),
+            description: projectDesc.trim() || undefined,
+          });
+          if (pendingLogoFile) {
+            try {
+              await api.projects.uploadLogo(project.id, pendingLogoFile);
+            } catch {
+              toast.warning(t('onboarding.logoUploadError'));
+            }
+          }
+          const res = await api.auth.selectProject(project.id);
+          setToken(res.token);
+          setRefreshToken(res.refreshToken);
+          queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
+          queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
         }
         if (logoPreviewUrlRef.current) {
           URL.revokeObjectURL(logoPreviewUrlRef.current);
@@ -80,12 +112,7 @@ export function useCreateProject(): UseCreateProjectReturn {
         }
         setPendingLogoFile(null);
         setPendingLogoPreviewUrl(null);
-        const res = await api.auth.selectProject(project.id);
-        setToken(res.token);
-        setRefreshToken(res.refreshToken);
         onProjectCreated();
-        queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
-        queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
         onComplete();
       } catch (e) {
         setProjectError(getErrorMessage(e));
@@ -93,21 +120,21 @@ export function useCreateProject(): UseCreateProjectReturn {
         setCreatingProject(false);
       }
     },
-    [projectName, projectDesc, pendingLogoFile, t, queryClient],
+    [projectName, projectDesc, pendingLogoFile, existingProjectId, existingProjectName, t, queryClient],
   );
 
-  const resetProject = useCallback(() => {
-    if (logoPreviewUrlRef.current) {
-      URL.revokeObjectURL(logoPreviewUrlRef.current);
-      logoPreviewUrlRef.current = null;
-    }
-    setProjectName('');
-    setProjectDesc('');
-    setCreatingProject(false);
-    setProjectError('');
-    setPendingLogoFile(null);
-    setPendingLogoPreviewUrl(null);
-  }, []);
+    const resetProject = useCallback(() => {
+        if (logoPreviewUrlRef.current) {
+            URL.revokeObjectURL(logoPreviewUrlRef.current);
+            logoPreviewUrlRef.current = null;
+        }
+        setProjectName(existingProjectName ?? '');
+        setProjectDesc('');
+        setCreatingProject(false);
+        setProjectError('');
+        setPendingLogoFile(null);
+        setPendingLogoPreviewUrl(null);
+    }, [existingProjectName]);
 
   return {
     projectName,

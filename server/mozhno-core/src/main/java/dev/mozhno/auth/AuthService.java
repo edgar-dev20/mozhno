@@ -6,10 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import dev.mozhno.spi.AuthenticationFlowSpi;
 
+import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.InvalidCredentialsException;
 import dev.mozhno.exception.NotFoundException;
-import dev.mozhno.projects.Project;
-import dev.mozhno.projects.ProjectRepository;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,18 +30,16 @@ public class AuthService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
-    private final ProjectRepository projectRepository;
 
     public AuthService(List<AuthenticationFlowSpi> authFlows,
                        JwtService jwtService, RefreshTokenService refreshTokenService,
-                       UserRepository userRepository, ProjectRepository projectRepository) {
+                       UserRepository userRepository) {
         this.authFlows = authFlows.stream()
             .sorted(Comparator.comparingInt(AuthenticationFlowSpi::priority))
             .toList();
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
         this.userRepository = userRepository;
-        this.projectRepository = projectRepository;
     }
 
     /**
@@ -92,8 +89,11 @@ public class AuthService {
         }
 
         User user = userRepository.findById(result.userId());
-        Integer resolvedProjectId = projectId != null ? projectId : resolveProjectId();
-        RefreshTokenService.TokenPair tokens = refreshTokenService.issueTokens(user, resolvedProjectId, rememberMe);
+        if (user.getProjectId() == null) {
+            throw new BadRequestException("SELECT_PROJECT",
+                "No project associated with this account. Please contact your administrator.");
+        }
+        RefreshTokenService.TokenPair tokens = refreshTokenService.issueTokens(user, user.getProjectId(), rememberMe);
         return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
     }
 
@@ -106,17 +106,6 @@ public class AuthService {
         return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
     }
 
-    private Integer resolveProjectId() {
-        int count = projectRepository.count();
-        if (count == 1) {
-            List<Project> projects = projectRepository.findAll();
-            if (!projects.isEmpty()) {
-                return projects.getFirst().getId();
-            }
-        }
-        return null;
-    }
-
     /**
      * Exchanges a valid refresh token for a new access/refresh token pair.
      *
@@ -125,16 +114,11 @@ public class AuthService {
      * @return login response with fresh tokens and current user DTO
      */
     @Transactional
-    public LoginResponse refresh(String rawRefreshToken, Integer projectId) {
-        RefreshTokenService.TokenPair tokens = refreshTokenService.refresh(rawRefreshToken, projectId);
+    public LoginResponse refresh(String rawRefreshToken) {
+        RefreshTokenService.TokenPair tokens = refreshTokenService.refresh(rawRefreshToken);
         String email = jwtService.parseToken(tokens.getAccessToken()).getEmail();
         User user = userRepository.findByEmail(email);
         return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
-    }
-
-    @Transactional
-    public LoginResponse refresh(String rawRefreshToken) {
-        return refresh(rawRefreshToken, null);
     }
 
     /**

@@ -23,6 +23,14 @@ const SERVER_MESSAGE_TO_KEY: Record<string, MessageKey> = {
   'Access denied': 'errors.forbidden',
 };
 
+const SERVER_CODE_TO_KEY: Record<string, MessageKey> = {
+  UPLOAD_SIZE_EXCEEDED: 'errors.upload.fileTooLarge',
+  UNSUPPORTED_IMAGE_FORMAT: 'errors.upload.unsupportedFormat',
+  IMAGE_READ_ERROR: 'errors.upload.readError',
+  IMAGE_TOO_LARGE: 'errors.upload.imageTooLarge',
+  SELECT_PROJECT: 'errors.selectProject',
+};
+
 function extractValidationDetails(error: AppError): string {
   const body = error.details as Record<string, unknown> | undefined;
   if (!body) return error.message;
@@ -36,6 +44,18 @@ function extractValidationDetails(error: AppError): string {
 
 export function getErrorMessage(error: unknown): string {
   if (isAppError(error)) {
+    const serverCode = (error.details as Record<string, unknown> | undefined)?.['code'] as string | undefined;
+    if (serverCode && SERVER_CODE_TO_KEY[serverCode]) {
+      const key = SERVER_CODE_TO_KEY[serverCode];
+      if (serverCode === 'IMAGE_TOO_LARGE') {
+        return t(key, { details: error.message });
+      }
+      if (serverCode === 'UPLOAD_SIZE_EXCEEDED') {
+        const maxMatch = error.message.match(/(\d+)\s*MB/);
+        return t(key, { max: maxMatch?.[1] ?? '2' });
+      }
+      return t(key);
+    }
     if (error.code === 'VALIDATION') {
       const detailsText = extractValidationDetails(error);
       if (detailsText !== error.message) return detailsText;
@@ -48,7 +68,10 @@ export function getErrorMessage(error: unknown): string {
       if (i18nKey) return t(i18nKey);
     }
     const key = ERROR_CODE_TO_KEY[error.code];
-    if (key) return t(key as MessageKey);
+    if (key) {
+      if (error.code === 'UNKNOWN' && error.message) return error.message;
+      return t(key as MessageKey);
+    }
     return error.message;
   }
 

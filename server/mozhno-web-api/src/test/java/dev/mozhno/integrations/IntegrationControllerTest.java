@@ -45,6 +45,8 @@ class IntegrationControllerTest extends BaseIntegrationTest {
         p.setName("Test Project");
         projectId = projectRepository.save(p).getId();
 
+        jdbcTemplate.update("UPDATE users SET project_id = ? WHERE email = ?", projectId, "integration-test@test.com");
+
         String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"email\":\"integration-test@test.com\",\"password\":\"secret\",\"projectId\":" + projectId + "}"))
