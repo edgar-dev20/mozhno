@@ -103,6 +103,9 @@ mozhno:
     enriched-max-page-size: ${MOZHNO_FLAGS_ENRICHED_MAX_PAGE_SIZE:500}
 
 management:
+  health:
+    mail:
+      enabled: ${MOZHNO_SMTP_HEALTH_ENABLED:false}
   server:
     port: ${MOZHNO_MANAGEMENT_PORT:9090}
   tracing:
