@@ -43,8 +43,16 @@ public class ProjectController {
     @GetMapping
     @Operation(summary = "Get all projects")
     public List<ProjectResponse> getAll(@AuthenticationPrincipal UserPrincipal user) {
-        List<Project> projects = projectService.findAll();
-        return projectAssembler.toResponseList(projects);
+        Integer projectId = user.projectId();
+        if (projectId == null) {
+            return List.of();
+        }
+        try {
+            Project project = projectService.findById(projectId);
+            return projectAssembler.toResponseList(List.of(project));
+        } catch (dev.mozhno.exception.NotFoundException e) {
+            return List.of();
+        }
     }
 
     @GetMapping("/{id}")

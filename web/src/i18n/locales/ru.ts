@@ -988,6 +988,8 @@ const ru = {
     logoUploadError: 'Ошибка загрузки логотипа',
     uploadLogo: 'Загрузить логотип',
     logoHint: 'PNG, JPG или SVG. Рекомендуемый размер 256×256.',
+    logoInvalidFormat: 'Допустимы только PNG, JPEG, GIF или WEBP',
+    logoDimensionsTooLarge: 'Изображение должно быть не более 1024×1024 пикселей',
     step1: {
       title: 'Создайте первый флаг',
       description:
@@ -1012,6 +1014,7 @@ const ru = {
     copied: 'Скопировано',
     copy: 'Копировать',
     skip: 'Пропустить',
+    skipExplore: 'Пропустить, освоюсь позже',
     next: 'Далее',
     finish: 'Завершить',
   },
@@ -1040,6 +1043,7 @@ const ru = {
     loading: 'Загрузка приложений...',
     emptyTitle: 'Нет подключений',
     emptyDescription: 'Подключите SDK в своём приложении',
+    emptyCta: 'Создать API-ключ',
     lastSeen: 'Последняя активность',
     sdkVersion: 'Версия SDK',
     environment: 'Окружение',

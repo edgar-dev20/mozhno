@@ -15,11 +15,6 @@ import { Menu } from 'lucide-react';
 import { cn } from '@/app/components/ui/utils';
 import { PageErrorBoundary } from '@/app/components/PageErrorBoundary';
 import { OnboardingWizard } from '@/app/components/onboarding';
-import {
-  isOnboardingComplete,
-  markOnboardingComplete,
-  resetOnboardingComplete,
-} from '@/shared/onboardingUtils';
 import { extractDominantColor } from '@/shared/extractLogoColor';
 import { readableAccentColor } from '@/shared/color';
 import { SkipLink } from '@/shared/components/SkipLink';
@@ -47,7 +42,7 @@ export function DashboardLayout() {
   const projectName = project?.name ?? null;
   const projectLogo = project?.logo ?? null;
 
-  const { data: enriched, isLoading: enrichedLoading } = useEnrichedFlagsQuery(projectId);
+  const { data: enriched } = useEnrichedFlagsQuery(projectId);
   const flags = useMemo(() => enriched?.flags ?? [], [enriched?.flags]);
   const segments = useMemo(() => enriched?.segments ?? [], [enriched?.segments]);
 
@@ -90,7 +85,6 @@ export function DashboardLayout() {
 
   const handleDismiss = useCallback(() => {
     setShowOnboarding(false);
-    markOnboardingComplete();
     queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
     queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
     queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
@@ -110,20 +104,12 @@ export function DashboardLayout() {
   useEffect(() => {
     if (!user || projectLoading) return;
     if (projectId === null) {
-      resetOnboardingComplete();
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowOnboarding(true);
       return;
     }
-    if (isOnboardingComplete()) return;
-    if (enrichedLoading) return;
-    if (enriched == null) return;
-    if (enriched.flags != null && enriched.flags.length === 0) {
-      setShowOnboarding(true);
-    } else if (enriched.flags != null && enriched.flags.length > 0) {
-      setShowOnboarding(false);
-    }
-  }, [user, projectLoading, projectId, enriched, enrichedLoading]);
+    setShowOnboarding(false);
+  }, [user, projectLoading, projectId]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

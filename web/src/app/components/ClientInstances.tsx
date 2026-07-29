@@ -14,9 +14,9 @@ import {
 } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
 import { api, ClientInstance, FlagResponse } from '@/api';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import { JavaIcon, JavaScriptIcon } from '@/app/components/LanguageIcons';
-import { SectionHeader, TruncatedCopyTooltip, getEnvColor, envColorStyles, formatCompactCount } from '@/shared';
+import { SectionHeader, EmptyState, TruncatedCopyTooltip, getEnvColor, envColorStyles, formatCompactCount } from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
@@ -36,6 +36,7 @@ function getStaleness(lastSeenAt: string): 'active' | 'recent' | 'stale' {
 
 export function ClientInstances() {
   const t = useT();
+  const navigate = useNavigate();
   const { data: project } = useProjectQuery();
   const projectId = project?.id ?? null;
 
@@ -254,21 +255,13 @@ export function ClientInstances() {
         {loading ? (
           <TableSkeleton rows={4} cols={4} />
         ) : recentInstances.length === 0 ? (
-          <div className="bg-card rounded-xl px-6 py-16 text-center shadow-md">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-info/10 dark:from-primary/15 dark:to-info/15 flex items-center justify-center">
-                <Activity size={24} className="text-brand" />
-              </div>
-              <div>
-                <p className="text-body-sm font-semibold text-foreground/80">
-                  {t('clientInstances.emptyTitle')}
-                </p>
-                <p className="text-caption text-muted-foreground mt-1 max-w-xs mx-auto">
-                  {t('clientInstances.emptyDescription')}
-                </p>
-              </div>
-            </div>
-          </div>
+          <EmptyState
+            icon={<Activity size={24} className="text-brand" />}
+            title={t('clientInstances.emptyTitle')}
+            description={t('clientInstances.emptyDescription')}
+            buttonLabel={t('clientInstances.emptyCta')}
+            onAction={() => navigate('/apikeys')}
+          />
         ) : (
           <AnimatePresence mode="popLayout">
             {groups.map((group, idx) => {

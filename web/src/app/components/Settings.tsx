@@ -28,7 +28,6 @@ import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
 import { useLocale, useT } from '@/i18n';
-import { resetOnboardingComplete } from '@/shared/onboardingUtils';
 import { toIntlLocale } from '@/i18n/locale';
 
 function formatDate(iso: string, locale: string): string {
@@ -273,7 +272,6 @@ export function Settings() {
     }
     localStorage.removeItem('mozhno_token');
     localStorage.removeItem('mozhno_refresh_token');
-    resetOnboardingComplete();
     window.location.replace('/login');
   };
 

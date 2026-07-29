@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import dev.mozhno.auth.UserRepository;
 import dev.mozhno.contexts.ContextDefinitionRequest;
 import dev.mozhno.contexts.ContextService;
 import dev.mozhno.environments.EnvironmentService;
@@ -37,26 +38,14 @@ class ProjectServiceTest {
     @Mock
     private ContextService contextService;
 
+    @Mock
+    private UserRepository userRepository;
+
     private ProjectService projectService;
 
     @BeforeEach
     void setUp() {
-        projectService = new ProjectService(projectRepository, events, environmentService, contextService);
-    }
-
-    @Test
-    void findAll_shouldReturnAllProjects() {
-        Project p1 = new Project();
-        p1.setId(1);
-        p1.setName("Project 1");
-        Project p2 = new Project();
-        p2.setId(2);
-        p2.setName("Project 2");
-        when(projectRepository.findAll()).thenReturn(List.of(p1, p2));
-
-        List<Project> result = projectService.findAll();
-        assertEquals(2, result.size());
-        verify(projectRepository).findAll();
+        projectService = new ProjectService(projectRepository, events, environmentService, contextService, userRepository);
     }
 
     @Test
@@ -136,6 +125,7 @@ class ProjectServiceTest {
         when(projectRepository.findById(1)).thenReturn(p);
         doNothing().when(projectRepository).deleteById(1);
         projectService.delete(1);
+        verify(userRepository).unlinkUsersFromProject(1);
         verify(projectRepository).deleteById(1);
     }
 

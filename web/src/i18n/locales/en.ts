@@ -980,6 +980,8 @@ const en = {
     logoUploadError: 'Error uploading logo',
     uploadLogo: 'Upload logo',
     logoHint: 'PNG, JPG or SVG. Recommended 256×256.',
+    logoInvalidFormat: 'Only PNG, JPEG, GIF or WEBP images are allowed',
+    logoDimensionsTooLarge: 'Image must be at most 1024×1024 pixels',
     step1: {
       title: 'Create your first flag',
       description:
@@ -1004,6 +1006,7 @@ const en = {
     copied: 'Copied',
     copy: 'Copy',
     skip: 'Skip',
+    skipExplore: 'Skip, I\'ll explore later',
     next: 'Next',
     finish: 'Finish',
   },
@@ -1032,6 +1035,7 @@ const en = {
     loading: 'Loading applications...',
     emptyTitle: 'No applications',
     emptyDescription: 'Connect the SDK to your application',
+    emptyCta: 'Create API key',
     lastSeen: 'Last seen',
     sdkVersion: 'SDK version',
     environment: 'Environment',

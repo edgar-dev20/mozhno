@@ -45,7 +45,7 @@ export function OnboardingStepper({
                 onClick={onSkipStepZero}
                 className="inline-flex items-center gap-1 px-4 py-2 text-body-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                {t('onboarding.skip')}
+                {t('onboarding.skipExplore')}
               </button>
             )}
             {currentStep > 0 && (

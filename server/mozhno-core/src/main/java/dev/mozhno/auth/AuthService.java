@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import dev.mozhno.spi.AuthenticationFlowSpi;
 
-import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.InvalidCredentialsException;
 import dev.mozhno.exception.NotFoundException;
 
@@ -89,10 +88,6 @@ public class AuthService {
         }
 
         User user = userRepository.findById(result.userId());
-        if (user.getProjectId() == null) {
-            throw new BadRequestException("SELECT_PROJECT",
-                "No project associated with this account. Please contact your administrator.");
-        }
         RefreshTokenService.TokenPair tokens = refreshTokenService.issueTokens(user, user.getProjectId(), rememberMe);
         return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
     }

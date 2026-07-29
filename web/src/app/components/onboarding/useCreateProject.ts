@@ -38,6 +38,7 @@ export function useCreateProject(options: UseCreateProjectOptions = { existingPr
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
   const [pendingLogoPreviewUrl, setPendingLogoPreviewUrl] = useState<string | null>(null);
   const logoPreviewUrlRef = useRef<string | null>(null);
+  const uploadSeqRef = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -47,11 +48,37 @@ export function useCreateProject(options: UseCreateProjectOptions = { existingPr
     };
   }, []);
 
-  const handleLogoUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
       toast.warning(t('errors.upload.fileTooLarge', { max: '2' }));
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.warning(t('onboarding.logoInvalidFormat'));
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+    const seq = ++uploadSeqRef.current;
+    const dimensionsValid = await new Promise<boolean>((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(img.naturalWidth * img.naturalHeight <= 1024 * 1024);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(false);
+      };
+      img.src = url;
+    });
+    if (seq !== uploadSeqRef.current) return;
+    if (!dimensionsValid) {
+      toast.warning(t('onboarding.logoDimensionsTooLarge'));
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }

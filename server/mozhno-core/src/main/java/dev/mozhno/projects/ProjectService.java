@@ -1,5 +1,6 @@
 package dev.mozhno.projects;
 
+import dev.mozhno.auth.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,7 +14,6 @@ import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.NotFoundException;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Service for managing projects, the top-level organizational unit.
@@ -25,25 +25,18 @@ public class ProjectService {
     private final DomainEventPublisher events;
     private final EnvironmentService environmentService;
     private final ContextService contextService;
+    private final UserRepository userRepository;
 
     public ProjectService(ProjectRepository projectRepository,
                           DomainEventPublisher events,
                           EnvironmentService environmentService,
-                          ContextService contextService) {
+                          ContextService contextService,
+                          UserRepository userRepository) {
         this.projectRepository = projectRepository;
         this.events = events;
         this.environmentService = environmentService;
         this.contextService = contextService;
-    }
-
-    /**
-     * Returns all projects.
-     *
-     * @return list of all projects
-     */
-    @Transactional(readOnly = true)
-    public List<Project> findAll() {
-        return projectRepository.findAll();
+        this.userRepository = userRepository;
     }
 
     /**
@@ -119,6 +112,7 @@ public class ProjectService {
     public void delete(Integer id) {
         Project p = projectRepository.findById(id);
         if (p == null) throw new NotFoundException("Project", id);
+        userRepository.unlinkUsersFromProject(id);
         projectRepository.deleteById(id);
         events.publish(DomainEvent.of(id, "project.deleted", "project",
             id, p.getName(), "Project deleted"));

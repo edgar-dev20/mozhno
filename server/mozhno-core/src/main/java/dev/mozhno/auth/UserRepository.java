@@ -159,4 +159,8 @@ public class UserRepository {
     public void updateAvatarData(Integer id, byte[] data) {
         jdbc.update("UPDATE users SET avatar_data = ? WHERE id = ?", data, id);
     }
+
+    public void unlinkUsersFromProject(Integer projectId) {
+        jdbc.update("UPDATE users SET project_id = NULL WHERE project_id = ?", projectId);
+    }
 }
