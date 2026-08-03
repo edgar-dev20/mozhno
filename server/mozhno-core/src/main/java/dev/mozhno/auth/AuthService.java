@@ -97,6 +97,8 @@ public class AuthService {
         if (user == null) {
             throw new NotFoundException("User not found");
         }
+        user.setProjectId(projectId);
+        userRepository.save(user);
         RefreshTokenService.TokenPair tokens = refreshTokenService.issueTokens(user, projectId, true);
         return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
     }
