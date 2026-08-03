@@ -15,7 +15,7 @@ class JwtServiceTest {
     @BeforeEach
     void setUp() {
         JwtProperties props = new JwtProperties();
-        props.setSecret("dGhpc2lzYXRlc3RzZWNyZXRrZXlmb3Jqd3R0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmc=");
+        props.setSecret("thisisatestsecretkeyforjwtthatisatleast32byteslong");
         props.setIssuer("test-issuer");
         props.setAccessTokenTtlMinutes(5);
 
@@ -62,7 +62,7 @@ class JwtServiceTest {
     @Test
     void parseToken_shouldReturnNullForDifferentIssuerToken() {
         JwtProperties otherProps = new JwtProperties();
-        otherProps.setSecret("c2hvdWxkYmUzMmJ5dGVzTWluaW11bUxlbmd0aEtleUZvckhTMjU2QWxnb3JpdGht");
+        otherProps.setSecret("shouldbe32bytesMinimumLengthKeyForHS256Algorithm");
         otherProps.setIssuer("other-issuer");
         JwtService otherJwtService = new JwtService(otherProps);
 
@@ -91,7 +91,7 @@ class JwtServiceTest {
     @Test
     void constructor_shouldRejectShortSecret() {
         JwtProperties props = new JwtProperties();
-        props.setSecret("dG9vU2hvcnQ=");
+        props.setSecret("tooShort");
         assertThrows(IllegalStateException.class, () -> new JwtService(props));
     }
 
@@ -105,7 +105,7 @@ class JwtServiceTest {
     @Test
     void extractProjectIdLenient_shouldReturnProjectIdForExpiredToken() {
         JwtProperties expiredProps = new JwtProperties();
-        expiredProps.setSecret("dGhpc2lzYXRlc3RzZWNyZXRrZXlmb3Jqd3R0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmc=");
+        expiredProps.setSecret("thisisatestsecretkeyforjwtthatisatleast32byteslong");
         expiredProps.setIssuer("test-issuer");
         expiredProps.setAccessTokenTtlMinutes(0);
 

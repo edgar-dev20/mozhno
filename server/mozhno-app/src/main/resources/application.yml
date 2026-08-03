@@ -57,8 +57,7 @@ server:
 mozhno:
   base-url: ${MOZHNO_BASE_URL:http://localhost:8080}
   jwt:
-    # Required. No default: the app refuses to start without a valid Base64 secret (>= 32 bytes).
-    # Generate one with: openssl rand -base64 32
+    # Plain string (≥32 chars) or Base64-encoded binary (≥32 bytes decoded). Generate: openssl rand -base64 32
     secret: ${MOZHNO_JWT_SECRET:}
     issuer: ${MOZHNO_JWT_ISSUER:mozhno}
     access-token-ttl-minutes: ${MOZHNO_JWT_ACCESS_TOKEN_TTL_MINUTES:15}

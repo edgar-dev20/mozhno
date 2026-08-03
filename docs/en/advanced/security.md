@@ -107,7 +107,7 @@ MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS=https://app.example.com
 
 | Recommendation | How To |
 |---------------|--------|
-| **Strong MOZHNO_JWT_SECRET** | `openssl rand -base64 32` |
+| **Strong MOZHNO_JWT_SECRET** | `openssl rand -base64 32` (one option; plain text >= 32 chars also accepted) |
 | **HTTPS-only** | Use a reverse proxy (Nginx, Traefik, Caddy) with TLS |
 | **Restricted CORS** | Specify a concrete domain, not `*` |
 | **Secrets manager** | Don't store passwords and keys in `docker-compose.yml` |

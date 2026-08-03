@@ -4,23 +4,23 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.stereotype.Service;
 
-import static io.jsonwebtoken.Jwts.SIG;
-
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
+
+import static io.jsonwebtoken.Jwts.SIG;
 
 /**
  * Generates and validates JSON Web Tokens for user authentication.
  *
- * <p>Access tokens are signed with HMAC-SHA256 using a Base64-decoded secret.
+ * <p>Access tokens are signed with HMAC-SHA256 using a secret provided by
+ * {@link JwtProperties}. The secret may be a plain string or Base64-encoded.
  * Parsing errors (expired, malformed, bad signature) return {@code null} instead
  * of throwing, allowing callers to treat invalid tokens as unauthenticated.</p>
  */
@@ -32,11 +32,11 @@ public class JwtService {
     private final long accessTokenTtlMinutes;
 
     public JwtService(JwtProperties properties) {
-        byte[] decodedKey = Base64.getDecoder().decode(properties.getSecret());
-        if (decodedKey.length < 32) {
-            throw new IllegalStateException("jwt.secret must be at least 256 bits (32 bytes) when Base64-decoded");
+        byte[] keyBytes = properties.getSecretBytes();
+        if (keyBytes.length < 32) {
+            throw new IllegalStateException("jwt.secret must be at least 256 bits (32 bytes)");
         }
-        this.key = Keys.hmacShaKeyFor(decodedKey);
+        this.key = new SecretKeySpec(keyBytes, "HmacSHA256");
         this.issuer = properties.getIssuer();
         this.accessTokenTtlMinutes = properties.getAccessTokenTtlMinutes();
     }

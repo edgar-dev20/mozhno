@@ -107,7 +107,7 @@ MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS=https://app.example.com
 
 | Рекомендация | Как сделать |
 |-------------|-------------|
-| **Сложный MOZHNO_JWT_SECRET** | `openssl rand -base64 32` |
+| **Сложный MOZHNO_JWT_SECRET** | `openssl rand -base64 32` (один из вариантов; простой текст >= 32 символов тоже принимается) |
 | **HTTPS-only** | Используйте обратный прокси (Nginx, Traefik, Caddy) с TLS |
 | **Ограниченный CORS** | Укажите конкретный домен, не `*` |
 | **Secrets manager** | Не храните пароли и ключи в `docker-compose.yml` |

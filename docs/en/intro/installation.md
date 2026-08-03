@@ -87,7 +87,10 @@ Create a `.env` file or set environment variables:
 export MOZHNO_DB_URL=jdbc:postgresql://localhost:5432/feature_flags
 export MOZHNO_DB_USERNAME=flags_user
 export MOZHNO_DB_PASSWORD=flags_password
+# One option: generate a Base64 secret
 export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)
+# Alternatively, any plain text string >= 32 characters works:
+# export MOZHNO_JWT_SECRET="your-strong-plain-text-secret-here"
 ```
 
 See [Configuration](/en/intro/configuration) for all available variables.

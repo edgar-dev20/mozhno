@@ -51,7 +51,7 @@ These are the most commonly configured environment variables:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MOZHNO_JWT_SECRET` | — (optional for dev) | Secret key for signing JWTs. Minimum 256 bits (32 bytes), Base64-encoded. If not set, a random key is generated at startup — tokens will be invalidated on restart. Set explicitly for production. |
+| `MOZHNO_JWT_SECRET` | — (optional for dev) | Secret key for signing JWTs. Minimum 256 bits (32 bytes). Accepts both plain text (>= 32 characters) and Base64 (>= 32 bytes decoded). If not set, a random key is generated at startup — tokens will be invalidated on restart. Set explicitly for production. |
 | `MOZHNO_SERVER_PORT` | `8080` | HTTP listen port |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Publicly reachable URL of the server. Used for generating links in emails, webhook payloads, and OAuth redirects. Must include protocol (http/https) and no trailing slash. |
 
@@ -148,7 +148,7 @@ services:
 
 ## Production Checklist
 
-1. **Generate a strong `MOZHNO_JWT_SECRET`** — use `openssl rand -base64 32`, never use the default or a predictable value.
+1. **Generate a strong `MOZHNO_JWT_SECRET`** — use `openssl rand -base64 32` (one option; a plain text string of >= 32 characters also works), never use the default or a predictable value.
 2. **Set `MOZHNO_BASE_URL`** to your real public URL — incorrect values break OAuth callbacks and webhook delivery.
 3. **Restrict `MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS`** to your actual frontend domain.
 4. **Use environment-specific secrets** — never reuse `MOZHNO_JWT_SECRET` across staging and production.

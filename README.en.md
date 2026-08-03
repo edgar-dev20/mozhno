@@ -113,9 +113,9 @@ volumes:
 ```
 
 ```bash
-# Generate a JWT secret for production (Base64, ≥32 bytes).
+# Generate a JWT secret for production (≥32 characters or Base64 ≥32 bytes).
 # For dev you can skip this — the server auto-generates a random key.
-export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)
+export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)  # or plain text ≥32 characters
 
 docker compose up -d
 ```
@@ -161,7 +161,7 @@ See each repo for installation and docs.
 | `MOZHNO_DB_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | PostgreSQL JDBC URL |
 | `MOZHNO_DB_USERNAME` | `flags_user` | Database user |
 | `MOZHNO_DB_PASSWORD` | `flags_password` | Database password |
-| `MOZHNO_JWT_SECRET` | *(recommended for production)* | Base64 signing key, ≥32 bytes. Optional for dev — auto-generated random key. Generate: `openssl rand -base64 32` |
+| `MOZHNO_JWT_SECRET` | *(recommended for production)* | Signing key (≥32 characters) or Base64 (≥32 bytes). Optional for dev — auto-generated random key. Generate: `openssl rand -base64 32` |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Public server URL |
 | `MOZHNO_CLIENT_MAX_METRICS_BATCH_SIZE` | `1000` | Max metrics batch size accepted from SDKs |
 | `MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Client instance data retention |

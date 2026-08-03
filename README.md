@@ -112,9 +112,9 @@ volumes:
 ```
 
 ```bash
-# Сгенерируйте JWT-секрет для продакшена (Base64, ≥32 байта).
+# Сгенерируйте JWT-секрет для продакшена (≥32 символов или Base64 ≥32 байт).
 # Для dev — можно пропустить: сервер сгенерирует случайный ключ.
-export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)
+export MOZHNO_JWT_SECRET=$(openssl rand -base64 32)  # или обычный текст ≥32 символов
 
 docker compose up -d
 ```
@@ -160,7 +160,7 @@ SDK живут в отдельных репозиториях:
 | `MOZHNO_DB_URL` | `jdbc:postgresql://localhost:5432/feature_flags` | JDBC URL базы данных |
 | `MOZHNO_DB_USERNAME` | `flags_user` | Пользователь БД |
 | `MOZHNO_DB_PASSWORD` | `flags_password` | Пароль БД |
-| `MOZHNO_JWT_SECRET` | *(рекомендуется для прода)* | Base64-ключ, ≥32 байта. Для dev опционален — генерируется случайный ключ. Сгенерировать: `openssl rand -base64 32` |
+| `MOZHNO_JWT_SECRET` | *(рекомендуется для прода)* | Ключ (≥32 символов) или Base64 (≥32 байт). Для dev опционален — генерируется случайный ключ. Сгенерировать: `openssl rand -base64 32` |
 | `MOZHNO_BASE_URL` | `http://localhost:8080` | Публичный URL сервера |
 | `MOZHNO_CLIENT_MAX_METRICS_BATCH_SIZE` | `1000` | Максимальный размер батча метрик от SDK |
 | `MOZHNO_CLIENT_INSTANCE_RETENTION_DAYS` | `30` | Срок хранения данных о клиентских инстансах |

@@ -225,7 +225,7 @@ Never hardcode secrets in `docker-compose.yml`. Use:
 **Environment file (`.env`):**
 ```bash
 DB_PASSWORD=your-secure-database-password
-MOZHNO_JWT_SECRET=your-64-character-hex-secret
+MOZHNO_JWT_SECRET=your-strong-secret-string
 ```
 
 **Docker secrets (Swarm mode):**
@@ -246,7 +246,7 @@ environment:
 
 ### Production Checklist
 
-- [ ] Generate a strong `MOZHNO_JWT_SECRET` (64+ hex characters)
+- [ ] Generate a strong `MOZHNO_JWT_SECRET` (>= 32 characters plain text, or Base64-encoded)
 - [ ] Use a unique, random `DB_PASSWORD`
 - [ ] Place behind a reverse proxy with TLS (Let's Encrypt)
 - [ ] Bind to `127.0.0.1` if proxy is local
@@ -342,7 +342,7 @@ flags.example.com {
 | # | Action | Command / Variable |
 |---|--------|-------------------|
 | 0 | Create admin (first launch) | `MOZHNO_INIT_EMAIL`, `MOZHNO_INIT_PASSWORD` → change password after login |
-| 1 | Generate JWT secret | `openssl rand -base64 32` → `MOZHNO_JWT_SECRET` |
+| 1 | Generate JWT secret | `openssl rand -base64 32` (one option; plain text >= 32 chars also works) → `MOZHNO_JWT_SECRET` |
 | 2 | Strong database password | `MOZHNO_DB_PASSWORD` |
 | 3 | Set public domain | `MOZHNO_BASE_URL=https://flags.example.com` |
 | 4 | Configure CORS | `MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS=https://app.example.com` |

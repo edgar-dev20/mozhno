@@ -118,7 +118,10 @@ networks:
 ```bash
 # JWT-секрет опционален для dev — без него генерируется случайный ключ
 # Для продакшена задайте явно:
+# Один из вариантов — сгенерировать Base64-ключ:
 MOZHNO_JWT_SECRET=$(openssl rand -base64 32) docker compose up -d
+# Либо любая строка >= 32 символов:
+# export MOZHNO_JWT_SECRET="your-strong-plain-text-secret" && docker compose up -d
 ```
 
 ## Переменные окружения
@@ -280,7 +283,7 @@ tmpfs:
 - Docker Secrets (в Swarm-режиме)
 - Внешний менеджер секретов (HashiCorp Vault, AWS Secrets Manager)
 
-Генерация криптографически стойкого JWT-секрета:
+Генерация криптографически стойкого JWT-секрета (один из вариантов; также подойдёт простая строка >= 32 символов):
 
 ```bash
 openssl rand -base64 32
@@ -416,7 +419,7 @@ flags.example.com {
 | # | Действие | Команда / переменная |
 |---|----------|---------------------|
 | 0 | Создать администратора (первый запуск) | `MOZHNO_INIT_EMAIL`, `MOZHNO_INIT_PASSWORD` → после входа сменить пароль |
-| 1 | Сгенерировать JWT-секрет | `openssl rand -base64 32` → `MOZHNO_JWT_SECRET` |
+| 1 | Сгенерировать JWT-секрет | `openssl rand -base64 32` (один из вариантов; простая строка >= 32 символов тоже подойдёт) → `MOZHNO_JWT_SECRET` |
 | 2 | Сложный пароль БД | `MOZHNO_DB_PASSWORD` |
 | 3 | Указать реальный домен | `MOZHNO_BASE_URL=https://flags.example.com` |
 | 4 | Настроить CORS | `MOZHNO_SECURITY_CORS_ALLOWED_ORIGINS=https://app.example.com` |

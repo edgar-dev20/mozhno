@@ -30,7 +30,7 @@ server:
 mozhno:
   base-url: "http://localhost:8080"
   jwt:
-    secret: "dGhpc2lzYXRlc3RzZWNyZXRrZXlmb3Jqd3R0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmc="
+    secret: "thisisatestsecretkeyforjwtthatisatleast32byteslong"
     issuer: "mozhno-test"
     access-token-ttl-minutes: 15
   security:

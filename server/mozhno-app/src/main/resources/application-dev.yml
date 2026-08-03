@@ -4,7 +4,7 @@
 mozhno:
   jwt:
     # Dev-only default secret so the app starts without configuration. NEVER use in production.
-    secret: ZGV2LXNlY3JldC1rZXktdGhhdC1pcy1hdC1sZWFzdC0zMi1ieXRlcy1sb25nLWZvci1kZXY=
+    secret: dev-secret-key-that-is-at-least-32-bytes-long-for-dev
     issuer: mozhno-dev
     access-token-ttl-minutes: 60
     refresh-token-ttl-days: 7
