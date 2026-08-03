@@ -8,6 +8,8 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.stereotype.Service;
 
+import static io.jsonwebtoken.Jwts.SIG;
+
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -63,7 +65,7 @@ public class JwtService {
             .claim("status", user.getStatus())
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiry))
-            .signWith(key);
+            .signWith(key, SIG.HS256);
 
         if (projectId != null) {
             builder.claim("project_id", projectId);
