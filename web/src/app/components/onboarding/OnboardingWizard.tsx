@@ -14,7 +14,6 @@ interface OnboardingWizardProps {
   existingProjectId: number | null;
   existingProjectName: string | null;
   onDismiss: () => void;
-  onDismissTemporary: () => void;
   onProjectCreated: () => void;
 }
 
@@ -34,7 +33,6 @@ export function OnboardingWizard({
   existingProjectId,
   existingProjectName,
   onDismiss,
-  onDismissTemporary,
   onProjectCreated,
 }: OnboardingWizardProps) {
   const t = useT();
@@ -79,8 +77,6 @@ export function OnboardingWizard({
   const handleBack = useCallback(() => {
     if (step > 0) setStep(step - 1);
   }, [step]);
-
-  if (!open) return null;
 
   return (
     <AnimatePresence>
@@ -160,7 +156,7 @@ export function OnboardingWizard({
                   onBack={handleBack}
                   onSkip={onDismiss}
                   onFinish={onDismiss}
-                  onSkipStepZero={onDismissTemporary}
+                  onSkipStepZero={onDismiss}
                 />
               </div>
             </div>

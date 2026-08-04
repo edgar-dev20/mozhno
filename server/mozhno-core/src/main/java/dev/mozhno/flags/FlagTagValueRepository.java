@@ -87,4 +87,8 @@ public class FlagTagValueRepository {
     public void deleteByFlagId(Integer flagId) {
         jdbc.update("DELETE FROM flag_tag_values WHERE flag_id = ?", flagId);
     }
+
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM flag_tag_values USING flags WHERE flags.id = flag_tag_values.flag_id AND flags.project_id = ?", projectId);
+    }
 }

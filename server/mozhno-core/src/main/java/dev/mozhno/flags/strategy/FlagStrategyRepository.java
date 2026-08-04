@@ -243,5 +243,8 @@ public class FlagStrategyRepository {
         }
     }
 
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM flag_strategies USING flags WHERE flags.id = flag_strategies.flag_id AND flags.project_id = ?", projectId);
+    }
 
 }

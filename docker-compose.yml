@@ -32,7 +32,7 @@ services:
       MOZHNO_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-feature_flags}
       MOZHNO_DB_USERNAME: ${POSTGRES_USER:-flags_user}
       MOZHNO_DB_PASSWORD: ${POSTGRES_PASSWORD:-flags_password}
-      MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET:-}
+      MOZHNO_JWT_SECRET: ${MOZHNO_JWT_SECRET:-secretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecretsecret}
       MOZHNO_BASE_URL: ${MOZHNO_BASE_URL:-http://localhost:8080}
       MOZHNO_DB_POOL_MAX_SIZE: ${MOZHNO_DB_POOL_MAX_SIZE:-20}
       MOZHNO_DB_POOL_MIN_IDLE: ${MOZHNO_DB_POOL_MIN_IDLE:-5}
@@ -41,7 +41,7 @@ services:
       MOZHNO_SMTP_USERNAME: ${MOZHNO_SMTP_USERNAME:-}
       MOZHNO_SMTP_PASSWORD: ${MOZHNO_SMTP_PASSWORD:-}
       MOZHNO_MANAGEMENT_PORT: '9090'
-      MOZHNO_INIT_EMAIL: ${MOZHNO_INIT_EMAIL:-admin@mozhno.com}
+      MOZHNO_INIT_EMAIL: ${MOZHNO_INIT_EMAIL:-admin@mozhno.dev}
       MOZHNO_INIT_PASSWORD: ${MOZHNO_INIT_PASSWORD:-admin}
     networks:
       - mozhno-net

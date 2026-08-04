@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import { fadeUp } from '@/shared/motion';
@@ -34,8 +34,10 @@ export function DashboardLayout() {
   const t = useT();
   const { toggleMobile } = useAppSidebar();
   const [accentColor, setAccentColor] = useState('#1a6b60');
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(
+    () => localStorage.getItem('mozhno_onboarding_dismissed') === '1',
+  );
 
   const { data: project, isLoading: projectLoading } = useProjectQuery();
   const projectId = project?.id ?? null;
@@ -60,8 +62,7 @@ export function DashboardLayout() {
   const handleLogoLoad = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
       if (!projectId) return;
-      const color = extractDominantColor(e.currentTarget, canvasRef.current);
-      canvasRef.current = e.currentTarget as unknown as HTMLCanvasElement;
+      const color = extractDominantColor(e.currentTarget);
       setAccentColor(color);
     },
     [projectId],
@@ -85,31 +86,28 @@ export function DashboardLayout() {
 
   const handleDismiss = useCallback(() => {
     setShowOnboarding(false);
-    queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
-    queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
-    queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
-  }, [queryClient]);
-
-  const handleDismissTemporary = useCallback(() => {
-    setShowOnboarding(false);
+    setOnboardingDismissed(true);
+    localStorage.setItem('mozhno_onboarding_dismissed', '1');
     queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
     queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
     queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
   }, [queryClient]);
 
   const handleProjectCreated = useCallback(() => {
+    setOnboardingDismissed(true);
+    localStorage.setItem('mozhno_onboarding_dismissed', '1');
     invalidateProjects();
   }, [invalidateProjects]);
 
   useEffect(() => {
-    if (!user || projectLoading) return;
-    if (projectId === null) {
+    if (!user || projectLoading || onboardingDismissed) return;
+    if (projectId === null || (projectName === 'My Project' && user.role === 'admin')) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowOnboarding(true);
       return;
     }
     setShowOnboarding(false);
-  }, [user, projectLoading, projectId]);
+  }, [user, projectLoading, projectId, projectName, onboardingDismissed]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -145,7 +143,7 @@ export function DashboardLayout() {
                 {projectLogo && projectId ? (
                   <img
                     key={projectLogo}
-                    src={`${api.projects.getLogoUrl(projectId)}?v=${encodeURIComponent(projectLogo)}`}
+                      src={`${api.projects.getLogoUrl()}?v=${encodeURIComponent(projectLogo)}`}
                     alt={projectName ?? ''}
                     onLoad={handleLogoLoad}
                     className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg object-cover shrink-0"
@@ -153,7 +151,7 @@ export function DashboardLayout() {
                 ) : (
                   <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-primary flex items-center justify-center text-[10px] sm:text-caption font-bold shadow-sm text-primary-foreground ring-1 ring-chart-4/30 shrink-0">
                     {(projectName ?? '?')[0].toUpperCase()}
-                  </div>
+                </div>
                 )}
                 <span
                   className="hidden sm:inline-block size-1.5 rounded-full shrink-0"
@@ -163,7 +161,6 @@ export function DashboardLayout() {
                 <span className="text-h3 sm:text-h2 font-semibold text-foreground truncate">
                   {projectName ?? '—'}
                 </span>
-                <canvas ref={canvasRef} className="hidden" />
                 <div className="hidden sm:block h-5 w-px bg-border mx-1" />
                 <div className="hidden sm:flex items-center gap-0.5">
                   <Tooltip>
@@ -297,12 +294,11 @@ export function DashboardLayout() {
               existingProjectId={projectId}
               existingProjectName={projectName}
               onDismiss={handleDismiss}
-              onDismissTemporary={handleDismissTemporary}
               onProjectCreated={handleProjectCreated}
             />
           )}
+                </div>
         </div>
-      </div>
     </>
   );
 }

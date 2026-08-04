@@ -37,9 +37,4 @@ export const authApi = {
       method: 'POST',
       body: JSON.stringify({ token, name, password }),
     }),
-  selectProject: (projectId: number) =>
-    request<{ token: string; refreshToken: string; user: UserDto }>('/auth/select-project', {
-      method: 'POST',
-      body: JSON.stringify({ projectId }),
-    }),
 };

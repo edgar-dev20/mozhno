@@ -124,17 +124,29 @@ public class UserInviteService {
             user.setRole(token.getRole());
             user.setStatus("active");
             user.setLocale(token.getLocale() != null ? token.getLocale() : "ru");
-            Project project = createDefaultProject();
-            user.setProjectId(project.getId());
+            user.setCreatedBy(token.getCreatedBy());
+            Integer inviterProjectId = resolveInviterProject(token.getCreatedBy());
+            if (inviterProjectId != null) {
+                user.setProjectId(inviterProjectId);
+            } else {
+                Project project = createDefaultProject();
+                user.setProjectId(project.getId());
+            }
             userRepository.save(user);
         } else if ("invited".equals(user.getStatus())) {
             user.setPasswordHash(passwordEncoder.encode(password));
             user.setName(name != null ? name : user.getName());
             user.setRole(token.getRole());
             user.setStatus("active");
+            user.setCreatedBy(token.getCreatedBy());
             if (user.getProjectId() == null) {
-                Project project = createDefaultProject();
-                user.setProjectId(project.getId());
+                Integer inviterProjectId = resolveInviterProject(token.getCreatedBy());
+                if (inviterProjectId != null) {
+                    user.setProjectId(inviterProjectId);
+                } else {
+                    Project project = createDefaultProject();
+                    user.setProjectId(project.getId());
+                }
             }
             userRepository.save(user);
         } else {
@@ -149,6 +161,13 @@ public class UserInviteService {
         return new UserDto(user.getId(), user.getEmail(), user.getName(),
             user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(),
             user.getCreatedAt(), user.getLastActiveAt());
+    }
+
+    private Integer resolveInviterProject(Integer inviterId) {
+        if (inviterId == null) return null;
+        User inviter = userRepository.findById(inviterId);
+        if (inviter == null || inviter.getProjectId() == null) return null;
+        return inviter.getProjectId();
     }
 
     private Project createDefaultProject() {

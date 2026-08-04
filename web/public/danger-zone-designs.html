@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Reset Project — 5 Designs (Mozhno DS)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { margin:0;padding:0;box-sizing:border-box }
+  body { font-family:'Inter',sans-serif;font-size:14px;line-height:1.5 }
+  :root {
+    --color-background: oklch(0.18 0.003 80);
+    --color-foreground: oklch(0.92 0.005 80);
+    --color-card: oklch(0.26 0.003 80);
+    --color-secondary: oklch(0.28 0.004 80);
+    --color-muted: oklch(0.26 0.004 80);
+    --color-muted-foreground: oklch(0.58 0.010 80);
+    --color-border: oklch(1 0 0 / 0.14);
+    --color-destructive: oklch(0.55 0.18 12);
+    --color-destructive-foreground: oklch(0.92 0 0);
+    --color-primary: oklch(0.62 0.16 170);
+    --color-primary-foreground: oklch(0.12 0.003 80);
+    --color-brand: oklch(0.58 0.18 175);
+    --color-info: oklch(0.58 0.18 175);
+    --color-accent: oklch(0.30 0.005 80);
+    --radius-xl: 0.75rem;
+  }
+  .grid-layout { display:flex;flex-direction:column;gap:40px;max-width:860px;margin:0 auto }
+  .section-title { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--color-destructive);margin-bottom:14px }
+  .card { background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius-xl);box-shadow:0 1px 3px rgba(0,0,0,.3) }
+  .card-header { display:flex;align-items:center;gap:12px;margin-bottom:20px }
+  .card-icon { padding:10px;border-radius:var(--radius-xl);background:var(--color-muted);border:1px solid var(--color-border);display:flex }
+  .card-icon.danger { background:oklch(0.3 0.06 12);border:1px solid oklch(0.4 0.08 12) }
+  .card-h2 { font-size:18px;font-weight:600;color:var(--color-foreground) }
+  .card-desc { font-size:13px;color:var(--color-muted-foreground) }
+  .btn { display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--radius-xl);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s;white-space:nowrap }
+  .btn-destructive { background:var(--color-destructive);color:var(--color-destructive-foreground) }
+  .btn-destructive:hover { filter:brightness(1.15) }
+  .btn-secondary { background:var(--color-secondary);color:var(--color-foreground);border:1px solid var(--color-border) }
+  .btn-secondary:hover { background:var(--color-accent) }
+  .btn-ghost { background:none;color:var(--color-destructive);font-weight:500;padding:0 }
+  .btn-ghost:hover { text-decoration:underline }
+  .warning-box { background:var(--color-secondary);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:16px;font-size:13px;color:var(--color-muted-foreground);line-height:1.65 }
+  .row-between { display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap }
+  .meta-row { display:flex;gap:20px;margin-top:14px;font-size:12px;color:var(--color-muted-foreground);flex-wrap:wrap }
+  .meta-item { display:flex;align-items:center;gap:5px }
+  .divider { width:1px;height:16px;background:var(--color-border) }
+  .collapsible-header { display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:16px;background:var(--color-secondary);border:1px solid var(--color-border);border-radius:var(--radius-xl) }
+  .collapsible-header:hover { border-color:oklch(0.45 0.12 12) }
+  .collapsible-body { display:none;padding:16px;border:1px solid oklch(0.4 0.10 12);border-top:none;border-radius:0 0 var(--radius-xl) var(--radius-xl);background:var(--color-card);font-size:13px;color:var(--color-muted-foreground);line-height:1.65 }
+  .collapsible-body.show { display:block }
+  .chevron { transition:transform .2s }
+  .chevron.open { transform:rotate(180deg) }
+  .left-accent { border-left:3px solid var(--color-destructive) }
+</style>
+</head>
+<body style="background:var(--color-background);color:var(--color-foreground);padding:40px 20px">
+<div class="grid-layout">
+
+  <!-- 1: Row card (как Project) -->
+  <div>
+    <div class="section-title">Опасная зона</div>
+    <div class="card"><div class="p-5 sm:p-6">
+      <div class="card-header">
+        <div class="card-icon danger"><svg width="20" height="20" fill="none" stroke="var(--color-destructive)" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m-7 4v6m4-6v6M5 6l1 14a2 2 0 002 2h8a2 2 0 002-2l1-14"/></svg></div>
+        <div><div class="card-h2">Сбросить проект</div><div class="card-desc">Необратимые действия с проектом</div></div>
+      </div>
+      <div class="warning-box mb-5">Все флаги, сегменты, окружения, API-ключи, контексты, теги и аудит будут удалены. Окружения создадутся заново. Проект останется с тем же ID.</div>
+      <button class="btn btn-destructive" onclick="alert('Confirm dialog opens')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        Сбросить проект
+      </button>
+    </div></div>
+  </div>
+
+  <!-- 2: Left accent stripe -->
+  <div>
+    <div class="section-title">Опасная зона</div>
+    <div class="card left-accent"><div class="p-5 sm:p-6">
+      <div class="card-header">
+        <div class="card-icon danger"><svg width="20" height="20" fill="none" stroke="var(--color-destructive)" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div>
+        <div><div class="card-h2">Сбросить проект до заводских настроек</div><div class="card-desc">Необратимые действия с проектом</div></div>
+      </div>
+      <div class="warning-box mb-5">Флаги, сегменты, окружения, API-ключи, контексты, теги и аудит будут удалены без возможности восстановления. Пользователи и роли сохранятся.</div>
+      <button class="btn btn-destructive" onclick="alert('Confirm dialog opens')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/></svg>
+        Сбросить проект
+      </button>
+    </div></div>
+  </div>
+
+  <!-- 3: Detail block -->
+  <div>
+    <div class="section-title">Опасная зона</div>
+    <div class="card"><div class="p-5 sm:p-6">
+      <div class="card-header">
+        <div class="card-icon danger"><svg width="20" height="20" fill="none" stroke="var(--color-destructive)" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div>
+        <div><div class="card-h2">Сбросить проект</div><div class="card-desc">Все данные будут удалены, проект вернётся к заводским настройкам</div></div>
+      </div>
+      <div class="meta-row">
+        <span class="meta-item"><svg width="14" height="14" fill="none" stroke="var(--color-destructive)" stroke-width="2"><path stroke-linecap="round" d="M5 13l4-10"/></svg>Флаги, сегменты, контексты</span>
+        <span class="meta-item"><svg width="14" height="14" fill="none" stroke="var(--color-destructive)" stroke-width="2"><path stroke-linecap="round" d="M5 13l4-10"/></svg>Окружения, API-ключи</span>
+        <span class="meta-item"><svg width="14" height="14" fill="none" stroke="var(--color-destructive)" stroke-width="2"><path stroke-linecap="round" d="M5 13l4-10"/></svg>Аудит, настройки</span>
+        <span class="meta-item"><svg width="14" height="14" fill="none" stroke="var(--color-info)" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/></svg>Пользователи сохранены</span>
+      </div>
+      <div style="margin-top:20px;display:flex;align-items:center;gap:12px">
+        <button class="btn btn-destructive" onclick="alert('Confirm dialog opens')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/></svg>
+          Сбросить проект
+        </button>
+        <span class="card-desc">Требуется подтверждение названием проекта</span>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 4: Collapsible -->
+  <div>
+    <div class="section-title">Опасная зона</div>
+    <div class="collapsible-header" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('show');this.querySelector('.chevron').classList.toggle('open')" tabindex="0" role="button" aria-expanded="false">
+      <svg width="18" height="18" fill="none" stroke="var(--color-destructive)" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h2"/></svg>
+      <span style="font-weight:600;font-size:15px;color:var(--color-foreground)">Сбросить проект</span>
+      <span style="margin-left:auto;font-size:12px;color:var(--color-muted-foreground)">Необратимо</span>
+      <svg class="chevron" width="16" height="16" fill="none" stroke="var(--color-muted-foreground)" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9l3-3 3 3"/></svg>
+    </div>
+    <div class="collapsible-body">
+      <p style="margin-bottom:16px">Все флаги, сегменты, окружения, API-ключи, контексты, теги и журнал аудита будут удалены без возможности восстановления. Окружения создадутся заново. Название проекта сбросится на «My Project». Пользователи и их роли сохранятся.</p>
+      <button class="btn btn-destructive" onclick="alert('Confirm dialog opens')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/></svg>
+        Сбросить проект
+      </button>
+    </div>
+  </div>
+
+  <!-- 5: Minimal inline -->
+  <div>
+    <div class="section-title">Опасная зона</div>
+    <div class="card"><div class="p-5 sm:p-6">
+      <div class="row-between">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span style="font-weight:500;font-size:14px;color:var(--color-foreground)">Сбросить проект</span>
+          <span class="divider"></span>
+          <span class="card-desc">Сотрёт все данные, сохранит пользователей</span>
+        </div>
+        <button class="btn btn-ghost" onclick="alert('Confirm dialog opens')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18"/></svg>
+          Сбросить
+        </button>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+</body>
+</html>

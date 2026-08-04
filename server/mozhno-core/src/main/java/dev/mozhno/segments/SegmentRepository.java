@@ -126,5 +126,7 @@ public class SegmentRepository {
         return jdbc.update("DELETE FROM segments WHERE id = ? AND project_id = ?", id, projectId);
     }
 
-
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM segments WHERE project_id = ?", projectId);
+    }
 }

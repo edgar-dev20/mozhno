@@ -154,7 +154,9 @@ jdbc:postgresql://host:5432/feature_flags?ssl=true&sslmode=require
 
 ## Verifying the Installation
 
-Once the server starts, open the web dashboard at `http://localhost:8080`. You'll be prompted to create an initial project and admin user.
+Once the server starts, open the web dashboard at `http://localhost:8080`.
+A default project ("My Project") and admin user are created automatically on first launch.
+You'll see an onboarding dialog to rename the project and upload a logo.
 
 To verify the API is healthy:
 

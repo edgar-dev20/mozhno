@@ -67,13 +67,13 @@ describe('auditApi', () => {
 });
 
 describe('clientInstancesApi', () => {
-  it('list with projectId', async () => {
-    await clientInstancesApi.list(1);
-    expect(requestSpy).toHaveBeenCalledWith('/projects/1/client-instances');
+  it('list with no envId', async () => {
+    await clientInstancesApi.list();
+    expect(requestSpy).toHaveBeenCalledWith('/projects/client-instances');
   });
   it('list with envId', async () => {
-    await clientInstancesApi.list(1, 2);
-    expect(requestSpy).toHaveBeenCalledWith('/projects/1/client-instances?environmentId=2');
+    await clientInstancesApi.list(2);
+    expect(requestSpy).toHaveBeenCalledWith('/projects/client-instances?environmentId=2');
   });
 });
 
@@ -178,30 +178,19 @@ describe('projectsApi', () => {
     await projectsApi.list();
     expect(requestSpy).toHaveBeenCalledWith('/projects');
   });
-  it('get', async () => {
-    await projectsApi.get(1);
-    expect(requestSpy).toHaveBeenCalledWith('/projects/1');
-  });
-  it('create', async () => {
-    await projectsApi.create({ name: 'p' });
-    expect(requestSpy).toHaveBeenCalledWith('/projects', {
-      method: 'POST',
-      body: JSON.stringify({ name: 'p' }),
-    });
-  });
   it('update', async () => {
-    await projectsApi.update(1, { name: 'p2' });
-    expect(requestSpy).toHaveBeenCalledWith('/projects/1', {
+    await projectsApi.update({ name: 'p2' });
+    expect(requestSpy).toHaveBeenCalledWith('/projects', {
       method: 'PUT',
       body: JSON.stringify({ name: 'p2' }),
     });
   });
-  it('delete', async () => {
-    await projectsApi.delete(1);
-    expect(requestSpy).toHaveBeenCalledWith('/projects/1', { method: 'DELETE' });
+  it('reset', async () => {
+    await projectsApi.reset();
+    expect(requestSpy).toHaveBeenCalledWith('/projects/reset', { method: 'POST' });
   });
   it('getLogoUrl returns string', () => {
-    expect(projectsApi.getLogoUrl(1)).toBe('/api/v1/projects/1/logo');
+    expect(projectsApi.getLogoUrl()).toBe('/api/v1/projects/logo');
   });
 });
 

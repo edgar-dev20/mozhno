@@ -57,76 +57,35 @@ class ProjectControllerTest extends BaseIntegrationTest {
     }
 
     @Test
-    void getAllProjects_shouldReturnEmptyList() throws Exception {
+    void getAllProjects_shouldReturnProject() throws Exception {
         mockMvc.perform(get("/api/v1/projects")
                 .header("Authorization", auth()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
-    }
-
-    @Test
-    void createProject_shouldReturnCreatedProject() throws Exception {
-        mockMvc.perform(post("/api/v1/projects")
-                        .header("Authorization", auth())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Test Project\", \"description\": \"Test Description\"}"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Test Project"))
-                .andExpect(jsonPath("$.description").value("Test Description"));
-    }
-
-    @Test
-    void getProject_shouldReturnProject() throws Exception {
-        Project p = new Project();
-        p.setName("Find Test");
-        p.setDescription("Description");
-        Project saved = projectRepository.save(p);
-
-        mockMvc.perform(get("/api/v1/projects/{id}", saved.getId())
-                .header("Authorization", auth()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Find Test"));
-    }
-
-    @Test
-    void getProject_shouldReturn404WhenNotFound() throws Exception {
-        mockMvc.perform(get("/api/v1/projects/9999")
-                .header("Authorization", auth()))
-                .andExpect(status().isNotFound());
+                .andExpect(jsonPath("$[0].name").value("Test Project"));
     }
 
     @Test
     void updateProject_shouldReturnUpdatedProject() throws Exception {
-        Project p = new Project();
-        p.setName("Original");
-        Project saved = projectRepository.save(p);
-
-        mockMvc.perform(put("/api/v1/projects/{id}", saved.getId())
-                        .header("Authorization", auth())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\": \"Updated\", \"description\": \"Updated Description\"}"))
+        mockMvc.perform(put("/api/v1/projects")
+                .header("Authorization", auth())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\": \"Updated\", \"description\": \"Updated Description\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Updated"));
     }
 
     @Test
-    void deleteProject_shouldReturn204() throws Exception {
-        Project p = new Project();
-        p.setName("To Delete");
-        Project saved = projectRepository.save(p);
-
-        mockMvc.perform(delete("/api/v1/projects/{id}", saved.getId())
+    void resetProject_shouldReturnMyProject() throws Exception {
+        mockMvc.perform(post("/api/v1/projects/reset")
                 .header("Authorization", auth()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("My Project"))
+                .andExpect(jsonPath("$.logo").doesNotExist());
     }
 
     @Test
     void getClientInstances_shouldReturnEmptyList() throws Exception {
-        Project p = new Project();
-        p.setName("CI Project");
-        Project saved = projectRepository.save(p);
-
-        mockMvc.perform(get("/api/v1/projects/{id}/client-instances", saved.getId())
+        mockMvc.perform(get("/api/v1/projects/client-instances")
                 .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
@@ -134,11 +93,7 @@ class ProjectControllerTest extends BaseIntegrationTest {
 
     @Test
     void getClientInstances_withEnvironmentId_shouldReturnEmptyList() throws Exception {
-        Project p = new Project();
-        p.setName("CI Env Project");
-        Project saved = projectRepository.save(p);
-
-        mockMvc.perform(get("/api/v1/projects/{id}/client-instances", saved.getId())
+        mockMvc.perform(get("/api/v1/projects/client-instances")
                 .param("environmentId", "1")
                 .header("Authorization", auth()))
                 .andExpect(status().isOk())
@@ -147,14 +102,9 @@ class ProjectControllerTest extends BaseIntegrationTest {
 
     @Test
     void uploadLogo_shouldReturnProject() throws Exception {
-        Project p = new Project();
-        p.setName("Logo Project");
-        Project saved = projectRepository.save(p);
+        MockMultipartFile file = new MockMultipartFile("file", "logo.png", "image/png", pngBytes());
 
-        MockMultipartFile file = new MockMultipartFile("file", "logo.png", "image/png",
-                pngBytes());
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/{id}/logo", saved.getId())
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/projects/logo")
                 .file(file)
                 .header("Authorization", auth()))
                 .andExpect(status().isOk())
@@ -163,13 +113,16 @@ class ProjectControllerTest extends BaseIntegrationTest {
 
     @Test
     void getLogo_shouldReturn404WhenNoLogo() throws Exception {
-        Project p = new Project();
-        p.setName("No Logo Project");
-        Project saved = projectRepository.save(p);
-
-        mockMvc.perform(get("/api/v1/projects/{id}/logo", saved.getId())
+        mockMvc.perform(get("/api/v1/projects/logo")
                 .header("Authorization", auth()))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteProject_shouldReturn405MethodNotAllowed() throws Exception {
+        mockMvc.perform(delete("/api/v1/projects")
+                .header("Authorization", auth()))
+                .andExpect(status().isMethodNotAllowed());
     }
 
     private static byte[] pngBytes() {

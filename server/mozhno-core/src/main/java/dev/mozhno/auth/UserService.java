@@ -7,9 +7,14 @@ import org.springframework.web.multipart.MultipartFile;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.spi.QuotaSpi;
+import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.ConflictException;
 import dev.mozhno.exception.NotFoundException;
 import dev.mozhno.exception.QuotaExceededException;
+
+import dev.mozhno.util.MediaTypeUtils;
+
+import org.springframework.http.MediaType;
 
 import java.io.IOException;
 import java.util.List;
@@ -125,7 +130,12 @@ public class UserService {
             user.setPasswordHash(passwordEncoder.encode(request.password()));
         }
         if (request.name() != null) user.setName(request.name());
-        if (request.role() != null) user.setRole(request.role());
+        if (request.role() != null) {
+            if ("admin".equals(user.getRole()) && !"admin".equals(request.role())) {
+                ensureGroupHasOtherAdmin(user);
+            }
+            user.setRole(request.role());
+        }
         if (request.status() != null) user.setStatus(request.status());
         if (request.locale() != null) user.setLocale(request.locale());
         User saved = userRepository.save(user);
@@ -142,7 +152,11 @@ public class UserService {
     @Transactional
     public void delete(Integer id) {
         User user = userRepository.findById(id);
-        String email = user != null ? user.getEmail() : String.valueOf(id);
+        if (user == null) return;
+        if ("admin".equals(user.getRole())) {
+            ensureGroupHasOtherAdmin(user);
+        }
+        String email = user.getEmail();
         userRepository.delete(id);
         events.publish(DomainEvent.of(null, "user.deleted", "user",
             id, email, "User deleted"));
@@ -165,35 +179,35 @@ public class UserService {
         try {
             bytes = file.getBytes();
         } catch (IOException e) {
-            throw new dev.mozhno.exception.BadRequestException("Failed to read avatar file: " + e.getMessage());
+            throw new BadRequestException("Failed to read avatar file: " + e.getMessage());
         }
-        org.springframework.http.MediaType type = dev.mozhno.util.MediaTypeUtils.detectRasterImageType(bytes);
+        MediaType type = MediaTypeUtils.detectRasterImageType(bytes);
         if (type == null) {
-            throw new dev.mozhno.exception.BadRequestException(
+            throw new BadRequestException(
                 "UNSUPPORTED_IMAGE_FORMAT",
                 "Only PNG, JPEG, GIF or WEBP images are allowed");
         }
         int[] dims;
         try {
-            dims = dev.mozhno.util.MediaTypeUtils.readDimensions(bytes);
+            dims = MediaTypeUtils.readDimensions(bytes);
         } catch (IOException e) {
-            throw new dev.mozhno.exception.BadRequestException(
+            throw new BadRequestException(
                 "IMAGE_READ_ERROR",
                 "Failed to read image");
         }
         if (dims == null) {
-            throw new dev.mozhno.exception.BadRequestException(
+            throw new BadRequestException(
                 "IMAGE_READ_ERROR",
                 "Failed to read image");
         }
         long pixels = (long) dims[0] * (long) dims[1];
         if (pixels > MAX_AVATAR_PIXELS) {
-            throw new dev.mozhno.exception.BadRequestException(
+            throw new BadRequestException(
                 "IMAGE_TOO_LARGE",
                 dims[0] + "x" + dims[1] + " px. Max: 1024x1024 px");
         }
         userRepository.updateAvatarData(id, bytes);
-        user.setAvatar("blob" + dev.mozhno.util.MediaTypeUtils.extensionFor(type));
+        user.setAvatar("blob" + MediaTypeUtils.extensionFor(type));
         User saved = userRepository.save(user);
         events.publish(DomainEvent.of(null, "user.avatar_updated", "user",
             saved.getId(), saved.getEmail(), "Avatar updated"));
@@ -217,5 +231,16 @@ public class UserService {
 
     private UserDto toDto(User user) {
         return new UserDto(user.getId(), user.getEmail(), user.getName(), user.getRole(), user.getStatus(), user.getAvatar(), user.getLocale(), user.getCreatedAt(), user.getLastActiveAt());
+    }
+
+    private void ensureGroupHasOtherAdmin(User user) {
+        int children = userRepository.countByCreatedBy(user.getId());
+        if (children > 0) {
+            int otherAdmins = userRepository.countAdminsCreatedBy(user.getId(), user.getId());
+            if (otherAdmins == 0) {
+                throw new ConflictException(
+                    "Cannot remove the last admin from a group that has members. Promote another member to admin first.");
+            }
+        }
     }
 }

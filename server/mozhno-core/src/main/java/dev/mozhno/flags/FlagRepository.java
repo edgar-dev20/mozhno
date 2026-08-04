@@ -379,4 +379,7 @@ public class FlagRepository {
         return jdbc.update("UPDATE flags SET archived = FALSE, archived_by = NULL, archived_at = NULL WHERE id = ? AND project_id = ?", id, projectId);
     }
 
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM flags WHERE project_id = ?", projectId);
+    }
 }

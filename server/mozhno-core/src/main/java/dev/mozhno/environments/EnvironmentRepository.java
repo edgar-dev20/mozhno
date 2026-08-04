@@ -139,5 +139,7 @@ public class EnvironmentRepository {
         return count != null ? count : 0;
     }
 
-
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM environments WHERE project_id = ?", projectId);
+    }
 }

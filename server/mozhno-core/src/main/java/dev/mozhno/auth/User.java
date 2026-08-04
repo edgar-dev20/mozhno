@@ -26,4 +26,5 @@ public class User {
     private int failedLoginAttempts;
     private Instant lockedUntil;
     private Integer projectId;
+    private Integer createdBy;
 }

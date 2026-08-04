@@ -123,4 +123,8 @@ public class AuditEventRepository {
         event.setId(keyHolder.getKey().intValue());
         return event;
     }
+
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM audit_log WHERE project_id = ?", projectId);
+    }
 }

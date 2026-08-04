@@ -28,7 +28,6 @@ const SERVER_CODE_TO_KEY: Record<string, MessageKey> = {
   UNSUPPORTED_IMAGE_FORMAT: 'errors.upload.unsupportedFormat',
   IMAGE_READ_ERROR: 'errors.upload.readError',
   IMAGE_TOO_LARGE: 'errors.upload.imageTooLarge',
-  SELECT_PROJECT: 'errors.selectProject',
 };
 
 function extractValidationDetails(error: AppError): string {

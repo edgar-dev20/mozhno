@@ -131,5 +131,8 @@ public class ContextValueRepository {
         return result;
     }
 
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM context_values USING context_definitions WHERE context_definitions.id = context_values.context_definition_id AND context_definitions.project_id = ?", projectId);
+    }
 
 }

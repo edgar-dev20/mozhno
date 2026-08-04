@@ -158,5 +158,7 @@ public class ContextDefinitionRepository {
         return jdbc.update("DELETE FROM context_definitions WHERE id = ? AND project_id = ?", id, projectId);
     }
 
-
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM context_definitions WHERE project_id = ?", projectId);
+    }
 }

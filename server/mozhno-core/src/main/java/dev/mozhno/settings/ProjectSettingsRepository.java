@@ -63,4 +63,8 @@ public class ProjectSettingsRepository {
             return findByProjectId(settings.getProjectId());
         }
     }
+
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM project_settings WHERE project_id = ?", projectId);
+    }
 }

@@ -14,7 +14,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `WeakKeyException` when auto-generated 256-bit key tried to verify HS384 tokens
 
-## [Unreleased]
+## [1.1.0] — 2026-08-04
+
+### Changed
+- **Projects are indestructible** — use `POST /projects/reset` to wipe data, project ID is permanent
+- **`{id}` removed from all project endpoints** — project ID is taken from the JWT
+- **JWT secrets** accept plain text (≥32 chars) or Base64, auto-detected
+- **JWT signing** explicitly pinned to HS256
+- **User hierarchy** via `users.created_by` — admin group isolation, last-admin protection
+- **Onboarding** shows only for admins with default "My Project" name — one-click dismiss persisted
+
+### Removed
+- `POST /projects` — projects are created once at bootstrap
+- `DELETE /projects/{id}` — use `POST /projects/reset` instead
+- `POST /auth/select-project` — project context lives in JWT from DB
+- `SelectProjectRequest`, `linkCreatorAndChildrenToProject`, `linkOrphansToProject`
+
+### Fixed
+- `WeakKeyException` when auto-generated 256-bit key tried to verify HS384 tokens
+- Double fetch on `/users` and `/audit` pages — migrated to React Query
+- Stale canvasRef in DashboardLayout breaking logo accent color
+- `reset()` now creates 3 environments (Production/Staging/Development) matching `createDefaultProject`
+- Invite accept correctly inherits inviter's project, with default-project fallback
+
+### Added
+- `POST /projects/reset` — clears all project data, resets name to "My Project"
+- `deleteByProjectId` on all 13 data repositories
+- User-project lifecycle integration tests (12 scenarios)
+- `UserServiceTest`, `JwtPropertiesTest` unit tests
+- `users.created_by` FK with ON DELETE SET NULL
+- Backfill migration V53 for orphaned users
+
+## [1.0.0] — 2026-08-03
 
 ### Added
 - Multi-stage Docker image with web UI embedded into Spring Boot fat JAR

@@ -137,7 +137,10 @@ Open [`http://localhost:8080`](http://localhost:8080) — the web dashboard is a
 
 Server — Spring Boot 4.0 / JDK 25. Web UI — React 19 SPA (Vite, Tailwind CSS 4, Radix UI). SDKs fetch flag rules once and evaluate locally.
 
-**Access model:** the active project is carried in the JWT (`project_id` claim), selected at login or via `/auth/select-project`. All resources (flags, segments, contexts, API keys, audit, etc.) are scoped to that project; mutation rights depend on the role (ADMIN/DEVELOPER/VIEWER).
+**Access model:** the active project is carried in the JWT (`project_id` claim).
+All resources (flags, segments, contexts, API keys, audit, etc.) are scoped to that
+project; mutation rights depend on the role (ADMIN/DEVELOPER/VIEWER).
+A project is created once during bootstrap and cannot be deleted — use reset to start fresh.
 
 ---
 

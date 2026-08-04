@@ -178,5 +178,8 @@ public class SegmentContextRepository {
         });
     }
 
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM segment_contexts USING segments WHERE segments.id = segment_contexts.segment_id AND segments.project_id = ?", projectId);
+    }
 
 }

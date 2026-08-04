@@ -237,6 +237,7 @@ class UserInviteServiceTest {
         token.setId(10);
         token.setEmail("newuser@example.com");
         token.setRole("developer");
+        token.setCreatedBy(42);
         token.setLocale("en");
         token.setExpiresAt(Instant.now().plus(6, java.time.temporal.ChronoUnit.DAYS));
 
@@ -266,9 +267,37 @@ class UserInviteServiceTest {
         assertThat(saved.getRole()).isEqualTo("developer");
         assertThat(saved.getStatus()).isEqualTo("active");
         assertThat(saved.getLocale()).isEqualTo("en");
+        assertThat(saved.getCreatedBy()).isEqualTo(42);
 
         verify(tokenRepository).markUsed(10);
         verify(events).publish(any(DomainEvent.class));
+    }
+
+    @Test
+    void acceptInvite_newUser_shouldUseInviterProject() {
+        User inviter = new User();
+        inviter.setId(99);
+        inviter.setProjectId(5);
+
+        InviteToken token = new InviteToken();
+        token.setId(20);
+        token.setEmail("child@example.com");
+        token.setRole("developer");
+        token.setCreatedBy(99);
+        token.setExpiresAt(Instant.now().plus(6, java.time.temporal.ChronoUnit.DAYS));
+
+        when(tokenRepository.findByHashForUpdate(anyString())).thenReturn(token);
+        when(userRepository.findById(99)).thenReturn(inviter);
+        when(userRepository.findByEmail("child@example.com")).thenReturn(null);
+        when(passwordEncoder.encode("Password123!")).thenReturn("hashed");
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        userInviteService.acceptInvite("invite-token", "Child", "Password123!");
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        assertThat(userCaptor.getValue().getProjectId()).isEqualTo(5);
+        assertThat(userCaptor.getValue().getCreatedBy()).isEqualTo(99);
     }
 
     @Test
@@ -283,6 +312,7 @@ class UserInviteServiceTest {
         token.setId(11);
         token.setEmail("existing@example.com");
         token.setRole("developer");
+        token.setCreatedBy(77);
         token.setExpiresAt(Instant.now().plus(6, java.time.temporal.ChronoUnit.DAYS));
 
         when(tokenRepository.findByHashForUpdate(anyString())).thenReturn(token);
@@ -300,6 +330,7 @@ class UserInviteServiceTest {
         assertThat(existing.getPasswordHash()).isEqualTo("hashed-newpass");
         assertThat(existing.getStatus()).isEqualTo("active");
         assertThat(existing.getRole()).isEqualTo("developer");
+        assertThat(existing.getCreatedBy()).isEqualTo(77);
 
         verify(tokenRepository).markUsed(11);
     }

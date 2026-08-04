@@ -87,7 +87,6 @@ public class RefreshTokenService {
      * in the same family, and generates a new access token.
      *
      * @param rawRefreshToken the raw (unhashed) refresh token
-     * @param projectId       the project ID to embed in the new JWT, or null
      * @return new token pair
      * @throws TokenReuseException if the token is unknown, expired, revoked, or reused
      */

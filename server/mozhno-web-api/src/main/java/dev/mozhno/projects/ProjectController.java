@@ -4,10 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import dev.mozhno.auth.UserPrincipal;
@@ -20,16 +19,10 @@ import java.util.List;
 
 /**
  * REST controller for managing projects.
- * A project is the top-level organizational unit that owns flags,
- * environments, segments, and other configuration resources.
+ * The project ID is taken from the JWT ({@code project_id} claim) — no path variable needed.
  *
- * <p><b>Project scoping:</b> the active project is carried in the JWT
- * {@code project_id} claim (chosen at login or via {@code /auth/select-project}).
- * Resource controllers (flags, segments, contexts, API keys, audit, …) scope all
- * data by {@code user.projectId()}. This controller also lists project metadata
- * so the UI can offer a project switcher.
- *
- * @see ProjectService
+ * <p>A project is created once (during bootstrap or invite acceptance)
+ * and cannot be deleted — only reset to factory defaults via {@code POST /reset}.
  */
 @RestController
 @RequestMapping("/api/v1/projects")
@@ -41,82 +34,54 @@ public class ProjectController {
     private final ClientInstanceService clientInstanceService;
 
     @GetMapping
-    @Operation(summary = "Get all projects")
+    @Operation(summary = "Get the current user's project")
     public List<ProjectResponse> getAll(@AuthenticationPrincipal UserPrincipal user) {
         Integer projectId = user.projectId();
-        if (projectId == null) {
-            return List.of();
-        }
-        try {
-            Project project = projectService.findById(projectId);
-            return projectAssembler.toResponseList(List.of(project));
-        } catch (dev.mozhno.exception.NotFoundException e) {
-            return List.of();
-        }
+        if (projectId == null) return List.of();
+        Project project = projectService.findById(projectId);
+        return projectAssembler.toResponseList(List.of(project));
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get project by ID")
-    public ProjectResponse getById(@PathVariable Integer id,
-                                   @AuthenticationPrincipal UserPrincipal user) {
-        Project project = projectService.findById(id);
-        return projectAssembler.toResponse(project);
-    }
-
-    @GetMapping("/{id}/client-instances")
-    @Operation(summary = "List connected SDK instances for a project")
-    public List<ClientInstance> getClientInstances(@PathVariable Integer id,
-                                                    @RequestParam(required = false) Integer environmentId,
+    @GetMapping("/client-instances")
+    @Operation(summary = "List connected SDK instances for the current project")
+    public List<ClientInstance> getClientInstances(@RequestParam(required = false) Integer environmentId,
                                                     @AuthenticationPrincipal UserPrincipal user) {
-        return clientInstanceService.getInstances(id, environmentId);
+        return clientInstanceService.getInstances(user.projectId(), environmentId);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Create a new project")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ProjectResponse create(@Valid @RequestBody ProjectRequest request,
-                                  @AuthenticationPrincipal UserPrincipal user) {
-        Project project = projectService.create(request);
-        return projectAssembler.toResponse(project);
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "Update a project")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ProjectResponse update(@PathVariable Integer id, @Valid @RequestBody ProjectRequest request,
-                                  @AuthenticationPrincipal UserPrincipal user) {
-        Project project = projectService.update(id, request);
-        return projectAssembler.toResponse(project);
-    }
-
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Delete a project")
-    @PreAuthorize("hasRole('ADMIN')")
-    public void delete(@PathVariable Integer id,
-                       @AuthenticationPrincipal UserPrincipal user) {
-        projectService.delete(id);
-    }
-
-    @PostMapping("/{id}/logo")
-    @Operation(summary = "Upload a logo image for a project")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ProjectResponse uploadLogo(@PathVariable Integer id,
-                                      @RequestParam("file") MultipartFile file,
-                                      @AuthenticationPrincipal UserPrincipal user) {
-        Project project = projectService.uploadLogo(id, file);
-        return projectAssembler.toResponse(project);
-    }
-
-    @GetMapping("/{id}/logo")
-    @Operation(summary = "Get the logo image for a project")
-    public ResponseEntity<byte[]> getLogo(@PathVariable Integer id,
-                                           @AuthenticationPrincipal UserPrincipal user) {
-        byte[] data = projectService.getLogoData(id);
+    @GetMapping("/logo")
+    @Operation(summary = "Get the logo image for the current project")
+    public ResponseEntity<byte[]> getLogo(@AuthenticationPrincipal UserPrincipal user) {
+        byte[] data = projectService.getLogoData(user.projectId());
         if (data == null) {
             return ResponseEntity.notFound().build();
         }
         return MediaTypeUtils.imageResponse(data);
+    }
+
+    @PutMapping
+    @Operation(summary = "Update the current project")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProjectResponse update(@Valid @RequestBody ProjectRequest request,
+                                  @AuthenticationPrincipal UserPrincipal user) {
+        Project project = projectService.update(user.projectId(), request);
+        return projectAssembler.toResponse(project);
+    }
+
+    @PostMapping("/reset")
+    @Operation(summary = "Reset project to factory defaults (clears all flags, segments, contexts, API keys)")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProjectResponse reset(@AuthenticationPrincipal UserPrincipal user) {
+        Project project = projectService.reset(user.projectId());
+        return projectAssembler.toResponse(project);
+    }
+
+    @PostMapping("/logo")
+    @Operation(summary = "Upload a logo image for the current project")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProjectResponse uploadLogo(@RequestParam("file") MultipartFile file,
+                                      @AuthenticationPrincipal UserPrincipal user) {
+        Project project = projectService.uploadLogo(user.projectId(), file);
+        return projectAssembler.toResponse(project);
     }
 }

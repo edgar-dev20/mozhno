@@ -448,7 +448,6 @@ const ru = {
     unexpected: 'Произошла непредвиденная ошибка.',
     rateLimited: 'Слишком много запросов. Пожалуйста, подождите.',
     notFoundInEnvironment: 'Флаг не найден в окружении. Попробуйте обновить страницу.',
-    selectProject: 'Проект не выбран. Пожалуйста, выберите проект.',
     auth: {
       invalidCredentials: 'Неверный email или пароль',
       emailPasswordRequired: 'Email и пароль обязательны',
@@ -500,15 +499,15 @@ const ru = {
     interfaceLanguage: 'Язык интерфейса',
     dangerZone: 'Опасная зона',
     dangerZoneDescription: 'Необратимые действия с проектом',
-    deleteProject: 'Удалить проект',
-    deleteProjectWarning:
-      'Это действие необратимо. Все флаги, окружения, сегменты, API-ключи и настройки будут безвозвратно удалены.',
+    resetProject: 'Сбросить проект',
+    resetDescription: 'Сброс данных проекта',
+    resetProjectDescription:
+      'Будут удалены все флаги, сегменты, окружения, API-ключи, контексты, теги и журнал аудита. Окружения «Production» и «Development» будут созданы заново. Название проекта сбросится на «My Project». Пользователи и их роли сохранятся.',
+    resetProjectConfirm: 'Сбросить проект?',
+    resetProjectConfirmTitle: 'Сбросить проект «{{name}}»?',
+    projectReset: 'Проект сброшен до заводских настроек',
     deleteEnvConfirm: 'Удалить окружение?',
     deleteEnvDescription: 'Окружение «{{name}}» будет удалено без возможности восстановления.',
-    deleteProjectConfirm: 'Удалить проект?',
-    deleteProjectDescription:
-      'Проект «{{name}}» и все связанные данные будут безвозвратно удалены. Это действие нельзя отменить.',
-    deleteProjectBtn: 'Удалить проект',
     editEnvName: 'Название окружения',
     editEnvTitle: 'Редактировать {{name}}',
     editEnvDescription: 'Измените название, описание, цвет или правила активации окружения.',

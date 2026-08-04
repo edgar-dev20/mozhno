@@ -1,10 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { api, setToken, setRefreshToken } from '@/api';
+import { api } from '@/api';
 import { useT } from '@/i18n';
 import { getErrorMessage } from '@/shared/errorHandler';
 import { toast } from 'sonner';
-import { useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '@/api/queryKeys';
 
 interface UseCreateProjectReturn {
   projectName: string;
@@ -29,7 +27,6 @@ interface UseCreateProjectOptions {
 export function useCreateProject(options: UseCreateProjectOptions = { existingProjectId: null, existingProjectName: null }): UseCreateProjectReturn {
   const { existingProjectId, existingProjectName } = options;
   const t = useT();
-  const queryClient = useQueryClient();
   const [projectName, setProjectName] = useState(existingProjectName ?? '');
   const [projectDesc, setProjectDesc] = useState('');
   const [creatingProject, setCreatingProject] = useState(false);
@@ -103,35 +100,18 @@ export function useCreateProject(options: UseCreateProjectOptions = { existingPr
       try {
         if (existingProjectId != null) {
           if (projectName.trim() !== (existingProjectName ?? '')) {
-            await api.projects.update(existingProjectId, {
+            await api.projects.update({
               name: projectName.trim(),
               description: projectDesc.trim() || undefined,
             });
           }
           if (pendingLogoFile) {
             try {
-              await api.projects.uploadLogo(existingProjectId, pendingLogoFile);
+              await api.projects.uploadLogo(pendingLogoFile);
             } catch {
               toast.warning(t('onboarding.logoUploadError'));
             }
           }
-        } else {
-          const project = await api.projects.create({
-            name: projectName.trim(),
-            description: projectDesc.trim() || undefined,
-          });
-          if (pendingLogoFile) {
-            try {
-              await api.projects.uploadLogo(project.id, pendingLogoFile);
-            } catch {
-              toast.warning(t('onboarding.logoUploadError'));
-            }
-          }
-          const res = await api.auth.selectProject(project.id);
-          setToken(res.token);
-          setRefreshToken(res.refreshToken);
-          queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
-          queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
         }
         if (logoPreviewUrlRef.current) {
           URL.revokeObjectURL(logoPreviewUrlRef.current);
@@ -147,7 +127,7 @@ export function useCreateProject(options: UseCreateProjectOptions = { existingPr
         setCreatingProject(false);
       }
     },
-    [projectName, projectDesc, pendingLogoFile, existingProjectId, existingProjectName, t, queryClient],
+    [projectName, projectDesc, pendingLogoFile, existingProjectId, existingProjectName, t],
   );
 
     const resetProject = useCallback(() => {

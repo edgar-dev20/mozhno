@@ -55,6 +55,7 @@ public class AuthService {
 
     /**
      * Authenticates with email, password, and optional provider parameters, then issues a token pair.
+     * Authenticates with email, password, and optional provider parameters, then issues a token pair.
      *
      * @param email      user email
      * @param password   plaintext password
@@ -89,17 +90,6 @@ public class AuthService {
 
         User user = userRepository.findById(result.userId());
         RefreshTokenService.TokenPair tokens = refreshTokenService.issueTokens(user, user.getProjectId(), rememberMe);
-        return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
-    }
-
-    public LoginResponse selectProject(String email, Integer projectId) {
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            throw new NotFoundException("User not found");
-        }
-        user.setProjectId(projectId);
-        userRepository.save(user);
-        RefreshTokenService.TokenPair tokens = refreshTokenService.issueTokens(user, projectId, true);
         return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
     }
 

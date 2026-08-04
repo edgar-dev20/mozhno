@@ -222,7 +222,7 @@ public class FlagAssembler {
 ## Multi-Tenancy & Security
 
 - **Tenant = `projectId`**, carried in the JWT (`project_id` claim) and exposed via
-  `UserPrincipal.projectId()`. Selected at login or `/auth/select-project`.
+  `UserPrincipal.projectId()`. Set at login from `users.project_id` or during project creation.
 - **Every** repository query and service method is scoped by `projectId`. When creating/
   updating, controllers set `request.setProjectId(user.projectId())` — never trust the body.
 - **Roles:** `ADMIN` / `DEVELOPER` / `VIEWER`. Guard mutating endpoints with

@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Plus,
   Mail,
@@ -23,6 +24,8 @@ import { TipCard } from '@/app/components/TipCard';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { UserTableSkeleton } from '@/app/components/skeletons';
 import { api, UserDto } from '@/api';
+import { queryKeys } from '@/api/queryKeys';
+import { useProjectQuery } from '@/app/hooks/queries';
 import { SectionHeader, GradientButton, EmptyState, SearchInput, ColorIcon, ErrorBox, Badge, getErrorMessage, Fab } from '@/shared';
 import { EmptyUsersIllustration } from '@/shared/components/illustrations';
 import { useT, useLocale, t } from '@/i18n';
@@ -63,9 +66,6 @@ function timeAgo(d: string) {
 }
 
 export function Users() {
-  const [users, setUsers] = useState<UserDto[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
   const [filter, setFilter] = useState('');
   const [debouncedFilter, setDebouncedFilter] = useState('');
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
@@ -92,27 +92,22 @@ export function Users() {
   const [diffOpen, setDiffOpen] = useState(false);
   const t = useT();
   const { locale } = useLocale();
+  const { data: project } = useProjectQuery();
+  const projectId = project?.id ?? null;
 
-  const loadUsers = async () => {
-    try {
-      const data = await api.users.list();
-      setUsers(data);
-      setLoadError(false);
-    } catch (e) {
-      setLoadError(true);
-      if (import.meta.env.DEV) console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    data: fetchedUsers,
+    isLoading: loading,
+    isError: loadError,
+    refetch: refetchUsers,
+  } = useQuery({
+    queryKey: queryKeys.users.all,
+    queryFn: () => api.users.list(),
+    enabled: !!projectId,
+  });
 
-  const didLoadUsers = useRef(false);
-  useEffect(() => {
-    if (!didLoadUsers.current) {
-      didLoadUsers.current = true;
-      loadUsers();
-    }
-  }, []);
+  const users = fetchedUsers ?? [];
+
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedFilter(filter), 200);
     return () => clearTimeout(timer);
@@ -154,7 +149,7 @@ export function Users() {
     setDeleting(true);
     try {
       await api.users.delete(deleteId);
-      setUsers(users.filter((u) => u.id !== deleteId));
+      refetchUsers();
       setExpandedIds((prev) => {
         const next = new Set(prev);
         next.delete(deleteId);
@@ -212,8 +207,8 @@ export function Users() {
           role: formData.role,
           status: formData.status,
         };
-        const updated = await api.users.update(editingUser.id, payload);
-        setUsers(users.map((u) => (u.id === updated.id ? updated : u)));
+        await api.users.update(editingUser.id, payload);
+        refetchUsers();
       } else {
         await api.users.invite({
           email: formData.email,
@@ -222,7 +217,7 @@ export function Users() {
           locale,
         });
         toast.success(t('users.form.inviteSent', { email: formData.email }));
-        loadUsers();
+        refetchUsers();
       }
       setIsPanelOpen(false);
       setDiffOpen(false);

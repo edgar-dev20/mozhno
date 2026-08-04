@@ -75,7 +75,9 @@ export function AuditLog() {
     });
   };
 
-  const { isLoading: loading, refetch: refetchEvents } = useQuery({
+  const initialLoadDone = useRef(false);
+
+  const { data: auditData, isLoading: loading } = useQuery({
     queryKey: queryKeys.audit.filtered(projectId, dateFrom, dateTo),
     queryFn: async () => {
       if (!projectId) return [];
@@ -86,17 +88,16 @@ export function AuditLog() {
     staleTime: 10_000,
   });
 
+  // Sync initial query data to local state for infinite scroll
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
-    if (projectId) {
-      refetchEvents().then((result) => {
-        if (result.data) {
-          setEvents(result.data);
-          setHasMore(result.data.length === PAGE_SIZE);
-          setExpandedIds(new Set());
-        }
-      });
-    }
-  }, [projectId, dateFrom, dateTo, refetchEvents]);
+    if (!auditData) return;
+    initialLoadDone.current = true;
+    setEvents(auditData);
+    setHasMore(auditData.length === PAGE_SIZE);
+    setExpandedIds(new Set());
+  }, [auditData]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (!openParam || events.length === 0) return;

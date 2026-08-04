@@ -87,11 +87,5 @@ describe('authApi', () => {
     });
   });
 
-  it('selectProject', async () => {
-    await authApi.selectProject(42);
-    expect(requestSpy).toHaveBeenCalledWith('/auth/select-project', {
-      method: 'POST',
-      body: JSON.stringify({ projectId: 42 }),
-    });
-  });
 });
+

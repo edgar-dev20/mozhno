@@ -37,12 +37,6 @@ public class AuthController {
             request.provider(), request.params(), rememberMe, request.projectId());
     }
 
-    @PostMapping("/select-project")
-    public LoginResponse selectProject(@Valid @RequestBody SelectProjectRequest request,
-                                        @AuthenticationPrincipal UserPrincipal user) {
-        return authService.selectProject(user.email(), request.projectId());
-    }
-
     @PostMapping("/refresh")
     public LoginResponse refresh(@Valid @RequestBody RefreshTokenRequest request) {
         return authService.refresh(request.refreshToken());

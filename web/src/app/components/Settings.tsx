@@ -12,7 +12,6 @@ import {
   Settings as SettingsIcon,
   ShieldCheck,
   Zap,
-  AlertTriangle,
   Key,
 } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
@@ -20,7 +19,7 @@ import { toast } from 'sonner';
 import { api, Environment } from '@/api';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { PluginSlot } from '@/app/components/PluginSlot';
-import { SectionHeader, EmptyState, GradientButton, LoadingState, ColorPicker, Badge, getEnvColor, getErrorMessage } from '@/shared';
+import { SectionHeader, EmptyState, GradientButton, LoadingState, ColorPicker, Badge, Card, getEnvColor, getErrorMessage } from '@/shared';
 import { EmptySettingsIllustration } from '@/shared/components/illustrations';
 import { SidePanel } from '@/app/components/SidePanel';
 import { Switch } from '@/app/components/ui/switch';
@@ -28,6 +27,7 @@ import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
 import { useLocale, useT } from '@/i18n';
+import { useAuth } from '@/app/auth/useAuth';
 import { toIntlLocale } from '@/i18n/locale';
 
 function formatDate(iso: string, locale: string): string {
@@ -42,6 +42,7 @@ export function Settings() {
   const queryClient = useQueryClient();
   const { locale } = useLocale();
   const t = useT();
+  const { user } = useAuth();
   const intlLocale = toIntlLocale(locale);
 
   const { data: project, isLoading: projectLoading } = useProjectQuery();
@@ -104,9 +105,6 @@ export function Settings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingLogoFile, setPendingLogoFile] = useState<File | null>(null);
   const [pendingLogoPreviewUrl, setPendingLogoPreviewUrl] = useState<string | null>(null);
-
-  const [deleteProjectOpen, setDeleteProjectOpen] = useState(false);
-  const [deletingProject, setDeletingProject] = useState(false);
 
   const maxEnvironments = envLimitData?.maxEnvironments;
 
@@ -173,10 +171,10 @@ export function Settings() {
       if (!projectId) throw new Error('No project');
       if (pendingLogoFile) {
         setUploadingLogo(true);
-        await api.projects.uploadLogo(projectId, pendingLogoFile);
+        await api.projects.uploadLogo(pendingLogoFile);
         setUploadingLogo(false);
       }
-      return api.projects.update(projectId, { name: projectName, description: projectDesc });
+      return api.projects.update({ name: projectName, description: projectDesc });
     },
     onSuccess: async () => {
       await Promise.all([
@@ -260,20 +258,25 @@ export function Settings() {
     removeEnvMutation.mutate();
   };
 
-  const deleteProject = async () => {
-    if (!projectId) return;
-    setDeletingProject(true);
-    try {
-      await api.projects.delete(projectId);
-    } catch (e: unknown) {
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resettingProject, setResettingProject] = useState(false);
+
+  const resetProjectMutation = useMutation({
+    mutationFn: () => api.projects.reset(),
+    onSuccess: () => {
+      toast.success(t('settings.projectReset'));
+      setResetOpen(false);
+      queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
+      queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.segments.all });
+    },
+    onError: (e: unknown) => {
       toast.error(getErrorMessage(e));
-      setDeletingProject(false);
-      return;
-    }
-    localStorage.removeItem('mozhno_token');
-    localStorage.removeItem('mozhno_refresh_token');
-    window.location.replace('/login');
-  };
+    },
+    onSettled: () => setResettingProject(false),
+  });
 
   if (loading) return <LoadingState text={t('settings.loading')} />;
 
@@ -368,7 +371,7 @@ export function Settings() {
                       key={pendingLogoPreviewUrl ?? project?.logo}
                       src={
                         pendingLogoPreviewUrl ||
-                        `${api.projects.getLogoUrl(project!.id)}?v=${encodeURIComponent(project!.logo!)}`
+                        `${api.projects.getLogoUrl()}?v=${encodeURIComponent(project!.logo!)}`
                       }
                       alt={t('settings.logoAlt')}
                       className="w-16 h-16 rounded-xl object-cover border border-border shadow-sm shrink-0"
@@ -568,51 +571,6 @@ export function Settings() {
             </div>
           </div>
         </motion.div>
-
-        {/* Danger Zone */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, delay: 0.3 }}
-          className="bg-card border border-destructive/20 rounded-xl shadow-md overflow-hidden"
-        >
-          <div className="p-4 sm:p-6">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-destructive/10 to-destructive/10 border border-destructive/20">
-                <AlertTriangle size={20} className="text-destructive" />
-              </div>
-              <div>
-                <h2 className="text-h2 font-semibold text-foreground">
-                  {t('settings.dangerZone')}
-                </h2>
-                <p className="text-body-sm text-muted-foreground">
-                  {t('settings.dangerZoneDescription')}
-                </p>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20">
-              <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
-                <div>
-                  <div className="font-medium text-foreground text-body-sm">
-                    {t('settings.deleteProject')}
-                  </div>
-                  <p className="text-caption text-muted-foreground mt-1 max-w-lg">
-                    {t('settings.deleteProjectWarning')}
-                  </p>
-                </div>
-                <GradientButton
-                  variant="danger"
-                  onClick={() => setDeleteProjectOpen(true)}
-                  icon={<Trash2 size={16} />}
-                  className="shrink-0"
-                >
-                  {t('settings.deleteProjectBtn')}
-                </GradientButton>
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </div>
 
       <SidePanel
@@ -743,6 +701,55 @@ export function Settings() {
         </div>
       </SidePanel>
 
+      {user?.role === 'admin' && (
+        <>
+          <div className="space-y-5 mt-2">
+            <SectionHeader title={t('settings.dangerZone')} description={t('settings.dangerZoneDescription')} />
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Card padded className="border border-border">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-body-sm font-medium text-foreground whitespace-nowrap">
+                      {t('settings.resetProject')}
+                    </span>
+                    <span className="hidden sm:block w-px h-4 bg-border" />
+                    <span className="text-body-sm text-muted-foreground truncate">
+                      {t('settings.resetDescription')}
+                    </span>
+                  </div>
+                  <GradientButton
+                    variant="danger"
+                    onClick={() => setResetOpen(true)}
+                    loading={resettingProject}
+                    icon={<Trash2 size={16} />}
+                  >
+                    {t('settings.resetProject')}
+                  </GradientButton>
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+
+          <ConfirmDialog
+            open={resetOpen}
+            onOpenChange={setResetOpen}
+            title={t('settings.resetProjectConfirmTitle', { name: project?.name ?? '' })}
+            description={t('settings.resetProjectDescription')}
+            confirmLabel={t('settings.resetProject')}
+            confirmPhrase={project?.name ?? ''}
+            onConfirm={() => {
+              setResettingProject(true);
+              resetProjectMutation.mutate();
+            }}
+            loading={resettingProject}
+          />
+        </>
+      )}
+
       <PluginSlot slotId="settings.premium" />
 
       <ConfirmDialog
@@ -760,18 +767,6 @@ export function Settings() {
         loading={deletingEnv}
       />
 
-      <ConfirmDialog
-        open={deleteProjectOpen}
-        onOpenChange={(open) => {
-          if (!open) setDeleteProjectOpen(false);
-        }}
-        title={t('settings.deleteProjectConfirm')}
-        description={t('settings.deleteProjectDescription', { name: project?.name ?? '' })}
-        confirmLabel={t('settings.deleteProjectBtn')}
-        confirmPhrase={project?.name}
-        onConfirm={deleteProject}
-        loading={deletingProject}
-      />
     </div>
   );
 }

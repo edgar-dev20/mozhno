@@ -110,4 +110,8 @@ public class IntegrationRepository {
     public int delete(Integer id, Integer projectId) {
         return jdbc.update("DELETE FROM integrations WHERE id = ? AND project_id = ?", id, projectId);
     }
+
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM integrations WHERE project_id = ?", projectId);
+    }
 }

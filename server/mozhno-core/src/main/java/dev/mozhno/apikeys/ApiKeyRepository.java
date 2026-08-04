@@ -162,4 +162,7 @@ public class ApiKeyRepository {
         return count != null ? count : 0;
     }
 
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM api_keys WHERE project_id = ?", projectId);
+    }
 }

@@ -123,5 +123,8 @@ public class TagRepository {
         return jdbc.query("SELECT id, name, description, color, project_id, created_at FROM tags WHERE id IN (" + placeholders + ")", ROW_MAPPER, ids.toArray());
     }
 
+    public void deleteByProjectId(Integer projectId) {
+        jdbc.update("DELETE FROM tags WHERE project_id = ?", projectId);
+    }
 
 }

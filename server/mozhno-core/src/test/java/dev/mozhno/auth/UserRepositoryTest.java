@@ -99,4 +99,49 @@ class UserRepositoryTest extends BaseIntegrationTest {
         assertEquals(1, result.size());
         assertEquals("Match", result.get(0).getName());
     }
+
+    @Test
+    void save_shouldPersistAndReadBackCreatedBy() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('by-creator@test.com', 'h1', 'admin')");
+        Integer creatorId = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'by-creator@test.com'", Integer.class);
+
+        User child = new User();
+        child.setEmail("child@test.com");
+        child.setPasswordHash("hash");
+        child.setName("Child");
+        child.setRole("developer");
+        child.setStatus("active");
+        child.setLocale("en");
+        child.setCreatedBy(creatorId);
+
+        User saved = userRepository.save(child);
+        assertNotNull(saved.getId());
+        assertEquals(creatorId, saved.getCreatedBy());
+
+        User reloaded = userRepository.findById(saved.getId());
+        assertEquals(creatorId, reloaded.getCreatedBy());
+    }
+
+    @Test
+    void countAdminsCreatedBy_shouldReturnCorrectCount() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('cnt-parent@test.com', 'h1', 'admin')");
+        Integer parentId = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'cnt-parent@test.com'", Integer.class);
+
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role, created_by) VALUES ('cnt-child-a@test.com', 'h2', 'admin', " + parentId + ")");
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role, created_by) VALUES ('cnt-child-d@test.com', 'h3', 'developer', " + parentId + ")");
+
+        int count = userRepository.countAdminsCreatedBy(parentId, parentId);
+        assertEquals(1, count);
+    }
+
+    @Test
+    void countByCreatedBy_shouldReturnCorrectCount() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('by-boss@test.com', 'h1', 'admin')");
+        Integer bossId = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'by-boss@test.com'", Integer.class);
+
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role, created_by) VALUES ('by-sub1@test.com', 'h2', 'developer', " + bossId + ")");
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role, created_by) VALUES ('by-sub2@test.com', 'h3', 'viewer', " + bossId + ")");
+
+        assertEquals(2, userRepository.countByCreatedBy(bossId));
+    }
 }

@@ -449,7 +449,6 @@ const en = {
     unexpected: 'An unexpected error occurred.',
     rateLimited: 'Too many requests. Please wait and try again.',
     notFoundInEnvironment: 'Flag not found in environment. Try refreshing the page.',
-    selectProject: 'No project selected. Please select a project.',
     auth: {
       invalidCredentials: 'Invalid email or password',
       emailPasswordRequired: 'Email and password are required',
@@ -501,15 +500,15 @@ const en = {
     interfaceLanguage: 'Interface language',
     dangerZone: 'Danger zone',
     dangerZoneDescription: 'Irreversible project actions',
-    deleteProject: 'Delete project',
-    deleteProjectWarning:
-      'This action is irreversible. All flags, environments, segments, API keys and settings will be permanently deleted.',
+    resetProject: 'Reset project',
+    resetDescription: 'Reset project data',
+    resetProjectDescription:
+      'This will delete all flags, segments, environments, API keys, contexts, tags and audit log. Environments "Production" and "Development" will be recreated. The project name will be reset to "My Project". Users and their roles are preserved.',
+    resetProjectConfirm: 'Reset project?',
+    resetProjectConfirmTitle: 'Reset project "{{name}}"?',
+    projectReset: 'Project has been reset to factory defaults',
     deleteEnvConfirm: 'Delete environment?',
     deleteEnvDescription: 'Environment "{{name}}" will be permanently deleted.',
-    deleteProjectConfirm: 'Delete project?',
-    deleteProjectDescription:
-      'Project "{{name}}" and all related data will be permanently deleted. This cannot be undone.',
-    deleteProjectBtn: 'Delete project',
     editEnvName: 'Environment name',
     editEnvTitle: 'Edit {{name}}',
     editEnvDescription: 'Change the name, description, color or activation rules of your environment.',
