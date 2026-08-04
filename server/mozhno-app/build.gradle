@@ -50,7 +50,22 @@ tasks.named('bootJar') {
     archiveFileName = 'mozhno.jar'
 }
 
+def webDir = file("${rootProject.projectDir}/../web")
+
+tasks.register('buildWebStatic', Exec) {
+    description = 'Builds the React UI static assets into server resources'
+    workingDir webDir
+    if (org.gradle.internal.os.OperatingSystem.current().isWindows()) {
+        commandLine 'cmd', '/c', 'npm.cmd', 'run', 'build:static'
+    } else {
+        commandLine 'npm', 'run', 'build:static'
+    }
+    onlyIf { file("${webDir}/package.json").exists() }
+}
+
 tasks.named('bootRun') {
+    dependsOn buildWebStatic
+
     // Local development convenience: `./gradlew bootRun` starts with the dev profile,
     // which supplies a non-production JWT secret and relaxed settings.
     // The packaged jar stays secure-by-default (requires MOZHNO_JWT_SECRET).

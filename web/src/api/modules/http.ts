@@ -165,6 +165,7 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
 }
 
 export async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
+  syncTokensFromStorage();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT);
   try {
@@ -175,6 +176,25 @@ export async function uploadRequest<T>(path: string, formData: FormData): Promis
       signal: controller.signal,
     });
     if (!res.ok) {
+      if (res.status === 401 && path !== '/auth/refresh') {
+        const refreshed = await tryRefreshToken();
+        if (refreshed) {
+          const retryRes = await fetch(`${BASE_URL}${path}`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${getToken()}` },
+            body: formData,
+            signal: controller.signal,
+          });
+          if (!retryRes.ok) {
+            if (retryRes.status === 401 && !syncTokensFromStorage()) {
+              clearAuth();
+            }
+            const retryBody = await retryRes.json().catch(() => ({}));
+            throw createAppError(retryBody.error || retryBody.message || `HTTP ${retryRes.status}`, retryRes.status, retryBody);
+          }
+          return retryRes.json() as Promise<T>;
+        }
+      }
       const body = await res.json().catch(() => ({}));
       throw createAppError(body.error || body.message || `HTTP ${res.status}`, res.status, body);
     }

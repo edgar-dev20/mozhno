@@ -11,5 +11,4 @@ export const projectsApi = {
     formData.append('file', file);
     return uploadRequest<Project>('/projects/logo', formData);
   },
-  getLogoUrl: () => '/api/v1/projects/logo',
 };

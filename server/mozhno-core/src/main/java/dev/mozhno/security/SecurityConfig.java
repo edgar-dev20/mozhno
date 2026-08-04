@@ -121,7 +121,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/auth/reset-password").permitAll()
                 .requestMatchers("/api/v1/auth/accept-invite").permitAll()
                 .requestMatchers("/api/v1/auth/me").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/v1/projects/*/logo").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/v1/projects/logo").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/v1/users/*/avatar").permitAll()
                 .requestMatchers("/api/v1/**").hasAnyRole("ADMIN", "DEVELOPER", "VIEWER")
                 .requestMatchers("/index.html", "/assets/**", "/favicon*", "/logo*.svg", "/manifest.json").permitAll()

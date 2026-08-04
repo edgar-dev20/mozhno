@@ -29,6 +29,7 @@ import { queryKeys } from '@/api/queryKeys';
 import { useLocale, useT } from '@/i18n';
 import { useAuth } from '@/app/auth/useAuth';
 import { toIntlLocale } from '@/i18n/locale';
+import { useProjectLogo } from '@/app/hooks/queries';
 
 function formatDate(iso: string, locale: string): string {
   return new Date(iso).toLocaleDateString(locale, {
@@ -47,6 +48,7 @@ export function Settings() {
 
   const { data: project, isLoading: projectLoading } = useProjectQuery();
   const projectId = project?.id ?? null;
+  const projectLogoUrl = useProjectLogo(project?.logo ?? null);
 
   const { data: environments = [] } = useEnvironmentsQuery();
 
@@ -366,12 +368,13 @@ export function Settings() {
                   {t('settings.logo')}
                 </label>
                 <div className="flex items-center gap-4 p-4 bg-secondary rounded-xl border border-border">
-                  {pendingLogoPreviewUrl || project?.logo ? (
+                  {pendingLogoPreviewUrl || projectLogoUrl ? (
                     <img
                       key={pendingLogoPreviewUrl ?? project?.logo}
                       src={
                         pendingLogoPreviewUrl ||
-                        `${api.projects.getLogoUrl()}?v=${encodeURIComponent(project!.logo!)}`
+                        projectLogoUrl ||
+                        ''
                       }
                       alt={t('settings.logoAlt')}
                       className="w-16 h-16 rounded-xl object-cover border border-border shadow-sm shrink-0"

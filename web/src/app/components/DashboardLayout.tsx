@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Outlet, useLocation } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import { fadeUp } from '@/shared/motion';
 import { useTheme } from 'next-themes';
 import { useT } from '@/i18n';
 import { useAuth } from '@/app/auth/useAuth';
-import { api } from '@/api';
-import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
 import { UserProfileMenu } from '@/app/components/UserProfileMenu';
@@ -25,6 +24,7 @@ import {
   useEnrichedFlagsQuery,
   useUsersQuery,
   useInvalidateQueries,
+  useProjectLogo,
 } from '@/app/hooks/queries';
 
 export function DashboardLayout() {
@@ -43,6 +43,7 @@ export function DashboardLayout() {
   const projectId = project?.id ?? null;
   const projectName = project?.name ?? null;
   const projectLogo = project?.logo ?? null;
+  const logoUrl = useProjectLogo(projectLogo);
 
   const { data: enriched } = useEnrichedFlagsQuery(projectId);
   const flags = useMemo(() => enriched?.flags ?? [], [enriched?.flags]);
@@ -140,10 +141,10 @@ export function DashboardLayout() {
                 >
                   <Menu size={20} />
                 </button>
-                {projectLogo && projectId ? (
+                {projectLogo && projectId && logoUrl ? (
                   <img
                     key={projectLogo}
-                      src={`${api.projects.getLogoUrl()}?v=${encodeURIComponent(projectLogo)}`}
+                      src={logoUrl}
                     alt={projectName ?? ''}
                     onLoad={handleLogoLoad}
                     className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg object-cover shrink-0"

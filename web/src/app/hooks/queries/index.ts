@@ -10,3 +10,4 @@ export { useMetricsSparklineQuery } from './useMetricsSparklineQuery';
 export type { SparklineData } from './useMetricsSparklineQuery';
 export { useOverviewQuery } from './useOverviewQuery';
 export { useInvalidateQueries } from './useInvalidateQueries';
+export { useProjectLogo } from './useProjectLogo';

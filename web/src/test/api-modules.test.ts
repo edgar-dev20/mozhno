@@ -189,9 +189,6 @@ describe('projectsApi', () => {
     await projectsApi.reset();
     expect(requestSpy).toHaveBeenCalledWith('/projects/reset', { method: 'POST' });
   });
-  it('getLogoUrl returns string', () => {
-    expect(projectsApi.getLogoUrl()).toBe('/api/v1/projects/logo');
-  });
 });
 
 describe('segmentsApi', () => {
