@@ -58,6 +58,13 @@ class UsersControllerTest extends BaseIntegrationTest {
         return "Bearer " + authToken;
     }
 
+    private int insertUser(String email, String role) {
+        jdbcTemplate.update(
+            "INSERT INTO users (email, password_hash, role, status, project_id) VALUES (?, ?, ?, ?, ?)",
+            email, passwordEncoder.encode("Pass1234!"), role, "active", testProjectId);
+        return jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = ?", Integer.class, email);
+    }
+
     @Test
     void getAllUsers_shouldReturnList() throws Exception {
         mockMvc.perform(get("/api/v1/users")
@@ -67,39 +74,8 @@ class UsersControllerTest extends BaseIntegrationTest {
     }
 
     @Test
-    void createUser_shouldReturnCreatedUser() throws Exception {
-        mockMvc.perform(post("/api/v1/users")
-                .header("Authorization", auth())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"newuser@test.com\",\"password\":\"Newpass123!\",\"name\":\"New User\",\"role\":\"developer\"}"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value("newuser@test.com"))
-                .andExpect(jsonPath("$.role").value("developer"));
-    }
-
-    @Test
-    void createUser_shouldReturnErrorWhenEmailExists() throws Exception {
-        jdbcTemplate.update(
-            "INSERT INTO users (email, password_hash, role, status, project_id) VALUES (?, ?, ?, ?, ?)",
-            "dup@test.com", passwordEncoder.encode("pass1"), "developer", "active", testProjectId);
-
-        mockMvc.perform(post("/api/v1/users")
-                .header("Authorization", auth())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"dup@test.com\",\"password\":\"newpass\",\"name\":\"Dup\",\"role\":\"viewer\"}"))
-                .andExpect(status().isConflict());
-    }
-
-    @Test
     void getById_shouldReturnUser() throws Exception {
-        ObjectMapper om = new ObjectMapper();
-        String createResp = mockMvc.perform(post("/api/v1/users")
-                .header("Authorization", auth())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"getuser@test.com\",\"password\":\"Pass1234!\",\"name\":\"Get Me\",\"role\":\"viewer\"}"))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        int userId = om.readTree(createResp).get("id").asInt();
+        int userId = insertUser("getuser@test.com", "viewer");
 
         mockMvc.perform(get("/api/v1/users/{id}", userId)
                 .header("Authorization", auth()))
@@ -108,15 +84,15 @@ class UsersControllerTest extends BaseIntegrationTest {
     }
 
     @Test
+    void getById_shouldReturn404WhenNotFound() throws Exception {
+        mockMvc.perform(get("/api/v1/users/99999")
+                .header("Authorization", auth()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void updateUser_shouldReturnUpdatedUser() throws Exception {
-        ObjectMapper om = new ObjectMapper();
-        String createResp = mockMvc.perform(post("/api/v1/users")
-                .header("Authorization", auth())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"update@test.com\",\"password\":\"Pass1234!\",\"name\":\"Old\",\"role\":\"viewer\"}"))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        int userId = om.readTree(createResp).get("id").asInt();
+        int userId = insertUser("update@test.com", "viewer");
 
         mockMvc.perform(put("/api/v1/users/{id}", userId)
                 .header("Authorization", auth())
@@ -128,25 +104,11 @@ class UsersControllerTest extends BaseIntegrationTest {
 
     @Test
     void deleteUser_shouldReturn204() throws Exception {
-        ObjectMapper om = new ObjectMapper();
-        String createResp = mockMvc.perform(post("/api/v1/users")
-                .header("Authorization", auth())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"todelete@test.com\",\"password\":\"Pass1234!\",\"name\":\"Del\",\"role\":\"viewer\"}"))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        int userId = om.readTree(createResp).get("id").asInt();
+        int userId = insertUser("todelete@test.com", "viewer");
 
         mockMvc.perform(delete("/api/v1/users/{id}", userId)
                 .header("Authorization", auth()))
                 .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void getById_shouldReturn404WhenNotFound() throws Exception {
-        mockMvc.perform(get("/api/v1/users/99999")
-                .header("Authorization", auth()))
-                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -182,7 +144,7 @@ class UsersControllerTest extends BaseIntegrationTest {
     }
 
     @Test
-    void invite_shouldReturn400ForNonAdmin() throws Exception {
+    void invite_shouldReturn403ForNonAdmin() throws Exception {
         jdbcTemplate.update(
             "INSERT INTO users (email, password_hash, role, status, project_id) VALUES (?, ?, ?, ?, ?)",
             "viewer-user@test.com", passwordEncoder.encode("viewpass"), "viewer", "active", testProjectId);
@@ -203,14 +165,7 @@ class UsersControllerTest extends BaseIntegrationTest {
 
     @Test
     void sendResetLink_shouldReturn200() throws Exception {
-        ObjectMapper om = new ObjectMapper();
-        String createResp = mockMvc.perform(post("/api/v1/users")
-                .header("Authorization", auth())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"email\":\"resetme@test.com\",\"password\":\"Pass1234!\",\"name\":\"Reset Me\",\"role\":\"viewer\"}"))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        int userId = om.readTree(createResp).get("id").asInt();
+        int userId = insertUser("resetme@test.com", "viewer");
 
         mockMvc.perform(post("/api/v1/users/{id}/send-reset-link", userId)
                 .header("Authorization", auth()))

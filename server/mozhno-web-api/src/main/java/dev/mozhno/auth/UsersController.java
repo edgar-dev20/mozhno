@@ -45,15 +45,6 @@ public class UsersController {
         return userService.findById(id);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Create a new user with password (admin only)")
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserDto create(@Valid @RequestBody UserCreateRequest request,
-                           @AuthenticationPrincipal UserPrincipal user) {
-        return userService.create(request, user.projectId());
-    }
-
     @PostMapping("/invite")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Invite a new user by email (admin only)")

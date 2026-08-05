@@ -2,7 +2,6 @@ package dev.mozhno.auth;
 
 import dev.mozhno.events.DomainEventPublisher;
 import dev.mozhno.exception.ConflictException;
-import dev.mozhno.spi.QuotaSpi;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,13 +18,12 @@ class UserServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private DomainEventPublisher events;
-    @Mock private QuotaSpi quotaSpi;
 
     private UserService userService;
 
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, passwordEncoder, events, quotaSpi);
+        userService = new UserService(userRepository, passwordEncoder, events);
     }
 
     @Test

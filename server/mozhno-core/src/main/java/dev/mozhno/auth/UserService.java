@@ -6,11 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import dev.mozhno.events.DomainEvent;
 import dev.mozhno.events.DomainEventPublisher;
-import dev.mozhno.spi.QuotaSpi;
 import dev.mozhno.exception.BadRequestException;
 import dev.mozhno.exception.ConflictException;
 import dev.mozhno.exception.NotFoundException;
-import dev.mozhno.exception.QuotaExceededException;
 
 import dev.mozhno.util.MediaTypeUtils;
 
@@ -20,29 +18,25 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Service for user management (CRUD) with quota enforcement.
+ * Service for user management (CRUD).
  *
- * <p>Before creating a user, the {@link dev.mozhno.spi.QuotaSpi} is consulted.
- * If the tenant quota is exceeded, the operation is blocked. Domain events
- * are published on create, update, and delete for audit and integration purposes.</p>
+ * <p>Domain events are published on update and delete for audit
+ * and integration purposes. User creation is handled exclusively through
+ * the invite flow — see {@link UserInviteService}.</p>
  */
 @Service
 public class UserService {
 
-    private static final String DEFAULT_STATUS = "active";
-    private static final String DEFAULT_LOCALE = "ru";
     private static final long MAX_AVATAR_PIXELS = 1024L * 1024L;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final DomainEventPublisher events;
-    private final QuotaSpi quotaSpi;
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                       DomainEventPublisher events, QuotaSpi quotaSpi) {
+                       DomainEventPublisher events) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.events = events;
-        this.quotaSpi = quotaSpi;
     }
 
     /**
@@ -71,40 +65,6 @@ public class UserService {
             throw new NotFoundException("User", id);
         }
         return toDto(user);
-    }
-
-    /**
-     * Creates a new user after checking quota and email uniqueness.
-     *
-     * @param request user creation payload
-     * @return created user DTO
-     * @throws RuntimeException if email exists or quota is exceeded
-     */
-    @Transactional
-    public UserDto create(UserCreateRequest request, Integer projectId) {
-        if (userRepository.existsByEmail(request.email())) {
-            throw new ConflictException("User with email " + request.email() + " already exists");
-        }
-
-        PasswordValidator.validate(request.password(), request.email());
-
-        QuotaSpi.QuotaResult quota = quotaSpi.canCreateUser(null);
-        if (quota instanceof QuotaSpi.Blocked blocked) {
-            throw new QuotaExceededException(blocked.current(), blocked.limit(), blocked.planName());
-        }
-
-        User user = new User();
-        user.setEmail(request.email());
-        user.setPasswordHash(passwordEncoder.encode(request.password()));
-        user.setName(request.name());
-        user.setRole(request.role());
-        user.setStatus(DEFAULT_STATUS);
-        user.setLocale(request.locale() != null ? request.locale() : DEFAULT_LOCALE);
-        user.setProjectId(projectId);
-        User saved = userRepository.save(user);
-        events.publish(DomainEvent.of(null, "user.created", "user",
-            saved.getId(), saved.getEmail(), "Role: " + saved.getRole()));
-        return toDto(saved);
     }
 
     /**

@@ -94,14 +94,14 @@ class RbacIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("ADMIN: can create user")
-    void adminCreateUser() throws Exception {
-        mockMvc.perform(post("/api/v1/users")
+    @DisplayName("ADMIN: can invite user")
+    void adminInviteUser() throws Exception {
+        mockMvc.perform(post("/api/v1/users/invite")
                         .header("Authorization", adminAuth())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"admin-created@test.com\",\"password\":\"NewPass1!\",\"name\":\"Created\",\"role\":\"viewer\"}"))
+                        .content("{\"email\":\"admin-invited@test.com\",\"role\":\"developer\"}"))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.email").value("admin-created@test.com"));
+                .andExpect(jsonPath("$.message").value("Invitation sent to admin-invited@test.com"));
     }
 
     @Test
@@ -131,13 +131,10 @@ class RbacIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("ADMIN: can delete user")
     void adminDeleteUser() throws Exception {
-        String createResp = mockMvc.perform(post("/api/v1/users")
-                        .header("Authorization", adminAuth())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"todelete@test.com\",\"password\":\"DelPass1!\",\"role\":\"viewer\"}"))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        int id = objectMapper.readTree(createResp).get("id").asInt();
+        jdbcTemplate.update(
+                "INSERT INTO users (email, password_hash, role, status, project_id) VALUES (?, ?, ?, ?, ?)",
+                "todelete@test.com", passwordEncoder.encode("DelPass1!"), "viewer", "active", projectId);
+        int id = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = ?", Integer.class, "todelete@test.com");
 
         mockMvc.perform(delete("/api/v1/users/{id}", id)
                         .header("Authorization", adminAuth()))
@@ -169,12 +166,12 @@ class RbacIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    @DisplayName("DEVELOPER: cannot create user (403)")
-    void developerCannotCreateUser() throws Exception {
-        mockMvc.perform(post("/api/v1/users")
+    @DisplayName("DEVELOPER: cannot invite user (403)")
+    void developerCannotInviteUser() throws Exception {
+        mockMvc.perform(post("/api/v1/users/invite")
                         .header("Authorization", devAuth())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"no@test.com\",\"password\":\"NoPass1!\",\"role\":\"viewer\"}"))
+                        .content("{\"email\":\"no@test.com\",\"role\":\"viewer\"}"))
                 .andExpect(status().isForbidden());
     }
 
@@ -350,13 +347,10 @@ class RbacIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("Admin cannot change own role when they have created other users")
     void adminCannotDemoteSelfWhenHasChildren() throws Exception {
-        String resp = mockMvc.perform(post("/api/v1/users")
-                        .header("Authorization", adminAuth())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"admin2@test.com\",\"password\":\"Admin2Pass1!\",\"role\":\"admin\"}"))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        int admin2Id = objectMapper.readTree(resp).get("id").asInt();
+        jdbcTemplate.update(
+                "INSERT INTO users (email, password_hash, role, status, project_id) VALUES (?, ?, ?, ?, ?)",
+                "admin2@test.com", passwordEncoder.encode("Admin2Pass1!"), "admin", "active", projectId);
+        int admin2Id = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = ?", Integer.class, "admin2@test.com");
 
         jdbcTemplate.update(
                 "INSERT INTO users (email, password_hash, role, status, project_id, created_by) VALUES (?, ?, ?, ?, ?, ?)",
