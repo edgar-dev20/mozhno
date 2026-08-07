@@ -69,11 +69,12 @@ public class UserService {
 
     /**
      * Updates an existing user. Only non-null fields in the request are applied.
+     * Email and name are immutable after account creation — set at invite acceptance.
      *
      * @param id      user id
      * @param request update payload (partial)
      * @return updated user DTO
-     * @throws RuntimeException if user not found or new email conflicts
+     * @throws RuntimeException if user not found
      */
     @Transactional
     public UserDto update(Integer id, UserUpdateRequest request) {
@@ -81,15 +82,10 @@ public class UserService {
         if (user == null) {
             throw new NotFoundException("User", id);
         }
-        if (request.email() != null && !request.email().equals(user.getEmail()) && userRepository.existsByEmail(request.email())) {
-            throw new ConflictException("User with email " + request.email() + " already exists");
-        }
-        if (request.email() != null) user.setEmail(request.email());
         if (request.password() != null) {
             PasswordValidator.validate(request.password(), user.getEmail());
             user.setPasswordHash(passwordEncoder.encode(request.password()));
         }
-        if (request.name() != null) user.setName(request.name());
         if (request.role() != null) {
             if ("admin".equals(user.getRole()) && !"admin".equals(request.role())) {
                 ensureGroupHasOtherAdmin(user);

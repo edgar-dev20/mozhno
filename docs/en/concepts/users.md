@@ -21,6 +21,8 @@ The first administrator is created on initial setup via the onboarding wizard. S
 3. Enter email and role
 4. The user receives an email with an activation link, sets their name and password
 
+The name is not specified at invitation — the user sets it themselves upon account activation.
+
 ## Password Recovery
 
 1. User clicks **"Forgot Password"** on the login page
@@ -29,7 +31,7 @@ The first administrator is created on initial setup via the onboarding wizard. S
 
 ## User Management (ADMIN)
 
-Administrators can view the user list, change roles, and delete accounts through the **Users** section in the web dashboard.
+Administrators can view the user list, change roles, and delete accounts through the **Users** section in the web dashboard. User email and name are immutable — they are set upon account activation.
 
 ## User Profile
 

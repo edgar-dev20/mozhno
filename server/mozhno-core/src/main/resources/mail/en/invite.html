@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>{{style}}</style></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Invitation to Mozhno</title><style>{{style}}</style></head>
 <body>
-<div class="container">
-  <div class="logo-section">
-    <div class="logo-badge">
-      <span class="logo-text">mozhno.</span>
-    </div>
-    <p class="tagline">Ship without fear.</p>
+<div class="card">
+  <div class="accent-bar"></div>
+  <div class="card-body">
+    <div class="wordmark">можно<span class="wordmark-dot">.</span></div>
+    <h2>Invitation</h2>
+    <p class="body-text">You've been invited to join a project.</p>
+    <a class="btn" href="{{link}}" style="color:#fff;text-decoration:none">Accept invitation</a>
+    <p class="fine-print">This link expires in 7 days.</p>
   </div>
-  <div class="body">
-    <h2>Welcome to Mozhno</h2>
-    <p>You have been invited to join Mozhno. Click the button below to accept the invitation and set up your account. This link is valid for 7&nbsp;days.</p>
-    <div class="btn-wrap">
-      <a class="button" href="{{link}}">Accept invitation</a>
-    </div>
-    <p class="muted">If the button doesn't work, copy and paste the link into your browser:</p>
-    <p class="link-fallback">{{link}}</p>
-    <p class="muted">Welcome to the team!</p>
+  <div class="card-divider"></div>
+  <div class="fallback">
+    <p>If the button doesn't work, copy this link:</p>
+    <p class="fallback-link">{{link}}</p>
   </div>
-  <div class="footer">
-    <p><span class="footer-brand">mozhno</span></p>
+  <div class="card-footer">
+    <p>You received this email because you were invited to a project.</p>
   </div>
 </div>
 </body>

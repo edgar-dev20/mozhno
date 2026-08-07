@@ -289,7 +289,7 @@ describe('usersApi', () => {
     expect(requestSpy).toHaveBeenCalledWith('/users/42/send-reset-link', { method: 'POST' });
   });
   it('update', async () => {
-    const d = { name: 'u' } as never;
+    const d = { role: 'developer' } as never;
     await usersApi.update(1, d);
     expect(requestSpy).toHaveBeenCalledWith('/users/1', { method: 'PUT', body: JSON.stringify(d) });
   });

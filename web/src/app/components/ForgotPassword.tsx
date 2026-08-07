@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
-import { Mail, ArrowLeft } from '@/shared/icons';
+import { Mail, ArrowLeft, Check } from '@/shared/icons';
 import { GradientButton, ErrorBox, getErrorMessage } from '@/shared';
 import { Input } from '@/app/components/ui/input';
+import { Alert, AlertDescription } from '@/app/components/ui/alert';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { api } from '@/api';
 import { useT, useLocale } from '@/i18n';
@@ -56,11 +57,10 @@ export function ForgotPassword() {
 
             {sent ? (
               <div className="text-center space-y-4">
-                <div className="p-4 bg-success dark:bg-success/10 border border-success dark:border-success/20 rounded-xl">
-                  <p className="text-body-sm text-success dark:text-success">
-                    {t('auth.forgotPasswordSent')}
-                  </p>
-                </div>
+                <Alert className="text-success [&>svg]:text-success">
+                  <Check size={16} />
+                  <AlertDescription>{t('auth.forgotPasswordSent')}</AlertDescription>
+                </Alert>
                 <Link
                   to="/login"
                   className="inline-flex items-center gap-1.5 text-body-sm text-muted-foreground hover:text-foreground transition-colors"

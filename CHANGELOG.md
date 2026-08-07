@@ -14,6 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `WeakKeyException` when auto-generated 256-bit key tried to verify HS384 tokens
 
+## [1.1.1] — 2026-08-07
+
+### Changed
+- **Email templates redesigned** to match the design system — SaaS-style cards with brand accent bar, Onest font, wordmark with copper dot; subjects now live in the templates themselves (`<title>`), not in Java maps
+- **User invitation simplified** — name field removed from the admin invite form; the invited user sets their name upon activation
+- **User email and name are immutable** — admins can no longer change them via the edit form or API; `UserUpdateRequest` accepts only password, role, status, locale
+- Success banners on auth pages (invite accept, password reset, forgot password) now use the `Alert` design-system component
+
+### Removed
+- `UserUpdateRequest.email` and `UserUpdateRequest.name` fields
+- `name` field from `InviteUserRequest`
+- Subject line maps from `UserInviteService` and `PasswordResetService`
+
 ## [1.1.0] — 2026-08-04
 
 ### Changed

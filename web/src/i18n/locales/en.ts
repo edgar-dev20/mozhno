@@ -596,9 +596,6 @@ const en = {
     },
     form: {
       nameLabel: 'Name',
-      namePlaceholder: 'First Last',
-      emailLabel: 'Email',
-      emailPlaceholder: 'hello@example.com',
       sendResetLink: 'Send reset link',
       resetLinkSent: 'Password reset link sent to user',
       inviteSent: 'Invitation sent to {{email}}',

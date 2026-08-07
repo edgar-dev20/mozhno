@@ -94,7 +94,7 @@ class UserServiceTest {
         when(userRepository.countByCreatedBy(1)).thenReturn(2);
         when(userRepository.countAdminsCreatedBy(1, 1)).thenReturn(0);
 
-        UserUpdateRequest request = new UserUpdateRequest(null, null, null, "developer", null, null);
+        UserUpdateRequest request = new UserUpdateRequest(null, "developer", null, null);
 
         ConflictException ex = assertThrows(ConflictException.class, () -> userService.update(1, request));
         assertTrue(ex.getMessage().contains("last admin"));
@@ -111,25 +111,10 @@ class UserServiceTest {
         when(userRepository.countAdminsCreatedBy(1, 1)).thenReturn(1);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        UserUpdateRequest request = new UserUpdateRequest(null, null, null, "developer", null, null);
+        UserUpdateRequest request = new UserUpdateRequest(null, "developer", null, null);
 
         assertDoesNotThrow(() -> userService.update(1, request));
         verify(userRepository).save(any(User.class));
-    }
-
-    @Test
-    void update_changingNameOnly_shouldNotCheckLastAdmin() {
-        User user = new User();
-        user.setId(1);
-        user.setRole("admin");
-        when(userRepository.findById(1)).thenReturn(user);
-        when(userRepository.save(any(User.class))).thenReturn(user);
-
-        UserUpdateRequest request = new UserUpdateRequest(null, null, "New Name", null, null, null);
-
-        assertDoesNotThrow(() -> userService.update(1, request));
-        verify(userRepository).save(any(User.class));
-        verify(userRepository, never()).countByCreatedBy(anyInt());
     }
 
     @Test
@@ -141,7 +126,7 @@ class UserServiceTest {
         when(userRepository.countByCreatedBy(1)).thenReturn(0);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        UserUpdateRequest request = new UserUpdateRequest(null, null, null, "viewer", null, null);
+        UserUpdateRequest request = new UserUpdateRequest(null, "viewer", null, null);
 
         assertDoesNotThrow(() -> userService.update(1, request));
         verify(userRepository).save(any(User.class));
@@ -155,10 +140,26 @@ class UserServiceTest {
         when(userRepository.findById(1)).thenReturn(user);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
-        UserUpdateRequest request = new UserUpdateRequest(null, null, null, "admin", null, null);
+        UserUpdateRequest request = new UserUpdateRequest(null, "admin", null, null);
 
         assertDoesNotThrow(() -> userService.update(1, request));
         verify(userRepository).save(any(User.class));
         verify(userRepository, never()).countByCreatedBy(anyInt());
+    }
+
+    @Test
+    void update_statusOnly_shouldNotTouchRoleOrPassword() {
+        User user = new User();
+        user.setId(1);
+        user.setRole("developer");
+        user.setStatus("active");
+        when(userRepository.findById(1)).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        UserUpdateRequest request = new UserUpdateRequest(null, null, "suspended", null);
+
+        assertDoesNotThrow(() -> userService.update(1, request));
+        verify(userRepository).save(any(User.class));
+        verify(passwordEncoder, never()).encode(anyString());
     }
 }

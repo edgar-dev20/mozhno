@@ -595,9 +595,6 @@ const ru = {
     },
     form: {
       nameLabel: 'Имя',
-      namePlaceholder: 'Имя Фамилия',
-      emailLabel: 'Email',
-      emailPlaceholder: 'hello@example.com',
       sendResetLink: 'Отправить ссылку для сброса',
       resetLinkSent: 'Ссылка для сброса пароля отправлена пользователю',
       inviteSent: 'Приглашение отправлено на {{email}}',

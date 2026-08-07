@@ -17,15 +17,12 @@ import dev.mozhno.spi.QuotaSpi;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 
 import static dev.mozhno.client.HashUtils.generateRawToken;
 import static dev.mozhno.client.HashUtils.sha256;
 
 @Service
 public class UserInviteService {
-
-    private static final Map<String, String> RU_INVITE_SUBJECT = Map.of("ru", "Приглашение в Mozhno", "en", "Invitation to Mozhno");
 
     private final EmailTemplateService emailTemplateService;
     private final InviteTokenRepository tokenRepository;
@@ -88,11 +85,10 @@ public class UserInviteService {
         tokenRepository.save(token);
 
         String inviteLink = baseUrl + "/accept-invite#token=" + rawToken;
-        String html = emailTemplateService.renderInviteEmail(inviteLink, locale);
-        String subject = RU_INVITE_SUBJECT.getOrDefault(locale, "Invitation to Mozhno");
+        EmailTemplateService.EmailTemplate template = emailTemplateService.renderInviteEmail(inviteLink, locale);
 
         notificationSpi.send(new NotificationSpi.NotificationEvent(
-            "EMAIL", request.email(), subject, html, null));
+            "EMAIL", request.email(), template.subject(), template.html(), null));
 
         events.publish(DomainEvent.of(null, "user.invited", "user",
             null, request.email(), "Invitation sent for role: " + request.role()));

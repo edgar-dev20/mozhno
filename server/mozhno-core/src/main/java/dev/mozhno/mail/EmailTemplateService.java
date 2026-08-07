@@ -7,9 +7,15 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class EmailTemplateService {
+
+    private static final Pattern TITLE_PATTERN = Pattern.compile("<title>([^<]+)</title>");
+
+    public record EmailTemplate(String subject, String html) {}
 
     private final String style;
     private final Map<String, String> templateCache = new ConcurrentHashMap<>();
@@ -18,16 +24,40 @@ public class EmailTemplateService {
         this.style = loadResource("mail/email-style.css");
     }
 
-    public String renderResetPasswordEmail(String resetLink, String locale) {
+    public EmailTemplate renderResetPasswordEmail(String resetLink, String locale) {
         String safeLocale = validateLocale(locale);
-        String template = loadTemplate("mail/" + safeLocale + "/reset-password.html");
-        return template.replace("{{style}}", style).replace("{{link}}", resetLink);
+        return render("mail/" + safeLocale + "/reset-password.html", resetLink);
     }
 
-    public String renderInviteEmail(String inviteLink, String locale) {
+    public EmailTemplate renderInviteEmail(String inviteLink, String locale) {
         String safeLocale = validateLocale(locale);
-        String template = loadTemplate("mail/" + safeLocale + "/invite.html");
-        return template.replace("{{style}}", style).replace("{{link}}", inviteLink);
+        return render("mail/" + safeLocale + "/invite.html", inviteLink);
+    }
+
+    public EmailTemplate renderAdminResetPasswordEmail(String resetLink, String locale) {
+        String safeLocale = validateLocale(locale);
+        return render("mail/" + safeLocale + "/admin-reset-password.html", resetLink);
+    }
+
+    public EmailTemplate renderResetPasswordEmail(String resetLink) {
+        return renderResetPasswordEmail(resetLink, "ru");
+    }
+
+    public EmailTemplate renderInviteEmail(String inviteLink) {
+        return renderInviteEmail(inviteLink, "ru");
+    }
+
+    private EmailTemplate render(String templatePath, String link) {
+        String template = loadTemplate(templatePath);
+        String subject = extractSubject(template);
+        String html = template.replace("{{style}}", style).replace("{{link}}", link);
+        html = TITLE_PATTERN.matcher(html).replaceFirst("");
+        return new EmailTemplate(subject, html);
+    }
+
+    private String extractSubject(String template) {
+        Matcher m = TITLE_PATTERN.matcher(template);
+        return m.find() ? m.group(1).trim() : "";
     }
 
     private String validateLocale(String locale) {
@@ -35,20 +65,6 @@ public class EmailTemplateService {
             return locale;
         }
         return "ru";
-    }
-
-    public String renderResetPasswordEmail(String resetLink) {
-        return renderResetPasswordEmail(resetLink, "ru");
-    }
-
-    public String renderInviteEmail(String inviteLink) {
-        return renderInviteEmail(inviteLink, "ru");
-    }
-
-    public String renderAdminResetPasswordEmail(String resetLink, String locale) {
-        String safeLocale = validateLocale(locale);
-        String template = loadTemplate("mail/" + safeLocale + "/admin-reset-password.html");
-        return template.replace("{{style}}", style).replace("{{link}}", resetLink);
     }
 
     private String loadTemplate(String path) {

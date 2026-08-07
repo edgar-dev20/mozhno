@@ -16,6 +16,7 @@ import {
   Crown,
   Code2,
   Eye,
+  Lock,
 } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
@@ -79,7 +80,6 @@ export function Users() {
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     role: 'viewer',
     status: 'invited',
@@ -125,7 +125,7 @@ export function Users() {
   const handleOpenCreate = () => {
     setEditingUser(null);
     setError('');
-    setFormData({ name: '', email: '', role: 'viewer', status: 'invited' });
+    setFormData({ email: '', role: 'viewer', status: 'invited' });
     setInitialFormData(null);
     setIsPanelOpen(true);
   };
@@ -134,7 +134,6 @@ export function Users() {
     setEditingUser(user);
     setError('');
     const initial = {
-      name: user.name ?? '',
       email: user.email,
       role: user.role,
       status: user.status,
@@ -181,10 +180,8 @@ export function Users() {
   const isDirty = useMemo(() => {
     if (!editingUser || !initialFormData) return false;
     return (
-      formData.name !== initialFormData.name ||
-      formData.email !== initialFormData.email ||
       formData.role !== initialFormData.role ||
-      (editingUser && formData.status !== initialFormData.status)
+      formData.status !== initialFormData.status
     );
   }, [formData, editingUser, initialFormData]);
 
@@ -202,8 +199,6 @@ export function Users() {
     try {
       if (editingUser) {
         const payload: Record<string, unknown> = {
-          name: formData.name,
-          email: formData.email,
           role: formData.role,
           status: formData.status,
         };
@@ -212,7 +207,6 @@ export function Users() {
       } else {
         await api.users.invite({
           email: formData.email,
-          name: formData.name || undefined,
           role: formData.role,
           locale,
         });
@@ -728,50 +722,55 @@ export function Users() {
               </div>
             )}
 
-            <div className="space-y-1.5">
-              <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
-                <span>{t('users.form.nameLabel')}</span>
-                <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
-                  {formData.name.length}/120
-                </span>
-              </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                maxLength={120}
-                placeholder={t('users.form.namePlaceholder')}
-                className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
-              />
-            </div>
+            {editingUser && (
+              <div className="space-y-1.5">
+                <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
+                  <span>{t('users.form.nameLabel')}</span>
+                </label>
+                <div className="w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium text-muted-foreground flex items-center gap-2 select-text">
+                  <span className="flex-1 truncate">{editingUser.name || '—'}</span>
+                  <Lock size={14} className="shrink-0 text-muted-foreground/60" />
+                </div>
+              </div>
+            )}
 
             <div className="space-y-1.5">
               <label className="text-body-sm font-medium text-foreground/80 flex items-center justify-between">
                 <span>Email</span>
-                <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
-                  {formData.email.length}/254
-                </span>
+                {!editingUser && (
+                  <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
+                    {formData.email.length}/254
+                  </span>
+                )}
               </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                maxLength={254}
-                placeholder="email@company.com"
-                className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
-              />
+              {editingUser ? (
+                <div className="w-full bg-muted/50 border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium text-muted-foreground flex items-center gap-2 select-text">
+                  <span className="flex-1 truncate">{editingUser.email}</span>
+                  <Lock size={14} className="shrink-0 text-muted-foreground/60" />
+                </div>
+              ) : (
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  maxLength={254}
+                  placeholder="email@company.com"
+                  className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
+                />
+              )}
             </div>
 
             {editingUser && (
               <div className="pt-4 border-t border-border">
-                <button
+                <GradientButton
                   type="button"
+                  variant="muted"
+                  size="md"
+                  icon={<Mail size={14} />}
                   onClick={() => setResetPasswordOpen(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 text-body-sm font-medium text-foreground/80 bg-secondary border border-border rounded-lg hover:bg-accent hover:text-foreground transition-all"
                 >
-                  <Mail size={14} />
                   {t('users.form.sendResetLink')}
-                </button>
+                </GradientButton>
               </div>
             )}
 

@@ -67,7 +67,7 @@ class PasswordResetServiceTest {
     void sendResetEmail_userFound_shouldStoreTokenAndSendEmail() {
         User user = createTestUser(1, "active");
         when(userRepository.findByEmail("test@example.com")).thenReturn(user);
-        when(emailTemplateService.renderResetPasswordEmail(anyString(), anyString())).thenReturn("<html>reset</html>");
+        when(emailTemplateService.renderResetPasswordEmail(anyString(), anyString())).thenReturn(new EmailTemplateService.EmailTemplate("Сброс пароля", "<html>reset</html>"));
         when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
             PasswordResetToken t = inv.getArgument(0);
             t.setId(1);
@@ -92,7 +92,7 @@ class PasswordResetServiceTest {
         NotificationSpi.NotificationEvent event = eventCaptor.getValue();
         assertThat(event.type()).isEqualTo("EMAIL");
         assertThat(event.recipient()).isEqualTo("test@example.com");
-        assertThat(event.subject()).isEqualTo("Сброс пароля Mozhno");
+        assertThat(event.subject()).isEqualTo("Сброс пароля");
         assertThat(event.body()).isEqualTo("<html>reset</html>");
 
         verify(events).publish(any(DomainEvent.class));
@@ -102,7 +102,7 @@ class PasswordResetServiceTest {
     void sendResetEmail_englishLocale_shouldUseEnglishSubject() {
         User user = createTestUser(2, "active");
         when(userRepository.findByEmail("eng@example.com")).thenReturn(user);
-        when(emailTemplateService.renderResetPasswordEmail(anyString(), eq("en"))).thenReturn("<html>reset-en</html>");
+        when(emailTemplateService.renderResetPasswordEmail(anyString(), eq("en"))).thenReturn(new EmailTemplateService.EmailTemplate("Mozhno password reset", "<html>reset-en</html>"));
         when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
             PasswordResetToken t = inv.getArgument(0);
             t.setId(2);
@@ -157,7 +157,7 @@ class PasswordResetServiceTest {
     void sendResetEmail_cooldown_shouldReturnFalse() {
         User user = createTestUser(1, "active");
         when(userRepository.findByEmail("cooldown@example.com")).thenReturn(user);
-        when(emailTemplateService.renderResetPasswordEmail(anyString(), anyString())).thenReturn("<html>reset</html>");
+        when(emailTemplateService.renderResetPasswordEmail(anyString(), anyString())).thenReturn(new EmailTemplateService.EmailTemplate("Сброс пароля", "<html>reset</html>"));
         when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
             PasswordResetToken t = inv.getArgument(0);
             t.setId(1);
@@ -177,7 +177,7 @@ class PasswordResetServiceTest {
     void sendResetEmail_resetLink_shouldNotHaveAuthPrefix() {
         User user = createTestUser(3, "active");
         when(userRepository.findByEmail("link@example.com")).thenReturn(user);
-        when(emailTemplateService.renderResetPasswordEmail(anyString(), anyString())).thenAnswer(inv -> inv.getArgument(0));
+        when(emailTemplateService.renderResetPasswordEmail(anyString(), anyString())).thenAnswer(inv -> new EmailTemplateService.EmailTemplate("Сброс пароля", inv.getArgument(0)));
         when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
             PasswordResetToken t = inv.getArgument(0);
             t.setId(3);
@@ -198,7 +198,7 @@ class PasswordResetServiceTest {
         User user = createTestUser(4, "active");
         user.setLocale("en");
         when(userRepository.findById(4)).thenReturn(user);
-        when(emailTemplateService.renderAdminResetPasswordEmail(anyString(), eq("en"))).thenReturn("<html>admin-reset-en</html>");
+        when(emailTemplateService.renderAdminResetPasswordEmail(anyString(), eq("en"))).thenReturn(new EmailTemplateService.EmailTemplate("Mozhno password reset", "<html>admin-reset-en</html>"));
         when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
             PasswordResetToken t = inv.getArgument(0);
             t.setId(4);
@@ -242,7 +242,7 @@ class PasswordResetServiceTest {
     void sendAdminResetEmail_shouldNotHaveAuthPrefix() {
         User user = createTestUser(6, "active");
         when(userRepository.findById(6)).thenReturn(user);
-        when(emailTemplateService.renderAdminResetPasswordEmail(anyString(), anyString())).thenAnswer(inv -> inv.getArgument(0));
+        when(emailTemplateService.renderAdminResetPasswordEmail(anyString(), anyString())).thenAnswer(inv -> new EmailTemplateService.EmailTemplate("Сброс пароля", inv.getArgument(0)));
         when(tokenRepository.save(any(PasswordResetToken.class))).thenAnswer(inv -> {
             PasswordResetToken t = inv.getArgument(0);
             t.setId(6);

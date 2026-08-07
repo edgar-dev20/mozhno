@@ -15,9 +15,6 @@ public record InviteUserRequest(
     @Schema(description = "User role: admin, developer, or viewer", example = "developer")
     String role,
 
-    @Schema(description = "Display name of the invited user", nullable = true)
-    String name,
-
     @Pattern(regexp = "ru|en")
     @Schema(description = "Preferred locale for email: ru or en (default ru)", nullable = true, example = "ru")
     String locale

@@ -164,14 +164,12 @@ export type UserCreateRequest = {
   locale?: string;
 };
 export type UserUpdateRequest = {
-  email?: string;
   password?: string;
-  name?: string;
   role?: string;
   status?: string;
   locale?: string;
 };
-export type UserInviteRequest = { email: string; name?: string; role: string; locale?: string };
+export type UserInviteRequest = { email: string; role: string; locale?: string };
 export type ApiKey = {
   id: number;
   projectId: number;

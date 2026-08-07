@@ -14,16 +14,12 @@ import dev.mozhno.exception.NotFoundException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 
 import static dev.mozhno.client.HashUtils.generateRawToken;
 import static dev.mozhno.client.HashUtils.sha256;
 
 @Service
 public class PasswordResetService {
-
-    private static final Map<String, String> RU_RESET_SUBJECT = Map.of("ru", "Сброс пароля Mozhno", "en", "Mozhno password reset");
-    private static final Map<String, String> RU_ADMIN_RESET_SUBJECT = Map.of("ru", "Сброс пароля Mozhno", "en", "Mozhno password reset");
 
     private final Cache<String, Instant> lastResetSent;
 
@@ -99,11 +95,10 @@ public class PasswordResetService {
         tokenRepository.save(token);
 
         String resetLink = baseUrl + "/reset-password#token=" + rawToken;
-        String html = emailTemplateService.renderResetPasswordEmail(resetLink, effectiveLocale);
-        String subject = RU_RESET_SUBJECT.getOrDefault(effectiveLocale, "Mozhno password reset");
+        EmailTemplateService.EmailTemplate template = emailTemplateService.renderResetPasswordEmail(resetLink, effectiveLocale);
 
         notificationSpi.send(new NotificationSpi.NotificationEvent(
-            "EMAIL", email, subject, html, null));
+            "EMAIL", email, template.subject(), template.html(), null));
 
         events.publish(DomainEvent.of(null, "password_reset.requested", "user",
             user.getId(), user.getEmail(), "Password reset email sent"));
@@ -131,11 +126,10 @@ public class PasswordResetService {
         tokenRepository.save(token);
 
         String resetLink = baseUrl + "/reset-password#token=" + rawToken;
-        String html = emailTemplateService.renderAdminResetPasswordEmail(resetLink, locale);
-        String subject = RU_ADMIN_RESET_SUBJECT.getOrDefault(locale, "Mozhno password reset");
+        EmailTemplateService.EmailTemplate template = emailTemplateService.renderAdminResetPasswordEmail(resetLink, locale);
 
         notificationSpi.send(new NotificationSpi.NotificationEvent(
-            "EMAIL", user.getEmail(), subject, html, null));
+            "EMAIL", user.getEmail(), template.subject(), template.html(), null));
 
         events.publish(DomainEvent.of(null, "password_reset.admin_requested", "user",
             userId, user.getEmail(), "Admin password reset email sent"));

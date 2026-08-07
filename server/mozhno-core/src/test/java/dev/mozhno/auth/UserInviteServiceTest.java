@@ -77,11 +77,11 @@ class UserInviteServiceTest {
     }
 
     private InviteUserRequest createRequest(String email, String role) {
-        return new InviteUserRequest(email, role, null, null);
+        return new InviteUserRequest(email, role, null);
     }
 
     private InviteUserRequest createRequest(String email, String role, String locale) {
-        return new InviteUserRequest(email, role, null, locale);
+        return new InviteUserRequest(email, role, locale);
     }
 
     @Test
@@ -109,7 +109,7 @@ class UserInviteServiceTest {
     void inviteUser_success_shouldStoreTokenAndSendEmail() {
         when(userRepository.existsByEmail("invitee@example.com")).thenReturn(false);
         when(quotaSpi.canCreateUser(null)).thenReturn(new QuotaSpi.Allowed());
-        when(emailTemplateService.renderInviteEmail(anyString(), anyString())).thenReturn("<html>invite</html>");
+        when(emailTemplateService.renderInviteEmail(anyString(), anyString())).thenReturn(new EmailTemplateService.EmailTemplate("Приглашение в можно", "<html>invite</html>"));
         when(tokenRepository.save(any(InviteToken.class))).thenAnswer(inv -> {
             InviteToken t = inv.getArgument(0);
             t.setId(1);
@@ -133,7 +133,7 @@ class UserInviteServiceTest {
         NotificationSpi.NotificationEvent event = eventCaptor.getValue();
         assertThat(event.type()).isEqualTo("EMAIL");
         assertThat(event.recipient()).isEqualTo("invitee@example.com");
-        assertThat(event.subject()).isEqualTo("Приглашение в Mozhno");
+        assertThat(event.subject()).isEqualTo("Приглашение в можно");
         assertThat(event.body()).isEqualTo("<html>invite</html>");
 
         verify(events).publish(any(DomainEvent.class));
@@ -143,7 +143,7 @@ class UserInviteServiceTest {
     void inviteUser_englishLocale_shouldUseEnglishSubjectAndTemplate() {
         when(userRepository.existsByEmail("eng@example.com")).thenReturn(false);
         when(quotaSpi.canCreateUser(null)).thenReturn(new QuotaSpi.Allowed());
-        when(emailTemplateService.renderInviteEmail(anyString(), eq("en"))).thenReturn("<html>invite-en</html>");
+        when(emailTemplateService.renderInviteEmail(anyString(), eq("en"))).thenReturn(new EmailTemplateService.EmailTemplate("Invitation to Mozhno", "<html>invite-en</html>"));
         when(tokenRepository.save(any(InviteToken.class))).thenAnswer(inv -> {
             InviteToken t = inv.getArgument(0);
             t.setId(1);
@@ -163,7 +163,7 @@ class UserInviteServiceTest {
     void inviteUser_defaultLocale_shouldBeRussian() {
         when(userRepository.existsByEmail("def@example.com")).thenReturn(false);
         when(quotaSpi.canCreateUser(null)).thenReturn(new QuotaSpi.Allowed());
-        when(emailTemplateService.renderInviteEmail(anyString(), eq("ru"))).thenReturn("<html>invite-ru</html>");
+        when(emailTemplateService.renderInviteEmail(anyString(), eq("ru"))).thenReturn(new EmailTemplateService.EmailTemplate("Приглашение в можно", "<html>invite-ru</html>"));
         when(tokenRepository.save(any(InviteToken.class))).thenAnswer(inv -> {
             InviteToken t = inv.getArgument(0);
             t.setId(1);
@@ -175,14 +175,14 @@ class UserInviteServiceTest {
         ArgumentCaptor<NotificationSpi.NotificationEvent> eventCaptor =
             ArgumentCaptor.forClass(NotificationSpi.NotificationEvent.class);
         verify(notificationSpi).send(eventCaptor.capture());
-        assertThat(eventCaptor.getValue().subject()).isEqualTo("Приглашение в Mozhno");
+        assertThat(eventCaptor.getValue().subject()).isEqualTo("Приглашение в можно");
     }
 
     @Test
     void inviteUser_inviteLink_shouldNotHaveAuthPrefix() {
         when(userRepository.existsByEmail("link@example.com")).thenReturn(false);
         when(quotaSpi.canCreateUser(null)).thenReturn(new QuotaSpi.Allowed());
-        when(emailTemplateService.renderInviteEmail(anyString(), anyString())).thenAnswer(inv -> inv.getArgument(0));
+        when(emailTemplateService.renderInviteEmail(anyString(), anyString())).thenAnswer(inv -> new EmailTemplateService.EmailTemplate("subj", inv.getArgument(0)));
         when(tokenRepository.save(any(InviteToken.class))).thenAnswer(inv -> {
             InviteToken t = inv.getArgument(0);
             t.setId(1);

@@ -97,9 +97,9 @@ class UsersControllerTest extends BaseIntegrationTest {
         mockMvc.perform(put("/api/v1/users/{id}", userId)
                 .header("Authorization", auth())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"name\":\"Updated Name\"}"))
+                .content("{\"role\":\"developer\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Updated Name"));
+                .andExpect(jsonPath("$.role").value("developer"));
     }
 
     @Test

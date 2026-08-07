@@ -11,95 +11,107 @@ class EmailTemplateServiceTest {
 
     @Test
     void renderResetPasswordEmail_ru_shouldContainRussianText() {
-        String html = service.renderResetPasswordEmail("https://example.com/reset?token=abc", "ru");
+        EmailTemplateService.EmailTemplate result = service.renderResetPasswordEmail("https://example.com/reset?token=abc", "ru");
+        String html = result.html();
 
+        assertThat(result.subject()).isEqualTo("Сброс пароля");
         assertThat(html).contains("Сброс пароля");
-        assertThat(html).contains("Вы запросили сброс пароля");
+        assertThat(html).contains("Мы получили запрос на сброс пароля");
         assertThat(html).contains("Сбросить пароль");
-        assertThat(html).contains("Если вы не запрашивали сброс пароля");
+        assertThat(html).contains("проигнорируйте это письмо");
         assertThat(html).contains("lang=\"ru\"");
     }
 
     @Test
     void renderResetPasswordEmail_en_shouldContainEnglishText() {
-        String html = service.renderResetPasswordEmail("https://example.com/reset?token=abc", "en");
+        EmailTemplateService.EmailTemplate result = service.renderResetPasswordEmail("https://example.com/reset?token=abc", "en");
+        String html = result.html();
 
-        assertThat(html).contains("Password reset");
-        assertThat(html).contains("You have requested a password reset");
+        assertThat(result.subject()).isEqualTo("Mozhno password reset");
+        assertThat(html).contains("Reset your password");
+        assertThat(html).contains("We received a request to reset your password");
         assertThat(html).contains("Reset password");
-        assertThat(html).contains("safely ignore this email");
+        assertThat(html).contains("ignore this email");
         assertThat(html).contains("lang=\"en\"");
     }
 
     @Test
     void renderResetPasswordEmail_default_shouldBeRussian() {
-        String html = service.renderResetPasswordEmail("https://example.com/reset?token=abc");
+        EmailTemplateService.EmailTemplate result = service.renderResetPasswordEmail("https://example.com/reset?token=abc");
+        String html = result.html();
 
+        assertThat(result.subject()).isEqualTo("Сброс пароля");
         assertThat(html).contains("Сброс пароля");
         assertThat(html).contains("lang=\"ru\"");
     }
 
     @Test
     void renderResetPasswordEmail_shouldContainResetLink() {
-        String html = service.renderResetPasswordEmail("https://example.com/reset?token=abc123", "ru");
+        String html = service.renderResetPasswordEmail("https://example.com/reset?token=abc123", "ru").html();
 
         assertThat(html).contains("https://example.com/reset?token=abc123");
     }
 
     @Test
     void renderResetPasswordEmail_en_shouldContainResetLink() {
-        String html = service.renderResetPasswordEmail("https://example.com/reset?token=abc123", "en");
+        String html = service.renderResetPasswordEmail("https://example.com/reset?token=abc123", "en").html();
 
         assertThat(html).contains("https://example.com/reset?token=abc123");
     }
 
     @Test
     void renderInviteEmail_ru_shouldContainRussianText() {
-        String html = service.renderInviteEmail("https://example.com/invite?token=xyz", "ru");
+        EmailTemplateService.EmailTemplate result = service.renderInviteEmail("https://example.com/invite?token=xyz", "ru");
+        String html = result.html();
 
-        assertThat(html).contains("Добро пожаловать в можно");
-        assertThat(html).contains("Вас пригласили присоединиться");
+        assertThat(result.subject()).isEqualTo("Приглашение в можно");
+        assertThat(html).contains("Приглашение");
+        assertThat(html).contains("Вы получили приглашение присоединиться");
         assertThat(html).contains("Принять приглашение");
-        assertThat(html).contains("Добро пожаловать в команду!");
+        assertThat(html).contains("потому что вас пригласили в проект");
         assertThat(html).contains("lang=\"ru\"");
     }
 
     @Test
     void renderInviteEmail_en_shouldContainEnglishText() {
-        String html = service.renderInviteEmail("https://example.com/invite?token=xyz", "en");
+        EmailTemplateService.EmailTemplate result = service.renderInviteEmail("https://example.com/invite?token=xyz", "en");
+        String html = result.html();
 
-        assertThat(html).contains("Welcome to Mozhno");
-        assertThat(html).contains("You have been invited to join");
+        assertThat(result.subject()).isEqualTo("Invitation to Mozhno");
+        assertThat(html).contains("Invitation");
+        assertThat(html).contains("You've been invited to join a project");
         assertThat(html).contains("Accept invitation");
-        assertThat(html).contains("Welcome to the team!");
+        assertThat(html).contains("because you were invited to a project");
         assertThat(html).contains("lang=\"en\"");
     }
 
     @Test
     void renderInviteEmail_default_shouldBeRussian() {
-        String html = service.renderInviteEmail("https://example.com/invite?token=xyz");
+        EmailTemplateService.EmailTemplate result = service.renderInviteEmail("https://example.com/invite?token=xyz");
+        String html = result.html();
 
-        assertThat(html).contains("Добро пожаловать в можно");
+        assertThat(result.subject()).isEqualTo("Приглашение в можно");
+        assertThat(html).contains("Приглашение");
         assertThat(html).contains("lang=\"ru\"");
     }
 
     @Test
     void renderInviteEmail_shouldContainInviteLink() {
-        String html = service.renderInviteEmail("https://example.com/invite?token=xyz789", "ru");
+        String html = service.renderInviteEmail("https://example.com/invite?token=xyz789", "ru").html();
 
         assertThat(html).contains("https://example.com/invite?token=xyz789");
     }
 
     @Test
     void renderInviteEmail_en_shouldContainInviteLink() {
-        String html = service.renderInviteEmail("https://example.com/invite?token=xyz789", "en");
+        String html = service.renderInviteEmail("https://example.com/invite?token=xyz789", "en").html();
 
         assertThat(html).contains("https://example.com/invite?token=xyz789");
     }
 
     @Test
     void renderResetPasswordEmail_shouldBeValidHtml() {
-        String html = service.renderResetPasswordEmail("https://example.com/reset?token=abc", "ru");
+        String html = service.renderResetPasswordEmail("https://example.com/reset?token=abc", "ru").html();
 
         assertThat(html.trim()).startsWith("<!DOCTYPE html>");
         assertThat(html.trim()).endsWith("</html>");
@@ -107,7 +119,7 @@ class EmailTemplateServiceTest {
 
     @Test
     void renderInviteEmail_shouldBeValidHtml() {
-        String html = service.renderInviteEmail("https://example.com/invite?token=abc", "ru");
+        String html = service.renderInviteEmail("https://example.com/invite?token=abc", "ru").html();
 
         assertThat(html.trim()).startsWith("<!DOCTYPE html>");
         assertThat(html.trim()).endsWith("</html>");
@@ -129,61 +141,73 @@ class EmailTemplateServiceTest {
 
     @Test
     void renderResetPasswordEmail_pathTraversal_shouldFallbackToRussian() {
-        String html = service.renderResetPasswordEmail("https://example.com/reset", "../../etc");
+        EmailTemplateService.EmailTemplate result = service.renderResetPasswordEmail("https://example.com/reset", "../../etc");
+        String html = result.html();
 
+        assertThat(result.subject()).isEqualTo("Сброс пароля");
         assertThat(html).contains("Сброс пароля");
         assertThat(html).contains("lang=\"ru\"");
     }
 
     @Test
     void renderInviteEmail_pathTraversal_shouldFallbackToRussian() {
-        String html = service.renderInviteEmail("https://example.com/invite", "../en");
+        EmailTemplateService.EmailTemplate result = service.renderInviteEmail("https://example.com/invite", "../en");
+        String html = result.html();
 
-        assertThat(html).contains("Добро пожаловать в можно");
+        assertThat(result.subject()).isEqualTo("Приглашение в можно");
+        assertThat(html).contains("Приглашение");
         assertThat(html).contains("lang=\"ru\"");
     }
 
     @Test
     void renderResetPasswordEmail_emptyLocale_shouldFallbackToRussian() {
-        String html = service.renderResetPasswordEmail("https://example.com/reset", "");
+        EmailTemplateService.EmailTemplate result = service.renderResetPasswordEmail("https://example.com/reset", "");
+        String html = result.html();
 
+        assertThat(result.subject()).isEqualTo("Сброс пароля");
         assertThat(html).contains("Сброс пароля");
         assertThat(html).contains("lang=\"ru\"");
     }
 
     @Test
     void renderInviteEmail_nullLocale_shouldFallbackToRussian() {
-        String html = service.renderInviteEmail("https://example.com/invite", null);
+        EmailTemplateService.EmailTemplate result = service.renderInviteEmail("https://example.com/invite", null);
+        String html = result.html();
 
-        assertThat(html).contains("Добро пожаловать в можно");
+        assertThat(result.subject()).isEqualTo("Приглашение в можно");
+        assertThat(html).contains("Приглашение");
         assertThat(html).contains("lang=\"ru\"");
     }
 
     @Test
     void renderAdminResetPasswordEmail_ru_shouldContainRussianText() {
-        String html = service.renderAdminResetPasswordEmail("https://example.com/reset?token=abc", "ru");
+        EmailTemplateService.EmailTemplate result = service.renderAdminResetPasswordEmail("https://example.com/reset?token=abc", "ru");
+        String html = result.html();
 
+        assertThat(result.subject()).isEqualTo("Сброс пароля");
         assertThat(html).contains("Сброс пароля");
         assertThat(html).contains("Администратор отправил вам ссылку");
         assertThat(html).contains("Сбросить пароль");
-        assertThat(html).contains("обратитесь к администратору");
+        assertThat(html).contains("администратор отправил сброс");
         assertThat(html).contains("lang=\"ru\"");
     }
 
     @Test
     void renderAdminResetPasswordEmail_en_shouldContainEnglishText() {
-        String html = service.renderAdminResetPasswordEmail("https://example.com/reset?token=abc", "en");
+        EmailTemplateService.EmailTemplate result = service.renderAdminResetPasswordEmail("https://example.com/reset?token=abc", "en");
+        String html = result.html();
 
+        assertThat(result.subject()).isEqualTo("Mozhno password reset");
         assertThat(html).contains("Password reset");
-        assertThat(html).contains("An administrator has sent you");
+        assertThat(html).contains("An administrator sent you");
         assertThat(html).contains("Reset password");
-        assertThat(html).contains("contact your administrator");
+        assertThat(html).contains("an administrator sent a password reset");
         assertThat(html).contains("lang=\"en\"");
     }
 
     @Test
     void renderAdminResetPasswordEmail_shouldBeValidHtml() {
-        String html = service.renderAdminResetPasswordEmail("https://example.com/reset?token=abc", "ru");
+        String html = service.renderAdminResetPasswordEmail("https://example.com/reset?token=abc", "ru").html();
 
         assertThat(html.trim()).startsWith("<!DOCTYPE html>");
         assertThat(html.trim()).endsWith("</html>");

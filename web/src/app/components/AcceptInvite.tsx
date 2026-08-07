@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
-import { Lock, UserRound } from '@/shared/icons';
+import { Lock, UserRound, Check } from '@/shared/icons';
 import { GradientButton, ErrorBox, getErrorMessage, getTokenFromHash } from '@/shared';
 import { Input } from '@/app/components/ui/input';
+import { Alert, AlertDescription } from '@/app/components/ui/alert';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { api } from '@/api';
 import { useT } from '@/i18n';
@@ -75,11 +76,10 @@ export function AcceptInvite() {
 
             {done ? (
               <div className="text-center space-y-4">
-                <div className="p-4 bg-success dark:bg-success/10 border border-success dark:border-success/20 rounded-xl">
-                  <p className="text-body-sm text-success dark:text-success">
-                    {t('auth.activationSuccess')}
-                  </p>
-                </div>
+                <Alert className="text-success [&>svg]:text-success">
+                  <Check size={16} />
+                  <AlertDescription>{t('auth.activationSuccess')}</AlertDescription>
+                </Alert>
                 <Link
                   to="/login"
                   className="inline-flex items-center justify-center gap-2 text-body-sm font-semibold text-primary-foreground bg-primary px-6 py-3 rounded-lg hover:bg-primary/90 shadow-lg transition-all"

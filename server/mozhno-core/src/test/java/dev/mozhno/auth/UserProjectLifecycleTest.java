@@ -112,7 +112,7 @@ class UserProjectLifecycleTest extends BaseIntegrationTest {
         User admin = createAdmin("demo-admin@test.com");
         createUser("demo-dev@test.com", "developer", admin.getId(), admin.getProjectId());
 
-        var request = new UserUpdateRequest(null, null, null, "developer", null, null);
+        var request = new UserUpdateRequest(null, "developer", null, null);
         var ex = assertThrows(dev.mozhno.exception.ConflictException.class,
             () -> userService.update(admin.getId(), request));
         assertTrue(ex.getMessage().contains("last admin"));
