@@ -9,7 +9,7 @@ import { useAuth } from '@/app/auth/useAuth';
 import { queryKeys } from '@/api/queryKeys';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
 import { UserProfileMenu } from '@/app/components/UserProfileMenu';
-import { Flag, GitBranch, UserCog, Sun, Moon, FileText } from '@/shared/icons';
+import { Sun, Moon, FileText } from '@/shared/icons';
 import { Menu } from 'lucide-react';
 import { cn } from '@/app/components/ui/utils';
 import { PageErrorBoundary } from '@/app/components/PageErrorBoundary';
@@ -21,8 +21,6 @@ import { AppSidebar, useAppSidebar } from '@/app/components/AppSidebar';
 
 import {
   useProjectQuery,
-  useEnrichedFlagsQuery,
-  useUsersQuery,
   useInvalidateQueries,
   useProjectLogo,
 } from '@/app/hooks/queries';
@@ -44,21 +42,6 @@ export function DashboardLayout() {
   const projectName = project?.name ?? null;
   const projectLogo = project?.logo ?? null;
   const logoUrl = useProjectLogo(projectLogo);
-
-  const { data: enriched } = useEnrichedFlagsQuery(projectId);
-  const flags = useMemo(() => enriched?.flags ?? [], [enriched?.flags]);
-  const segments = useMemo(() => enriched?.segments ?? [], [enriched?.segments]);
-
-  const { data: users = [] } = useUsersQuery(!!projectId);
-
-  const stats = useMemo(
-    () => ({
-      flags: flags.length,
-      users: users.length,
-      segments: segments.length,
-    }),
-    [flags, users, segments],
-  );
 
   const handleLogoLoad = useCallback(
     (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -162,54 +145,6 @@ export function DashboardLayout() {
                 <span className="text-h3 sm:text-h2 font-semibold text-foreground truncate">
                   {projectName ?? '—'}
                 </span>
-                <div className="hidden sm:block h-5 w-px bg-border mx-1" />
-                <div className="hidden sm:flex items-center gap-0.5">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span
-                        role="status"
-                        aria-label={`${stats.flags} ${t('navigation.flags')}`}
-                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
-                      >
-                        <Flag size={12} aria-hidden="true" />
-                        <span className="tabular-nums font-mono text-body-sm" aria-hidden="true">{stats.flags}</span>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-caption">
-                      {t('navigation.flags')}
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span
-                        role="status"
-                        aria-label={`${stats.users} ${t('navigation.users')}`}
-                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
-                      >
-                        <UserCog size={12} aria-hidden="true" />
-                        <span className="tabular-nums font-mono text-body-sm" aria-hidden="true">{stats.users}</span>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-caption">
-                      {t('navigation.users')}
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span
-                        role="status"
-                        aria-label={`${stats.segments} ${t('navigation.segments')}`}
-                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
-                      >
-                        <GitBranch size={12} aria-hidden="true" />
-                        <span className="tabular-nums font-mono text-body-sm" aria-hidden="true">{stats.segments}</span>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-caption">
-                      {t('navigation.segments')}
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
                 <button
