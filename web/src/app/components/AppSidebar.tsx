@@ -218,7 +218,7 @@ function SidebarContent({
             {!collapsed && (
               <span className="flex items-center gap-2">
                 <span>{t('common.collapse')}</span>
-                <kbd className="text-[10px] font-medium text-muted-foreground/50 bg-muted px-1 py-0.5 rounded leading-none">
+                <kbd className="text-caption font-medium text-muted-foreground bg-muted px-1 py-0.5 rounded leading-none">
                   {shortcutKey}
                 </kbd>
               </span>
@@ -257,8 +257,8 @@ export function AppSidebar() {
             <Wordmark text="можно" size="md" />
             <button
               onClick={toggleMobile}
-              className="p-1.5 -mr-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-              aria-label="Close menu"
+              className="p-1.5 -mr-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
+              aria-label={t('navigation.closeMenu')}
             >
               <X size={18} />
             </button>

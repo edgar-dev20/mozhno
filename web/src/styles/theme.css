@@ -62,3 +62,12 @@
 .gradient-btn-danger:not(:disabled):hover{background-image:linear-gradient(to right,color-mix(in oklch,var(--gradient-danger-start),black 10%),color-mix(in oklch,var(--gradient-danger-end),black 10%))}
 .gradient-btn-warning{background-image:linear-gradient(to right,var(--gradient-warning-start),var(--gradient-warning-end))}
 .gradient-btn-warning:not(:disabled):hover{background-image:linear-gradient(to right,color-mix(in oklch,var(--gradient-warning-start),black 10%),color-mix(in oklch,var(--gradient-warning-end),black 10%))}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

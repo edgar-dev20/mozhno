@@ -10,6 +10,9 @@ import { useT } from '@/i18n';
 interface FlagsListProps {
   loading: boolean;
   empty: boolean;
+  hasActiveFilters: boolean;
+  searchQuery: string;
+  onClearFilters: () => void;
   visibleFlags: FlagView[];
   expandedKeys: Set<string>;
   onToggleExpand: (key: string) => void;
@@ -31,6 +34,9 @@ interface FlagsListProps {
 export function FlagsList({
   loading,
   empty,
+  hasActiveFilters,
+  searchQuery,
+  onClearFilters,
   visibleFlags,
   expandedKeys,
   onToggleExpand,
@@ -61,13 +67,25 @@ export function FlagsList({
   if (empty) {
     return (
       <div className="space-y-3">
-        <EmptyState
-          illustration={<EmptyFlagsIllustration />}
-          title={t('flags.noFlags')}
-          description={t('flags.noFlagsDescription')}
-          buttonLabel={t('flags.create')}
-          onAction={onCreateClick}
-        />
+        {hasActiveFilters ? (
+          <EmptyState
+            illustration={<EmptyFlagsIllustration />}
+            title={t('flags.noResults')}
+            description={t('flags.noResultsDescription', {
+              query: searchQuery.trim() || t('flags.searchPlaceholder'),
+            })}
+            buttonLabel={t('flags.clearFilters')}
+            onAction={onClearFilters}
+          />
+        ) : (
+          <EmptyState
+            illustration={<EmptyFlagsIllustration />}
+            title={t('flags.noFlags')}
+            description={t('flags.noFlagsDescription')}
+            buttonLabel={t('flags.create')}
+            onAction={onCreateClick}
+          />
+        )}
       </div>
     );
   }

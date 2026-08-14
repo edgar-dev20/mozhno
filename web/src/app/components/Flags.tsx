@@ -84,7 +84,9 @@ export function Flags() {
     dateTo,
     setDateTo,
     uniqueTagValues,
+    staleFilter,
     setStaleFilter,
+    clearFilters,
   } = useFlagFilters(flags, enrichedData?.totalItems);
 
   const {
@@ -368,6 +370,17 @@ export function Flags() {
       <FlagsList
         loading={loading}
         empty={!loading && filtered.length === 0}
+        hasActiveFilters={
+          !!searchQuery.trim() ||
+          !!flagTypeFilter ||
+          !!selectedTagTypeFilter ||
+          !!selectedTagValueFilter ||
+          !!dateFrom ||
+          !!dateTo ||
+          staleFilter
+        }
+        searchQuery={searchQuery}
+        onClearFilters={clearFilters}
         visibleFlags={visibleFlags}
         expandedKeys={expandedKeys}
         onToggleExpand={handleToggleExpand}

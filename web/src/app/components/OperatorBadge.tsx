@@ -18,7 +18,7 @@ export function OperatorBadge({ operator, className = '', contextType }: Operato
       : operator;
   return (
     <span
-      className={`shrink-0 inline-flex items-center font-mono text-[10px] font-bold px-1.5 py-0.5 rounded leading-none uppercase border ${OPERATOR_COLORS[colorKey] ?? 'text-muted-foreground bg-muted border-border'} ${className}`}
+      className={`shrink-0 inline-flex items-center font-mono text-caption font-bold px-1.5 py-0.5 rounded leading-none uppercase border ${OPERATOR_COLORS[colorKey] ?? 'text-muted-foreground bg-muted border-border'} ${className}`}
     >
       {code}
     </span>

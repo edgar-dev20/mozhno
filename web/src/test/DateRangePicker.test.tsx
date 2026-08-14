@@ -42,8 +42,8 @@ describe('DateRangePicker', () => {
         }}
       />,
     );
-    const clearBtn = screen.getByRole('button').querySelector('.ml-auto');
-    if (clearBtn) await user.click(clearBtn);
+    const clearBtn = screen.getByRole('button', { name: /Очистить/i });
+    await user.click(clearBtn);
     expect(cleared).toBe(true);
   });
 

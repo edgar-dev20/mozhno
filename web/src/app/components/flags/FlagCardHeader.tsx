@@ -103,7 +103,7 @@ export const FlagCardHeader = memo(function FlagCardHeader({
             {flag.name}
           </span>
           {flag.archived && (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-caption font-medium bg-muted text-muted-foreground/70 border border-border/50 shrink-0">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-caption font-medium bg-muted text-muted-foreground border border-border/50 shrink-0">
               {t('audit.action.archived')}
             </span>
           )}

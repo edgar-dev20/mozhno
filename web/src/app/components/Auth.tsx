@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { Mail, Lock } from '@/shared/icons';
 import { GradientButton, ErrorBox, getErrorMessage } from '@/shared';
@@ -17,6 +17,11 @@ export function Auth() {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (error) errorRef.current?.focus();
+  }, [error]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +55,7 @@ export function Auth() {
             </div>
 
             {error && (
-              <div className="mb-4">
+              <div ref={errorRef} tabIndex={-1} className="mb-4 outline-none" role="group">
                 <ErrorBox>{error}</ErrorBox>
               </div>
             )}
@@ -67,6 +72,8 @@ export function Auth() {
                   <Input
                     id="email"
                     type="email"
+                    name="email"
+                    autoComplete="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     maxLength={254}
@@ -88,6 +95,8 @@ export function Auth() {
                   <Input
                     id="password"
                     type="password"
+                    name="password"
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     maxLength={128}

@@ -14,7 +14,8 @@ export function InlineDiffBar({ changes }: InlineDiffBarProps) {
 
   useEffect(() => {
     if (ref.current && changes.length > 0) {
-      ref.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      ref.current.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' });
     }
   }, [changes.length]);
 
@@ -24,19 +25,18 @@ export function InlineDiffBar({ changes }: InlineDiffBarProps) {
         <motion.div
           ref={ref}
           key="diff-bar"
-          initial={{ scaleY: 0 }}
-          animate={{ scaleY: 1 }}
-          exit={{ scaleY: 0 }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          style={{ transformOrigin: 'top' }}
           className="will-change-transform"
         >
           <div className="border-t border-border bg-secondary/30 dark:bg-secondary/10">
             <div className="px-6 pt-4 pb-1 flex items-center gap-2">
-              <span className="text-caption font-semibold text-muted-foreground/70">
+              <span className="text-caption font-semibold text-muted-foreground">
                 {t('common.reviewChanges')}
               </span>
-              <span className="text-[11px] font-medium text-muted-foreground/50 tabular-nums">
+              <span className="text-caption font-medium text-muted-foreground tabular-nums">
                 {changes.length}
               </span>
             </div>

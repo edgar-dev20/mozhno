@@ -24,7 +24,7 @@ interface ConstraintRowProps {
 }
 
 export function ConstraintRow({
-  id: _id,
+  id,
   contextDefId,
   operator,
   valuesPreview,
@@ -59,21 +59,24 @@ export function ConstraintRow({
 
   return (
     <div>
-      <div
+      <button
+        type="button"
         onClick={onToggle}
-        className={`group cursor-pointer flex items-center gap-3 px-3.5 py-2.5 rounded-lg border transition-all ${
+        aria-expanded={isActive}
+        aria-controls={`${id}-body`}
+        className={`group cursor-pointer w-full text-left flex items-center gap-3 px-3.5 py-2.5 rounded-lg border transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${
           isActive
             ? 'bg-brand/10 dark:bg-brand/8 border-brand/30 dark:border-brand/30 shadow-sm rounded-b-none'
             : 'bg-input-background border-border hover:border-brand/30 dark:hover:border-brand/20 hover:shadow-sm'
         }`}
       >
-        <span className="shrink-0 text-[11px] font-semibold text-foreground/80 min-w-0 truncate">
+        <span className="shrink-0 text-caption font-semibold text-foreground/80 min-w-0 truncate">
           {contextDefId === 0
             ? t('flags.noContext')
             : (ctxDef?.name ?? t('flags.unknownField', { id: String(contextDefId) }))}
         </span>
         <OperatorBadge operator={operator} contextType={contextType} />
-        <span className="flex-1 min-w-0 text-[11px] text-foreground/80 truncate">
+        <span className="flex-1 min-w-0 text-caption text-foreground/80 truncate">
           {displayValues}
         </span>
         <span
@@ -81,10 +84,13 @@ export function ConstraintRow({
         >
           <ChevronRight size={14} />
         </span>
-      </div>
+      </button>
 
       {isActive && (
-        <div className="bg-accent dark:bg-brand/3 border border-t-0 border-brand/30 dark:border-brand/30 rounded-b-lg px-3.5 py-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div
+          id={`${id}-body`}
+          className="bg-accent dark:bg-brand/3 border border-t-0 border-brand/30 dark:border-brand/30 rounded-b-lg px-3.5 py-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200"
+        >
           <div className="space-y-2">
             <label className="text-caption font-semibold text-muted-foreground/80">
               {t('flags.detailCard.context')}
@@ -93,13 +99,15 @@ export function ConstraintRow({
               {contexts.map((ctx) => (
                 <button
                   key={ctx.id}
+                  type="button"
+                  aria-pressed={hasContext && contextDefId === ctx.id}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleContextChange(ctx.id);
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-caption font-medium transition-all border ${
+                  className={`px-3 py-1.5 rounded-lg text-caption font-medium transition-all border focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${
                     hasContext && contextDefId === ctx.id
-                      ? 'bg-brand/10 text-brand border-brand/20'
+                      ? 'bg-brand/10 text-brand dark:text-palette-brand-800 border-brand/20'
                       : 'bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border-border'
                   }`}
                 >
@@ -138,7 +146,7 @@ export function ConstraintRow({
                 {t('flags.detailCard.preview')}
               </label>
               <div className="px-2.5 py-1.5 bg-brand/5 rounded-lg border border-brand/10">
-                <div className="flex items-center gap-1.5 text-[11px]">
+                <div className="flex items-center gap-1.5 text-caption">
                   <span className="font-semibold text-foreground/80">{ctxDef?.name ?? '?'}</span>
                   <OperatorBadge operator={operator} contextType={contextType} />
                   <span className={`break-all min-w-0 text-foreground/80`}>{displayValues}</span>
@@ -149,7 +157,7 @@ export function ConstraintRow({
 
           {!hasContext && (
             <div className="p-4 bg-warning/10 rounded-xl border border-warning/20 text-center">
-              <p className="text-caption text-warning">{t('flags.detailCard.selectContext')}</p>
+              <p className="text-caption text-palette-warning-700 dark:text-palette-warning-700">{t('flags.detailCard.selectContext')}</p>
             </div>
           )}
 

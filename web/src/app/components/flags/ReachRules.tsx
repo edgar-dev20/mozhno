@@ -69,7 +69,7 @@ export function ReachRules({ sources }: ReachRulesProps) {
           {si > 0 && (
             <div className="flex items-center gap-2 py-0.5">
               <div className="flex-1 h-px bg-warning/20" />
-              <span className="text-[10px] font-bold text-warning/60 uppercase tracking-wider px-1">
+              <span className="text-caption font-bold text-palette-warning-700 dark:text-palette-warning-600 uppercase tracking-wider px-1">
                 {t('flags.ruleOr')}
               </span>
               <div className="flex-1 h-px bg-warning/20" />
@@ -85,11 +85,11 @@ export function ReachRules({ sources }: ReachRulesProps) {
                   darkDim={false}
                 />
               )}
-              <span className="text-caption font-semibold text-brand truncate">{src.name}</span>
+              <span className="text-caption font-semibold text-brand dark:text-palette-brand-800 truncate">{src.name}</span>
             </div>
             <div className="px-3 py-2 space-y-1.5">
               {conditions.length === 0 ? (
-                <div className="text-[11px] text-muted-foreground/80 italic">
+                <div className="text-caption text-muted-foreground italic">
                   {t('flags.activateSegmentAnyone')}
                 </div>
               ) : (
@@ -98,13 +98,13 @@ export function ReachRules({ sources }: ReachRulesProps) {
                     {ci > 0 && (
                       <div className="flex items-center gap-2">
                         <div className="flex-1 h-px bg-brand/15" />
-                        <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider px-1">
+                        <span className="text-caption font-bold text-brand uppercase tracking-wider px-1">
                           {t('flags.ruleAnd')}
                         </span>
                         <div className="flex-1 h-px bg-brand/15" />
                       </div>
                     )}
-                    <div className="flex items-center gap-1.5 text-[11px]">
+                    <div className="flex items-center gap-1.5 text-caption">
                       <span className="font-semibold text-foreground/80">{c.field}</span>
                       <OperatorBadge operator={c.operator} contextType={c.contextType} />
                       <span className="break-all min-w-0 text-foreground/80">

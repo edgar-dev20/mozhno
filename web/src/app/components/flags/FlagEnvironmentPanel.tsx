@@ -205,7 +205,7 @@ export function FlagEnvironmentPanel({
                   {t('flags.summaryFlagOff')}
                 </span>
               ) : envRuleEnabled ? (
-                <span className="inline-flex items-center gap-1.5 text-caption font-semibold px-2 py-1 rounded-full bg-success/10 text-success">
+                <span className="inline-flex items-center gap-1.5 text-caption font-semibold px-2 py-1 rounded-full bg-success/10 text-success dark:text-palette-success-700">
                   <span className="w-1.5 h-1.5 rounded-full bg-success" />
                   {t('flags.summaryActive')}
                 </span>
@@ -260,13 +260,13 @@ export function FlagEnvironmentPanel({
               </div>
             )}
 
-            <div className="flex items-center gap-4 text-[11px] text-muted-foreground pt-2 border-t border-brand/10">
+            <div className="flex items-center gap-4 text-caption text-muted-foreground pt-2 border-t border-brand/10">
               {selectedSegs.length > 0 && (
                 <span>
                   {t('flags.summaryStatsSegments')}:{' '}
                   <strong className="text-foreground/80">{selectedSegs.length}</strong>
                   {selectedSegs.length > 1 && (
-                    <span className="text-brand/70 font-medium"> {t('flags.summaryLogicOrSegments')}</span>
+                    <span className="text-brand font-medium"> {t('flags.summaryLogicOrSegments')}</span>
                   )}
                 </span>
               )}
@@ -295,6 +295,7 @@ export function FlagEnvironmentPanel({
             onValueChange={([v]) => onEnvRulePercentChange(v)}
             max={100}
             step={1}
+            aria-label={t('flags.rolloutPercentage')}
             className="relative flex items-center select-none touch-none w-full h-5"
           >
             <Slider.Track className="bg-accent relative grow rounded-full h-2.5">
@@ -333,7 +334,7 @@ export function FlagEnvironmentPanel({
                         : [...envRuleSegments, seg.id],
                     )
                   }
-                  className={`group cursor-pointer flex flex-col p-3.5 rounded-lg transition-all border ${checked ? 'shadow-sm' : 'bg-input-bg border-border hover:border-border hover:shadow-sm'}`}
+                  className={`group cursor-pointer flex flex-col p-3.5 rounded-lg transition-all border ${checked ? 'shadow-sm' : 'bg-input-background border-border hover:border-border hover:shadow-sm'}`}
                   style={
                     checked
                       ? { backgroundColor: segColor + '0D', borderColor: segColor + '40' }
@@ -360,6 +361,7 @@ export function FlagEnvironmentPanel({
                       <div
                         role="checkbox"
                         aria-checked={checked}
+                        aria-label={seg.name}
                         tabIndex={0}
                         onKeyDown={(e) => {
                           if (e.key === ' ' || e.key === 'Enter') {
@@ -371,7 +373,7 @@ export function FlagEnvironmentPanel({
                             );
                           }
                         }}
-                        className={`w-5 h-5 rounded-md flex items-center justify-center transition-all border-2 ${checked ? '' : 'border-border'}`}
+                        className={`w-5 h-5 rounded-md flex items-center justify-center transition-all border-2 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${checked ? '' : 'border-border'}`}
                         style={
                           checked ? { backgroundColor: segColor, borderColor: segColor } : undefined
                         }
@@ -405,7 +407,7 @@ export function FlagEnvironmentPanel({
                         return (
                           <div
                             key={ci}
-                            className="flex items-center gap-1.5 text-[11px] px-2.5 py-1.5 rounded-lg border"
+                            className="flex items-center gap-1.5 text-caption px-2.5 py-1.5 rounded-lg border"
                             style={{
                               backgroundColor: segColor + '0F',
                               borderColor: segColor + '1A',
@@ -448,13 +450,13 @@ export function FlagEnvironmentPanel({
               <label className="text-body-sm font-medium text-foreground/80">
                 {t('flags.additionalConditions')}
               </label>
-              <span className="inline-flex items-center text-caption px-1.5 py-1 rounded bg-brand/10 text-brand font-medium leading-none">
+              <span className="inline-flex items-center text-caption px-1.5 py-1 rounded bg-brand/10 text-brand dark:text-palette-brand-800 font-medium leading-none">
                 {t('flags.configurable')}
               </span>
             </div>
             <button
               onClick={addGroup}
-              className="text-caption text-brand hover:text-brand/70 flex items-center gap-1 font-medium"
+              className="text-caption text-brand flex items-center gap-1 font-medium focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none rounded"
             >
               <Plus size={12} />
               {t('common.add')}
@@ -527,7 +529,7 @@ export function FlagEnvironmentPanel({
                     const hasSegmentsCovered = segmentsCoveredValues.size > 0;
 
                     const segmentsCoveredNote = hasSegmentsCovered ? (
-                      <p className="text-[11px] text-muted-foreground/60 italic">
+                      <p className="text-caption text-muted-foreground italic">
                         {t('flags.segmentsCoveredValuesNote')}
                       </p>
                     ) : null;
@@ -558,8 +560,8 @@ export function FlagEnvironmentPanel({
                                   key={i}
                                   className={`inline-flex items-center gap-1 px-2 py-1 text-caption font-mono rounded-md border ${
                                     inWhitelist
-                                      ? 'bg-success/10 text-success border-success/20'
-                                      : 'bg-warning/10 text-warning border-warning/30'
+                                      ? 'bg-success/10 text-success dark:text-palette-success-700 border-success/20'
+                                      : 'bg-warning/10 text-palette-warning-700 border-warning/30'
                                   }`}
                                 >
                                   {v}
@@ -569,7 +571,8 @@ export function FlagEnvironmentPanel({
                                         values: g.values.filter((_, j) => j !== i),
                                       })
                                     }
-                                    className={`${inWhitelist ? 'text-success' : 'text-warning'} hover:text-destructive transition-colors`}
+                                    aria-label={t('flags.removeTag', { tag: v })}
+                                    className={`${inWhitelist ? 'text-success dark:text-palette-success-700' : 'text-palette-warning-700'} p-0.5 hover:text-destructive transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none rounded-sm`}
                                   >
                                     <X size={11} />
                                   </button>
@@ -581,7 +584,7 @@ export function FlagEnvironmentPanel({
                               {validVals
                                 .filter((v) => !g.values.includes(v))
                                 .map((v) => {
-                                  const covered = renderCoveredChip(v, 'px-3 py-1.5 rounded-lg text-caption font-medium bg-muted/30 text-muted-foreground/50 border border-border/40 cursor-not-allowed');
+                                  const covered = renderCoveredChip(v, 'px-3 py-1.5 rounded-lg text-caption font-medium bg-muted/30 text-muted-foreground border border-border/40 cursor-not-allowed');
                                   if (covered) return covered;
                                   return (
                                     <button
@@ -598,7 +601,7 @@ export function FlagEnvironmentPanel({
                             </div>
                             {segmentsCoveredNote}
                             {validVals.every((v) => g.values.includes(v) || segmentsCoveredValues.has(v)) && (
-                              <p className="text-[11px] text-muted-foreground">
+                              <p className="text-caption text-muted-foreground">
                                 {t('flags.whitelistAllSelected')}
                               </p>
                             )}
@@ -616,14 +619,14 @@ export function FlagEnvironmentPanel({
                             />
                             {validVals.some((v) => !g.values.includes(v) && !segmentsCoveredValues.has(v)) && (
                               <div className="mt-2">
-                                <p className="text-[11px] text-muted-foreground mb-1">
+                                <p className="text-caption text-muted-foreground mb-1">
                                   {t('flags.whitelistSuggestions')}
                                 </p>
                                 <div className="flex flex-wrap gap-1">
                                   {validVals
                                     .filter((v) => !g.values.includes(v))
                                     .map((v) => {
-                                      const covered = renderCoveredChip(v, 'px-2 py-0.5 text-caption border border-muted rounded-md text-muted-foreground/50 cursor-not-allowed');
+                                      const covered = renderCoveredChip(v, 'px-2 py-0.5 text-caption border border-muted rounded-md text-muted-foreground cursor-not-allowed');
                                       if (covered) return covered;
                                       return (
                                         <button
@@ -677,7 +680,7 @@ export function FlagEnvironmentPanel({
                           <div className="flex flex-wrap gap-1.5">
                             {validVals.map((v) => {
                               const isSelected = g.values.includes(v);
-                              const covered = !isSelected ? renderCoveredChip(v, 'px-3 py-1.5 rounded-lg text-caption font-medium bg-muted/30 text-muted-foreground/50 border border-border/40 cursor-not-allowed') : null;
+                              const covered = !isSelected ? renderCoveredChip(v, 'px-3 py-1.5 rounded-lg text-caption font-medium bg-muted/30 text-muted-foreground border border-border/40 cursor-not-allowed') : null;
                               if (covered) return covered;
                               return (
                                 <button
@@ -689,7 +692,8 @@ export function FlagEnvironmentPanel({
                                       updateGroup({ values: [v] });
                                     }
                                   }}
-                                  className={`px-3 py-1.5 rounded-lg text-caption font-medium transition-all border ${
+                                  aria-pressed={isSelected}
+                                  className={`px-3 py-1.5 rounded-lg text-caption font-medium transition-all border focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${
                                     isSelected
                                       ? 'bg-brand/10 text-brand border-brand/20'
                                       : 'bg-secondary/80 text-foreground/70 hover:bg-secondary hover:text-foreground border-border'
@@ -702,9 +706,9 @@ export function FlagEnvironmentPanel({
                           </div>
                           {segmentsCoveredNote}
                           {g.values.length > 0 && (
-                            <p className="text-[11px] text-muted-foreground">
+                            <p className="text-caption text-muted-foreground">
                               {t('flags.detailCard.value')}:{' '}
-                              <span className={`font-semibold ${validVals.includes(g.values[0]) ? 'text-foreground/80' : 'text-warning'}`}>
+                              <span className={`font-semibold ${validVals.includes(g.values[0]) ? 'text-foreground/80' : 'text-palette-warning-700 dark:text-palette-warning-700'}`}>
                                 {g.values[0]}
                                 {!validVals.includes(g.values[0]) && ' (not in whitelist)'}
                               </span>
@@ -724,6 +728,7 @@ export function FlagEnvironmentPanel({
                             ) as React.HTMLAttributes<HTMLInputElement>['inputMode']
                           }
                           pattern={getInputPattern(contextType)}
+                          aria-label={t('flags.detailCard.value')}
                           placeholder={
                             getInputPlaceholder(contextType) || t('flags.valuePlaceholder')
                           }
@@ -747,7 +752,7 @@ export function FlagEnvironmentPanel({
                           </datalist>
                         )}
                         {contextType !== ContextType.STRING && contextType !== ContextType.TIME && (
-                          <p className="text-[11px] text-muted-foreground/60 ml-0.5">
+                          <p className="text-caption text-muted-foreground ml-0.5">
                             {getInputHint(contextType)}
                           </p>
                         )}
@@ -774,10 +779,10 @@ export function FlagEnvironmentPanel({
             </div>
           </div>
           <div>
-            <h5 className="text-caption font-semibold text-brand dark:text-brand-light mb-1">
+            <h5 className="text-caption font-semibold text-brand dark:text-palette-brand-800 mb-1">
               {t('flags.howTargetingWorks')}
             </h5>
-            <p className="text-caption text-brand/80 dark:text-brand-light/80">
+            <p className="text-caption text-brand dark:text-palette-brand-800">
               {t('flags.howTargetingWorksDesc')}
             </p>
           </div>

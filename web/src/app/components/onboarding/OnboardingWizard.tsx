@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { useT } from '@/i18n';
 import { CreateProjectStep } from './CreateProjectStep';
 import { CreateFlagStep } from './CreateFlagStep';
@@ -79,22 +80,20 @@ export function OnboardingWizard({
   }, [step]);
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+    <DialogPrimitive.Root
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onDismiss();
+      }}
+    >
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-200" />
+        <DialogPrimitive.Content
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-200"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="bg-card border border-border rounded-2xl shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_2px_4px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.12)] w-full max-w-2xl mx-4 overflow-hidden"
-          >
+          <div className="bg-card border border-border rounded-2xl shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_2px_4px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.12)] w-full max-w-2xl overflow-hidden">
             <div className="flex">
               <OnboardingSidebar step={step} />
 
@@ -109,12 +108,12 @@ export function OnboardingWizard({
                     transition={{ duration: 0.2 }}
                     className="flex-1 flex flex-col"
                   >
-                    <h2 className="text-h2 font-semibold text-foreground mb-2">
+                    <DialogPrimitive.Title className="text-h2 font-semibold text-foreground mb-2">
                       {t(STEPS[step].title)}
-                    </h2>
-                    <p className="text-body-sm text-muted-foreground leading-relaxed mb-6">
+                    </DialogPrimitive.Title>
+                    <DialogPrimitive.Description className="text-body-sm text-muted-foreground leading-relaxed mb-6">
                       {t(STEPS[step].description)}
-                    </p>
+                    </DialogPrimitive.Description>
 
                     {step === 0 && (
                       <CreateProjectStep
@@ -157,12 +156,13 @@ export function OnboardingWizard({
                   onSkip={onDismiss}
                   onFinish={onDismiss}
                   onSkipStepZero={onDismiss}
+                  canSkipStepZero={existingProjectId != null}
                 />
               </div>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }

@@ -55,21 +55,21 @@ export const OPERATOR_LABELS: Record<string, string> = {
 };
 
 export const OPERATOR_COLORS: Record<string, string> = {
-  [Operator.IN]: 'text-brand dark:text-brand bg-brand/10 border-brand/20',
+  [Operator.IN]: 'text-palette-brand-700 dark:text-palette-brand-800 bg-brand/10 border-brand/20',
   [Operator.NOT_IN]:
-    'text-brand dark:text-brand bg-brand/10 border-brand/20',
-  [Operator.EQ]: 'text-success dark:text-success bg-success/10 border-success/20',
-  [Operator.NE]: 'text-brand dark:text-brand bg-brand/10 border-brand/20',
-  [Operator.GT]: 'text-warning dark:text-warning bg-warning/10 border-warning/20',
-  [Operator.GTE]: 'text-warning dark:text-warning bg-warning/10 border-warning/20',
-  [Operator.LT]: 'text-warning dark:text-warning bg-warning/10 border-warning/20',
-  [Operator.LTE]: 'text-warning dark:text-warning bg-warning/10 border-warning/20',
+    'text-palette-brand-700 dark:text-palette-brand-800 bg-brand/10 border-brand/20',
+  [Operator.EQ]: 'text-palette-brand-700 dark:text-palette-brand-800 bg-brand/10 border-brand/20',
+  [Operator.NE]: 'text-palette-brand-700 dark:text-palette-brand-800 bg-brand/10 border-brand/20',
+  [Operator.GT]: 'text-palette-warning-700 bg-warning/10 border-warning/20',
+  [Operator.GTE]: 'text-palette-warning-700 bg-warning/10 border-warning/20',
+  [Operator.LT]: 'text-palette-warning-700 bg-warning/10 border-warning/20',
+  [Operator.LTE]: 'text-palette-warning-700 bg-warning/10 border-warning/20',
   [Operator.CONTAINS]:
-    'text-brand dark:text-brand bg-brand/10 border-brand/20',
+    'text-palette-brand-700 dark:text-palette-brand-800 bg-brand/10 border-brand/20',
   after:
-    'text-warning dark:text-warning bg-warning/10 border-warning/20',
+    'text-palette-warning-700 bg-warning/10 border-warning/20',
   before:
-    'text-warning dark:text-warning bg-warning/10 border-warning/20',
+    'text-palette-warning-700 bg-warning/10 border-warning/20',
 };
 
 export function getOperatorsForType(type: string | undefined): OperatorDef[] {

@@ -11,6 +11,7 @@ import {
   Trash2,
   User,
   Clock,
+  Check,
 } from '@/shared/icons';
 import { FormField, GradientButton, formatDateTime } from '@/shared';
 import { useT } from '@/i18n';
@@ -141,23 +142,27 @@ export function FlagEditPanel({
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
+            aria-pressed={flagType === 'RELEASE'}
             onClick={() => setValue('flagType', 'RELEASE')}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-body-sm font-semibold transition-all ${flagType === 'RELEASE' ? 'border-info bg-info/10 text-info shadow-sm' : 'border-border text-muted-foreground hover:border-info/20'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-body-sm font-semibold transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${flagType === 'RELEASE' ? 'border-info bg-info/10 text-palette-info-700 shadow-sm' : 'border-border text-muted-foreground hover:border-info/20'}`}
           >
+            {flagType === 'RELEASE' && <Check size={14} aria-hidden="true" />}
             <Rocket
               size={18}
-              className={flagType === 'RELEASE' ? 'text-info' : 'text-muted-foreground'}
+              className={flagType === 'RELEASE' ? 'text-palette-info-700' : 'text-muted-foreground'}
             />
             {t('flags.release')}
           </button>
           <button
             type="button"
+            aria-pressed={flagType === 'KILLSWITCH'}
             onClick={() => setValue('flagType', 'KILLSWITCH')}
-            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-body-sm font-semibold transition-all ${flagType === 'KILLSWITCH' ? 'border-chart-4 bg-chart-4/10 text-chart-4 shadow-sm' : 'border-border text-muted-foreground hover:border-chart-4/20'}`}
+            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-body-sm font-semibold transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${flagType === 'KILLSWITCH' ? 'border-chart-4 bg-chart-4/10 text-chart-4 dark:text-palette-warning-600 shadow-sm' : 'border-border text-muted-foreground hover:border-chart-4/20'}`}
           >
+            {flagType === 'KILLSWITCH' && <Check size={14} aria-hidden="true" />}
             <ShieldOff
               size={18}
-              className={flagType === 'KILLSWITCH' ? 'text-chart-4' : 'text-muted-foreground'}
+              className={flagType === 'KILLSWITCH' ? 'text-chart-4 dark:text-palette-warning-600' : 'text-muted-foreground'}
             />
             {t('flags.killswitch')}
           </button>
@@ -183,7 +188,8 @@ export function FlagEditPanel({
                   <button
                     type="button"
                     onClick={() => setFormTags((prev) => prev.filter((_, j) => j !== i))}
-                    className="hover:opacity-80"
+                    aria-label={t('flags.removeTag', { tag: tv.value })}
+                    className="p-1 -mr-0.5 hover:opacity-80 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none rounded-sm"
                   >
                     <X size={12} />
                   </button>
@@ -214,10 +220,12 @@ export function FlagEditPanel({
                   <button
                     type="button"
                     key={tg.id}
+                    aria-pressed={newTagId === tg.id}
                     onClick={() => setNewTagId(tg.id)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm font-medium border ${newTagId === tg.id ? 'shadow-sm' : 'hover:shadow-sm border-border'}`}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm font-medium border focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${newTagId === tg.id ? 'shadow-sm' : 'hover:shadow-sm border-border'}`}
                     style={newTagId === tg.id ? { borderColor: tg.color, borderWidth: '2px' } : {}}
                   >
+                    {newTagId === tg.id && <Check size={14} aria-hidden="true" />}
                     <div
                       className="w-2.5 h-2.5 rounded-full dark:brightness-[.85] dark:saturate-[.7]"
                       style={{
@@ -244,6 +252,7 @@ export function FlagEditPanel({
                         setNewTagVal('');
                       }
                     }}
+                    aria-label={t('flags.enterTagValue')}
                     placeholder={t('flags.enterTagValue')}
                     maxLength={255}
                     autoFocus
@@ -258,7 +267,7 @@ export function FlagEditPanel({
                     {t('common.add')}
                   </GradientButton>
                 </div>
-                <div className="text-caption font-normal text-muted-foreground/50 tabular-nums text-right">
+                <div className="text-caption font-normal text-muted-foreground tabular-nums text-right">
                   {newTagVal.length}/255
                 </div>
               </div>

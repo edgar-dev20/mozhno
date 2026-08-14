@@ -150,7 +150,7 @@ export function DashboardLayout() {
                     className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg object-cover shrink-0"
                   />
                 ) : (
-                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-primary flex items-center justify-center text-[10px] sm:text-caption font-bold shadow-sm text-primary-foreground ring-1 ring-chart-4/30 shrink-0">
+                  <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-primary flex items-center justify-center text-caption sm:text-caption font-bold shadow-sm text-primary-foreground ring-1 ring-chart-4/30 shrink-0">
                     {(projectName ?? '?')[0].toUpperCase()}
                 </div>
                 )}
@@ -169,7 +169,7 @@ export function DashboardLayout() {
                       <span
                         role="status"
                         aria-label={`${stats.flags} ${t('navigation.flags')}`}
-                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
+                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
                       >
                         <Flag size={12} aria-hidden="true" />
                         <span className="tabular-nums font-mono text-body-sm" aria-hidden="true">{stats.flags}</span>
@@ -184,7 +184,7 @@ export function DashboardLayout() {
                       <span
                         role="status"
                         aria-label={`${stats.users} ${t('navigation.users')}`}
-                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
+                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
                       >
                         <UserCog size={12} aria-hidden="true" />
                         <span className="tabular-nums font-mono text-body-sm" aria-hidden="true">{stats.users}</span>
@@ -199,7 +199,7 @@ export function DashboardLayout() {
                       <span
                         role="status"
                         aria-label={`${stats.segments} ${t('navigation.segments')}`}
-                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground/70 hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
+                        className="inline-flex items-center gap-1.5 text-caption font-medium text-muted-foreground hover:text-muted-foreground transition-colors cursor-default px-2 py-1 rounded-md hover:bg-accent"
                       >
                         <GitBranch size={12} aria-hidden="true" />
                         <span className="tabular-nums font-mono text-body-sm" aria-hidden="true">{stats.segments}</span>

@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react';
-import { Rocket, ShieldOff } from '@/shared/icons';
+import { lazy, Suspense, type ReactNode } from 'react';
+import { Check, Rocket, ShieldOff } from '@/shared/icons';
 import { SearchInput, adjustColor } from '@/shared';
 import type { Tag as TagType } from '@/api';
 import { useT } from '@/i18n';
@@ -25,6 +25,35 @@ interface FlagFiltersBarProps {
   selectedTagValueFilter: string | null;
   onTagValueFilterChange: (v: string | null) => void;
   uniqueTagValues: (typeId: number) => string[];
+}
+
+function FilterChip({
+  active,
+  activeClass,
+  onPress,
+  children,
+}: {
+  active: boolean;
+  activeClass?: string;
+  onPress: () => void;
+  children: ReactNode;
+}) {
+  const base = 'inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none';
+  return (
+    <button
+      type="button"
+      onClick={onPress}
+      aria-pressed={active}
+      className={`${base} ${
+        active
+          ? activeClass ?? 'bg-brand/10 text-brand dark:text-palette-brand-800 border-brand/20'
+          : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
+      }`}
+    >
+      {active && <Check size={12} aria-hidden="true" />}
+      {children}
+    </button>
+  );
 }
 
 export function FlagFiltersBar({
@@ -56,44 +85,31 @@ export function FlagFiltersBar({
           />
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
-          <button
-            onClick={() => onFlagTypeFilterChange(null)}
-            className={`inline-flex items-center px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
-              !flagTypeFilter
-                ? 'bg-brand/10 text-brand border-brand/20'
-                : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
-            }`}
-          >
+          <FilterChip active={!flagTypeFilter} onPress={() => onFlagTypeFilterChange(null)}>
             {t('common.all')}
-          </button>
-          <button
-            onClick={() => onFlagTypeFilterChange(flagTypeFilter === 'RELEASE' ? null : 'RELEASE')}
-            className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
-              flagTypeFilter === 'RELEASE'
-                ? 'bg-info/10 text-info border-info/20'
-                : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
-            }`}
+          </FilterChip>
+          <FilterChip
+            active={flagTypeFilter === 'RELEASE'}
+            activeClass="bg-info/10 text-palette-info-700 border-info/20"
+            onPress={() => onFlagTypeFilterChange(flagTypeFilter === 'RELEASE' ? null : 'RELEASE')}
           >
             <Rocket size={12} />
             {t('flags.release')}
-          </button>
-          <button
-            onClick={() =>
+          </FilterChip>
+          <FilterChip
+            active={flagTypeFilter === 'KILLSWITCH'}
+            activeClass="bg-chart-4/10 text-chart-4 dark:text-palette-warning-600 border-chart-4/20"
+            onPress={() =>
               onFlagTypeFilterChange(flagTypeFilter === 'KILLSWITCH' ? null : 'KILLSWITCH')
             }
-            className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
-              flagTypeFilter === 'KILLSWITCH'
-                ? 'bg-chart-4/10 text-chart-4 border-chart-4/20'
-                : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
-            }`}
           >
             <ShieldOff size={12} />
             {t('flags.killswitch')}
-          </button>
+          </FilterChip>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-nowrap">
+      <div className="flex items-center gap-2 flex-wrap">
         <span className="hidden sm:inline text-caption font-medium text-muted-foreground shrink-0">{t('flags.created')}</span>
         <Suspense
           fallback={<div className="min-w-[150px] sm:min-w-[260px] h-9 bg-muted rounded-lg animate-pulse" />}
@@ -111,50 +127,55 @@ export function FlagFiltersBar({
             className="min-w-[150px] sm:min-w-[260px]"
           />
         </Suspense>
-        <span className="text-foreground/20 dark:text-foreground/70 mx-1 hidden sm:inline">|</span>
-        <button
-          onClick={() => onSortByChange('name')}
-          className={`shrink-0 inline-flex items-center text-caption px-2 py-2.5 sm:px-3 sm:py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'name' ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+        <span className="text-foreground/20 dark:text-foreground/70 mx-1 hidden sm:inline" aria-hidden="true">|</span>
+        <FilterChip
+          active={sortBy === 'name'}
+          onPress={() => onSortByChange('name')}
         >
           {t('flags.sortByName')}
-        </button>
-        <button
-          onClick={() => onSortByChange('createdAt')}
-          className={`shrink-0 inline-flex items-center text-caption px-2 py-2.5 sm:px-3 sm:py-1.5 font-semibold rounded-lg transition-all border ${sortBy === 'createdAt' ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+        </FilterChip>
+        <FilterChip
+          active={sortBy === 'createdAt'}
+          onPress={() => onSortByChange('createdAt')}
         >
           {t('flags.sortByDate')}
-        </button>
+        </FilterChip>
       </div>
 
       {tags.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-body-sm font-medium text-muted-foreground w-full sm:w-auto">{t('flags.tagType')}</span>
-            <button
-              onClick={() => {
+            <FilterChip
+              active={!selectedTagTypeFilter}
+              onPress={() => {
                 onTagTypeFilterChange(null);
                 onTagValueFilterChange(null);
               }}
-              className={`inline-flex items-center px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${!selectedTagTypeFilter ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
             >
               {t('common.all')}
-            </button>
+            </FilterChip>
             {tags.map((tg) => {
               const active = selectedTagTypeFilter === tg.id;
               return (
                 <button
                   key={tg.id}
+                  type="button"
+                  aria-pressed={active}
                   onClick={() => {
                     onTagTypeFilterChange(active ? null : tg.id);
                     onTagValueFilterChange(null);
                   }}
-                  className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? 'text-primary-foreground dark:brightness-[.85] dark:saturate-[.7]' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+                  className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${
+                    active ? 'text-primary-foreground dark:brightness-[.85] dark:saturate-[.7]' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
+                  }`}
                   style={
                     active
                       ? { backgroundColor: tg.color, borderColor: adjustColor(tg.color, 20) }
                       : undefined
                   }
                 >
+                  {active && <Check size={12} aria-hidden="true" />}
                   {tg.name}
                 </button>
               );
@@ -165,20 +186,24 @@ export function FlagFiltersBar({
               <span className="text-body-sm font-medium text-muted-foreground w-full sm:w-auto">
                 {t('flags.tagValue')}
               </span>
-              <button
-                onClick={() => onTagValueFilterChange(null)}
-                className={`inline-flex items-center px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${!selectedTagValueFilter ? 'bg-brand/10 text-brand border-brand/20' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+              <FilterChip
+                active={!selectedTagValueFilter}
+                onPress={() => onTagValueFilterChange(null)}
               >
                 {t('common.all')}
-              </button>
+              </FilterChip>
               {uniqueTagValues(selectedTagTypeFilter).map((v) => {
                 const tg = tags.find((t) => t.id === selectedTagTypeFilter);
                 const active = selectedTagValueFilter === v;
                 return (
                   <button
                     key={v}
+                    type="button"
+                    aria-pressed={active}
                     onClick={() => onTagValueFilterChange(active ? null : v)}
-                    className={`inline-flex items-center px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${active ? 'text-primary-foreground dark:brightness-[.85] dark:saturate-[.7]' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'}`}
+                    className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${
+                      active ? 'text-primary-foreground dark:brightness-[.85] dark:saturate-[.7]' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
+                    }`}
                     style={
                       active
                         ? {
@@ -188,6 +213,7 @@ export function FlagFiltersBar({
                         : undefined
                     }
                   >
+                    {active && <Check size={12} aria-hidden="true" />}
                     {v}
                   </button>
                 );

@@ -3,6 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Drawer } from 'vaul';
 import { X } from '@/shared/icons';
 import { useIsMobile } from '@/shared/hooks/useIsMobile';
+import { useT } from '@/i18n';
 
 interface SidePanelProps {
   open: boolean;
@@ -24,6 +25,7 @@ function PanelContent({
   onDiffDismiss,
 }: Omit<SidePanelProps, 'open' | 'onOpenChange'>) {
   const hasDiff = !!diffSlot && !!onDiffDismiss;
+  const t = useT();
 
   return (
     <>
@@ -39,7 +41,10 @@ function PanelContent({
           </Dialog.Description>
         </div>
         <Dialog.Close asChild>
-          <button className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all">
+          <button
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
+            aria-label={t('common.close')}
+          >
             <X size={18} />
           </button>
         </Dialog.Close>
@@ -47,11 +52,11 @@ function PanelContent({
 
       {hasDiff ? (
         <div className="flex-1 relative overflow-hidden">
-          <div className="absolute inset-0 overflow-y-auto p-4 sm:p-6">{children}</div>
+          <div inert className="absolute inset-0 overflow-y-auto p-4 sm:p-6">{children}</div>
           <div
             onClick={onDiffDismiss}
             className="absolute inset-0 bg-overlay backdrop-blur-[2px] cursor-pointer z-10 flex items-start justify-center pt-8"
-            title="Нажмите чтобы отменить"
+            title={t('flags.diffDismissTitle')}
           />
         </div>
       ) : (

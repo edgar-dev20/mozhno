@@ -52,7 +52,7 @@ function buildRule(
     );
   } else if (activeSegs.length > 0) {
     parts.push(
-      <span key="sdot" className={`text-caption text-muted-foreground/60 ${muted ? 'opacity-30' : ''}`}>
+      <span key="sdot" className={`text-caption text-muted-foreground ${muted ? 'opacity-30' : ''}`}>
         ·
       </span>,
     );
@@ -61,7 +61,7 @@ function buildRule(
     visibleSegs.forEach((seg, si) => {
       if (si > 0)
         parts.push(
-          <span key={`sc${si}`} className="text-muted-foreground/60">
+          <span key={`sc${si}`} className="text-muted-foreground">
             ,{' '}
           </span>,
         );
@@ -102,14 +102,14 @@ function buildRule(
       const parsed: unknown = JSON.parse(es.contextValuesJson);
       if (Array.isArray(parsed) && parsed.length > 0) {
         parts.push(
-          <span key="cdot" className="text-muted-foreground/60">
+          <span key="cdot" className="text-muted-foreground">
             ·
           </span>,
         );
         parts.push(
           <span
             key="customConds"
-            className={`inline-flex items-center px-1 py-0 rounded text-[9px] font-semibold tracking-wide ${muted ? 'bg-muted text-muted-foreground/50' : 'bg-brand/10 text-brand'}`}
+            className={`inline-flex items-center px-1 py-0 rounded text-caption font-semibold tracking-wide ${muted ? 'bg-muted text-muted-foreground/50' : 'bg-brand/10 text-brand dark:text-palette-brand-800'}`}
           >
             +{parsed.length}
           </span>,
@@ -153,7 +153,8 @@ export const FlagCardEnvironmentColumn = memo(function FlagCardEnvironmentColumn
         <div className="flex items-center gap-1">
           <button
             onClick={() => onOpenEnvironment(flag, env.id)}
-            className="inline-flex items-center px-1.5 py-1 text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand dark:hover:text-brand hover:border-brand/20 dark:hover:border-brand/30 hover:bg-brand/5 dark:hover:bg-brand/10 transition-all"
+            aria-label={t('flags.environmentSettingsBtn')}
+            className="inline-flex items-center px-1.5 py-1 text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand dark:hover:text-brand hover:border-brand/20 dark:hover:border-brand/30 hover:bg-brand/5 dark:hover:bg-brand/10 transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
           >
             <Settings size={12} />
           </button>
@@ -162,6 +163,7 @@ export const FlagCardEnvironmentColumn = memo(function FlagCardEnvironmentColumn
               <Switch
                 checked={es.enabled}
                 onCheckedChange={handleToggle}
+                aria-label={`${flag.name} — ${env.name}`}
                 className="data-[state=checked]:bg-brand scale-75 origin-right"
               />
             </span>
@@ -175,7 +177,8 @@ export const FlagCardEnvironmentColumn = memo(function FlagCardEnvironmentColumn
             {sparkBuckets.length > 0 ? (
               <button
                 onClick={() => onMetricsClick(flag.flagId, flag.name, env.id)}
-                className="w-full h-full cursor-pointer rounded-md transition-all hover:bg-sparkline-true/[0.08] dark:hover:bg-sparkline-true/[0.10]"
+                aria-label={t('flags.metrics.chartTitle')}
+                className="w-full h-full cursor-pointer rounded-md transition-all hover:bg-sparkline-true/[0.08] dark:hover:bg-sparkline-true/[0.10] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
               >
                 <FlagSparkline data={sparkBuckets} height={56} />
               </button>
@@ -194,7 +197,7 @@ export const FlagCardEnvironmentColumn = memo(function FlagCardEnvironmentColumn
           </div>
         </>
       ) : (
-        <span className="text-caption text-muted-foreground/50 italic">
+        <span className="text-caption text-muted-foreground italic">
           {t('environment.noStrategy')}
         </span>
       )}

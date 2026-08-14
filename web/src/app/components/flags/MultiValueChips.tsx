@@ -74,8 +74,8 @@ export function MultiValueChips({ values, onChange, autoFocus, validValues }: Mu
             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-caption font-medium border animate-in fade-in zoom-in-95 duration-150 data-[shake]:animate-[shake_400ms_ease-in-out] ${
               hasWhitelist
                 ? inWhitelist
-                  ? 'bg-success/10 text-success border-success/20'
-                  : 'bg-warning/10 text-warning border-warning/30'
+                  ? 'bg-success/10 text-success dark:text-palette-success-700 border-success/20'
+                  : 'bg-warning/10 text-palette-warning-700 border-warning/30'
                 : 'bg-primary/10 text-primary border-primary/20'
             }`}
           >
@@ -83,14 +83,14 @@ export function MultiValueChips({ values, onChange, autoFocus, validValues }: Mu
             <button
               type="button"
               onClick={() => removeValue(i)}
-              className={`shrink-0 p-0.5 rounded-sm transition-colors -mr-0.5 hover:text-destructive ${
+              aria-label={`${t('common.remove')}: ${v}`}
+              className={`shrink-0 p-1 rounded-sm transition-colors -mr-0.5 hover:text-destructive focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${
                 hasWhitelist
                   ? inWhitelist
-                    ? 'text-success'
-                    : 'text-warning'
+                    ? 'text-success dark:text-palette-success-700'
+                    : 'text-palette-warning-700'
                   : ''
               }`}
-              tabIndex={-1}
             >
               <X size={12} />
             </button>
@@ -103,6 +103,7 @@ export function MultiValueChips({ values, onChange, autoFocus, validValues }: Mu
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
+          aria-label={t('flags.chipInputLabel')}
           placeholder={
             values.length === 0 ? t('flags.chipEmptyPlaceholder') : t('flags.chipPlaceholder')
           }
@@ -110,7 +111,7 @@ export function MultiValueChips({ values, onChange, autoFocus, validValues }: Mu
         />
       </div>
       {values.length > 0 && (
-        <p className="text-caption text-muted-foreground/60 leading-none">
+        <p className="text-caption text-muted-foreground leading-none">
           {t('flags.chipHint', { n: String(values.length) })}
         </p>
       )}

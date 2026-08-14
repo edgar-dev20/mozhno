@@ -67,7 +67,7 @@ export const FlagCardDetail = memo(function FlagCardDetail({
             </div>
           )}
         </div>
-        <div className="flex flex-col gap-1 text-caption text-muted-foreground/70 mt-auto pt-2 shrink-0">
+        <div className="flex flex-col gap-1 text-caption text-muted-foreground mt-auto pt-2 shrink-0">
           {flag.createdBy && (
             <span className="flex items-center gap-1">
               <User size={10} />

@@ -23,11 +23,7 @@ function rowClasses(hasRemoved: boolean, hasAdded: boolean, compact: boolean) {
   return `border-l-2 border-l-success bg-success/30 dark:bg-success/10 ${py}`;
 }
 
-function renderValue(
-  value: DiffChange['before'] | DiffChange['after'],
-  isOld: boolean,
-  compact: boolean,
-) {
+function renderValue(value: DiffChange['before'] | DiffChange['after'], isOld: boolean) {
   if (value === null || value === undefined || value === '') {
     return <span className="text-muted-foreground/50 italic">—</span>;
   }
@@ -36,27 +32,11 @@ function renderValue(
   }
   if (isOld) {
     return (
-      <span
-        className={
-          compact
-            ? 'text-caption text-muted-foreground/60 line-through'
-            : 'text-caption text-muted-foreground/60 line-through'
-        }
-      >
-        {String(value)}
-      </span>
+      <span className="text-caption text-muted-foreground line-through">{String(value)}</span>
     );
   }
   return (
-    <span
-      className={
-        compact
-          ? 'text-caption font-medium text-foreground/90'
-          : 'text-caption font-medium text-foreground/90'
-      }
-    >
-      {String(value)}
-    </span>
+    <span className="text-caption font-medium text-foreground/90">{String(value)}</span>
   );
 }
 
@@ -79,19 +59,13 @@ function DiffRow({
       transition={{ duration: 0.15, delay: Math.min(index, 5) * 0.04 }}
       className={`pl-3 pr-3 ${rowClasses(hasRemoved, hasAdded, compact)}`}
     >
-      <div
-        className={
-          compact
-            ? 'text-caption font-medium text-muted-foreground/70 mb-0.5'
-            : 'text-caption font-medium text-muted-foreground/70 mb-0.5'
-        }
-      >
+      <div className="text-caption font-medium text-muted-foreground mb-0.5">
         {change.label}
       </div>
       <div className="flex items-start gap-2 min-w-0">
         {hasRemoved && (
           <span className="min-w-0 flex-1 break-words">
-            {renderValue(change.before, true, compact)}
+            {renderValue(change.before, true)}
           </span>
         )}
         {hasRemoved && hasAdded && (
@@ -99,7 +73,7 @@ function DiffRow({
         )}
         {hasAdded && (
           <span className="min-w-0 flex-1 break-words">
-            {renderValue(change.after, false, compact)}
+            {renderValue(change.after, false)}
           </span>
         )}
       </div>

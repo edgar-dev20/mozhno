@@ -79,30 +79,37 @@ export function DateRangePicker({
   const displayTo = to instanceof Date && !isNaN(to.getTime());
   const hasValue = displayFrom || displayTo;
 
+  const displayText = hasValue
+    ? `${displayFrom ? formatDisplay(from!, dateLocale) : t('common.from')} - ${displayTo ? formatDisplay(to!, dateLocale) : t('common.to')}`
+    : (placeholder ?? t('common.selectPeriod'));
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={placeholder ?? t('common.selectPeriod')}
-          className={`inline-flex items-center gap-2 bg-accent border-transparent rounded-lg px-3 py-2 text-sm hover:bg-accent/80 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
-        >
-          <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
-          <span className={hasValue ? 'text-foreground/80' : 'text-muted-foreground'}>
-            {hasValue
-              ? `${displayFrom ? formatDisplay(from!, dateLocale) : t('common.from')} - ${displayTo ? formatDisplay(to!, dateLocale) : t('common.to')}`
-              : (placeholder ?? t('common.selectPeriod'))}
-          </span>
-          {hasValue && (
-            <span
-              onClick={handleClear}
-              className="ml-auto shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            >
-              <X size={13} />
+      <div className={`relative inline-flex ${className}`}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label={displayText}
+            className={`inline-flex items-center gap-2 w-full bg-accent border-transparent rounded-lg px-3 py-2 text-sm hover:bg-accent/80 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${hasValue ? 'pr-8' : ''}`}
+          >
+            <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
+            <span className={hasValue ? 'text-foreground/80' : 'text-muted-foreground'}>
+              {displayText}
             </span>
-          )}
-        </button>
-      </PopoverTrigger>
+          </button>
+        </PopoverTrigger>
+        {hasValue && (
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={handleClear}
+            aria-label={t('common.clearFilter')}
+            className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
+          >
+            <X size={13} />
+          </button>
+        )}
+      </div>
       <PopoverContent className="rounded-xl w-auto p-0 max-w-[calc(100vw-2rem)]" align="start" sideOffset={4}>
         <CalendarComponent
           mode="range"

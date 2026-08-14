@@ -37,7 +37,14 @@ export function CreateProjectStep({
   return (
     <div className="space-y-3 flex-1">
       <div>
+        <label
+          htmlFor="onboarding-project-name"
+          className="block text-body-sm font-medium text-foreground/80 mb-1.5"
+        >
+          {t('onboarding.projectNameLabel')}
+        </label>
         <input
+          id="onboarding-project-name"
           type="text"
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
@@ -45,12 +52,19 @@ export function CreateProjectStep({
           placeholder={t('onboarding.projectNamePlaceholder')}
           className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
         />
-        <div className="text-caption font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+        <div className="text-caption font-normal text-muted-foreground tabular-nums text-right mt-0.5">
           {projectName.length}/120
         </div>
       </div>
       <div>
+        <label
+          htmlFor="onboarding-project-desc"
+          className="block text-body-sm font-medium text-foreground/80 mb-1.5"
+        >
+          {t('onboarding.projectDescLabel')}
+        </label>
         <textarea
+          id="onboarding-project-desc"
           value={projectDesc}
           onChange={(e) => setProjectDesc(e.target.value)}
           maxLength={500}
@@ -58,7 +72,7 @@ export function CreateProjectStep({
           placeholder={t('onboarding.projectDescPlaceholder')}
           className="w-full bg-input-background border border-border text-foreground rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-none"
         />
-        <div className="text-caption font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+        <div className="text-caption font-normal text-muted-foreground tabular-nums text-right mt-0.5">
           {projectDesc.length}/500
         </div>
       </div>
@@ -73,7 +87,7 @@ export function CreateProjectStep({
         {pendingLogoPreviewUrl && (
           <img
             src={pendingLogoPreviewUrl}
-            alt="Logo preview"
+            alt={t('onboarding.logoPreviewAlt')}
             className="w-10 h-10 rounded-lg object-cover border border-border shrink-0"
           />
         )}
@@ -87,7 +101,11 @@ export function CreateProjectStep({
         </button>
       </div>
       <p className="text-caption text-muted-foreground">{t('onboarding.logoHint')}</p>
-      {error && <p className="text-caption text-destructive">{error}</p>}
+      {error && (
+        <p role="alert" className="text-caption text-destructive">
+          {error}
+        </p>
+      )}
       <GradientButton onClick={onCreate} disabled={creating} loading={creating} className="w-full">
         {isEditing ? t('onboarding.saveAndContinue') : t('onboarding.createProject')}
       </GradientButton>

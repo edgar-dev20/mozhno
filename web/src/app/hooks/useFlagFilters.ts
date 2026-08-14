@@ -132,6 +132,16 @@ export function useFlagFilters(flags: FlagView[], totalItems?: number) {
   const showMoreFlags = () => setDisplayLimit((prev) => Math.min(prev + 10, filtered.length));
   const showAllFlags = () => setDisplayLimit(filtered.length);
 
+  const clearFilters = () => {
+    setSearchQuery('');
+    setFlagTypeFilter(null);
+    setSelectedTagTypeFilter(null);
+    setSelectedTagValueFilter(null);
+    setDateFrom('');
+    setDateTo('');
+    setStaleFilter(false);
+  };
+
   const uniqueTagValues = (typeId: number) =>
     [
       ...new Set(
@@ -163,6 +173,8 @@ export function useFlagFilters(flags: FlagView[], totalItems?: number) {
     setDateTo,
     uniqueTagValues,
     totalItems,
+    staleFilter,
     setStaleFilter,
+    clearFilters,
   };
 }
