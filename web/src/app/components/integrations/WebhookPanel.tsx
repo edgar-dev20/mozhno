@@ -42,7 +42,6 @@ export function WebhookPanel({
         <Switch
           checked={form.formEnabled}
           onCheckedChange={form.setFormEnabled}
-          className="data-[state=checked]:bg-primary"
         />
       </div>
 

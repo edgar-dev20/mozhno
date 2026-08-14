@@ -669,7 +669,7 @@ export function Settings() {
             <Switch
               checked={envFormApproval}
               onCheckedChange={setEnvFormApproval}
-              className="data-[state=checked]:bg-brand mt-0.5 shrink-0"
+              className="mt-0.5 shrink-0"
             />
           </div>
 

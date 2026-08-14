@@ -113,7 +113,7 @@
       "border":                { "light": "oklch(0 0 0 / 0.08)",          "dark": "oklch(1 0 0 / 0.14)" },
       "input-border":          { "light": "transparent",                  "dark": "oklch(0.32 0.005 80)" },
       "input-background":      { "light": "oklch(0.965 0.002 200)",       "dark": "oklch(0.22 0.003 80)" },
-      "switch-background":     { "light": "oklch(0.82 0.010 150)",        "dark": "oklch(0.38 0.005 80)" },
+      "switch-background":     { "light": "oklch(0.66 0.012 150)",        "dark": "oklch(0.38 0.005 80)" },
       "ring":                  { "light": "oklch(0.44 0.15 170 / 0.45)",  "dark": "oklch(0.56 0.15 170 / 0.45)" },
       "brand":                 { "light": "oklch(0.48 0.17 175)",         "dark": "oklch(0.65 0.18 175)" },
       "brand-foreground":      { "light": "oklch(0.98 0.001 200)",        "dark": "oklch(0.12 0.003 80)" },

@@ -537,7 +537,7 @@ export function Constraints() {
           <div className="pt-5 border-t border-border space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <label className="text-body-sm font-medium text-foreground/80">
+                <label htmlFor="constraint-strict" className="text-body-sm font-medium text-foreground/80 cursor-pointer">
                   {t('constraints.strictModeLabel')}
                 </label>
                 <p className="text-caption text-muted-foreground mt-0.5">
@@ -545,9 +545,9 @@ export function Constraints() {
                 </p>
               </div>
               <Switch
+                id="constraint-strict"
                 checked={formIsStrict}
                 onCheckedChange={setFormIsStrict}
-                className="!bg-switch-background data-[state=checked]:!bg-brand dark:data-[state=checked]:!bg-brand"
               />
             </div>
 

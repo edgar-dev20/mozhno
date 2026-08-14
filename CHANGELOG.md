@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- **`Switch` component (`@mozhno/core-ui`)** — visual API change: ON-state color unified to the brand token (was `primary`), thumb enlarged 16→18px with a symmetric 2px inset, light-theme OFF track darkened (`switch-background` 0.82→0.66) to meet WCAG 1.4.11 (3:1); consumers relying on the default appearance will see the new styling
+
 ## [1.0.0] — 2026-08-03
 
 ### Changed

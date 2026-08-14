@@ -170,7 +170,6 @@ export const FlagCardEnvironmentColumn = memo(function FlagCardEnvironmentColumn
                   checked={es.enabled}
                   onCheckedChange={handleToggle}
                   aria-label={`${flag.name} — ${env.name}`}
-                  className="data-[state=checked]:bg-brand"
                 />
               ) : (
                 <FlagEnabledDot flagName={flag.name} envName={env.name} enabled={es.enabled} />

@@ -30,7 +30,7 @@
   --border:oklch(0 0 0 / 0.08);
   --input-border:transparent;
   --input-background:oklch(0.965 0.002 200);
-  --switch-background:oklch(0.82 0.010 150);
+  --switch-background:oklch(0.66 0.012 150);
   --ring:oklch(0.44 0.15 170 / 0.45);
   --brand:oklch(0.48 0.17 175);
   --brand-foreground:oklch(0.98 0.001 200);

@@ -189,7 +189,6 @@ export function FlagEnvironmentPanel({
             <Switch
               checked={envRuleEnabled}
               onCheckedChange={handleEnvRuleToggle}
-              className="!bg-switch-background data-[state=checked]:!bg-brand dark:data-[state=checked]:!bg-brand"
             />
           </span>
         </div>
