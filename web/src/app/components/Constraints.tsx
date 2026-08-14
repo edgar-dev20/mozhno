@@ -313,8 +313,16 @@ export function Constraints() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2, delay: idx * 0.03 }}
+                  role="button"
+                  tabIndex={0}
                   className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer"
                   onClick={() => openEdit(c)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openEdit(c);
+                    }
+                  }}
                 >
                   <div
                     className="h-1.5"
@@ -457,6 +465,7 @@ export function Constraints() {
             }
             maxLength={100}
             value={formKey}
+            error={keyError}
           >
             <input
               type="text"
@@ -470,7 +479,6 @@ export function Constraints() {
               disabled={!!editing}
               className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-secondary/50"
             />
-            {keyError && <p className="text-caption text-destructive mt-1">{keyError}</p>}
           </FormField>
           <div className="space-y-2">
             <label className="text-body-sm font-medium text-foreground/80">{t('common.type')}</label>
@@ -621,14 +629,14 @@ export function Constraints() {
                   {formValidValues.map((v, vi) => (
                     <span
                       key={vi}
-                      className="inline-flex items-center gap-1 px-2 py-1 text-caption font-mono bg-success/10 text-success border border-success/20 rounded-md break-all leading-none"
+                      className="inline-flex items-center gap-1 px-2 py-1 text-caption font-mono bg-success/10 text-success dark:text-palette-success-700 border border-success/20 rounded-md break-all leading-none"
                     >
                       {v}
                       <button
                         onClick={() =>
                           setFormValidValues((prev) => prev.filter((_, i) => i !== vi))
                         }
-                        className="text-success hover:text-destructive transition-colors"
+                        className="text-success dark:text-palette-success-700 hover:text-destructive transition-colors"
                       >
                         <X size={11} />
                       </button>

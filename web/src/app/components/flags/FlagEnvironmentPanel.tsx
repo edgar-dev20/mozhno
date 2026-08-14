@@ -301,7 +301,7 @@ export function FlagEnvironmentPanel({
             <Slider.Track className="bg-accent relative grow rounded-full h-2.5">
               <Slider.Range className="absolute bg-brand rounded-full h-full" />
             </Slider.Track>
-            <Slider.Thumb className="block w-6 h-6 bg-background border-2 border-brand rounded-full shadow-lg focus:outline-none" />
+            <Slider.Thumb className="block w-6 h-6 bg-background border-2 border-brand rounded-full shadow-lg outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]" />
           </Slider.Root>
           <p className="text-caption text-muted-foreground/80">
             {envRulePercent === 100

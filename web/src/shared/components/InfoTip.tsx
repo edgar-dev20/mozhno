@@ -21,7 +21,7 @@ export function InfoTip({ text, side = 'top', size = 12, className = '' }: InfoT
         <button
           type="button"
           aria-label={text}
-          className={`inline-flex items-center justify-center rounded-full p-1 -m-1 text-muted-foreground/40 hover:text-muted-foreground focus-visible:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 transition-colors cursor-help align-middle ${className}`}
+          className={`inline-flex items-center justify-center rounded-full p-1 -m-1 text-muted-foreground/70 dark:text-muted-foreground hover:text-muted-foreground focus-visible:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 transition-colors cursor-help align-middle ${className}`}
         >
           <Info size={size} aria-hidden="true" />
         </button>

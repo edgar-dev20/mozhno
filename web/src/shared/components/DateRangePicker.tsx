@@ -92,7 +92,7 @@ export function DateRangePicker({
             aria-label={displayText}
             className={`inline-flex items-center gap-2 w-full bg-accent border-transparent rounded-lg px-3 py-2 text-sm hover:bg-accent/80 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${hasValue ? 'pr-8' : ''}`}
           >
-            <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
+            <Calendar size={14} className="text-muted-foreground/70 dark:text-muted-foreground shrink-0" />
             <span className={hasValue ? 'text-foreground/80' : 'text-muted-foreground'}>
               {displayText}
             </span>

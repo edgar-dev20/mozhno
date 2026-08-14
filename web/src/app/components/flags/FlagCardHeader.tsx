@@ -46,7 +46,9 @@ const getTypeIcon = (t: string, size = 10) => {
 };
 
 const getIconColor = (t: string) =>
-  t === 'RELEASE' ? 'text-info bg-info/10' : 'text-chart-4 bg-chart-4/10';
+  t === 'RELEASE'
+    ? 'text-palette-info-600 dark:text-palette-info-700 bg-info/10'
+    : 'text-palette-warning-600 dark:text-palette-warning-700 bg-chart-4/10';
 
 interface FlagCardHeaderProps {
   flag: FlagView;

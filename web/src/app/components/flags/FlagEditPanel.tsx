@@ -95,7 +95,7 @@ export function FlagEditPanel({
 
   return (
     <form id="flag-edit-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <FormField label={t('common.name')} maxLength={120} value={watchedName}>
+      <FormField label={t('common.name')} maxLength={120} value={watchedName} error={errors.name?.message}>
         <input
           type="text"
           {...register('name')}
@@ -103,7 +103,6 @@ export function FlagEditPanel({
           placeholder={t('flags.namePlaceholderEdit')}
           className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
         />
-        {errors.name && <p className="text-caption text-destructive mt-1">{errors.name.message}</p>}
       </FormField>
 
       <FormField label={t('common.key')} hint={t('flags.keyHint')}>

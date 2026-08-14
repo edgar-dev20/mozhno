@@ -192,7 +192,7 @@ type KpiTone = 'neutral' | 'warning' | 'destructive' | 'brand';
 
 function toneClass(tone: KpiTone, value: number): string {
   if (value <= 0 || tone === 'neutral') return '';
-  if (tone === 'warning') return 'text-warning';
+  if (tone === 'warning') return 'text-palette-warning-600 dark:text-palette-warning-700';
   if (tone === 'destructive') return 'text-destructive';
   return 'text-brand';
 }
@@ -401,7 +401,7 @@ function EnvironmentStatCard({
                 <InfoTip text={t('overview.hints.stale')} />
               </span>
               <span
-                className={`font-semibold tabular-nums ${env.staleCount > 0 ? 'text-warning' : ''}`}
+                className={`font-semibold tabular-nums ${env.staleCount > 0 ? 'text-palette-warning-600 dark:text-palette-warning-700' : ''}`}
               >
                 {env.staleCount}
               </span>
@@ -413,7 +413,7 @@ function EnvironmentStatCard({
           <div className="mt-3 pt-2.5 border-t border-border">
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-caption font-semibold text-warning bg-warning/10 border border-warning/20 cursor-help">
+                <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-caption font-semibold text-palette-warning-600 dark:text-palette-warning-700 bg-warning/10 border border-warning/20 cursor-help">
                   <span className="w-1.5 h-1.5 rounded-full bg-warning" />
                   {t('overview.environments.sdkSilent')}
                 </span>
@@ -620,14 +620,14 @@ function DriftFlagRow({
           <div className="table-row">
             <div className="table-cell align-middle py-2 pl-4" style={{ width: 155 }}>
               <div className="text-body-sm font-semibold leading-tight truncate">{row.name}</div>
-              <div className="text-caption text-muted-foreground/55 font-mono mt-px truncate">{row.flagKey}</div>
+              <div className="text-caption text-muted-foreground/70 dark:text-muted-foreground font-mono mt-px truncate">{row.flagKey}</div>
             </div>
             {row.cells.map((cell) => {
               const env = envRefs.find((e) => e.id === cell.environmentId);
               const stateText =
                 cell.state === 'rollout' ? `${cell.percentage}%` : cell.state === 'on' ? t('overview.drift.on') : t('overview.drift.off');
               const stateColor =
-                cell.state === 'on' ? 'text-success' : cell.state === 'off' ? 'text-muted-foreground/50' : 'text-brand';
+                cell.state === 'on' ? 'text-success' : cell.state === 'off' ? 'text-muted-foreground/70 dark:text-muted-foreground' : 'text-brand';
               return (
                 <div key={cell.environmentId} className="table-cell align-middle text-center py-2">
                   <div className="inline-flex items-center gap-2 min-w-0">
@@ -645,7 +645,7 @@ function DriftFlagRow({
               <span
                 className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-caption font-bold ${
                   isDrift
-                    ? 'text-warning bg-warning/10 border border-warning/20'
+                    ? 'text-palette-warning-600 dark:text-palette-warning-700 bg-warning/10 border border-warning/20'
                     : 'text-brand bg-brand/10 border border-brand/20'
                 }`}
               >
@@ -660,13 +660,13 @@ function DriftFlagRow({
       <div className="flex items-center justify-between gap-3 py-2.5 pl-4 pr-3 sm:hidden">
         <div className="min-w-0 flex-1">
           <div className="text-body-sm font-semibold leading-tight truncate">{row.name}</div>
-          <div className="text-caption text-muted-foreground/55 font-mono mt-px truncate">{row.flagKey}</div>
+          <div className="text-caption text-muted-foreground/70 dark:text-muted-foreground font-mono mt-px truncate">{row.flagKey}</div>
         </div>
         <div className="shrink-0">
           <span
             className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-caption font-bold ${
               isDrift
-                ? 'text-warning bg-warning/10 border border-warning/20'
+                ? 'text-palette-warning-600 dark:text-palette-warning-700 bg-warning/10 border border-warning/20'
                 : 'text-brand bg-brand/10 border border-brand/20'
             }`}
           >

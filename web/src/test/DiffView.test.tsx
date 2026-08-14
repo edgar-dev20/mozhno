@@ -13,8 +13,8 @@ describe('DiffView', () => {
     const changes: DiffChange[] = [{ field: 'name', label: 'Name', before: 'Old', after: 'New' }];
     render(<DiffView changes={changes} />);
     expect(screen.getByText('Name')).toBeInTheDocument();
-    expect(screen.getByText('Old')).toBeInTheDocument();
-    expect(screen.getByText('New')).toBeInTheDocument();
+    expect(screen.getByText(/Old/)).toBeInTheDocument();
+    expect(screen.getByText(/New/)).toBeInTheDocument();
   });
 
   it('renders group headers', () => {
@@ -38,12 +38,12 @@ describe('DiffView', () => {
   it('renders removed-only change', () => {
     const changes: DiffChange[] = [{ field: 'a', label: 'A', before: 'old', after: '' }];
     render(<DiffView changes={changes} />);
-    expect(screen.getByText('old')).toBeInTheDocument();
+    expect(screen.getByText(/old/)).toBeInTheDocument();
   });
 
   it('renders added-only change', () => {
     const changes: DiffChange[] = [{ field: 'a', label: 'A', before: '', after: 'new' }];
     render(<DiffView changes={changes} />);
-    expect(screen.getByText('new')).toBeInTheDocument();
+    expect(screen.getByText(/new/)).toBeInTheDocument();
   });
 });

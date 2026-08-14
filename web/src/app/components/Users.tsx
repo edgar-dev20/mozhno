@@ -284,12 +284,12 @@ export function Users() {
     const style =
       role === 'admin'
         ? {
-            on: 'bg-warning/10 text-warning border-warning/20',
+              on: 'bg-warning/10 text-palette-warning-600 dark:text-palette-warning-700 border-warning/20',
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
           }
         : role === 'developer'
           ? {
-              on: 'bg-info/10 text-info border-info/20',
+              on: 'bg-info/10 text-palette-info-600 dark:text-palette-info-700 border-info/20',
               off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
             }
           : {
@@ -313,18 +313,18 @@ export function Users() {
     const style =
       status === 'active'
         ? {
-            on: 'bg-success/10 text-success border-success/20',
+            on: 'bg-success/10 text-success dark:text-palette-success-700 border-success/20',
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
             dot: 'bg-success',
           }
         : status === 'invited'
           ? {
-              on: 'bg-warning/10 text-warning border-warning/20',
+            on: 'bg-warning/10 text-palette-warning-600 dark:text-palette-warning-700 border-warning/20',
               off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
               dot: 'bg-warning',
             }
           : {
-              on: 'bg-destructive/10 text-destructive border-destructive/20',
+              on: 'bg-destructive/10 text-destructive dark:text-palette-danger-700 border-destructive/20',
               off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
               dot: 'bg-destructive',
             };
@@ -412,7 +412,7 @@ export function Users() {
         {loadError ? (
           <ErrorBox>
             {t('users.errors.load')}{' '}
-            <button onClick={loadUsers} className="underline hover:no-underline font-semibold">
+            <button onClick={() => refetchUsers()} className="underline hover:no-underline font-semibold">
               {t('common.retry')}
             </button>
           </ErrorBox>
@@ -794,7 +794,7 @@ export function Users() {
                       borderColor: 'border-warning',
                       bgHover: 'group-hover:bg-warning/10',
                       bgSelected: 'bg-warning/10',
-                      textSelected: 'text-warning',
+                      textSelected: 'text-palette-warning-600 dark:text-palette-warning-700',
                       description: t('users.roleDescriptions.admin'),
                     },
                     {

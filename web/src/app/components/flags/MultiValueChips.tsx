@@ -84,7 +84,7 @@ export function MultiValueChips({ values, onChange, autoFocus, validValues }: Mu
               type="button"
               onClick={() => removeValue(i)}
               aria-label={`${t('common.remove')}: ${v}`}
-              className={`shrink-0 p-1 rounded-sm transition-colors -mr-0.5 hover:text-destructive focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${
+              className={`shrink-0 p-1.5 rounded-sm transition-colors -mr-0.5 hover:text-destructive focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${
                 hasWhitelist
                   ? inWhitelist
                     ? 'text-success dark:text-palette-success-700'
@@ -107,7 +107,7 @@ export function MultiValueChips({ values, onChange, autoFocus, validValues }: Mu
           placeholder={
             values.length === 0 ? t('flags.chipEmptyPlaceholder') : t('flags.chipPlaceholder')
           }
-          className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-caption placeholder:text-muted-foreground/60 py-1"
+          className="flex-1 min-w-[120px] bg-transparent border-none outline-none rounded-md focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:border-ring text-caption placeholder:text-muted-foreground/60 py-1"
         />
       </div>
       {values.length > 0 && (

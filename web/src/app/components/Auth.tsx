@@ -38,10 +38,11 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden transition-colors">
+    <main className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden transition-colors">
       <div className="absolute top-[-180px] right-[-100px] w-[450px] h-[450px] bg-gradient-to-br from-gradient-start/10 to-gradient-end/5 dark:from-gradient-start/8 dark:to-gradient-end/4 rounded-full blur-3xl"></div>
 
       <div className="w-full max-w-md relative z-10">
+        <h1 className="sr-only">{t('auth.login')}</h1>
         <div className="bg-card backdrop-blur-2xl rounded-2xl shadow-xl border border-border transition-colors">
           <div className="p-6 sm:p-8">
             <div className="flex justify-center mb-4">
@@ -140,6 +141,6 @@ export function Auth() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

@@ -46,11 +46,12 @@ export function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden transition-colors">
+    <main className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden transition-colors">
       <div className="absolute top-[-180px] right-[-100px] w-[450px] h-[450px] bg-gradient-to-br from-gradient-start/10 to-gradient-end/5 dark:from-gradient-start/8 dark:to-gradient-end/4 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-gradient-to-tr from-primary/10 to-info/10 dark:from-primary/15 dark:to-info/15 rounded-full blur-3xl"></div>
 
       <div className="w-full max-w-md relative z-10">
+        <h1 className="sr-only">{t('auth.resetPassword')}</h1>
         <div className="bg-card/80 backdrop-blur-2xl rounded-2xl shadow-2xl border border-border transition-colors animate-[fadeIn_0.5s_ease-out]">
           <div className="p-6 sm:p-8">
             <div className="flex justify-center mb-4">
@@ -95,6 +96,7 @@ export function ResetPassword() {
                     <Input
                       id="password"
                       type="password"
+                      autoComplete="new-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       maxLength={128}
@@ -116,6 +118,7 @@ export function ResetPassword() {
                     <Input
                       id="confirm"
                       type="password"
+                      autoComplete="new-password"
                       value={confirm}
                       onChange={(e) => setConfirm(e.target.value)}
                       maxLength={128}
@@ -139,6 +142,6 @@ export function ResetPassword() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

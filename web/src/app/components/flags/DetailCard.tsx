@@ -180,7 +180,7 @@ export function DetailCard({
                       />
                     )}
                     {ctxDef?.type && ctxDef.type !== ContextType.STRING && ctxDef.type !== ContextType.TIME && (
-                      <p className="text-[11px] text-muted-foreground/60 ml-0.5">
+                      <p className="text-[11px] text-muted-foreground/70 dark:text-muted-foreground ml-0.5">
                         {getInputHint(ctxDef.type)}
                       </p>
                     )}
@@ -209,7 +209,7 @@ export function DetailCard({
             )}
             {!hasContext && group && (
               <div className="p-4 bg-warning/5 rounded-xl border border-warning/10 text-center">
-                <p className="text-caption text-warning">{t('flags.detailCard.selectContext')}</p>
+                <p className="text-caption text-palette-warning-600 dark:text-palette-warning-700">{t('flags.detailCard.selectContext')}</p>
               </div>
             )}
           </div>

@@ -117,32 +117,32 @@ export function WebhookEventsPicker({
           const expanded = expandedCats.has(cat.catKey);
           return (
             <div key={cat.catKey} className="rounded-xl border border-border overflow-hidden">
-              <button
-                type="button"
-                onClick={() => onToggleCatExpand(cat.catKey)}
-                className="w-full flex items-center justify-between px-3 py-2.5 hover:bg-secondary transition-colors"
-              >
-                <div className="flex items-center gap-2.5">
-                  <ChevronDown
-                    size={14}
-                    className={`text-muted-foreground transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
-                  />
-                  <span className="text-body-sm font-medium text-foreground/80">{cat.label}</span>
-                  <span className="text-caption text-muted-foreground">
-                    {cat.events.filter((e) => formEventSet.has(e.key)).length}/{cat.events.length}
-                  </span>
-                </div>
+              <div className="relative">
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleCatAll(cat.catKey);
-                  }}
-                  className="text-caption font-medium text-brand hover:text-brand transition-colors"
+                  onClick={() => onToggleCatExpand(cat.catKey)}
+                  aria-expanded={expanded}
+                  className="w-full flex items-center justify-between gap-2 px-3 py-2.5 pr-24 hover:bg-secondary transition-colors"
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <ChevronDown
+                      size={14}
+                      className={`text-muted-foreground shrink-0 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+                    />
+                    <span className="text-body-sm font-medium text-foreground/80 truncate">{cat.label}</span>
+                    <span className="text-caption text-muted-foreground shrink-0">
+                      {cat.events.filter((e) => formEventSet.has(e.key)).length}/{cat.events.length}
+                    </span>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleCatAll(cat.catKey)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-caption font-medium text-brand hover:text-brand transition-colors"
                 >
                   {allInCat ? t('integrations.deselectCategory') : t('integrations.selectCategory')}
                 </button>
-              </button>
+              </div>
               {expanded && (
                 <div className="px-3 pb-2.5 grid grid-cols-2 gap-1">
                   {cat.events.map((evt) => {

@@ -197,23 +197,23 @@ export function AuditLog() {
       case 'flag':
         return 'text-brand bg-brand/10 border-brand/20';
       case 'user':
-        return 'text-info bg-info/10 border-info/20';
+        return 'text-palette-info-600 dark:text-palette-info-700 bg-info/10 border-info/20';
       case 'tag':
-        return 'text-success bg-success/10 border-success/20';
+        return 'text-success dark:text-palette-success-700 bg-success/10 border-success/20';
       case 'apikey':
-        return 'text-warning bg-warning/10 border-warning/20';
+        return 'text-palette-warning-600 dark:text-palette-warning-700 bg-warning/10 border-warning/20';
       case 'segment':
-        return 'text-chart-4 bg-chart-4/10 border-chart-4/20';
+        return 'text-palette-warning-600 dark:text-palette-warning-700 bg-chart-4/10 border-chart-4/20';
       case 'project':
-        return 'text-info bg-info/10 border-info/20';
+        return 'text-palette-info-600 dark:text-palette-info-700 bg-info/10 border-info/20';
       case 'environment':
-        return 'text-success bg-success/10 border-success/20';
+        return 'text-success dark:text-palette-success-700 bg-success/10 border-success/20';
       case 'context':
         return 'text-brand bg-brand/10 border-brand/20';
       case 'strategy':
-        return 'text-chart-4 bg-chart-4/10 border-chart-4/20';
+        return 'text-palette-warning-600 dark:text-palette-warning-700 bg-chart-4/10 border-chart-4/20';
       case 'integration':
-        return 'text-warning bg-warning/10 border-warning/20';
+        return 'text-palette-warning-600 dark:text-palette-warning-700 bg-warning/10 border-warning/20';
       default:
         return 'text-muted-foreground bg-muted border-border';
     }
@@ -396,8 +396,17 @@ export function AuditLog() {
                     id={`audit-card-${event.id}`}
                   >
                     <div
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={expanded}
                       className="flex flex-col sm:flex-row gap-2 sm:gap-4 px-3 sm:px-4 py-2.5 sm:py-3 cursor-pointer"
                       onClick={() => toggleExpand(event.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleExpand(event.id);
+                        }
+                      }}
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div

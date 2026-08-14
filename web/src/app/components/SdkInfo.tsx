@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Copy, Check, ChevronDown, ChevronUp, Server, Globe } from '@/shared/icons';
 import { JavaIcon } from '@/app/components/LanguageIcons';
@@ -12,6 +12,7 @@ interface CodeBlockProps {
 }
 
 function CodeBlock({ code, lang }: CodeBlockProps) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -23,12 +24,13 @@ function CodeBlock({ code, lang }: CodeBlockProps) {
   return (
     <div className="relative group">
       {lang && (
-        <span className="absolute top-2 right-12 text-caption font-mono text-muted-foreground/70 uppercase tracking-wider">
+        <span className="absolute top-2 right-12 text-caption font-mono text-muted-foreground/70 dark:text-muted-foreground uppercase tracking-wider">
           {lang}
         </span>
       )}
       <button
         onClick={handleCopy}
+        aria-label={t('sdkInfo.copySnippet')}
         className="absolute top-2 right-2 p-1.5 rounded-lg bg-popover/60 hover:bg-background dark:hover:bg-muted text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground transition-colors"
       >
         {copied ? <Check size={14} className="text-success" /> : <Copy size={14} />}
@@ -169,6 +171,7 @@ export function SdkInfo() {
   const t = useT();
   const [activeTab, setActiveTab] = useState<SdkTab>('java');
   const [expanded, setExpanded] = useState(true);
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const active = tabs.find((tab) => tab.id === activeTab)!;
   const content = buildContent(t);
@@ -182,10 +185,11 @@ export function SdkInfo() {
         boxShadow: '0 0 40px rgba(99,102,241,0.06), inset 0 1px 0 rgba(99,102,241,0.08)',
       }}
     >
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full p-5 flex items-center justify-between hover:bg-background/20 dark:hover:bg-background/5 transition-colors cursor-pointer select-none"
-      >
+        <button
+          onClick={() => setExpanded(!expanded)}
+          aria-expanded={expanded}
+          className="w-full p-5 flex items-center justify-between hover:bg-background/20 dark:hover:bg-background/5 transition-colors cursor-pointer select-none"
+        >
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand/10 to-brand/10 flex items-center justify-center">
             <JavaIcon size={18} />
@@ -197,7 +201,7 @@ export function SdkInfo() {
         </div>
         <div className="flex items-center gap-2">
           {!expanded && (
-            <span className="text-caption text-muted-foreground/70 hidden sm:inline">
+            <span className="text-caption text-muted-foreground/70 dark:text-muted-foreground hidden sm:inline">
               {active.label}
             </span>
           )}
@@ -217,12 +221,34 @@ export function SdkInfo() {
           transition={{ duration: 0.25 }}
           className="px-5 pb-5"
         >
-          <div className="flex flex-wrap gap-1.5 mb-4 p-1 bg-accent rounded-xl">
-            {tabs.map((tab) => (
+          <div
+            role="tablist"
+            aria-label={t('sdkInfo.title')}
+            className="flex flex-wrap gap-1.5 mb-4 p-1 bg-accent rounded-xl"
+          >
+            {tabs.map((tab, tabIdx) => (
               <button
                 key={tab.id}
+                role="tab"
+                aria-selected={activeTab === tab.id}
+                tabIndex={activeTab === tab.id ? 0 : -1}
+                ref={(el) => {
+                  tabRefs.current[tabIdx] = el;
+                }}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 text-body-sm font-medium rounded-lg transition-all ${
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    const idx = tabs.findIndex((t) => t.id === activeTab);
+                    const next =
+                      e.key === 'ArrowRight'
+                        ? tabs[(idx + 1) % tabs.length]
+                        : tabs[(idx - 1 + tabs.length) % tabs.length];
+                    setActiveTab(next.id);
+                    tabRefs.current[tabs.findIndex((t) => t.id === next.id)]?.focus();
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3.5 py-2 text-body-sm font-medium rounded-lg transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${
                   activeTab === tab.id
                     ? 'bg-popover shadow-sm text-foreground'
                     : 'text-muted-foreground hover:text-foreground/70 dark:hover:text-muted-foreground'
@@ -251,7 +277,7 @@ export function SdkInfo() {
                 className={`shrink-0 inline-flex items-center gap-1 text-caption font-semibold px-2.5 py-1 rounded-lg border ${
                   active.keyType === 'SERVER'
                     ? 'text-brand bg-brand/10 border-brand/20'
-                    : 'text-success bg-success/10 border-success/20'
+                    : 'text-success dark:text-palette-success-700 bg-success/10 border-success/20'
                 }`}
               >
                 {active.keyType === 'SERVER' ? (

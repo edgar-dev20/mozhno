@@ -189,6 +189,7 @@ export function ClientInstances() {
             />
             <input
               type="text"
+              aria-label={t('common.search')}
               placeholder={t('clientInstances.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -210,7 +211,7 @@ export function ClientInstances() {
               onClick={() => setLangFilter('java')}
               className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                 langFilter === 'java'
-                  ? 'bg-warning/10 text-warning border-warning/20'
+                  ? 'bg-warning/10 text-palette-warning-600 dark:text-palette-warning-700 border-warning/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
               }`}
             >
@@ -221,7 +222,7 @@ export function ClientInstances() {
               onClick={() => setLangFilter('js')}
               className={`inline-flex items-center gap-1.5 px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
                 langFilter === 'js'
-                  ? 'bg-warning/10 text-warning border-warning/20'
+                  ? 'bg-warning/10 text-palette-warning-600 dark:text-palette-warning-700 border-warning/20'
                   : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
               }`}
             >
@@ -289,8 +290,17 @@ export function ClientInstances() {
                   className="group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
                 >
                   <div
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={expanded}
                     className="flex gap-4 px-4 py-3 cursor-pointer"
                     onClick={() => toggleExpand(appName, environmentIds)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleExpand(appName, environmentIds);
+                      }
+                    }}
                   >
                     <div className="flex-1 min-w-0 flex items-center gap-3">
                       <div className="p-1.5 rounded-lg shrink-0 bg-muted">
@@ -305,7 +315,7 @@ export function ClientInstances() {
                             key={kt}
                             className={`inline-flex items-center gap-1 px-1.5 py-1 rounded text-caption font-semibold border shrink-0 leading-none ${
                               kt === 'FRONTEND'
-                                ? 'text-warning bg-warning/10 border-warning/20'
+                                ? 'text-palette-warning-600 dark:text-palette-warning-700 bg-warning/10 border-warning/20'
                                 : 'text-brand bg-brand/10 border-brand/20'
                             }`}
                           >

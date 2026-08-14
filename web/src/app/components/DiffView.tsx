@@ -25,18 +25,18 @@ function rowClasses(hasRemoved: boolean, hasAdded: boolean, compact: boolean) {
 
 function renderValue(value: DiffChange['before'] | DiffChange['after'], isOld: boolean) {
   if (value === null || value === undefined || value === '') {
-    return <span className="text-muted-foreground/50 italic">—</span>;
+    return <span className="text-muted-foreground/70 dark:text-muted-foreground italic">—</span>;
   }
   if (isValidElement(value)) {
     return value;
   }
   if (isOld) {
     return (
-      <span className="text-caption text-muted-foreground line-through">{String(value)}</span>
+      <span className="text-caption text-muted-foreground line-through">− {String(value)}</span>
     );
   }
   return (
-    <span className="text-caption font-medium text-foreground/90">{String(value)}</span>
+    <span className="text-caption font-medium text-foreground/90">+ {String(value)}</span>
   );
 }
 

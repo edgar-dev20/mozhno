@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useMemo, memo } from 'react';
 import { aggregateHourPairs } from '@/shared/sparklineAggregation';
 import { motion } from 'motion/react';
+import { useT } from '@/i18n';
 
 interface SparklineBucket {
   trueCount: number;
@@ -13,6 +14,7 @@ interface FlagSparklineProps {
 }
 
 export const FlagSparkline = memo(function FlagSparkline({ data, height = 56 }: FlagSparklineProps) {
+  const t = useT();
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(100);
 
@@ -35,7 +37,7 @@ export const FlagSparkline = memo(function FlagSparkline({ data, height = 56 }: 
   if (data.length === 0) {
     return (
       <div
-        className="flex items-center justify-center text-caption text-muted-foreground/40"
+        className="flex items-center justify-center text-caption text-muted-foreground/70 dark:text-muted-foreground"
         style={{ height }}
       >
         —
@@ -61,7 +63,7 @@ export const FlagSparkline = memo(function FlagSparkline({ data, height = 56 }: 
           height={height}
           className="block"
           role="img"
-          aria-label="Sparkline chart"
+          aria-label={t('flags.metrics.chartTitle')}
         >
           {displayData.map((d, i) => {
             const x = paddingX + i * (barWidth + gap);

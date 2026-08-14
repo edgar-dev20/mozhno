@@ -43,7 +43,7 @@ export const FlagCardDetail = memo(function FlagCardDetail({
             <span className="text-caption font-mono text-muted-foreground">{flag.key}</span>
           </div>
           {flag.description && (
-            <div className="text-caption text-foreground/60 dark:text-muted-foreground/60 mt-0.5 mb-1 line-clamp-3 break-words">
+            <div className="text-caption text-foreground/60 dark:text-muted-foreground mt-0.5 mb-1 line-clamp-3 break-words">
               {flag.description}
             </div>
           )}

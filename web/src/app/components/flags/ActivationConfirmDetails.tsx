@@ -126,8 +126,8 @@ export function ActivationConfirmDetails({
       {hasSources && (
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Filter size={11} className="text-muted-foreground/70" />
-            <span className="text-caption font-semibold text-muted-foreground/70">
+            <Filter size={11} className="text-muted-foreground/70 dark:text-muted-foreground" />
+            <span className="text-caption font-semibold text-muted-foreground/70 dark:text-muted-foreground">
               {t('flags.activateRules')} · {sources.length}
             </span>
             <span className="h-px flex-1 bg-border" />

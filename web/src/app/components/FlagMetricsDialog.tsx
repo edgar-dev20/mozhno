@@ -287,6 +287,7 @@ export function FlagMetricsDialog({
   const closeButton = (
     <button
       onClick={() => onOpenChange(false)}
+      aria-label={t('common.close')}
       className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0"
     >
       <X size={20} />
@@ -402,7 +403,7 @@ export function FlagMetricsDialog({
       {/* Filter breadcrumb */}
       {(filterAppName || filterInstanceId) && (
         <div className="flex-shrink-0 mx-5 mt-3 flex items-center gap-1.5 text-caption">
-          <span className="text-muted-foreground/40">Showing:</span>
+          <span className="text-muted-foreground/70 dark:text-muted-foreground">Showing:</span>
           <button onClick={clearFilters} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent text-muted-foreground hover:bg-accent/80 transition-colors font-medium">{t('common.all')}</button>
           {filterAppName && (
             <>
@@ -416,7 +417,7 @@ export function FlagMetricsDialog({
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sparkline-true/10 text-sparkline-true font-medium">{filterInstance.instanceId}</span>
             </>
           )}
-          <button onClick={clearFilters} className="ml-2 p-0.5 rounded text-muted-foreground/40 hover:text-foreground/60 transition-colors"><X size={12} /></button>
+          <button onClick={clearFilters} aria-label={t('common.clearFilter')} className="ml-2 p-1.5 rounded text-muted-foreground/70 dark:text-muted-foreground hover:text-foreground/60 transition-colors"><X size={12} /></button>
         </div>
       )}
 
@@ -463,7 +464,7 @@ export function FlagMetricsDialog({
                           const envName = env?.name ?? '';
                           const envColor = getEnvColor(env ?? inst.environmentId);
                           return (
-                            <button key={inst.id} onClick={(e) => { e.stopPropagation(); selectInstance(group.appName, inst.id); }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 ${isInstSelected ? 'bg-sparkline-true/10 ring-1 ring-sparkline-true/20' : 'bg-secondary/30 hover:bg-secondary/50'}`}>
+                            <div key={inst.id} role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); selectInstance(group.appName, inst.id); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectInstance(group.appName, inst.id); } }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none ${isInstSelected ? 'bg-sparkline-true/10 ring-1 ring-sparkline-true/20' : 'bg-secondary/30 hover:bg-secondary/50'}`}>
                               <StatusDot state={staleness} />
                               <div className="flex-1 min-w-0 flex items-center gap-2">
                                 <TruncatedCopyTooltip value={inst.instanceId} className={`font-mono text-detail font-medium ${isInstSelected ? 'text-sparkline-true' : 'text-foreground/80'}`} />
@@ -477,7 +478,7 @@ export function FlagMetricsDialog({
                                 {inst.sdkVersion && (<span className="text-muted-foreground/35 font-mono text-caption shrink-0">v{inst.sdkVersion}</span>)}
                                 <span className="text-muted-foreground/30 text-caption w-14 text-right tabular-nums shrink-0">{timeAgo(inst.lastSeenAt)}</span>
                               </div>
-                            </button>
+                            </div>
                           );
                         })}
                       </div>
@@ -497,7 +498,7 @@ export function FlagMetricsDialog({
       <Drawer.Root open={open} onOpenChange={onOpenChange} direction="bottom">
         <Drawer.Portal>
           <Drawer.Overlay className="fixed inset-0 bg-overlay backdrop-blur-sm z-40" />
-          <Drawer.Content className="bg-card border-t border-border rounded-t-3xl z-50 fixed bottom-0 left-0 right-0 max-h-[92dvh] flex flex-col outline-none">
+          <Drawer.Content className="bg-card border-t border-border rounded-t-3xl z-50 fixed bottom-0 left-0 right-0 max-h-[92dvh] flex flex-col outline-none" aria-label={flagName}>
             <div className="mx-auto mt-3 h-1.5 w-10 rounded-full bg-muted-foreground/20 flex-shrink-0" />
             {header}
             {body}
@@ -511,7 +512,7 @@ export function FlagMetricsDialog({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-background/60 backdrop-blur-sm z-40 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 duration-300" />
-        <Dialog.Content className="fixed right-4 top-4 bottom-4 w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:[--tw-exit-translate-x:calc(100%+1rem)] data-[state=open]:slide-in-from-right-full duration-300">
+        <Dialog.Content className="fixed right-4 top-4 bottom-4 w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:[--tw-exit-translate-x:calc(100%+1rem)] data-[state=open]:slide-in-from-right-full duration-300" aria-label={flagName}>
           {header}
           {body}
         </Dialog.Content>

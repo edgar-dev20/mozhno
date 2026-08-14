@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DayPicker } from 'react-day-picker';
 import { addMonths, addYears, setMonth, setYear, startOfMonth } from 'date-fns';
 
-import { useLocale } from '@/i18n';
+import { useLocale, useT } from '@/i18n';
 import { cn } from '@/app/components/ui/utils';
 
 const MONTHS_RU = [
@@ -53,6 +53,7 @@ function MonthYearCaption({
   onMonthChange: (d: Date) => void;
   months: string[];
 }) {
+  const t = useT();
   const currentYear = month.getFullYear();
   const currentMonth = month.getMonth();
 
@@ -63,6 +64,7 @@ function MonthYearCaption({
           <button
             type="button"
             onClick={() => onMonthChange(addYears(month, -1))}
+            aria-label={t('common.previousYear')}
             className="size-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground opacity-70 hover:opacity-100 transition-colors inline-flex items-center justify-center"
           >
             <ChevronLeft className="size-4" />
@@ -77,6 +79,7 @@ function MonthYearCaption({
           <button
             type="button"
             onClick={() => onMonthChange(addYears(month, 1))}
+            aria-label={t('common.nextYear')}
             className="size-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground opacity-70 hover:opacity-100 transition-colors inline-flex items-center justify-center"
           >
             <ChevronRight className="size-4" />
@@ -117,6 +120,7 @@ function MonthYearCaption({
           <button
             type="button"
             onClick={() => onMonthChange(setYear(month, decadeStart - 12))}
+            aria-label={t('common.previousDecade')}
             className="size-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground opacity-70 hover:opacity-100 transition-colors inline-flex items-center justify-center"
           >
             <ChevronLeft className="size-4" />
@@ -127,6 +131,7 @@ function MonthYearCaption({
           <button
             type="button"
             onClick={() => onMonthChange(setYear(month, decadeStart + 12))}
+            aria-label={t('common.nextDecade')}
             className="size-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground opacity-70 hover:opacity-100 transition-colors inline-flex items-center justify-center"
           >
             <ChevronRight className="size-4" />
@@ -161,6 +166,7 @@ function MonthYearCaption({
       <button
         type="button"
         onClick={() => onMonthChange(addMonths(month, -1))}
+        aria-label={t('common.previousMonth')}
         className="size-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground opacity-70 hover:opacity-100 transition-colors inline-flex items-center justify-center"
       >
         <ChevronLeft className="size-4" />
@@ -182,6 +188,7 @@ function MonthYearCaption({
       <button
         type="button"
         onClick={() => onMonthChange(addMonths(month, 1))}
+        aria-label={t('common.nextMonth')}
         className="size-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground opacity-70 hover:opacity-100 transition-colors inline-flex items-center justify-center"
       >
         <ChevronRight className="size-4" />
@@ -237,7 +244,7 @@ function Calendar({
         month_grid: cn('w-full border-collapse', isPicker && 'hidden'),
         weekdays: cn('flex w-full', isPicker && 'hidden'),
         weekday:
-          'text-muted-foreground/70 size-8 font-medium text-xs uppercase tracking-wider inline-flex items-center justify-center',
+          'text-muted-foreground/70 dark:text-muted-foreground size-8 font-medium text-xs uppercase tracking-wider inline-flex items-center justify-center',
         weeks: cn('flex flex-col mt-2', isPicker && 'hidden'),
         week: 'flex w-full',
         day: cn(

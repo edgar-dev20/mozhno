@@ -450,7 +450,7 @@ export function Settings() {
 
             <div className="space-y-4">
               {maxEnvironments != null && environments.length >= maxEnvironments ? (
-                <div className="p-3 bg-warning/10 border border-warning/20 rounded-xl text-body-sm text-warning">
+                <div className="p-3 bg-warning/10 border border-warning/20 rounded-xl text-body-sm text-palette-warning-600 dark:text-palette-warning-700">
                   {t('settings.envLimitReached', {
                     count: String(maxEnvironments),
                     max: String(maxEnvironments),
@@ -691,10 +691,10 @@ export function Settings() {
               <div className="flex items-start gap-3">
                 <Key size={18} className="text-warning shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-body-sm font-semibold text-warning">
+                  <p className="text-body-sm font-semibold text-palette-warning-600 dark:text-palette-warning-700">
                     {t('settings.envApiKeyCount', { count: String(apiKeysByEnv[editingEnv.id] || 0) })}
                   </p>
-                  <p className="text-caption text-warning mt-1">
+                  <p className="text-caption text-palette-warning-600 dark:text-palette-warning-700 mt-1">
                     {t('settings.deleteEnvBlocked')}
                   </p>
                 </div>

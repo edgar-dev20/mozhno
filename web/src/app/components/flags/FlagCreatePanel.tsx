@@ -58,7 +58,7 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
 
   return (
     <form id="flag-create-form" onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      <FormField label={t('common.name')} maxLength={120} value={nameValue}>
+      <FormField label={t('common.name')} maxLength={120} value={nameValue} error={errors.name?.message}>
         <input
           type="text"
           {...register('name')}
@@ -66,7 +66,6 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
           placeholder={t('flags.namePlaceholderEdit')}
           className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground"
         />
-        {errors.name && <p className="text-caption text-destructive mt-1">{errors.name.message}</p>}
       </FormField>
 
       <FormField
@@ -74,15 +73,15 @@ export function FlagCreatePanel({ allTags, onSave }: FlagCreatePanelProps) {
         hint={t('flags.keyHint')}
         maxLength={100}
         value={keyValue}
+        error={errors.key?.message}
       >
         <input
           type="text"
           {...register('key')}
           maxLength={100}
           placeholder="new-checkout-flow"
-          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
+          className="w-full bg-input-background border border-border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground font-mono"
         />
-        {errors.key && <p className="text-caption text-destructive mt-1">{errors.key.message}</p>}
       </FormField>
 
       <FormField label={t('common.description')} maxLength={160} value={descriptionValue}>

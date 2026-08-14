@@ -16,7 +16,7 @@ export function SearchInput({ value, onChange, placeholder, className = '' }: Se
     <div className={`relative w-full sm:max-w-md ${className}`}>
       <Search
         size={14}
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70"
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 dark:text-muted-foreground"
       />
       <input
         type="text"

@@ -60,7 +60,7 @@ export function WebhookBodyEditor({
               </span>
             )}
           </span>
-          <span className="text-caption font-normal text-muted-foreground/50 tabular-nums">
+          <span className="text-caption font-normal text-muted-foreground/70 dark:text-muted-foreground tabular-nums">
             {body.length}/10000
           </span>
         </label>
@@ -107,11 +107,20 @@ export function WebhookBodyEditor({
         maxLength={10000}
         placeholder={t('integrations.bodyPlaceholder')}
         rows={7}
+        aria-invalid={jsonContentType && jsonValid === false || undefined}
+        aria-describedby={
+          jsonContentType && jsonValid === false ? 'webhook-body-error' : undefined
+        }
         className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-body-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground resize-y whitespace-pre overflow-x-auto ${
           jsonContentType && jsonValid === false ? 'border-warning/30' : 'border-border'
         }`}
       />
-      <p className="text-caption text-muted-foreground/70">{t('integrations.bodyHint')}</p>
+      {jsonContentType && jsonValid === false && (
+        <p id="webhook-body-error" role="alert" className="text-caption text-palette-warning-600 dark:text-palette-warning-700">
+          {t('integrations.bodyInvalidJson')}
+        </p>
+      )}
+      <p className="text-caption text-muted-foreground/70 dark:text-muted-foreground">{t('integrations.bodyHint')}</p>
     </div>
   );
 }

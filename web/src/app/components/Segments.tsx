@@ -832,8 +832,8 @@ export function Segments() {
                                 key={vi}
                                 className={`inline-flex items-center gap-1 px-2 py-1 text-caption font-mono rounded-md border break-all leading-none ${
                                   inWhitelist
-                                    ? 'bg-success/10 text-success border-success/20'
-                                    : 'bg-warning/10 text-warning border-warning/30'
+                                    ? 'bg-success/10 text-success dark:text-palette-success-700 border-success/20'
+                                    : 'bg-warning/10 text-palette-warning-600 dark:text-palette-warning-700 border-warning/30'
                                 }`}
                               >
                                 {v}
@@ -842,7 +842,8 @@ export function Segments() {
                                     e.stopPropagation();
                                     removeValue(c.id, vi);
                                   }}
-                                  className={`${inWhitelist ? 'text-success' : 'text-warning'} hover:text-destructive transition-colors`}
+                                  aria-label={t('common.remove')}
+                                  className={`p-1.5 ${inWhitelist ? 'text-success dark:text-palette-success-700' : 'text-palette-warning-600 dark:text-palette-warning-700'} hover:text-destructive transition-colors`}
                                 >
                                   <X size={11} />
                                 </button>

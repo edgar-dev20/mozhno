@@ -25,8 +25,16 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.2, delay: index * 0.03 }}
+      role="button"
+      tabIndex={0}
       className="group relative bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer"
       onClick={() => onEdit(item)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onEdit(item);
+        }
+      }}
     >
       <div
         className={`h-1.5 bg-gradient-to-r ${hasError ? 'from-destructive to-warning' : 'from-gradient-start to-gradient-end'}`}
@@ -43,7 +51,7 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
             </div>
             <div className="min-w-0">
               <h3 className="font-semibold text-foreground truncate">{item.name}</h3>
-              <p className="text-caption text-muted-foreground/70 font-mono mt-0.5 truncate">
+              <p className="text-caption text-muted-foreground/70 dark:text-muted-foreground font-mono mt-0.5 truncate">
                 {cfg.url || t('integrations.urlNotSet')}
               </p>
             </div>
@@ -78,7 +86,7 @@ export function WebhookCard({ item, index, onEdit }: WebhookCardProps) {
               {t('integrations.status.error')}
             </Badge>
           )}
-          <span className="text-caption text-muted-foreground/70">
+          <span className="text-caption text-muted-foreground/70 dark:text-muted-foreground">
             {evts.length > 0
               ? t('integrations.eventCount', { count: String(evts.length) })
               : t('integrations.noEvents')}

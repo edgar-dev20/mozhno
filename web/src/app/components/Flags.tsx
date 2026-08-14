@@ -280,7 +280,10 @@ export function Flags() {
     const targetKey = searchParams.get('open');
     if (targetKey && flags.length > 0 && !expandedKeys.has(targetKey)) {
       setExpandedKeys(new Set([...expandedKeys, targetKey]));
-      document.getElementById(`flag-card-${targetKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document
+        .getElementById(`flag-card-${targetKey}`)
+        ?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
     }
   }, [flags, searchParams, expandedKeys, setExpandedKeys]);
 
@@ -401,7 +404,12 @@ export function Flags() {
 
       {archivedFlags.length > 0 && (
         <div className="flex justify-center pt-2">
-          <GradientButton variant="muted" onClick={() => setArchiveOpen(!archiveOpen)} icon={<Archive size={16} />}>
+          <GradientButton
+            variant="muted"
+            onClick={() => setArchiveOpen(!archiveOpen)}
+            aria-expanded={archiveOpen}
+            icon={<Archive size={16} />}
+          >
             {t('flags.archiveSection')} ({archivedFlags.length})
           </GradientButton>
         </div>

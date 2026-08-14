@@ -35,7 +35,7 @@ export function EmptyState({
             </div>
           ) : null}
           <div>
-            <p className="text-h3 font-heading text-foreground">{title}</p>
+            <h2 className="text-h3 font-heading text-foreground">{title}</h2>
             <p className="text-body-sm text-muted-foreground mt-1.5 leading-body">{description}</p>
           </div>
           {buttonLabel && onAction && (

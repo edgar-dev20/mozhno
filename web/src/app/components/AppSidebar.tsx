@@ -5,7 +5,7 @@ import { useAuth } from '@/app/auth/useAuth';
 import { Wordmark } from '@/shared/components/Wordmark';
 import { Hairline } from '@/shared/components/Hairline';
 import { GradientButton } from '@/shared/components/GradientButton';
-import { Sheet, SheetContent } from '@/app/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle } from '@/app/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
 import { PanelLeftIcon, X } from 'lucide-react';
 import { OVERVIEW_ITEMS, MANAGEMENT_ITEMS, TEAM_ITEMS, SETTINGS_ITEMS } from '@/app/components/navConfig';
@@ -88,6 +88,7 @@ function NavLinkItem({
       to={item.path}
       end={item.exact}
       onClick={onClick}
+      aria-label={collapsed ? t(item.labelKey as MessageKey) : undefined}
       className={({ isActive: active }) =>
         `flex items-center gap-3 rounded-lg transition-all duration-200 text-body-sm font-medium w-full text-left px-3 py-2.5 ${
           active
@@ -131,7 +132,7 @@ function SidebarContent({
   const shortcutKey = isMac ? '⌘B' : 'Ctrl+B';
 
   return (
-    <nav aria-label="Navigation" className="flex flex-col h-full">
+    <nav aria-label={t('navigation.ariaNav')} className="flex flex-col h-full">
       <div
         className={`h-14 flex items-center border-b border-border transition-all ${collapsed && !mobile ? 'justify-center px-2' : 'px-5'}`}
       >
@@ -213,6 +214,7 @@ function SidebarContent({
             onClick={() => setCollapsed(!collapsed)}
             icon={<PanelLeftIcon size={15} className={collapsed ? 'rotate-180' : ''} />}
             className="w-full"
+            aria-label={t('common.collapse')}
             title={collapsed ? shortcutKey : undefined}
           >
             {!collapsed && (
@@ -253,6 +255,7 @@ export function AppSidebar() {
     <>
       <Sheet open={mobileOpen} onOpenChange={(open) => { if (!open) toggleMobile(); }}>
         <SheetContent side="left" className="w-[78vw] max-w-64 p-0 gap-0 rounded-r-2xl bg-card [&>button]:hidden">
+          <SheetTitle className="sr-only">{t('navigation.menu')}</SheetTitle>
           <div className="flex items-center justify-between h-14 px-5 border-b border-border shrink-0">
             <Wordmark text="можно" size="md" />
             <button
@@ -323,7 +326,7 @@ export function AppSidebar() {
         className={`hidden md:flex flex-col bg-card border-r border-border shadow-sm transition-[width] duration-300 overflow-hidden min-w-0 ${
           collapsed ? 'w-16' : 'w-56'
         }`}
-        aria-label="Sidebar"
+        aria-label={t('navigation.ariaSidebar')}
       >
         <SidebarContent />
       </aside>

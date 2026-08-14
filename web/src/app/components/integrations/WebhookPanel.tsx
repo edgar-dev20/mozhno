@@ -42,7 +42,7 @@ export function WebhookPanel({
         <Switch
           checked={form.formEnabled}
           onCheckedChange={form.setFormEnabled}
-          className="data-[state=checked]:bg-primary scale-75 origin-right"
+          className="data-[state=checked]:bg-primary"
         />
       </div>
 
@@ -91,13 +91,13 @@ export function WebhookPanel({
           <div className="flex items-start gap-3">
             <AlertTriangle size={18} className="text-warning shrink-0 mt-0.5" />
             <div className="min-w-0">
-              <div className="text-body-sm font-medium text-warning">
+              <div className="text-body-sm font-medium text-palette-warning-600 dark:text-palette-warning-700">
                 {t('integrations.lastDeliveryError')}
               </div>
-              <div className="text-caption text-warning mt-1 font-mono whitespace-pre-wrap break-all">
+              <div className="text-caption text-palette-warning-600 dark:text-palette-warning-700 mt-1 font-mono whitespace-pre-wrap break-all">
                 {editingLastError}
               </div>
-              <div className="flex items-center gap-1 mt-2 text-caption text-warning">
+              <div className="flex items-center gap-1 mt-2 text-caption text-palette-warning-600 dark:text-palette-warning-700">
                 <Clock size={11} />
                 {t('integrations.deliveryErrorHint')}
               </div>

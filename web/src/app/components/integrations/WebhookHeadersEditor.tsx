@@ -117,7 +117,7 @@ export function WebhookHeadersEditor({
                     </div>
                   )}
                 </div>
-                <div className="text-[10px] font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+                <div className="text-[10px] font-normal text-muted-foreground/70 dark:text-muted-foreground tabular-nums text-right mt-0.5">
                   {h.key.length}/500
                 </div>
               </div>
@@ -131,13 +131,14 @@ export function WebhookHeadersEditor({
                   placeholder={t('integrations.headerValuePlaceholder')}
                   className="w-full bg-input-background border border-border rounded-lg px-3 py-2 text-caption font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
                 />
-                <div className="text-[10px] font-normal text-muted-foreground/50 tabular-nums text-right mt-0.5">
+                <div className="text-[10px] font-normal text-muted-foreground/70 dark:text-muted-foreground tabular-nums text-right mt-0.5">
                   {h.value.length}/500
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => onRemove(h.id)}
+                aria-label={t('common.remove')}
                 className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0 mt-0.5"
               >
                 <X size={14} />

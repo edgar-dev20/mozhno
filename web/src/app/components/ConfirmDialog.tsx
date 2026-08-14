@@ -194,7 +194,7 @@ export function ConfirmDialog({
               className={cn(
                 'flex size-7 shrink-0 items-center justify-center rounded-md border',
                 variant === 'warning'
-                  ? 'border-warning/20 bg-warning/10 text-warning'
+                  ? 'border-warning/20 bg-warning/10 text-palette-warning-600 dark:text-palette-warning-700'
                   : 'border-primary/20 bg-primary/10 text-primary',
               )}
             >

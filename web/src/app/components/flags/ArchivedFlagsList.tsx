@@ -112,7 +112,7 @@ export function ArchivedFlagsList({ flags, onUnarchive, tags }: ArchivedFlagsLis
                     })}
                   </div>
                 )}
-                <div className="flex items-center gap-2 mt-1 text-caption text-muted-foreground/70">
+                <div className="flex items-center gap-2 mt-1 text-caption text-muted-foreground/70 dark:text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <User size={10} />
                     {flag.createdBy ?? '-'}

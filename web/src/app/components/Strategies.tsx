@@ -8,7 +8,7 @@ const BUILTIN = [
     nameKey: 'strategies.gradualName' as const,
     descKey: 'strategies.gradualDesc' as const,
     icon: Percent,
-    color: 'text-info',
+    color: 'text-palette-info-600 dark:text-palette-info-700',
     bg: 'bg-info/10',
   },
   {
@@ -22,7 +22,7 @@ const BUILTIN = [
     nameKey: 'strategies.killswitchName' as const,
     descKey: 'strategies.killswitchDesc' as const,
     icon: AlertTriangle,
-    color: 'text-destructive',
+    color: 'text-destructive dark:text-palette-danger-700',
     bg: 'bg-destructive/10',
   },
 ];

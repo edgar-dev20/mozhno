@@ -63,29 +63,38 @@ export function DatePicker({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          aria-label={placeholder ?? t('common.selectDate')}
-          className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-lg px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${className}`}
-        >
-          <Calendar size={14} className="text-muted-foreground/70 shrink-0" />
-          <span className={displayDate ? 'text-foreground/80' : 'text-muted-foreground'}>
-            {displayDate
-              ? formatDisplay(value!, dateLocale)
-              : (placeholder ?? t('common.selectDate'))}
-          </span>
-          {displayDate && (
-            <span
-              onClick={handleClear}
-              className="ml-auto shrink-0 rounded p-0.5 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            >
-              <X size={13} />
+      <div className={`relative ${className}`}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            aria-label={
+              displayDate
+                ? formatDisplay(value!, dateLocale)
+                : (placeholder ?? t('common.selectDate'))
+            }
+            className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-lg px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${displayDate ? 'pr-8' : ''}`}
+          >
+            <Calendar size={14} className="text-muted-foreground/70 dark:text-muted-foreground shrink-0" />
+            <span className={displayDate ? 'text-foreground/80' : 'text-muted-foreground'}>
+              {displayDate
+                ? formatDisplay(value!, dateLocale)
+                : (placeholder ?? t('common.selectDate'))}
             </span>
-          )}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent className="rounded-xl w-auto p-0" align="center" avoidCollisions={false}>
+          </button>
+        </PopoverTrigger>
+        {displayDate && (
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={handleClear}
+            aria-label={t('common.clearFilter')}
+            className="absolute right-1 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
+          >
+            <X size={13} />
+          </button>
+        )}
+      </div>
+      <PopoverContent className="rounded-xl w-auto p-0 max-w-[calc(100vw-2rem)]" align="center" avoidCollisions={false}>
         <CalendarComponent
           mode="single"
           selected={value ?? undefined}

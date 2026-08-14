@@ -15,9 +15,12 @@ export function FormField({ label, children, hint, error, maxLength, value }: Fo
   const errorId = error ? `${id}-error` : undefined;
   const describedByIds = [hintId, errorId].filter(Boolean).join(' ') || undefined;
 
-  const childProps: Record<string, string | undefined> = { id };
+  const childProps: Record<string, string | boolean | undefined> = { id };
   if (describedByIds) {
     childProps['aria-describedby'] = describedByIds;
+  }
+  if (error) {
+    childProps['aria-invalid'] = true;
   }
 
   return (
@@ -28,17 +31,21 @@ export function FormField({ label, children, hint, error, maxLength, value }: Fo
       >
         <span>{label}</span>
         {maxLength !== undefined && value !== undefined && (
-          <span className="text-xs font-normal text-muted-foreground/50 tabular-nums">
+          <span className="text-xs font-normal text-muted-foreground/70 dark:text-muted-foreground tabular-nums">
             {value.length}/{maxLength}
           </span>
         )}
       </label>
-      {React.isValidElement(children)
-        ? React.cloneElement(
-            children as React.ReactElement<{ id?: string; 'aria-describedby'?: string }>,
-            childProps,
-          )
-        : children}
+  {React.isValidElement(children)
+    ? React.cloneElement(
+        children as React.ReactElement<{
+          id?: string;
+          'aria-describedby'?: string;
+          'aria-invalid'?: boolean;
+        }>,
+        childProps,
+      )
+    : children}
       {hint && (
         <p id={hintId} className="text-xs text-muted-foreground pl-1">
           {hint}

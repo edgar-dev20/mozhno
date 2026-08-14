@@ -54,9 +54,17 @@ function PanelContent({
         <div className="flex-1 relative overflow-hidden">
           <div inert className="absolute inset-0 overflow-y-auto p-4 sm:p-6">{children}</div>
           <div
+            role="button"
+            tabIndex={0}
             onClick={onDiffDismiss}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onDiffDismiss();
+              }
+            }}
+            aria-label={t('flags.diffDismissTitle')}
             className="absolute inset-0 bg-overlay backdrop-blur-[2px] cursor-pointer z-10 flex items-start justify-center pt-8"
-            title={t('flags.diffDismissTitle')}
           />
         </div>
       ) : (

@@ -164,7 +164,7 @@ export function ApiKeys() {
   };
   const getKeyTypeColor = (t: string) =>
     t === 'FRONTEND'
-      ? 'text-warning dark:text-warning bg-warning/10 dark:bg-warning/10'
+      ? 'text-palette-warning-600 dark:text-palette-warning-700 bg-warning/10 dark:bg-warning/10'
       : 'text-brand dark:text-brand bg-brand/10 dark:bg-brand/10';
   const getKeyTypeLabel = (t: string) => (t === 'FRONTEND' ? 'Frontend' : 'Server');
   const getKeyTypeIcon = (t: string) => (t === 'FRONTEND' ? Globe : Server);
@@ -212,7 +212,7 @@ export function ApiKeys() {
     const style =
       type === 'FRONTEND'
         ? {
-            on: 'bg-warning/10 text-warning border-warning/20',
+            on: 'bg-warning/10 text-palette-warning-600 dark:text-palette-warning-700 border-warning/20',
             off: 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent',
           }
         : {
@@ -333,8 +333,17 @@ export function ApiKeys() {
                     className="group bg-card rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden"
                   >
                     <div
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={expanded}
                       className="flex gap-4 px-4 py-3 cursor-pointer"
                       onClick={() => toggleExpand(k.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          toggleExpand(k.id);
+                        }
+                      }}
                     >
                       <div className="flex-1 min-w-0 flex items-center gap-3">
                         <div className={`p-1.5 rounded-lg shrink-0 ${getKeyTypeColor(k.keyType)}`}>
@@ -390,7 +399,7 @@ export function ApiKeys() {
                             <div className="p-4 pb-3">
                               <div className="bg-warning/10 border border-warning/20 rounded-xl p-4">
                                 <div className="flex items-center justify-between mb-2">
-                                  <span className="text-caption font-semibold text-warning uppercase tracking-wider">
+                                  <span className="text-caption font-semibold text-palette-warning-600 dark:text-palette-warning-700 uppercase tracking-wider">
                                     {t('apiKeys.secretKey')}
                                   </span>
                                   <div className="flex items-center gap-1">
@@ -399,7 +408,7 @@ export function ApiKeys() {
                                         e.stopPropagation();
                                         setShowKey(showKey === k.id ? null : k.id);
                                       }}
-                                      className="flex items-center gap-1.5 px-2.5 py-1 text-caption font-medium rounded-xl text-warning bg-warning/10 hover:bg-warning/10 transition-colors"
+                                      className="flex items-center gap-1.5 px-2.5 py-1 text-caption font-medium rounded-xl text-palette-warning-600 dark:text-palette-warning-700 bg-warning/10 hover:bg-warning/10 transition-colors"
                                     >
                                       {showKey === k.id ? (
                                         <>
@@ -422,8 +431,8 @@ export function ApiKeys() {
                                       disabled={copiedKeyId === k.id}
                                       className={`flex items-center gap-1 px-2.5 py-1 text-caption font-medium rounded-xl transition-colors ${
                                         copiedKeyId === k.id
-                                          ? 'text-success bg-success/10 cursor-default'
-                                          : 'text-warning bg-warning/10 hover:bg-warning/10'
+                                          ? 'text-success dark:text-palette-success-700 bg-success/10 cursor-default'
+                                          : 'text-palette-warning-600 dark:text-palette-warning-700 bg-warning/10 hover:bg-warning/10'
                                       }`}
                                     >
                                       {copiedKeyId === k.id ? (
@@ -554,7 +563,7 @@ export function ApiKeys() {
           {error && <ErrorBox>{error}</ErrorBox>}
 
           <div className="p-4 bg-warning/10 border border-warning/20 rounded-lg">
-            <p className="text-caption text-warning">{t('apiKeys.panelWarning')}</p>
+            <p className="text-caption text-palette-warning-600 dark:text-palette-warning-700">{t('apiKeys.panelWarning')}</p>
           </div>
 
           <div className="space-y-1.5">
@@ -570,10 +579,12 @@ export function ApiKeys() {
               onChange={(e) => { setFormName(e.target.value); setFormNameError(''); }}
               maxLength={120}
               placeholder={t('apiKeys.formNamePlaceholder')}
+              aria-invalid={!!formNameError || undefined}
+              aria-describedby={formNameError ? 'apikey-name-error' : undefined}
               className={`w-full bg-input-background border rounded-lg px-4 py-2.5 text-body-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:font-normal placeholder:text-muted-foreground ${formNameError ? 'border-destructive' : 'border-border'}`}
             />
             {formNameError && (
-              <p className="text-caption text-destructive">{formNameError}</p>
+              <p id="apikey-name-error" role="alert" className="text-caption text-destructive">{formNameError}</p>
             )}
           </div>
 
@@ -585,7 +596,7 @@ export function ApiKeys() {
               value={String(formEnvId ?? '')}
               onValueChange={(v) => { setFormEnvId(v ? Number(v) : null); setFormEnvError(''); }}
             >
-              <SelectTrigger className={`w-full bg-input-background rounded-lg px-4 py-2.5 h-auto text-body-sm ${formEnvError ? 'border-destructive' : 'border-input'}`}>
+              <SelectTrigger aria-invalid={!!formEnvError || undefined} aria-describedby={formEnvError ? 'apikey-env-error' : undefined} className={`w-full bg-input-background rounded-lg px-4 py-2.5 h-auto text-body-sm ${formEnvError ? 'border-destructive' : 'border-input'}`}>
                 <SelectValue placeholder={t('apiKeys.formEnvPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
@@ -600,7 +611,7 @@ export function ApiKeys() {
               </SelectContent>
             </Select>
             {formEnvError && (
-              <p className="text-caption text-destructive">{formEnvError}</p>
+              <p id="apikey-env-error" role="alert" className="text-caption text-destructive">{formEnvError}</p>
             )}
           </div>
 
@@ -627,7 +638,7 @@ export function ApiKeys() {
                     colorHex: '#c08140',
                     borderColor: 'border-warning',
                     bgSelected: 'bg-warning/10',
-                    textSelected: 'text-warning',
+                    textSelected: 'text-palette-warning-600 dark:text-palette-warning-700',
                     label: 'Frontend',
                     description: t('apiKeys.formFrontendDesc'),
                   },

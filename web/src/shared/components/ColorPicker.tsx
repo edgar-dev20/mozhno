@@ -64,7 +64,7 @@ export function ColorPicker({
                 {previewPlaceholder}
               </div>
             ) : null}
-            <div className="text-caption text-muted-foreground/70 font-mono flex items-center gap-1">
+            <div className="text-caption text-muted-foreground/70 dark:text-muted-foreground font-mono flex items-center gap-1">
               <Hash size={10} />
               {value}
             </div>
@@ -86,11 +86,12 @@ export function ColorPicker({
                   applyCustomHex();
                 }
               }}
+              aria-label={t('tags.form.color.hexLabel')}
               placeholder={t('tags.form.color.hexPlaceholder')}
               maxLength={7}
               className="w-full bg-card border border-border rounded-xl pl-8 pr-4 py-2.5 text-body-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-all placeholder:text-muted-foreground"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-caption font-normal text-muted-foreground/50 tabular-nums">
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-caption font-normal text-muted-foreground/70 dark:text-muted-foreground tabular-nums">
               {customHex.length}/7
             </span>
           </div>
@@ -109,7 +110,7 @@ export function ColorPicker({
         {COLOR_PALETTES.map(([key, colors]) => (
           <div key={key}>
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-caption font-semibold text-muted-foreground/70 uppercase tracking-wider">
+              <span className="text-caption font-semibold text-muted-foreground/70 dark:text-muted-foreground uppercase tracking-wider">
                 {t(key)}
               </span>
               <div className="h-px flex-1 bg-accent" />
@@ -122,7 +123,8 @@ export function ColorPicker({
                     key={c}
                     type="button"
                     onClick={() => onChange(c)}
-                    title={getColorName(c)}
+                    aria-label={getColorName(c)}
+                    aria-pressed={active}
                     className="w-9 h-9 rounded-lg transition-all relative group"
                     style={{
                       backgroundColor: c,
@@ -149,7 +151,7 @@ export function ColorPicker({
         ))}
       </div>
 
-      <p className="text-caption text-muted-foreground/70 flex items-center gap-1">
+      <p className="text-caption text-muted-foreground/70 dark:text-muted-foreground flex items-center gap-1">
         <Sparkles size={12} className="text-warning" />
         {t('tags.form.color.hint')}
       </p>
