@@ -9,6 +9,7 @@ import {
   useEnrichedFlagsQuery,
   useEnvironmentsQuery,
 } from '@/app/hooks/queries';
+import { usePermissions } from '@/app/hooks/usePermissions';
 import {
   Card,
   GradientButton,
@@ -69,9 +70,7 @@ export function Overview() {
   const t = useT();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const role = user?.role;
-  const canWrite = role === 'admin' || role === 'developer';
-  const isAdmin = role === 'admin';
+  const { canWrite, canManage: isAdmin } = usePermissions();
 
   const { data: project } = useProjectQuery();
   const projectId = project?.id ?? null;
@@ -137,7 +136,7 @@ export function Overview() {
             <div className="lg:col-span-2">
               <ActivityFeed t={t} events={overview.recentActivity} />
             </div>
-            <OnboardingChecklist t={t} onboarding={overview.onboarding} />
+            <OnboardingChecklist t={t} onboarding={overview.onboarding} canWrite={canWrite} />
           </div>
         ) : (
           <div className="lg:max-w-3xl">
@@ -145,7 +144,7 @@ export function Overview() {
           </div>
         )}
       </Section>
-      <Fab onClick={() => navigate('/flags?new=1')} label={t('overview.quickActions.createFlag')} />
+      {canWrite && <Fab onClick={() => navigate('/flags?new=1')} label={t('overview.quickActions.createFlag')} />}
     </div>
   );
 }
@@ -797,9 +796,11 @@ function avatarStyle(name: string): React.CSSProperties {
 function OnboardingChecklist({
   t,
   onboarding,
+  canWrite,
 }: {
   t: TFn;
   onboarding: OverviewResponse['onboarding'];
+  canWrite: boolean;
 }) {
   const navigate = useNavigate();
   const items: {
@@ -807,7 +808,7 @@ function OnboardingChecklist({
     labelKey: MessageKey;
     nav?: string;
   }[] = [
-    { key: 'hasFlags', labelKey: 'overview.onboarding.hasFlags', nav: '/flags?new=1' },
+    { key: 'hasFlags', labelKey: 'overview.onboarding.hasFlags', nav: canWrite ? '/flags?new=1' : undefined },
     { key: 'hasEnvironments', labelKey: 'overview.onboarding.hasEnvironments', nav: '/settings' },
     { key: 'hasApiKey', labelKey: 'overview.onboarding.hasApiKey', nav: '/apikeys' },
     { key: 'hasConnectedSdk', labelKey: 'overview.onboarding.hasConnectedSdk', nav: '/applications' },

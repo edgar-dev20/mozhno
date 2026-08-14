@@ -44,6 +44,7 @@ const en = {
     yes: 'Yes',
     no: 'No',
     enabled: 'Enabled',
+    disabled: 'Disabled',
     fileTooBig: 'File too large. Maximum size: {{size}}MB',
     selectPeriod: 'Select period',
     selectDate: 'Select date',

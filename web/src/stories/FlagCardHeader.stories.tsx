@@ -49,6 +49,7 @@ export const Collapsed: Story = {
   args: {
     flag: MOCK_FLAG,
     expanded: false,
+    canWrite: true,
     environments: MOCK_ENVS,
     tags: [],
     onToggleExpand: fn(),
@@ -60,6 +61,7 @@ export const Expanded: Story = {
   args: {
     flag: MOCK_FLAG,
     expanded: true,
+    canWrite: true,
     environments: MOCK_ENVS,
     tags: [],
     onToggleExpand: fn(),
@@ -71,6 +73,7 @@ export const Archived: Story = {
   args: {
     flag: { ...MOCK_FLAG, archived: true },
     expanded: false,
+    canWrite: true,
     environments: MOCK_ENVS,
     tags: [],
     onToggleExpand: fn(),

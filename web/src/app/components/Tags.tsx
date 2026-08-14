@@ -21,6 +21,7 @@ import {
 } from '@/shared';
 import { EmptyTagsIllustration } from '@/shared/components/illustrations';
 import { useProjectQuery, useTagsQuery } from '@/app/hooks/queries';
+import { usePermissions } from '@/app/hooks/usePermissions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
 import { useT, type MessageKey } from '@/i18n';
@@ -57,6 +58,7 @@ const getColorName = (hex: string): string => {
 export function Tags() {
   const t = useT();
   const queryClient = useQueryClient();
+  const { canWrite } = usePermissions();
 
   const { data: project } = useProjectQuery();
   const projectId = project?.id ?? null;
@@ -170,9 +172,11 @@ export function Tags() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('tags.title')} description={t('tags.description')} />
         <div className="hidden sm:block">
-          <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
-            {t('tags.create')}
-          </GradientButton>
+          {canWrite && (
+            <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
+              {t('tags.create')}
+            </GradientButton>
+          )}
         </div>
       </div>
 
@@ -191,7 +195,7 @@ export function Tags() {
           title={t('tags.emptyTitle')}
           description={t('tags.emptyDescription')}
           buttonLabel={t('tags.create')}
-          onAction={openCreate}
+          onAction={canWrite ? openCreate : undefined}
         />
       ) : (
         <AnimatePresence mode="popLayout">
@@ -204,16 +208,16 @@ export function Tags() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2, delay: idx * 0.03 }}
-                className="group relative bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background"
-                onClick={() => openEdit(tag)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e: React.KeyboardEvent) => {
+                className={`group relative bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 ${canWrite ? 'cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background' : ''}`}
+                onClick={canWrite ? () => openEdit(tag) : undefined}
+                role={canWrite ? 'button' : undefined}
+                tabIndex={canWrite ? 0 : undefined}
+                onKeyDown={canWrite ? (e: React.KeyboardEvent) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     openEdit(tag);
                   }
-                }}
+                } : undefined}
               >
                 <ColorBar color={tag.color} />
                 <div className="p-5">
@@ -472,7 +476,7 @@ export function Tags() {
         onConfirm={handleDelete}
         loading={deleting}
       />
-      <Fab onClick={openCreate} label={t('tags.create')} />
+      {canWrite && <Fab onClick={openCreate} label={t('tags.create')} />}
     </div>
   );
 }

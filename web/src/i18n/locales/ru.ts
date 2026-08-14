@@ -42,6 +42,7 @@ const ru = {
     yes: 'Да',
     no: 'Нет',
     enabled: 'Включён',
+    disabled: 'Выключен',
     fileTooBig: 'Файл слишком большой. Максимальный размер: {{size}}MB',
     selectPeriod: 'Выберите период',
     selectDate: 'Выберите дату',

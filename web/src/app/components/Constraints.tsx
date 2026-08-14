@@ -14,6 +14,7 @@ import { SectionHeader, EmptyState, ColorIcon, FormField, GradientButton, ErrorB
 import { EmptyConstraintsIllustration } from '@/shared/components/illustrations';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useContextsQuery, useSegmentsQuery } from '@/app/hooks/queries';
+import { usePermissions } from '@/app/hooks/usePermissions';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/queryKeys';
 import { useT } from '@/i18n';
@@ -51,6 +52,7 @@ function formatDate(iso: string | null): string {
 export function Constraints() {
   const t = useT();
   const queryClient = useQueryClient();
+  const { canWrite } = usePermissions();
 
   const { data: project } = useProjectQuery();
   const projectId = project?.id ?? null;
@@ -278,9 +280,11 @@ export function Constraints() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('constraints.title')} description={t('constraints.description')} />
         <div className="hidden sm:block">
-          <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
-            {t('constraints.create')}
-          </GradientButton>
+          {canWrite && (
+            <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
+              {t('constraints.create')}
+            </GradientButton>
+          )}
         </div>
       </div>
 
@@ -299,7 +303,7 @@ export function Constraints() {
           title={t('constraints.emptyTitle')}
           description={t('constraints.emptyDescription')}
           buttonLabel={t('constraints.create')}
-          onAction={openCreate}
+          onAction={canWrite ? openCreate : undefined}
         />
       ) : (
         <AnimatePresence mode="popLayout">
@@ -313,16 +317,16 @@ export function Constraints() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.2, delay: idx * 0.03 }}
-                  role="button"
-                  tabIndex={0}
-                  className="group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-                  onClick={() => openEdit(c)}
-                  onKeyDown={(e) => {
+                  role={canWrite ? 'button' : undefined}
+                  tabIndex={canWrite ? 0 : undefined}
+                  className={`group bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 ${canWrite ? 'cursor-pointer' : ''}`}
+                  onClick={canWrite ? () => openEdit(c) : undefined}
+                  onKeyDown={canWrite ? (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       openEdit(c);
                     }
-                  }}
+                  } : undefined}
                 >
                   <div
                     className="h-1.5"
@@ -729,7 +733,7 @@ export function Constraints() {
         onConfirm={handleDelete}
         loading={deleting}
       />
-      <Fab onClick={openCreate} label={t('constraints.create')} />
+      {canWrite && <Fab onClick={openCreate} label={t('constraints.create')} />}
     </div>
   );
 }

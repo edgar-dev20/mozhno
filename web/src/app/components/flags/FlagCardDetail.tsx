@@ -16,6 +16,7 @@ interface FlagCardDetailProps {
   onOpenEnvironment: (flag: FlagView, envId: number) => void;
   onToggleFlag: (flag: FlagView, envId: number) => void;
   onMetricsClick: (flagId: number, flagName: string, envId: number) => void;
+  canWrite?: boolean;
 }
 
 export const FlagCardDetail = memo(function FlagCardDetail({
@@ -28,6 +29,7 @@ export const FlagCardDetail = memo(function FlagCardDetail({
   onOpenEnvironment,
   onToggleFlag,
   onMetricsClick,
+  canWrite = false,
 }: FlagCardDetailProps) {
   const t = useT();
   const tagMap = useMemo(() => {
@@ -81,18 +83,20 @@ export const FlagCardDetail = memo(function FlagCardDetail({
             </span>
           )}
         </div>
-        <div className="pt-2 shrink-0">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onOpenGeneral(flag);
-            }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand dark:hover:text-brand hover:border-brand/20 dark:hover:border-brand/30 hover:bg-brand/5 dark:hover:bg-brand/10 transition-all"
-          >
-            <Settings size={12} />
-            {t('common.edit')}
-          </button>
-        </div>
+        {canWrite && (
+          <div className="pt-2 shrink-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenGeneral(flag);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-caption font-medium text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand dark:hover:text-brand hover:border-brand/20 dark:hover:border-brand/30 hover:bg-brand/5 dark:hover:bg-brand/10 transition-all"
+            >
+              <Settings size={12} />
+              {t('common.edit')}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2 sm:flex-[2] sm:min-w-0 pb-1 sm:pb-0">
@@ -109,6 +113,7 @@ export const FlagCardDetail = memo(function FlagCardDetail({
               onOpenEnvironment={onOpenEnvironment}
               onToggleFlag={onToggleFlag}
               onMetricsClick={onMetricsClick}
+              canWrite={canWrite}
             />
           );
         })}

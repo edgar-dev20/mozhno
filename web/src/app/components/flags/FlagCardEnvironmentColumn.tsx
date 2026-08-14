@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, memo } from 'react';
 import { Settings, BarChart3 } from '@/shared/icons';
 import { Switch } from '@/app/components/ui/switch';
+import { FlagEnabledDot } from '@/app/components/flags/FlagEnabledDot';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/components/ui/tooltip';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
 import { FlagSparkline, SparklinePlaceholder } from '@/app/components/FlagSparkline';
@@ -17,6 +18,7 @@ interface FlagCardEnvironmentColumnProps {
   onOpenEnvironment: (flag: FlagView, envId: number) => void;
   onToggleFlag: (flag: FlagView, envId: number) => void;
   onMetricsClick: (flagId: number, flagName: string, envId: number) => void;
+  canWrite?: boolean;
 }
 
 function buildRule(
@@ -131,6 +133,7 @@ export const FlagCardEnvironmentColumn = memo(function FlagCardEnvironmentColumn
   onOpenEnvironment,
   onToggleFlag,
   onMetricsClick,
+  canWrite = false,
 }: FlagCardEnvironmentColumnProps) {
   const t = useT();
   const es = flag.environments[env.id];
@@ -151,21 +154,27 @@ export const FlagCardEnvironmentColumn = memo(function FlagCardEnvironmentColumn
           {env.name}
         </span>
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => onOpenEnvironment(flag, env.id)}
-            aria-label={t('flags.environmentSettingsBtn')}
-            className="inline-flex items-center px-1.5 py-1 text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand dark:hover:text-brand hover:border-brand/20 dark:hover:border-brand/30 hover:bg-brand/5 dark:hover:bg-brand/10 transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
-          >
-            <Settings size={12} />
-          </button>
+          {canWrite && (
+            <button
+              onClick={() => onOpenEnvironment(flag, env.id)}
+              aria-label={t('flags.environmentSettingsBtn')}
+              className="inline-flex items-center px-1.5 py-1 text-muted-foreground bg-secondary border border-border rounded-lg hover:text-brand dark:hover:text-brand hover:border-brand/20 dark:hover:border-brand/30 hover:bg-brand/5 dark:hover:bg-brand/10 transition-all focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none"
+            >
+              <Settings size={12} />
+            </button>
+          )}
           {es && (
             <span key={`col-glow-${glowKey}`} className={glowKey > 0 ? 'animate-flag-on' : ''}>
-              <Switch
-                checked={es.enabled}
-                onCheckedChange={handleToggle}
-                aria-label={`${flag.name} — ${env.name}`}
-                className="data-[state=checked]:bg-brand"
-              />
+              {canWrite ? (
+                <Switch
+                  checked={es.enabled}
+                  onCheckedChange={handleToggle}
+                  aria-label={`${flag.name} — ${env.name}`}
+                  className="data-[state=checked]:bg-brand"
+                />
+              ) : (
+                <FlagEnabledDot flagName={flag.name} envName={env.name} enabled={es.enabled} />
+              )}
             </span>
           )}
         </div>

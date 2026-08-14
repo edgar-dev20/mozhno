@@ -50,6 +50,7 @@ import { EmptySegmentsIllustration } from '@/shared/components/illustrations';
 import { SegmentCardSkeletonList } from '@/app/components/skeletons';
 import { useT } from '@/i18n';
 
+import { usePermissions } from '@/app/hooks/usePermissions';
 import { useSegments } from '@/app/hooks/useSegments';
 
 interface SegmentContextEntry {
@@ -61,6 +62,7 @@ interface SegmentContextEntry {
 
 export function Segments() {
   const t = useT();
+  const { canWrite } = usePermissions();
   const { segments, contexts, loading, error, setError, handleDelete, handleSave } = useSegments();
 
   const [panelOpen, setPanelOpen] = useState(false);
@@ -358,9 +360,11 @@ export function Segments() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('segments.title')} description={t('segments.description')} />
         <div className="hidden sm:block">
-          <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
-            {t('segments.create')}
-          </GradientButton>
+          {canWrite && (
+            <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
+              {t('segments.create')}
+            </GradientButton>
+          )}
         </div>
       </div>
 
@@ -379,7 +383,7 @@ export function Segments() {
           title={t('segments.emptyTitle')}
           description={t('segments.emptyDescription')}
           buttonLabel={t('segments.emptyButton')}
-          onAction={openCreate}
+          onAction={canWrite ? openCreate : undefined}
         />
       ) : (
         <AnimatePresence mode="popLayout">
@@ -402,20 +406,20 @@ export function Segments() {
                       color={s.color || '#1a6b60'}
                       icon={<SegmentIcon name={s.icon || 'Users'} size={24} />}
                       shadow
-                      onClick={() => openEdit(s)}
+                      onClick={canWrite ? () => openEdit(s) : undefined}
                     />
                   </div>
                   <h3
-                    className="text-h2 font-semibold text-foreground mb-1.5 cursor-pointer hover:text-foreground/60 dark:hover:text-muted-foreground/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background rounded"
-                    onClick={() => openEdit(s)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e: React.KeyboardEvent) => {
+                    className={`text-h2 font-semibold text-foreground mb-1.5 ${canWrite ? 'cursor-pointer hover:text-foreground/60 dark:hover:text-muted-foreground/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-1 focus-visible:ring-offset-background rounded' : ''}`}
+                    onClick={canWrite ? () => openEdit(s) : undefined}
+                    role={canWrite ? 'button' : undefined}
+                    tabIndex={canWrite ? 0 : undefined}
+                    onKeyDown={canWrite ? (e: React.KeyboardEvent) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         openEdit(s);
                       }
-                    }}
+                    } : undefined}
                   >
                     {s.name}
                   </h3>
@@ -920,7 +924,7 @@ export function Segments() {
         onConfirm={doDelete}
         loading={deleting}
       />
-      <Fab onClick={openCreate} label={t('segments.create')} />
+      {canWrite && <Fab onClick={openCreate} label={t('segments.create')} />}
     </div>
   );
 }

@@ -13,6 +13,7 @@ export interface FlagCardProps {
   onOpenEnvironment: (flag: FlagView, envId: number) => void;
   onToggleFlag: (flag: FlagView, envId: number) => void;
   onMetricsClick: (flagId: number, flagName: string, envId: number) => void;
+  canWrite?: boolean;
   environments: { id: number; name: string }[];
   segments: SegmentResponse[];
   tags: TagType[];
@@ -43,6 +44,7 @@ export const FlagCard = memo(function FlagCard(props: FlagCardProps) {
           environments={props.environments}
           tags={props.tags}
           onToggleFlag={props.onToggleFlag}
+          canWrite={props.canWrite}
         />
       </div>
 
@@ -68,6 +70,7 @@ export const FlagCard = memo(function FlagCard(props: FlagCardProps) {
               onOpenEnvironment={props.onOpenEnvironment}
               onToggleFlag={props.onToggleFlag}
               onMetricsClick={props.onMetricsClick}
+              canWrite={props.canWrite}
             />
           </motion.div>
         )}

@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, memo } from 'react';
 import { Switch } from '@/app/components/ui/switch';
+import { FlagEnabledDot } from '@/app/components/flags/FlagEnabledDot';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useT } from '@/i18n';
 import { readableColorForBg } from '@/shared/color';
@@ -57,6 +58,7 @@ interface FlagCardHeaderProps {
   environments: { id: number; name: string }[];
   tags: TagType[];
   onToggleFlag: (flag: FlagView, envId: number) => void;
+  canWrite?: boolean;
 }
 
 export const FlagCardHeader = memo(function FlagCardHeader({
@@ -66,6 +68,7 @@ export const FlagCardHeader = memo(function FlagCardHeader({
   environments,
   tags,
   onToggleFlag,
+  canWrite = false,
 }: FlagCardHeaderProps) {
   const t = useT();
   const [glowKeys, setGlowKeys] = useState<Record<number, number>>({});
@@ -143,12 +146,16 @@ export const FlagCardHeader = memo(function FlagCardHeader({
                       key={`glow-${env.id}-${glowKeys[env.id] ?? 0}`}
                       className={(glowKeys[env.id] ?? 0) > 0 ? 'animate-flag-on' : ''}
                     >
-                      <Switch
-                        checked={es.enabled}
-                        onCheckedChange={() => handleToggle(env.id)}
-                        aria-label={`${flag.name} — ${env.name}`}
-                        className="data-[state=checked]:bg-brand"
-                      />
+                      {canWrite ? (
+                        <Switch
+                          checked={es.enabled}
+                          onCheckedChange={() => handleToggle(env.id)}
+                          aria-label={`${flag.name} — ${env.name}`}
+                          className="data-[state=checked]:bg-brand"
+                        />
+                      ) : (
+                        <FlagEnabledDot flagName={flag.name} envName={env.name} enabled={es.enabled} />
+                      )}
                     </span>
                   )}
                 </div>

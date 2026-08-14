@@ -63,6 +63,7 @@ export const ActiveFlag: Story = {
   args: {
     flag: MOCK_FLAG,
     expanded: false,
+    canWrite: true,
     onToggleExpand: fn(),
     onOpenGeneral: fn(),
     onOpenEnvironment: fn(),
@@ -86,6 +87,7 @@ export const Expanded: Story = {
   args: {
     flag: MOCK_FLAG,
     expanded: true,
+    canWrite: true,
     onToggleExpand: fn(),
     onOpenGeneral: fn(),
     onOpenEnvironment: fn(),
@@ -107,6 +109,7 @@ export const Archived: Story = {
   args: {
     flag: { ...MOCK_FLAG, archived: true },
     expanded: false,
+    canWrite: true,
     onToggleExpand: fn(),
     onOpenGeneral: fn(),
     onOpenEnvironment: fn(),
@@ -116,5 +119,28 @@ export const Archived: Story = {
     segments: [],
     tags: [],
     sparklineData: MOCK_SPARKLINE,
+  },
+};
+
+export const ReadOnlyViewer: Story = {
+  args: {
+    flag: MOCK_FLAG,
+    expanded: true,
+    canWrite: false,
+    onToggleExpand: fn(),
+    onOpenGeneral: fn(),
+    onOpenEnvironment: fn(),
+    onToggleFlag: fn(),
+    onMetricsClick: fn(),
+    environments: MOCK_ENVIRONMENTS,
+    segments: [],
+    tags: [],
+    sparklineData: MOCK_SPARKLINE,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const status = canvas.getAllByRole('status');
+    await expect(status.length).toBeGreaterThan(0);
+    await expect(canvas.queryAllByRole('switch')).toHaveLength(0);
   },
 };

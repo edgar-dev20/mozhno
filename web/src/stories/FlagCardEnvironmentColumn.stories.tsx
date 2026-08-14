@@ -43,6 +43,7 @@ export const Production: Story = {
     flag: MOCK_FLAG,
     segments: [],
     sparkBuckets: [],
+    canWrite: true,
     onOpenEnvironment: fn(),
     onToggleFlag: fn(),
     onMetricsClick: fn(),
@@ -55,6 +56,20 @@ export const Staging: Story = {
     flag: MOCK_FLAG,
     segments: [],
     sparkBuckets: [],
+    canWrite: true,
+    onOpenEnvironment: fn(),
+    onToggleFlag: fn(),
+    onMetricsClick: fn(),
+  },
+};
+
+export const ReadOnlyViewer: Story = {
+  args: {
+    env: { id: 1, name: 'Production' },
+    flag: MOCK_FLAG,
+    segments: [],
+    sparkBuckets: [],
+    canWrite: false,
     onOpenEnvironment: fn(),
     onToggleFlag: fn(),
     onMetricsClick: fn(),

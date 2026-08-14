@@ -27,6 +27,7 @@ import {
 } from '@/app/hooks/mutations';
 import { useFlagFilters } from '@/app/hooks/useFlagFilters';
 import { useFlagPanels } from '@/app/hooks/useFlagPanels';
+import { usePermissions } from '@/app/hooks/usePermissions';
 import { FlagFiltersBar } from '@/app/components/flags/FlagFiltersBar';
 import { ArchivedFlagsList } from '@/app/components/flags/ArchivedFlagsList';
 import { FlagsList } from '@/app/components/flags/FlagsList';
@@ -42,6 +43,7 @@ export function Flags() {
   const t = useT();
   const queryClient = useQueryClient();
   const projectId = project?.id ?? null;
+  const { canWrite } = usePermissions();
 
   const { data: environments = [] } = useEnvironmentsQuery();
   const { data: enrichedData, isLoading: flagsLoading } = useEnrichedFlagsQuery(projectId);
@@ -269,12 +271,12 @@ export function Flags() {
     if (createHandledRef.current) return;
     if (searchParams.get('new') === '1') {
       createHandledRef.current = true;
-      openCreate();
       const next = new URLSearchParams(searchParams);
       next.delete('new');
       setSearchParams(next, { replace: true });
+      if (canWrite) openCreate();
     }
-  }, [searchParams, setSearchParams, openCreate]);
+  }, [searchParams, setSearchParams, openCreate, canWrite]);
 
   useEffect(() => {
     const targetKey = searchParams.get('open');
@@ -344,9 +346,11 @@ export function Flags() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <SectionHeader title={t('flags.title')} description={t('flags.description')} />
         <div className="hidden sm:block">
-          <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
-            {t('flags.create')}
-          </GradientButton>
+          {canWrite && (
+            <GradientButton onClick={openCreate} icon={<Plus size={18} />}>
+              {t('flags.create')}
+            </GradientButton>
+          )}
         </div>
       </div>
 
@@ -392,6 +396,7 @@ export function Flags() {
         onToggleFlag={handleToggleFlag}
         onMetricsClick={handleMetricsClick}
         onCreateClick={openCreate}
+        canWrite={canWrite}
         environments={environments}
         segments={segments}
         tags={tags}
@@ -402,17 +407,16 @@ export function Flags() {
         onShowAll={showAllFlags}
       />
 
-      {archivedFlags.length > 0 && (
+      {canWrite && archivedFlags.length > 0 && (
         <div className="flex justify-center pt-2">
-          <GradientButton
-            variant="muted"
-            onClick={() => setArchiveOpen(!archiveOpen)}
-            aria-expanded={archiveOpen}
-            icon={<Archive size={16} />}
-          >
+          <GradientButton variant="muted" onClick={() => setArchiveOpen(!archiveOpen)} icon={<Archive size={16} />}>
             {t('flags.archiveSection')} ({archivedFlags.length})
           </GradientButton>
         </div>
+      )}
+
+      {canWrite && archiveOpen && (
+        <ArchivedFlagsList flags={archivedFlags} onUnarchive={doUnarchive} tags={tags} />
       )}
 
       {archiveOpen && (
@@ -517,7 +521,7 @@ export function Flags() {
         )}
       </ConfirmDialog>
 
-      <Fab onClick={openCreate} label={t('flags.create')} />
+      {canWrite && <Fab onClick={openCreate} label={t('flags.create')} />}
     </div>
   );
 }

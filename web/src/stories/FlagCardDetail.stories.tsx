@@ -49,6 +49,7 @@ export const Default: Story = {
     segments: [],
     tags: [],
     sparklineData: new Map(),
+    canWrite: true,
     onOpenGeneral: fn(),
     onOpenEnvironment: fn(),
     onToggleFlag: fn(),

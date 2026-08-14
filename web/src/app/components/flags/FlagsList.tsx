@@ -21,6 +21,7 @@ interface FlagsListProps {
   onToggleFlag: (flag: FlagView, envId: number) => void;
   onMetricsClick: (flagId: number, flagName: string, envId: number) => void;
   onCreateClick: () => void;
+  canWrite?: boolean;
   environments: { id: number; name: string }[];
   segments: SegmentResponse[];
   tags: TagType[];
@@ -45,6 +46,7 @@ export function FlagsList({
   onToggleFlag,
   onMetricsClick,
   onCreateClick,
+  canWrite = false,
   environments,
   segments,
   tags,
@@ -83,7 +85,7 @@ export function FlagsList({
             title={t('flags.noFlags')}
             description={t('flags.noFlagsDescription')}
             buttonLabel={t('flags.create')}
-            onAction={onCreateClick}
+            onAction={canWrite ? onCreateClick : undefined}
           />
         )}
       </div>
@@ -102,6 +104,7 @@ export function FlagsList({
           onOpenEnvironment={onOpenEnvironment}
           onToggleFlag={onToggleFlag}
           onMetricsClick={onMetricsClick}
+          canWrite={canWrite}
           environments={environments}
           segments={segments}
           tags={tags}
