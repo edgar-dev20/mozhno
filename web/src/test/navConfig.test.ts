@@ -31,6 +31,7 @@ describe('MANAGEMENT_ITEMS', () => {
     expect(paths).toContain('/segments');
     expect(paths).toContain('/contexts');
     expect(paths).toContain('/tags');
+    expect(paths).toContain('/audit');
   });
 
   it('all items have path, labelKey, and icon and are not admin-only', () => {
@@ -47,7 +48,6 @@ describe('TEAM_ITEMS', () => {
   it('has expected items', () => {
     const paths = TEAM_ITEMS.map((i) => i.path);
     expect(paths).toContain('/users');
-    expect(paths).toContain('/audit');
   });
 
   it('all items are admin-only with path, labelKey, and icon', () => {

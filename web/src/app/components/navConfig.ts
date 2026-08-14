@@ -30,11 +30,11 @@ export const MANAGEMENT_ITEMS: NavItem[] = [
   { path: '/segments', labelKey: 'navigation.segments', icon: Users },
   { path: '/contexts', labelKey: 'navigation.contexts', icon: Box },
   { path: '/tags', labelKey: 'navigation.tags', icon: Tag },
+  { path: '/audit', labelKey: 'navigation.audit', icon: Activity },
 ];
 
 export const TEAM_ITEMS: NavItem[] = [
   { path: '/users', labelKey: 'navigation.users', icon: UserCog, adminOnly: true },
-  { path: '/audit', labelKey: 'navigation.audit', icon: Activity, adminOnly: true },
 ];
 
 export const SETTINGS_ITEMS: NavItem[] = [

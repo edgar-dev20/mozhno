@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router';
 import { useAuth } from '@/app/auth/useAuth';
 import { useT } from '@/i18n';
 
-const adminRoutes = ['/users', '/integrations', '/settings', '/audit', '/apikeys'];
+const adminRoutes = ['/users', '/integrations', '/settings', '/apikeys'];
 
 export function ProtectedRoute() {
   const t = useT();
