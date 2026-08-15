@@ -102,21 +102,14 @@ class SegmentServiceTest {
     }
 
     @Test
-    void create_shouldCreateSegmentWithoutContext() {
-        when(segmentRepository.save(any(Segment.class))).thenAnswer(inv -> {
-            Segment s = inv.getArgument(0);
-            s.setId(1);
-            return s;
-        });
-
+    void create_shouldRejectSegmentWithoutContext() {
         SegmentRequest req = new SegmentRequest();
         req.setProjectId(1);
         req.setName("Empty Segment");
         req.setContext(null);
 
-        Segment result = segmentService.create(req);
-        assertNotNull(result);
-        assertEquals("Empty Segment", result.getName());
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> segmentService.create(req));
+        assertTrue(ex.getMessage().contains("At least one targeting condition"));
     }
 
     @Test
@@ -132,11 +125,31 @@ class SegmentServiceTest {
         SegmentRequest req = new SegmentRequest();
         req.setName("New Name");
         req.setDescription("Updated");
-        req.setContext(List.of());
+        SegmentRequest.ContextEntry entry = new SegmentRequest.ContextEntry();
+        entry.setContextDefinitionId(2);
+        entry.setOperator("in");
+        entry.setContextValues("web,mobile");
+        req.setContext(List.of(entry));
 
         Segment result = segmentService.update(1, req);
         assertEquals("New Name", result.getName());
         verify(segmentContextRepository).deleteBySegmentId(1);
+        verify(segmentContextRepository).saveBatch(eq(1), anyList());
+    }
+
+    @Test
+    void update_shouldRejectEmptyContext() {
+        Segment existing = new Segment();
+        existing.setId(1);
+        existing.setProjectId(1);
+        when(segmentRepository.findById(1)).thenReturn(existing);
+
+        SegmentRequest req = new SegmentRequest();
+        req.setName("New Name");
+        req.setContext(List.of());
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> segmentService.update(1, req));
+        assertTrue(ex.getMessage().contains("At least one targeting condition"));
     }
 
     @Test

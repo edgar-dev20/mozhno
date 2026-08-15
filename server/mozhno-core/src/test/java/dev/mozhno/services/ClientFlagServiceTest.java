@@ -136,7 +136,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
     }
 
     @Test
-    void segmentConstraintOnly_shouldReturnConstraints() {
+    void segmentConstraintOnly_shouldReturnSegments() {
         Segment seg = new Segment();
         seg.setProjectId(projectId);
         seg.setName("VIP Users");
@@ -172,14 +172,17 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
 
         assertThat(result).hasSize(1);
         List<ClientFlagResponse.Constraint> constraints = result.get(0).getActivation().getConstraints();
-        assertThat(constraints).hasSize(1);
-        assertThat(constraints.get(0).getField()).isEqualTo("userId");
-        assertThat(constraints.get(0).getOperator()).isEqualTo("in");
-        assertThat(constraints.get(0).getValues()).containsExactly("user-100", "user-200", "user-300");
+        assertThat(constraints).isNull();
+        List<ClientFlagResponse.Segment> segments = result.get(0).getActivation().getSegments();
+        assertThat(segments).hasSize(1);
+        assertThat(segments.get(0).getConstraints()).hasSize(1);
+        assertThat(segments.get(0).getConstraints().get(0).getField()).isEqualTo("userId");
+        assertThat(segments.get(0).getConstraints().get(0).getOperator()).isEqualTo("in");
+        assertThat(segments.get(0).getConstraints().get(0).getValues()).containsExactly("user-100", "user-200", "user-300");
     }
 
     @Test
-    void segmentAndStrategySameField_shouldMergeAndDedup() {
+    void segmentAndStrategySameField_shouldKeepConstraintsSeparate() {
         Segment seg = new Segment();
         seg.setProjectId(projectId);
         seg.setName("VIP Segment");
@@ -220,11 +223,15 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         assertThat(constraints).hasSize(1);
         assertThat(constraints.get(0).getField()).isEqualTo("userId");
         assertThat(constraints.get(0).getOperator()).isEqualTo("in");
-        assertThat(constraints.get(0).getValues()).containsExactly("user-1", "user-2", "user-3", "user-4");
+        assertThat(constraints.get(0).getValues()).containsExactly("user-3", "user-4");
+        List<ClientFlagResponse.Segment> segments = result.get(0).getActivation().getSegments();
+        assertThat(segments).hasSize(1);
+        assertThat(segments.get(0).getConstraints()).hasSize(1);
+        assertThat(segments.get(0).getConstraints().get(0).getValues()).containsExactly("user-1", "user-2", "user-3");
     }
 
     @Test
-    void segmentAndStrategyDifferentFields_shouldReturnBoth() {
+    void segmentAndStrategyDifferentFields_shouldReturnBothSeparately() {
         Segment seg = new Segment();
         seg.setProjectId(projectId);
         seg.setName("EU Segment");
@@ -268,17 +275,19 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
 
         assertThat(result).hasSize(1);
         List<ClientFlagResponse.Constraint> constraints = result.get(0).getActivation().getConstraints();
-        assertThat(constraints).hasSize(2);
-        assertThat(constraints.get(0).getField()).isEqualTo("country");
-        assertThat(constraints.get(0).getOperator()).isEqualTo("in");
-        assertThat(constraints.get(0).getValues()).containsExactly("DE", "FR", "IT");
-        assertThat(constraints.get(1).getField()).isEqualTo("userId");
-        assertThat(constraints.get(1).getOperator()).isEqualTo("eq");
-        assertThat(constraints.get(1).getValues()).containsExactly("user-42", "user-99");
+        assertThat(constraints).hasSize(1);
+        assertThat(constraints.get(0).getField()).isEqualTo("userId");
+        assertThat(constraints.get(0).getOperator()).isEqualTo("eq");
+        assertThat(constraints.get(0).getValues()).containsExactly("user-42", "user-99");
+        List<ClientFlagResponse.Segment> segments = result.get(0).getActivation().getSegments();
+        assertThat(segments).hasSize(1);
+        assertThat(segments.get(0).getConstraints()).hasSize(1);
+        assertThat(segments.get(0).getConstraints().get(0).getField()).isEqualTo("country");
+        assertThat(segments.get(0).getConstraints().get(0).getValues()).containsExactly("DE", "FR", "IT");
     }
 
     @Test
-    void segmentWithMultipleContextDefinitions_shouldReturnMultipleConstraints() {
+    void segmentWithMultipleContextDefinitions_shouldReturnSegmentConstraints() {
         Segment seg = new Segment();
         seg.setProjectId(projectId);
         seg.setName("Multi Context");
@@ -326,11 +335,14 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
 
         assertThat(result).hasSize(1);
         List<ClientFlagResponse.Constraint> constraints = result.get(0).getActivation().getConstraints();
-        assertThat(constraints).hasSize(2);
-        assertThat(constraints.get(0).getField()).isEqualTo("country");
-        assertThat(constraints.get(0).getValues()).containsExactly("US", "CA");
-        assertThat(constraints.get(1).getField()).isEqualTo("platform");
-        assertThat(constraints.get(1).getValues()).containsExactly("ios", "android");
+        assertThat(constraints).isNull();
+        List<ClientFlagResponse.Segment> segments = result.get(0).getActivation().getSegments();
+        assertThat(segments).hasSize(1);
+        assertThat(segments.get(0).getConstraints()).hasSize(2);
+        assertThat(segments.get(0).getConstraints().get(0).getField()).isEqualTo("country");
+        assertThat(segments.get(0).getConstraints().get(0).getValues()).containsExactly("US", "CA");
+        assertThat(segments.get(0).getConstraints().get(1).getField()).isEqualTo("platform");
+        assertThat(segments.get(0).getConstraints().get(1).getValues()).containsExactly("ios", "android");
     }
 
     @Test
@@ -370,8 +382,11 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
 
         assertThat(result).hasSize(1);
         List<ClientFlagResponse.Constraint> constraints = result.get(0).getActivation().getConstraints();
-        assertThat(constraints).hasSize(1);
-        assertThat(constraints.get(0).getValues()).containsExactly("east", "west");
+        assertThat(constraints).isNull();
+        List<ClientFlagResponse.Segment> segments = result.get(0).getActivation().getSegments();
+        assertThat(segments).hasSize(1);
+        assertThat(segments.get(0).getConstraints()).hasSize(1);
+        assertThat(segments.get(0).getConstraints().get(0).getValues()).containsExactly("east", "west");
     }
 
     @Test
@@ -652,7 +667,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
     }
 
     @Test
-    void evaluate_directConstraintAndSegment_userMatchesSegmentButNotDirect_shouldNotReturn() {
+    void evaluate_directConstraintAndSegment_userMatchesSegmentButNotDirect_shouldReturnFlag() {
         ContextDefinition userIdCd = new ContextDefinition();
         userIdCd.setName("User ID");
         userIdCd.setContextKey("userId");
@@ -694,6 +709,100 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
 
         List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
             projectId, envId, Map.of("userId", "user-100"), null, null);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getName()).isEqualTo("Direct + Segment");
+    }
+
+    @Test
+    void evaluate_directConstraintAndSegment_userMatchesDirectButNotSegment_shouldReturnFlag() {
+        ContextDefinition userIdCd = new ContextDefinition();
+        userIdCd.setName("User ID");
+        userIdCd.setContextKey("userId");
+        userIdCd.setProjectId(projectId);
+        Integer userIdCdId = contextDefinitionRepository.save(userIdCd).getId();
+
+        ContextDefinition planCd = new ContextDefinition();
+        planCd.setName("Plan");
+        planCd.setContextKey("plan");
+        planCd.setProjectId(projectId);
+        Integer planCdId = contextDefinitionRepository.save(planCd).getId();
+
+        Segment seg = new Segment();
+        seg.setProjectId(projectId);
+        seg.setName("VIP");
+        Integer segId = segmentRepository.save(seg).getId();
+        SegmentContext sc = new SegmentContext();
+        sc.setSegmentId(segId);
+        sc.setContextDefinitionId(userIdCdId);
+        sc.setContextValues("user-100");
+        segmentContextRepository.save(sc);
+
+        Flag flag = new Flag();
+        flag.setProjectId(projectId);
+        flag.setName("Direct + Segment");
+        flag.setKey("direct-segment");
+        flag.setFlagType(FlagType.RELEASE);
+        flag.setEnabled(true);
+        Flag saved = flagRepository.save(flag);
+
+        FlagStrategy s = new FlagStrategy();
+        s.setFlagId(saved.getId());
+        s.setEnvironmentId(envId);
+        s.setEnabled(true);
+        s.setSegmentIds(List.of(segId));
+        s.setContextDefinitionId(planCdId);
+        s.setContextValuesJson("[{\"cd\":" + planCdId + ",\"op\":\"in\",\"val\":\"premium\"}]");
+        flagStrategyRepository.save(s);
+
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
+            projectId, envId, Map.of("plan", "premium"), null, null);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getName()).isEqualTo("Direct + Segment");
+    }
+
+    @Test
+    void evaluate_directConstraintAndSegment_neitherMatches_shouldNotReturn() {
+        ContextDefinition userIdCd = new ContextDefinition();
+        userIdCd.setName("User ID");
+        userIdCd.setContextKey("userId");
+        userIdCd.setProjectId(projectId);
+        Integer userIdCdId = contextDefinitionRepository.save(userIdCd).getId();
+
+        ContextDefinition planCd = new ContextDefinition();
+        planCd.setName("Plan");
+        planCd.setContextKey("plan");
+        planCd.setProjectId(projectId);
+        Integer planCdId = contextDefinitionRepository.save(planCd).getId();
+
+        Segment seg = new Segment();
+        seg.setProjectId(projectId);
+        seg.setName("VIP");
+        Integer segId = segmentRepository.save(seg).getId();
+        SegmentContext sc = new SegmentContext();
+        sc.setSegmentId(segId);
+        sc.setContextDefinitionId(userIdCdId);
+        sc.setContextValues("user-100");
+        segmentContextRepository.save(sc);
+
+        Flag flag = new Flag();
+        flag.setProjectId(projectId);
+        flag.setName("Direct + Segment");
+        flag.setKey("direct-segment");
+        flag.setFlagType(FlagType.RELEASE);
+        flag.setEnabled(true);
+        Flag saved = flagRepository.save(flag);
+
+        FlagStrategy s = new FlagStrategy();
+        s.setFlagId(saved.getId());
+        s.setEnvironmentId(envId);
+        s.setEnabled(true);
+        s.setSegmentIds(List.of(segId));
+        s.setContextDefinitionId(planCdId);
+        s.setContextValuesJson("[{\"cd\":" + planCdId + ",\"op\":\"in\",\"val\":\"premium\"}]");
+        flagStrategyRepository.save(s);
+
+        List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
+            projectId, envId, Map.of("plan", "free"), null, null);
         assertThat(results).isEmpty();
     }
 

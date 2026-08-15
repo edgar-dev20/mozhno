@@ -64,7 +64,7 @@ public class FeatureFlagEvaluator {
                 hasSegments = true;
                 for (Integer segId : s.getSegmentIds()) {
                     List<SegmentContextWithName> segContexts = segmentContextsMap.getOrDefault(segId, Collections.emptyList());
-                    if (segContexts.isEmpty() || evaluateSegment(segContexts, context)) {
+                    if (!segContexts.isEmpty() && evaluateSegment(segContexts, context)) {
                         segmentsOk = true;
                         break;
                     }
@@ -72,7 +72,7 @@ public class FeatureFlagEvaluator {
             }
 
             if (hasDirect && hasSegments) {
-                if (!directOk || !segmentsOk) return false;
+                if (!directOk && !segmentsOk) return false;
             } else if (hasDirect) {
                 if (!directOk) return false;
             } else if (hasSegments) {

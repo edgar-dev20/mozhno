@@ -44,7 +44,7 @@ export const CustomAndSegments: Story = {
         name: 'Внутренние сотрудники',
         color: '#6d5ae0',
         icon: 'Users',
-        conditions: [],
+        conditions: [{ field: 'role', operator: 'eq', values: ['admin'] }],
       },
     ],
   },

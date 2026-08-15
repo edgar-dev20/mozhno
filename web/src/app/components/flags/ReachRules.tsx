@@ -88,12 +88,7 @@ export function ReachRules({ sources }: ReachRulesProps) {
               <span className="text-caption font-semibold text-brand dark:text-palette-brand-800 truncate">{src.name}</span>
             </div>
             <div className="px-3 py-2 space-y-1.5">
-              {conditions.length === 0 ? (
-                <div className="text-caption text-muted-foreground italic">
-                  {t('flags.activateSegmentAnyone')}
-                </div>
-              ) : (
-                conditions.map((c, ci) => (
+              {conditions.map((c, ci) => (
                   <div key={ci} className="space-y-1.5">
                     {ci > 0 && (
                       <div className="flex items-center gap-2">
@@ -112,8 +107,7 @@ export function ReachRules({ sources }: ReachRulesProps) {
                       </span>
                     </div>
                   </div>
-                ))
-              )}
+                ))}
             </div>
           </div>
         </Fragment>

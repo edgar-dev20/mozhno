@@ -97,7 +97,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
     }
 
     @Test
-    void createSegment_withoutContext_shouldReturnCreated() throws Exception {
+    void createSegment_withoutContext_shouldReturnBadRequest() throws Exception {
         SegmentRequest req = new SegmentRequest();
         req.setName("Empty Segment");
         req.setDescription("No context");
@@ -107,9 +107,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
                         .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Empty Segment"))
-                .andExpect(jsonPath("$.context").isArray());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -182,8 +180,7 @@ class SegmentControllerTest extends BaseIntegrationTest {
                         .header("Authorization", auth())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reqEmpty)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.context.length()").value(0));
+                .andExpect(status().isBadRequest());
     }
 
     @Test

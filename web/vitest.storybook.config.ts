@@ -27,4 +27,7 @@ export default defineConfig({
     },
     setupFiles: ["./.storybook/vitest.setup.ts"],
   },
+  server: {
+    host: "127.0.0.1",
+  },
 });

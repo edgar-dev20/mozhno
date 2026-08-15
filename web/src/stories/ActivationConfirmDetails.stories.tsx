@@ -31,7 +31,9 @@ const SEGMENTS: SegmentResponse[] = [
   seg(3, 'Клиенты Pro', 'Crown', '#c08140', 'платный тариф', [
     { contextDefinitionId: 10, operator: 'in', contextValues: 'EU,US' },
   ]),
-  seg(4, 'QA-инженеры', 'Bug', '#5a82a0', 'тестирование релизов'),
+  seg(4, 'QA-инженеры', 'Bug', '#5a82a0', 'тестирование релизов', [
+    { contextDefinitionId: 13, operator: 'eq', contextValues: 'qa' },
+  ]),
   seg(5, 'Ранний доступ', 'Star', '#c05a52', 'early access'),
   seg(6, 'VIP-клиенты', 'Gem', '#b89430', 'высокий LTV'),
   seg(7, 'Разработчики', 'Code', '#4a8c5e', 'API-интеграторы'),

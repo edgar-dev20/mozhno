@@ -1,7 +1,7 @@
 import * as Slider from '@radix-ui/react-slider';
 import { useState, useCallback } from 'react';
 import { Switch } from '@/app/components/ui/switch';
-import { Plus, Percent, Users, Settings, Filter, X } from '@/shared/icons';
+import { Plus, Percent, Users, Settings, X } from '@/shared/icons';
 import { SegmentIcon } from '@/app/components/SegmentIcon';
 import { ColorIcon } from '@/shared';
 import { isMultiOperator } from '@/app/components/operatorsMeta';
@@ -170,10 +170,7 @@ export function FlagEnvironmentPanel({
       conditions: toConditions(lines.filter((l) => l.source === seg.name)),
     });
   }
-  const conditionSourceCount = reachSources.filter((s) => s.conditions.length > 0).length;
-
-  return (
-    <div className="space-y-5">
+  return (    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-body-sm font-medium text-foreground">
@@ -233,85 +230,42 @@ export function FlagEnvironmentPanel({
                   <>
                     <span className="text-h1 font-bold text-brand">{envRulePercent}%</span>
                     <span className="text-body-sm text-muted-foreground ml-1.5">
-                      {hasSegments
-                        ? `${t('flags.summaryFromSegments')} ${selectedSegs.map((s) => s.name).join(', ')}`
-                        : t('flags.of') + ' ' + t('flags.allUsers')}
+                      {reachSources.length > 0 ? t('flags.summaryFromBelow') : t('flags.allUsers')}
                     </span>
                   </>
                 )}
               </div>
             </div>
 
+            <Slider.Root
+              value={[envRulePercent]}
+              onValueChange={([v]) => onEnvRulePercentChange(v)}
+              max={100}
+              step={1}
+              aria-label={t('flags.rolloutPercentage')}
+              className="relative flex items-center select-none touch-none w-full h-5"
+            >
+              <Slider.Track className="bg-accent relative grow rounded-full h-2.5">
+                <Slider.Range className="absolute bg-brand rounded-full h-full" />
+              </Slider.Track>
+              <Slider.Thumb className="block w-6 h-6 bg-background border-2 border-brand rounded-full shadow-lg outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]" />
+            </Slider.Root>
+
             {reachSources.length > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center gap-1.5 text-caption font-semibold text-muted-foreground/80">
-                  <Filter size={10} />
-                  {t('flags.summaryUnderConditions')}
+                  <Users size={11} />
+                  {t('flags.summaryAudience')}
                 </div>
                 <ReachRules sources={reachSources} />
               </div>
             )}
-
-            {!hasSegments && !hasConstraints && envRulePercent !== 100 && envRulePercent !== 0 && (
-              <div className="flex items-center gap-2 text-caption text-muted-foreground/80">
-                <Filter size={12} />
-                {t('flags.noConditionsGlobal')}
-              </div>
-            )}
-
-            <div className="flex items-center gap-4 text-caption text-muted-foreground pt-2 border-t border-brand/10">
-              {selectedSegs.length > 0 && (
-                <span>
-                  {t('flags.summaryStatsSegments')}:{' '}
-                  <strong className="text-foreground/80">{selectedSegs.length}</strong>
-                  {selectedSegs.length > 1 && (
-                    <span className="text-brand font-medium"> {t('flags.summaryLogicOrSegments')}</span>
-                  )}
-                </span>
-              )}
-              {conditionSourceCount > 0 && (
-                <span>
-                  {t('flags.summaryStatsConditions')}:{' '}
-                  <strong className="text-foreground/80">{conditionSourceCount}</strong>
-                </span>
-              )}
-            </div>
           </div>
         </div>
       )}
 
       <div className="p-5 bg-secondary/50 rounded-xl border border-border space-y-5">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-body-sm font-medium text-foreground/80 flex items-center gap-2">
-              <Percent size={14} className="text-brand" />
-              {t('flags.rolloutPercentage')}
-            </label>
-            <span className="text-h2 font-bold text-brand">{envRulePercent}%</span>
-          </div>
-          <Slider.Root
-            value={[envRulePercent]}
-            onValueChange={([v]) => onEnvRulePercentChange(v)}
-            max={100}
-            step={1}
-            aria-label={t('flags.rolloutPercentage')}
-            className="relative flex items-center select-none touch-none w-full h-5"
-          >
-            <Slider.Track className="bg-accent relative grow rounded-full h-2.5">
-              <Slider.Range className="absolute bg-brand rounded-full h-full" />
-            </Slider.Track>
-            <Slider.Thumb className="block w-6 h-6 bg-background border-2 border-brand rounded-full shadow-lg outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]" />
-          </Slider.Root>
-          <p className="text-caption text-muted-foreground/80">
-            {envRulePercent === 100
-              ? t('flags.fullRollout')
-              : envRulePercent === 0
-                ? t('flags.flagOff')
-                : t('flags.percentUsers', { percent: String(envRulePercent) })}
-          </p>
-        </div>
-
-        <div className="pt-4 border-t border-border">
+        <div>
           <div className="flex items-center gap-2 mb-3">
             <Users size={16} className="text-brand" />
             <label className="text-body-sm font-medium text-foreground/80">

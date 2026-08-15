@@ -231,6 +231,13 @@ export function Segments() {
 
   const doSave = async () => {
     setError('');
+    const hasValidCondition = formContexts.some(
+      (c) => c.contextDefinitionId !== 0 && (c.contextValues ?? '').trim().length > 0,
+    );
+    if (!hasValidCondition) {
+      setError(t('segments.errors.conditionRequired'));
+      return;
+    }
     setSaving(true);
     try {
       if (editing) {

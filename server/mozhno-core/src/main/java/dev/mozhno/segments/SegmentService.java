@@ -141,7 +141,9 @@ public class SegmentService {
     }
 
     private void validateContextValues(SegmentRequest request) {
-        if (request.getContext() == null || request.getContext().isEmpty()) return;
+        if (request.getContext() == null || request.getContext().isEmpty()) {
+            throw new BadRequestException("At least one targeting condition is required");
+        }
 
         List<SegmentRequest.ContextEntry> entries = request.getContext();
         for (int i = 0; i < entries.size(); i++) {
