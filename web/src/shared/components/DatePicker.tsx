@@ -72,7 +72,7 @@ export function DatePicker({
                 ? formatDisplay(value!, dateLocale)
                 : (placeholder ?? t('common.selectDate'))
             }
-            className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-lg px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${displayDate ? 'pr-8' : ''}`}
+            className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-lg px-3 py-2 text-body hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${displayDate ? 'pr-8' : ''}`}
           >
             <Calendar size={14} className="text-muted-foreground/70 dark:text-muted-foreground shrink-0" />
             <span className={displayDate ? 'text-foreground/80' : 'text-muted-foreground'}>
@@ -110,7 +110,7 @@ export function DatePicker({
                 key={preset.label}
                 type="button"
                 onClick={() => handleSelect(preset.getValue())}
-                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
+                className="px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
               >
                 {preset.label}
               </button>
@@ -119,7 +119,7 @@ export function DatePicker({
               <button
                 type="button"
                 onClick={() => onChange(undefined)}
-                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
+                className="px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
               >
                 {t('common.clearFilter')}
               </button>

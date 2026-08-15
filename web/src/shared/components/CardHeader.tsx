@@ -15,10 +15,10 @@ export function CardHeader({ title, subtitle, meta, className = '' }: CardHeader
           {title}
         </h3>
         {meta && (
-          <span className="text-xs font-medium shrink-0 text-muted-foreground/70 dark:text-muted-foreground">{meta}</span>
+          <span className="text-caption font-medium shrink-0 text-muted-foreground/70 dark:text-muted-foreground">{meta}</span>
         )}
       </div>
-      {subtitle && <p className="text-xs text-muted-foreground/70 dark:text-muted-foreground mt-0.5">{subtitle}</p>}
+      {subtitle && <p className="text-caption text-muted-foreground/70 dark:text-muted-foreground mt-0.5">{subtitle}</p>}
     </div>
   );
 }

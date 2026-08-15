@@ -98,7 +98,7 @@ export function DateTimePicker({
           <button
             type="button"
             aria-label={hasValue ? displayText : (placeholder ?? t('common.selectDateTime'))}
-            className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-lg px-3 py-2 text-sm hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${hasValue ? 'pr-8' : ''}`}
+            className={`inline-flex items-center gap-2 w-full bg-card border border-border rounded-lg px-3 py-2 text-body hover:border-ring focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${hasValue ? 'pr-8' : ''}`}
           >
             <Calendar size={14} className="text-muted-foreground/70 dark:text-muted-foreground shrink-0" />
             <span className={hasValue ? 'text-foreground/80' : 'text-muted-foreground'}>
@@ -135,9 +135,9 @@ export function DateTimePicker({
             onChange={(e) => setHoursState(e.target.value)}
             aria-label={t('common.hours')}
             placeholder="HH"
-            className="w-14 bg-secondary border border-border rounded-md px-2 py-1.5 text-xs text-center focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
+            className="w-14 bg-secondary border border-border rounded-md px-2 py-1.5 text-caption text-center focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
           />
-          <span className="text-muted-foreground text-sm font-medium">:</span>
+          <span className="text-muted-foreground text-body font-medium">:</span>
           <input
             type="number"
             min={0}
@@ -146,13 +146,13 @@ export function DateTimePicker({
             onChange={(e) => setMinutesState(e.target.value)}
             aria-label={t('common.minutes')}
             placeholder="MM"
-            className="w-14 bg-secondary border border-border rounded-md px-2 py-1.5 text-xs text-center focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
+            className="w-14 bg-secondary border border-border rounded-md px-2 py-1.5 text-caption text-center focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
           />
           <button
             type="button"
             onClick={handleConfirm}
             disabled={!date}
-            className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-primary-foreground rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="ml-auto inline-flex items-center gap-1 px-3 py-1.5 text-caption font-semibold text-primary-foreground rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               backgroundImage:
                 'linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end))',

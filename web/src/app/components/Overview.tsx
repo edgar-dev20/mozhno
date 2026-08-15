@@ -350,7 +350,7 @@ function EnvironmentStatCard({
         <div className="flex items-center gap-4">
           <div className="relative w-24 h-24 shrink-0">
             <svg viewBox="0 0 96 96" className="w-24 h-24 -rotate-90">
-              <circle cx="48" cy="48" r={RING_R} fill="none" stroke="var(--color-muted)" strokeWidth="9" />
+              <circle cx="48" cy="48" r={RING_R} fill="none" stroke="var(--color-border)" strokeWidth="9" />
               <motion.circle
                 cx="48"
                 cy="48"
@@ -366,7 +366,7 @@ function EnvironmentStatCard({
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-h2 font-heading font-bold leading-none tracking-tight tabular-nums">
+              <span className="text-h3 font-heading font-bold leading-none tracking-tight tabular-nums">
                 {enabledPct}%
               </span>
               <span className="text-[10px] leading-none text-muted-foreground mt-1 tabular-nums">
@@ -554,7 +554,7 @@ function GaugeCard({
           <path
             d="M 8 34 A 28 28 0 0 1 64 34"
             fill="none"
-            stroke="var(--muted)"
+            stroke="var(--border)"
             strokeWidth="6"
             strokeLinecap="round"
           />
@@ -640,7 +640,7 @@ function DriftFlagRow({
                 </div>
               );
             })}
-            <div className="table-cell align-middle py-2 pr-4">
+            <div className="table-cell align-middle py-2 pr-4 text-right">
               <span
                 className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-caption font-bold ${
                   isDrift

@@ -27,11 +27,11 @@ export function FormField({ label, children, hint, error, maxLength, value }: Fo
     <div className="space-y-1.5">
       <label
         htmlFor={id}
-        className="text-sm font-medium text-foreground/80 flex items-center justify-between"
+        className="text-body font-medium text-foreground/80 flex items-center justify-between"
       >
         <span>{label}</span>
         {maxLength !== undefined && value !== undefined && (
-          <span className="text-xs font-normal text-muted-foreground/70 dark:text-muted-foreground tabular-nums">
+          <span className="text-caption font-normal text-muted-foreground/70 dark:text-muted-foreground tabular-nums">
             {value.length}/{maxLength}
           </span>
         )}
@@ -47,12 +47,12 @@ export function FormField({ label, children, hint, error, maxLength, value }: Fo
       )
     : children}
       {hint && (
-        <p id={hintId} className="text-xs text-muted-foreground pl-1">
+        <p id={hintId} className="text-caption text-muted-foreground pl-1">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} role="alert" className="text-xs text-destructive pl-1">
+        <p id={errorId} role="alert" className="text-caption text-destructive pl-1">
           {error}
         </p>
       )}

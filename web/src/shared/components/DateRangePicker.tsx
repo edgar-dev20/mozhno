@@ -90,7 +90,7 @@ export function DateRangePicker({
           <button
             type="button"
             aria-label={displayText}
-            className={`inline-flex items-center gap-2 w-full bg-accent border-transparent rounded-lg px-3 py-2 text-sm hover:bg-accent/80 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${hasValue ? 'pr-8' : ''}`}
+            className={`inline-flex items-center gap-2 w-full bg-accent border-transparent rounded-lg px-3 py-2 text-body hover:bg-accent/80 focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring transition-colors ${hasValue ? 'pr-8' : ''}`}
           >
             <Calendar size={14} className="text-muted-foreground/70 dark:text-muted-foreground shrink-0" />
             <span className={hasValue ? 'text-foreground/80' : 'text-muted-foreground'}>
@@ -131,7 +131,7 @@ export function DateRangePicker({
                   onChange(value.from, value.to);
                   setOpen(false);
                 }}
-                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
+                className="px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border bg-accent text-muted-foreground hover:bg-accent/80 border-transparent"
               >
                 {preset.label}
               </button>
@@ -142,7 +142,7 @@ export function DateRangePicker({
                 onClick={() => {
                   onChange(undefined, undefined);
                 }}
-                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all border border-transparent bg-accent text-muted-foreground hover:bg-accent/80"
+                className="px-3 py-1.5 text-caption font-semibold rounded-lg transition-all border border-transparent bg-accent text-muted-foreground hover:bg-accent/80"
               >
                 {t('common.clearFilter')}
               </button>

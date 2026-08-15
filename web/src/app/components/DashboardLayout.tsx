@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Outlet, useLocation } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
@@ -14,8 +14,6 @@ import { Menu } from 'lucide-react';
 import { cn } from '@/app/components/ui/utils';
 import { PageErrorBoundary } from '@/app/components/PageErrorBoundary';
 import { OnboardingWizard } from '@/app/components/onboarding';
-import { extractDominantColor } from '@/shared/extractLogoColor';
-import { readableAccentColor } from '@/shared/color';
 import { SkipLink } from '@/shared/components/SkipLink';
 import { AppSidebar, useAppSidebar } from '@/app/components/AppSidebar';
 
@@ -31,7 +29,6 @@ export function DashboardLayout() {
   const location = useLocation();
   const t = useT();
   const { toggleMobile } = useAppSidebar();
-  const [accentColor, setAccentColor] = useState('#1a6b60');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState(
     () => localStorage.getItem('mozhno_onboarding_dismissed') === '1',
@@ -42,21 +39,6 @@ export function DashboardLayout() {
   const projectName = project?.name ?? null;
   const projectLogo = project?.logo ?? null;
   const logoUrl = useProjectLogo(projectLogo);
-
-  const handleLogoLoad = useCallback(
-    (e: React.SyntheticEvent<HTMLImageElement>) => {
-      if (!projectId) return;
-      const color = extractDominantColor(e.currentTarget);
-      setAccentColor(color);
-    },
-    [projectId],
-  );
-
-  const isDark = theme === 'dark';
-  const displayColor = useMemo(
-    () => readableAccentColor(accentColor, isDark),
-    [accentColor, isDark],
-  );
 
   const { invalidateProjects } = useInvalidateQueries();
   const queryClient = useQueryClient();
@@ -127,9 +109,8 @@ export function DashboardLayout() {
                 {projectLogo && projectId && logoUrl ? (
                   <img
                     key={projectLogo}
-                      src={logoUrl}
+                    src={logoUrl}
                     alt={projectName ?? ''}
-                    onLoad={handleLogoLoad}
                     className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg object-cover shrink-0"
                   />
                 ) : (
@@ -137,19 +118,14 @@ export function DashboardLayout() {
                     {(projectName ?? '?')[0].toUpperCase()}
                 </div>
                 )}
-                <span
-                  className="hidden sm:inline-block size-1.5 rounded-full shrink-0"
-                  style={{ backgroundColor: displayColor }}
-                  aria-hidden="true"
-                />
-                <span className="text-h3 sm:text-h2 font-semibold text-foreground truncate">
+                <span className="text-h3 font-semibold text-foreground truncate">
                   {projectName ?? '—'}
                 </span>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="relative inline-flex h-7 w-11 shrink-0 items-center rounded-full border border-border bg-muted transition-colors duration-300 hover:bg-accent"
+                  className="relative inline-flex h-7 w-11 shrink-0 items-center rounded-full border border-border bg-muted transition-colors duration-300 hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                   aria-label={theme === 'dark' ? t('userMenu.lightTheme') : t('userMenu.darkTheme')}
                 >
                   <span
@@ -171,7 +147,7 @@ export function DashboardLayout() {
                       href="https://docs.mozhno.dev"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hidden sm:inline-flex items-center justify-center size-8 rounded-md text-muted-foreground/70 hover:text-muted-foreground hover:bg-accent transition-colors"
+                      className="hidden sm:inline-flex items-center justify-center size-8 rounded-full border border-border bg-muted text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                       aria-label={t('common.docs')}
                     >
                       <FileText size={18} />
@@ -187,7 +163,7 @@ export function DashboardLayout() {
                       href="https://github.com/mozhno-dev/mozhno"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hidden sm:inline-flex items-center justify-center size-8 rounded-md text-muted-foreground/70 hover:text-muted-foreground hover:bg-accent transition-colors"
+                      className="hidden sm:inline-flex items-center justify-center size-8 rounded-full border border-border bg-muted text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
                       aria-label="GitHub"
                     >
                       <svg viewBox="0 0 24 24" fill="currentColor" className="size-[18px]"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>

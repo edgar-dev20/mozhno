@@ -24,8 +24,8 @@ const badgeVariants = cva(
         pill: 'rounded-full',
       },
       size: {
-        sm: 'px-1.5 py-0.5 text-xs',
-        md: 'px-2 py-0.5 text-xs',
+        sm: 'px-1.5 py-0.5 text-caption',
+        md: 'px-2 py-0.5 text-caption',
       },
     },
     compoundVariants: [

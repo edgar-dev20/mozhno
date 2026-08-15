@@ -39,7 +39,7 @@ export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProp
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -10, scale: 0.97 }}
           transition={{ duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="relative overflow-hidden rounded-xl border border-border bg-card shadow-sm"
+          className="relative overflow-hidden rounded-xl bg-card shadow-md"
         >
           <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-gradient-start to-gradient-end" />
           <div className="p-3 sm:p-4 pl-5 sm:pl-6 flex items-start gap-3">
@@ -48,7 +48,7 @@ export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProp
                 {imageSrc ? (
                   <img src={imageSrc} alt="" className="w-10 h-10 object-cover" />
                 ) : icon ? (
-                  <div className="p-2.5 bg-muted">
+                  <div className="p-2.5 bg-primary/10">
                     {React.cloneElement(
                       icon as React.ReactElement<{
                         size?: number;
@@ -63,7 +63,7 @@ export function TipCard({ text, label, icon, imageSrc, storageKey }: TipCardProp
             )}
             <div className="flex-1 min-w-0 pt-0.5">
               <div className="mb-1.5">
-                <Badge variant="primary" uppercase>
+                <Badge variant="primary">
                   {displayLabel}
                 </Badge>
               </div>
