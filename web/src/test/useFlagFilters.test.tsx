@@ -146,3 +146,85 @@ describe('useFlagFilters', () => {
     expect(vals).toEqual(['backend']);
   });
 });
+
+describe('useFlagFilters stale filter', () => {
+  const now = Date.now();
+  const DAY = 24 * 60 * 60 * 1000;
+
+  function envFlag(id: number, createdAt: string | null, lastUsedAt: string | null): FlagView {
+    return makeFlag({
+      flagId: id,
+      name: `F${id}`,
+      key: `f${id}`,
+      createdAt,
+      environments: {
+        1: {
+          enabled: false,
+          percentage: 0,
+          segmentIds: [],
+          strategyId: 1,
+          contextDefinitionId: null,
+          contextValuesJson: null,
+          lastUsedAt,
+        },
+      },
+    });
+  }
+
+  it('excludes flags created within the stale window', () => {
+    const fresh = envFlag(1, new Date(now - 2 * DAY).toISOString(), null);
+    const old = envFlag(2, new Date(now - 90 * DAY).toISOString(), null);
+
+    const { result } = renderHook(() => useFlagFilters([fresh, old]));
+    act(() => result.current.setStaleFilter(true));
+
+    expect(result.current.filtered.map((f) => f.flagId)).toEqual([2]);
+  });
+
+  it('excludes old flags evaluated recently', () => {
+    const used = envFlag(1, new Date(now - 90 * DAY).toISOString(), new Date(now - 2 * DAY).toISOString());
+
+    const { result } = renderHook(() => useFlagFilters([used]));
+    act(() => result.current.setStaleFilter(true));
+
+    expect(result.current.filtered).toHaveLength(0);
+  });
+
+  it('includes old flags never evaluated', () => {
+    const unused = envFlag(1, new Date(now - 90 * DAY).toISOString(), null);
+
+    const { result } = renderHook(() => useFlagFilters([unused]));
+    act(() => result.current.setStaleFilter(true));
+
+    expect(result.current.filtered.map((f) => f.flagId)).toEqual([1]);
+  });
+
+  it('includes flags without createdAt when never evaluated', () => {
+    const noCreatedAt = envFlag(1, null, null);
+
+    const { result } = renderHook(() => useFlagFilters([noCreatedAt]));
+    act(() => result.current.setStaleFilter(true));
+
+    expect(result.current.filtered.map((f) => f.flagId)).toEqual([1]);
+  });
+
+  it('excludes fresh flags without environments and includes old ones', () => {
+    const fresh = makeFlag({
+      flagId: 1,
+      name: 'Fresh',
+      key: 'fresh',
+      createdAt: new Date(now - 2 * DAY).toISOString(),
+    });
+    const old = makeFlag({
+      flagId: 2,
+      name: 'Old',
+      key: 'old',
+      createdAt: new Date(now - 90 * DAY).toISOString(),
+    });
+
+    const { result } = renderHook(() => useFlagFilters([fresh, old]));
+    act(() => result.current.setStaleFilter(true));
+
+    expect(result.current.filtered.map((f) => f.flagId)).toEqual([2]);
+  });
+});

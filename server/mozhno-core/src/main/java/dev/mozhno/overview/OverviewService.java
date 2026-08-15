@@ -121,7 +121,7 @@ public class OverviewService {
                 }
             }
 
-            if (lastUsed == null || lastUsed.isBefore(staleThreshold)) stale++;
+            if (isStale(flag.getCreatedAt(), lastUsed, staleThreshold)) stale++;
             if (enabledSomewhere && isKillswitch(flag)) killswitches++;
         }
 
@@ -167,14 +167,15 @@ public class OverviewService {
             int stale = 0;
 
             for (List<FlagWithStrategy> group : byFlag.values()) {
-                if (group.get(0).flag().isArchived()) continue;
+                Flag flag = group.get(0).flag();
+                if (flag.isArchived()) continue;
                 FlagStrategy s = strategyForEnv(group, envId);
                 if (s == null) continue;
                 if (s.isEnabled()) {
                     enabled++;
                     if (isRollout(s)) rollout++;
                 }
-                if (s.getLastUsedAt() == null || s.getLastUsedAt().isBefore(staleThreshold)) stale++;
+                if (isStale(flag.getCreatedAt(), s.getLastUsedAt(), staleThreshold)) stale++;
             }
 
             long[] eval = evalByEnv.getOrDefault(envId, new long[2]);
@@ -221,6 +222,11 @@ public class OverviewService {
             }
         }
         return null;
+    }
+
+    private static boolean isStale(Instant createdAt, Instant lastUsed, Instant staleThreshold) {
+        if (createdAt != null && createdAt.isAfter(staleThreshold)) return false;
+        return lastUsed == null || lastUsed.isBefore(staleThreshold);
     }
 
     private static boolean isRollout(FlagStrategy s) {

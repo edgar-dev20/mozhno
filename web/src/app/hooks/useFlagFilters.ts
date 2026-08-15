@@ -31,6 +31,7 @@ function applyFilters(flags: FlagView[], criteria: FilterCriteria, archived: boo
   if (staleFilter) {
     const now = Date.now();
     result = result.filter((f) => {
+      if (f.createdAt && now - new Date(f.createdAt).getTime() < STALE_MS) return false;
       const envs = Object.values(f.environments);
       if (envs.length === 0) return true;
       return envs.every((e) => {
