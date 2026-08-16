@@ -16,7 +16,14 @@ import { motion, AnimatePresence } from 'motion/react';
 import { api, ClientInstance, FlagResponse } from '@/api';
 import { NavLink, useNavigate } from 'react-router';
 import { JavaIcon, JavaScriptIcon } from '@/app/components/LanguageIcons';
-import { SectionHeader, EmptyState, TruncatedCopyTooltip, getEnvColor, envColorStyles, formatCompactCount } from '@/shared';
+import {
+  SectionHeader,
+  EmptyState,
+  TruncatedCopyTooltip,
+  getEnvColor,
+  envColorStyles,
+  formatCompactCount,
+} from '@/shared';
 import { TableSkeleton } from '@/app/components/skeletons';
 import { useProjectQuery, useEnvironmentsQuery } from '@/app/hooks/queries';
 import { useQuery } from '@tanstack/react-query';
@@ -49,21 +56,24 @@ export function ClientInstances() {
   const [searchQuery, setSearchQuery] = useState('');
   const [langFilter, setLangFilter] = useState<'all' | 'java' | 'js'>('all');
 
-  const timeAgo = useCallback((d: string) => {
-    if (!d) return '';
-    const diff = Date.now() - new Date(d).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 1) return t('users.time.justNow');
-    if (mins < 60) return t('users.time.minutesAgo', { n: String(mins) });
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return t('users.time.hoursAgo', { n: String(hours) });
-    const days = Math.floor(hours / 24);
-    return t('users.time.daysAgo', { n: String(days) });
-  }, [t]);
+  const timeAgo = useCallback(
+    (d: string) => {
+      if (!d) return '';
+      const diff = Date.now() - new Date(d).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return t('users.time.justNow');
+      if (mins < 60) return t('users.time.minutesAgo', { n: String(mins) });
+      const hours = Math.floor(mins / 60);
+      if (hours < 24) return t('users.time.hoursAgo', { n: String(hours) });
+      const days = Math.floor(hours / 24);
+      return t('users.time.daysAgo', { n: String(days) });
+    },
+    [t],
+  );
 
   const { data: instances = [], isLoading: loading } = useQuery({
     queryKey: queryKeys.clientInstances.filtered(projectId, envFilter),
-    queryFn: () => api.clientInstances.list(projectId ?? 0, envFilter ?? undefined),
+    queryFn: () => api.clientInstances.list(envFilter ?? undefined),
     enabled: !!projectId,
     staleTime: 15_000,
   });
@@ -112,7 +122,8 @@ export function ClientInstances() {
     setExpandedApps(next);
   };
 
-  const envName = (id: number | null) => id != null ? (environments.find((e) => e.id === id)?.name ?? '-') : '-';
+  const envName = (id: number | null) =>
+    id != null ? (environments.find((e) => e.id === id)?.name ?? '-') : '-';
   const envColorHex = (id: number | null) => {
     const env = id != null ? environments.find((e) => e.id === id) : undefined;
     return getEnvColor(env ?? id);
@@ -240,11 +251,16 @@ export function ClientInstances() {
                 key={e.id}
                 onClick={() => handleEnvFilter(e.id)}
                 className={`px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
-                  active ? '' : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
+                  active
+                    ? ''
+                    : 'bg-accent text-muted-foreground hover:bg-accent/80 border-transparent'
                 }`}
                 style={active ? styles.soft : undefined}
               >
-                <span className="inline-block w-1.5 h-1.5 rounded-full mr-1.5" style={styles.dot}></span>
+                <span
+                  className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
+                  style={styles.dot}
+                ></span>
                 {e.name}
               </button>
             );
@@ -328,25 +344,19 @@ export function ClientInstances() {
                     <div className="flex items-center gap-3 shrink-0">
                       {!expanded && (
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            {environmentIds.slice(0, 3).map((envId) => {
-                              return (
-                                <span
-                                  key={envId}
-                                  className="w-1.5 h-1.5 rounded-full"
-                                  style={{ backgroundColor: envColorHex(envId) }}
-                                />
-                              );
-                            })}
-                            {environmentIds.length > 3 && (
-                              <span className="text-caption font-semibold text-muted-foreground">
-                                +{environmentIds.length - 3}
-                              </span>
-                            )}
-                          </div>
+                          <span
+                            className="hidden sm:block text-caption text-muted-foreground truncate max-w-[96px]"
+                            title={environmentIds.map((envId) => envName(envId)).join(', ')}
+                          >
+                            {environmentIds
+                              .slice(0, 2)
+                              .map((envId) => envName(envId))
+                              .join(', ')}
+                            {environmentIds.length > 2 && ` +${environmentIds.length - 2}`}
+                          </span>
                           {activeCount > 0 ? (
                             <span className="inline-flex items-center gap-1 text-caption font-medium bg-primary/5 dark:bg-primary/10 text-primary dark:text-primary/80 px-2 py-0.5 rounded-lg border border-primary/20">
-                              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                              <Activity size={11} />
                               {activeCount} / {instanceCount}
                             </span>
                           ) : (
@@ -390,7 +400,9 @@ export function ClientInstances() {
                               <span className="text-caption font-semibold text-muted-foreground/70">
                                 {t('clientInstances.instances')}
                               </span>
-                              <span className="text-caption text-muted-foreground">{instanceCount}</span>
+                              <span className="text-caption text-muted-foreground">
+                                {instanceCount}
+                              </span>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                               {groupInstances.map((inst) => {
@@ -399,16 +411,17 @@ export function ClientInstances() {
                                   <div
                                     key={inst.id}
                                     className={`rounded-lg px-3 py-2.5 flex flex-col gap-1.5 border ${staleness === 'stale' ? 'bg-secondary/60 border-border/40' : ''}`}
-                                    style={staleness === 'stale' ? undefined : envColorStyles(envColorHex(inst.environmentId)).card}
+                                    style={
+                                      staleness === 'stale'
+                                        ? undefined
+                                        : envColorStyles(envColorHex(inst.environmentId)).card
+                                    }
                                   >
                                     <div className="flex items-center justify-between gap-2">
                                       <TruncatedCopyTooltip
                                         value={inst.instanceId}
                                         className={`font-mono text-caption min-w-0 ${staleness === 'stale' ? 'text-foreground/50' : 'text-foreground/80'}`}
                                       />
-                                      {staleness === 'active' && (
-                                        <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
-                                      )}
                                     </div>
                                     <div className="flex items-center justify-between gap-2">
                                       <span className="text-caption text-muted-foreground flex items-center gap-1">
@@ -433,7 +446,6 @@ export function ClientInstances() {
                             return (
                               <div key={envId} className="border-t border-border pt-2.5 mt-1">
                                 <div className="flex items-center gap-2 mb-1.5">
-                                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: envColorHex(envId) }}></span>
                                   <span className="text-caption font-semibold text-muted-foreground/70">
                                     {t('clientInstances.flags')}
                                   </span>
@@ -467,62 +479,57 @@ export function ClientInstances() {
                                             const metricTotal = metricsByFlag.get(flag.id) ?? 0;
                                             const TypeIcon =
                                               flag.flagType === 'KILLSWITCH' ? ShieldOff : Rocket;
-                                            const typeColor =
-                                              flag.flagType === 'KILLSWITCH'
+                                            const typeColor = flag.enabled
+                                              ? flag.flagType === 'KILLSWITCH'
                                                 ? 'text-chart-4'
-                                                : 'text-info';
+                                                : 'text-info'
+                                              : 'text-muted-foreground';
                                             return (
                                               <NavLink
                                                 key={flag.id}
                                                 to={`/flags?open=${encodeURIComponent(flag.key)}`}
-                                                className="bg-secondary rounded-lg px-2.5 py-2 hover:shadow-md transition-all group/flag flex flex-col gap-1"
+                                                title={flag.name}
+                                                className="bg-secondary rounded-lg px-2.5 py-1.5 hover:shadow-md transition-all group/flag flex items-center gap-1.5 min-w-0"
                                               >
-                                                <div className="flex items-center gap-1.5 min-w-0">
-                                                  <span
-                                                    className={`shrink-0 w-1.5 h-1.5 rounded-full ${flag.enabled ? 'bg-primary shadow-sm dark:' : 'bg-muted-foreground/30'}`}
-                                                  />
-                                                  <span className="text-caption font-semibold text-foreground/90 truncate">
-                                                    {flag.name}
-                                                  </span>
-                                                </div>
-                                                <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-                                                  <TypeIcon
-                                                    size={11}
-                                                    className={`shrink-0 ${typeColor}`}
-                                                  />
-                                                  {flag.percentage != null &&
-                                                    flag.percentage < 100 && (
-                                                      <span className="shrink-0 text-caption text-brand font-medium">
-                                                        {flag.percentage}%
-                                                      </span>
-                                                    )}
-                                                  <code className="text-caption font-mono text-muted-foreground/70 truncate">
-                                                    {flag.key}
-                                                  </code>
-                                                  {flag.tags.length > 0 && (
-                                                    <div className="flex items-center gap-1 shrink-0">
-                                                      {flag.tags.slice(0, 2).map((tv, i) => (
-                                                        <span
-                                                          key={i}
-                                                          className="inline-flex items-center px-1 py-0 rounded text-caption font-medium text-primary-foreground truncate max-w-[64px] dark:brightness-[.85] dark:saturate-[.7]"
-                                                          style={{ background: tv.tagColor }}
-                                                        >
-                                                          {tv.value}
-                                                        </span>
-                                                      ))}
-                                                    </div>
+                                                <span
+                                                  className={`text-caption font-semibold truncate flex-1 min-w-0 ${flag.enabled ? 'text-foreground/90' : 'text-foreground/60'}`}
+                                                >
+                                                  {flag.name}
+                                                </span>
+                                                <TypeIcon
+                                                  size={11}
+                                                  className={`shrink-0 ${typeColor}`}
+                                                />
+                                                {flag.percentage != null &&
+                                                  flag.percentage < 100 && (
+                                                    <span className="shrink-0 text-caption text-brand font-medium">
+                                                      {flag.percentage}%
+                                                    </span>
                                                   )}
-                                                </div>
+                                                <code className="hidden sm:inline text-caption font-mono text-muted-foreground/70 truncate max-w-[72px]">
+                                                  {flag.key}
+                                                </code>
+                                                {flag.tags.length > 0 && (
+                                                  <div className="hidden xl:flex items-center gap-1 shrink-0">
+                                                    {flag.tags.slice(0, 1).map((tv, i) => (
+                                                      <span
+                                                        key={i}
+                                                        className="inline-flex items-center px-1 py-0 rounded text-caption font-medium text-primary-foreground truncate max-w-[56px] dark:brightness-[.85] dark:saturate-[.7]"
+                                                        style={{ background: tv.tagColor }}
+                                                      >
+                                                        {tv.value}
+                                                      </span>
+                                                    ))}
+                                                  </div>
+                                                )}
                                                 {metricTotal > 0 && (
-                                                  <div className="flex items-center gap-1">
+                                                  <span className="shrink-0 inline-flex items-center gap-1 text-caption text-muted-foreground/70">
                                                     <Activity
                                                       size={9}
                                                       className="text-muted-foreground"
                                                     />
-                                                    <span className="text-caption text-muted-foreground/70">
-                                                      {formatCompactCount(metricTotal)}
-                                                    </span>
-                                                  </div>
+                                                    {formatCompactCount(metricTotal)}
+                                                  </span>
                                                 )}
                                               </NavLink>
                                             );
@@ -536,12 +543,14 @@ export function ClientInstances() {
                                                     new Set([...prev, `${appName}:${envId}`]),
                                                 );
                                               }}
-                                              className="bg-secondary border border-dashed border-border dark:border-border rounded-lg px-2.5 py-2 hover:border-brand dark:hover:border-brand hover:bg-brand/30 dark:hover:bg-brand/5 transition-all flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-brand dark:hover:text-brand cursor-pointer"
+                                              className="bg-secondary border border-dashed border-border dark:border-border rounded-lg px-2.5 py-1.5 hover:border-brand dark:hover:border-brand hover:bg-brand/30 dark:hover:bg-brand/5 transition-all flex items-center justify-center gap-1.5 text-muted-foreground hover:text-brand dark:hover:text-brand cursor-pointer"
                                             >
                                               <span className="text-caption font-medium">
                                                 +{visible.length - max}
                                               </span>
-                                              <span className="text-caption">{t('common.showAll')}</span>
+                                              <span className="text-caption">
+                                                {t('common.showAll')}
+                                              </span>
                                             </button>
                                           )}
                                         </>
