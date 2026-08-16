@@ -42,8 +42,8 @@ export const WithTags: Story = {
   args: {
     flag: MOCK_FLAG,
     allTags: [
-      { tagId: 1, tagName: 'frontend', tagColor: '#3b82f6', value: '' },
-      { tagId: 2, tagName: 'checkout', tagColor: '#8b5cf6', value: '' },
+      { id: 1, projectId: 1, name: 'frontend', description: '', color: '#3b82f6', createdAt: '2025-01-01T00:00:00Z' },
+      { id: 2, projectId: 1, name: 'checkout', description: '', color: '#8b5cf6', createdAt: '2025-01-01T00:00:00Z' },
     ],
     onSave: fn(),
     onArchive: fn(),

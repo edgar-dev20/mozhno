@@ -16,9 +16,9 @@ export const Default: Story = { args: { allTags: [], onSave: fn() } };
 export const WithTags: Story = {
   args: {
     allTags: [
-      { tagId: 1, tagName: 'frontend', tagColor: '#3b82f6', value: '' },
-      { tagId: 2, tagName: 'backend', tagColor: '#10b981', value: '' },
-      { tagId: 3, tagName: 'critical', tagColor: '#ef4444', value: '' },
+      { id: 1, projectId: 1, name: 'frontend', description: '', color: '#3b82f6', createdAt: '2025-01-01T00:00:00Z' },
+      { id: 2, projectId: 1, name: 'backend', description: '', color: '#10b981', createdAt: '2025-01-01T00:00:00Z' },
+      { id: 3, projectId: 1, name: 'critical', description: '', color: '#ef4444', createdAt: '2025-01-01T00:00:00Z' },
     ],
     onSave: fn(),
   },

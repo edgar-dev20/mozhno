@@ -159,7 +159,7 @@ export function FlagMetricsDialog({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setInstancesLoading(true);
     api.clientInstances
-      .list(projectId, selectedEnvId)
+      .list(selectedEnvId)
       .then((data) => {
         setInstances(
           data.filter((i) => Date.now() - new Date(i.lastSeenAt).getTime() < 24 * 60 * 60 * 1000),

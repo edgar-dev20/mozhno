@@ -270,7 +270,7 @@ export function Settings() {
       setResetOpen(false);
       queryClient.invalidateQueries({ queryKey: queryKeys.flags.enriched });
       queryClient.invalidateQueries({ queryKey: queryKeys.environments.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys.byProject(projectId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.contexts.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.segments.all });
     },

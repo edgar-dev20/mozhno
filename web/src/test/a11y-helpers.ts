@@ -1,8 +1,8 @@
 import { axe } from 'vitest-axe';
-import type { RunOptions } from 'vitest-axe';
+import type { AxeCore } from 'vitest-axe';
 import { expect } from 'vitest';
 
-const WCAG_AA: RunOptions = {
+export const WCAG_AA: AxeCore.RunOptions = {
   runOnly: {
     type: 'tag',
     values: ['wcag2aa', 'wcag21aa'],

@@ -31,8 +31,8 @@ export const WithSelections: Story = {
 
 export const AllExpanded: Story = {
   args: {
-    formEvents: ['flag.created', 'instance.connected', 'user.invited'],
-    expandedCats: new Set(['flags', 'instances', 'users']),
+    formEvents: ['flag.created', 'user.created', 'context_definition.created'],
+    expandedCats: new Set(['flags', 'users', 'contexts']),
     onFormEventsChange: fn(),
     onToggleCatExpand: fn(),
   },
