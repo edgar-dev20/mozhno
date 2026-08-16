@@ -110,11 +110,9 @@ export function MultiValueChips({ values, onChange, autoFocus, validValues }: Mu
           className="flex-1 min-w-[120px] bg-transparent border-none outline-none rounded-md focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:border-ring text-caption placeholder:text-muted-foreground/60 px-1.5 py-1"
         />
       </div>
-      {values.length > 0 && (
-        <p className="text-caption text-muted-foreground leading-none">
-          {t('flags.chipHint', { n: String(values.length) })}
-        </p>
-      )}
+      <p className="text-caption text-muted-foreground leading-none">
+        {values.length > 0 ? t('flags.chipHint') : t('flags.chipHintEmpty')}
+      </p>
     </div>
   );
 }

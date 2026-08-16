@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { userEvent, within, expect } from 'storybook/test';
 import { MultiValueChips } from '@/app/components/flags/MultiValueChips';
+import { ru } from '@/i18n/locales/ru';
 import { useState } from 'react';
 
 const meta: Meta<typeof MultiValueChips> = {
@@ -32,9 +33,11 @@ export const Empty: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const input = canvas.getByRole('textbox');
-    await expect(input).toBeInTheDocument();
+    await expect(canvas.getByText(ru.flags.chipHintEmpty)).toBeInTheDocument();
     await userEvent.type(input, 'FR');
     await userEvent.keyboard('{Enter}');
+    await expect(canvas.getByText('FR')).toBeInTheDocument();
+    await expect(canvas.getByText(ru.flags.chipHint)).toBeInTheDocument();
   },
 };
 export const WithValues: Story = {
@@ -44,6 +47,7 @@ export const WithValues: Story = {
     await expect(canvas.getByText('US')).toBeInTheDocument();
     await expect(canvas.getByText('CA')).toBeInTheDocument();
     await expect(canvas.getByText('UK')).toBeInTheDocument();
+    await expect(canvas.getByText(ru.flags.chipHint)).toBeInTheDocument();
   },
 };
 export const WithValidValues: Story = { render: WithValidValuesRender };
