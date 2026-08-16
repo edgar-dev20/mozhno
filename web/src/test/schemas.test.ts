@@ -66,6 +66,7 @@ const validSegmentResponse = {
   icon: 'star',
   color: '#ff0000',
   createdAt: '2025-01-01T00:00:00Z',
+  usedByFlags: 2,
   context: [],
 };
 

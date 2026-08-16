@@ -376,7 +376,7 @@ export function Constraints() {
                             </span>
                           )}
                         </div>
-                        {usage && usage.length > 0 && (
+                        {usage && usage.length > 0 ? (
                           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                             {usage.map((s) => (
                               <span
@@ -388,6 +388,10 @@ export function Constraints() {
                                 {s.name}
                               </span>
                             ))}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 mt-2 text-caption text-muted-foreground">
+                            <span>{t('constraints.notUsedInSegments')}</span>
                           </div>
                         )}
                       </div>

@@ -112,6 +112,7 @@ export type SegmentResponse = {
   icon: string;
   color: string;
   context: SegmentContextEntry[];
+  usedByFlags: number;
   createdAt: string;
 };
 

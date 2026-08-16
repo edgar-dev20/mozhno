@@ -10,7 +10,11 @@ import dev.mozhno.CacheNames;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * JDBC-based repository for {@link Segment} entities.
@@ -43,6 +47,35 @@ public class SegmentRepository {
      */
     public List<Segment> findByProjectId(Integer projectId) {
         return jdbc.query("SELECT id, project_id, name, description, icon, color, created_at FROM segments WHERE project_id = ?", ROW_MAPPER, projectId);
+    }
+
+    /**
+     * Counts how many distinct flags use each of the given segments.
+     *
+     * @param segmentIds segment IDs to count usage for
+     * @return map of segment ID to number of flags using it
+     */
+    public Map<Integer, Integer> countFlagsBySegmentIds(List<Integer> segmentIds) {
+        if (segmentIds == null || segmentIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        String placeholders = segmentIds.stream()
+            .map(id -> "?")
+            .collect(Collectors.joining(","));
+        return jdbc.query(
+            "SELECT ss.segment_id, COUNT(DISTINCT fs.flag_id) AS flag_count " +
+                "FROM strategy_segments ss " +
+                "JOIN flag_strategies fs ON fs.id = ss.strategy_id " +
+                "WHERE ss.segment_id IN (" + placeholders + ") " +
+                "GROUP BY ss.segment_id",
+            rs -> {
+                Map<Integer, Integer> counts = new HashMap<>();
+                while (rs.next()) {
+                    counts.put(rs.getInt("segment_id"), rs.getInt("flag_count"));
+                }
+                return counts;
+            },
+            segmentIds.toArray());
     }
 
     /**

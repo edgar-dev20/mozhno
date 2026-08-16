@@ -66,6 +66,7 @@ export const segmentResponseSchema = z.object({
   icon: z.string(),
   color: z.string(),
   createdAt: z.string(),
+  usedByFlags: z.number(),
   context: z.array(
     z.object({
       contextDefinitionId: z.number(),

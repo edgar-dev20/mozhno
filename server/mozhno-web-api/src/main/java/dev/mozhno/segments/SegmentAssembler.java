@@ -12,11 +12,16 @@ import java.util.Map;
 public class SegmentAssembler {
 
     public SegmentResponse toResponse(Segment segment) {
-        return toResponse(segment, Collections.emptyList());
+        return toResponse(segment, Collections.emptyList(), 0);
     }
 
     public SegmentResponse toResponse(Segment segment, List<SegmentContextRepository.SegmentContextWithName> allContexts,
                                        Integer segmentId) {
+        return toResponse(segment, allContexts, segmentId, 0);
+    }
+
+    public SegmentResponse toResponse(Segment segment, List<SegmentContextRepository.SegmentContextWithName> allContexts,
+                                       Integer segmentId, int usedByFlags) {
         List<SegmentResponse.ContextEntryResponse> entries = allContexts.stream()
             .filter(ctx -> ctx.getSegmentId().equals(segmentId))
             .map(ctx -> SegmentResponse.ContextEntryResponse.builder()
@@ -25,11 +30,17 @@ public class SegmentAssembler {
                 .contextValues(ctx.getContextValues())
                 .build())
             .toList();
-        return toResponse(segment, entries);
+        return toResponse(segment, entries, usedByFlags);
     }
 
     public List<SegmentResponse> toResponseList(List<Segment> segments,
                                                   List<SegmentContextRepository.SegmentContextWithName> allContexts) {
+        return toResponseList(segments, allContexts, Collections.emptyMap());
+    }
+
+    public List<SegmentResponse> toResponseList(List<Segment> segments,
+                                                  List<SegmentContextRepository.SegmentContextWithName> allContexts,
+                                                  Map<Integer, Integer> flagCounts) {
         Map<Integer, List<SegmentResponse.ContextEntryResponse>> contextMap = new LinkedHashMap<>();
         for (SegmentContextRepository.SegmentContextWithName ctx : allContexts) {
             SegmentResponse.ContextEntryResponse ce = SegmentResponse.ContextEntryResponse.builder()
@@ -42,12 +53,14 @@ public class SegmentAssembler {
 
         List<SegmentResponse> responses = new ArrayList<>();
         for (Segment s : segments) {
-            responses.add(toResponse(s, contextMap.getOrDefault(s.getId(), Collections.emptyList())));
+            responses.add(toResponse(s, contextMap.getOrDefault(s.getId(), Collections.emptyList()),
+                flagCounts.getOrDefault(s.getId(), 0)));
         }
         return responses;
     }
 
-    private SegmentResponse toResponse(Segment segment, List<SegmentResponse.ContextEntryResponse> contextEntries) {
+    private SegmentResponse toResponse(Segment segment, List<SegmentResponse.ContextEntryResponse> contextEntries,
+                                       int usedByFlags) {
         return SegmentResponse.builder()
             .id(segment.getId())
             .projectId(segment.getProjectId())
@@ -57,6 +70,7 @@ public class SegmentAssembler {
             .color(segment.getColor())
             .createdAt(segment.getCreatedAt())
             .context(contextEntries)
+            .usedByFlags(usedByFlags)
             .build();
     }
 }

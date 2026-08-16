@@ -29,6 +29,9 @@ public record SegmentResponse(
     @Schema(description = "Context targeting rules")
     List<ContextEntryResponse> context,
 
+    @Schema(description = "Number of flags that use this segment", example = "3")
+    Integer usedByFlags,
+
     @Schema(description = "When the segment was created")
     Instant createdAt
 ) {

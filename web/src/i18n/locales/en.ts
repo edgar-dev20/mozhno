@@ -298,7 +298,7 @@ const en = {
     tipText:
       'Roll out through segments gradually: internal testers first, then external beta, and only then all users. Each step is a rollback point without downtime.',
     tipLabel: 'Strategy',
-    contextCount: '{{count}} context',
+    usedByFlags: 'Used in {{count}} {{flags}}',
     rules: 'Rules',
     unknownField: 'Field #{{id}}',
     noContext: 'Select context',
@@ -723,6 +723,7 @@ const en = {
     typeHelpText: 'Value format for targeting. SDK validates the passed value against the type.',
     relatedSegmentsLabel: 'Related segments',
     badgeInUse: 'In use',
+    notUsedInSegments: 'Not used in segments',
     cannotDeleteHelp:
       'This context is used in segments and cannot be deleted. Remove segment associations first.',
     deleteButton: 'Delete context',

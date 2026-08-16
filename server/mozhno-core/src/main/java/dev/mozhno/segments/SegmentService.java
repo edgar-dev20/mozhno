@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 /**
  * Service for managing user segments, including their context-based targeting rules.
  * Enforces quota limits on segment creation.
@@ -138,6 +137,11 @@ public class SegmentService {
 
     public List<SegmentContextRepository.SegmentContextWithName> getContextsForSegments(List<Integer> segmentIds) {
         return segmentContextRepository.findContextsBySegmentIds(segmentIds);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<Integer, Integer> countFlagsBySegments(List<Integer> segmentIds) {
+        return segmentRepository.countFlagsBySegmentIds(segmentIds);
     }
 
     private void validateContextValues(SegmentRequest request) {

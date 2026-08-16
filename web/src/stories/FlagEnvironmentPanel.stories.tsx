@@ -60,6 +60,7 @@ const QA_SEGMENT: SegmentResponse = {
   icon: 'Bug',
   color: '#5a82a0',
   context: [{ contextDefinitionId: 13, operator: 'eq', contextValues: 'qa' }],
+  usedByFlags: 3,
   createdAt: '2025-01-01T00:00:00Z',
 };
 

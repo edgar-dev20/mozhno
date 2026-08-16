@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Plus,
-  Users,
+  Flag,
   Filter,
   Settings,
   X,
@@ -48,7 +48,8 @@ import {
 } from '@/shared';
 import { EmptySegmentsIllustration } from '@/shared/components/illustrations';
 import { SegmentCardSkeletonList } from '@/app/components/skeletons';
-import { useT } from '@/i18n';
+import { useT, useLocale } from '@/i18n';
+import { russianPlural } from '@/shared/russianCases';
 
 import { usePermissions } from '@/app/hooks/usePermissions';
 import { useSegments } from '@/app/hooks/useSegments';
@@ -62,8 +63,16 @@ interface SegmentContextEntry {
 
 export function Segments() {
   const t = useT();
+  const { locale } = useLocale();
   const { canWrite } = usePermissions();
   const { segments, contexts, loading, error, setError, handleDelete, handleSave } = useSegments();
+
+  const pluralFlags = (n: number) =>
+    locale === 'ru'
+      ? russianPlural(n, 'флаге', 'флагах', 'флагах')
+      : n === 1
+        ? 'flag'
+        : 'flags';
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [editing, setEditing] = useState<SegmentResponse | null>(null);
@@ -430,16 +439,19 @@ export function Segments() {
                   >
                     {s.name}
                   </h3>
-                  <p className="text-body-sm text-muted-foreground mb-6 line-clamp-2 h-10">
-                    {s.description}
-                  </p>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-body-sm">
-                      <Users size={16} className="text-muted-foreground/70" />
-                      <span className="text-foreground/60 dark:text-muted-foreground/60">
-                        {t('segments.contextCount', { count: String((s.context ?? []).length) })}
-                      </span>
-                    </div>
+          <p className="text-body-sm text-muted-foreground mb-4 line-clamp-2">
+            {s.description}
+          </p>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-body-sm">
+              <Flag size={16} className="text-muted-foreground/70" />
+              <span className="text-foreground/60 dark:text-muted-foreground/60">
+                {t('segments.usedByFlags', {
+                  count: String(s.usedByFlags ?? 0),
+                  flags: pluralFlags(s.usedByFlags ?? 0),
+                })}
+              </span>
+            </div>
                     {s.context && s.context.length > 0 && (
                       <div className="bg-secondary rounded-lg p-3 border border-border flex flex-col gap-2">
                         <div className="flex items-center gap-2 text-caption font-semibold text-muted-foreground/80">

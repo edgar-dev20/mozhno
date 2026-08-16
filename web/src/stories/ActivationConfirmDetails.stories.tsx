@@ -17,6 +17,7 @@ const seg = (
   icon,
   color,
   context,
+  usedByFlags: 0,
   createdAt: '2025-01-01T00:00:00Z',
 });
 

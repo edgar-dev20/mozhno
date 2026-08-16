@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import dev.mozhno.auth.UserPrincipal;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/segments")
@@ -27,7 +28,8 @@ public class SegmentController {
         List<Integer> segmentIds = segments.stream().map(Segment::getId).toList();
         List<SegmentContextRepository.SegmentContextWithName> contexts =
             segmentService.getContextsForSegments(segmentIds);
-        return segmentAssembler.toResponseList(segments, contexts);
+        Map<Integer, Integer> flagCounts = segmentService.countFlagsBySegments(segmentIds);
+        return segmentAssembler.toResponseList(segments, contexts, flagCounts);
     }
 
     @GetMapping("/{id}")
@@ -37,7 +39,7 @@ public class SegmentController {
         Segment segment = segmentService.findById(id, user.projectId());
         List<SegmentContextRepository.SegmentContextWithName> contexts =
             segmentService.getContextsForSegments(List.of(id));
-        return segmentAssembler.toResponse(segment, contexts, id);
+        return segmentAssembler.toResponse(segment, contexts, id, countFlags(id));
     }
 
     @PostMapping
@@ -50,7 +52,7 @@ public class SegmentController {
         Segment segment = segmentService.create(request);
         List<SegmentContextRepository.SegmentContextWithName> contexts =
             segmentService.getContextsForSegments(List.of(segment.getId()));
-        return segmentAssembler.toResponse(segment, contexts, segment.getId());
+        return segmentAssembler.toResponse(segment, contexts, segment.getId(), 0);
     }
 
     @PutMapping("/{id}")
@@ -63,7 +65,11 @@ public class SegmentController {
         Segment segment = segmentService.update(id, request);
         List<SegmentContextRepository.SegmentContextWithName> contexts =
             segmentService.getContextsForSegments(List.of(segment.getId()));
-        return segmentAssembler.toResponse(segment, contexts, segment.getId());
+        return segmentAssembler.toResponse(segment, contexts, segment.getId(), countFlags(id));
+    }
+
+    private int countFlags(Integer segmentId) {
+        return segmentService.countFlagsBySegments(List.of(segmentId)).getOrDefault(segmentId, 0);
     }
 
     @DeleteMapping("/{id}")

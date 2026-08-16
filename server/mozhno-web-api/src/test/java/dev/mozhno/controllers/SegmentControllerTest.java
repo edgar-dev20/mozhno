@@ -11,12 +11,17 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import dev.mozhno.BaseIntegrationTest;
 import dev.mozhno.contexts.ContextDefinition;
+import dev.mozhno.environments.Environment;
+import dev.mozhno.flags.Flag;
+import dev.mozhno.flags.FlagType;
+import dev.mozhno.flags.strategy.FlagStrategy;
 import dev.mozhno.projects.Project;
 import dev.mozhno.segments.Segment;
 import dev.mozhno.segments.SegmentRequest;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -73,6 +78,44 @@ class SegmentControllerTest extends BaseIntegrationTest {
                 .header("Authorization", auth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
+    }
+
+    @Test
+    void getAllSegments_shouldIncludeFlagUsageCount() throws Exception {
+        Environment env = new Environment();
+        env.setName("dev");
+        env.setProjectId(projectId);
+        Integer envId = environmentRepository.save(env).getId();
+
+        Segment used = new Segment();
+        used.setName("Used Segment");
+        used.setProjectId(projectId);
+        Segment saved = segmentRepository.save(used);
+
+        Segment unused = new Segment();
+        unused.setName("Unused Segment");
+        unused.setProjectId(projectId);
+        segmentRepository.save(unused);
+
+        Flag f = new Flag();
+        f.setProjectId(projectId);
+        f.setName("flag with segment");
+        f.setKey("flag-with-segment");
+        f.setFlagType(FlagType.RELEASE);
+        Integer flagId = flagRepository.save(f).getId();
+
+        FlagStrategy fs = new FlagStrategy();
+        fs.setFlagId(flagId);
+        fs.setEnvironmentId(envId);
+        fs.setEnabled(true);
+        fs.setSegmentIds(List.of(saved.getId()));
+        flagStrategyRepository.save(fs);
+
+        mockMvc.perform(get("/api/v1/segments")
+                        .header("Authorization", auth()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[*].usedByFlags", containsInAnyOrder(0, 1)));
     }
 
     @Test
