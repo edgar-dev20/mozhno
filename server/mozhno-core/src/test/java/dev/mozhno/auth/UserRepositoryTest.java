@@ -6,6 +6,8 @@ import dev.mozhno.apikeys.ApiKeyRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -143,5 +145,50 @@ class UserRepositoryTest extends BaseIntegrationTest {
         jdbcTemplate.execute("INSERT INTO users (email, password_hash, role, created_by) VALUES ('by-sub2@test.com', 'h3', 'viewer', " + bossId + ")");
 
         assertEquals(2, userRepository.countByCreatedBy(bossId));
+    }
+
+    @Test
+    void touchActivity_whenNeverActive_setsTimestamp() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('touch-new@test.com', 'h', 'admin')");
+        Integer id = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'touch-new@test.com'", Integer.class);
+
+        userRepository.touchActivity(id);
+
+        assertNotNull(userRepository.findById(id).getLastActiveAt());
+    }
+
+    @Test
+    void touchActivity_withinWindow_isThrottled() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('touch-hot@test.com', 'h', 'admin')");
+        Integer id = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'touch-hot@test.com'", Integer.class);
+
+        userRepository.touchActivity(id);
+        java.sql.Timestamp first = jdbcTemplate.queryForObject(
+            "SELECT last_active_at FROM users WHERE id = ?", java.sql.Timestamp.class, id);
+
+        userRepository.touchActivity(id);
+        java.sql.Timestamp second = jdbcTemplate.queryForObject(
+            "SELECT last_active_at FROM users WHERE id = ?", java.sql.Timestamp.class, id);
+
+        assertEquals(first, second);
+    }
+
+    @Test
+    void touchActivity_afterWindow_updates() {
+        jdbcTemplate.execute("INSERT INTO users (email, password_hash, role) VALUES ('touch-cold@test.com', 'h', 'admin')");
+        Integer id = jdbcTemplate.queryForObject("SELECT id FROM users WHERE email = 'touch-cold@test.com'", Integer.class);
+        jdbcTemplate.update(
+            "UPDATE users SET last_active_at = CURRENT_TIMESTAMP - INTERVAL '10 minutes' WHERE id = ?", id);
+
+        userRepository.touchActivity(id);
+
+        java.sql.Timestamp updated = jdbcTemplate.queryForObject(
+            "SELECT last_active_at FROM users WHERE id = ?", java.sql.Timestamp.class, id);
+        assertTrue(updated.toInstant().isAfter(Instant.now().minus(5, ChronoUnit.MINUTES)));
+    }
+
+    @Test
+    void touchActivity_unknownUser_isNoOp() {
+        assertDoesNotThrow(() -> userRepository.touchActivity(99999));
     }
 }

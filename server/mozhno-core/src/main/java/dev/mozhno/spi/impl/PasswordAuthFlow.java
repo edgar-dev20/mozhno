@@ -91,7 +91,6 @@ public class PasswordAuthFlow implements AuthenticationFlowSpi {
         if (user.getFailedLoginAttempts() > 0) {
             userRepository.resetFailedAttempts(user.getId());
         }
-        userRepository.updateLastActive(user.getId());
         return new AuthResult(true, null,
             user.getId(), user.getEmail(), user.getName(),
             user.getRole(), user.getStatus());

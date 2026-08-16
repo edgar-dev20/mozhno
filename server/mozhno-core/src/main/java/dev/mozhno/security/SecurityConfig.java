@@ -25,6 +25,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 import dev.mozhno.spi.AuthenticationProviderSpi;
 import dev.mozhno.spi.impl.DelegatingAuthenticationFilter;
+import dev.mozhno.auth.AuthProperties;
+import dev.mozhno.auth.UserRepository;
 import dev.mozhno.logging.LoggingMdcFilter;
 
 import java.io.IOException;
@@ -39,13 +41,19 @@ public class SecurityConfig {
     private final List<AuthenticationProviderSpi> authProviders;
     private final RateLimitProperties rateLimitProperties;
     private final SecurityProperties securityProperties;
+    private final UserRepository userRepository;
+    private final AuthProperties authProperties;
 
     public SecurityConfig(List<AuthenticationProviderSpi> authProviders,
                           RateLimitProperties rateLimitProperties,
-                          SecurityProperties securityProperties) {
+                          SecurityProperties securityProperties,
+                          UserRepository userRepository,
+                          AuthProperties authProperties) {
         this.authProviders = authProviders;
         this.rateLimitProperties = rateLimitProperties;
         this.securityProperties = securityProperties;
+        this.userRepository = userRepository;
+        this.authProperties = authProperties;
     }
 
     @Bean
@@ -131,6 +139,7 @@ public class SecurityConfig {
             .addFilterBefore(new RateLimitFilter(rateLimitProperties.isEnabled(), rateLimitProperties), UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(new LoggingMdcFilter(), UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(new DelegatingAuthenticationFilter(authProviders), UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(new UserActivityFilter(userRepository, authProperties), UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(spaForwardFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

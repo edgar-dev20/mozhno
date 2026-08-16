@@ -232,6 +232,7 @@ MOZHNO_INIT_PASSWORD=admin
 | `MOZHNO_AUTH_PASSWORD_RESET_TOKEN_TTL_HOURS` | `1` | Срок жизни токена сброса пароля (ч) |
 | `MOZHNO_AUTH_PASSWORD_RESET_COOLDOWN_MINUTES` | `5` | Минимальный интервал между письмами сброса (мин) |
 | `MOZHNO_AUTH_INVITE_TOKEN_TTL_DAYS` | `7` | Срок жизни токена приглашения (дни) |
+| `MOZHNO_AUTH_ACTIVITY_WINDOW_MINUTES` | `5` | Как часто обновляется метка активности пользователя (мин) |
 | `MOZHNO_WEBHOOK_CONNECT_TIMEOUT_SECONDS` | `10` | Таймаут соединения для вебхуков (с) |
 | `MOZHNO_WEBHOOK_REQUEST_TIMEOUT_SECONDS` | `30` | Таймаут запроса для вебхуков (с) |
 | `MOZHNO_WEBHOOK_ASYNC_CORE_POOL_SIZE` | `4` | Базовый размер пула потоков вебхуков |

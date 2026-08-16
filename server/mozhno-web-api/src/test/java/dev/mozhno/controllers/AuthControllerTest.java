@@ -17,7 +17,11 @@ import dev.mozhno.auth.JwtToken;
 import dev.mozhno.auth.User;
 import dev.mozhno.projects.Project;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -323,5 +327,54 @@ class AuthControllerTest extends BaseIntegrationTest {
         String newToken = objectMapper.readTree(refreshResponse).get("token").asText();
         JwtToken parsed = jwtService.parseToken(newToken);
         assertEquals(userProjectId, parsed.getProjectId());
+    }
+
+    @Test
+    void authenticatedRequest_shouldTouchUserActivity() throws Exception {
+        insertUser("activity@test.com", "actpass", "admin");
+
+        String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"activity@test.com\",\"password\":\"actpass\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String token = objectMapper.readTree(loginResponse).get("token").asText();
+
+        jdbcTemplate.update(
+            "UPDATE users SET last_active_at = CURRENT_TIMESTAMP - INTERVAL '10 minutes' WHERE email = ?",
+            "activity@test.com");
+
+        mockMvc.perform(get("/api/v1/auth/me")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        java.sql.Timestamp updated = jdbcTemplate.queryForObject(
+            "SELECT last_active_at FROM users WHERE email = ?", java.sql.Timestamp.class, "activity@test.com");
+        assertTrue(updated.toInstant().isAfter(Instant.now().minus(5, ChronoUnit.MINUTES)));
+    }
+
+    @Test
+    void refresh_shouldTouchUserActivity() throws Exception {
+        insertUser("refresh-act@test.com", "refpass", "developer");
+
+        String loginResponse = mockMvc.perform(post("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"refresh-act@test.com\",\"password\":\"refpass\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String refreshToken = objectMapper.readTree(loginResponse).get("refreshToken").asText();
+
+        jdbcTemplate.update(
+            "UPDATE users SET last_active_at = CURRENT_TIMESTAMP - INTERVAL '10 minutes' WHERE email = ?",
+            "refresh-act@test.com");
+
+        mockMvc.perform(post("/api/v1/auth/refresh")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"refreshToken\":\"" + refreshToken + "\"}"))
+                .andExpect(status().isOk());
+
+        java.sql.Timestamp updated = jdbcTemplate.queryForObject(
+            "SELECT last_active_at FROM users WHERE email = ?", java.sql.Timestamp.class, "refresh-act@test.com");
+        assertTrue(updated.toInstant().isAfter(Instant.now().minus(5, ChronoUnit.MINUTES)));
     }
 }

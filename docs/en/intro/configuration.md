@@ -178,6 +178,7 @@ Additional groups with sensible defaults (no need to change unless tuning):
 | `MOZHNO_AUTH_PASSWORD_RESET_TOKEN_TTL_HOURS` | `1` | Password reset token lifetime (hours) |
 | `MOZHNO_AUTH_PASSWORD_RESET_COOLDOWN_MINUTES` | `5` | Minimum delay between reset emails (minutes) |
 | `MOZHNO_AUTH_INVITE_TOKEN_TTL_DAYS` | `7` | Invite token lifetime (days) |
+| `MOZHNO_AUTH_ACTIVITY_WINDOW_MINUTES` | `5` | How often a user's activity timestamp is refreshed (minutes) |
 | `MOZHNO_WEBHOOK_CONNECT_TIMEOUT_SECONDS` | `10` | Webhook connect timeout (seconds) |
 | `MOZHNO_WEBHOOK_REQUEST_TIMEOUT_SECONDS` | `30` | Webhook request timeout (seconds) |
 | `MOZHNO_WEBHOOK_ASYNC_CORE_POOL_SIZE` | `4` | Webhook thread pool core size |

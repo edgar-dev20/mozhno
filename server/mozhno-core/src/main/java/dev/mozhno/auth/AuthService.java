@@ -90,6 +90,7 @@ public class AuthService {
 
         User user = userRepository.findById(result.userId());
         RefreshTokenService.TokenPair tokens = refreshTokenService.issueTokens(user, user.getProjectId(), rememberMe);
+        userRepository.touchActivity(user.getId());
         return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
     }
 
@@ -105,6 +106,7 @@ public class AuthService {
         RefreshTokenService.TokenPair tokens = refreshTokenService.refresh(rawRefreshToken);
         String email = jwtService.parseToken(tokens.getAccessToken()).getEmail();
         User user = userRepository.findByEmail(email);
+        userRepository.touchActivity(user.getId());
         return new LoginResponse(tokens.getAccessToken(), tokens.getRefreshToken(), toDto(user));
     }
 

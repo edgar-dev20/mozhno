@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -91,7 +92,6 @@ class PasswordAuthFlowTest {
         AuthenticationFlowSpi.AuthResult result = flow.authenticate(req("u@example.com", "correct-horse"));
 
         assertFalse(result.success());
-        verify(userRepository, never()).updateLastActive(any());
     }
 
     @Test
@@ -103,7 +103,7 @@ class PasswordAuthFlowTest {
         AuthenticationFlowSpi.AuthResult result = flow.authenticate(req("u@example.com", "correct-horse"));
 
         assertTrue(result.success());
-        verify(userRepository).updateLastActive(9);
+        assertEquals(9, result.userId());
     }
 
     private User activeUser(String email, String rawPassword) {

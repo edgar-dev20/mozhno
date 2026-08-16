@@ -78,6 +78,25 @@ class AuthServiceTest {
     }
 
     @Test
+    void login_shouldTouchActivity() {
+        User user = new User();
+        user.setId(1);
+        user.setEmail("user@example.com");
+        user.setRole("admin");
+        user.setStatus("active");
+        user.setProjectId(1);
+
+        mockLoginSuccess("user@example.com", "correctpassword", user);
+        when(userRepository.findById(1)).thenReturn(user);
+        when(refreshTokenService.issueTokens(eq(user), any(), eq(false))).thenReturn(
+            new RefreshTokenService.TokenPair("access.token", "refresh.token"));
+
+        authService.login("user@example.com", "correctpassword", false);
+
+        verify(userRepository).touchActivity(1);
+    }
+
+    @Test
     void login_shouldThrowOnInvalidEmail() {
         mockLoginFailure("Invalid email or password");
 
@@ -163,6 +182,7 @@ class AuthServiceTest {
         assertEquals("new.acc", response.token());
         assertEquals("new.ref", response.refreshToken());
         assertEquals("refresh@example.com", response.user().email());
+        verify(userRepository).touchActivity(3);
     }
 
     @Test

@@ -20,9 +20,11 @@ import java.util.List;
 @Repository
 public class UserRepository {
     private final JdbcTemplate jdbc;
+    private final AuthProperties authProperties;
 
-    public UserRepository(JdbcTemplate jdbc) {
+    public UserRepository(JdbcTemplate jdbc, AuthProperties authProperties) {
         this.jdbc = jdbc;
+        this.authProperties = authProperties;
     }
 
     private static final RowMapper<User> ROW_MAPPER = (rs, _) -> {
@@ -110,8 +112,18 @@ public class UserRepository {
         jdbc.update("UPDATE users SET role = ? WHERE id = ?", role, id);
     }
 
-    public void updateLastActive(Integer id) {
-        jdbc.update("UPDATE users SET last_active_at = CURRENT_TIMESTAMP WHERE id = ?", id);
+    /**
+     * Records user activity by refreshing {@code last_active_at}, throttled to
+     * at most one write per {@code mozhno.auth.activity-window-minutes} per user.
+     * The staleness check runs in SQL so no in-memory state is needed and
+     * concurrent requests are safe.
+     */
+    public void touchActivity(Integer id) {
+        jdbc.update("""
+            UPDATE users SET last_active_at = CURRENT_TIMESTAMP
+            WHERE id = ? AND (last_active_at IS NULL
+                OR last_active_at < CURRENT_TIMESTAMP - MAKE_INTERVAL(mins => ?))
+            """, id, authProperties.getActivityWindowMinutes());
     }
 
     public void delete(Integer id) {

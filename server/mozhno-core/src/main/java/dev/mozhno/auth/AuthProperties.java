@@ -17,6 +17,10 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "mozhno.auth")
 public class AuthProperties {
 
+    /** How often a user's last-activity timestamp may be rewritten, in minutes. */
+    @Positive
+    private int activityWindowMinutes = 5;
+
     @NestedConfigurationProperty
     private final PasswordReset passwordReset = new PasswordReset();
 
