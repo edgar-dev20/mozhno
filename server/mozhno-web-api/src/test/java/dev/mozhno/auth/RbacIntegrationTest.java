@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import dev.mozhno.BaseIntegrationTest;
+import dev.mozhno.contexts.ContextDefinition;
 import dev.mozhno.projects.Project;
 
 import static org.hamcrest.Matchers.*;
@@ -158,10 +159,16 @@ class RbacIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("DEVELOPER: can create segment")
     void developerCreateSegment() throws Exception {
+        ContextDefinition cd = new ContextDefinition();
+        cd.setName("appName");
+        cd.setProjectId(projectId);
+        Integer contextDefId = contextDefinitionRepository.save(cd).getId();
+
         mockMvc.perform(post("/api/v1/segments")
                         .header("Authorization", devAuth())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Dev Segment\"}"))
+                        .content("{\"name\":\"Dev Segment\",\"context\":[{\"contextDefinitionId\":" +
+                                contextDefId + ",\"operator\":\"in\",\"contextValues\":\"web,mobile\"}]}"))
                 .andExpect(status().isCreated());
     }
 
