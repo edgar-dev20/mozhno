@@ -36,7 +36,6 @@ public class OverviewAssembler {
                     .evalFalse48h(e.evalFalse48h())
                     .connectedApps(e.connectedApps())
                     .lastSeenAt(e.lastSeenAt())
-                    .sdkSilent(e.sdkSilent())
                     .build())
                 .toList())
             .onboarding(OverviewResponse.Onboarding.builder()

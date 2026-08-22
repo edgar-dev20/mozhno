@@ -327,7 +327,6 @@ export type OverviewEnvironmentStat = {
   evalFalse48h: number;
   connectedApps: number;
   lastSeenAt: string | null;
-  sdkSilent: boolean;
 };
 
 export type OverviewOnboarding = {

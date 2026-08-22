@@ -26,7 +26,6 @@ import {
 } from '@/shared';
 import { Skeleton } from '@/app/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/app/components/ui/avatar';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/app/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -407,22 +406,6 @@ function EnvironmentStatCard({
             </div>
           </div>
         </div>
-
-        {env.sdkSilent && (
-          <div className="mt-3 pt-2.5 border-t border-border">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-caption font-semibold text-palette-warning-600 dark:text-palette-warning-700 bg-warning/10 border border-warning/20 cursor-help">
-                  <span className="w-1.5 h-1.5 rounded-full bg-warning" />
-                  {t('overview.environments.sdkSilent')}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-[220px] leading-snug">
-                {t('overview.hints.sdkSilent')}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        )}
       </div>
     </Card>
   );

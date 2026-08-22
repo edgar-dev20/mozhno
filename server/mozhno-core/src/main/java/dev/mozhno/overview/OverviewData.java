@@ -36,8 +36,7 @@ public record OverviewData(
         long evalTrue48h,
         long evalFalse48h,
         int connectedApps,
-        Instant lastSeenAt,
-        boolean sdkSilent
+        Instant lastSeenAt
     ) {}
 
     /** Onboarding checklist flags derived from project data. */

@@ -40,8 +40,7 @@ public record OverviewResponse(
         long evalFalse48h,
         int connectedApps,
         @Schema(nullable = true)
-        Instant lastSeenAt,
-        boolean sdkSilent
+        Instant lastSeenAt
     ) {}
 
     @Builder

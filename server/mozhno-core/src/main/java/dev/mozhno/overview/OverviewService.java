@@ -34,8 +34,6 @@ public class OverviewService {
 
     /** A flag is considered stale when it has not been evaluated within this window. */
     private static final int STALE_DAYS = 30;
-    /** An environment with connected apps is "silent" if none reported within this window. */
-    private static final int SDK_SILENT_MINUTES = 60;
     /** Number of recent audit events surfaced on the home feed. */
     private static final int RECENT_ACTIVITY_LIMIT = 8;
 
@@ -66,7 +64,6 @@ public class OverviewService {
     @Transactional(readOnly = true)
     public OverviewData build(Integer projectId) {
         Instant staleThreshold = Instant.now().minus(STALE_DAYS, ChronoUnit.DAYS);
-        Instant sdkSilentThreshold = Instant.now().minus(SDK_SILENT_MINUTES, ChronoUnit.MINUTES);
 
         List<FlagWithStrategy> pairs = flagService.findByProjectIdWithAllEnvironmentStrategies(projectId);
         List<Environment> environments = environmentService.findByProjectId(projectId);
@@ -81,7 +78,7 @@ public class OverviewService {
 
         OverviewData.Totals totals = computeTotals(byFlag, staleThreshold);
         List<OverviewData.EnvironmentStat> envStats =
-            computeEnvironmentStats(environments, byFlag, metrics, instances, staleThreshold, sdkSilentThreshold);
+            computeEnvironmentStats(environments, byFlag, metrics, instances, staleThreshold);
         OverviewData.Onboarding onboarding =
             computeOnboarding(projectId, byFlag.isEmpty(), environments, instances);
         List<AuditEvent> recentActivity =
@@ -133,8 +130,7 @@ public class OverviewService {
             Map<Integer, List<FlagWithStrategy>> byFlag,
             List<FlagMetric> metrics,
             List<ClientInstance> instances,
-            Instant staleThreshold,
-            Instant sdkSilentThreshold) {
+            Instant staleThreshold) {
 
         int totalActiveFlags = 0;
         for (List<FlagWithStrategy> group : byFlag.values()) {
@@ -181,7 +177,6 @@ public class OverviewService {
             long[] eval = evalByEnv.getOrDefault(envId, new long[2]);
             int apps = appsByEnv.getOrDefault(envId, new int[1])[0];
             Instant lastSeen = lastSeenByEnv.get(envId);
-            boolean sdkSilent = apps > 0 && (lastSeen == null || lastSeen.isBefore(sdkSilentThreshold));
 
             stats.add(new OverviewData.EnvironmentStat(
                 envId,
@@ -193,8 +188,7 @@ public class OverviewService {
                 eval[0],
                 eval[1],
                 apps,
-                lastSeen,
-                sdkSilent
+                lastSeen
             ));
         }
         return stats;
