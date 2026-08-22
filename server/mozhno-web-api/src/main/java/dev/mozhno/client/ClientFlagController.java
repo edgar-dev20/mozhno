@@ -1,5 +1,6 @@
 package dev.mozhno.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -33,19 +35,39 @@ import java.util.Map;
 @Tag(name = "Client", description = "Client SDK API — requires API key via Bearer token")
 public class ClientFlagController {
     private static final Logger log = LoggerFactory.getLogger(ClientFlagController.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
     private final ClientFlagService clientFlagService;
     private final ClientInstanceService clientInstanceService;
 
     @GetMapping("/features")
     @Operation(summary = "Get all feature flags for the authenticated project", security = @SecurityRequirement(name = "ApiKeyAuth"))
     @Timed(value = "client.flags.fetch", description = "Time taken to fetch feature flags for SDK clients")
-    public List<ClientFlagResponse> getFeatures(HttpServletRequest request) {
+    public ResponseEntity<List<ClientFlagResponse>> getFeatures(HttpServletRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!(auth instanceof ApiKeyAuthentication apiKeyAuth)) {
             throw new AccessDeniedException("Invalid API key authentication");
         }
         recordInstance(apiKeyAuth, request);
-        return clientFlagService.getFlagsForProject(apiKeyAuth.getProjectId(), apiKeyAuth.getEnvironmentId());
+
+        List<ClientFlagResponse> flags = clientFlagService.getFlagsForProject(
+            apiKeyAuth.getProjectId(), apiKeyAuth.getEnvironmentId());
+
+        String etag = computeEtag(flags);
+        String ifNoneMatch = request.getHeader("If-None-Match");
+        if (ifNoneMatch != null && etag.equals(ifNoneMatch.trim())) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).eTag(etag).build();
+        }
+        return ResponseEntity.ok().eTag(etag).body(flags);
+    }
+
+    private static String computeEtag(List<ClientFlagResponse> flags) {
+        try {
+            String json = MAPPER.writeValueAsString(flags);
+            return "\"" + Integer.toHexString(json.hashCode()) + "\"";
+        } catch (Exception e) {
+            log.warn("Failed to compute ETag", e);
+            return "\"0\"";
+        }
     }
 
     @PostMapping("/evaluate")

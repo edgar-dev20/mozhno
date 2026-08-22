@@ -46,8 +46,10 @@ public class SecurityProperties {
         /** Comma-separated list of allowed origins. Empty disables cross-origin credentials. */
         private List<String> allowedOrigins = List.of();
         private List<String> allowedMethods = List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS");
-        private List<String> allowedHeaders = List.of("Authorization", "Content-Type", "X-Requested-With");
-        private List<String> exposedHeaders = List.of("X-Total-Count", "Link");
+        private List<String> allowedHeaders = List.of(
+            "Authorization", "Content-Type", "X-Requested-With", "If-None-Match",
+            "X-Mozhno-App-Name", "X-Mozhno-Instance-Id", "X-Mozhno-Sdk-Type", "X-Mozhno-Sdk-Version");
+        private List<String> exposedHeaders = List.of("X-Total-Count", "Link", "ETag");
         @Min(0)
         private long maxAgeSeconds = 3600L;
     }

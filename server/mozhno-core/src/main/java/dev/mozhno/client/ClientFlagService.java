@@ -197,7 +197,7 @@ public class ClientFlagService {
 
         List<ClientEvaluateResponse.ToggleResult> results = new ArrayList<>();
         for (FlagWithStrategy fws : flags) {
-            if (requestedSet != null && !requestedSet.contains(fws.flag().getName())) {
+            if (requestedSet != null && !requestedSet.contains(fws.flag().getKey())) {
                 continue;
             }
             boolean enabled = evaluator.evaluateFlag(fws.flag(), fws.strategy(), context, segmentContextsMap, contextDefMap);
@@ -205,7 +205,7 @@ public class ClientFlagService {
 
             if (enabled) {
                 results.add(new ClientEvaluateResponse.ToggleResult(
-                    fws.flag().getName(),
+                    fws.flag().getKey(),
                     true,
                     new ClientEvaluateResponse.VariantData("enabled", true, null)
                 ));

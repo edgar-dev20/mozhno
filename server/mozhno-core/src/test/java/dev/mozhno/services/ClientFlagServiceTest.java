@@ -402,7 +402,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of(), null, null);
 
         assertThat(results).hasSize(1);
-        assertThat(results.get(0).getName()).isEqualTo("Simple Flag");
+        assertThat(results.get(0).getName()).isEqualTo("simple-flag");
         assertThat(results.get(0).isEnabled()).isTrue();
     }
 
@@ -447,7 +447,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
 
         List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(projectId, envId, Map.of("plan", "premium"), null, null);
         assertThat(results).hasSize(1);
-        assertThat(results.get(0).getName()).isEqualTo("Premium Flag");
+        assertThat(results.get(0).getName()).isEqualTo("premium-flag");
     }
 
     @Test
@@ -561,7 +561,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
             projectId, envId, Map.of("userId", "user-100"), null, null);
         assertThat(results).hasSize(1);
-        assertThat(results.get(0).getName()).isEqualTo("OR Segments Flag");
+        assertThat(results.get(0).getName()).isEqualTo("or-segments-flag");
     }
 
     @Test
@@ -710,7 +710,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
             projectId, envId, Map.of("userId", "user-100"), null, null);
         assertThat(results).hasSize(1);
-        assertThat(results.get(0).getName()).isEqualTo("Direct + Segment");
+        assertThat(results.get(0).getName()).isEqualTo("direct-segment");
     }
 
     @Test
@@ -757,7 +757,7 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
             projectId, envId, Map.of("plan", "premium"), null, null);
         assertThat(results).hasSize(1);
-        assertThat(results.get(0).getName()).isEqualTo("Direct + Segment");
+        assertThat(results.get(0).getName()).isEqualTo("direct-segment");
     }
 
     @Test
@@ -850,6 +850,6 @@ class ClientFlagServiceTest extends BaseIntegrationTest {
         List<ClientEvaluateResponse.ToggleResult> results = clientFlagService.evaluate(
             projectId, envId, Map.of("userId", "user-100", "plan", "premium"), null, null);
         assertThat(results).hasSize(1);
-        assertThat(results.get(0).getName()).isEqualTo("Both Match");
+        assertThat(results.get(0).getName()).isEqualTo("both-match");
     }
 }
