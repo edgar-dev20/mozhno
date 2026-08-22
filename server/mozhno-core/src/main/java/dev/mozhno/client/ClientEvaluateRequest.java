@@ -13,6 +13,6 @@ public class ClientEvaluateRequest {
     @Schema(description = "Context key-value pairs for targeting evaluation")
     private Map<String, String> context;
 
-    @Schema(description = "List of flag names to evaluate", nullable = true)
+    @Schema(description = "List of flag keys to evaluate", nullable = true)
     private List<String> toggles;
 }

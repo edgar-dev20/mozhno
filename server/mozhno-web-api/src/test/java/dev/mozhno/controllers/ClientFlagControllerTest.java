@@ -177,7 +177,7 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
                         .content("{\"context\":{\"userId\":\"test-user\"}}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.toggles").isArray())
-                .andExpect(jsonPath("$.toggles[0].name").value("Test Feature"))
+                .andExpect(jsonPath("$.toggles[0].name").value("test-feature"))
                 .andExpect(jsonPath("$.toggles[0].enabled").value(true));
     }
 
@@ -220,7 +220,7 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
                         .content("{\"context\":{\"country\":\"RU\"}}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.toggles", hasSize(2)))
-                .andExpect(jsonPath("$.toggles[?(@.name=='Constrained Feature')].enabled", hasItem(true)));
+                .andExpect(jsonPath("$.toggles[?(@.name=='constrained-feature')].enabled", hasItem(true)));
     }
 
     @Test
@@ -259,10 +259,10 @@ class ClientFlagControllerTest extends BaseIntegrationTest {
         mockMvc.perform(post("/api/client/evaluate")
                         .header("Authorization", "client-test-token-abcdefghijklmnop1234567890")
                         .contentType("application/json")
-                        .content("{\"toggles\":[\"Test Feature\"],\"context\":{}}"))
+                        .content("{\"toggles\":[\"test-feature\"],\"context\":{}}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.toggles", hasSize(1)))
-                .andExpect(jsonPath("$.toggles[0].name").value("Test Feature"));
+                .andExpect(jsonPath("$.toggles[0].name").value("test-feature"));
     }
 
     @Test
