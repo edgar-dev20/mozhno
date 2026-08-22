@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "specs": [
+    "01-rollout-bucketing.json",
+    "02-constraints.json",
+    "03-segments.json"
+  ]
+}

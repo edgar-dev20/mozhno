@@ -1,0 +1,33 @@
+{
+  "name": "03-segments",
+  "flags": [
+    { "name": "Segments OR", "key": "s-or", "enabled": true,
+      "activation": { "segments": [
+        { "name": "gold", "constraints": [ { "field": "plan", "operator": "in", "values": ["gold"] } ] },
+        { "name": "silver", "constraints": [ { "field": "plan", "operator": "in", "values": ["silver"] } ] }
+      ] } },
+    { "name": "Constraints OR segments", "key": "s-const-or-seg", "enabled": true,
+      "activation": {
+        "constraints": [ { "field": "plan", "operator": "in", "values": ["gold"] } ],
+        "segments": [ { "name": "beta", "constraints": [ { "field": "beta", "operator": "in", "values": ["true"] } ] } ]
+      } },
+    { "name": "Segment with empty constraints", "key": "s-empty-seg", "enabled": true,
+      "activation": { "segments": [ { "name": "empty", "constraints": [] } ] } }
+  ],
+  "tests": [
+    { "name": "segment OR: second segment matches", "flag": "s-or",
+      "context": { "plan": "silver" }, "expected": true },
+    { "name": "segment OR: first segment matches", "flag": "s-or",
+      "context": { "plan": "gold" }, "expected": true },
+    { "name": "segment OR: no segment matches", "flag": "s-or",
+      "context": { "plan": "bronze" }, "expected": false },
+    { "name": "constraint matches", "flag": "s-const-or-seg",
+      "context": { "plan": "gold" }, "expected": true },
+    { "name": "segment matches when constraint fails", "flag": "s-const-or-seg",
+      "context": { "beta": "true" }, "expected": true },
+    { "name": "both fail", "flag": "s-const-or-seg",
+      "context": { "plan": "bronze" }, "expected": false },
+    { "name": "segment with empty constraints passes", "flag": "s-empty-seg",
+      "context": {}, "expected": true }
+  ]
+}

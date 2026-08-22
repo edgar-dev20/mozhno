@@ -1,0 +1,64 @@
+{
+  "name": "02-constraints",
+  "flags": [
+    { "name": "Plan in", "key": "c-plan-in", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "plan", "operator": "in", "values": ["gold", "silver"] } ] } },
+    { "name": "Country not_in", "key": "c-country-notin", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "country", "operator": "not_in", "values": ["US"] } ] } },
+    { "name": "Age eq number", "key": "c-age-eq", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "age", "operator": "eq", "contextType": "number", "values": ["30"] } ] } },
+    { "name": "Age ne number", "key": "c-age-ne", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "age", "operator": "ne", "contextType": "number", "values": ["30"] } ] } },
+    { "name": "Age gte number", "key": "c-age-gte", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "age", "operator": "gte", "contextType": "number", "values": ["18"] } ] } },
+    { "name": "Age lt number", "key": "c-age-lt", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "age", "operator": "lt", "contextType": "number", "values": ["18"] } ] } },
+    { "name": "Email contains", "key": "c-email-contains", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "email", "operator": "contains", "values": ["@gmail.com"] } ] } },
+    { "name": "Version semver gte", "key": "c-ver-semver", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "version", "operator": "gte", "contextType": "semver", "values": ["1.5.0"] } ] } },
+    { "name": "Joined time gt", "key": "c-joined-time", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "joined", "operator": "gt", "contextType": "time", "values": ["2024-01-01T00:00:00Z"] } ] } },
+    { "name": "AND of two constraints", "key": "c-and", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "plan", "operator": "in", "values": ["gold"] },
+        { "field": "region", "operator": "in", "values": ["eu"] } ] } },
+    { "name": "Unknown operator", "key": "c-unknown-op", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "x", "operator": "bogus", "values": ["y"] } ] } }
+  ],
+  "tests": [
+    { "name": "in: gold matched", "flag": "c-plan-in", "context": { "plan": "gold" }, "expected": true },
+    { "name": "in: free not matched", "flag": "c-plan-in", "context": { "plan": "free" }, "expected": false },
+    { "name": "not_in: DE passes", "flag": "c-country-notin", "context": { "country": "DE" }, "expected": true },
+    { "name": "not_in: US blocked", "flag": "c-country-notin", "context": { "country": "US" }, "expected": false },
+    { "name": "eq number 30", "flag": "c-age-eq", "context": { "age": "30" }, "expected": true },
+    { "name": "eq number 31", "flag": "c-age-eq", "context": { "age": "31" }, "expected": false },
+    { "name": "ne number 31", "flag": "c-age-ne", "context": { "age": "31" }, "expected": true },
+    { "name": "ne number 30", "flag": "c-age-ne", "context": { "age": "30" }, "expected": false },
+    { "name": "gte 18 at boundary", "flag": "c-age-gte", "context": { "age": "18" }, "expected": true },
+    { "name": "gte 18 below", "flag": "c-age-gte", "context": { "age": "17" }, "expected": false },
+    { "name": "lt 18 below", "flag": "c-age-lt", "context": { "age": "17" }, "expected": true },
+    { "name": "lt 18 at boundary", "flag": "c-age-lt", "context": { "age": "18" }, "expected": false },
+    { "name": "contains gmail", "flag": "c-email-contains", "context": { "email": "a@gmail.com" }, "expected": true },
+    { "name": "contains yahoo", "flag": "c-email-contains", "context": { "email": "a@yahoo.com" }, "expected": false },
+    { "name": "semver gte above", "flag": "c-ver-semver", "context": { "version": "1.6.0" }, "expected": true },
+    { "name": "semver gte equal", "flag": "c-ver-semver", "context": { "version": "1.5.0" }, "expected": true },
+    { "name": "semver gte below", "flag": "c-ver-semver", "context": { "version": "1.4.9" }, "expected": false },
+    { "name": "time gt after", "flag": "c-joined-time", "context": { "joined": "2025-01-01T00:00:00Z" }, "expected": true },
+    { "name": "time gt before", "flag": "c-joined-time", "context": { "joined": "2023-01-01T00:00:00Z" }, "expected": false },
+    { "name": "AND both match", "flag": "c-and", "context": { "plan": "gold", "region": "eu" }, "expected": true },
+    { "name": "AND second fails", "flag": "c-and", "context": { "plan": "gold", "region": "us" }, "expected": false },
+    { "name": "unknown operator => false", "flag": "c-unknown-op", "context": { "x": "y" }, "expected": false },
+    { "name": "missing field => false", "flag": "c-plan-in", "context": {}, "expected": false }
+  ]
+}
