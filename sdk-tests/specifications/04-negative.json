@@ -1,0 +1,29 @@
+{
+  "name": "04-negative",
+  "flags": [
+    { "name": "Over 100", "key": "neg-over100", "enabled": true,
+      "activation": { "rollOut": 150 } },
+    { "name": "Negative", "key": "neg-negative", "enabled": true,
+      "activation": { "rollOut": -5 } },
+    { "name": "Disabled over 100", "key": "neg-disabled", "enabled": false,
+      "activation": { "rollOut": 150 } },
+    { "name": "Empty values", "key": "neg-empty-values", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "plan", "operator": "in", "values": [] } ] } },
+    { "name": "Non-numeric eq", "key": "neg-eq-nan", "enabled": true,
+      "activation": { "constraints": [
+        { "field": "age", "operator": "eq", "contextType": "number", "values": ["18"] } ] } }
+  ],
+  "tests": [
+    { "name": "rollout > 100 always true (>=100 shortcut)", "flag": "neg-over100",
+      "context": {}, "expected": true },
+    { "name": "rollout < 0 always false (<=0 shortcut)", "flag": "neg-negative",
+      "context": { "userId": "user-1" }, "expected": false },
+    { "name": "disabled flag false even with rollout > 100", "flag": "neg-disabled",
+      "context": {}, "expected": false },
+    { "name": "constraint with empty values is skipped (parity)", "flag": "neg-empty-values",
+      "context": { "plan": "gold" }, "expected": true },
+    { "name": "eq number with non-numeric value fails closed (parity)", "flag": "neg-eq-nan",
+      "context": { "age": "abc" }, "expected": false }
+  ]
+}

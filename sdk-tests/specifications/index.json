@@ -3,6 +3,7 @@
   "specs": [
     "01-rollout-bucketing.json",
     "02-constraints.json",
-    "03-segments.json"
+    "03-segments.json",
+    "04-negative.json"
   ]
 }
