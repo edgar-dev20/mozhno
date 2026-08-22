@@ -308,7 +308,7 @@ flowchart TD
 ### Код
 
 - [ ] Удалена зависимость старого SDK (LaunchDarkly/Unleash/Flagsmith)
-- [ ] Добавлена зависимость можно. SDK (`dev.mozhno:mozhno-client-java:1.0.1`)
+- [ ] Добавлена зависимость можно. SDK (`dev.mozhno:mozhno-client-java:1.1.1`)
 - [ ] Заменена инициализация SDK
 - [ ] Заменён вызов `isEnabled()` / `isFeatureEnabled()` на `mozhnoClient.isEnabled()`
 - [ ] Заменён контекст пользователя на `MozhnoContext`

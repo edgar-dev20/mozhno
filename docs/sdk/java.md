@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("dev.mozhno:mozhno-client-java:1.0.1")
+    implementation("dev.mozhno:mozhno-client-java:1.1.1")
 }
 ```
 
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'dev.mozhno:mozhno-client-java:1.0.1'
+    implementation 'dev.mozhno:mozhno-client-java:1.1.1'
 }
 ```
 
@@ -74,6 +74,7 @@ client.start();
 | `environment(String)` | `String` | Нет | `null` | Имя окружения |
 | `disableMetrics(boolean)` | `boolean` | Нет | `false` | Отключить отправку метрик |
 | `synchronousFetchOnInitialisation(boolean)` | `boolean` | Нет | `false` | Блокировать на первичной загрузке правил |
+| `stickyAnonId(boolean)` | `boolean` | Нет | `true` | Автогенерация стабильного анонимного ID для роллаута |
 | `contextProvider(MozhnoContextProvider)` | — | Нет | `null` | Кастомный провайдер контекста |
 | `proxy(java.net.Proxy)` | `Proxy` | Нет | `null` | HTTP-прокси |
 
@@ -90,6 +91,7 @@ mozhno:
   environment: production
   fetch-toggles-interval: 15
   send-metrics-interval: 60
+  sticky-anon-id: true
 ```
 
 Клиент автоматически создаётся и доступен как Spring-бин:
@@ -131,6 +133,10 @@ MozhnoContext context = MozhnoContext.builder()
 ```
 
 Все значения атрибутов — строки. Для числовых сравнений задайте `contextType: number` в правилах таргетинга.
+
+### Анонимные пользователи и роллаут
+
+Для процентного роллаута SDK использует `userId`, затем `sessionId` как идентификатор корзины. Если в контексте нет ни одного, клиент автоматически генерирует стабильный `anonymousId` (случайный UUID при старте клиента) и использует его — анонимные запросы распределяются по корзинам равномерно и стабильно для каждого экземпляра приложения. Отключить поведение можно через `stickyAnonId(false)` (или `mozhno.sticky-anon-id: false` в Spring) — тогда все анонимные запросы без идентификатора попадут в одну группу, а SDK выведет предупреждение в лог. Подробнее о поведении при обновлении SDK — в [гайде по роллауту](/guide/rollout).
 
 ### Методы билдера контекста
 

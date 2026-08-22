@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation("dev.mozhno:mozhno-client-java:1.0.1")
+    implementation("dev.mozhno:mozhno-client-java:1.1.1")
 }
 ```
 
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'dev.mozhno:mozhno-client-java:1.0.1'
+    implementation 'dev.mozhno:mozhno-client-java:1.1.1'
 }
 ```
 
@@ -67,6 +67,7 @@ client.start();
 | `environment(String)` | String | `null` | Environment name |
 | `disableMetrics(boolean)` | boolean | `false` | Disable metrics reporting |
 | `synchronousFetchOnInitialisation(boolean)` | boolean | `false` | Block on initial flag fetch |
+| `stickyAnonId(boolean)` | boolean | `true` | Auto-generate a stable anonymous ID for rollout bucketing |
 | `contextProvider(MozhnoContextProvider)` | — | `null` | Custom context provider |
 
 ### Spring Boot Auto-Configuration
@@ -82,6 +83,7 @@ mozhno:
   environment: production
   fetch-toggles-interval: 15
   send-metrics-interval: 60
+  sticky-anon-id: true
 ```
 
 The client is automatically created and available as a Spring bean:
@@ -123,6 +125,10 @@ MozhnoContext context = MozhnoContext.builder()
 ```
 
 All attribute values are strings. For numeric comparisons, set `contextType: number` in your targeting rules.
+
+### Anonymous Users and Rollout
+
+For percentage rollout, the SDK uses `userId`, then `sessionId`, as the bucketing identifier. When neither is present in the context, the client auto-generates a stable `anonymousId` (a random UUID created at client startup) and uses it instead — anonymous traffic is bucketed uniformly and stays stable for each application instance. To disable this behavior, use `stickyAnonId(false)` (or `mozhno.sticky-anon-id: false` in Spring); in that case all anonymous requests without an identifier land in a single bucket and the SDK logs a warning. See the [rollout guide](/en/guide/rollout) for upgrade behavior details.
 
 | Method | Description |
 |--------|-------------|

@@ -37,7 +37,7 @@ A flag can reference multiple segments — matching any one is enough (**OR**). 
 
 ## Percentage Rollout
 
-Deterministic distribution via MurmurHash32 of `flagKey + userId` (or `sessionId`). The same user always lands in the same bucket.
+Deterministic distribution via MurmurHash32 of `flagKey + userId` (or `sessionId`, or the auto-generated `anonymousId`). The same user always lands in the same bucket. See [Rollout](/en/guide/rollout).
 
 ## Lifecycle
 

@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **`Switch` component (`@mozhno/core-ui`)** — visual API change: ON-state color unified to the brand token (was `primary`), thumb enlarged 16→18px with a symmetric 2px inset, light-theme OFF track darkened (`switch-background` 0.82→0.66) to meet WCAG 1.4.11 (3:1); consumers relying on the default appearance will see the new styling
 
+### Fixed
+- **SDK coordinates aligned** — Java SDK published as `dev.mozhno:mozhno-client-java:1.1.1`, JS SDK as `@mozhno/client-js@1.1.1`; all documentation updated to the released coordinates (interim `mozhno-java-sdk` / `@mozhno/js-sdk` artifacts are deprecated and ignored)
+
 ## [1.0.0] — 2026-08-03
 
 ### Changed

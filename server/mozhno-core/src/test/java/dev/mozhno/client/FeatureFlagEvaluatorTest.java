@@ -237,4 +237,40 @@ class FeatureFlagEvaluatorTest {
         assertThat(evaluate(flag, s, Map.of("userId", "user-1"), Collections.emptyMap(), Collections.emptyMap()))
             .isEqualTo(expected);
     }
+
+    @Test
+    void percentage_anonymousId_shouldBeUsedWhenUserIdAndSessionIdMissing() {
+        FlagStrategy s = new FlagStrategy();
+        s.setEnabled(true);
+        s.setPercentage(50.0);
+
+        Flag flag = flag();
+        int hash = Math.abs(murmurHash32((flag.getKey() + "anon-1").getBytes(StandardCharsets.UTF_8)) % 100);
+        boolean expected = hash < 50;
+
+        assertThat(evaluate(flag, s, Map.of("anonymousId", "anon-1"), Collections.emptyMap(), Collections.emptyMap()))
+            .isEqualTo(expected);
+    }
+
+    @Test
+    void percentage_bucket_shouldMatchSharedReferenceVector() {
+        FlagStrategy s = new FlagStrategy();
+        s.setEnabled(true);
+        s.setPercentage(66.0);
+
+        // seed "test-flag" + "anon-1" → bucket 65 (shared with Java/JS SDKs)
+        assertThat(evaluate(flag(), s, Map.of("anonymousId", "anon-1"), Collections.emptyMap(), Collections.emptyMap()))
+            .isTrue();
+    }
+
+    @Test
+    void percentage_fractional_shouldTruncateToInt() {
+        FlagStrategy s = new FlagStrategy();
+        s.setEnabled(true);
+        s.setPercentage(50.5);
+
+        // seed "test-flag" + "56" → bucket 50; intValue(50.5) == 50 → 50 < 50 is false
+        assertThat(evaluate(flag(), s, Map.of("userId", "56"), Collections.emptyMap(), Collections.emptyMap()))
+            .isFalse();
+    }
 }

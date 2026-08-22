@@ -44,7 +44,7 @@ A flag can reference multiple segments — matching any one is enough (**OR**). 
 
 ## Percentage Rollout
 
-MurmurHash32 of `flagKey + userId` (or `sessionId` if `userId` is absent). The same user always lands in the same bucket.
+MurmurHash32 of `flagKey + userId` (or `sessionId` if `userId` is absent, or the auto-generated `anonymousId`). The same user always lands in the same bucket. See [Rollout](/en/guide/rollout).
 
 ## Rules & Environments
 

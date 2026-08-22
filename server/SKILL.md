@@ -326,7 +326,7 @@ immutable once merged.
   `security/`, plus per-feature packages (`flags`, `auth`, `events`, `client`, …).
   `mozhno-core` exposes `testFixtures` reused by `mozhno-web-api` tests.
 - Run: `./gradlew check` (or `make server-test` = `./gradlew check jacocoTestReport`).
-- Java SDK tests: `./gradlew :mozhno-client-java:check` (or `make java-sdk-test`).
+- Java SDK tests (separate repo `mozhno-dev/mozhno-java-sdk`): `./gradlew check`.
 
 ### Test templates
 

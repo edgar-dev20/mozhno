@@ -207,7 +207,7 @@ Use this checklist regardless of source platform:
 ### Java SDK
 
 1. **Remove** old SDK dependency (e.g., `launchdarkly-java-server-sdk`)
-2. **Add** можнo. SDK: `implementation("dev.mozhno:mozhno-client-java:1.0.1")`
+2. **Add** можнo. SDK: `implementation("dev.mozhno:mozhno-client-java:1.1.1")`
 3. **Build client**:
 
 ```java

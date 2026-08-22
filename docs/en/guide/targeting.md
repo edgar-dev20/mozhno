@@ -102,9 +102,9 @@ hash = MurmurHash32(flagKey + identifier) % 100
 if hash < percentage → enabled
 ```
 
-The same identifier always gets the same result for the same flag. The identifier is `userId`, with `sessionId` as fallback.
+The same identifier always gets the same result for the same flag. The identifier is `userId`, with `sessionId` as fallback; when neither is provided, the SDK uses an auto-generated stable `anonymousId`.
 
-> **Important:** If neither `userId` nor `sessionId` is provided, the hash is seeded with just the flag key — all anonymous users land in the same bucket (either all get the feature, or none do). The SDK logs a warning in this case.
+> **Important:** If `stickyAnonId` is disabled and no identifier is provided, the hash is seeded with just the flag key — all anonymous users land in the same bucket (either all get the feature, or none do). The SDK logs a warning in this case. See [Rollout](/en/guide/rollout).
 
 100% rollout enables the flag for everyone; 0% disables it.
 

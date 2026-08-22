@@ -117,7 +117,7 @@ const ctx = {
 const enabled = client.isEnabled('new-checkout', ctx);
 ```
 
-If neither `userId` nor `sessionId` is provided, the SDK auto-generates a persistent anonymous ID (controlled by `stickyAnonId`, default `true`) for deterministic percentage rollout.
+If neither `userId` nor `sessionId` is provided, the SDK auto-generates a persistent anonymous ID (controlled by `stickyAnonId`, default `true`) for deterministic percentage rollout. In browsers the anonymous ID is generated once and persisted in localStorage, so the user stays in the same bucket across sessions. In `mode: 'client'`, the anonymous ID is sent to the server in the `anonymousId` context field and used there for bucketing.
 
 ## React Integration
 

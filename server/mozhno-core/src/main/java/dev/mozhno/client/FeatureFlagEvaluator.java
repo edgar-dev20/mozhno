@@ -83,7 +83,8 @@ public class FeatureFlagEvaluator {
         if (s != null && s.getPercentage() != null) {
             if (s.getPercentage() >= 100) return true;
             if (s.getPercentage() <= 0) return false;
-            String seed = flag.getKey() + context.getOrDefault("userId", context.getOrDefault("sessionId", ""));
+            String seed = flag.getKey() + context.getOrDefault("userId",
+                context.getOrDefault("sessionId", context.getOrDefault("anonymousId", "")));
             int hash = murmurHash32(seed.getBytes(StandardCharsets.UTF_8));
             int bucket = Math.abs(hash % 100);
             return bucket < s.getPercentage().intValue();

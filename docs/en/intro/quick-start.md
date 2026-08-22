@@ -69,7 +69,7 @@ Add the dependency to `build.gradle`:
 
 ```groovy
 repositories { mavenCentral() }
-dependencies { implementation 'dev.mozhno:mozhno-client-java:1.0.1' }
+dependencies { implementation 'dev.mozhno:mozhno-client-java:1.1.1' }
 ```
 
 ```java

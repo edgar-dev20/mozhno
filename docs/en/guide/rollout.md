@@ -13,7 +13,11 @@ if hash < percentage → enabled
 
 MurmurHash32 guarantees **deterministic bucketing**: the same user always gets the same result for the same flag at the same percentage.
 
-The identifier is `userId`, with `sessionId` as fallback. If neither is provided, all anonymous users land in the same bucket. The SDK logs a warning.
+The identifier is `userId`, with `sessionId` as fallback. If neither is provided, the SDK auto-generates a stable anonymous identifier (`anonymousId`): browser SDKs persist it in localStorage so it survives page reloads, while server SDKs generate it at client startup and keep it for the lifetime of the process.
+
+This makes anonymous traffic bucketing **uniform and sticky**: each anonymous user/instance always lands in the same bucket, so rollout percentages apply fairly to the whole audience. This behavior is controlled by the `stickyAnonId` option (default `true`) in all SDKs. When disabled, all anonymous requests without an identifier fall into a single bucket — the SDK logs a warning.
+
+> **On upgrade:** in SDK versions before `stickyAnonId`, all anonymous requests without an identifier landed in a single bucket (based on the flag key). After upgrading, anonymous traffic moves to new buckets — tied to the localStorage ID in browsers, or to the app instance ID on the server — so the effective rollout percentage for the anonymous audience may shift abruptly. Plan the upgrade while flags are at 100%/0%, or temporarily set `stickyAnonId(false)` to preserve the legacy behavior.
 
 100% enables for everyone; 0% disables for everyone.
 
