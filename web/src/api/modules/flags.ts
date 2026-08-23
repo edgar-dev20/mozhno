@@ -5,6 +5,7 @@ import {
   FlagStrategy,
   StrategyRequest,
   FlagMetric,
+  FlagContributor,
   PaginatedDashboardResponse,
 } from '@/api/modules/types';
 
@@ -71,5 +72,9 @@ export const metricsApi = {
   listForProject: (environmentId?: number) =>
     request<FlagMetric[]>(
       `/metrics${environmentId != null ? `?environmentId=${environmentId}` : ''}`,
+    ),
+  contributors: (flagId: number, environmentId: number) =>
+    request<FlagContributor[]>(
+      `/flags/${flagId}/metrics/contributors?environmentId=${environmentId}`,
     ),
 };

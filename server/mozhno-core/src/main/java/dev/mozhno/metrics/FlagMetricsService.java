@@ -46,6 +46,18 @@ public class FlagMetricsService {
     }
 
     /**
+     * Returns per-instance contributor summaries for a specific flag and environment over the last 48 hours.
+     *
+     * @param flagId the flag ID
+     * @param environmentId the environment ID
+     * @return list of contributors ordered by total contribution descending
+     */
+    public List<FlagContributor> getContributors(Integer flagId, Integer environmentId) {
+        Instant since = Instant.now().minus(48, ChronoUnit.HOURS).truncatedTo(ChronoUnit.HOURS);
+        return flagMetricRepository.findContributors(flagId, environmentId, since);
+    }
+
+    /**
      * Returns metrics for all flags in a project, optionally filtered by environment, over the last 48 hours.
      *
      * @param projectId the project ID

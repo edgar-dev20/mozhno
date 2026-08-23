@@ -261,6 +261,17 @@ export type FlagMetric = {
   timeBucket: string;
 };
 
+export type FlagContributor = {
+  instanceId: number;
+  sdkInstanceId: string;
+  appName: string;
+  appType: string;
+  sdkVersion: string | null;
+  lastSeenAt: string;
+  evaluationTrueCount: number;
+  evaluationFalseCount: number;
+};
+
 export type PaginatedDashboardResponse = {
   flags: EnrichedFlagResponse[];
   page: number;

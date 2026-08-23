@@ -41,4 +41,13 @@ public class FlagMetricsController {
         List<FlagMetric> metrics = flagMetricsService.getProjectMetrics(user.projectId(), environmentId);
         return metricsAssembler.toResponseList(metrics);
     }
+
+    @GetMapping("/api/v1/flags/{flagId}/metrics/contributors")
+    @Operation(summary = "Get per-instance flag contributors over the last 48 hours")
+    public List<FlagContributorResponse> getContributors(@PathVariable Integer flagId,
+                                                         @RequestParam Integer environmentId,
+                                                         @AuthenticationPrincipal UserPrincipal user) {
+        List<FlagContributor> contributors = flagMetricsService.getContributors(flagId, environmentId);
+        return metricsAssembler.toContributorResponseList(contributors);
+    }
 }

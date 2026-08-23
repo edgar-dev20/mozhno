@@ -172,6 +172,31 @@ public class FlagMetricRepository {
     }
 
     /**
+     * Returns per-instance contributor summaries for a specific flag and environment since the given time.
+     * Only rows with a client instance are included; aggregated rows (client_instance_id IS NULL) are ignored.
+     *
+     * @param flagId the flag ID
+     * @param environmentId the environment ID
+     * @param since the start time for the query range
+     * @return list of contributors ordered by total contribution descending
+     */
+    public List<FlagContributor> findContributors(Integer flagId, Integer environmentId, Instant since) {
+        String sql = """
+            SELECT fm.client_instance_id AS instance_id,
+                   ci.instance_id AS sdk_instance_id,
+                   ci.app_name, ci.app_type, ci.sdk_version, ci.last_seen_at,
+                   SUM(fm.evaluation_true_count)  AS evaluation_true_count,
+                   SUM(fm.evaluation_false_count) AS evaluation_false_count
+            FROM flag_metrics fm
+            JOIN client_instances ci ON ci.id = fm.client_instance_id
+            WHERE fm.flag_id = ? AND fm.environment_id = ? AND fm.time_bucket >= ?
+            GROUP BY fm.client_instance_id, ci.instance_id, ci.app_name, ci.app_type, ci.sdk_version, ci.last_seen_at
+            ORDER BY (SUM(fm.evaluation_true_count) + SUM(fm.evaluation_false_count)) DESC
+            """;
+        return jdbc.query(sql, contributorRowMapper(), flagId, environmentId, Timestamp.from(since));
+    }
+
+    /**
      * Returns metrics for a project and environment since the given time.
      *
      * @param projectId the project ID
@@ -244,6 +269,22 @@ public class FlagMetricRepository {
             Timestamp ca = rs.getTimestamp("created_at");
             m.setCreatedAt(ca != null ? ca.toInstant() : null);
             return m;
+        };
+    }
+
+    private static org.springframework.jdbc.core.RowMapper<FlagContributor> contributorRowMapper() {
+        return (rs, _) -> {
+            Timestamp lastSeen = rs.getTimestamp("last_seen_at");
+            return new FlagContributor(
+                rs.getLong("instance_id"),
+                rs.getString("sdk_instance_id"),
+                rs.getString("app_name"),
+                rs.getString("app_type"),
+                rs.getString("sdk_version"),
+                lastSeen != null ? lastSeen.toInstant() : null,
+                rs.getLong("evaluation_true_count"),
+                rs.getLong("evaluation_false_count")
+            );
         };
     }
 }

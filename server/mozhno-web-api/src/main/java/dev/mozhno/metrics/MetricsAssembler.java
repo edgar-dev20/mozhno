@@ -24,4 +24,21 @@ public class MetricsAssembler {
     public List<FlagMetricResponse> toResponseList(List<FlagMetric> metrics) {
         return metrics.stream().map(this::toResponse).toList();
     }
+
+    public FlagContributorResponse toContributorResponse(FlagContributor contributor) {
+        return FlagContributorResponse.builder()
+            .instanceId(contributor.instanceId())
+            .sdkInstanceId(contributor.sdkInstanceId())
+            .appName(contributor.appName())
+            .appType(contributor.appType())
+            .sdkVersion(contributor.sdkVersion())
+            .lastSeenAt(contributor.lastSeenAt())
+            .evaluationTrueCount(contributor.evaluationTrueCount())
+            .evaluationFalseCount(contributor.evaluationFalseCount())
+            .build();
+    }
+
+    public List<FlagContributorResponse> toContributorResponseList(List<FlagContributor> contributors) {
+        return contributors.stream().map(this::toContributorResponse).toList();
+    }
 }
