@@ -87,15 +87,15 @@ function docsVars(mode) {
     ['--vp-font-family-base', `'Onest','Inter',ui-sans-serif,system-ui,sans-serif`],
     ['--vp-font-family-mono', `'JetBrains Mono','Fira Code','Consolas',monospace`],
 
-    ['--vp-c-brand-1', S('brand', mode)],
-    ['--vp-c-brand-2', isLight ? P('brand', '600', mode) : P('brand', '500', mode)],
-    ['--vp-c-brand-3', isLight ? P('brand', '700', mode) : 'oklch(0.48 0.15 175)'],
-    ['--vp-c-brand-soft', soft(S('brand', mode), '0.14')],
+    ['--vp-c-brand-1', isLight ? S('brand', mode) : 'oklch(0.77 0.12 175)'],
+    ['--vp-c-brand-2', isLight ? P('brand', '600', mode) : 'oklch(0.83 0.10 175)'],
+    ['--vp-c-brand-3', isLight ? P('brand', '700', mode) : 'oklch(0.75 0.13 175)'],
+    ['--vp-c-brand-soft', soft(isLight ? S('brand', mode) : 'oklch(0.77 0.12 175)', '0.14')],
 
-    ['--vp-c-copper-1', S('warning', mode)],
+    ['--vp-c-copper-1', isLight ? S('warning', mode) : 'oklch(0.78 0.14 75)'],
     ['--vp-c-copper-2', isLight ? P('warning', '400', mode) : P('warning', '600', mode)],
     ['--vp-c-copper-3', isLight ? P('warning', '600', mode) : P('warning', '400', mode)],
-    ['--vp-c-copper-soft', soft(S('warning', mode), '0.12')],
+    ['--vp-c-copper-soft', soft(isLight ? S('warning', mode) : 'oklch(0.78 0.14 75)', '0.12')],
 
     ['--vp-c-bg', isLight ? 'oklch(0.978 0.001 200)' : S('background', mode)],
     ['--vp-c-bg-alt', isLight ? 'oklch(0.992 0.001 200)' : 'oklch(0.22 0.004 80)'],
@@ -103,8 +103,11 @@ function docsVars(mode) {
     ['--vp-c-bg-soft', isLight ? 'oklch(0.97 0.002 200)' : 'oklch(0.24 0.004 80)'],
 
     ['--vp-c-text-1', S('foreground', mode)],
-    ['--vp-c-text-2', isLight ? P('gray', '600', mode) : 'oklch(0.70 0.010 80)'],
-    ['--vp-c-text-3', isLight ? P('gray', '500', mode) : 'oklch(0.53 0.014 80)'],
+    // Dark-mode text shades are raised above the canonical palette steps so the
+    // pairs pass APCA Lc >= 60 on the dark surface (--vp-c-bg oklch(0.18 0.003 80)):
+    // the canonical gray-500/600 dark steps measure Lc 25/49 and fail the floor.
+    ['--vp-c-text-2', isLight ? P('gray', '600', mode) : 'oklch(0.80 0.006 80)'],
+    ['--vp-c-text-3', isLight ? P('gray', '500', mode) : 'oklch(0.78 0.008 80)'],
 
     ['--vp-c-border', isLight ? 'oklch(0 0 0 / 0.12)' : S('border', mode)],
     ['--vp-c-divider', isLight ? 'oklch(0 0 0 / 0.10)' : 'oklch(1 0 0 / 0.10)'],

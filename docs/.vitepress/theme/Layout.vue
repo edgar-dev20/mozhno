@@ -31,10 +31,12 @@ function animateContent() {
 function smoothScroll() {
   if (typeof window === 'undefined') return
   const hash = route.hash
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const behavior = reduceMotion ? 'instant' as ScrollBehavior : 'smooth' as ScrollBehavior
   if (hash) {
     nextTick(() => {
       const el = document.querySelector(hash)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      if (el) el.scrollIntoView({ behavior, block: 'start' })
     })
   } else {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
