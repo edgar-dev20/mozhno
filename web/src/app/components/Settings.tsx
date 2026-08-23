@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
+  AlertTriangle,
   Building2,
   Globe,
   Save,
@@ -19,7 +20,7 @@ import { toast } from 'sonner';
 import { api, Environment } from '@/api';
 import { ConfirmDialog } from '@/app/components/ConfirmDialog';
 import { PluginSlot } from '@/app/components/PluginSlot';
-import { SectionHeader, EmptyState, GradientButton, LoadingState, ColorPicker, Badge, Card, getEnvColor, getErrorMessage } from '@/shared';
+import { SectionHeader, EmptyState, GradientButton, LoadingState, ColorPicker, Badge, getEnvColor, getErrorMessage } from '@/shared';
 import { EmptySettingsIllustration } from '@/shared/components/illustrations';
 import { SidePanel } from '@/app/components/SidePanel';
 import { Switch } from '@/app/components/ui/switch';
@@ -574,6 +575,51 @@ export function Settings() {
             </div>
           </div>
         </motion.div>
+
+        {/* Danger Zone Card */}
+        {user?.role === 'admin' && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: 0.2 }}
+            className="bg-card border border-destructive/20 rounded-xl shadow-md overflow-hidden"
+          >
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2.5 rounded-xl bg-destructive/10 border border-destructive/20">
+                  <AlertTriangle size={20} className="text-destructive" />
+                </div>
+                <div>
+                  <h2 className="text-h2 font-semibold text-foreground">
+                    {t('settings.dangerZone')}
+                  </h2>
+                  <p className="text-body-sm text-muted-foreground">
+                    {t('settings.dangerZoneDescription')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="min-w-0">
+                  <span className="text-body-sm font-medium text-foreground block">
+                    {t('settings.resetProject')}
+                  </span>
+                  <span className="text-body-sm text-muted-foreground block mt-0.5">
+                    {t('settings.resetDescription')}
+                  </span>
+                </div>
+                <GradientButton
+                  variant="danger"
+                  onClick={() => setResetOpen(true)}
+                  loading={resettingProject}
+                  icon={<Trash2 size={16} />}
+                >
+                  {t('settings.resetProject')}
+                </GradientButton>
+              </div>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       <SidePanel
@@ -705,52 +751,19 @@ export function Settings() {
       </SidePanel>
 
       {user?.role === 'admin' && (
-        <>
-          <div className="space-y-5 mt-2">
-            <SectionHeader title={t('settings.dangerZone')} description={t('settings.dangerZoneDescription')} />
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Card padded className="border border-border">
-                <div className="flex items-center justify-between gap-4 flex-wrap">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-body-sm font-medium text-foreground whitespace-nowrap">
-                      {t('settings.resetProject')}
-                    </span>
-                    <span className="hidden sm:block w-px h-4 bg-border" />
-                    <span className="text-body-sm text-muted-foreground truncate">
-                      {t('settings.resetDescription')}
-                    </span>
-                  </div>
-                  <GradientButton
-                    variant="danger"
-                    onClick={() => setResetOpen(true)}
-                    loading={resettingProject}
-                    icon={<Trash2 size={16} />}
-                  >
-                    {t('settings.resetProject')}
-                  </GradientButton>
-                </div>
-              </Card>
-            </motion.div>
-          </div>
-
-          <ConfirmDialog
-            open={resetOpen}
-            onOpenChange={setResetOpen}
-            title={t('settings.resetProjectConfirmTitle', { name: project?.name ?? '' })}
-            description={t('settings.resetProjectDescription')}
-            confirmLabel={t('settings.resetProject')}
-            confirmPhrase={project?.name ?? ''}
-            onConfirm={() => {
-              setResettingProject(true);
-              resetProjectMutation.mutate();
-            }}
-            loading={resettingProject}
-          />
-        </>
+        <ConfirmDialog
+          open={resetOpen}
+          onOpenChange={setResetOpen}
+          title={t('settings.resetProjectConfirmTitle', { name: project?.name ?? '' })}
+          description={t('settings.resetProjectDescription')}
+          confirmLabel={t('settings.resetProject')}
+          confirmPhrase={project?.name ?? ''}
+          onConfirm={() => {
+            setResettingProject(true);
+            resetProjectMutation.mutate();
+          }}
+          loading={resettingProject}
+        />
       )}
 
       <PluginSlot slotId="settings.premium" />
