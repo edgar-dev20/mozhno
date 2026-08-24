@@ -78,4 +78,11 @@ class FlagServiceTest {
         List<Flag> result = flagService.findByProjectIdIncludingArchived(1);
         assertEquals(1, result.size());
     }
+
+    @Test
+    void countActiveByProjectId_shouldDelegateToRepository() {
+        when(flagRepository.countActiveByProjectId(1)).thenReturn(3);
+
+        assertEquals(3, flagService.countActiveByProjectId(1));
+    }
 }

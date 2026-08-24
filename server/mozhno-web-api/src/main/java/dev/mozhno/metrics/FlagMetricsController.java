@@ -1,5 +1,6 @@
 package dev.mozhno.metrics;
 
+import dev.mozhno.flags.FlagService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.List;
 @Tag(name = "Metrics", description = "Feature flag evaluation metrics")
 public class FlagMetricsController {
     private final FlagMetricsService flagMetricsService;
+    private final FlagService flagService;
     private final MetricsAssembler metricsAssembler;
 
     @GetMapping("/api/v1/flags/{flagId}/metrics")
@@ -49,5 +51,24 @@ public class FlagMetricsController {
                                                          @AuthenticationPrincipal UserPrincipal user) {
         List<FlagContributor> contributors = flagMetricsService.getContributors(flagId, environmentId);
         return metricsAssembler.toContributorResponseList(contributors);
+    }
+
+    @GetMapping("/api/v1/projects/client-instances/usage")
+    @Operation(summary = "Get flags a client application attempted to activate in an environment over a window")
+    public ClientInstanceUsageResponse getAppFlagUsage(@RequestParam String appName,
+                                                       @RequestParam Integer environmentId,
+                                                       @RequestParam(required = false, defaultValue = "168") Integer hours,
+                                                       @AuthenticationPrincipal UserPrincipal user) {
+        int clampedHours = flagMetricsService.clampUsageWindow(hours);
+        List<FlagUsage> usage = flagMetricsService.getUsageByAppName(
+            user.projectId(), appName, environmentId, clampedHours);
+        int totalActiveFlags = flagService.countActiveByProjectId(user.projectId());
+        return ClientInstanceUsageResponse.builder()
+            .appName(appName)
+            .environmentId(environmentId)
+            .hours(clampedHours)
+            .totalActiveFlags(totalActiveFlags)
+            .flags(metricsAssembler.toUsageResponseList(usage))
+            .build();
     }
 }

@@ -197,6 +197,52 @@ public class FlagMetricRepository {
     }
 
     /**
+     * Returns per-app flag usage summaries: for each flag evaluated by instances of the given app
+     * in the environment within the window, summed true/false counts plus the flag's environment state.
+     * Only rows with a client instance are included; aggregated rows (client_instance_id IS NULL)
+     * are ignored and archived flags are excluded.
+     *
+     * @param projectId the project ID
+     * @param appName the application name
+     * @param environmentId the environment ID
+     * @param since the start time for the query range
+     * @return list of flag usage summaries ordered by total evaluations descending
+     */
+    public List<FlagUsage> findUsageByAppName(Integer projectId, String appName, Integer environmentId, Instant since) {
+        String sql = """
+            SELECT f.id AS flag_id,
+                   f.flag_key,
+                   f.name,
+                   f.flag_type,
+                   COALESCE(s.enabled, f.enabled) AS flag_enabled,
+                   s.percentage,
+                   SUM(fm.evaluation_true_count) AS evaluation_true_count,
+                   SUM(fm.evaluation_false_count) AS evaluation_false_count
+            FROM flag_metrics fm
+            JOIN client_instances ci ON ci.id = fm.client_instance_id
+            JOIN flags f ON f.id = fm.flag_id
+            LEFT JOIN flag_strategies s ON s.flag_id = f.id AND s.environment_id = fm.environment_id
+            WHERE ci.project_id = ? AND ci.app_name = ? AND fm.environment_id = ? AND fm.time_bucket >= ?
+              AND f.archived = FALSE
+            GROUP BY f.id, f.flag_key, f.name, f.flag_type, s.enabled, f.enabled, s.percentage
+            ORDER BY (SUM(fm.evaluation_true_count) + SUM(fm.evaluation_false_count)) DESC, f.flag_key ASC
+            """;
+        return jdbc.query(sql, usageRowMapper(), projectId, appName, environmentId, Timestamp.from(since));
+    }
+
+    /**
+     * Deletes metric rows whose time bucket is older than the given number of days.
+     *
+     * @param days the retention threshold in days
+     * @return the number of deleted rows
+     */
+    public int deleteOlderThan(int days) {
+        return jdbc.update(
+            "DELETE FROM flag_metrics WHERE time_bucket < NOW() - (? * INTERVAL '1 day')",
+            days);
+    }
+
+    /**
      * Returns metrics for a project and environment since the given time.
      *
      * @param projectId the project ID
@@ -284,6 +330,26 @@ public class FlagMetricRepository {
                 lastSeen != null ? lastSeen.toInstant() : null,
                 rs.getLong("evaluation_true_count"),
                 rs.getLong("evaluation_false_count")
+            );
+        };
+    }
+
+    private static org.springframework.jdbc.core.RowMapper<FlagUsage> usageRowMapper() {
+        return (rs, _) -> {
+            long trueCount = rs.getLong("evaluation_true_count");
+            long falseCount = rs.getLong("evaluation_false_count");
+            Double percentageValue = (Double) rs.getObject("percentage");
+            Integer percentage = percentageValue != null ? (int) Math.round(percentageValue) : null;
+            return new FlagUsage(
+                rs.getInt("flag_id"),
+                rs.getString("flag_key"),
+                rs.getString("name"),
+                rs.getString("flag_type"),
+                rs.getBoolean("flag_enabled"),
+                percentage,
+                trueCount,
+                falseCount,
+                trueCount + falseCount
             );
         };
     }

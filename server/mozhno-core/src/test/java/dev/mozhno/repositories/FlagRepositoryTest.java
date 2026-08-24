@@ -196,4 +196,49 @@ class FlagRepositoryTest extends BaseIntegrationTest {
         List<Flag> result = flagRepository.findByProjectIdIncludingArchived(projectId);
         assertEquals(2, result.size());
     }
+
+    @Test
+    void countActiveByProjectId_shouldCountOnlyNonArchivedFlags() {
+        Integer projectId = createProject();
+        Flag f1 = new Flag();
+        f1.setProjectId(projectId);
+        f1.setName("active-1");
+        f1.setKey("active-1");
+        flagRepository.save(f1);
+
+        Flag f2 = new Flag();
+        f2.setProjectId(projectId);
+        f2.setName("active-2");
+        f2.setKey("active-2");
+        flagRepository.save(f2);
+
+        Flag f3 = new Flag();
+        f3.setProjectId(projectId);
+        f3.setName("archived");
+        f3.setKey("archived-key");
+        Flag archived = flagRepository.save(f3);
+        flagRepository.setArchived(archived.getId(), true, null, archived.getProjectId());
+
+        assertEquals(2, flagRepository.countActiveByProjectId(projectId));
+    }
+
+    @Test
+    void countActiveByProjectId_shouldBeScopedToProject() {
+        Integer projectId = createProject();
+        Flag f = new Flag();
+        f.setProjectId(projectId);
+        f.setName("active");
+        f.setKey("active-key");
+        flagRepository.save(f);
+
+        Integer otherProjectId = createProject();
+        Flag other = new Flag();
+        other.setProjectId(otherProjectId);
+        other.setName("other");
+        other.setKey("other-key");
+        flagRepository.save(other);
+
+        assertEquals(1, flagRepository.countActiveByProjectId(projectId));
+        assertEquals(1, flagRepository.countActiveByProjectId(otherProjectId));
+    }
 }

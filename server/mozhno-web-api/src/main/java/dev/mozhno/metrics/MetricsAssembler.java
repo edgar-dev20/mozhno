@@ -41,4 +41,22 @@ public class MetricsAssembler {
     public List<FlagContributorResponse> toContributorResponseList(List<FlagContributor> contributors) {
         return contributors.stream().map(this::toContributorResponse).toList();
     }
+
+    public FlagUsageResponse toUsageResponse(FlagUsage usage) {
+        return FlagUsageResponse.builder()
+            .flagId(usage.flagId())
+            .key(usage.key())
+            .name(usage.name())
+            .flagType(usage.flagType())
+            .enabled(usage.enabled())
+            .percentage(usage.percentage())
+            .evaluationTrueCount(usage.evaluationTrueCount())
+            .evaluationFalseCount(usage.evaluationFalseCount())
+            .totalEvaluations(usage.totalEvaluations())
+            .build();
+    }
+
+    public List<FlagUsageResponse> toUsageResponseList(List<FlagUsage> usage) {
+        return usage.stream().map(this::toUsageResponse).toList();
+    }
 }

@@ -272,6 +272,26 @@ export type FlagContributor = {
   evaluationFalseCount: number;
 };
 
+export type FlagUsage = {
+  flagId: number;
+  key: string;
+  name: string;
+  flagType: string;
+  enabled: boolean;
+  percentage: number | null;
+  evaluationTrueCount: number;
+  evaluationFalseCount: number;
+  totalEvaluations: number;
+};
+
+export type ClientInstanceUsage = {
+  appName: string;
+  environmentId: number;
+  hours: number;
+  totalActiveFlags: number;
+  flags: FlagUsage[];
+};
+
 export type PaginatedDashboardResponse = {
   flags: EnrichedFlagResponse[];
   page: number;

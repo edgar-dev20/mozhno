@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import {
   Monitor,
   Server,
@@ -13,7 +13,7 @@ import {
   Box,
 } from '@/shared/icons';
 import { motion, AnimatePresence } from 'motion/react';
-import { api, ClientInstance, FlagResponse } from '@/api';
+import { api, ClientInstance, ClientInstanceUsage } from '@/api';
 import { NavLink, useNavigate } from 'react-router';
 import { JavaIcon, JavaScriptIcon } from '@/app/components/LanguageIcons';
 import {
@@ -33,6 +33,13 @@ import { useT } from '@/i18n';
 const ACTIVE_MS = 5 * 60 * 1000;
 const RECENT_MS = 60 * 60 * 1000;
 const WINDOW_MS = 24 * 60 * 60 * 1000;
+const MIN_ACTIVATION_SAMPLE = 50;
+const USAGE_WINDOWS = [24, 168, 720] as const;
+
+type UsageState = ClientInstanceUsage | 'loading' | 'error';
+
+const usageKey = (appName: string, envId: number, window: number) =>
+  JSON.stringify([appName, envId, window]);
 
 function getStaleness(lastSeenAt: string): 'active' | 'recent' | 'stale' {
   const age = Date.now() - new Date(lastSeenAt).getTime();
@@ -51,10 +58,12 @@ export function ClientInstances() {
 
   const [envFilter, setEnvFilter] = useState<number | null>(null);
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
-  const [flagCache, setFlagCache] = useState<Record<number, FlagResponse[]>>({});
-  const [flagsExpanded, setFlagsExpanded] = useState<Set<string>>(new Set());
+  const [usageWindow, setUsageWindow] = useState<number>(USAGE_WINDOWS[1]);
+  const [usageByKey, setUsageByKey] = useState<Record<string, UsageState>>({});
+  const [usageExpanded, setUsageExpanded] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [langFilter, setLangFilter] = useState<'all' | 'java' | 'js'>('all');
+  const usageRequestSeq = useRef<Record<string, number>>({});
 
   const timeAgo = useCallback(
     (d: string) => {
@@ -78,52 +87,75 @@ export function ClientInstances() {
     staleTime: 15_000,
   });
 
-  const { data: metricsByFlag = new Map() } = useQuery({
-    queryKey: queryKeys.metrics.project(projectId, envFilter),
-    queryFn: async () => {
-      if (!projectId) return new Map<number, number>();
-      const data = await api.metrics.listForProject(envFilter ?? undefined);
-      const map = new Map<number, number>();
-      for (const m of data) {
-        const total = m.evaluationTrueCount + m.evaluationFalseCount;
-        map.set(m.flagId, (map.get(m.flagId) || 0) + total);
+  const loadUsage = useCallback(
+    async (appName: string, envId: number, window: number) => {
+      if (!projectId) return;
+      const key = usageKey(appName, envId, window);
+      const seq = (usageRequestSeq.current[key] = (usageRequestSeq.current[key] ?? 0) + 1);
+      setUsageByKey((prev) => ({ ...prev, [key]: 'loading' }));
+      try {
+        const data = await api.clientInstances.usage(appName, envId, window);
+        if (seq !== usageRequestSeq.current[key]) return;
+        setUsageByKey((prev) => ({ ...prev, [key]: data }));
+      } catch {
+        if (seq !== usageRequestSeq.current[key]) return;
+        setUsageByKey((prev) => ({ ...prev, [key]: 'error' }));
       }
-      return map;
     },
-    enabled: !!projectId,
-    staleTime: 15_000,
-  });
+    [projectId],
+  );
 
-  const loadFlags = async (envId: number) => {
-    const cached = flagCache[envId];
-    if ((cached !== undefined && Array.isArray(cached)) || !projectId) return;
-    try {
-      const flags = await api.flags.listByEnvironment(envId);
-      setFlagCache((prev) => ({ ...prev, [envId]: flags }));
-    } catch {
-      /* silently ignore flag loading errors */
+  const ensureUsageLoaded = useCallback(
+    (appName: string, envIds: number[], window: number) => {
+      if (!projectId) return;
+      for (const envId of envIds) {
+        const key = usageKey(appName, envId, window);
+        if (!(key in usageByKey)) void loadUsage(appName, envId, window);
+      }
+    },
+    [projectId, usageByKey, loadUsage],
+  );
+
+  const handleEnvFilter = (envId: number | null) => {
+    usageRequestSeq.current = {};
+    setEnvFilter(envId);
+    setExpandedApps(new Set());
+    setUsageByKey({});
+    setUsageExpanded(new Set());
+  };
+
+  const handleWindowChange = (hours: number) => {
+    if (hours === usageWindow) return;
+    usageRequestSeq.current = {};
+    setUsageWindow(hours);
+    setUsageByKey({});
+    setUsageExpanded(new Set());
+    for (const group of groups) {
+      if (expandedApps.has(group.appName)) {
+        ensureUsageLoaded(group.appName, group.environmentIds, hours);
+      }
     }
   };
 
-  const handleEnvFilter = (envId: number | null) => {
-    setEnvFilter(envId);
-    setExpandedApps(new Set());
-    setFlagCache({});
-  };
-
-  const toggleExpand = (appName: string, envIds: number[]) => {
+  const toggleExpand = (appName: string) => {
     const next = new Set(expandedApps);
     if (next.has(appName)) {
       next.delete(appName);
     } else {
       next.add(appName);
-      envIds.forEach((envId) => loadFlags(envId));
+      const group = groups.find((g) => g.appName === appName);
+      if (group) ensureUsageLoaded(group.appName, group.environmentIds, usageWindow);
     }
     setExpandedApps(next);
   };
 
   const envName = (id: number | null) =>
     id != null ? (environments.find((e) => e.id === id)?.name ?? '-') : '-';
+  const hoursLabel = (hours: number) => {
+    if (hours > 168) return t('clientInstances.usageWindow30d');
+    if (hours > 24) return t('clientInstances.usageWindow7d');
+    return t('clientInstances.usageWindow24h');
+  };
   const envColorHex = (id: number | null) => {
     const env = id != null ? environments.find((e) => e.id === id) : undefined;
     return getEnvColor(env ?? id);
@@ -137,33 +169,41 @@ export function ClientInstances() {
 
   // eslint-disable-next-line react-hooks/purity
   const cutoff = useMemo(() => Date.now() - WINDOW_MS, []);
-  const recentInstances = instances.filter((inst) => new Date(inst.lastSeenAt).getTime() > cutoff);
+  const recentInstances = useMemo(
+    () => instances.filter((inst) => new Date(inst.lastSeenAt).getTime() > cutoff),
+    [instances, cutoff],
+  );
 
-  const filtered = recentInstances.filter((inst) => {
-    if (langFilter !== 'all' && inst.appType !== langFilter) return false;
-    if (searchQuery && !inst.appName.toLowerCase().includes(searchQuery.toLowerCase()))
-      return false;
-    return true;
-  });
+  const filtered = useMemo(
+    () =>
+      recentInstances.filter((inst) => {
+        if (langFilter !== 'all' && inst.appType !== langFilter) return false;
+        if (searchQuery && !inst.appName.toLowerCase().includes(searchQuery.toLowerCase()))
+          return false;
+        return true;
+      }),
+    [recentInstances, langFilter, searchQuery],
+  );
 
-  const grouped = new Map<string, ClientInstance[]>();
-  for (const inst of filtered) {
-    const key = inst.appName;
-    if (!grouped.has(key)) grouped.set(key, []);
-    grouped.get(key)!.push(inst);
-  }
-
-  const groups = Array.from(grouped.entries()).map(([appName, instances]) => ({
-    appName,
-    instances,
-    appType: instances[0]?.appType ?? 'unknown',
-    keyTypes: [...new Set(instances.map((i) => i.keyType))],
-    lastSeenAt: instances.reduce(
-      (latest, i) => (!latest || (i.lastSeenAt && i.lastSeenAt > latest) ? i.lastSeenAt : latest),
-      '',
-    ),
-    environmentIds: [...new Set(instances.map((i) => i.environmentId))],
-  }));
+  const groups = (() => {
+    const grouped = new Map<string, ClientInstance[]>();
+    for (const inst of filtered) {
+      const key = inst.appName;
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key)!.push(inst);
+    }
+    return Array.from(grouped.entries()).map(([appName, instances]) => ({
+      appName,
+      instances,
+      appType: instances[0]?.appType ?? 'unknown',
+      keyTypes: [...new Set(instances.map((i) => i.keyType))],
+      lastSeenAt: instances.reduce(
+        (latest, i) => (!latest || (i.lastSeenAt && i.lastSeenAt > latest) ? i.lastSeenAt : latest),
+        '',
+      ),
+      environmentIds: [...new Set(instances.map((i) => i.environmentId))],
+    }));
+  })();
 
   const appLabel =
     groups.length === 1
@@ -241,6 +281,30 @@ export function ClientInstances() {
               JS
             </button>
           </div>
+          <div
+            className="flex items-center gap-1.5 flex-wrap"
+            role="group"
+            aria-label={t('clientInstances.usageWindowLabel')}
+            title={t('clientInstances.usageWindowHint')}
+          >
+            {USAGE_WINDOWS.map((hours) => {
+              const active = usageWindow === hours;
+              return (
+                <button
+                  key={hours}
+                  aria-pressed={active}
+                  onClick={() => handleWindowChange(hours)}
+                  className={`px-3 py-2.5 sm:py-1.5 text-caption font-semibold rounded-lg transition-all border ${
+                    active
+                      ? 'bg-brand/10 text-brand border border-brand/20'
+                      : 'bg-accent text-muted-foreground hover:bg-accent/80 border border-transparent'
+                  }`}
+                >
+                  {hoursLabel(hours)}
+                </button>
+              );
+            })}
+          </div>
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           {environments.map((e) => {
@@ -279,6 +343,12 @@ export function ClientInstances() {
             buttonLabel={t('clientInstances.emptyCta')}
             onAction={() => navigate('/apikeys')}
           />
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={<Search size={24} className="text-brand" />}
+            title={t('clientInstances.filterEmptyTitle')}
+            description={t('clientInstances.filterEmptyDescription')}
+          />
         ) : (
           <AnimatePresence mode="popLayout">
             {groups.map((group, idx) => {
@@ -310,11 +380,11 @@ export function ClientInstances() {
                     tabIndex={0}
                     aria-expanded={expanded}
                     className="flex gap-4 px-4 py-3 cursor-pointer"
-                    onClick={() => toggleExpand(appName, environmentIds)}
+                    onClick={() => toggleExpand(appName)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        toggleExpand(appName, environmentIds);
+                        toggleExpand(appName);
                       }
                     }}
                   >
@@ -441,52 +511,99 @@ export function ClientInstances() {
                           </div>
 
                           {environmentIds.map((envId) => {
-                            const rawFlags = flagCache[envId];
-                            const flags = Array.isArray(rawFlags) ? rawFlags : undefined;
+                            const state = usageByKey[usageKey(appName, envId, usageWindow)];
+                            const flags = typeof state === 'object' ? state.flags : undefined;
                             return (
                               <div key={envId} className="border-t border-border pt-2.5 mt-1">
                                 <div className="flex items-center gap-2 mb-1.5">
-                                  <span className="text-caption font-semibold text-muted-foreground/70">
-                                    {t('clientInstances.flags')}
+                                  <span className="text-caption font-semibold text-muted-foreground">
+                                    {t('clientInstances.usageTitle')}
                                   </span>
                                   <span className="text-caption text-muted-foreground">
                                     {envName(envId)}
                                   </span>
-                                  {flags && (
-                                    <span className="text-caption text-muted-foreground">
-                                      {flags.filter((f) => !f.archived).length}
+                                  <span className="text-caption text-muted-foreground">
+                                    {typeof state === 'object'
+                                      ? hoursLabel(state.hours)
+                                      : hoursLabel(usageWindow)}
+                                  </span>
+                                  {typeof state === 'object' && (
+                                    <span
+                                      className="text-caption text-muted-foreground"
+                                      title={t('clientInstances.usageCountTooltip', {
+                                        used: String(state.flags.length),
+                                        total: String(state.totalActiveFlags),
+                                      })}
+                                    >
+                                      {t('clientInstances.usageCount', {
+                                        used: String(state.flags.length),
+                                        total: String(state.totalActiveFlags),
+                                      })}
                                     </span>
                                   )}
                                 </div>
-                                {!flags ? (
-                                  <div className="flex items-center justify-center py-4">
+                                {!state || state === 'loading' ? (
+                                  <div
+                                    className="flex items-center justify-center py-4"
+                                    role="status"
+                                    aria-label={t('clientInstances.loading')}
+                                  >
                                     <div className="w-4 h-4 border-2 border-border border-t-brand rounded-full animate-spin" />
                                   </div>
-                                ) : flags.filter((f) => !f.archived).length === 0 ? (
+                                ) : state === 'error' ? (
+                                  <div className="flex items-center justify-between gap-3 py-2">
+                                    <p className="text-caption text-muted-foreground">
+                                      {t('clientInstances.usageLoadError')}
+                                    </p>
+                                    <button
+                                      onClick={() => loadUsage(appName, envId, usageWindow)}
+                                      className="px-2.5 py-1.5 text-caption font-semibold text-brand rounded-lg border border-brand/20 bg-brand/10 hover:bg-brand/20 transition-all"
+                                    >
+                                      {t('clientInstances.usageRetry')}
+                                    </button>
+                                  </div>
+                                ) : flags && flags.length === 0 ? (
                                   <p className="text-caption text-muted-foreground py-2">
-                                    {t('clientInstances.noFlagsInEnv')}
+                                    {t('clientInstances.usageEmpty')}
                                   </p>
                                 ) : (
                                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
                                     {(() => {
-                                      const visible = flags.filter((f) => !f.archived);
+                                      const visible = flags ?? [];
                                       const max = 10;
-                                      const showAll = flagsExpanded.has(`${appName}:${envId}`);
+                                      const showAll = usageExpanded.has(`${appName}:${envId}`);
                                       const displayed = showAll ? visible : visible.slice(0, max);
                                       return (
                                         <>
                                           {displayed.map((flag) => {
-                                            const metricTotal = metricsByFlag.get(flag.id) ?? 0;
+                                            const total =
+                                              flag.evaluationTrueCount + flag.evaluationFalseCount;
+                                            const onPct =
+                                              total > 0
+                                                ? Math.round(
+                                                    (flag.evaluationTrueCount / total) * 100,
+                                                  )
+                                                : 0;
+                                            const hasSample = total >= MIN_ACTIVATION_SAMPLE;
                                             const TypeIcon =
-                                              flag.flagType === 'KILLSWITCH' ? ShieldOff : Rocket;
+                                              flag.flagType === 'KILLSWITCH'
+                                                ? ShieldOff
+                                                : Rocket;
                                             const typeColor = flag.enabled
                                               ? flag.flagType === 'KILLSWITCH'
                                                 ? 'text-chart-4'
                                                 : 'text-info'
                                               : 'text-muted-foreground';
+                                            const rateTooltip = t(
+                                              'clientInstances.usageRateTooltip',
+                                              { pct: String(onPct) },
+                                            );
+                                            const rateAria = hasSample
+                                              ? rateTooltip
+                                              : `${rateTooltip} · ${t('clientInstances.usageLowSample')}`;
                                             return (
                                               <NavLink
-                                                key={flag.id}
+                                                key={flag.flagId}
                                                 to={`/flags?open=${encodeURIComponent(flag.key)}`}
                                                 title={flag.name}
                                                 className="bg-secondary rounded-lg px-2.5 py-1.5 hover:shadow-md transition-all group/flag flex items-center gap-1.5 min-w-0"
@@ -502,35 +619,48 @@ export function ClientInstances() {
                                                 />
                                                 {flag.percentage != null &&
                                                   flag.percentage < 100 && (
-                                                    <span className="shrink-0 text-caption text-brand font-medium">
+                                                    <span
+                                                      className="shrink-0 text-caption text-muted-foreground font-medium"
+                                                      title={t('clientInstances.usageConfigRollout')}
+                                                    >
                                                       {flag.percentage}%
                                                     </span>
                                                   )}
+                                                <span
+                                                  className="shrink-0 inline-flex items-center gap-1"
+                                                  aria-label={rateAria}
+                                                  title={rateAria}
+                                                >
+                                                  <span className="w-8 h-1 rounded-full bg-muted overflow-hidden">
+                                                    {onPct > 0 && (
+                                                      <span
+                                                        className="block h-full rounded-full bg-brand"
+                                                        style={{
+                                                          width: `${Math.max(onPct, 4)}%`,
+                                                        }}
+                                                      />
+                                                    )}
+                                                  </span>
+                                                  <span
+                                                    className={`text-caption tabular-nums ${
+                                                      hasSample
+                                                        ? 'text-muted-foreground'
+                                                        : 'text-muted-foreground/60'
+                                                    }`}
+                                                  >
+                                                    {hasSample ? `${onPct}%` : `~${onPct}%`}
+                                                  </span>
+                                                </span>
                                                 <code className="hidden sm:inline text-caption font-mono text-muted-foreground/70 truncate max-w-[72px]">
                                                   {flag.key}
                                                 </code>
-                                                {flag.tags.length > 0 && (
-                                                  <div className="hidden xl:flex items-center gap-1 shrink-0">
-                                                    {flag.tags.slice(0, 1).map((tv, i) => (
-                                                      <span
-                                                        key={i}
-                                                        className="inline-flex items-center px-1 py-0 rounded text-caption font-medium text-primary-foreground truncate max-w-[56px] dark:brightness-[.85] dark:saturate-[.7]"
-                                                        style={{ background: tv.tagColor }}
-                                                      >
-                                                        {tv.value}
-                                                      </span>
-                                                    ))}
-                                                  </div>
-                                                )}
-                                                {metricTotal > 0 && (
-                                                  <span className="shrink-0 inline-flex items-center gap-1 text-caption text-muted-foreground/70">
-                                                    <Activity
-                                                      size={9}
-                                                      className="text-muted-foreground"
-                                                    />
-                                                    {formatCompactCount(metricTotal)}
-                                                  </span>
-                                                )}
+                                                <span className="shrink-0 inline-flex items-center gap-1 text-caption text-muted-foreground">
+                                                  <Activity
+                                                    size={9}
+                                                    className="text-muted-foreground"
+                                                  />
+                                                  {formatCompactCount(total)}
+                                                </span>
                                               </NavLink>
                                             );
                                           })}
@@ -538,7 +668,7 @@ export function ClientInstances() {
                                             <button
                                               onClick={(e) => {
                                                 e.preventDefault();
-                                                setFlagsExpanded(
+                                                setUsageExpanded(
                                                   (prev) =>
                                                     new Set([...prev, `${appName}:${envId}`]),
                                                 );

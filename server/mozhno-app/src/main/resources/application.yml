@@ -91,6 +91,7 @@ mozhno:
       max-pool-size: ${MOZHNO_WEBHOOK_ASYNC_MAX_POOL_SIZE:16}
       queue-capacity: ${MOZHNO_WEBHOOK_ASYNC_QUEUE_CAPACITY:100}
   metrics:
+    retention-days: ${MOZHNO_METRICS_RETENTION_DAYS:90}
     async:
       pool:
         core-size: ${MOZHNO_METRICS_ASYNC_POOL_CORE_SIZE:2}

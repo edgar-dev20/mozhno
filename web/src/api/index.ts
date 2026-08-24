@@ -52,6 +52,8 @@ export type {
   StrategyRequest,
   FlagMetric,
   FlagContributor,
+  FlagUsage,
+  ClientInstanceUsage,
   SegmentResponse,
   SegmentRequest,
   Tag,

@@ -170,4 +170,191 @@ class FlagMetricRepositoryTest extends BaseIntegrationTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).evaluationTrueCount()).isEqualTo(1);
     }
+
+    @Test
+    void findUsageByAppName_empty_shouldReturnEmpty() {
+        createFlag("empty-usage-flag");
+
+        List<FlagUsage> result = repository.findUsageByAppName(
+            projectId, "web-app", envId, Instant.now().minus(7, ChronoUnit.DAYS));
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findUsageByAppName_shouldReturnFlagWithSums() {
+        Flag flag = createFlag("usage-flag");
+        Long instA = createInstance("web-app", "inst-a");
+        Long instB = createInstance("web-app", "inst-b");
+
+        repository.recordEvaluation(projectId, flag.getId(), envId, true, instA);
+        repository.recordEvaluation(projectId, flag.getId(), envId, true, instB);
+        repository.recordEvaluation(projectId, flag.getId(), envId, false, instB);
+
+        List<FlagUsage> result = repository.findUsageByAppName(
+            projectId, "web-app", envId, Instant.now().minus(7, ChronoUnit.DAYS));
+
+        assertThat(result).hasSize(1);
+        FlagUsage usage = result.get(0);
+        assertThat(usage.flagId()).isEqualTo(flag.getId());
+        assertThat(usage.key()).isEqualTo("usage-flag");
+        assertThat(usage.name()).isEqualTo("usage-flag");
+        assertThat(usage.flagType()).isEqualTo("RELEASE");
+        assertThat(usage.evaluationTrueCount()).isEqualTo(2);
+        assertThat(usage.evaluationFalseCount()).isEqualTo(1);
+        assertThat(usage.totalEvaluations()).isEqualTo(3);
+    }
+
+    @Test
+    void findUsageByAppName_shouldSumAcrossTimeBuckets() {
+        Flag flag = createFlag("multi-bucket-usage-flag");
+        Long instanceId = createInstance("web-app", "inst-a");
+
+        repository.recordEvaluation(projectId, flag.getId(), envId, true, instanceId);
+        jdbcTemplate.update("""
+            INSERT INTO flag_metrics (project_id, flag_id, environment_id, evaluation_true_count, evaluation_false_count, time_bucket, client_instance_id)
+            VALUES (?, ?, ?, ?, ?, NOW() - INTERVAL '3 hours', ?)
+            """, projectId, flag.getId(), envId, 100, 50, instanceId);
+
+        List<FlagUsage> result = repository.findUsageByAppName(
+            projectId, "web-app", envId, Instant.now().minus(7, ChronoUnit.DAYS));
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).evaluationTrueCount()).isEqualTo(101);
+        assertThat(result.get(0).evaluationFalseCount()).isEqualTo(50);
+        assertThat(result.get(0).totalEvaluations()).isEqualTo(151);
+    }
+
+    @Test
+    void findUsageByAppName_shouldFilterByAppAndEnvironment() {
+        Flag flag = createFlag("usage-filter-flag");
+        Long webApp = createInstance("web-app", "inst-a");
+        Long otherApp = createInstance("other-app", "inst-b");
+
+        Environment env2 = new Environment();
+        env2.setName("staging");
+        env2.setProjectId(projectId);
+        Integer env2Id = environmentRepository.save(env2).getId();
+
+        repository.recordEvaluation(projectId, flag.getId(), envId, true, webApp);
+        repository.recordEvaluation(projectId, flag.getId(), envId, true, otherApp);
+        repository.recordEvaluation(projectId, flag.getId(), env2Id, true, webApp);
+
+        List<FlagUsage> forWebApp = repository.findUsageByAppName(
+            projectId, "web-app", envId, Instant.now().minus(7, ChronoUnit.DAYS));
+        assertThat(forWebApp).hasSize(1);
+        assertThat(forWebApp.get(0).evaluationTrueCount()).isEqualTo(1);
+
+        List<FlagUsage> forOtherApp = repository.findUsageByAppName(
+            projectId, "other-app", envId, Instant.now().minus(7, ChronoUnit.DAYS));
+        assertThat(forOtherApp).hasSize(1);
+
+        List<FlagUsage> forWebAppEnv2 = repository.findUsageByAppName(
+            projectId, "web-app", env2Id, Instant.now().minus(7, ChronoUnit.DAYS));
+        assertThat(forWebAppEnv2).hasSize(1);
+    }
+
+    @Test
+    void findUsageByAppName_shouldIgnoreAggregatedRows() {
+        Flag flag = createFlag("agg-usage-flag");
+        repository.recordEvaluation(projectId, flag.getId(), envId, true, null);
+
+        List<FlagUsage> result = repository.findUsageByAppName(
+            projectId, "web-app", envId, Instant.now().minus(7, ChronoUnit.DAYS));
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findUsageByAppName_shouldExcludeArchivedFlags() {
+        Flag flag = createFlag("archived-usage-flag");
+        Long instanceId = createInstance("web-app", "inst-a");
+
+        repository.recordEvaluation(projectId, flag.getId(), envId, true, instanceId);
+        flagRepository.setArchived(flag.getId(), true, null, projectId);
+
+        List<FlagUsage> result = repository.findUsageByAppName(
+            projectId, "web-app", envId, Instant.now().minus(7, ChronoUnit.DAYS));
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findUsageByAppName_shouldOrderByTotalDescendingAndRespectWindow() {
+        Flag top = createFlag("usage-top");
+        Flag low = createFlag("usage-low");
+        Long instanceId = createInstance("web-app", "inst-a");
+
+        repository.recordEvaluations(projectId, top.getId(), envId, 100, 0, instanceId);
+        repository.recordEvaluations(projectId, low.getId(), envId, 5, 0, instanceId);
+        jdbcTemplate.update("""
+            INSERT INTO flag_metrics (project_id, flag_id, environment_id, evaluation_true_count, evaluation_false_count, time_bucket, client_instance_id)
+            VALUES (?, ?, ?, ?, ?, NOW() - INTERVAL '200 hours', ?)
+            """, projectId, top.getId(), envId, 1000, 0, instanceId);
+
+        List<FlagUsage> result = repository.findUsageByAppName(
+            projectId, "web-app", envId, Instant.now().minus(7, ChronoUnit.DAYS));
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).key()).isEqualTo("usage-top");
+        assertThat(result.get(0).totalEvaluations()).isEqualTo(100);
+        assertThat(result.get(1).key()).isEqualTo("usage-low");
+    }
+
+    @Test
+    void findUsageByAppName_shouldExposeStrategyStateAndRoundedPercentage() {
+        Flag flag = createFlag("strategy-usage-flag");
+        Long instanceId = createInstance("web-app", "inst-a");
+        jdbcTemplate.update("""
+            INSERT INTO flag_strategies (flag_id, environment_id, enabled, percentage)
+            VALUES (?, ?, TRUE, ?)
+            """, flag.getId(), envId, 40.5);
+
+        repository.recordEvaluation(projectId, flag.getId(), envId, true, instanceId);
+
+        List<FlagUsage> result = repository.findUsageByAppName(
+            projectId, "web-app", envId, Instant.now().minus(7, ChronoUnit.DAYS));
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).enabled()).isTrue();
+        assertThat(result.get(0).percentage()).isEqualTo(41);
+    }
+
+    @Test
+    void findUsageByAppName_shouldFallBackToFlagEnabledWithoutStrategy() {
+        Flag flag = createFlag("no-strategy-usage-flag");
+        Long instanceId = createInstance("web-app", "inst-a");
+
+        repository.recordEvaluation(projectId, flag.getId(), envId, true, instanceId);
+
+        List<FlagUsage> result = repository.findUsageByAppName(
+            projectId, "web-app", envId, Instant.now().minus(7, ChronoUnit.DAYS));
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).enabled()).isFalse();
+        assertThat(result.get(0).percentage()).isNull();
+    }
+
+    @Test
+    void deleteOlderThan_shouldRemoveOnlyExpiredBuckets() {
+        Flag flag = createFlag("retention-flag");
+        Long instanceId = createInstance("web-app", "inst-a");
+
+        repository.recordEvaluation(projectId, flag.getId(), envId, true, instanceId);
+        jdbcTemplate.update("""
+            INSERT INTO flag_metrics (project_id, flag_id, environment_id, evaluation_true_count, evaluation_false_count, time_bucket, client_instance_id)
+            VALUES (?, ?, ?, ?, ?, NOW() - INTERVAL '100 days', ?)
+            """, projectId, flag.getId(), envId, 50, 0, instanceId);
+        jdbcTemplate.update("""
+            INSERT INTO flag_metrics (project_id, flag_id, environment_id, evaluation_true_count, evaluation_false_count, time_bucket, client_instance_id)
+            VALUES (?, ?, ?, ?, ?, NOW() - INTERVAL '3 days', ?)
+            """, projectId, flag.getId(), envId, 10, 0, instanceId);
+
+        int deleted = repository.deleteOlderThan(30);
+
+        assertThat(deleted).isEqualTo(1);
+        Integer remaining = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM flag_metrics WHERE flag_id = ?", Integer.class, flag.getId());
+        assertThat(remaining).isEqualTo(2);
+    }
 }

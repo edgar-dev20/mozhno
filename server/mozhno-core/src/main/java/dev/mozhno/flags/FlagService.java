@@ -84,6 +84,17 @@ public class FlagService {
     }
 
     /**
+     * Returns the number of non-archived flags in the given project.
+     *
+     * @param projectId the project ID
+     * @return count of active flags
+     */
+    @Transactional(readOnly = true)
+    public int countActiveByProjectId(Integer projectId) {
+        return flagRepository.countActiveByProjectId(projectId);
+    }
+
+    /**
      * Finds a flag by its project and key.
      *
      * @param projectId the project ID
