@@ -6,7 +6,7 @@
 #   3. runtime       — minimal JRE image to run the application
 
 # ── Web UI builder ──────────────────────────────────────────────
-FROM node:24-alpine AS web-builder
+FROM node:25-alpine AS web-builder
 WORKDIR /src/web
 
 COPY web/package.json web/package-lock.json ./
